@@ -5,120 +5,107 @@
 namespace bee::fish::parser
 {
    
-   template<class T>
-		class Repeat : public Match
-		{
-		private:
-			  T* _match;
-			   
-		protected:
-			  vector<Match*> _items;
-			  size_t _matchedCount = 0;
-			  
-		public:
-			
-			  Repeat() : Match()
-			  {
-			     _match = NULL;
-			  }
-			   
-			  virtual ~Repeat() {
-			   
-			     for (auto
-			             it = _items.cbegin();
-			             it != _items.cend();
-			             ++it)
-			     {
-			        Match* child = *it;
-			        if (child)
-			        {
-			           delete child;
-			        }
-			     }
-			      
-			     if (_match) {
-			        delete _match;
-			        _match = NULL;
-			     }
-			  }
-			   
-			   
-			  virtual bool match(int character)
-			  {
-			
-			     if (_match == NULL)
-			        _match = createItem();
-			         
-			     bool matched =
-			        _match->match(character);
-			         
-			     if (matched)
-			        Match::match(character);
-			      
-			     if (_match->result() == true)
-			     {
-			      
-			        addItem(_match);
-			         
-			        _match = createItem();
-			         
-			        ++_matchedCount;
-			     }
-			     else if (
-			           (_match->result() == false) ||
-			           (!matched) ||
-			           (character == Match::EndOfFile)
-			        )
-			     {
-			        if (_matchedCount > 0)
-			        {
-			           success();
-			        }
-			        else
-			        {
-			           fail();
-			        }
-			         
-			     }
-			      
-			     return matched;
-			      
-			  }
-			   
-			  virtual vector<Match*>& items() {
-			      return _items;
-			  }
-			   
-			  virtual T* createItem() {
-			     return new T();
-			  }
-			   
-			  virtual void addItem(Match* match) {
-			      
-			     items().push_back(
-			        match
-			     );
-			      
-			  }
-			   
-			   
-			  virtual string name()
-			  {
-			     return
-			        "Repeat" + 
-			        to_string(_matchedCount);
-			  }
-			   
-			  Repeat(const Repeat& source) 
+   class Repeat : public Match
+   {
+   private:
+      Match* _template;
+      Match* _match;
+   
+   protected:
+      size_t _matchedCount = 0;
+  
+   public:
+
+      Repeat(Match* t) :
+         Match(),
+         _template(t),
+         _match(NULL)
       {
+         _template = t;
          _match = NULL;
       }
-			   
+   
+      Repeat(const Repeat& source) :
+         Match(source),
+         _template(source._template),
+         _match(NULL)
+      {
+      }
+      
+      virtual ~Repeat()
+      {
+
+         delete _template;
+         
+         if (_match)
+           delete _match;
+      }
+   
+   
+      virtual bool match(WideChar character)
+      {
+
+         if (_match == NULL)
+            _match = createItem();
+         
+         bool matched =
+            _match->match(character);
+         
+         if (matched)
+            Match::match(character);
+      
+         if (_match->result() == true)
+         {
+      
+            matchedItem(_match);
+            _match = NULL;
+            ++_matchedCount;
+         }
+         else if (
+            (_match->result() == false) ||
+            (!matched) ||
+            (character == Match::EndOfFile)
+         )
+         {
+            if (_matchedCount > 0)
+            {
+               success();
+            }
+            else
+            {
+               fail();
+            }
+         
+         }
+      
+         return matched;
+      
+      }
+   
+      virtual Match* createItem()
+      {
+         return _template->copy();
+      }
+   
+      virtual void matchedItem(Match* match)
+      {
+      
+         delete match;
+      
+      }
+   
       virtual Match* copy() const
       {
          return new Repeat(*this);
       }
-			
+      
+      virtual void write(ostream& out)
+      {
+         out << "Repeat";
+         writeResult(out);
+         out << "(" << *_template << ")";
+      }
+
    };
 
 

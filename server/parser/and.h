@@ -27,6 +27,12 @@ namespace bee::fish::parser {
          _iterator = _inputs.end();
       }
       
+      And(const And& source) :
+         Match(source)
+      {
+			     _iterator = _inputs.end();
+      }
+      
       virtual ~And() {
       }
       
@@ -76,17 +82,23 @@ namespace bee::fish::parser {
       {
          return "And";
       }
-   
-      And(const And& source) :
-         Match(source)
-      {
-			     _iterator = _inputs.end();
-      }
+
 			   
       virtual Match* copy() const
       {
          return new And(*this);
       }
+      
+      virtual void write(ostream& out)
+      {
+         out << "And";
+         writeResult(out);
+         out << "(";
+         writeInputs(out);
+         out << ")";
+         
+      }
+      
    };
 
 };

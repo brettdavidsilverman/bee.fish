@@ -13,6 +13,8 @@ namespace bee::fish::parser
    inline bool testRange();
    inline bool testWord();
    inline bool testCaseInsensitiveWord();
+   inline bool testRepeat();
+   inline bool testUTF8Character();
    
    inline bool testMatch(string label, Match& match, string text, bool result = true, wstring expected = L"");
 
@@ -24,6 +26,8 @@ namespace bee::fish::parser
       ok &= testRange();
       ok &= testWord();
       ok &= testCaseInsensitiveWord();
+      ok &= testRepeat();
+      ok &= testUTF8Character();
       
       if (ok)
          cout << "SUCCESS";
@@ -102,7 +106,25 @@ namespace bee::fish::parser
       return ok;
    }
    
-
+   inline bool testRepeat()
+   {
+      bool ok = true;
+      Range range('a', 'z');
+      Repeat repeat(range.copy());
+      ok &= testMatch("Repeat range match", repeat, "helloworld", true, L"helloworld");
+      
+      return ok;
+   }
+   
+   inline bool testUTF8Character()
+   {
+      bool ok = true;
+      Repeat repeat(new UTF8Character());
+      ok &= testMatch("UTF8 character repeat match", repeat, "helloworld", true, L"helloworld");
+      
+      return ok;
+   }
+   
    inline bool testMatch(string label, Match& match, string text, bool result, wstring expected)
    {
       cout << label << ":\t";

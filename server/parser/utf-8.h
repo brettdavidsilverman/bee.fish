@@ -160,6 +160,7 @@ namespace bee::fish::parser {
                Character::match(
                   _temporary
                );
+               
             }
             
          }
@@ -191,11 +192,9 @@ namespace bee::fish::parser {
                // Start the character value
                // using the bytes extract mask.
              
-               WideChar wchar = (
+               _temporary = (
                   bits & byte._extractMask
                ).to_ulong();
-               
-               _temporary = wchar;
                
                return true;
             }
