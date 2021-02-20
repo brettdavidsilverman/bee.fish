@@ -5,14 +5,28 @@
 
 namespace bee::fish::parser {
 
+   
    class Character : public Match {
    protected:
-      int _character;
-
+      WideChar _character;
+      bool _matchAny;
+      WideChar _matchedCharacter;
+      
    public:
-      Character(int character) :
+   
+      Character() :
          Match(),
-         _character(character)
+         _character(-1),
+         _matchAny(true),
+         _matchedCharacter(-1)
+      {
+      }
+      
+      Character(WideChar character) :
+         Match(),
+         _character(character),
+         _matchAny(false),
+         _matchedCharacter(-1)
       {
       }
    
@@ -20,15 +34,21 @@ namespace bee::fish::parser {
       {
       }
    
-      virtual bool match(int character)
+      virtual bool match(WideChar character)
       {
-         bool matched =
-            (_character == character);
+         bool matched;
+         
+         if (_matchAny)
+            matched = true;
+         else
+            matched =
+               (_character == character);
          
          if (matched)
          {
-            success();
+            _matchedCharacter = character;
             Match::match(character);
+            success();
          }
          else
          {
@@ -38,35 +58,40 @@ namespace bee::fish::parser {
          return matched;
       }
    
-      virtual string name()
+      virtual void write(ostream& out)
       {
-         ostringstream out;
-         out << "\"Char";
-         Match::write(out, _character);
-         out << "\"";
-         return out.str();
+         out << "Character";
+         writeResult(out);
+         out << "(";
+         if (!_matchAny)
+         {
+            out << "'";
+            Match::write(out, _character);
+            out << "'";
+         }
+         out << ")";
       }
    
       Character(const Character& source) :
-         Match(source)
+         Match(source),
+         _character(source._character),
+         _matchAny(source._matchAny),
+         _matchedCharacter(source._matchedCharacter)
       {
-         _character = source._character;
       }
 			   
       virtual Match* copy() const
       {
          return new Character(*this);
       }
+      
+      virtual WideChar& character()
+      {
+         return _matchedCharacter;
+      }
    
 
-};
-
-template<int T>
-class Char : public Character {
-public:
-   Char() : Character(T)
-   {}
-};
+   };
 
 
 };

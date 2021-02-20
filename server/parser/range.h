@@ -8,18 +8,18 @@ namespace bee::fish::parser {
             
    class Range : public Match {
    private:
-			  char _minimum;
-			  char _maximum;
+			  WideChar _minimum;
+			  WideChar _maximum;
 			   
 		public:
-			  Range(char minimum, char maximum)
-			     : Match()
+			  Range(WideChar minimum, WideChar maximum)
+			     : Match(),
+			     _minimum(minimum),
+         _maximum(maximum)
 			  {
-			     _minimum = minimum;
-			     _maximum = maximum;
 			  }
 			   
-			  virtual bool match(int character)
+			  virtual bool match(WideChar character)
 			  {
 			   
 			     if (character == Match::EndOfFile)
@@ -31,8 +31,8 @@ namespace bee::fish::parser {
 			         
 			     if (matched)
 			     {
-			        success();
 			        Match::match(character);
+			        success();
 			     }
 			     else {
 			        fail();
@@ -43,25 +43,20 @@ namespace bee::fish::parser {
 			   
 			  virtual void write(ostream& out)
 			  {
-			     out << "Range(";
-			     Match::write(out);
-			     out << ":'";
+			     out << "Range";
+			     writeResult(out);
+			     out << "('";
 			     Match::write(out, _minimum);
-			     out << "','";
+			     out << "', '";
 			     Match::write(out, _maximum);
 			     out << "')";
 			       
 			  }
-			   
-			  virtual std::string name()
-			  {
-			     return "Range";
-			  }
 			  
-			  Range(const Range& source) 
+      Range(const Range& source) :
+         _minimum(source._minimum),
+         _maximum(source._maximum)
       {
-         _minimum = source._minimum;
-         _maximum = source._maximum;
       }
 			   
       virtual Match* copy() const

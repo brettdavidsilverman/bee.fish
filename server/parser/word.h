@@ -11,29 +11,29 @@ using namespace std;
    class Word : public Match {
    protected:
    
-      string _word;
-      string::const_iterator _index;
+      wstring _word;
+      wstring::const_iterator _index;
    
-      virtual bool match_char(int character)
+      virtual bool match_char(WideChar character)
       {
          if (character == Match::EndOfFile)
             return false;
          return
             (
-               (*_index) == (char)character
+               (*_index) == character
             );
       }
    
    public:
 
-      Word(const string& word) :
+      Word(const wstring& word) :
          Match(),
          _word(word)
       {
          _index = _word.cbegin();
       }
    
-      virtual bool match(int character)
+      virtual bool match(WideChar character)
       {
    
          bool matched = match_char(character);
@@ -58,13 +58,14 @@ using namespace std;
    
       virtual void write(ostream& out)
       {
-         out << "Word(";
-         Match::write(out);
-         out << ":\"" << _word << "\"";
-         out << ")";
+         out << "Word";
+         writeResult(out);
+         out << "(\"";
+         Match::write(out, _word);
+         out << "\")";
       }
    
-      virtual const string& word()
+      virtual const wstring& word()
       {
          return _word;
       }

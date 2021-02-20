@@ -26,16 +26,17 @@ inline ostream& operator <<
 using namespace bee::fish::server;
 
 namespace bee::fish::parser {
+
+			typedef wchar_t WideChar;
 			
 			class Match {
 			protected:
-			
-			   string _value = "";
-			   wstring _wvalue = L"";
+		
+			   wstring _wvalue;
 			   optional<bool> _result = nullopt;
 			   
 			public:
-			   static const int EndOfFile = -1;
+			   static const WideChar EndOfFile = -1;
 			   bool _capture = true;
 			   
 			   vector<Match*> _inputs;
@@ -89,15 +90,14 @@ namespace bee::fish::parser {
 			   */
 			   
 			   virtual bool match
-			   (int character)
+			   (WideChar character)
 			   {
 			      
 			      if ( _capture &&
 			           character != Match::EndOfFile 
 			         )
 			      {
-			         _value += (char)character;
-			         _wvalue += (char)character;
+			         _wvalue += character;
 			      }
 			      
 			      return true;
@@ -110,9 +110,7 @@ namespace bee::fish::parser {
 			   {
 			      
 			      _result = nullopt;
-			      
-			      cerr << endl;
-			      
+			     
 			      while (!in.eof())
 			      {
 			         int character = in.get();
@@ -122,7 +120,7 @@ namespace bee::fish::parser {
 #ifdef DEBUG
              Match::write(cerr, character);
 #endif
-             match(character);
+             match((WideChar)character);
 			         
 			         if (_result != nullopt)
 			            break;
@@ -179,35 +177,12 @@ namespace bee::fish::parser {
 			
 			   }
 			   
-			   virtual void write(ostream& out) 
+			   virtual void writeResult(ostream& out) 
 			   {
-			      
-			      out << "{" 
-			          << name() 
-			          << ":{ok:\""
-			          << _result
-			          << "\"";
-			 
-			      for (auto it = _inputs.cbegin();
-			                it != _inputs.cend();
-			                ++it
-			          )
-			      {
-			         out << ',';
-			         Match* input = *it;
-			         if (input)
-			            out << *input;
-			         else
-			            out << "null";
-			      }
-			      
-			      out << '}'
-			          << '}';
+			      out << "<" << result() << ">";
 			   }
 			   
-			   virtual string name() {
-			      return "Match";
-			   }
+			   virtual void write(ostream& out) = 0;
 			   
 			   virtual Match& operator[]
 			   (size_t index)
@@ -215,12 +190,7 @@ namespace bee::fish::parser {
 			      return *(_inputs[index]);
 			   }
 			   
-			   virtual string& value()
-			   {
-			      return _value;
-			   }
-			   
-			   virtual wstring& wvalue()
+			   virtual wstring& str()
 			   {
 			      return _wvalue;
 			   }
@@ -233,8 +203,15 @@ namespace bee::fish::parser {
 			public:
 			
 			   
+			   static void write(ostream& out, const wstring& text)
+			   {
+			      for (auto c : text)
+			      {
+			         write(out, c);
+			      }
+			   }
 			   
-			   static void write(ostream& out, int character)
+			   static void write(ostream& out, WideChar character)
 			   {
 			      switch (character) {
 			      case '\"':

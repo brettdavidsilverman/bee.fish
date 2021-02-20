@@ -31,20 +31,6 @@ namespace bee::fish::parser {
       }
       
       
-      friend And& operator and(And& first, Match& second);
-      /*
-      And& operator and(Match& next)
-      {
-         _inputs.push_back(next.copy());
-         return *this;
-      }
-      
-      Or* operator or(Match* _or)
-      {
-         return new Or(this, _or);
-      }
-      */
-      
       virtual bool
       match(int character) {
       

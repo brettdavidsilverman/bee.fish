@@ -2,15 +2,14 @@ CC = g++
 INCLUDE = -I./
 CFLAGS = -std=c++2a $(INCLUDE) -Wall -fmax-errors=1
 
-OBJECTS=main.o test.o
-DEPS=match.h and.h or.h not.h character.h word.h ciword.h repeat.h optional.h load-on-demand.h parser.h version.h json/json.h json/string.h json/number.h json/array.h json/object.h json/blank-space.h ../id/id.h ../https/request.h ../https/basic-authorization.h ../https/base64.h Makefile
+OBJECTS=main.o
+DEPS=match.h and.h or.h not.h character.h utf-8.h range.h word.h ciword.h repeat.h optional.h load-on-demand.h parser.h version.h test.h ../id/id.h Makefile
 
 %.o: %.cpp $(DEPS)
 	$(CC) $< -c $(CFLAGS)
 
 
 parser: $(OBJECTS) $(DEPS) Makefile
-	cd json && make $(DEBUG)
 	@echo "Linking parser"
 	@$(CC) $(CFLAGS) -O -o parser -lcrypto -lssl $(OBJECTS)
 	
@@ -23,5 +22,4 @@ clean:
 	rm -f parser
 	rm -f *.o
 	rm -f trace.txt
-	cd json && make clean
 
