@@ -10,8 +10,6 @@ using namespace std;
 
 namespace bee::fish::parser {
 
-   class And;
-   
    class And : public Match {
    protected:
    
@@ -37,8 +35,8 @@ namespace bee::fish::parser {
       }
       
       
-      virtual bool
-      match(int character) {
+      virtual bool match(const Char& character)
+      {
       
          bool matched = false;
          vector<Match*>::iterator 
@@ -77,19 +75,13 @@ namespace bee::fish::parser {
 
          return matched;
       }
-      
-      virtual string name()
-      {
-         return "And";
-      }
-
 			   
       virtual Match* copy() const
       {
          return new And(*this);
       }
       
-      virtual void write(ostream& out)
+      virtual void write(ostream& out) const
       {
          out << "And";
          writeResult(out);

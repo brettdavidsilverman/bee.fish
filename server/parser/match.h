@@ -27,18 +27,16 @@ using namespace bee::fish::server;
 
 namespace bee::fish::parser {
 
-   typedef wchar_t WideChar;
-
+   typedef uint32_t Char;
+   
    class Match
    {
    protected:
 
-      wstring _wvalue;
       optional<bool> _result = nullopt;
    
    public:
-      static const WideChar EndOfFile = -1;
-      bool _capture = true;
+      inline static const Char EndOfFile = -1;
    
       vector<Match*> _inputs;
    
@@ -84,19 +82,10 @@ namespace bee::fish::parser {
    
       virtual Match* copy() const = 0;
    
-      virtual bool match(WideChar character)
-      {
+      virtual bool match(const Char& character) = 0;
       
-         if ( _capture &&
-              character != Match::EndOfFile 
-            )
-         {
-            _wvalue += character;
-         }
-      
-         return true;
-      }
-
+      virtual void write(ostream& out) const = 0;
+   
       virtual bool read(
          istream& in,
          bool last = true
@@ -107,14 +96,14 @@ namespace bee::fish::parser {
      
          while (!in.eof())
          {
-            int character = in.get();
+            Char character = in.get();
 
             if (character == Match::EndOfFile)
                break;
 #ifdef DEBUG
             Match::write(cerr, character);
 #endif
-            match((WideChar)character);
+            match((Char)character);
          
             if (_result != nullopt)
                break;
@@ -149,7 +138,7 @@ namespace bee::fish::parser {
       
       }
    
-      virtual optional<bool> result()
+      virtual const optional<bool>& result() const
       {
          return _result;
       }
@@ -165,7 +154,7 @@ namespace bee::fish::parser {
       }
  
       friend ostream& operator <<
-      (ostream& out, Match& match) 
+      (ostream& out, const Match& match) 
       {
 
          match.write(out);
@@ -174,160 +163,35 @@ namespace bee::fish::parser {
 
       }
    
-      virtual void writeResult(ostream& out) 
+      virtual void writeResult(ostream& out) const
       {
          out << "<" << result() << ">";
       }
    
-      virtual void writeInputs(ostream& out)
+      virtual void writeInputs(ostream& out) const
       {
-         for (auto it = _inputs.begin(); 
-                   it != _inputs.end();
+         for (auto it = _inputs.cbegin(); 
+                   it != _inputs.cend();
                  ++it)
          {
-            Match* input = *it;
+            const Match* input = *it;
             out << *input;
-            if (it + 1 != _inputs.end())
+            if (it + 1 != _inputs.cend())
                out << ", ";
          }
       }
 
-      virtual void write(ostream& out) = 0;
-   
       virtual Match& operator[]
       (size_t index)
       {
          return *(_inputs[index]);
       }
    
-      virtual wstring& str()
-      {
-         return _wvalue;
-      }
-   
-      virtual bool isOptional()
-      {
-         return false;
-      }
-   
-   public:
-
-   
-      static void write(
-         ostream& out,
-         const wstring& text
-      )
-      {
-         for (WideChar c : text)
-         {
-            write(out, c);
-         }
-         
-      }
-   
-      static void write(ostream& out, WideChar character)
-      {
-         switch (character) {
-         case '\"':
-            out << "\\\"";
-            break;
-         case '\\':
-            out << "\\\\";
-            break;
-         case '\b':
-            out << "\\b";
-            break;
-         case '\f':
-            out << "\\f";
-            break;
-         case '\r':
-            out << "\\r";
-            break;
-         case '\n':
-            out << "\\n";
-            break;
-         case '\t':
-            out << "\\t";
-            break;
-         case Match::EndOfFile:
-            out << "-1";
-            break;
-         default:
-            {
-               uint32_t uint = character;
-
-               if (uint <= 0x007F)
-               {
-                  char c1 = (char)uint;
-                  out << c1;
-               }
-               else if (uint <= 0x07FF)
-               {
-                  //110xxxxx 10xxxxxx
-                  char c1 = ( 0b00011111 &
-                            (char) (uint >> 6) ) |
-                            0b11000000;
-                            
-                  char c2 = (0b00111111 &
-                           (char) uint) |
-                            0b10000000;
-                            
-                  out << c1 << c2;
-               }
-               else if (uint <= 0xFFFF)
-               {
-                  //1110xxxx 10xxxxxx 10xxxxxx
-                 char c1 = (0b00001111 &
-                         (char) (uint >> 12)) |
-                           0b11100000;
-                           
-                 char c2 = (0b00111111 &
-                         (char) (uint >> 6)) |
-                           0b10000000;
-                           
-                 char c3 = (0b00111111 &
-                          (char) uint) |
-                           0b10000000;
-                           
-                 out << c1 << c2 << c3;
-               }
-               else if (uint <= 0x10FFFF)
-               {
-                  //11110xxx 10xxxxxx
-                  //10xxxxxx 10xxxxxx
-                  char c1 = (0b00000111 &
-                          (char) (uint >> 18)) |
-                            0b11110000;
-                            
-                  char c2 = (0b00111111 &
-                          (char) (uint >> 12)) |
-                            0b10000000;
-                            
-                  char c3 = (0b00111111 &
-                          (char) (uint >> 6)) |
-                            0b10000000;
-                            
-                  char c4 = (0b00111111 &
-                           (char) uint) |
-                            0b10000000;
-                            
-                  out << c1 << c2 << c3 << c4;
-               }
-               else
-               {
-                  out << "{"
-                      << (uint64_t)character
-                      << "}";
-               }
-            }
-         }
-      }
-
    
    };
 
 
-
+   
 }
 
 #endif

@@ -16,18 +16,16 @@ namespace bee::fish::parser
   
    public:
 
-      Repeat(Match* t) :
+      Repeat(const Match& t) :
          Match(),
-         _template(t),
+         _template(t.copy()),
          _match(NULL)
       {
-         _template = t;
-         _match = NULL;
       }
    
       Repeat(const Repeat& source) :
          Match(source),
-         _template(source._template),
+         _template(source._template->copy()),
          _match(NULL)
       {
       }
@@ -42,7 +40,7 @@ namespace bee::fish::parser
       }
    
    
-      virtual bool match(WideChar character)
+      virtual bool match(const Char& character)
       {
 
          if (_match == NULL)
@@ -51,9 +49,6 @@ namespace bee::fish::parser
          bool matched =
             _match->match(character);
          
-         if (matched)
-            Match::match(character);
-      
          if (_match->result() == true)
          {
       
@@ -99,7 +94,7 @@ namespace bee::fish::parser
          return new Repeat(*this);
       }
       
-      virtual void write(ostream& out)
+      virtual void write(ostream& out) const
       {
          out << "Repeat";
          writeResult(out);

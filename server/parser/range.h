@@ -2,24 +2,25 @@
 #define BEE_FISH_PARSER__RANGE_H
 
 #include "match.h"
+#include "bstring.h"
 
 namespace bee::fish::parser {
 
             
    class Range : public Match {
    private:
-			  WideChar _minimum;
-			  WideChar _maximum;
+			  const Char _minimum;
+			  const Char _maximum;
 			   
 		public:
-			  Range(WideChar minimum, WideChar maximum)
+			  Range(const Char& minimum, const Char& maximum)
 			     : Match(),
 			     _minimum(minimum),
          _maximum(maximum)
 			  {
 			  }
 			   
-			  virtual bool match(WideChar character)
+			  virtual bool match(const Char& character)
 			  {
 			   
 			     if (character == Match::EndOfFile)
@@ -31,25 +32,25 @@ namespace bee::fish::parser {
 			         
 			     if (matched)
 			     {
-			        Match::match(character);
 			        success();
 			     }
-			     else {
+			     else
+			     {
 			        fail();
 			     }
 			
 			     return matched;
 			  }
 			   
-			  virtual void write(ostream& out)
+			  virtual void write(ostream& out) const
 			  {
 			     out << "Range";
 			     writeResult(out);
-			     out << "('";
-			     Match::write(out, _minimum);
-			     out << "', '";
-			     Match::write(out, _maximum);
-			     out << "')";
+			     out << "('"
+			         << bstring(_minimum)
+			         << "', '"
+			         << bstring(_maximum)
+			         << "')";
 			       
 			  }
 			  

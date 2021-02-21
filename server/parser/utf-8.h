@@ -40,13 +40,19 @@ namespace bee::fish::parser {
          return new UTF8Byte(*this);
       }
       
-      virtual void write(ostream& out)
+      virtual void write(ostream& out) const
       {
          out << "UTF8Byte";
          writeResult(out);
          out << "({" << _matchMask << "}, "
              << "{" << _extractMask << "}, "
              << _byteCount << ")";
+      }
+      
+      virtual bool match(const Char& character)
+      {
+         bitset<8> bits(character);
+         return match(bits);
       }
       
       virtual bool match(const bitset<8>& bits)
@@ -101,9 +107,9 @@ namespace bee::fish::parser {
       public Character
    {
    protected:
-      unsigned int    _firstByteCount;
-      unsigned int    _byteCount;
-      WideChar _temporary;
+      unsigned int _firstByteCount;
+      unsigned int _byteCount;
+      Char         _temporary;
    public:
    
       UTF8Character() :
@@ -115,8 +121,8 @@ namespace bee::fish::parser {
          
       }
        
-      UTF8Character(WideChar& wideChar) :
-         Character(wideChar),
+      UTF8Character(Char& character) :
+         Character(character),
          _firstByteCount(0),
          _byteCount(0),
          _temporary(0)
@@ -133,7 +139,7 @@ namespace bee::fish::parser {
       {
       }
       
-      virtual bool match(WideChar character)
+      virtual bool match(const Char& character)
       {
          bitset<8> bits(character);
          bool matched = false;
@@ -196,6 +202,7 @@ namespace bee::fish::parser {
                   bits & byte._extractMask
                ).to_ulong();
                
+               
                return true;
             }
                
@@ -236,24 +243,21 @@ namespace bee::fish::parser {
          return new UTF8Character(*this);
       }
       
-      virtual void write(ostream& out)
+      virtual void write(ostream& out) const
       {
          out << "UTF8Character";
          writeResult(out);
          out << "(";
          if (!_matchAny)
          {
-            out << (int)character();
+            out << character();
          }
          out << ")";
       }
       
       
    };
-   /*
-   const Match
-      UTF8Character = UTF8Character();
-      */
+ 
 }
 
 #endif

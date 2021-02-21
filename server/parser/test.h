@@ -10,24 +10,28 @@ namespace bee::fish::parser
    inline bool test();
    
    inline bool testCharacter();
+   inline bool testUTF8Character();
+   inline bool testRepeat();
    inline bool testRange();
    inline bool testWord();
    inline bool testCaseInsensitiveWord();
-   inline bool testRepeat();
-   inline bool testUTF8Character();
+   inline bool testBString();
+  
    
-   inline bool testMatch(string label, Match& match, string text, bool result = true, wstring expected = L"");
+   inline bool testMatch(string label, Match& match, string text, bool result = true, string expected = "");
 
    inline bool test()
    {
       bool ok = true;
-      
+      /*
       ok &= testCharacter();
+      ok &= testUTF8Character();
+      ok &= testRepeat();
       ok &= testRange();
       ok &= testWord();
-      ok &= testCaseInsensitiveWord();
-      ok &= testRepeat();
-      ok &= testUTF8Character();
+      ok &= testCaseInsensitiveWord();*/
+      ok &= testBString();
+      
       
       if (ok)
          cout << "SUCCESS";
@@ -53,13 +57,32 @@ namespace bee::fish::parser
       
       // Character
       CharA characterMatch;
-      ok &= testMatch("Character match", characterMatch, "A", true, L"A");
+      ok &= testMatch("Character match", characterMatch, "A", true);
 
       CharA characterNoMatch;
       ok &= testMatch("Character no match", characterNoMatch, "B", false);
       
       Character any;
-      ok &= testMatch("Character any", any, "a", true, L"a");
+      ok &= testMatch("Character any", any, "a", true);
+      
+      return ok;
+   }
+   
+   inline bool testUTF8Character()
+   {
+      bool ok = true;
+      UTF8Character anyChar;
+      ok &= testMatch("UTF8 character match", anyChar, "π", true);
+      
+      return ok;
+   }
+   
+   inline bool testRepeat()
+   {
+      bool ok = true;
+      UTF8Character anyChar;
+      Repeat repeat(anyChar);
+      ok &= testMatch("Repeat range match", repeat, "helloworld", true, "helloworld");
       
       return ok;
    }
@@ -70,7 +93,7 @@ namespace bee::fish::parser
       
       // Character
       Range rangeMatch('a', 'z');
-      ok &= testMatch("Range match", rangeMatch, "b", true, L"b");
+      ok &= testMatch("Range match", rangeMatch, "b", true, "b");
 
       Range rangeNoMatch('a', 'z');
       ok &= testMatch("Range no match", rangeNoMatch, "B", false);
@@ -83,10 +106,10 @@ namespace bee::fish::parser
       bool ok = true;
       
       // Character
-      Word wordMatch(L"Word");
-      ok &= testMatch("Word match", wordMatch, "Word", true, L"Word");
+      Word wordMatch(bstring("Word"));
+      ok &= testMatch("Word match", wordMatch, "Word", true, "Word");
 
-      Word wordNoMatch(L"Word");
+      Word wordNoMatch(bstring("Word"));
       ok &= testMatch("Word no match", wordNoMatch, "Wor*", false);
 
       return ok;
@@ -97,50 +120,41 @@ namespace bee::fish::parser
       bool ok = true;
       
       // Character
-      CIWord ciWordMatch(L"ABC");
-      ok &= testMatch("Case insensitive Word match", ciWordMatch, "abc", true, L"abc");
+      CIWord ciWordMatch(bstring("ABC"));
+      ok &= testMatch("Case insensitive Word match", ciWordMatch, "abc", true, "abc");
 
-      CIWord ciWordNoMatch(L"ABC");
+      CIWord ciWordNoMatch(bstring("ABC"));
       ok &= testMatch("Case insensitive Word no match", ciWordNoMatch, "abZ", false);
 
       return ok;
    }
    
-   inline bool testRepeat()
+   inline bool testBString()
    {
       bool ok = true;
-      Range range('a', 'z');
-      Repeat repeat(range.copy());
-      ok &= testMatch("Repeat range match", repeat, "helloworld", true, L"helloworld");
+      Word runes(bstring("ᛒᚢᛞᛖ"));
+     
+      ok &= testMatch("Test runes bstring ᛒᚢᛞᛖ", runes, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
       
       return ok;
    }
    
-   inline bool testUTF8Character()
-   {
-      bool ok = true;
-      Repeat repeat(new UTF8Character());
-      ok &= testMatch("UTF8 character repeat match", repeat, "helloworld", true, L"helloworld");
-      
-      return ok;
-   }
-   
-   inline bool testMatch(string label, Match& match, string text, bool result, wstring expected)
+   inline bool testMatch(string label, Match& match, string text, bool result, const string expected)
    {
       cout << label << ":\t";
       
-      match._capture = true;
-      match.read(text);
+      Capture capture(match);
+      capture.read(text);
       
       bool ok = true;
       
-      if (result == true && match.result() != true)
+      if (result == true && capture.result() != true)
          ok = false;
-      else if (result == false && match.result() != false)
+      else if (result == false && capture.result() != false)
          ok = false;
-      else if (match.result() == true)
+      else if (capture.result() == true && expected.length())
       {
-         if (expected != match.str())
+         if (bstring(expected) != capture.value())
             ok = false;
       }
       
@@ -149,8 +163,8 @@ namespace bee::fish::parser
       else
       {
          cout << "FAIL" << endl << match << endl;
-         wcout << "\tExpected \t" << expected << endl;
-         wcout << "\tGot\t" << match.str() << endl;
+         cout << "\tExpected \t" << expected << endl;
+         cout << "\tGot\t" << capture.value() << endl;
       }
       
       return ok;

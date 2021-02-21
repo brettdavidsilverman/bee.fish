@@ -8,9 +8,9 @@ namespace bee::fish::parser {
    
    class Character : public Match {
    protected:
-      WideChar _character;
+      Char _character;
       bool _matchAny;
-      WideChar _matchedCharacter;
+      Char _matchedCharacter;
       
    public:
    
@@ -22,7 +22,7 @@ namespace bee::fish::parser {
       {
       }
       
-      Character(WideChar character) :
+      Character(Char character) :
          Match(),
          _character(character),
          _matchAny(false),
@@ -34,7 +34,7 @@ namespace bee::fish::parser {
       {
       }
    
-      virtual bool match(WideChar character)
+      virtual bool match(const Char& character)
       {
          bool matched;
          
@@ -47,7 +47,6 @@ namespace bee::fish::parser {
          if (matched)
          {
             _matchedCharacter = character;
-            Match::match(character);
             success();
          }
          else
@@ -58,16 +57,14 @@ namespace bee::fish::parser {
          return matched;
       }
    
-      virtual void write(ostream& out)
+      virtual void write(ostream& out) const
       {
          out << "Character";
          writeResult(out);
          out << "(";
          if (!_matchAny)
          {
-            out << "'";
-            Match::write(out, _character);
-            out << "'";
+            out << character();
          }
          out << ")";
       }
@@ -85,7 +82,7 @@ namespace bee::fish::parser {
          return new Character(*this);
       }
       
-      virtual WideChar& character()
+      virtual const Char& character() const
       {
          return _matchedCharacter;
       }

@@ -11,20 +11,18 @@ namespace bee::fish::parser {
 
    class CIWord : public Word {
    public:
-      CIWord(const wstring& word) :
+      CIWord(const bstring& word) :
          Word(word)
       {
       
       }
    
    
-      virtual void write(ostream& out)
+      virtual void write(ostream& out) const
       {
          out << "CIWord";
          writeResult(out);
-         out << "(\"";
-         Match::write(out, _word);
-         out << "\")";
+         out << "(\"" << _word << "\")";
       }
 
       CIWord(const CIWord& source) :
@@ -38,7 +36,7 @@ namespace bee::fish::parser {
       }
       
    protected:
-      virtual bool match_char(WideChar character) {
+      virtual bool match_char(const Char& character) {
    
          if (character == Match::EndOfFile)
             return false;

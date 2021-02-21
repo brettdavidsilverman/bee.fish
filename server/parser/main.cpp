@@ -1,9 +1,11 @@
 #include <iostream>
 #include "parser.h"
+#include "bstring.h"
 #include "test.h"
 
 using namespace std;
 using namespace bee::fish::parser;
+
 
 int main(int argc, char* argv[]) {
    
@@ -15,20 +17,16 @@ int main(int argc, char* argv[]) {
         << "Version: "
            << BEE_FISH_PARSER_VERSION
            << endl;
+ 
+   if (!test())
+      return 1;
    
-   //if (!test())
-   //   return 1;
-   std::locale::global(std::locale("C.UTF-8"));
-   
-   Repeat repeat(new UTF8Character());
-   repeat._capture = true;
    string str = "ᚻᛖ ᚳᚹᚫᚦ ᚦᚫᛏ ᚻᛖ ᛒᚢᛞᛖ ᚩᚾ ᚦᚫᛗ ᛚᚪᚾᛞᛖ ᚾᚩᚱᚦᚹᛖᚪᚱᛞᚢᛗ ᚹᛁᚦ ᚦᚪ ᚹᛖᛥᚫ";
-   cout << str << endl;
-   repeat.read(str);
-   wcout << repeat.str() << endl;
-   
-   Match::write(cout, repeat.str());
-   
+   bstring bstr(str);
+   cout << endl << "******" << endl;
+   cout << bstr << endl;
+   //cout << repeat.str() << endl;
+
    /*
    if (str == stream.str())
       cout << "SUCCESS" << endl;

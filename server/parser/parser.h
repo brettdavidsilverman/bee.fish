@@ -8,10 +8,12 @@
 #include "match.h"
 #include "character.h"
 #include "utf-8.h"
+#include "bstring.h"
 #include "range.h"
 #include "word.h"
 #include "ciword.h"
 #include "repeat.h"
+#include "capture.h"
 /*
 #include "and.h"
 #include "or.h"
@@ -24,7 +26,10 @@ using namespace std;
 
 namespace bee::fish::parser
 {
-  
+
+   class Parser
+   {
+   };
 }
 
 #endif
