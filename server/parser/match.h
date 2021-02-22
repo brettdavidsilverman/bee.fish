@@ -43,10 +43,9 @@ namespace bee::fish::parser {
       BString _value;
       
       template<typename ...T>
-      Match(T*... inputs) :
-         _inputs{inputs...}
+      Match(T*... args) :
+         _inputs{args...}
       {
-
       }
    
       virtual ~Match() {
@@ -203,7 +202,12 @@ namespace bee::fish::parser {
                  ++it)
          {
             const Match* input = *it;
-            out << *input;
+            
+            if (input == NULL)
+               out << "NULL";
+            else
+               out << *input;
+               
             if (it + 1 != _inputs.cend())
                out << ", ";
          }

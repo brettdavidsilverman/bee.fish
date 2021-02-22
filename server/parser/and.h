@@ -4,7 +4,6 @@
 #include <vector>
 #include <optional>
 #include "match.h"
-#include "or.h"
 
 using namespace std;
 
@@ -41,7 +40,7 @@ namespace bee::fish::parser {
          bool matched = false;
          vector<Match*>::iterator 
             end = _inputs.end();
-            
+  
          if (_iterator == end)
             _iterator = _inputs.begin();
             
@@ -51,10 +50,7 @@ namespace bee::fish::parser {
 
             matched =
                item->match(character);
-         
-            if (matched)
-               Match::match(character);
-
+               
             if (item->result() == true) {
             
                if ( ++_iterator == end ) {

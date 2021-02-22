@@ -31,6 +31,11 @@ using namespace std;
       {
          _index = _word.cbegin();
       }
+      
+      Word(const string& word) :
+         Word(BString(word))
+      {
+      }
    
       virtual bool match(const Char& character)
       {

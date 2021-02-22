@@ -19,11 +19,16 @@ namespace bee::fish::parser {
       {
       }
       
+      Or(const Or& source) :
+         Match(source)
+      {
+      }
+      
       virtual ~Or()
       {
       }
   
-      virtual bool match(int character)
+      virtual bool match(const Char& character)
       {
    
          bool matched = false;
@@ -70,9 +75,6 @@ namespace bee::fish::parser {
          {
             fail();
          }
-         else if (matched)
-            Match::match(character);
-        
          
          return matched;
       }
@@ -82,33 +84,27 @@ namespace bee::fish::parser {
          return *_item;
       }
    
-      virtual string& value()
-      {
-         return item().value();
-      }
       
       virtual size_t index()
       {
          return _index;
       }
       
-      virtual string name()
-      {
-         return "Or";
-      }
-      
-      Or(const Or& source) :
-         Match(source)
-      {
-      }
 			   
       virtual Match* copy() const
       {
          return new Or(*this);
       }
       
-      friend Or& operator or(Or& first, const Match& second);
-
+      virtual void write(ostream& out) const
+      {
+         out << "Or";
+         writeResult(out);
+         out << "(";
+         writeInputs(out);
+         out << ")";
+         
+      }
    };
 
 

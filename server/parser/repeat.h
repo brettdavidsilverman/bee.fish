@@ -16,9 +16,9 @@ namespace bee::fish::parser
   
    public:
 
-      Repeat(const Match& t) :
+      Repeat(Match* templatePtr) :
          Match(),
-         _template(t.copy()),
+         _template(templatePtr),
          _match(NULL)
       {
       }

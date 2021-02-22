@@ -17,7 +17,11 @@ namespace bee::fish::parser {
       
       }
    
-   
+      CIWord(const string& word) :
+         CIWord(BString(word))
+      {
+      }
+
       virtual void write(ostream& out) const
       {
          out << "CIWord";

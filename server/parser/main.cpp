@@ -16,17 +16,17 @@ int main(int argc, char* argv[]) {
         << "Version: "
            << BEE_FISH_PARSER_VERSION
            << endl;
-           
+
    if (!test())
       return 1;
-   
+   return 0;
    //bool success = true;
    //bool success = request.read("\"蓮书厙蹦㦕乥厙哦哦哦哦厙乥㦓餹鎙㥔锹厕㤹㣕㕍協퍍㓌쪐\\u0000\"");
   // success = request.read("\"\n\"");
  
    Word parser(BString("ᛒᚢᛞᛖ"));
-   cout << endl << "Reading from stdin." << endl;
-   parser.read(cin);
+   //cout << endl << "Reading from stdin." << endl;
+   //parser.read(cin);
  
    if (parser.result() == true)
    {

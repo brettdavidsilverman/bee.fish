@@ -8,38 +8,40 @@ namespace bee::fish::parser {
 
    using namespace std;
 
-   class Optional : public Match {
+   class Optional : public Match
+   {
    protected:
-      Match* _item;
+      Match* _match;
       bool _matched = false;
    
    public:
-      Optional(Match* match)
-         : Match()
+      Optional(Match* match) :
+         Match(),
+         _match(match)
       {
-         _item = match;
       }
    
       virtual ~Optional()
       {
-         if (_item) {
-            delete _item;
-            _item = NULL;
-         }
+         if (_match)
+            delete _match;
       }
    
-		   virtual bool match(int character)
+		   virtual bool match(const Char& character)
 		   {
 		     
 		      bool matched =
-		         item().match(character);
+		         _match->match(character);
 		      
 		      
-		      if (item().result() == true) {
+		      if (_match->result() == true)
+		      {
 		         success();
 		         _matched = true;
 		      } 
-		      else if (item().result() == false) {
+		      else if (_match->result() == false)
+		      {
+		         matched = false;
 		         success();
 		      }
 		      else if (character == Match::EndOfFile) {
@@ -54,23 +56,10 @@ namespace bee::fish::parser {
 		   {
 		      return _matched;
 		   }
-		   
+
 		   virtual Match& item()
 		   {
-		      return *_item;
-		   }
-		   
-		   virtual string& value()
-		   {
-		      if (result() == true)
-		         return item().value();
-		         
-		      return Match::value();
-		   }
-		   
-		   virtual string name()
-		   {
-		      return "Optional";
+		      return *_match;
 		   }
 		   
 		   virtual bool isOptional()
@@ -78,9 +67,10 @@ namespace bee::fish::parser {
 		      return true;
 		   }
      
-      Optional(const Optional& source) 
+      Optional(const Optional& source) :
+         Match(source),
+         _match(source._match->copy())
       {
-         _item = source._item->copy();
       }
 			   
       virtual Match* copy() const
@@ -88,6 +78,15 @@ namespace bee::fish::parser {
          return new Optional(*this);
       }
       
+      virtual void write(ostream& out) const
+      {
+         out << "Optional";
+         writeResult(out);
+         out << "("
+             << *_match
+             << ")";
+         
+      }
    
    };
 

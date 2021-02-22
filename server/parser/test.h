@@ -15,7 +15,10 @@ namespace bee::fish::parser
    inline bool testWord();
    inline bool testCaseInsensitiveWord();
    inline bool testBString();
-  
+   inline bool testAnd();
+   inline bool testOr();
+   inline bool testNot();
+   inline bool testOptional();
    
    inline bool testMatch(string label, Match& match, string text, bool result = true, string expected = "");
 
@@ -29,7 +32,10 @@ namespace bee::fish::parser
       ok &= testWord();
       ok &= testCaseInsensitiveWord();
       ok &= testBString();
-      
+      ok &= testAnd();
+      ok &= testOr();
+      ok &= testNot();
+     // ok &= testOptional();
       
       if (ok)
          cout << "SUCCESS";
@@ -69,8 +75,7 @@ namespace bee::fish::parser
    inline bool testRepeat()
    {
       bool ok = true;
-      Character anyChar;
-      Repeat repeat(anyChar);
+      Repeat repeat(new Character());
       ok &= testMatch("Repeat range match", repeat, "helloworld", true, "helloworld");
       
       return ok;
@@ -95,10 +100,10 @@ namespace bee::fish::parser
       bool ok = true;
       
       // Character
-      Word wordMatch(BString("Word"));
+      Word wordMatch("Word");
       ok &= testMatch("Word match", wordMatch, "Word", true, "Word");
 
-      Word wordNoMatch(BString("Word"));
+      Word wordNoMatch("Word");
       ok &= testMatch("Word no match", wordNoMatch, "Wor*", false);
 
       return ok;
@@ -109,10 +114,10 @@ namespace bee::fish::parser
       bool ok = true;
       
       // Character
-      CIWord ciWordMatch(BString("ABC"));
+      CIWord ciWordMatch("ABC");
       ok &= testMatch("Case insensitive Word match", ciWordMatch, "abc", true, "abc");
 
-      CIWord ciWordNoMatch(BString("ABC"));
+      CIWord ciWordNoMatch("ABC");
       ok &= testMatch("Case insensitive Word no match", ciWordNoMatch, "abZ", false);
 
       return ok;
@@ -126,6 +131,81 @@ namespace bee::fish::parser
       ok &= testMatch("Test runes BString ᛒᚢᛞᛖ", runes, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
       
       return ok;
+   }
+   
+   inline bool testAnd()
+   {
+      bool ok = true;
+      
+      And testAnd(
+         new Character('a'),
+         new Character('b'),
+         new Character('c')
+      );
+      
+      ok &= testMatch("Simple 'and' match", testAnd, "abc", true, "abc");
+
+      And testAndNoMatch(testAnd);
+      
+      ok &= testMatch("Simple 'and' no match", testAndNoMatch, "abz", false);
+
+      return ok;
+   }
+   
+   inline bool testOr()
+   {
+      bool ok = true;
+      
+      Or testOr(
+         new Word("true"),
+         new Word("false")
+      );
+      
+      ok &= testMatch("Simple 'or' match", testOr, "true", true, "true");
+      
+      Or testOrNoMatch(testOr);
+      
+      ok &= testMatch("Simple 'or' no match", testOrNoMatch, "maybe", false);
+      
+      return ok;
+   }
+   
+   inline bool testNot()
+   {
+      bool ok = true;
+      
+      Not testNot(new Word("true"));
+      
+      ok &= testMatch("Simple 'not' match", testNot, "false", true);
+      
+      Not testNotNoMatch(testNot);
+      
+      ok &= testMatch("Simple 'not' no match", testNotNoMatch, "true", false);
+      
+      return ok;
+   }
+   
+   inline bool testOptional()
+   {
+   
+      bool ok = true;
+      
+      And testOptional
+      (
+         new Word("one"),
+         new Optional(new Word("two")),
+         new Word("three")
+      );
+      
+      And testOptional123(testOptional);
+      ok &= testMatch("Optional one two three match", testOptional123, "onetwothree", true, "onetwothree");
+      
+      And testOptional13(testOptional);
+      
+      ok &= testMatch("Optional one three match", testOptional13, "onethree", true, "onethree");
+      
+      return ok;
+      
    }
    
    inline bool testMatch(string label, Match& match, string text, bool result, const string expected)

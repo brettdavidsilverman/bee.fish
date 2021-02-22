@@ -66,7 +66,9 @@ namespace bee::fish::parser {
          out << "(";
          if (!_matchAny)
          {
-            out << character();
+            out << "'";
+            UTF8Character::write(out, character());
+            out << "'";
          }
          out << ")";
       }
@@ -86,7 +88,7 @@ namespace bee::fish::parser {
       
       virtual const Char& character() const
       {
-         return _matchedCharacter;
+         return _character;
       }
    
 
