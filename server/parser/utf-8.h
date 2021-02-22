@@ -255,7 +255,114 @@ namespace bee::fish::parser {
          out << ")";
       }
       
+      static void writeCharacter(ostream& out, const Char& character)
+      {
+         switch (character)
+         {
+         case '\"':
+            out << "\\\"";
+            break;
+         case '\\':
+            out << "\\\\";
+            break;
+         case '\b':
+            out << "\\b";
+            break;
+         case '\f':
+            out << "\\f";
+            break;
+         case '\r':
+            out << "\\r";
+            break;
+         case '\n':
+            out << "\\n";
+            break;
+         case '\t':
+            out << "\\t";
+            break;
+         case Match::EndOfFile:
+            out << "-1";
+            break;
+         default:
+            writeUTF8Character(out, character);
+         }
+      }
       
+      static void writeUTF8Character(
+         ostream& out,
+         const Char& character
+      )
+      {
+         if (character <= 0x007F)
+         {
+            char c1 = (char)character;
+            out << c1;
+         }
+         else if (character <= 0x07FF)
+         {
+            //110xxxxx 10xxxxxx
+            char c1 = ( 0b00011111         &
+                      ( character >> 6 ) ) |
+                        0b11000000;
+                            
+            char c2 = ( 0b00111111  &
+                        character ) |
+                        0b10000000;
+                            
+            out << c1 << c2;
+         }
+         else if (character <= 0xFFFF)
+         {
+            //1110xxxx 10xxxxxx 10xxxxxx
+            char c1 = ( 0b00001111          &
+                      ( character >> 12 ) ) |
+                        0b11100000;
+                           
+            char c2 = ( 0b00111111          &
+                      ( character >>  6 ) ) |
+                        0b10000000;
+                           
+            char c3 = ( 0b00111111  &
+                        character ) |
+                        0b10000000;
+                           
+            out << c1 << c2 << c3;
+
+         }
+         else if (character <= 0x10FFFF)
+         {
+            //11110xxx 10xxxxxx
+            //10xxxxxx 10xxxxxx
+            char c1 = ( 0b00000111         &
+                      ( character >> 18) ) |
+                        0b11110000;
+                            
+            char c2 = ( 0b00111111         &
+                      ( character >> 12) ) |
+                        0b10000000;
+                            
+            char c3 = ( 0b00111111         &
+                      ( character >>  6) ) |
+                        0b10000000;
+                            
+            char c4 = ( 0b00111111 &
+                        character ) |
+                        0b10000000;
+                            
+            out << c1 << c2 << c3 << c4;
+         }
+         else if (character == Match::EndOfFile)
+         {
+            out << "{-1}";
+         }
+         else
+         {
+            out << "{"
+                << (int32_t)character
+                << "}";
+         }
+   
+      }
    };
  
 }

@@ -11,12 +11,12 @@
 using namespace std;
 
 inline ostream& operator <<
-(ostream& out, optional<bool> ok)
+(ostream& out, const optional<bool>& ok)
 {
    if (ok == true)
-      out << "1";
+      out << "true";
    else if (ok == false)
-      out << "0";
+      out << "false";
    else
       out << "?";
          
@@ -85,58 +85,6 @@ namespace bee::fish::parser {
       virtual bool match(const Char& character) = 0;
       
       virtual void write(ostream& out) const = 0;
-   
-      virtual bool read(
-         istream& in,
-         bool last = true
-      )
-      {
-      
-         _result = nullopt;
-     
-         while (!in.eof())
-         {
-            Char character = in.get();
-
-            if (character == Match::EndOfFile)
-               break;
-#ifdef DEBUG
-            Match::write(cerr, character);
-#endif
-            match((Char)character);
-         
-            if (_result != nullopt)
-               break;
-            
-         }
-
-         if ( _result == nullopt &&
-              last &&
-              in.eof()
-            )
-         {
-#ifdef DEBUG
-            Match::write(cerr, Match::EndOfFile);
-#endif
-            match(Match::EndOfFile);
-         
-            return _result == true;
-         }
-     
-         return (_result != false);
-      }
-   
-      virtual bool read(
-         const string& str,
-         bool last = true
-      )
-      {
-      
-         istringstream in(str);
-      
-         return read(in, last);
-      
-      }
    
       virtual const optional<bool>& result() const
       {

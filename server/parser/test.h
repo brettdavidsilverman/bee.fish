@@ -23,13 +23,13 @@ namespace bee::fish::parser
    inline bool test()
    {
       bool ok = true;
-      /*
+      
       ok &= testCharacter();
       ok &= testUTF8Character();
       ok &= testRepeat();
       ok &= testRange();
       ok &= testWord();
-      ok &= testCaseInsensitiveWord();*/
+      ok &= testCaseInsensitiveWord();
       ok &= testBString();
       
       
@@ -72,7 +72,10 @@ namespace bee::fish::parser
    {
       bool ok = true;
       UTF8Character anyChar;
-      ok &= testMatch("UTF8 character match", anyChar, "π", true);
+      string str;
+      str.push_back(0xCF);
+      str.push_back(0x80);
+      ok &= testMatch("UTF8 character match", anyChar, str, true, "π");
       
       return ok;
    }
@@ -106,10 +109,10 @@ namespace bee::fish::parser
       bool ok = true;
       
       // Character
-      Word wordMatch(bstring("Word"));
+      Word wordMatch(BString("Word"));
       ok &= testMatch("Word match", wordMatch, "Word", true, "Word");
 
-      Word wordNoMatch(bstring("Word"));
+      Word wordNoMatch(BString("Word"));
       ok &= testMatch("Word no match", wordNoMatch, "Wor*", false);
 
       return ok;
@@ -120,10 +123,10 @@ namespace bee::fish::parser
       bool ok = true;
       
       // Character
-      CIWord ciWordMatch(bstring("ABC"));
+      CIWord ciWordMatch(BString("ABC"));
       ok &= testMatch("Case insensitive Word match", ciWordMatch, "abc", true, "abc");
 
-      CIWord ciWordNoMatch(bstring("ABC"));
+      CIWord ciWordNoMatch(BString("ABC"));
       ok &= testMatch("Case insensitive Word no match", ciWordNoMatch, "abZ", false);
 
       return ok;
@@ -132,9 +135,9 @@ namespace bee::fish::parser
    inline bool testBString()
    {
       bool ok = true;
-      Word runes(bstring("ᛒᚢᛞᛖ"));
+      Word runes(BString("ᛒᚢᛞᛖ"));
      
-      ok &= testMatch("Test runes bstring ᛒᚢᛞᛖ", runes, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
+      ok &= testMatch("Test runes BString ᛒᚢᛞᛖ", runes, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
       
       return ok;
    }
@@ -144,7 +147,10 @@ namespace bee::fish::parser
       cout << label << ":\t";
       
       Capture capture(match);
-      capture.read(text);
+      Parser parser(capture);
+      parser.read(text);
+      
+      BString exp(expected);
       
       bool ok = true;
       
@@ -154,7 +160,8 @@ namespace bee::fish::parser
          ok = false;
       else if (capture.result() == true && expected.length())
       {
-         if (bstring(expected) != capture.value())
+         
+         if (exp != capture.value())
             ok = false;
       }
       
@@ -162,9 +169,10 @@ namespace bee::fish::parser
          cout << "ok" << endl;
       else
       {
-         cout << "FAIL" << endl << match << endl;
-         cout << "\tExpected \t" << expected << endl;
+         cout << "FAIL" << endl;
+         cout << "\tExpect\t" << exp << endl;
          cout << "\tGot\t" << capture.value() << endl;
+         cout << capture.item() << endl;
       }
       
       return ok;

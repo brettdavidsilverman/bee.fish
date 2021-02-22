@@ -2,7 +2,6 @@
 #define BEE_FISH_PARSER__CAPTURE_H
 
 #include "match.h"
-#include "bstring.h"
 
 using namespace std;
 
@@ -12,7 +11,7 @@ namespace bee::fish::parser {
    {
    protected:
       Match* _item;
-      bstring _value;
+      BString _value;
 
    public:
       Capture(
@@ -50,7 +49,7 @@ namespace bee::fish::parser {
          return matched;
       }
    
-      virtual bstring& value()
+      virtual BString& value()
       {
          return _value;
       }

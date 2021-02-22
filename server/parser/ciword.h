@@ -11,7 +11,7 @@ namespace bee::fish::parser {
 
    class CIWord : public Word {
    public:
-      CIWord(const bstring& word) :
+      CIWord(const BString& word) :
          Word(word)
       {
       

@@ -1,15 +1,14 @@
 #include <iostream>
+#include "version.h"
 #include "parser.h"
-#include "bstring.h"
 #include "test.h"
 
 using namespace std;
 using namespace bee::fish::parser;
 
-
 int main(int argc, char* argv[]) {
    
-   clog << "bee.fish.server.parser "
+   cout << "bee.fish.server.parser "
            << endl
         << "C++ run time: "
            << __cplusplus
@@ -17,55 +16,41 @@ int main(int argc, char* argv[]) {
         << "Version: "
            << BEE_FISH_PARSER_VERSION
            << endl;
- 
+   UTF8Character anyChar;
+      string str;
+      str.push_back(0xCF);
+      str.push_back(0x80);
+   if (anyChar.match(0xCF80))
+   {
+      cout << anyChar.result() << endl;
+   }
+      
    if (!test())
       return 1;
    
-   string str = "ᚻᛖ ᚳᚹᚫᚦ ᚦᚫᛏ ᚻᛖ ᛒᚢᛞᛖ ᚩᚾ ᚦᚫᛗ ᛚᚪᚾᛞᛖ ᚾᚩᚱᚦᚹᛖᚪᚱᛞᚢᛗ ᚹᛁᚦ ᚦᚪ ᚹᛖᛥᚫ";
-   bstring bstr(str);
-   cout << endl << "******" << endl;
-   cout << bstr << endl;
-   //cout << repeat.str() << endl;
-
-   /*
-   if (str == stream.str())
-      cout << "SUCCESS" << endl;
-   else
-      cout << "FAIL" << endl;
-   */
-   /*
-   Repeat repeat2(new UTF8Character);
-   repeat2.read("Hello World");
-   if (repeat2.str() == L"Hello World")
-      cout << "SUCCESS" << endl;
-   else
-      cout << "FAIL" << endl;
-      
-   Match::write(cout, repeat2.str());
-   */
    //bool success = true;
    //bool success = request.read("\"蓮书厙蹦㦕乥厙哦哦哦哦厙乥㦓餹鎙㥔锹厕㤹㣕㕍協퍍㓌쪐\\u0000\"");
   // success = request.read("\"\n\"");
- /*
-   cerr << endl << "Reading from stdin." << endl;
-   bool result = request.read(cin);
  
-   if (result && request.result())
+   Word word(BString("ᛒᚢᛞᛖ"));
+   Parser parser(word);
+   cout << endl << "Reading from stdin." << endl;
+   parser.read(cin);
+ 
+   if (parser.result())
    {
-      cerr << endl
-           << request.value()
-           << endl
+      cout << endl << word << endl
            << "ok joe"
            << endl;
    }
    else
    {
    
-      cerr << endl << "Fail" << endl;
+      cout << endl << "Fail" << endl;
 
    }
    
-   */
+ 
    return 0;
    
 }

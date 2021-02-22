@@ -2,7 +2,7 @@
 #define BEE_FISH_PARSER__RANGE_H
 
 #include "match.h"
-#include "bstring.h"
+#include "b-string.h"
 
 namespace bee::fish::parser {
 
@@ -47,9 +47,9 @@ namespace bee::fish::parser {
 			     out << "Range";
 			     writeResult(out);
 			     out << "('"
-			         << bstring(_minimum)
+			         << BString(_minimum)
 			         << "', '"
-			         << bstring(_maximum)
+			         << BString(_maximum)
 			         << "')";
 			       
 			  }
