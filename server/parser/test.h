@@ -10,7 +10,6 @@ namespace bee::fish::parser
    inline bool test();
    
    inline bool testCharacter();
-   inline bool testUTF8Character();
    inline bool testRepeat();
    inline bool testRange();
    inline bool testWord();
@@ -25,7 +24,6 @@ namespace bee::fish::parser
       bool ok = true;
       
       ok &= testCharacter();
-      ok &= testUTF8Character();
       ok &= testRepeat();
       ok &= testRange();
       ok &= testWord();
@@ -68,22 +66,10 @@ namespace bee::fish::parser
       return ok;
    }
    
-   inline bool testUTF8Character()
-   {
-      bool ok = true;
-      UTF8Character anyChar;
-      string str;
-      str.push_back(0xCF);
-      str.push_back(0x80);
-      ok &= testMatch("UTF8 character match", anyChar, str, true, "π");
-      
-      return ok;
-   }
-   
    inline bool testRepeat()
    {
       bool ok = true;
-      UTF8Character anyChar;
+      Character anyChar;
       Repeat repeat(anyChar);
       ok &= testMatch("Repeat range match", repeat, "helloworld", true, "helloworld");
       
@@ -146,22 +132,23 @@ namespace bee::fish::parser
    {
       cout << label << ":\t";
       
-      Capture capture(match);
-      Parser parser(capture);
-      parser.read(text);
+      Match& parser = match;
+      parser._capture = true;
       
       BString exp(expected);
       
       bool ok = true;
       
-      if (result == true && capture.result() != true)
+      parser.read(text);
+      
+      if (result == true && parser.result() != true)
          ok = false;
-      else if (result == false && capture.result() != false)
+      else if (result == false && parser.result() != false)
          ok = false;
-      else if (capture.result() == true && expected.length())
+      else if (parser.result() == true && expected.length())
       {
          
-         if (exp != capture.value())
+         if (exp != parser._value)
             ok = false;
       }
       
@@ -171,8 +158,8 @@ namespace bee::fish::parser
       {
          cout << "FAIL" << endl;
          cout << "\tExpect\t" << exp << endl;
-         cout << "\tGot\t" << capture.value() << endl;
-         cout << capture.item() << endl;
+         cout << "\tGot\t" << parser._value << endl;
+         cout << parser << endl;
       }
       
       return ok;

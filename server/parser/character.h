@@ -38,7 +38,9 @@ namespace bee::fish::parser {
       {
          bool matched;
          
-         if (_matchAny)
+         if (character == Match::EndOfFile)
+            matched = false;
+         else if (_matchAny)
             matched = true;
          else
             matched =

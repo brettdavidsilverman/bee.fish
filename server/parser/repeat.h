@@ -48,10 +48,9 @@ namespace bee::fish::parser
          
          bool matched =
             _match->match(character);
-         
+
          if (_match->result() == true)
          {
-      
             matchedItem(_match);
             _match = NULL;
             ++_matchedCount;

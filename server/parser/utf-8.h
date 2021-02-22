@@ -4,12 +4,12 @@
 #include <bitset>
 #include <wchar.h>
 
-#include "match.h"
-#include "character.h"
 
 namespace bee::fish::parser {
+
+   typedef uint32_t Char;
    
-   struct UTF8Byte : public Match
+   struct UTF8Byte
    {
       bitset<8>  _matchMask;
       bitset<8>  _extractMask;
@@ -35,37 +35,12 @@ namespace bee::fish::parser {
       {
       }
       
-      virtual Match* copy() const
-      {
-         return new UTF8Byte(*this);
-      }
-      
-      virtual void write(ostream& out) const
-      {
-         out << "UTF8Byte";
-         writeResult(out);
-         out << "({" << _matchMask << "}, "
-             << "{" << _extractMask << "}, "
-             << _byteCount << ")";
-      }
-      
-      virtual bool match(const Char& character)
-      {
-         bitset<8> bits(character);
-         return match(bits);
-      }
-      
-      virtual bool match(const bitset<8>& bits)
+      bool match(const bitset<8>& bits)
       {
 
          bool matched =
             ((bits & _matchMask) == bits);
          
-         if (matched)
-            success();
-         else
-            fail();
-            
          return matched;
       }
       
@@ -103,43 +78,55 @@ namespace bee::fish::parser {
       );
    
    
-   class UTF8Character :
-      public Character
+   struct UTF8Character
    {
    protected:
-      unsigned int _firstByteCount;
+      unsigned int _expectedByteCount;
       unsigned int _byteCount;
-      Char         _temporary;
+      Char         _character;
+      optional<bool> _result;
+      
+      inline static const Char EndOfFile = -1;
    public:
    
       UTF8Character() :
-         Character(),
-         _firstByteCount(0),
+         _expectedByteCount(0),
          _byteCount(0),
-         _temporary(0)
+         _character(0),
+         _result(nullopt)
       {
          
       }
        
       UTF8Character(Char& character) :
-         Character(character),
-         _firstByteCount(0),
+         _expectedByteCount(0),
          _byteCount(0),
-         _temporary(0)
+         _character(0),
+         _result(nullopt)
       {
       }
       
       UTF8Character(
          const UTF8Character& source
       ) :
-         Character(source),
-         _firstByteCount(source._firstByteCount),
+         _expectedByteCount(source._expectedByteCount),
          _byteCount(source._byteCount),
-         _temporary(source._temporary)
+         _character(source._character),
+         _result(nullopt)
       {
       }
       
-      virtual bool match(const Char& character)
+      const optional<bool>& result() const
+      {
+         return _result;
+      }
+      
+      const Char& character() const
+      {
+         return _character;
+      }
+      
+      bool match(const char& character)
       {
          bitset<8> bits(character);
          bool matched = false;
@@ -157,21 +144,16 @@ namespace bee::fish::parser {
          {
             // Check if we've read enough bytes.
             if ( ++_byteCount ==
-                   _firstByteCount )
+                   _expectedByteCount )
             {
                // All bytes match
-               // Get character to perform
-               // further checks before calling
-               // success.
-               Character::match(
-                  _temporary
-               );
+               _result = true;
                
             }
             
          }
          else
-            fail();
+            _result = false;
             
          return matched;
 
@@ -193,12 +175,12 @@ namespace bee::fish::parser {
             {
                // Store how many subsequent bytes
                // (including this one).
-               _firstByteCount = byte._byteCount;
+               _expectedByteCount = byte._byteCount;
                
                // Start the character value
                // using the bytes extract mask.
              
-               _temporary = (
+               _character = (
                   bits & byte._extractMask
                ).to_ulong();
                
@@ -222,8 +204,8 @@ namespace bee::fish::parser {
          {
             // Left shift the 6 usable bits
             // onto the character value.
-            _temporary =
-               (_temporary << 6) |
+            _character =
+               (_character << 6) |
                (
                   bits &
                      UTF8Subsequent._extractMask
@@ -238,24 +220,7 @@ namespace bee::fish::parser {
 
       }
       
-      virtual Match* copy() const
-      {
-         return new UTF8Character(*this);
-      }
-      
-      virtual void write(ostream& out) const
-      {
-         out << "UTF8Character";
-         writeResult(out);
-         out << "(";
-         if (!_matchAny)
-         {
-            out << character();
-         }
-         out << ")";
-      }
-      
-      static void writeCharacter(ostream& out, const Char& character)
+      static void write(ostream& out, const Char& character)
       {
          switch (character)
          {
@@ -280,15 +245,15 @@ namespace bee::fish::parser {
          case '\t':
             out << "\\t";
             break;
-         case Match::EndOfFile:
-            out << "-1";
+         case EndOfFile:
+            out << "{-1}";
             break;
          default:
-            writeUTF8Character(out, character);
+            writeUTF8(out, character);
          }
       }
       
-      static void writeUTF8Character(
+      static void writeUTF8(
          ostream& out,
          const Char& character
       )
@@ -351,7 +316,7 @@ namespace bee::fish::parser {
                             
             out << c1 << c2 << c3 << c4;
          }
-         else if (character == Match::EndOfFile)
+         else if (character == EndOfFile)
          {
             out << "{-1}";
          }

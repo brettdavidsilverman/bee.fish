@@ -7,39 +7,41 @@
 #include <map>
 #include <sstream>
 #include "../id/id.h"
+#include "utf-8.h"
+#include "b-string.h"
 
 using namespace std;
-
-inline ostream& operator <<
-(ostream& out, const optional<bool>& ok)
-{
-   if (ok == true)
-      out << "true";
-   else if (ok == false)
-      out << "false";
-   else
-      out << "?";
-         
-   return out;
-}
 
 using namespace bee::fish::server;
 
 namespace bee::fish::parser {
 
-   typedef uint32_t Char;
-   
+   inline ostream& operator <<
+   (ostream& out, const optional<bool>& ok)
+   {
+      if (ok == true)
+         out << "true";
+      else if (ok == false)
+         out << "false";
+      else
+         out << "?";
+         
+      return out;
+   }
+
    class Match
    {
    protected:
 
       optional<bool> _result = nullopt;
-   
+
    public:
       inline static const Char EndOfFile = -1;
    
       vector<Match*> _inputs;
-   
+      bool _capture = false;
+      BString _value;
+      
       template<typename ...T>
       Match(T*... inputs) :
          _inputs{inputs...}
@@ -100,7 +102,85 @@ namespace bee::fish::parser {
       {
          _result = false;
       }
- 
+      
+      virtual void read(
+         istream& input,
+         bool last = true
+      )
+      {
+      
+         Char character;
+         while (!input.eof())
+         {
+            if (getNext(input, character))
+            {
+
+#ifdef DEBUG
+               UTF8Character::write(cerr, character);
+#endif
+               bool matched = match(character);
+            
+               if (_capture && matched)
+                  _value.push_back(character);
+         
+               if (result() != nullopt)
+                  break;
+            }
+            
+         }
+
+         if ( result() == nullopt &&
+              last &&
+              input.eof()
+            )
+         {
+#ifdef DEBUG
+            UTF8Character::write(cerr, Match::EndOfFile);
+#endif
+            match(Match::EndOfFile);
+         
+         }
+     
+      }
+      
+   protected:
+   
+      bool getNext(
+         istream& input,
+         Char& character
+      )
+      {
+         char nextChar;
+         UTF8Character utf8;
+            
+         while ( !input.eof() &&
+                 input.get(nextChar) &&
+                 utf8.match(nextChar) &&
+                 utf8.result() == nullopt )
+            ;
+        
+         if (utf8.result() == true)
+         {
+            character = utf8.character();
+            return true;
+         }
+         else
+            return false;
+      }
+      
+   public:
+      virtual void read(
+         const string& str,
+         bool last = true
+      )
+      {
+      
+         stringstream input(str);
+      
+         return read(input, last);
+      
+      }
+
       friend ostream& operator <<
       (ostream& out, const Match& match) 
       {

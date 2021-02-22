@@ -5,10 +5,10 @@
 
 using namespace std;
 using namespace bee::fish::parser;
-
+      
 int main(int argc, char* argv[]) {
    
-   cout << "bee.fish.server.parser "
+   clog << "bee.fish.server.parser "
            << endl
         << "C++ run time: "
            << __cplusplus
@@ -16,15 +16,7 @@ int main(int argc, char* argv[]) {
         << "Version: "
            << BEE_FISH_PARSER_VERSION
            << endl;
-   UTF8Character anyChar;
-      string str;
-      str.push_back(0xCF);
-      str.push_back(0x80);
-   if (anyChar.match(0xCF80))
-   {
-      cout << anyChar.result() << endl;
-   }
-      
+           
    if (!test())
       return 1;
    
@@ -32,22 +24,19 @@ int main(int argc, char* argv[]) {
    //bool success = request.read("\"蓮书厙蹦㦕乥厙哦哦哦哦厙乥㦓餹鎙㥔锹厕㤹㣕㕍協퍍㓌쪐\\u0000\"");
   // success = request.read("\"\n\"");
  
-   Word word(BString("ᛒᚢᛞᛖ"));
-   Parser parser(word);
+   Word parser(BString("ᛒᚢᛞᛖ"));
    cout << endl << "Reading from stdin." << endl;
    parser.read(cin);
  
-   if (parser.result())
+   if (parser.result() == true)
    {
-      cout << endl << word << endl
+      cout << endl
            << "ok joe"
            << endl;
    }
    else
    {
-   
       cout << endl << "Fail" << endl;
-
    }
    
  

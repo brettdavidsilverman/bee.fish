@@ -7,6 +7,7 @@
 
 namespace bee::fish::parser {
 
+   
    class BString :
       public vector<Char>
    
@@ -31,15 +32,7 @@ namespace bee::fish::parser {
                utf8 = UTF8Character();
             }
          }
-         /*
-         BStringStream stream(string);
-         Char character;
-         while (!stream.eof())
-         {
-            stream >> character;
-            push_back(character);
-         }
-         */
+
       }
       
       // wide string 
@@ -62,7 +55,7 @@ namespace bee::fish::parser {
       {
          for (auto c : bstr)
          {
-            UTF8Character::writeCharacter(out, c);
+            UTF8Character::writeUTF8(out, c);
          }
          
          return out;
