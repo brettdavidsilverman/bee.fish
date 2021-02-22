@@ -14,9 +14,11 @@
 #include "ciword.h"
 #include "repeat.h"
 #include "and.h"
+/*
 #include "or.h"
 #include "not.h"
 #include "optional.h"
+*/
 /*
 #include "load-on-demand.h"
 */

@@ -50,13 +50,7 @@ namespace bee::fish::parser {
    
       virtual MatchPtr copy() const = 0;
    
-      virtual bool match(const Char& character)
-      {
-         if (_capture)
-            _value.push_back(character);
-            
-         return true;
-      }
+      virtual bool match(const Char& character) = 0;
       
       virtual void write(ostream& out) const = 0;
    
@@ -90,8 +84,11 @@ namespace bee::fish::parser {
 #ifdef DEBUG
                UTF8Character::write(cerr, character);
 #endif
-               match(character);
-               
+               bool matched = match(character);
+            
+               if (_capture && matched)
+                  _value.push_back(character);
+         
                if (result() != nullopt)
                   break;
             }
@@ -110,6 +107,20 @@ namespace bee::fish::parser {
          
          }
      
+      }
+            
+   public:
+   
+      virtual void read(
+         const string& str,
+         bool last = true
+      )
+      {
+      
+         stringstream input(str);
+      
+         return read(input, last);
+      
       }
       
    protected:
@@ -136,20 +147,8 @@ namespace bee::fish::parser {
          else
             return false;
       }
-      
    public:
-      virtual void read(
-         const string& str,
-         bool last = true
-      )
-      {
-      
-         stringstream input(str);
-      
-         return read(input, last);
-      
-      }
-
+   
       friend ostream& operator <<
       (ostream& out, const Match& match) 
       {
@@ -165,27 +164,13 @@ namespace bee::fish::parser {
          out << "<" << result() << ">";
       }
    
-      virtual void writeInputs(
-         ostream& out,
-         const vector<MatchPtr>& inputs
-      ) const
-      {
-         for (auto it = inputs.cbegin(); 
-                   it != inputs.cend();
-                 ++it)
-         {
-            const MatchPtr input = *it;
-            
-            if (input == NULL)
-               out << "NULL";
-            else
-               out << *input;
-               
-            if (it + 1 != inputs.cend())
-               out << ", ";
-         }
-      }
 
+
+      virtual Match& operator[]
+      (size_t index)
+      {
+         return *(_inputs[index]);
+      }
    
    
    };

@@ -8,15 +8,15 @@ namespace bee::fish::parser
    class Repeat : public Match
    {
    private:
-      Match* _template;
-      Match* _match;
+      MatchPtr _template;
+      MatchPtr _match;
    
    protected:
       size_t _matchedCount = 0;
   
    public:
 
-      Repeat(Match* templatePtr) :
+      Repeat(MatchPtr templatePtr) :
          Match(),
          _template(templatePtr),
          _match(NULL)
@@ -24,19 +24,10 @@ namespace bee::fish::parser
       }
    
       Repeat(const Repeat& source) :
-         Match(source),
+         Match(),
          _template(source._template->copy()),
          _match(NULL)
       {
-      }
-      
-      virtual ~Repeat()
-      {
-
-         delete _template;
-         
-         if (_match)
-           delete _match;
       }
    
    
@@ -51,6 +42,7 @@ namespace bee::fish::parser
 
          if (_match->result() == true)
          {
+            Match::match(character);
             matchedItem(_match);
             _match = NULL;
             ++_matchedCount;
@@ -76,21 +68,19 @@ namespace bee::fish::parser
       
       }
    
-      virtual Match* createItem()
+      virtual MatchPtr createItem()
       {
          return _template->copy();
       }
    
-      virtual void matchedItem(Match* match)
+      virtual void matchedItem(MatchPtr match)
       {
-      
-         delete match;
       
       }
    
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new Repeat(*this);
+         return MatchPtr(new Repeat(*this));
       }
       
       virtual void write(ostream& out) const

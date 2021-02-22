@@ -49,6 +49,7 @@ namespace bee::fish::parser {
          if (matched)
          {
             _matchedCharacter = character;
+            Match::match(character);
             success();
          }
          else
@@ -74,16 +75,16 @@ namespace bee::fish::parser {
       }
    
       Character(const Character& source) :
-         Match(source),
+         Match(),
          _character(source._character),
          _matchAny(source._matchAny),
          _matchedCharacter(source._matchedCharacter)
       {
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new Character(*this);
+         return MatchPtr(new Character(*this));
       }
       
       virtual const Char& character() const

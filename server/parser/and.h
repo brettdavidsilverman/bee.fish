@@ -7,25 +7,28 @@
 
 using namespace std;
 
-namespace bee::fish::parser {
+namespace bee::fish::parser
+{
 
-   class And : public Match {
+   class And : public Match
+   {
    protected:
-   
-      vector<Match*>::iterator
+      vector<MatchPtr> _inputs;
+      
+      vector<MatchPtr>::iterator
          _iterator;
-
+      
    public:
 
       template<typename ...T>
-      And(T*... inputs) :
-         Match(inputs...)
+      And(T... args) :
+         _inputs{args...}
       {
          _iterator = _inputs.end();
       }
       
       And(const And& source) :
-         Match(source)
+         _inputs(source._inputs)
       {
 			     _iterator = _inputs.end();
       }
@@ -38,7 +41,7 @@ namespace bee::fish::parser {
       {
       
          bool matched = false;
-         vector<Match*>::iterator 
+         vector<MatchPtr>::iterator 
             end = _inputs.end();
   
          if (_iterator == end)
@@ -46,7 +49,7 @@ namespace bee::fish::parser {
             
          for (;;) {
 
-            Match* item = *_iterator;
+            MatchPtr item = *_iterator;
 
             matched =
                item->match(character);
@@ -68,13 +71,16 @@ namespace bee::fish::parser {
                  result() != nullopt )
                break;
          }
-
+         
+         if (matched)
+            Match::match(character);
+            
          return matched;
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new And(*this);
+         return MatchPtr(new And(*this));
       }
       
       virtual void write(ostream& out) const
@@ -82,9 +88,15 @@ namespace bee::fish::parser {
          out << "And";
          writeResult(out);
          out << "(";
-         writeInputs(out);
+         writeInputs(out, _inputs);
          out << ")";
          
+      }
+      
+      virtual Match& operator[]
+      (size_t index)
+      {
+         return *(_inputs[index]);
       }
       
    };

@@ -34,9 +34,9 @@ namespace bee::fish::parser {
       {
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new CIWord(*this);
+         return MatchPtr(new CIWord(*this));
       }
       
    protected:

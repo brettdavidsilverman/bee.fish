@@ -27,7 +27,7 @@ namespace bee::fish::parser {
       {
       
          bool matched =
-            _match->match(character);
+            !_match->match(character);
          
          if (_match->result() == false)
             success();
@@ -37,7 +37,10 @@ namespace bee::fish::parser {
             success();
          }
          
-         return !matched;
+         if (matched)
+            Match::match(character);
+            
+         return matched;
       
       }
    

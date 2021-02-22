@@ -44,6 +44,7 @@ using namespace std;
 
          if (matched)
          {
+            Match::match(character);
             ++_index;
             if (_index == _word.end())
             {
@@ -76,9 +77,9 @@ using namespace std;
       {
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new Word(*this);
+         return MatchPtr(new Word(*this));
       }
    
    };

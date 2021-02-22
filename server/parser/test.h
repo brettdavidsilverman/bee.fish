@@ -16,10 +16,11 @@ namespace bee::fish::parser
    inline bool testCaseInsensitiveWord();
    inline bool testBString();
    inline bool testAnd();
+   /*
    inline bool testOr();
    inline bool testNot();
    inline bool testOptional();
-   
+   */
    inline bool testMatch(string label, Match& match, string text, bool result = true, string expected = "");
 
    inline bool test()
@@ -33,9 +34,12 @@ namespace bee::fish::parser
       ok &= testCaseInsensitiveWord();
       ok &= testBString();
       ok &= testAnd();
+      
+      /*
       ok &= testOr();
       ok &= testNot();
-     // ok &= testOptional();
+      ok &= testOptional();
+      */
       
       if (ok)
          cout << "SUCCESS";
@@ -75,7 +79,7 @@ namespace bee::fish::parser
    inline bool testRepeat()
    {
       bool ok = true;
-      Repeat repeat(new Character());
+      Repeat repeat(MatchPtr(new Character()));
       ok &= testMatch("Repeat range match", repeat, "helloworld", true, "helloworld");
       
       return ok;
@@ -138,9 +142,9 @@ namespace bee::fish::parser
       bool ok = true;
       
       And testAnd(
-         new Character('a'),
-         new Character('b'),
-         new Character('c')
+         MatchPtr(new Character('a')),
+         MatchPtr(new Character('b')),
+         MatchPtr(new Character('c'))
       );
       
       ok &= testMatch("Simple 'and' match", testAnd, "abc", true, "abc");
@@ -151,7 +155,7 @@ namespace bee::fish::parser
 
       return ok;
    }
-   
+   /*
    inline bool testOr()
    {
       bool ok = true;
@@ -207,7 +211,7 @@ namespace bee::fish::parser
       return ok;
       
    }
-   
+   */
    inline bool testMatch(string label, Match& match, string text, bool result, const string expected)
    {
       cout << label << ":\t";
@@ -242,6 +246,9 @@ namespace bee::fish::parser
          cout << parser << endl;
       }
       
+#ifdef DEBUG
+      cerr << parser << endl;
+#endif
       return ok;
    }
 

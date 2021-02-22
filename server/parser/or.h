@@ -8,19 +8,20 @@ namespace bee::fish::parser {
 
    class Or : public Match {
    protected:
-      Match* _item = NULL;
+      vector<MatchPtr> _inputs;
+      MatchPtr _item = NULL;
       size_t _index = 0;
       
    public:
 
       template<typename ...T>
-      Or(T*... inputs) :
-         Match(inputs...)
+      Or(T... inputs) :
+         _inputs{args...}
       {
       }
       
       Or(const Or& source) :
-         Match(source)
+         _inputs(source._inputs)
       {
       }
       
@@ -76,6 +77,9 @@ namespace bee::fish::parser {
             fail();
          }
          
+         if (matched)
+            Match::match(character);
+            
          return matched;
       }
    
@@ -101,9 +105,15 @@ namespace bee::fish::parser {
          out << "Or";
          writeResult(out);
          out << "(";
-         writeInputs(out);
+         writeInputs(out, _inputs);
          out << ")";
          
+      }
+      
+      virtual Match& operator[]
+      (size_t index)
+      {
+         return *(_inputs[index]);
       }
    };
 

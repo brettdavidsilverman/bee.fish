@@ -32,6 +32,7 @@ namespace bee::fish::parser {
 			         
 			     if (matched)
 			     {
+			        Match::match(character);
 			        success();
 			     }
 			     else
@@ -60,9 +61,9 @@ namespace bee::fish::parser {
       {
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new Range(*this);
+         return MatchPtr(new Range(*this));
       }
 	 };
 		
