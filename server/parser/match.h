@@ -75,13 +75,14 @@ namespace bee::fish::parser {
          _result = false;
       }
       
-      virtual void read(
+      void read(
          istream& input,
          bool last = true
       )
       {
       
          Char character;
+         
          while (!input.eof())
          {
             if (getNext(input, character))
@@ -90,8 +91,11 @@ namespace bee::fish::parser {
 #ifdef DEBUG
                UTF8Character::write(cerr, character);
 #endif
-               match(character);
-               
+              // matched = false;
+              // while (!matched && result() == nullopt)
+               bool matched = match(character);
+                cerr << "{"; UTF8Character::write(cerr, character); cerr << ":" << matched << "}";
+         
                if (result() != nullopt)
                   break;
             }
@@ -165,26 +169,6 @@ namespace bee::fish::parser {
          out << "<" << result() << ">";
       }
    
-      virtual void writeInputs(
-         ostream& out,
-         const vector<MatchPtr>& inputs
-      ) const
-      {
-         for (auto it = inputs.cbegin(); 
-                   it != inputs.cend();
-                 ++it)
-         {
-            const MatchPtr input = *it;
-            
-            if (input == NULL)
-               out << "NULL";
-            else
-               out << *input;
-               
-            if (it + 1 != inputs.cend())
-               out << ", ";
-         }
-      }
 
    
    

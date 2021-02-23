@@ -61,6 +61,19 @@ namespace bee::fish::parser {
          return out;
       }
       
+      bool operator == (const string& rhs)
+      {
+         BString test(rhs);
+         return (*this == test);
+      }
+      
+      bool operator != (const string& rhs)
+      {
+         BString test(rhs);
+         return (*this != test);
+      }
+      
+      
    };
    
    

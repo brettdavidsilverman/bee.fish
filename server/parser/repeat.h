@@ -34,7 +34,7 @@ namespace bee::fish::parser
       virtual bool match(const Char& character)
       {
 
-         if (_match == NULL)
+         if (!_match)
             _match = createItem();
          
          bool matched =

@@ -13,69 +13,55 @@ namespace bee::fish::parser
    class And : public Match
    {
    protected:
-      vector<MatchPtr> _inputs;
-      
-      vector<MatchPtr>::iterator
-         _iterator;
+      MatchPtr _first;
+      MatchPtr _second;
       
    public:
 
-      template<typename ...T>
-      And(T... args) :
-         _inputs{args...}
+      And(MatchPtr first, MatchPtr second) :
+         _first(first),
+         _second(second)
       {
-         _iterator = _inputs.end();
       }
       
       And(const And& source) :
-         _inputs(source._inputs)
+         _first(source._first->copy()),
+         _second(source._second->copy())
       {
-			     _iterator = _inputs.end();
       }
-      
-      virtual ~And() {
-      }
-      
       
       virtual bool match(const Char& character)
       {
       
          bool matched = false;
-         vector<MatchPtr>::iterator 
-            end = _inputs.end();
-  
-         if (_iterator == end)
-            _iterator = _inputs.begin();
-            
-         for (;;) {
-
-            MatchPtr item = *_iterator;
-
-            matched =
-               item->match(character);
-               
-            if (item->result() == true) {
-            
-               if ( ++_iterator == end ) {
-                  success();
-               }
-               
-            }
-            else if (item->result() == false) {
-            
-               fail();
-               
-            }
-            
-            if ( matched ||
-                 result() != nullopt )
-               break;
+         
+         if ( _first->result() == nullopt )
+         {
+            matched = _first->match(character);
          }
          
+         if ( !matched && _first->result() == true )
+         {
+         
+            if ( _second->result() == nullopt )
+            {
+               matched = _second->match(character);
+            }
+         
+            if ( _second->result() == true )
+               success();
+         }
+        
+         if ( _first->result() == false || 
+              _second->result() == false )
+            fail();
+         
+        
          if (matched)
             Match::match(character);
             
          return matched;
+         
       }
 			   
       virtual MatchPtr copy() const
@@ -87,16 +73,23 @@ namespace bee::fish::parser
       {
          out << "And";
          writeResult(out);
-         out << "(";
-         writeInputs(out, _inputs);
-         out << ")";
+         out << "(" 
+             << *_first
+             << ", "
+             << *_second
+             << ")";
          
       }
       
       virtual Match& operator[]
       (size_t index)
       {
-         return *(_inputs[index]);
+         if (index == 0)
+            return *_first;
+         else if (index == 1)
+            return *_second;
+
+         throw runtime_error("Invalid index");
       }
       
    };

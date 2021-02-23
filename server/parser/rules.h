@@ -1,54 +1,42 @@
 #ifndef BEE_FISH_PARSER__RULES_H
 #define BEE_FISH_PARSER__RULES_H
-#include <string>
-#include <vector>
-#include <iostream>
-#include <optional>
+
 #include <memory>
 
-#include "version.h"
-#include "match.h"
-#include "utf-8.h"
-#include "character.h"
-#include "range.h"
-#include "word.h"
-#include "ciword.h"
-#include "repeat.h"
-
-#include "or.h"
-#include "and.h"
-#include "not.h"
-/*
-#include "optional.h"
-#include "load-on-demand.h"
-*/
+#include "parser.h"
 
 using namespace std;
 
 namespace bee::fish::parser {
 
+   #define WORD(word) MatchPtr(new Word(word))
+   #define C(character) MatchPtr(new Character(character))
+   
+   MatchPtr operator and (MatchPtr first, MatchPtr second)
+   {
+      return MatchPtr(new And(first, second));
+   }
 
-   inline Match operator and(const Match& first, const Match& second)
+   MatchPtr operator or (MatchPtr first, MatchPtr second)
    {
-      return And(first, second);
+      return MatchPtr(new Or(first, second));
+   }
+    
+   MatchPtr operator not (MatchPtr item)
+   {
+      Not* _not = new Not(item);
+      MatchPtr pointer(_not);
+      return pointer;
    }
    
-   inline Match operator or(const Match& first, const Match& second)
+   MatchPtr operator ~ (MatchPtr item)
    {
-      return Or(first, second);
+      return MatchPtr(new Optional(item));
+      
+      //return (item or (not item));
    }
-   
-   inline Match operator ~(const Match& match)
-   {
-      return Optional(match);
-   }
-   
-   inline Match operator not(const Match& match)
-   {
-      return Not(match);
-   }
-   
-
+ 
+  
 }
 
 #endif

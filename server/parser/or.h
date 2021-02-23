@@ -8,113 +8,119 @@ namespace bee::fish::parser {
 
    class Or : public Match {
    protected:
-      vector<MatchPtr> _inputs;
-      MatchPtr _item = NULL;
-      size_t _index = 0;
+      MatchPtr _first;
+      MatchPtr _second;
       
    public:
 
-      template<typename ...T>
-      Or(T... inputs) :
-         _inputs{args...}
+      Or(MatchPtr first, MatchPtr second) :
+         _first(first),
+         _second(second)
       {
       }
       
       Or(const Or& source) :
-         _inputs(source._inputs)
+         _first(source._first->copy()),
+         _second(source._second->copy())
       {
       }
       
-      virtual ~Or()
-      {
-      }
-  
       virtual bool match(const Char& character)
       {
    
          bool matched = false;
-         _index = 0;
-         auto end = _inputs.end();
-         
-         for ( auto
-                 it  = _inputs.begin();
-                 it != end;
-                ++_index, ++it
-             )
+        
+         if (_first->result() == nullopt)
          {
-         
-            Match* item = *it;
-            
-            if (!item)
-               continue;
-
-            if (item->match(character))
+            matched |= _first->match(character);
+            if (_first->result() == true)
             {
-               matched = true;
-            }
-            
-            if (item->result() == true)
-            {
-               _item = item;
+               if (matched)
+                  Match::match(character);
+                  
                success();
                return matched;
             }
-            else if (
-               !matched ||
-               (item->result() == false)
-            )
-            {
-               delete item;
-               *it = NULL;
-            }
-            
-       
          }
-      
-         if (result() == nullopt && 
-             !matched)
+         
+         if (_second->result() == nullopt)
          {
-            fail();
+            matched |= _second->match(character);
+            if (_second->result() == true)
+            {
+               if (matched)
+                  Match::match(character);
+
+               success();
+               return matched;
+            }
          }
+
+         if ( ( _first->result() == false &&
+               _second->result() == false ) )
+            fail();
          
          if (matched)
             Match::match(character);
             
          return matched;
+         
+         
       }
    
    
       virtual Match& item() {
-         return *_item;
+         if (_first->result() == true)
+            return *_first;
+         else if (_second->result() == true)
+            return *_second;
+         else
+            throw runtime_error(
+               "None of the items succeeded in Or"
+            );
       }
-   
       
       virtual size_t index()
       {
-         return _index;
+         if (_first->result() == true)
+            return 0;
+         else if (_second->result() == true)
+            return 1;
+         else
+            throw runtime_error(
+               "None of the items succeeded in Or"
+            );
       }
       
-			   
-      virtual Match* copy() const
+			  virtual Match& operator[]
+      (size_t index)
       {
-         return new Or(*this);
+         if (index == 0)
+            return *_first;
+         else if (index == 1)
+            return *_second;
+
+         throw runtime_error("Invalid index");
+      }
+      
+      virtual MatchPtr copy() const
+      {
+         return MatchPtr(new Or(*this));
       }
       
       virtual void write(ostream& out) const
       {
          out << "Or";
          writeResult(out);
-         out << "(";
-         writeInputs(out, _inputs);
-         out << ")";
+         out << "("
+             << *_first
+             << ", "
+             << *_second
+             << ")";
          
       }
       
-      virtual Match& operator[]
-      (size_t index)
-      {
-         return *(_inputs[index]);
-      }
+      
    };
 
 
