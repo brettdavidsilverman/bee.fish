@@ -15,7 +15,6 @@ namespace bee::fish::parser {
    public:
    
       Character() :
-         Match(),
          _character(-1),
          _matchAny(true),
          _matchedCharacter(-1)
@@ -23,7 +22,6 @@ namespace bee::fish::parser {
       }
       
       Character(Char character) :
-         Match(),
          _character(character),
          _matchAny(false),
          _matchedCharacter(-1)
@@ -85,6 +83,12 @@ namespace bee::fish::parser {
       virtual MatchPtr copy() const
       {
          return MatchPtr(new Character(*this));
+      }
+      
+      virtual void reset()
+      {
+         Match::reset();
+         _matchedCharacter = -1;
       }
       
       virtual const Char& character() const

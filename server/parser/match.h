@@ -34,22 +34,20 @@ namespace bee::fish::parser {
    
    class Match
    {
-   protected:
+   public:
 
       optional<bool> _result = nullopt;
-
-   public:
+     
       inline static const Char EndOfFile = -1;
-   
+      
       bool _capture = false;
+      
       BString _value;
       
       Match()
       {
       }
-   
-      virtual MatchPtr copy() const = 0;
-   
+      
       virtual bool match(const Char& character)
       {
          if (_capture)
@@ -59,11 +57,6 @@ namespace bee::fish::parser {
       }
       
       virtual void write(ostream& out) const = 0;
-   
-      virtual const optional<bool>& result() const
-      {
-         return _result;
-      }
    
       virtual void success()
       {
@@ -82,36 +75,32 @@ namespace bee::fish::parser {
       {
       
          Char character;
+         bool matched = false;
          
          while (!input.eof())
          {
             if (getNext(input, character))
             {
-
+               matched = match(character);
 #ifdef DEBUG
-               UTF8Character::write(cerr, character);
+               cerr << "{"; UTF8Character::write(cerr, character); cerr << ":" << matched << "}";
 #endif
-              // matched = false;
-              // while (!matched && result() == nullopt)
-               bool matched = match(character);
-                cerr << "{"; UTF8Character::write(cerr, character); cerr << ":" << matched << "}";
-         
-               if (result() != nullopt)
+               
+               if (_result != nullopt)
                   break;
             }
             
          }
 
-         if ( result() == nullopt &&
+         if ( _result == nullopt &&
               last &&
               input.eof()
             )
          {
+            matched = match(Match::EndOfFile);
 #ifdef DEBUG
-            UTF8Character::write(cerr, Match::EndOfFile);
+            cerr << "{"; UTF8Character::write(cerr, character); cerr << ":" << matched << "}";
 #endif
-            match(Match::EndOfFile);
-         
          }
      
       }
@@ -129,12 +118,12 @@ namespace bee::fish::parser {
          while ( !input.eof() &&
                  input.get(nextChar) &&
                  utf8.match(nextChar) &&
-                 utf8.result() == nullopt )
+                 utf8._result == nullopt )
             ;
         
-         if (utf8.result() == true)
+         if (utf8._result == true)
          {
-            character = utf8.character();
+            character = utf8._character;
             return true;
          }
          else
@@ -166,11 +155,22 @@ namespace bee::fish::parser {
    
       virtual void writeResult(ostream& out) const
       {
-         out << "<" << result() << ">";
+         out << "<" << _result << ">";
       }
    
 
-   
+      virtual MatchPtr copy() const = 0;
+      
+      virtual void reset()
+      {
+         _result = nullopt;
+         _value.clear();
+      }
+      
+      virtual bool isMatched()
+      {
+         return (_result == true);
+      }
    
    };
 

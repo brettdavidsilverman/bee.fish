@@ -29,36 +29,38 @@ namespace bee::fish::parser {
       {
    
          bool matched = false;
-        
-         if (_first->result() == nullopt)
+         while (!matched && _result == nullopt)
          {
-            matched |= _first->match(character);
-            if (_first->result() == true)
+            if (_first->_result == nullopt)
             {
-               if (matched)
-                  Match::match(character);
+               matched |= _first->match(character);
+               if (_first->_result == true)
+               {
+                  if (matched)
+                     Match::match(character);
                   
-               success();
-               return matched;
+                  success();
+                  return matched;
+               }
             }
-         }
          
-         if (_second->result() == nullopt)
-         {
-            matched |= _second->match(character);
-            if (_second->result() == true)
+            if (_second->_result == nullopt)
             {
-               if (matched)
-                  Match::match(character);
+               matched |= _second->match(character);
+               if (_second->_result == true)
+               {
+                  if (matched)
+                     Match::match(character);
 
-               success();
-               return matched;
+                  success();
+                  return matched;
+               }
             }
-         }
 
-         if ( ( _first->result() == false &&
-               _second->result() == false ) )
-            fail();
+            if ( ( _first->_result == false &&
+                  _second->_result == false ) )
+               fail();
+         }
          
          if (matched)
             Match::match(character);
@@ -70,9 +72,9 @@ namespace bee::fish::parser {
    
    
       virtual Match& item() {
-         if (_first->result() == true)
+         if (_first->_result == true)
             return *_first;
-         else if (_second->result() == true)
+         else if (_second->_result == true)
             return *_second;
          else
             throw runtime_error(
@@ -82,9 +84,9 @@ namespace bee::fish::parser {
       
       virtual size_t index()
       {
-         if (_first->result() == true)
+         if (_first->_result == true)
             return 0;
-         else if (_second->result() == true)
+         else if (_second->_result == true)
             return 1;
          else
             throw runtime_error(
@@ -106,6 +108,13 @@ namespace bee::fish::parser {
       virtual MatchPtr copy() const
       {
          return MatchPtr(new Or(*this));
+      }
+      
+      virtual void reset()
+      {
+         Match::reset();
+         _first->reset();
+         _second->reset();
       }
       
       virtual void write(ostream& out) const

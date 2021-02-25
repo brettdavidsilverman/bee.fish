@@ -8,7 +8,6 @@ namespace bee::fish::parser
    class Repeat : public Match
    {
    private:
-      MatchPtr _template;
       MatchPtr _match;
    
    protected:
@@ -16,39 +15,31 @@ namespace bee::fish::parser
   
    public:
 
-      Repeat(MatchPtr templatePtr) :
-         Match(),
-         _template(templatePtr),
-         _match(NULL)
+      Repeat(MatchPtr match) :
+         _match(match)
       {
       }
    
       Repeat(const Repeat& source) :
-         Match(),
-         _template(source._template->copy()),
-         _match(NULL)
+         _match(source._match->copy())
       {
       }
-   
    
       virtual bool match(const Char& character)
       {
 
-         if (!_match)
-            _match = createItem();
-         
          bool matched =
             _match->match(character);
 
-         if (_match->result() == true)
+         if (_match->_result == true)
          {
             Match::match(character);
             matchedItem(_match);
-            _match = NULL;
+            _match->reset();;
             ++_matchedCount;
          }
          else if (
-            (_match->result() == false) ||
+            (_match->_result == false) ||
             (!matched) ||
             (character == Match::EndOfFile)
          )
@@ -61,16 +52,10 @@ namespace bee::fish::parser
             {
                fail();
             }
-         
          }
       
          return matched;
       
-      }
-   
-      virtual MatchPtr createItem()
-      {
-         return _template->copy();
       }
    
       virtual void matchedItem(MatchPtr match)
@@ -83,11 +68,18 @@ namespace bee::fish::parser
          return MatchPtr(new Repeat(*this));
       }
       
+      virtual void reset()
+      {
+         Match::reset();
+         _match->reset();
+         _matchedCount = 0;
+      }
+      
       virtual void write(ostream& out) const
       {
          out << "Repeat";
          writeResult(out);
-         out << "(" << *_template << ")";
+         out << "(" << *_match << ")";
       }
 
    };

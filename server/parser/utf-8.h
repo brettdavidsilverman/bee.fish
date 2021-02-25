@@ -81,29 +81,18 @@ namespace bee::fish::parser {
    struct UTF8Character
    {
    protected:
-      unsigned int _expectedByteCount;
-      unsigned int _byteCount;
-      Char         _character;
-      optional<bool> _result;
+      unsigned int _expectedByteCount = 0;
+      unsigned int _byteCount = 0;
+      
       
       inline static const Char EndOfFile = -1;
    public:
-   
-      UTF8Character() :
-         _expectedByteCount(0),
-         _byteCount(0),
-         _character(0),
-         _result(nullopt)
+      Char           _character = 0;
+      optional<bool> _result = nullopt;
+      
+      UTF8Character()
       {
          
-      }
-       
-      UTF8Character(Char& character) :
-         _expectedByteCount(0),
-         _byteCount(0),
-         _character(0),
-         _result(nullopt)
-      {
       }
       
       UTF8Character(
@@ -116,14 +105,12 @@ namespace bee::fish::parser {
       {
       }
       
-      const optional<bool>& result() const
+      bool reset()
       {
-         return _result;
-      }
-      
-      const Char& character() const
-      {
-         return _character;
+         _expectedByteCount = 0;
+         _byteCount = 0;
+         _character = 0;
+         _result = nullopt;
       }
       
       bool match(const char& character)

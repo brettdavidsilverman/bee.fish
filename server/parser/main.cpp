@@ -27,9 +27,9 @@ int main(int argc, char* argv[]) {
  
    Word parser(BString("ᛒᚢᛞᛖ"));
    //cout << endl << "Reading from stdin." << endl;
-   //parser.read(cin);
+   parser.read("ᛒᚢᛞᛖ");
  
-   if (parser.result() == true)
+   if (parser._result== true)
    {
       cout << endl
            << "ok joe"

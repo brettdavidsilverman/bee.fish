@@ -35,27 +35,27 @@ namespace bee::fish::parser
       
          bool matched = false;
          
-         if ( _first->result() == nullopt )
+         if ( _first->_result == nullopt )
          {
             matched = _first->match(character);
          }
-         
-         if ( !matched && _first->result() == true )
+         else if ( _first->_result == true )
          {
+            matched = _second->match(character);
+         }
          
-            if ( _second->result() == nullopt )
-            {
-               matched = _second->match(character);
-            }
-         
-            if ( _second->result() == true )
-               success();
+         if ( _first->_result == true &&
+              _second->_result == true )
+         {
+            success();
          }
         
-         if ( _first->result() == false || 
-              _second->result() == false )
+         if ( _first->_result == false || 
+              _second->_result == false )
+         {
+            matched = false;
             fail();
-         
+         }
         
          if (matched)
             Match::match(character);
@@ -67,6 +67,13 @@ namespace bee::fish::parser
       virtual MatchPtr copy() const
       {
          return MatchPtr(new And(*this));
+      }
+      
+      virtual void reset()
+      {
+         Match::reset();
+         _first->reset();
+         _second->reset();
       }
       
       virtual void write(ostream& out) const

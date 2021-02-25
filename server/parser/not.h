@@ -15,8 +15,6 @@ namespace bee::fish::parser {
          _item(match)
       {
       }
-   
-
 
       virtual bool match(const Char& character)
       {
@@ -24,16 +22,21 @@ namespace bee::fish::parser {
          bool matched =
             _item->match(character);
             
-         if (_item->result() == false)
-            success();
-         else if (_item->result() == true)
+         if (_item->_result == true)
             fail();
-         else if (character == Match::EndOfFile) {
+         else if (character == Match::EndOfFile)
             success();
+        
+         if (!matched)
+         {
+            // Reset the item
+            _item = _item->copy();
+
+            Match::match(character);
          }
          
-         if (!matched)
-            Match::match(character);
+         // if (_item->result() == false)
+         //   success();
             
          return matched;
       
@@ -47,6 +50,12 @@ namespace bee::fish::parser {
       virtual MatchPtr copy() const
       {
          return MatchPtr(new Not(*this));
+      }
+      
+      virtual void reset()
+      {
+         Match::reset();
+         _item->reset();
       }
       
       virtual void write(ostream& out) const

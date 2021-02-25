@@ -60,6 +60,11 @@ using namespace std;
          return matched;
       }
    
+      virtual void reset()
+      {
+         _index = _word.cbegin();
+      }
+      
       virtual void write(ostream& out) const
       {
          out << "Word";

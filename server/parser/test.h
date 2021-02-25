@@ -234,8 +234,10 @@ namespace bee::fish::parser
       
       MatchPtr testOptional =
          WORD("one") and
-         ~ WORD("two") and
-         WORD("three");
+         OPTIONAL(
+            WORD("two"),
+            WORD("three")
+         );
       
       MatchPtr testOptional123 = testOptional->copy();
       
@@ -260,11 +262,11 @@ namespace bee::fish::parser
       
       parser.read(text);
       
-      if (result == true && parser.result() != true)
+      if (result == true && parser._result != true)
          ok = false;
-      else if (result == false && parser.result() != false)
+      else if (result == false && parser._result != false)
          ok = false;
-      else if (parser.result() == true && expected.length())
+      else if (parser._result == true && expected.length())
       {
          
          if (parser._value != expected)
@@ -275,7 +277,8 @@ namespace bee::fish::parser
          cout << "ok" << endl;
       else
       {
-         cout << "FAIL " << parser.result() << endl;
+         cout << "FAIL " << parser._result << endl;
+         cout << "\tTested\t" << text << endl;
          cout << "\tExpect\t" << expected << endl;
          cout << "\tGot\t" << parser._value << endl;
          cout << "\t" << parser << endl;

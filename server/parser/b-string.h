@@ -26,10 +26,10 @@ namespace bee::fish::parser {
          for (const char& c : string)
          {
             utf8.match(c);
-            if (utf8.result())
+            if (utf8._result)
             {
-               push_back(utf8.character());
-               utf8 = UTF8Character();
+               push_back(utf8._character);
+               utf8.reset();
             }
          }
 

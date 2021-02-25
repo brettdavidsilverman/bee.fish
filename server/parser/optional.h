@@ -12,12 +12,12 @@ namespace bee::fish::parser {
    {
    protected:
       MatchPtr _item;
-      bool _matched = false;
    
    public:
       Optional(MatchPtr match) :
          _item(match)
       {
+         _optional = true;
       }
    
 		   virtual bool match(const Char& character)
@@ -28,7 +28,6 @@ namespace bee::fish::parser {
 		      
 		      if (_item->result() == true)
 		      {
-		         _matched = true;
 		         success();
 		      } 
 		      else if (_item->result() == false)
@@ -46,21 +45,21 @@ namespace bee::fish::parser {
 		      return matched;
 		   }
       
-      virtual bool& matched()
-		   {
-		      return _matched;
-		   }
-
 		   virtual Match& item()
 		   {
 		      return *_item;
 		   }
 		   
-		   virtual bool isOptional()
-		   {
-		      return true;
-		   }
-     
+      virtual bool isMatched()
+      {
+         return (_item->isMatched());
+      }
+      
+      virtual bool isOptional()
+      {
+         return true;
+      }
+      
       Optional(const Optional& source) :
          _item(source._item->copy())
       {
