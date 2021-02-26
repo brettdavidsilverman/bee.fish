@@ -14,14 +14,14 @@ namespace bee::fish::parser {
    class And : public Match {
    protected:
    
-      vector<MatchPtr>::iterator
+      vector<Match*>::iterator
          _iterator;
 
    public:
 
-      template<typename ...MatchPtr>
-      And(bool variadic, MatchPtr... inputs) :
-         Match(variadic, inputs...)
+      template<typename ...T>
+      And(T*... inputs) :
+         Match(inputs...)
       {
          _iterator = _inputs.end();
       }
@@ -30,7 +30,7 @@ namespace bee::fish::parser {
       match(const Char& character) {
       
          bool matched = false;
-         vector<MatchPtr>::iterator 
+         vector<Match*>::iterator 
             end = _inputs.end();
             
          if (_iterator == end)
@@ -38,7 +38,7 @@ namespace bee::fish::parser {
             
          for (;;) {
 
-            MatchPtr item = *_iterator;
+            Match* item = *_iterator;
 
             matched =
                item->match(character);
@@ -66,11 +66,6 @@ namespace bee::fish::parser {
 
          return matched;
       }
-      
-      virtual string name()
-      {
-         return "And";
-      }
    
       And(const And& source) :
          Match(source)
@@ -78,18 +73,33 @@ namespace bee::fish::parser {
 			     _iterator = _inputs.end();
       }
 			   
-      virtual MatchPtr copy() const
+      virtual Match* copy() const
       {
-         return MatchPtr(new And(*this));
+         return new And(*this);
       }
+      
+      virtual void write(
+         ostream& out,
+         size_t tabIndex = 0
+      ) const
+      {
+         writeHeader(out, "And", tabIndex);
+         out << endl;
+         writeInputs(out, tabIndex);
+      }
+      
    };
    
    class AndPtr : public MatchPtr
    {
    public:
-      template<typename ...T>
-      AndPtr(T... inputs) :
-         MatchPtr(new And(true, inputs...))
+      AndPtr(MatchPtr first, MatchPtr second) :
+         MatchPtr(
+            new And(
+               first->copy(),
+               second->copy()
+            )
+         )
       {
       }
    };

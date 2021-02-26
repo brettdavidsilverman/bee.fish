@@ -8,14 +8,14 @@ namespace bee::fish::parser {
 
    class Or : public Match {
    protected:
-      MatchPtr _item = NULL;
+      Match* _item = NULL;
       size_t _index = 0;
       
    public:
 
-      template<typename ...MatchPtr>
-      Or(bool variadic, MatchPtr... inputs) :
-         Match(variadic, inputs...)
+      template<typename ...T>
+      Or(T*... inputs) :
+         Match(inputs...)
       {
       }
       
@@ -37,7 +37,7 @@ namespace bee::fish::parser {
              )
          {
          
-            MatchPtr item = *it;
+            Match* item = *it;
             
             if (!item)
                continue;
@@ -58,6 +58,7 @@ namespace bee::fish::parser {
                (item->result() == false)
             )
             {
+               delete item;
                *it = NULL;
             }
             
@@ -81,9 +82,9 @@ namespace bee::fish::parser {
          return *_item;
       }
    
-      virtual string& value()
+      virtual BString& value()
       {
-         return item().value();
+         return item()._value;
       }
       
       virtual size_t index()
@@ -91,29 +92,37 @@ namespace bee::fish::parser {
          return _index;
       }
       
-      virtual string name()
-      {
-         return "Or";
-      }
-      
       Or(const Or& source) :
          Match(source)
       {
       }
 			   
-      virtual MatchPtr copy() const
+      virtual Match* copy() const
       {
-         return MatchPtr(new Or(*this));
+         return new Or(*this);
       }
       
+      virtual void write(
+         ostream& out,
+         size_t tabIndex = 0
+      ) const
+      {
+         writeHeader(out, "Or", tabIndex);
+         out << endl;
+         writeInputs(out, tabIndex);
+      }
    };
 
    class OrPtr : public MatchPtr
    {
    public:
-      template<typename ...T>
-      OrPtr(T... inputs) :
-         MatchPtr(new Or(true, inputs...))
+      OrPtr(MatchPtr first, MatchPtr second) :
+         MatchPtr(
+            new Or(
+               first->copy(),
+               second->copy()
+            )
+         )
       {
       }
    };

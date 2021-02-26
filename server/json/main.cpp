@@ -1,17 +1,15 @@
 #include <iostream>
-#include "../parser.h"
+#include "../parser/parser.h"
 #include "version.h"
 #include "json.h"
+#include "test.h"
 
 using namespace std;
 using namespace bee::fish::parser;
-using namespace bee::fish::parser::json;
+using namespace bee::fish::json;
 
 
 int main(int argc, char* argv[]) {
-   
-   // Set standard input and output
-   // to unbufferd
    
    cerr << "bee.fish.server.parser.json"
            << endl
@@ -19,9 +17,15 @@ int main(int argc, char* argv[]) {
            << __cplusplus
            << endl
         << "Version: "
-           << BEE_FISH_SERVER_PARSER_JSON_VERSION
+           << BEE_FISH_SERVER_JSON_VERSION
         << endl;
            
+   if (!bee::fish::parser::test())
+      return 1;
+      
+   if (!bee::fish::json::test())
+      return 2;
+      /*
   // Request req;
    JSON* parser = new JSON();
 
@@ -38,4 +42,7 @@ int main(int argc, char* argv[]) {
       cerr << endl << "Fail" << endl;
  
    delete parser;
+   */
+   
+   return 0;
 }

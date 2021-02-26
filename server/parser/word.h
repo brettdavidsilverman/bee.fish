@@ -1,8 +1,8 @@
 #ifndef BEE_FISH_PARSER__WORD
 #define BEE_FISH_PARSER__WORD
-
-#include "match.h"
 #include <string.h>
+#include "match.h"
+
 
 namespace bee::fish::parser {
 
@@ -11,8 +11,8 @@ using namespace std;
    class Word : public Match {
    protected:
    
-      string _word;
-      string::const_iterator _index;
+      
+      BString::const_iterator _index;
    
       virtual bool match_char(const Char& character)
       {
@@ -20,14 +20,20 @@ using namespace std;
             return false;
          return
             (
-               (*_index) == (char)character
+               (*_index) == character
             );
       }
    
    public:
-
+      BString _word;
+      
       Word(const string& word) :
-         Match(),
+         _word(BString(word))
+      {
+         _index = _word.cbegin();
+      }
+      
+      Word(const BString& word) :
          _word(word)
       {
          _index = _word.cbegin();
@@ -56,17 +62,12 @@ using namespace std;
          return matched;
       }
    
-      virtual void write(ostream& out)
+      virtual void write(ostream& out, size_t tabIndex = 0) const
       {
-         out << "Word(";
-         Match::write(out);
-         out << ":\"" << _word << "\"";
-         out << ")";
-      }
-   
-      virtual const string& word()
-      {
-         return _word;
+         writeHeader(out, "Word", tabIndex);
+         out << "(\"";
+         UTF8Character::writeEscaped(out, _word);
+         out << "\")";
       }
    
       Word(const Word& source) :
@@ -74,9 +75,9 @@ using namespace std;
       {
       }
 			   
-      virtual MatchPtr copy() const
+      virtual Match* copy() const
       {
-         return MatchPtr(new Word(*this));
+         return new Word(*this);
       }
    
    };

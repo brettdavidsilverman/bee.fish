@@ -12,30 +12,41 @@ namespace bee::fish::parser {
  
    inline static const CharacterPtr eof(Match::EndOfFile);
    
-   MatchPtr operator and (MatchPtr first, MatchPtr second)
+   AndPtr operator and (MatchPtr& first, MatchPtr& second)
    {
       return AndPtr(first, second);
    }
 
-   MatchPtr operator or (MatchPtr first, MatchPtr second)
+   OrPtr operator or (MatchPtr& first, MatchPtr& second)
    {
       return OrPtr(first, second);
    }
     
-   MatchPtr operator not (MatchPtr item)
+   NotPtr operator not (MatchPtr& item)
    {
       return NotPtr(item);
    }
   
 
-   MatchPtr operator += (MatchPtr repeat, MatchPtr untill)
+   RepeatPtr operator ++ (const MatchPtr& repeat)
    {
-      return RepeatPtr(repeat, untill, 0, 0);
+      return RepeatPtr(repeat);
    }
    
-   MatchPtr OptionalPtr(MatchPtr optional, MatchPtr next)
+   MatchPtr OptionalPtr(MatchPtr& optional)
+   {
+      return MatchPtr(new Optional(optional));
+   }
+   
+   MatchPtr OptionalPtr(MatchPtr& optional, MatchPtr& next)
    {
       return ((optional and next) or next);
+   }
+   
+   
+   MatchPtr operator - (MatchPtr& optional)
+   {
+      return OptionalPtr(optional);
    }
    
   

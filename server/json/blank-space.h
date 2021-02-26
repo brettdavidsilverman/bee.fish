@@ -1,11 +1,11 @@
-#ifndef BEE_FISH_PARSER__BLANK_SPACE_H
-#define BEE_FISH_PARSER__BLANK_SPACE_H
+#ifndef BEE_FISH_JSON__BLANK_SPACE_H
+#define BEE_FISH_JSON__BLANK_SPACE_H
 
-#include "../parser.h"
+#include "../parser/parser.h"
 
 using namespace bee::fish::parser;
 
-namespace bee::fish::parser::json
+namespace bee::fish::json
 {
    
    class BlankSpaceCharacter : public Or
@@ -23,10 +23,11 @@ namespace bee::fish::parser::json
       }
    };
       
-   class BlankSpace : public Repeat<BlankSpaceCharacter>
+   class BlankSpace : public Repeat
    {
    public:
-      BlankSpace() : Repeat()
+      BlankSpace() :
+         Repeat(new BlankSpaceCharacter())
       {
       }
    };

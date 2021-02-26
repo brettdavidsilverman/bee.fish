@@ -19,15 +19,12 @@ namespace bee::fish::parser
    inline bool testOr();
    inline bool testNot();
    inline bool testOptional();
-   /*
+   inline bool testRules();
+   
    
    inline bool testBString();
    
    
-   
-   inline bool testRules();
-   
-   */
    inline bool testMatch(string label, Match& match, string text, bool result = false, string expected = "");
 
    inline bool test()
@@ -43,14 +40,8 @@ namespace bee::fish::parser
       ok &= testOr();
       ok &= testNot();
       ok &= testOptional();
-    /*
       ok &= testBString();
       
-      
-      
-      
-      ok &= testRules();
-      */
       if (ok)
          cout << "SUCCESS";
       else
@@ -132,9 +123,10 @@ namespace bee::fish::parser
    {
       bool ok = true;
       Repeat repeat(
-         MatchPtr(new Character())
+         new Character()
       );
       ok &= testMatch("Repeat any character match", repeat, "helloworld", true, "helloworld");
+ 
       return ok;
    }
    
@@ -143,10 +135,9 @@ namespace bee::fish::parser
       bool ok = true;
       
       And testAnd(
-         true,
-         MatchPtr(new Character('a')),
-         MatchPtr(new Character('b')),
-         MatchPtr(new Character('c'))
+         new Character('a'),
+         new Character('b'),
+         new Character('c')
       );
       
       ok &= testMatch("Simple 'and' match", testAnd, "abc", true, "abc");
@@ -154,7 +145,7 @@ namespace bee::fish::parser
       And testAndNoMatch(testAnd);
       
       ok &= testMatch("Simple 'and' no match", testAndNoMatch, "abz");
-  
+      
       return ok;
    }
    
@@ -163,9 +154,8 @@ namespace bee::fish::parser
       bool ok = true;
       
       Or testOr(
-         true,
-         MatchPtr(new Word("true")),
-         MatchPtr(new Word("false"))
+         new Word("true"),
+         new Word("false")
       );
       
       ok &= testMatch("Simple 'or' match", testOr, "true", true, "true");
@@ -181,25 +171,27 @@ namespace bee::fish::parser
    {
       bool ok = true;
       
-      Not testNot(MatchPtr(new Word("ABC")));
+      Not testNot(new Word("ABC"));
       ok &= testMatch("Simple 'not' match", testNot, "abc", true, "a");
       
-      MatchPtr testNotPtr = testNot.copy();
+      Not testNotNoMatch(testNot);
  
-      ok &= testMatch("Simple 'not' no match", *testNotPtr, "ABC", false);
+      ok &= testMatch("Simple 'not' no match", testNotNoMatch, "ABC", false);
     
       Not _not1 (
-         MatchPtr( new Range('a', 'z'))
+         new Range('a', 'z')
       );
 			  
       ok &= testMatch("Not range match", _not1, "A", true, "A");
       
       Not _not2(
-         MatchPtr( new Range('a', 'z'))
+         new Range('a', 'z')
       );
       
       ok &= testMatch("Not range no match", _not2, "a");
-
+ 
+      cerr << _not2 << endl;
+      
       return ok;
    }
    
@@ -208,25 +200,56 @@ namespace bee::fish::parser
    
       bool ok = true;
       
-      MatchPtr testOptional =
-         AndPtr(
-            WordPtr("one"),
-            OptionalPtr(
-               WordPtr("two")
-            )
-         );
+      And testOptional(
+         new Word("one"),
+         new Optional(new Word("two"))
+      );
       
-      MatchPtr testOptional12 = testOptional->copy();
+      Match* testOptional12 = testOptional.copy();
       
       ok &= testMatch("Optional one two match", *testOptional12, "onetwo", true, "onetwo");
       
-      MatchPtr testOptional1 = testOptional->copy();
+      Match* testOptional1 = testOptional.copy();
       
       ok &= testMatch("Optional one match", *testOptional1, "one", true, "one");
+/*
+      And testOptional123(
+         new Word("one"),
+         new Optional2(
+            new Word("two"),
+            new Word("three")
+         )
+      );
+      cerr << testOptional123 << endl;
       
+      Match* _testOptional123 = testOptional123.copy();
+      
+      ok &= testMatch("Optional one two three match", *_testOptional123, "onetwothree", true, "onetwothree");
+      
+      Match* testOptional13 = testOptional123.copy();
+      
+      ok &= testMatch("Optional one three match", *testOptional13, "onethree", true, "onethree");
+      
+      cerr << *testOptional13 << endl;
+      */
       return ok;
       
    }
+   
+   inline bool testBString()
+   {
+      bool ok = true;
+      Word runes("ᛒᚢᛞᛖ");
+     
+      ok &= testMatch("Test runes BString ᛒᚢᛞᛖ", runes, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
+     
+      Word runes2(BString("ᛒᚢᛞᛖ"));
+
+      ok &= testMatch("Test runes BString ᛒᚢᛞᛖ", runes2, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
+
+      return ok;
+   }
+   
    /*
    inline bool testRules()
    {
@@ -259,40 +282,44 @@ namespace bee::fish::parser
       ok &= testMatch("Rule for 'or' match third", *testOrRule3, "null", true, "null");
       ok &= testMatch("Rule for 'or' no match", *testOrRuleNoMatch, "bee");
       
+      MatchPtr optional =
+         WordPtr("one") and
+         OptionalPtr(
+            WordPtr("two"),
+            WordPtr("three")
+         );
+      
+      ok &= testMatch("Rule for 'optional {-}' match 123", *(optional->copy()), "onetwothree", true, "onetwothree");
+      ok &= testMatch("Rule for 'optional {-}' match 13", *(optional->copy()), "onethree", true, "onethree");
+      
+      
       MatchPtr repeat =
-         RepeatPtr(CharacterPtr('A'), CharacterPtr('.'), 1, 0);
-      MatchPtr testRepeatMatch(repeat->copy());
-      MatchPtr testRepeatNoMatch(repeat->copy());
+         ++(CharacterPtr('A'));
+         
+      MatchPtr testRepeatMatch = repeat->copy();
+      MatchPtr testRepeatNoMatch = repeat->copy();
       
       ok &= testMatch("Rule for 'repeat' match", *testRepeatMatch, "AAAA.", true, "AAAA");
       ok &= testMatch("Rule for 'repeat' no match", *testRepeatNoMatch, "B");
-
+      
       MatchPtr repeat2 =
-         WordPtr("abc") += CharacterPtr('!');
+         ++WordPtr("abc") and CharacterPtr('!');
      
-      ok &= testMatch("Rule for 'repeat' += match", *repeat2, "abcabcabc!", true, "abcabcabc");
+      ok &= testMatch("Rule for 'repeat' += match", *repeat2, "abcabcabc!", true, "abcabcabc!");
       
       MatchPtr repeat3 =
          WordPtr("Abc") += WordPtr("AbC");
      
       ok &= testMatch("Rule for 'repeat' += match 2", *repeat3, "AbcAbcAbC", true, "AbcAbcAb");
-
-      return ok;
-   }
-   
-
-   
-   inline bool testBString()
-   {
-      bool ok = true;
-      Word runes("ᛒᚢᛞᛖ");
-     
-      ok &= testMatch("Test runes BString ᛒᚢᛞᛖ", runes, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
       
       return ok;
    }
    
+
    */
+   
+   
+   
    inline bool testMatch(string label, Match& match, string text, bool result, const string expected)
    {
       cout << label << ":\t";
@@ -327,7 +354,7 @@ namespace bee::fish::parser
       }
       
 #ifdef DEBUG
-      //cout << parser << endl;
+      cout << parser << endl;
 #endif
       return ok;
    }

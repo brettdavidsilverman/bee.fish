@@ -55,34 +55,40 @@ namespace bee::fish::parser {
       
          return matched;
       }
-   
-      virtual string name()
-      {
-         ostringstream out;
-         out << "\"Char";
-         Match::write(out, _character);
-         out << "\"";
-         return out.str();
-      }
-   
       
-      virtual MatchPtr copy() const
+      virtual void write(ostream& out, size_t tabIndex = 0) const
       {
-         return MatchPtr(new Character(*this));
+         writeHeader(out, "Character", tabIndex);
+         out << "(";
+         if (!_anyCharacter)
+         {
+            out << "'";
+            UTF8Character::writeEscaped(
+               out, _character
+            );
+            out << "'";
+         }
+         out << ")";
+         
+      }
+      
+      virtual Match* copy() const
+      {
+         return new Character(*this);
       }
    
 
    };
 
    class CharacterPtr : public MatchPtr
-   {
-   public:
-      CharacterPtr(const Char& character) :
-         MatchPtr(new Character(character))
-      {
-      }
-      
-   };
+	  {
+	  public:
+	     CharacterPtr(
+			     const Char& character
+			  ) : MatchPtr(new Character(character))
+			  {
+			  }
+  	};
 };
 
 #endif

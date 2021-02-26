@@ -19,6 +19,8 @@ int main(int argc, char* argv[]) {
            << BEE_FISH_SERVER_PARSER_VERSION
            << endl;
    
+   Word word("Brett");
+   cerr << word << endl;
    if (!test())
       return 1;
       /*

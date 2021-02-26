@@ -1,25 +1,34 @@
-#ifndef BEE_FISH_PARSER_JSON__NUMBER_H
-#define BEE_FISH_PARSER_JSON__NUMBER_H
+#ifndef BEE_FISH_JSON__NUMBER_H
+#define BEE_FISH_JSON__NUMBER_H
 
-#include "../parser.h"
+#include "../parser/parser.h"
 
-namespace bee::fish::parser::json {
+namespace bee::fish::json {
       
-   class Number :
-      public And,
-      public Value
+   class Number : public And
    {
+   public:
+      class Sign;
+      class Integer;
+      class Fraction;
+      class Exponent;
+      
+      Sign* _sign;
+      Integer* _integer;
+      Fraction* _fraction;
+      Exponent* _exponent;
+      
    public:
       Number() : And(
          new Optional(
-            new Sign()
+            _sign = new Sign()
          ),
-         new Integer(),
+         _integer = new Integer(),
          new Optional(
-            new Fraction()
+            _fraction = new Fraction()
          ),
          new Optional(
-            new Exponent()
+            _exponent = new Exponent()
          )
       )
       {
@@ -34,12 +43,14 @@ namespace bee::fish::parser::json {
             
       };
       
-      class Integer : public
-         Repeat<IntegerCharacter>
+      class Integer : public Repeat
       {
       public:
-         Integer() : Repeat()
+         Integer() : Repeat(
+            new IntegerCharacter()
+         )
          {
+            _capture = true;
          }
 
       };
@@ -47,9 +58,12 @@ namespace bee::fish::parser::json {
       class Fraction : public And
       {
       public:
+         Integer* _integer;
+         
+      public:
          Fraction() : And(
             new Character('.'),
-            new Integer()
+            _integer = new Integer()
          )
          {
          }
@@ -58,13 +72,19 @@ namespace bee::fish::parser::json {
       class Exponent : public And
       {
       public:
+         Sign* _sign;
+         Integer* _integer;
+         
+      public:
          Exponent() : And(
             new Or(
                new Character('E'),
                new Character('e')
             ),
-            new Sign(),
-            new Integer()
+            new Optional(
+               _sign = new Sign()
+            ),
+            _integer = new Integer()
          )
          {
          }
@@ -78,12 +98,13 @@ namespace bee::fish::parser::json {
             new Character('-')
          )
          {
+            _capture = true;
          }
       };
       
       virtual void write(ostream& out)
       {
-         out << value();
+         out << "Number";
       }
          
    };

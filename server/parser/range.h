@@ -43,17 +43,20 @@ namespace bee::fish::parser {
 			     return matched;
 			  }
 			   
-			  virtual void write(ostream& out)
-			  {
-			     out << "Range(";
-			     Match::write(out);
-			     out << ":'";
-			     Match::write(out, _minimum);
-			     out << "','";
-			     Match::write(out, _maximum);
-			     out << "')";
-			       
-			  }
+			  virtual void write(ostream& out, size_t tabIndex = 0) const
+      {
+         writeHeader(out, "Range", tabIndex);
+         out << "('";
+         UTF8Character::writeEscaped(
+            out, _minimum
+         );
+         out << "', '";
+         UTF8Character::writeEscaped(
+            out, _maximum
+         );
+         out << "')";
+         
+      }
 			   
 			  virtual std::string name()
 			  {
@@ -66,23 +69,24 @@ namespace bee::fish::parser {
          _maximum = source._maximum;
       }
 			   
-      virtual MatchPtr copy() const
+      virtual Match* copy() const
       {
-         return MatchPtr(new Range(*this));
+         return new Range(*this);
       }
-	 };
+   };
 	 
 	 
-	 class RangePtr : public MatchPtr
-	 {
-	 public:
-	    RangePtr(
+	  class RangePtr : public MatchPtr
+	  {
+	  public:
+	     RangePtr(
 			     const Char& minimum,
 			     const Char& maximum
-			 ) : MatchPtr(new Range(minimum, maximum))
-			 {
-			 }
-	 };
+			  ) : MatchPtr(new Range(minimum, maximum))
+			  {
+			  }
+  	};
+			 
 		
 
 };

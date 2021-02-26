@@ -8,24 +8,32 @@ namespace bee::fish::parser
    class Repeat : public Match
    {
    private:
-      MatchPtr _template;
-      MatchPtr _match;
+      const Match* _template;
+      Match* _match;
       
    protected:
       size_t _matchedCount = 0;
         
    public:
       
-      Repeat(MatchPtr template_) :
+      Repeat(Match* template_) :
          _template(template_),
          _match(NULL)
       {
       }
       
+      virtual ~Repeat()
+      {
+         if (_match)
+            delete _match;
+            
+         delete _template;
+      }
+      
       virtual bool match(const Char& character)
       {
       
-         if (_match == NULL)
+         if (!_match)
             _match = createItem();
          
          bool matched =
@@ -37,7 +45,7 @@ namespace bee::fish::parser
          if (_match->result() == true)
          {
          
-            matchedItem(*_match);
+            matchedItem(_match);
          
             _match = createItem();
          
@@ -64,40 +72,46 @@ namespace bee::fish::parser
          
       }
       
-      virtual MatchPtr createItem()
+      virtual Match* createItem()
       {
          return _template->copy();
       }
       
-      virtual void matchedItem(Match& match)
+      virtual void matchedItem(Match* match)
       {
+         delete match;
       }
       
-      
-      virtual string name()
-      {
-         return
-            "Repeat" + 
-            to_string(_matchedCount);
-      }
-      
-      Repeat(const Repeat& source) 
+      Repeat(const Repeat& source) :
+         _template(source._template->copy())
       {
          _match = NULL;
       }
       
-      virtual MatchPtr copy() const
+      virtual Match* copy() const
       {
-         return MatchPtr(new Repeat(*this));
+         return new Repeat(*this);
       }
       
+      virtual void write(
+         ostream& out,
+         size_t tabIndex = 0
+      ) const
+      {
+         writeHeader(out, "Repeat", tabIndex);
+         out << endl;
+         out << tabs(tabIndex) << "(" << endl;
+         _template->write(out, tabIndex + 1);
+         out << endl;
+         out << tabs(tabIndex) << ")";
+      }
    };
    
    class RepeatPtr : public MatchPtr
    {
    public:
       RepeatPtr(MatchPtr _template) :
-         MatchPtr(new Repeat(_template))
+         MatchPtr(new Repeat(_template->copy()))
       {
       }
    };

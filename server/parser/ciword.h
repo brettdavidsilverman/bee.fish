@@ -16,14 +16,22 @@ namespace bee::fish::parser {
       {
       
       }
+      
+      CIWord(const BString& word) :
+         Word(word)
+      {
+      
+      }
    
-   
-      virtual void write(ostream& out) {
-         out << "CIWord(";
-         Match::write(out);
-         out << ":\"" << _word << "\""
-             << ")"
-             << endl;
+      virtual void write(
+         ostream& out, 
+         size_t tabIndex = 0
+      ) const
+      {
+         writeHeader(out, "CIWord", tabIndex);
+         out << "(\"";
+         UTF8Character::writeEscaped(out, _word);
+         out << "\")";
       }
 
       CIWord(const CIWord& source) :
@@ -31,9 +39,9 @@ namespace bee::fish::parser {
       {
       }
 			   
-      virtual MatchPtr copy() const
+      virtual Match* copy() const
       {
-         return MatchPtr(new CIWord(*this));
+         return new CIWord(*this);
       }
       
    protected:
@@ -44,7 +52,7 @@ namespace bee::fish::parser {
          
          return (
             tolower(*_index) == 
-            tolower((char)character)
+            tolower(character)
          );
       }
    };

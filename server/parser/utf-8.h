@@ -208,7 +208,19 @@ namespace bee::fish::parser {
 
       }
       
-      static void write(ostream& out, const Char& character)
+      static void writeEscaped(
+         ostream& out,
+         const vector<Char>& characters
+      )
+      {
+         for (const Char& character : characters)
+            writeEscaped(out, character);
+      }
+
+      static void writeEscaped(
+         ostream& out,
+         const Char& character
+      )
       {
          switch (character)
          {
