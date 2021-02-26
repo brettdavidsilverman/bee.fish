@@ -6,7 +6,9 @@
 #include <optional>
 #include <map>
 #include <sstream>
-#include "../id/id.h"
+#include <memory>
+
+#include "utf-8.h"
 
 using namespace std;
 
@@ -23,45 +25,38 @@ inline ostream& operator <<
    return out;
 }
 
-using namespace bee::fish::server;
-
 namespace bee::fish::parser {
-			
+
+			class Match;
+    typedef shared_ptr<Match> MatchPtr;
+   
 			class Match {
-			protected:
+			public:
 			
 			   string _value = "";
 			   wstring _wvalue = L"";
 			   optional<bool> _result = nullopt;
 			   
 			public:
-			   static const int EndOfFile = -1;
+			   inline static const Char EndOfFile = -1;
 			   bool _capture = true;
 			   
-			   vector<Match*> _inputs;
+			   vector<MatchPtr> _inputs;
 			   
-			   template<typename ...T>
-			   Match(T*... inputs) :
+			   Match()
+			   {
+			   }
+			   
+			   template<typename ...MatchPtr>
+			   Match(bool variadic, MatchPtr... inputs) :
 			      _inputs{inputs...}
 			      
 			   {
 			
 			   }
 			   
-			   virtual ~Match() {
-			      
-			      for (auto
-			             it = _inputs.cbegin();
-			             it != _inputs.cend();
-			           ++it)
-			      {
-			         Match* child = *it;
-			         if (child)
-			         {
-			            delete child;
-			         }
-			      }
-			      
+			   virtual ~Match()
+			   {
 			   }
 			   
 			   Match(const Match& source)
@@ -71,17 +66,17 @@ namespace bee::fish::parser {
 			                it != source._inputs.end();
 			                ++it)
 			      {
-			         Match* match = *it;
+			         MatchPtr match = *it;
 			         if (match)
 			         {
-			            Match* copy = match->copy();
+			            MatchPtr copy = match->copy();
 			            _inputs.push_back(copy);
 			         }
 			      }
 			      
 			   }
 			   
-			   virtual Match* copy() const = 0;
+			   virtual MatchPtr copy() const = 0;
 			   /*
 			   {
 			      return new Match(*this);
@@ -89,7 +84,7 @@ namespace bee::fish::parser {
 			   */
 			   
 			   virtual bool match
-			   (int character)
+			   (const Char& character)
 			   {
 			      
 			      if ( _capture &&
@@ -110,8 +105,6 @@ namespace bee::fish::parser {
 			   {
 			      
 			      _result = nullopt;
-			      
-			      cerr << endl;
 			      
 			      while (!in.eof())
 			      {
@@ -194,7 +187,7 @@ namespace bee::fish::parser {
 			          )
 			      {
 			         out << ',';
-			         Match* input = *it;
+			         MatchPtr input = *it;
 			         if (input)
 			            out << *input;
 			         else

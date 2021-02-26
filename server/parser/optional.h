@@ -10,25 +10,16 @@ namespace bee::fish::parser {
 
    class Optional : public Match {
    protected:
-      Match* _item;
+      MatchPtr _item;
       bool _matched = false;
    
    public:
-      Optional(Match* match)
-         : Match()
+      Optional(MatchPtr match) :
+         _item(match)
       {
-         _item = match;
       }
    
-      virtual ~Optional()
-      {
-         if (_item) {
-            delete _item;
-            _item = NULL;
-         }
-      }
-   
-		   virtual bool match(int character)
+		   virtual bool match(const Char& character)
 		   {
 		     
 		      bool matched =
@@ -83,14 +74,22 @@ namespace bee::fish::parser {
          _item = source._item->copy();
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new Optional(*this);
+         return MatchPtr(new Optional(*this));
       }
       
    
    };
 
+   class OptionalPtr : public MatchPtr
+   {
+   public:
+      OptionalPtr(MatchPtr item) :
+         MatchPtr(new Optional(item))
+      {
+      }
+   };
 
 }
 

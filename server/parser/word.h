@@ -14,7 +14,7 @@ using namespace std;
       string _word;
       string::const_iterator _index;
    
-      virtual bool match_char(int character)
+      virtual bool match_char(const Char& character)
       {
          if (character == Match::EndOfFile)
             return false;
@@ -33,7 +33,7 @@ using namespace std;
          _index = _word.cbegin();
       }
    
-      virtual bool match(int character)
+      virtual bool match(const Char& character)
       {
    
          bool matched = match_char(character);
@@ -74,13 +74,21 @@ using namespace std;
       {
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new Word(*this);
+         return MatchPtr(new Word(*this));
       }
    
    };
 
+   class WordPtr : public MatchPtr
+   {
+   public:
+      WordPtr(const string& word) :
+         MatchPtr(new Word(word))
+      {
+      }
+   };
 
 };
 

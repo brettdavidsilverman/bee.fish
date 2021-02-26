@@ -8,14 +8,14 @@ namespace bee::fish::parser {
 
    class Or : public Match {
    protected:
-      Match* _item = NULL;
+      MatchPtr _item = NULL;
       size_t _index = 0;
       
    public:
 
-      template<typename ...T>
-      Or(T*... inputs) :
-         Match(inputs...)
+      template<typename ...MatchPtr>
+      Or(bool variadic, MatchPtr... inputs) :
+         Match(variadic, inputs...)
       {
       }
       
@@ -23,7 +23,7 @@ namespace bee::fish::parser {
       {
       }
   
-      virtual bool match(int character)
+      virtual bool match(const Char& character)
       {
    
          bool matched = false;
@@ -37,7 +37,7 @@ namespace bee::fish::parser {
              )
          {
          
-            Match* item = *it;
+            MatchPtr item = *it;
             
             if (!item)
                continue;
@@ -51,14 +51,13 @@ namespace bee::fish::parser {
             {
                _item = item;
                success();
-               return matched;
+               break;
             }
             else if (
                !matched ||
                (item->result() == false)
             )
             {
-               delete item;
                *it = NULL;
             }
             
@@ -102,16 +101,22 @@ namespace bee::fish::parser {
       {
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new Or(*this);
+         return MatchPtr(new Or(*this));
       }
       
-      friend Or& operator or(Or& first, const Match& second);
-
    };
 
-
+   class OrPtr : public MatchPtr
+   {
+   public:
+      template<typename ...T>
+      OrPtr(T... inputs) :
+         MatchPtr(new Or(true, inputs...))
+      {
+      }
+   };
 };
 
 #endif

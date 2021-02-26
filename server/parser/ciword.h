@@ -31,13 +31,13 @@ namespace bee::fish::parser {
       {
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new CIWord(*this);
+         return MatchPtr(new CIWord(*this));
       }
       
    protected:
-      virtual bool match_char(int character) {
+      virtual bool match_char(const Char& character) {
    
          if (character == Match::EndOfFile)
             return false;
@@ -46,6 +46,15 @@ namespace bee::fish::parser {
             tolower(*_index) == 
             tolower((char)character)
          );
+      }
+   };
+   
+   class CIWordPtr : public MatchPtr
+   {
+   public:
+      CIWordPtr(const string& word) :
+         MatchPtr(new CIWord(word))
+      {
       }
    };
 

@@ -4,7 +4,6 @@
 #include <vector>
 #include <optional>
 #include "match.h"
-#include "or.h"
 
 using namespace std;
 
@@ -15,41 +14,23 @@ namespace bee::fish::parser {
    class And : public Match {
    protected:
    
-      vector<Match*>::iterator
+      vector<MatchPtr>::iterator
          _iterator;
 
    public:
 
-      template<typename ...T>
-      And(T*... inputs) :
-         Match(inputs...)
+      template<typename ...MatchPtr>
+      And(bool variadic, MatchPtr... inputs) :
+         Match(variadic, inputs...)
       {
          _iterator = _inputs.end();
       }
       
-      virtual ~And() {
-      }
-      
-      
-      friend And& operator and(And& first, Match& second);
-      /*
-      And& operator and(Match& next)
-      {
-         _inputs.push_back(next.copy());
-         return *this;
-      }
-      
-      Or* operator or(Match* _or)
-      {
-         return new Or(this, _or);
-      }
-      */
-      
       virtual bool
-      match(int character) {
+      match(const Char& character) {
       
          bool matched = false;
-         vector<Match*>::iterator 
+         vector<MatchPtr>::iterator 
             end = _inputs.end();
             
          if (_iterator == end)
@@ -57,7 +38,7 @@ namespace bee::fish::parser {
             
          for (;;) {
 
-            Match* item = *_iterator;
+            MatchPtr item = *_iterator;
 
             matched =
                item->match(character);
@@ -97,12 +78,23 @@ namespace bee::fish::parser {
 			     _iterator = _inputs.end();
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new And(*this);
+         return MatchPtr(new And(*this));
+      }
+   };
+   
+   class AndPtr : public MatchPtr
+   {
+   public:
+      template<typename ...T>
+      AndPtr(T... inputs) :
+         MatchPtr(new And(true, inputs...))
+      {
       }
    };
 
+		
 };
 
 #endif

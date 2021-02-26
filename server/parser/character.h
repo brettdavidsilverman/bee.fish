@@ -7,28 +7,46 @@ namespace bee::fish::parser {
 
    class Character : public Match {
    protected:
-      int _character;
-
+      Char _character;
+      bool _anyCharacter;
+      
    public:
-      Character(int character) :
-         Match(),
-         _character(character)
+      Character() :
+         _character(-1),
+         _anyCharacter(true)
       {
       }
-   
+      
+      Character(const Char& character) :
+         _character(character),
+         _anyCharacter(false)
+      {
+      }
+      
+      Character(const Character& source) :
+         _character(source._character),
+         _anyCharacter(source._anyCharacter)
+      {
+         _character = source._character;
+      }
+			   
       virtual ~Character()
       {
       }
    
-      virtual bool match(int character)
+      virtual bool match(const Char& character)
       {
          bool matched =
-            (_character == character);
+            (character != Match::EndOfFile) &&
+            (
+               _anyCharacter ||
+               (_character == character)
+            );
          
          if (matched)
          {
-            success();
             Match::match(character);
+            success();
          }
          else
          {
@@ -47,28 +65,24 @@ namespace bee::fish::parser {
          return out.str();
       }
    
-      Character(const Character& source) :
-         Match(source)
+      
+      virtual MatchPtr copy() const
       {
-         _character = source._character;
-      }
-			   
-      virtual Match* copy() const
-      {
-         return new Character(*this);
+         return MatchPtr(new Character(*this));
       }
    
 
-};
+   };
 
-template<int T>
-class Char : public Character {
-public:
-   Char() : Character(T)
-   {}
-};
-
-
+   class CharacterPtr : public MatchPtr
+   {
+   public:
+      CharacterPtr(const Char& character) :
+         MatchPtr(new Character(character))
+      {
+      }
+      
+   };
 };
 
 #endif

@@ -8,18 +8,20 @@ namespace bee::fish::parser {
             
    class Range : public Match {
    private:
-			  char _minimum;
-			  char _maximum;
+			  Char _minimum;
+			  Char _maximum;
 			   
 		public:
-			  Range(char minimum, char maximum)
-			     : Match()
+			  Range(
+			     const Char& minimum,
+			     const Char& maximum
+			  ) :
+			     _minimum(minimum),
+			     _maximum(maximum)
 			  {
-			     _minimum = minimum;
-			     _maximum = maximum;
 			  }
 			   
-			  virtual bool match(int character)
+			  virtual bool match(const Char& character)
 			  {
 			   
 			     if (character == Match::EndOfFile)
@@ -31,8 +33,8 @@ namespace bee::fish::parser {
 			         
 			     if (matched)
 			     {
-			        success();
 			        Match::match(character);
+			        success();
 			     }
 			     else {
 			        fail();
@@ -64,10 +66,22 @@ namespace bee::fish::parser {
          _maximum = source._maximum;
       }
 			   
-      virtual Match* copy() const
+      virtual MatchPtr copy() const
       {
-         return new Range(*this);
+         return MatchPtr(new Range(*this));
       }
+	 };
+	 
+	 
+	 class RangePtr : public MatchPtr
+	 {
+	 public:
+	    RangePtr(
+			     const Char& minimum,
+			     const Char& maximum
+			 ) : MatchPtr(new Range(minimum, maximum))
+			 {
+			 }
 	 };
 		
 
