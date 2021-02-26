@@ -198,6 +198,11 @@ namespace bee::fish::parser {
          return _result;
       }
       
+      virtual bool matched()
+      {
+         return _result == true;
+      }
+      
       virtual void success()
       {
          _result = true;

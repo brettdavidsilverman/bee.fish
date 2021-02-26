@@ -11,9 +11,11 @@ namespace bee::fish::parser {
    class Optional : public Match {
    protected:
       Match* _item;
-      bool _matched = false;
+     
    
    public:
+      bool _matched = false;
+      
       Optional(Match* match) :
          _item(match)
       {
@@ -46,11 +48,6 @@ namespace bee::fish::parser {
 		      return matched;
 		   }
       
-      virtual bool& matched()
-		   {
-		      return _matched;
-		   }
-		   
 		   virtual Match& item()
 		   {
 		      return *_item;

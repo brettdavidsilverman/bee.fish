@@ -34,6 +34,28 @@ namespace bee::fish::json {
       {
       }
       
+      virtual void write(
+         ostream& out,
+         size_t tabIndex = 0
+      ) const
+      {
+         out << tabs(tabIndex);
+         
+         if (_sign->matched())
+            out << _sign->_value;
+            
+         out << _integer->_value;
+         
+         if (_fraction->matched())
+            out << '.'
+                << _fraction->_integer->_value;
+                
+         if (_exponent->matched())
+         {
+            _exponent->write(out);
+         }
+         
+      }
       class IntegerCharacter : public Range
       {
       public:
@@ -88,6 +110,13 @@ namespace bee::fish::json {
          )
          {
          }
+         
+         void write(ostream& out)
+         {
+            out << 'e'
+                << _sign->_value
+                << _integer->_value;
+         }
       };
       
       class Sign : public Or
@@ -102,10 +131,6 @@ namespace bee::fish::json {
          }
       };
       
-      virtual void write(ostream& out)
-      {
-         out << "Number";
-      }
          
    };
 }

@@ -190,8 +190,6 @@ namespace bee::fish::parser
       
       ok &= testMatch("Not range no match", _not2, "a");
  
-      cerr << _not2 << endl;
-      
       return ok;
    }
    
