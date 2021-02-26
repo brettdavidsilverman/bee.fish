@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
    optional<bool> ok =
       parser->read(cin, true);
    
-   if (ok) {
+   if (ok == true) {
       cerr << endl
            << "ok joe" << endl
            << endl;
