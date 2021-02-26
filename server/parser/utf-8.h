@@ -105,7 +105,7 @@ namespace bee::fish::parser {
       {
       }
       
-      bool reset()
+      void reset()
       {
          _expectedByteCount = 0;
          _byteCount = 0;

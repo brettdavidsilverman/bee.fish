@@ -51,6 +51,20 @@ namespace bee::fish::parser {
          );
       }
    };
+   
+   class CIWordPtr : public MatchPtr
+   {
+   public:
+      CIWordPtr(const string& str) :
+         MatchPtr(new CIWord(str))
+      {
+      }
+      
+      CIWordPtr(const BString& word) :
+         MatchPtr(new CIWord(word))
+      {
+      }
+   };
 
 }
 

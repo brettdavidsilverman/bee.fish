@@ -79,9 +79,11 @@ namespace bee::fish::parser
    inline bool testRepeat()
    {
       bool ok = true;
-      Repeat repeat(MatchPtr(new Character()));
-      ok &= testMatch("Repeat range match", repeat, "helloworld", true, "helloworld");
-      
+      Repeat repeat(
+         MatchPtr(new Character()),
+         MatchPtr(new Character('!'))
+      );
+      ok &= testMatch("Repeat any character match", repeat, "helloworld!", true, "helloworld");
       return ok;
    }
    
@@ -182,13 +184,13 @@ namespace bee::fish::parser
    {
       bool ok = true;
       
-      Not testNot(MatchPtr(new Word("true")));
+      Not testNot(MatchPtr(new Word("ABC")));
       
-      ok &= testMatch("Simple 'not' match", testNot, "false", true);
+      ok &= testMatch("Simple 'not' match", testNot, "abc", true, "abc");
       
-      Not testNotNoMatch(testNot);
+      MatchPtr testNotNoMatch(testNot.copy());
       
-      ok &= testMatch("Simple 'not' no match", testNotNoMatch, "true", false);
+      ok &= testMatch("Simple 'not' no match", *testNotNoMatch, "ABC", false);
       
       return ok;
    }
@@ -197,33 +199,51 @@ namespace bee::fish::parser
    {
       bool ok = true;
       
-      MatchPtr word1 = WORD("Hello");
+      MatchPtr word1 = WordPtr("Hello");
       word1->_capture = true;
       MatchPtr testAndRule =
          word1 and 
-         WORD("World") and
-         C('.');
+         WordPtr("World") and
+         CharacterPtr('.');
       
       ok &= testMatch("Rule for 'and' match", *testAndRule, "HelloWorld.", true, "HelloWorld.");
       
       ok &= word1->_value == "Hello";
       
       MatchPtr testOrRule =
-         WORD("true") or
-         WORD("false") or
-         WORD("null");
+         WordPtr("true") or
+         WordPtr("false") or
+         WordPtr("null");
          
       
-      Or testOrRule1((Or&)*testOrRule);
-      Or testOrRule2((Or&)*testOrRule);
-      Or testOrRule3((Or&)*testOrRule);
-      Or testOrRuleNoMatch((Or&)*testOrRule);
+      MatchPtr testOrRule1(testOrRule->copy());
+      MatchPtr testOrRule2(testOrRule->copy());
+      MatchPtr testOrRule3(testOrRule->copy());
+      MatchPtr testOrRuleNoMatch(testOrRule->copy());
       
-      ok &= testMatch("Rule for 'or' match first", testOrRule1, "true", true, "true");
-      ok &= testMatch("Rule for 'or' match second", testOrRule2, "false", true, "false");
-      ok &= testMatch("Rule for 'or' match third", testOrRule3, "null", true, "null");
-      ok &= testMatch("Rule for 'or' no match", testOrRuleNoMatch, "bee");
+      ok &= testMatch("Rule for 'or' match first", *testOrRule1, "true", true, "true");
+      ok &= testMatch("Rule for 'or' match second", *testOrRule2, "false", true, "false");
+      ok &= testMatch("Rule for 'or' match third", *testOrRule3, "null", true, "null");
+      ok &= testMatch("Rule for 'or' no match", *testOrRuleNoMatch, "bee");
       
+      MatchPtr repeat =
+         RepeatPtr(CharacterPtr('A'), CharacterPtr('.'), 1, 0);
+      MatchPtr testRepeatMatch(repeat->copy());
+      MatchPtr testRepeatNoMatch(repeat->copy());
+      
+      ok &= testMatch("Rule for 'repeat' match", *testRepeatMatch, "AAAA.", true, "AAAA");
+      ok &= testMatch("Rule for 'repeat' no match", *testRepeatNoMatch, "B");
+
+      MatchPtr repeat2 =
+         WordPtr("abc") += CharacterPtr('!');
+     
+      ok &= testMatch("Rule for 'repeat' += match", *repeat2, "abcabcabc!", true, "abcabcabc");
+      
+      MatchPtr repeat3 =
+         WordPtr("Abc") += WordPtr("AbC");
+     
+      ok &= testMatch("Rule for 'repeat' += match 2", *repeat3, "AbcAbcAbC", true, "AbcAbcAb");
+
       return ok;
    }
    
@@ -233,10 +253,10 @@ namespace bee::fish::parser
       bool ok = true;
       
       MatchPtr testOptional =
-         WORD("one") and
-         OPTIONAL(
-            WORD("two"),
-            WORD("three")
+         WordPtr("one") and
+         OptionalPtr(
+            WordPtr("two"),
+            WordPtr("three")
          );
       
       MatchPtr testOptional123 = testOptional->copy();
@@ -285,7 +305,7 @@ namespace bee::fish::parser
       }
       
 #ifdef DEBUG
-      cerr << parser << endl;
+      //cout << parser << endl;
 #endif
       return ok;
    }

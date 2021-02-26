@@ -9,33 +9,35 @@ using namespace std;
 
 namespace bee::fish::parser {
 
-   #define WORD(word) MatchPtr(new Word(word))
-   #define C(character) MatchPtr(new Character(character))
-   #define eof C(Match::EndOfFile)
-   #define AND(first, second) MatchPtr(new And(first, second))
-   #define OR(first, second) MatchPtr(new Or(first, second))
-   #define NOT(match) MatchPtr(new Not(match))
-   #define OPTIONAL(optional, next) ((optional and next) or next)
-
+ 
+   inline static const CharacterPtr eof(Match::EndOfFile);
+   
    MatchPtr operator and (MatchPtr first, MatchPtr second)
    {
-      return AND(first, second);
+      return AndPtr(first, second);
    }
 
    MatchPtr operator or (MatchPtr first, MatchPtr second)
    {
-      return OR(first, second);
+      return OrPtr(first, second);
    }
     
    MatchPtr operator not (MatchPtr item)
    {
-      return NOT(item);
+      return NotPtr(item);
    }
   
-   MatchPtr operator - (MatchPtr item)
+
+   MatchPtr operator += (MatchPtr repeat, MatchPtr untill)
    {
-      return OPTIONAL(item, eof);
+      return RepeatPtr(repeat, untill, 0, 0);
    }
+   
+   MatchPtr OptionalPtr(MatchPtr optional, MatchPtr next)
+   {
+      return ((optional and next) or next);
+   }
+   
   
 }
 

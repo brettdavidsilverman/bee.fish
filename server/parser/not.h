@@ -21,24 +21,27 @@ namespace bee::fish::parser {
       
          bool matched =
             _item->match(character);
-            
-         if (_item->_result == true)
-            fail();
-         else if (character == Match::EndOfFile)
+         
+         if (character == Match::EndOfFile)
             success();
-        
-         if (!matched)
+         else if (_item->_result == false)
+         {
+            _item->reset();
+            Match::match(character);
+            return true;
+         }
+         else if (_item->_result == true)
+            fail();
+         else if (!matched)
          {
             // Reset the item
-            _item = _item->copy();
-
+            _item->reset();
             Match::match(character);
+            return true;
          }
          
-         // if (_item->result() == false)
-         //   success();
             
-         return matched;
+         return false;
       
       }
    
@@ -66,6 +69,15 @@ namespace bee::fish::parser {
              << *_item
              << ")";
          
+      }
+   };
+   
+   class NotPtr : public MatchPtr
+   {
+   public:
+      NotPtr(MatchPtr item) :
+         MatchPtr(new Not(item))
+      {
       }
    };
 

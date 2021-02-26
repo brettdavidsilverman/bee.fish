@@ -26,13 +26,10 @@ namespace bee::fish::json {
       {
       }
       
-      class IntegerCharacterPtr : public MatchPtr
+      class IntegerCharacter : public Range
       {
       public:
-         IntegerCharacterPtr() :
-            MatchPtr(
-               new Range('0', '9')
-            )
+         IntegerCharacter() : Range('0', '9')
          {
          }
             
@@ -43,10 +40,13 @@ namespace bee::fish::json {
       public:
          IntegerPtr() : MatchPtr(
             new Repeat(
-               IntegerCharacterPtr()
-               ,
+               MatchPtr(
+                  new IntegerCharacter()
+               ),
                NOT(
-                  IntegerCharacterPtr()
+                  MatchPtr(
+                     new IntegerCharacter()
+                  )
                ),
                1,
                0

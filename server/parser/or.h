@@ -29,37 +29,25 @@ namespace bee::fish::parser {
       {
    
          bool matched = false;
-         while (!matched && _result == nullopt)
-         {
-            if (_first->_result == nullopt)
-            {
-               matched |= _first->match(character);
-               if (_first->_result == true)
-               {
-                  if (matched)
-                     Match::match(character);
-                  
-                  success();
-                  return matched;
-               }
-            }
          
-            if (_second->_result == nullopt)
-            {
-               matched |= _second->match(character);
-               if (_second->_result == true)
-               {
-                  if (matched)
-                     Match::match(character);
+         if (_first->_result == nullopt)
+            matched |= _first->match(character);
+        
+         if (_second->_result == nullopt)
+            matched |= _second->match(character);
+ 
 
-                  success();
-                  return matched;
-               }
-            }
-
-            if ( ( _first->_result == false &&
-                  _second->_result == false ) )
-               fail();
+         if ( ( _first->_result  == false ) &&
+              ( _second->_result == false ) )
+         {
+            matched = false;
+            fail();
+         }
+         
+         if ( ( _first->_result  == true ) ||
+              ( _second->_result == true ) )
+         {
+            success();
          }
          
          if (matched)
@@ -131,8 +119,16 @@ namespace bee::fish::parser {
       
       
    };
-
-
+   
+   class OrPtr : public MatchPtr
+   {
+   public:
+      OrPtr(MatchPtr first, MatchPtr second) :
+         MatchPtr(new Or(first, second))
+      {
+      }
+   };
+   
 };
 
 #endif

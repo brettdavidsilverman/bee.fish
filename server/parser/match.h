@@ -48,6 +48,10 @@ namespace bee::fish::parser {
       {
       }
       
+      virtual ~Match()
+      {
+      }
+      
       virtual bool match(const Char& character)
       {
          if (_capture)
@@ -75,16 +79,23 @@ namespace bee::fish::parser {
       {
       
          Char character;
+         
+         __attribute__((unused))
          bool matched = false;
          
          while (!input.eof())
          {
             if (getNext(input, character))
             {
-               matched = match(character);
+               matched = false;
+               
+               //while (!matched && _result == nullopt)
+               {
+                  matched = match(character);
 #ifdef DEBUG
-               cerr << "{"; UTF8Character::write(cerr, character); cerr << ":" << matched << "}";
+                  cerr << "{"; UTF8Character::write(cerr, character); cerr << ":" << matched << "}";
 #endif
+               }
                
                if (_result != nullopt)
                   break;
@@ -97,10 +108,15 @@ namespace bee::fish::parser {
               input.eof()
             )
          {
-            matched = match(Match::EndOfFile);
+            matched = false;
+           // while (!matched && _result == nullopt)
+            {
+
+               matched = match(Match::EndOfFile);
 #ifdef DEBUG
-            cerr << "{"; UTF8Character::write(cerr, character); cerr << ":" << matched << "}";
+               cerr << "{"; UTF8Character::write(cerr, Match::EndOfFile); cerr << ":" << matched << "}";
 #endif
+            }
          }
      
       }

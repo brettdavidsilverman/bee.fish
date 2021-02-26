@@ -26,7 +26,6 @@ using namespace std;
    public:
 
       Word(const BString& word) :
-         Match(),
          _word(word)
       {
          _index = _word.cbegin();
@@ -62,6 +61,7 @@ using namespace std;
    
       virtual void reset()
       {
+         Match::reset();
          _index = _word.cbegin();
       }
       
@@ -89,6 +89,19 @@ using namespace std;
    
    };
 
+   class WordPtr : public MatchPtr
+   {
+   public:
+      WordPtr(const string& str) :
+         MatchPtr(new Word(str))
+      {
+      }
+      
+      WordPtr(const BString& word) :
+         MatchPtr(new Word(word))
+      {
+      }
+   };
 
 };
 

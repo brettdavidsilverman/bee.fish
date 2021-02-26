@@ -21,7 +21,7 @@ namespace bee::fish::parser {
       {
       }
       
-      Character(Char character) :
+      Character(const Char& character) :
          _character(character),
          _matchAny(false),
          _matchedCharacter(-1)
@@ -51,9 +51,7 @@ namespace bee::fish::parser {
             success();
          }
          else
-         {
             fail();
-         }
       
          return matched;
       }
@@ -99,6 +97,16 @@ namespace bee::fish::parser {
 
    };
 
+
+   class CharacterPtr : public MatchPtr
+   {
+   public:
+      CharacterPtr(const Char& character) :
+         MatchPtr(new Character(character))
+      {
+      }
+      
+   };
 
 };
 

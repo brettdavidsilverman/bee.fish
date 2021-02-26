@@ -39,7 +39,7 @@ namespace bee::fish::parser
          {
             matched = _first->match(character);
          }
-         else if ( _first->_result == true )
+         else if ( _second->_result == nullopt )
          {
             matched = _second->match(character);
          }
@@ -99,6 +99,15 @@ namespace bee::fish::parser
          throw runtime_error("Invalid index");
       }
       
+   };
+   
+   class AndPtr : public MatchPtr
+   {
+   public:
+      AndPtr(MatchPtr first, MatchPtr second) :
+         MatchPtr(new And(first, second))
+      {
+      }
    };
 
 };

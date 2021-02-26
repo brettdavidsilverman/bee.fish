@@ -67,6 +67,18 @@ namespace bee::fish::parser {
       }
 	 };
 		
+   class RangePtr : public MatchPtr
+   {
+   public:
+      RangePtr(
+         const Char& minimum,
+         const Char& maximum
+      ) : MatchPtr(
+         new Range(minimum, maximum)
+      )
+      {
+      }
+   };
 
 };
 

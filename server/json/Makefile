@@ -1,8 +1,7 @@
 CC = g++
-CFLAGS = -std=c++2a -Wall -fmax-errors=1 -Ofast
+CFLAGS = -std=c++2a -Wall -fmax-errors=1
 OBJECTS=main.o
-BUILD_NUMBER_FILE=../../build-number.txt
-DEPS=json.h string.h number.h array.h object.h blank-space.h value.h version.h ../match.h Makefile
+DEPS=json.h string.h number.h array.h object.h blank-space.h value.h version.h ../parser/parser Makefile
 
 json: $(OBJECTS)
 	rm -f json
@@ -12,6 +11,9 @@ json: $(OBJECTS)
 %.o: %.cpp $(DEPS)
 	$(CC) $< -c $(CFLAGS)
 
+parser:
+	cd ../parser && make
+	
 debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -Og -g -D DEBUG
