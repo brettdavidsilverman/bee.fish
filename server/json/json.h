@@ -3,7 +3,14 @@
 
 #include <map>
 #include <iomanip>
+#include "../parser/parser.h"
+#include "blank-space.h"
+#include "number.h"
+#include "string.h"
+#include "array.h"
+//#include "object.h"
 
+/*
 namespace bee::fish::json
 {
    class JSON;
@@ -14,14 +21,8 @@ namespace bee::fish::json
    class BlankSpace;
 }
 
-#include "../parser/parser.h"
-#include "blank-space.h"
-#include "number.h"
-#include "string.h"
-#include "array.h"
-/*
-#include "object.h"
 */
+
 using namespace bee::fish::parser;
 
 namespace bee::fish::json
@@ -95,17 +96,15 @@ namespace bee::fish::json
 
       };
       
-      virtual void write(ostream& out)
+      virtual void write(
+         ostream& out,
+         size_t tabIndex = 0
+      ) const
       { 
-         if (result() == true)
-            out << *item();
+         if (_result == true)
+            out << *(_switch->_item);
          else
-            And::write(out);
-      }
-      
-      Match* item()
-      {
-         return _switch->_item;
+            And::write(out, tabIndex);
       }
 
       virtual size_t index()
@@ -119,7 +118,8 @@ namespace bee::fish::json
       }
    };
    
-   Match* JSON = new _JSON();
+   _JSON __JSON;
+   Match* JSON = &__JSON;
 }
 
 #endif

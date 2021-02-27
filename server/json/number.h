@@ -39,6 +39,12 @@ namespace bee::fish::json {
          size_t tabIndex = 0
       ) const
       {
+         if (_result != true)
+         {
+            And::write(out, tabIndex);
+            return;
+         }
+         
          out << tabs(tabIndex);
          
          if (_sign->matched())

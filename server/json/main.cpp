@@ -25,24 +25,22 @@ int main(int argc, char* argv[]) {
       
    if (!bee::fish::json::test())
       return 2;
-      /*
+      
   // Request req;
-   JSON* parser = new JSON();
-
+   _JSON parser;
+   cerr << parser << endl;
    cerr << "Reading from stdin." << endl;
    optional<bool> ok =
-      parser->read(cin, true);
+      parser.read(cin, true);
    
    if (ok == true) {
       cerr << endl
+           << parser << endl
            << "ok joe" << endl
            << endl;
    }
    else
       cerr << endl << "Fail" << endl;
- 
-   delete parser;
-   */
    
    return 0;
 }

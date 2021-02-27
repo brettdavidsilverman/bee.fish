@@ -11,9 +11,11 @@ using namespace bee::fish::parser;
 
 namespace bee::fish::parser::json {
    
+   extern Match* JSON;
+   
    class Object : 
       public And,
-      public map<wstring, JSON*>,
+      public map<wstring, _JSON*>,
       public Value
    {
    public:
@@ -79,7 +81,7 @@ namespace bee::fish::parser::json {
                )
             ),
             new Optional(
-               new Repeat<IdentifierCharacter>()
+               new Repeat(new IdentifierCharacter())
             )
          )
          {
@@ -167,7 +169,7 @@ namespace bee::fish::parser::json {
             new Optional(
                new BlankSpace()
             ),
-            new LoadOnDemand<JSON>()
+            new LoadOnDemand(JSON)
          )
          {
             _object = object;
@@ -190,8 +192,8 @@ namespace bee::fish::parser::json {
             
          JSON* itemPtr()
          {
-            LoadOnDemand<JSON>* lazyLoad =
-               (LoadOnDemand<JSON>*)(_inputs[4]);
+            LoadOnDemand* lazyLoad =
+               (LoadOnDemand*)(_inputs[4]);
             JSON* value = lazyLoad->itemPtr();
             return value;
          }
@@ -272,7 +274,7 @@ namespace bee::fish::parser::json {
       virtual JSON& operator[]
       (const wstring& label)
       {
-         JSON* json = at(label);
+         _JSON* json = at(label);
          return *json;
       }
          
