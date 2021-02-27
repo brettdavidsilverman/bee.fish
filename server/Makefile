@@ -8,6 +8,7 @@ all:
 	cd database && $(MAKE) $(DEBUG)
 	cd id && $(MAKE) $(DEBUG)
 	cd parser && $(MAKE) $(DEBUG)
+	cd json && $(MAKE) $(DEBUG)
 	cd power-encoding && $(MAKE) $(DEBUG)
 	cd https && $(MAKE) $(DEBUG)
 	
@@ -26,3 +27,4 @@ clean:
 	make -C id clean
 	make -C power-encoding clean
 	make -C cgi clean
+	make -C json clean
