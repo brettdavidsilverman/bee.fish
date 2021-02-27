@@ -73,6 +73,12 @@ namespace bee::fish::parser {
          return (*this != test);
       }
       
+      BString& operator += (const string& rhs)
+      {
+         BString string(rhs);
+         insert(end(), string.begin(), string.end());
+         return *this;
+      }
       
    };
    

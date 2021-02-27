@@ -15,10 +15,8 @@
 #include "or.h"
 #include "not.h"
 #include "optional.h"
-
-/*
 #include "load-on-demand.h"
-*/
+
 using namespace std;
 
 namespace bee::fish::parser {

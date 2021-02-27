@@ -19,7 +19,7 @@ namespace bee::fish::parser
    inline bool testOr();
    inline bool testNot();
    inline bool testOptional();
-   inline bool testRules();
+   //inline bool testRules();
    
    
    inline bool testBString();
@@ -239,11 +239,11 @@ namespace bee::fish::parser
       bool ok = true;
       Word runes("ᛒᚢᛞᛖ");
      
-      ok &= testMatch("Test runes BString ᛒᚢᛞᛖ", runes, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
+      ok &= testMatch("Test runes BString ᛒᚢᛞᛖ match 1", runes, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
      
       Word runes2(BString("ᛒᚢᛞᛖ"));
 
-      ok &= testMatch("Test runes BString ᛒᚢᛞᛖ", runes2, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
+      ok &= testMatch("Test runes BString ᛒᚢᛞᛖ match 2", runes2, "ᛒᚢᛞᛖ", true, "ᛒᚢᛞᛖ");
 
       return ok;
    }

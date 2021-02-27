@@ -1,19 +1,17 @@
-#ifndef BEE_FISH_PARSER_JSON__ARRAY_H
-#define BEE_FISH_PARSER_JSON__ARRAY_H
+#ifndef BEE_FISH_JSON__ARRAY_H
+#define BEE_FISH_JSON__ARRAY_H
 
-#include "../parser.h"
-#include "json.h"
-#include "value.h"
+#include "../parser/parser.h"
+
 
 using namespace bee::fish::parser;
 
-namespace bee::fish::parser::json {
+namespace bee::fish::json {
    
-   class JSON;
+   extern Match* JSON;
    
    class Array :
-      public And,
-      public Value
+      public And
    {
       
    public:
@@ -21,9 +19,9 @@ namespace bee::fish::parser::json {
          new Character('['),
          new Optional(
             new And(
-               new LoadOnDemand<JSON>(),
+               new LoadOnDemand(JSON),
                new Optional(
-                  new Repeat<Record>()
+                  new Repeat(new Record())
                )
             )
          ),
@@ -42,10 +40,9 @@ namespace bee::fish::parser::json {
       public:
          Record() : And(
             new Character(','),
-            new LoadOnDemand<JSON>()
+            new LoadOnDemand(JSON)
          )
          {
-            _capture = true;
          }
          
          

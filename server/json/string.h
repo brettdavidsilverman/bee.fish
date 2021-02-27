@@ -1,5 +1,5 @@
-#ifndef BEE_FISH_PARSER_JSON__STRING_H
-#define BEE_FISH_PARSER_JSON__STRING_H
+#ifndef BEE_FISH_JSON__STRING_H
+#define BEE_FISH_JSON__STRING_H
 
 #include <iomanip>
 #include <iostream>       // std::cout, std::hex
@@ -7,14 +7,14 @@
 #include <locale>         // std::wstring_convert
 #include <codecvt>        // std::codecvt_utf8_utf16
 
-#include "../parser.h"
-#include "value.h"
+#include "../parser/parser.h"
 
-namespace bee::fish::parser::json {
+using namespace bee::fish::parser;
+
+namespace bee::fish::json {
 
    class String :
-      public And,
-      public Value
+      public And
    {
    protected:
       
@@ -53,9 +53,9 @@ namespace bee::fish::parser::json {
             _capture = true;
          }
          
-         char character()
+         Char character()
          {
-            return value()[0];
+            return _value[0];
          }
       };
       
@@ -82,11 +82,12 @@ namespace bee::fish::parser::json {
          class UnicodeHex : public And
          {
          protected:
-         
+            And* _hex;
+            
          public:
             UnicodeHex() : And(
                new Character('u'),
-               new And(
+               _hex = new And(
                   new Hex(),
                   new Hex(),
                   new Hex(),
@@ -94,15 +95,17 @@ namespace bee::fish::parser::json {
                )
             )
             {
+               _hex->_capture = true;
             }
             
-            virtual string& hex()
+            virtual BString& hex()
             {
-               return (*this)[1].value();
+               return _hex->_value;
             }
             
             virtual string character()
             {
+               /*
                const char *hexString = hex().c_str();
                unsigned int hexNumber;
                sscanf(hexString, "%x", &hexNumber);
@@ -112,6 +115,8 @@ namespace bee::fish::parser::json {
                value += high;
                value += low;
                return value;
+               */
+               throw runtime_error("Not implemented");
             }
             
             class Hex : public Or
@@ -152,7 +157,7 @@ namespace bee::fish::parser::json {
             }
             
             virtual string character() {
-               switch (value()[1]) {
+               switch (_value[1]) {
                case '\\':
                   return "";
                case 'b':
@@ -196,21 +201,21 @@ namespace bee::fish::parser::json {
       };
       
       class StringCharacters: public
-         Repeat<StringCharacter>
+         Repeat
         
       {
-      protected:
-         string _value;
+      public:
+         BString _value;
          
       public:
       
-         StringCharacters() : Repeat()
+         StringCharacters() :
+            Repeat(new StringCharacter())
          {
-            _capture = true;
          }
          
          
-         virtual void addItem(Match* item)
+         virtual void matchedItem(Match* item)
          {
             if (_capture)
             {
@@ -220,21 +225,20 @@ namespace bee::fish::parser::json {
                _value += str;
               // wcerr << _wvalue << endl;
             }
-            Repeat::addItem(item);
-         }
-         
-         virtual string& value()
-         {
-            return _value;
+            Repeat::matchedItem(item);
          }
          
       };
       
-      virtual void write(ostream& out)
+      virtual void write(
+         ostream& out,
+         size_t tabIndex = 0
+      ) const
       {
+         out << tabs(tabIndex);
          out << '\"';
          
-         string& str = value();
+         const BString& str = _value;
          String::write(out, str);
          
          out << '\"';
@@ -276,14 +280,10 @@ namespace bee::fish::parser::json {
       }
       
       */
-      static void write(wostream& wout, const wstring& wstr)
-      {
-         wout << wstr;
-      }
       
-      static void write(ostream& out, const string& str)
+      static void write(ostream& out, const BString& str)
       {
-         for (const char& c : str)
+         for (const Char& c : str)
          {
             if (c >= 0x00 && c <= 0x1F)
             {
@@ -294,10 +294,10 @@ namespace bee::fish::parser::json {
                    << std::setfill('0') 
                    << std::right
                    << std::hex
-                   << (unsigned char)c;
+                   << c;
             }
             else
-               Match::write(out, c);
+               UTF8Character::writeEscaped(out, c);
          }
       }
       
@@ -310,14 +310,9 @@ namespace bee::fish::parser::json {
             (optional.item());
       }
       
-      virtual wstring& wvalue()
+      virtual BString& value()
       {
-         return characters().wvalue();
-      }
-      
-      virtual string& value()
-      {
-         return characters().value();
+         return characters()._value;
       }
 
 

@@ -1,10 +1,10 @@
-#ifndef BEE_FISH_PARSER__JSON_H
-#define BEE_FISH_PARSER__JSON_H
+#ifndef BEE_FISH__JSON_H
+#define BEE_FISH__JSON_H
 
 #include <map>
 #include <iomanip>
 
-namespace bee::fish::parser::json
+namespace bee::fish::json
 {
    class JSON;
    class Object;
@@ -17,31 +17,34 @@ namespace bee::fish::parser::json
 #include "../parser/parser.h"
 #include "blank-space.h"
 #include "number.h"
-/*
 #include "string.h"
 #include "array.h"
+/*
 #include "object.h"
 */
 using namespace bee::fish::parser;
 
-namespace bee::fish::parser::json
+namespace bee::fish::json
 {
-   /*
-   class JSON : public And
+   
+   class _JSON : public And
    {
    public:
-      JSON() : And(
+      Or* _switch;
+      
+   public:
+      _JSON() : And(
          new Optional(
             new BlankSpace()
          ),
-         new Or(
+         _switch = new Or(
             new True(),
             new False(),
             new Null(),
             new Number(),
             new String(),
-            new Array(),
-            new Object()
+            new Array()
+            //new Object()
          ),
          new Optional(
             new BlankSpace()
@@ -49,7 +52,6 @@ namespace bee::fish::parser::json
       )
       
       {
-         _inputs[1]->_capture = true;
       }
             
       class True : public Word
@@ -96,37 +98,19 @@ namespace bee::fish::parser::json
       virtual void write(ostream& out)
       { 
          if (result() == true)
-            out << item();
+            out << *item();
          else
             And::write(out);
       }
       
-      Match& item()
+      Match* item()
       {
-         Or& _or = (Or&)(*this)[1];
-         
-         return _or.item();
+         return _switch->_item;
       }
 
-      virtual string name()
-      {
-         return "JSON";
-      }
-      
-      virtual string& value()
-      {
-         return item().value();
-      }
-      
-      virtual wstring& wvalue()
-      {
-         return item().wvalue();
-      }
-      
       virtual size_t index()
       {
-         Or* _or = (Or*)_inputs[1];
-         return _or->index();
+         return _switch->index();
       }
       
       virtual bool isNull()
@@ -135,7 +119,7 @@ namespace bee::fish::parser::json
       }
    };
    
-   */
+   Match* JSON = new _JSON();
 }
 
 #endif

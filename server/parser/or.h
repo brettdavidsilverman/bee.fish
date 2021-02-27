@@ -7,7 +7,7 @@
 namespace bee::fish::parser {
 
    class Or : public Match {
-   protected:
+   public:
       Match* _item = NULL;
       size_t _index = 0;
       
