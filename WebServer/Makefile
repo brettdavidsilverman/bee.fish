@@ -1,8 +1,8 @@
-
-
-build/WebServer: build
-	cd code ; \
-	g++ WebServer.cpp -o ../build/WebServer
+build/WebServer: build code/WebServer.hpp code/WebServer.cpp
+	g++ code/WebServer.cpp -o build/WebServer -I code
 
 build:
 	mkdir build
+
+clean:
+	rm -f -r build
