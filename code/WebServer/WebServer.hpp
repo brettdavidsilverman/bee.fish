@@ -33,9 +33,9 @@ namespace BeeFish {
       boost::asio::thread_pool m_threads;
 
    public:
-      WebServer(int port = 80) :
+      WebServer(int port = WEB_SERVER_PORT, int threads = WEB_SERVER_THREADS) :
          m_port(port),
-         m_threads(WEB_SERVER_THREADS)
+         m_threads(threads)
       {
       }
 

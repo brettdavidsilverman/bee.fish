@@ -3,8 +3,9 @@
 
 #include "../config.hpp"
 
-#define WEB_SERVER "0.0.0 Prototype"
+#define WEB_SERVER "0.0.1 Prototype"
 
+#define WEB_SERVER_PORT    80
 #define WEB_SERVER_THREADS 10
 
 #endif

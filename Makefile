@@ -4,5 +4,9 @@ all: build
 build:
 	mkdir build
 
+install:
+	sudo setcap cap_net_bind_service=ep ./build/WebServer
+	./build/WebServer
+
 clean:
-	rm -f -r build 
+	rm -f -r build
