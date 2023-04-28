@@ -1,6 +1,7 @@
 #include <iostream>
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "WebServer.hpp"
+#include "test.hpp"
 
 int main(int argc, const char* argv[]) {
 
@@ -9,12 +10,19 @@ int main(int argc, const char* argv[]) {
 
    cout << "WebServer " << WEB_SERVER << endl;
 
+#ifdef DEBUG
+   cout << "Debug mode" << endl;
+#else
+   cout << "Release mode" << endl;
+#endif
+
    if (hasArg(argc, argv, "-help") >= 0) {
       cout
          << "   Usage: WebServer [arguments]" << endl
          << "   Arguments:" << endl
          << "      [-port port]" << endl
          << "      [-threads threads]" << endl
+         << ".     [-test]" << endl
          << "   Example:" << endl
          << "      ./WebServer -port 80 -threads 10" << endl;
       return 0;
@@ -40,9 +48,17 @@ int main(int argc, const char* argv[]) {
       threads = atoi(argv[threadsArgument]);
    }
 
+   if (hasArg(argc, argv, "-test") >= 0) {
+      if (!testWebServer()) {
+         throw runtime_error("WebServer tests failed");
+      }
+      return 0;
+   }
+
    WebServer webServer(port, threads);
 
    webServer.start();
+   webServer.join();
 
    return 0;
 }

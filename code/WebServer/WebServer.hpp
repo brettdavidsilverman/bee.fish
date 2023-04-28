@@ -15,6 +15,7 @@
 #include <iostream>
 #include <thread>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/post.hpp>
@@ -30,60 +31,108 @@ namespace BeeFish {
    protected:
       const int m_port;
       int m_serverSocket = -1;
-      boost::asio::thread_pool m_threads;
+      boost::asio::thread_pool m_threadPool;
+      std::thread* m_loopThread = nullptr;
+      bool m_stop = false;
+      std::string m_host;
 
    public:
       WebServer(int port = WEB_SERVER_PORT, int threads = WEB_SERVER_THREADS) :
          m_port(port),
-         m_threads(threads)
+         m_threadPool(threads)
       {
+         std::stringstream stream;
+         stream << WEB_SERVER_HOST << ":" << m_port << "/";
+         m_host = stream.str();
       }
 
       ~WebServer() {
-         close();
+         stop();
       }
       
       virtual void start() {
+         using namespace std;
 
-         WebServer::loop(this); 
+         cout << "Starting WebServer " << m_host << endl;
+         
+         if (!initializeServerSocket()) {
+            throw runtime_error("initializeServerSocket failed");
+         }
+
+         m_stop = false;
+         m_loopThread = new std::thread(WebServer::loop, this); 
 
       }
 
-      static void loop(void* param) {
+      virtual void stop() {
+         using namespace std;
+
+         cout << "Stopping WebServer" << endl;
+
+         if (m_loopThread) {
+            m_stop = true;
+   
+            string command = "curl " + m_host;
+            system(command.c_str());
+
+            m_loopThread->join();
+            delete m_loopThread;
+            m_loopThread = nullptr;
+         }
+
+         m_threadPool.join();
+
+         cout << "WebServer stopped" << endl;
+
+      }
+
+      virtual void join() {
+         if (m_loopThread) {
+            m_loopThread->join();
+         }
+         m_threadPool.join();
+      }
+
+      virtual std::string host() {
+         return m_host;
+      }
+
+      static void loop(WebServer* webServer) {
 
          using namespace std;
 
-         WebServer* webServer = (WebServer*)param;
+         cout << "WebServer loop started" << endl;
 
-         for (;;) {
+         while (!webServer->m_stop) {
 
             socklen_t clilen;
             struct sockaddr_in cli_addr;
             int clientSocket = -1;
 
-            
-            while (webServer->m_serverSocket == -1) {
-               if (!webServer->initializeServerSocket()) {
-                  webServer->sleep();
-                  continue;
-               }
-            }
-
-
             // Process will wait here till connection is accepted
             clilen = sizeof(cli_addr);
-            clientSocket = accept(webServer->m_serverSocket, (struct sockaddr *)&cli_addr, &clilen);
+
+            cerr << "accept" << endl;
+
+            clientSocket = accept(
+               webServer->m_serverSocket,
+               (struct sockaddr *)&cli_addr,
+               &clilen
+            );
+
+            cerr << "accepted" << endl;
                
-            if (clientSocket < 0)
+            if (clientSocket >= 0 &&
+                !webServer->m_stop)
             {
-               // try closing the server and start over
-               webServer->close();
-               continue;
+               webServer->handleRequest(clientSocket);
             }
-            
-            webServer->handleRequest(clientSocket);
 
          }
+         
+         webServer->close();
+ 
+         cout << "WebServer loop ended" << endl;
 
       }
 
@@ -95,7 +144,6 @@ namespace BeeFish {
          struct sockaddr_in serv_addr;
 
          if (m_serverSocket > 0) {
-            cerr << "Closing server socket " << m_serverSocket << endl;
             ::close(m_serverSocket);    
          }
 
@@ -130,7 +178,7 @@ namespace BeeFish {
             return false;
          }
 
-         cerr << "Server listening on port " << m_port << endl;
+         cout << "Server listening on port " << m_port << endl;
 
          return true;
 
@@ -138,15 +186,17 @@ namespace BeeFish {
 
       virtual void handleRequest(int clientSocket) {
   
+         std::cerr << "handleRequest()" << std::endl;
+
          boost::asio::post(
-            m_threads,
+            m_threadPool,
             [clientSocket]() {
                const char* response =
                   "HTTP/1.1 200 OK\r\n" \
                   "Content-Type: text/plain\r\n" \
                   "Connection: close\r\n" \
                   "\r\n" \
-                  "Hello World";
+                  "Hello World\r\n\r\n";
                ::write(clientSocket, response, strlen(response));
                ::close(clientSocket);
                return;
@@ -161,9 +211,11 @@ namespace BeeFish {
          m_serverSocket = -1;
       }
 
-      virtual void sleep() {
+      static void sleep() {
          usleep(2L * 1000L * 1000L);
       }
+
+   
    };
 
 }
