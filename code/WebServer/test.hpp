@@ -34,12 +34,16 @@ namespace BeeFish {
       WebServer testServer(8080, 1);
       
       testServer.start();
-
       WebServer::sleep();
+
+      string command = "curl -v " + testServer.host();
+         system(command.c_str());
+
+      /*
 
       string command = "curl " + testServer.host() + " | grep \"Hello World\"";
      
-     /*
+     
       if (system(command.c_str()) == 0) {
          cout << "WebServer tests pass" << endl;
          success = true;

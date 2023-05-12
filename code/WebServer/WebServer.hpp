@@ -69,21 +69,11 @@ namespace BeeFish {
 
          cout << "Stopping WebServer" << endl;
 
-         if (m_loopThread) {
-            m_stop = true;
-   
-            string command = "curl " + m_host;
-            system(command.c_str());
-
-            m_loopThread->join();
-            delete m_loopThread;
-            m_loopThread = nullptr;
-         }
-
-         m_threadPool.join();
-
-         cout << "WebServer stopped" << endl;
-
+         string command = "./stop.sh " + m_host;
+         system(command.c_str());
+     
+         throw runtime_error("Should not reach here");
+         
       }
 
       virtual void join() {

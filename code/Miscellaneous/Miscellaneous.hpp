@@ -2,6 +2,7 @@
 #define BEE_FISH__MISCELLANEOUS__HPP
 
 #include <string>
+#include "optional.h"
 
 namespace BeeFish {
 
