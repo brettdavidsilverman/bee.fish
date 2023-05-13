@@ -14,7 +14,7 @@ namespace BeeFishParser {
    typedef BeeFishMisc::optional<bool> Optional;
    #define NullOpt BeeFishMisc::nullopt
 
-   class Character;
+   class UTF8Character;
 
    class Parser {
    public:
@@ -67,14 +67,17 @@ namespace BeeFishParser {
       }
       
       virtual Optional read(
-         Character& character
+         const UTF8Character& utf8
       )
       {
          return true;
       }
 
-      virtual Optional read(const std::string& string) {
-         
+      virtual Optional read(
+         const char* stream
+      )
+      {
+         std::string string(stream);
          bool parsed = true;
 
          for (std::string::const_iterator it =
@@ -97,14 +100,12 @@ namespace BeeFishParser {
       )
       {
          bitset<8> bits = character;
-
-         for (int i = 7;
-              i >= 0;
+         for (int i = 0;
+              i < 8;
               --i)
          {
 
             bool bit = bits[i];
-std::cerr << (bit ? 1 : 0);
             Optional result =
                read(bit);
 
@@ -119,7 +120,7 @@ std::cerr << (bit ? 1 : 0);
       }
 
       virtual Optional read(bool bit) {
-        return true;
+         return true;
       }
 
       virtual void setup() {

@@ -9,6 +9,8 @@ namespace BeeFishParser {
       public UTF8Character
    {
    public:
+      using UTF8Character::read;
+
       Character()
       {
       }
@@ -19,9 +21,10 @@ namespace BeeFishParser {
       }
 
       virtual Optional read(
-         Character& character
-      )
+         const UTF8Character& character
+      ) override
       {
+ 
          bool matched =
             ( *this == character );
          
@@ -38,7 +41,6 @@ namespace BeeFishParser {
       }
 
       
- 
 
    };
 

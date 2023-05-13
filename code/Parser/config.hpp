@@ -3,6 +3,6 @@
 
 #include "../config.hpp"
 
-#define PARSER "Version 0.0.0"
+#define PARSER "Version 0.0.1"
 
 #endif

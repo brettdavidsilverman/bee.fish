@@ -29,7 +29,7 @@ namespace BeeFishParser {
       }
 
       virtual Optional
-      read(bool bit)
+      read(bool bit) override
       {
 
          if (_bits[_bitCount].read(bit) == true &&
@@ -54,8 +54,9 @@ namespace BeeFishParser {
    private:
       std::vector<Char> _chars;
       Char _current;
-      size_t _expectedCharCount;
+      size_t _expectedCharCount {0};
    public:
+
       UTF8Character()
       {
       }
@@ -68,6 +69,7 @@ namespace BeeFishParser {
       }
 
       virtual Optional read(bool bit)
+      override
       {
 
          Char& c = _current;
@@ -85,7 +87,6 @@ namespace BeeFishParser {
                    _expectedCharCount ==
                       _chars.size())
                {
-                  std::cout << "Hello Mother Fucker" << std::endl;
                   return read(*this);
                }
             }
@@ -136,13 +137,8 @@ namespace BeeFishParser {
       }
 
    public:
-      virtual Optional read(
-         UTF8Character& character
-      )
-      {
-         return false;
-      }
 
+      using Parser::read;
    };
 
 

@@ -79,11 +79,12 @@ namespace BeeFishParser {
       std::cout << "testReadCharacter: " << std::flush;
 
       UTF8Character a("a");
-      Character c(a);
-      Parser& p(c);
-      std::cout << c << std::endl;
+      Character character(a);
 
-      success &= (p.read("a") == true);
+      std::cout << character << std::flush;
+
+      success = success && 
+         (character.read("a") == true);
 
       if (success)
          std::cout << "😃" << std::endl;
