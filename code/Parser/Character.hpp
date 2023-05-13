@@ -15,12 +15,16 @@ namespace BeeFishParser {
       {
       }
 
+      Character(const std::string& character) :
+         UTF8Character(character)
+      {
+      }
       Character(const UTF8Character& character) :
          UTF8Character(character)
       {
       }
 
-      virtual Optional read(
+      virtual bool read(
          const UTF8Character& character
       ) override
       {

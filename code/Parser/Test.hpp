@@ -8,7 +8,7 @@ namespace BeeFishParser {
 
    inline bool test() {
       
-      cout << "Testing parser" << endl << endl;
+      std::cout << "Testing parser" << std::endl << std::endl;
 
       Parser parser;
       if (!parser.read(""))
@@ -78,13 +78,16 @@ namespace BeeFishParser {
 
       std::cout << "testReadCharacter: " << std::flush;
 
-      UTF8Character a("a");
-      Character character(a);
+      Character character("😃");
 
-      std::cout << character << std::flush;
+      std::string stream("😃");
 
       success = success && 
-         (character.read("a") == true);
+         (character.read(
+             stream.c_str(),
+             stream.length()
+         ) == true) &&
+         (character._result == true);
 
       if (success)
          std::cout << "😃" << std::endl;

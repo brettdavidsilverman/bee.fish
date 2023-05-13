@@ -6,7 +6,6 @@
 #include <bitset>
 
 #include "../Miscellaneous/Miscellaneous.hpp"
-using namespace std;
 
 namespace BeeFishParser {
 
@@ -66,27 +65,20 @@ namespace BeeFishParser {
          return EmptyString();
       }
       
-      virtual Optional read(
-         const UTF8Character& utf8
+      
+      virtual bool read(
+         const char* stream, size_t length
       )
       {
-         return true;
-      }
-
-      virtual Optional read(
-         const char* stream
-      )
-      {
-         std::string string(stream);
          bool parsed = true;
 
-         for (std::string::const_iterator it =
-                 string.cbegin();
-              it != string.cend();
-              ++it
-             )
+         const char* cend = stream + length;
+
+         for (const char* c = stream;
+              c != cend;
+              ++c)
          {
-            parsed = read(*it);
+            parsed = read(*c);
             if (!parsed)
                break;
          }
@@ -95,13 +87,13 @@ namespace BeeFishParser {
 
       }
 
-      virtual Optional read(
+      virtual bool read(
          char character
       )
       {
-         bitset<8> bits = character;
-         for (int i = 0;
-              i < 8;
+         std::bitset<8> bits = character;
+         for (int i = 7;
+              i >= 0;
               --i)
          {
 
@@ -119,7 +111,16 @@ namespace BeeFishParser {
          return true;
       }
 
-      virtual Optional read(bool bit) {
+      virtual bool read(bool bit) {
+         return true;
+      }
+
+
+      virtual bool read(
+         const UTF8Character& utf8
+      )
+      {
+         throw 1;
          return true;
       }
 
