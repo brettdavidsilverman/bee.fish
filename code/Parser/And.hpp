@@ -2,92 +2,69 @@
 #define BEE_FISH_PARSER__AND_H
 #include <ostream>
 #include <vector>
-#include "../misc/optional.h"
-#include "match.h"
+#include "Parser.hpp"
+#include "UTF8Character.hpp"
 
 using namespace std;
 
 namespace BeeFishParser {
 
-   class And : public Match {
+   class And : public Character {
    protected:
-      vector<Match*> _inputs;
-      size_t _iterator;
+      Parser& _lhs; // Left hand side
+      Parser& _rhs; // Right hand side
+ 
    public:
 
-      template<typename ...T>
-      And(T*... inputs) :
-         _inputs{inputs...}
+      using Parser::read;
+
+      And(
+         Parser& lhs,
+         Parser& rhs
+      ) :
+         _lhs(lhs),
+         _rhs(rhs)
       {
-         _iterator = 0;
       }
       
       virtual ~And()
       {
-         for (auto it : _inputs)
-         {
-            Match* match = it;
-            if (match)
-               delete match;
-         }
       }
 
-      virtual void setup(Parser* parser) {
-         Match::setup(parser);
-         for (auto item : _inputs)
-            item->setup(parser);
-         _iterator = 0;
-      }     
+      virtual bool read(const Character& character) {
 
-      virtual bool matchCharacter(const Char& character) {
-      
          bool matched = false;
             
-         if ( _iterator == size() ) {
-            _result = false;
-            return false;
+         if ( _lhs._result == NullOpt ) {
+            matched = _lhs.read(character);
          }
-            
-         while ( !matched &&
-                 _result == BeeFishMisc::nullopt )
+         else if (
+            _lhs._result == true &&
+            _rhs._result == NullOpt
+         )
          {
-
-            Match* item = _inputs[_iterator];
-
-            matched =
-               item->match(_parser, character);
-         
-            if (item->_result == true) {
-            
-               if ( ++_iterator == 
-                    size() ) {
-                  _result = true;
-               }
-               
-            }
-            else if (item->_result == false) {
-            
-               _result = false;
-               
-            }
-            
+            matched = _rhs.read(character);
          }
+
+         if (matched) {
+            if (_lhs._result == true &&
+                _rhs._result == true )
+            {
+               setResult(true);
+            }
+         }
+         
+         if (_lhs._result == false ||
+             _rhs._result == false )
+         {
+            setResult(false);
+         }
+
 
          return matched;
+
          
-      }
-
-      size_t size() {
-         return _inputs.size();
-      }
-
-      void push_back(Match* match) {
          
-         if (_setup)
-            match->setup(_parser);
-
-         _inputs.push_back(match);
-
       }
 
       

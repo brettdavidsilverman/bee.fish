@@ -2,74 +2,24 @@
 #define BEE_FISH_PARSER__UTF8_CHARACTER_HPP
 #include <string>
 #include <vector>
+#include "Char.hpp"
 #include "Parser.hpp"
 
 namespace BeeFishParser {
 
-   class Bit : public Parser {
-   public:
-      bool _bit;
-
-      virtual bool read(bool bit)
-      override
-      {
-         _bit = bit;
-         setResult(true);
-         return true;
-      }
-   };
-
-
-   class Char : public Parser
-   {
-   public:
-      std::bitset<8> _bits;
-      int _bitCount {0};
-      char _char {-1};
-
-      Char()
-      {
-      }
-
-      virtual bool
-      read(bool bit) override
-      {
-
-         _bits[7 - _bitCount++] = bit;
-         if (_bitCount == 8) {
-            setResult(true);
-         }
-         return true;
-      }
-
-
-      virtual void setResult(
-         Optional result
-      ) override
-      {
-         if (result == true) {
-            _char = _bits.to_ulong();
-         }
-
-         Parser::setResult(result);
-      }
-
-   };
-
    class UTF8Character :
       public Parser
    {
-
-   private:
-      bool _first {true};
-      Char _current;
+   protected:
+      Char _currentChar;
       size_t _expectedCharCount {0};
       std::string _chars;
+      bool _matchAny {false};
    public:
 
       using Parser::read;
 
-      UTF8Character()
+      UTF8Character() : _matchAny(true)
       {
       }
 
@@ -84,26 +34,27 @@ namespace BeeFishParser {
       override
       {
 
-        // std::cerr << (bit ? 1 : 0) << std::flush;
+         //std::cerr << (bit ? 1 : 0) << std::flush;
 
-         Char& c = _current;
+         Char& c = _currentChar;
        
          if (c.read(bit)) {
             if (c._result == true) {
-               if (_first) {
-                  _chars.clear();
-                  _first = false;
-               }
-               _chars.push_back(c._char);
-               if (_chars.size() == 1) {
+
+               if (_currentChars.length() == 0) {
                   _expectedCharCount =
                      getExpectedCharCount();
                }
-               _current = Char();
+
+               _currentChars.push_back(c._char);
+               _currentChar = Char();
+
                if (_expectedCharCount ==
-                      _chars.size())
+                   _currentChars.length())
                {
-                  return read(*this);
+                  UTF8Character character(_currentChars);
+                  _currentChars.clear();
+                  return read(character);
                }
                return true;
             }
@@ -112,24 +63,17 @@ namespace BeeFishParser {
          
          return false;
       }
-
+      
       size_t getExpectedCharCount() {
-         Char& first = _current;
+         Char& first = _currentChar;
          size_t count;
-         for (count = 0;
-              first._bits[7 - count];
+         for (count = 1;
+              first._bits[8 - count];
               ++count)
          {
          }
 
          return count;
-      }
-
-      virtual bool read(
-         const UTF8Character& character
-      ) override
-      {
-         return true;
       }
 
       std::wstring toWString() {
@@ -171,14 +115,26 @@ namespace BeeFishParser {
 
       bool operator == (
          const UTF8Character& rhs
-      ) 
+      ) const
       {
          return _chars == rhs._chars;
       }
 
-   
+      virtual bool read(
+         const UTF8Character& character
+      ) override
+      {
+         if (_matchAny) {
+            _chars = character._chars;
+            setResult(true);
+         }
+         else if (character == *this)
+            setResult(true);
+         return true;
+      }
    };
 
+   typedef UTF8Character Character;
 
 }
 

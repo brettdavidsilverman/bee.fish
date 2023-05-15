@@ -6,7 +6,7 @@
 
 #include "config.hpp"
 #include "Parser.hpp"
-#include "Character.hpp"
+#include "UTF8Character.hpp"
 #include "Test.hpp"
 
 using namespace std;

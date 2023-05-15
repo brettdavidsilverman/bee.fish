@@ -1,10 +1,13 @@
 #include "Parser.hpp"
+#include "UTF8Character.hpp"
+#include "And.hpp"
 
 namespace BeeFishParser {
 
    bool testUnicode();
    bool testCharacter();
    bool testReadCharacter();
+   bool testAnd();
 
    inline bool test() {
       
@@ -21,6 +24,9 @@ namespace BeeFishParser {
          return false;
 
       if (!testReadCharacter())
+         return false;
+
+      if (!testAnd())
          return false;
 
       return true;
@@ -78,16 +84,13 @@ namespace BeeFishParser {
 
       std::cout << "testReadCharacter: " << std::flush;
 
-      Character character("😃");
+      UTF8Character character("a");
 
-      std::string stream("😃");
+      std::string stream("a");
 
       success = success && 
-         (character.read(
-             stream.c_str(),
-             stream.length()
-         ) == true) &&
-         (character._result == true);
+         character.read(stream) &&
+         character._result;
 
       if (success)
          std::cout << "😃" << std::endl;
@@ -96,5 +99,30 @@ namespace BeeFishParser {
 
       return success;
       
+   }
+
+   inline bool testAnd() {
+
+      bool success = true;
+
+      std::cout << "testAnd: " << std::flush;
+
+      Character character1("a");
+      Character character2("b");
+
+      And _and(character1, character2);
+
+      std::string stream("ab");
+
+      success = success &&
+         _and.read(stream) &&
+         _and.result() == true;
+
+      if (success)
+         std::cout << "😃" << std::endl;
+      else
+         std::cout << "Fail" << std::endl;
+
+      return success;
    }
 }

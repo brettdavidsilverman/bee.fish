@@ -1,84 +1,36 @@
-#ifndef BEE_FISH_PARSER__PARSER_H
-#define BEE_FISH_PARSER__PARSER_H
+#ifndef BEE_FISH_PARSER__PARSER_HPP
+#define BEE_FISH_PARSER__PARSER_HPP
 
 #include <iostream>
 #include <string>
 #include <bitset>
 
-#include "../Miscellaneous/Miscellaneous.hpp"
+#include "ParserBase.hpp"
 
 namespace BeeFishParser {
 
    typedef std::string String;
    typedef BeeFishMisc::optional<bool> Optional;
-   #define NullOpt BeeFishMisc::nullopt
 
    class UTF8Character;
 
-   class Parser {
-   public:
-      
-      Optional _result = NullOpt;
-
-   public:
-   
-      Parser()
-      {
-         ++parserInstanceCount();
-      }
-
-      Parser(const Parser& parser)
-      {
-         ++parserInstanceCount();
-      }
-      
-      virtual ~Parser()
-      {
-         --parserInstanceCount();
-      }
-      
+   class Parser : public ParserBase
+   {
+   protected:
+      std::string _currentChars;
    public:
   
-      bool parsed() const
-      {
-         return (result() == true);
-      }
-      
-      virtual Optional result() const
-      {
-         return _result;
-      }
-
-      virtual void setResult(Optional result) {
-
-         _result = result;
-
-         if (result == true)
-            success();
-         else if (result == false)
-            fail();
-
-      }
-
-      virtual String value()
-      {
-         return EmptyString();
-      }
-      
       
       virtual bool read(
-         const char* stream, size_t length
+         const std::string& string
       )
       {
+
          bool parsed = true;
 
-         const char* cend = stream + length;
-
-         for (const char* c = stream;
-              c != cend;
-              ++c)
+         for (char c : string)
          {
-            parsed = read(*c);
+            parsed = read(c);
             if (!parsed)
                break;
          }
@@ -91,6 +43,7 @@ namespace BeeFishParser {
          char character
       )
       {
+
          std::bitset<8> bits = character;
          for (int i = 7;
               i >= 0;
@@ -110,17 +63,15 @@ namespace BeeFishParser {
 
          return true;
       }
-
+      
       virtual bool read(bool bit) {
          return true;
       }
-
-
+      
       virtual bool read(
          const UTF8Character& utf8
       )
       {
-         throw 1;
          return true;
       }
 
@@ -129,32 +80,20 @@ namespace BeeFishParser {
          _result = NullOpt;
 
       }
+      
+      virtual const String& value() const
+      {
+         return EmptyString();
+      }
 
    protected:
-
-      
-      
-      virtual void success()
-      {
-      }
-   
-      virtual void fail()
-      {
-      }
 
       virtual void capture(char character)
       {
       }
+      
 
-      static const String& EmptyString() {
-         static const String _EmptyString = {};
-         return _EmptyString;
-      }
 
-      static unsigned long& parserInstanceCount() {
-         static unsigned long _parserInstanceCount = 0;
-         return _parserInstanceCount;
-      }
    };
 
 
