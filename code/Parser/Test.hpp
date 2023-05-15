@@ -1,6 +1,7 @@
 #include "Parser.hpp"
-#include "UTF8Character.hpp"
+#include "Character.hpp"
 #include "And.hpp"
+#include "Or.hpp"
 
 namespace BeeFishParser {
 
@@ -8,6 +9,7 @@ namespace BeeFishParser {
    bool testCharacter();
    bool testReadCharacter();
    bool testAnd();
+   bool testOr();
 
    inline bool test() {
       
@@ -27,6 +29,9 @@ namespace BeeFishParser {
          return false;
 
       if (!testAnd())
+         return false;
+
+      if (!testOr())
          return false;
 
       return true;
@@ -117,6 +122,31 @@ namespace BeeFishParser {
       success = success &&
          _and.read(stream) &&
          _and.result() == true;
+
+      if (success)
+         std::cout << "😃" << std::endl;
+      else
+         std::cout << "Fail" << std::endl;
+
+      return success;
+   }
+
+   inline bool testOr() {
+
+      bool success = true;
+
+      std::cout << "testOr: " << std::flush;
+
+      Character character1("a");
+      Character character2("b");
+
+      Or _or(character1, character2);
+
+      std::string stream("b");
+
+      success = success &&
+         _or.read(stream) &&
+         _or.result() == true;
 
       if (success)
          std::cout << "😃" << std::endl;
