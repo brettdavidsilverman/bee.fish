@@ -3,6 +3,6 @@
 
 #include "../config.hpp"
 
-#define PARSER "Version 0.0.6 Basic Or"
+#define PARSER "Version 0.0.7 Basic Not"
 
 #endif

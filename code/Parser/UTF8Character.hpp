@@ -130,6 +130,9 @@ namespace BeeFishParser {
          }
          else if (character == *this)
             setResult(true);
+         else {
+            setResult(false);
+         }
          return true;
       }
    };

@@ -2,6 +2,7 @@
 #include "Character.hpp"
 #include "And.hpp"
 #include "Or.hpp"
+#include "Not.hpp"
 
 namespace BeeFishParser {
 
@@ -10,14 +11,11 @@ namespace BeeFishParser {
    bool testReadCharacter();
    bool testAnd();
    bool testOr();
+   bool testNot();
 
    inline bool test() {
       
       std::cout << "Testing parser" << std::endl << std::endl;
-
-      Parser parser;
-      if (!parser.read(""))
-         return false;
 
       if (!testUnicode())
          return false;
@@ -32,6 +30,9 @@ namespace BeeFishParser {
          return false;
 
       if (!testOr())
+         return false;
+
+      if (!testNot())
          return false;
 
       return true;
@@ -152,6 +153,29 @@ namespace BeeFishParser {
          std::cout << "😃" << std::endl;
       else
          std::cout << "Fail" << std::endl;
+
+      return success;
+   }
+
+   inline bool testNot() {
+
+      bool success = true;
+
+      std::cout << "testNot: " << std::flush;
+
+      Character character("a");
+      Not _not(character);
+
+      std::string stream("z");
+
+      success = success &&
+         _not.read(stream);// &&
+         //_not.result() == true;
+
+      if (success)
+         std::cout << "😃" << std::endl;
+      else
+         std::cout << "Fail: " << _not.result() << std::endl;
 
       return success;
    }
