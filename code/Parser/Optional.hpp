@@ -12,7 +12,7 @@ namespace BeeFishParser {
    class Optional : public Character {
    protected:
       std::shared_ptr<Parser> _optional;
-
+      bool _matched = false;
    public:
       using Parser::read;
 
@@ -28,23 +28,29 @@ namespace BeeFishParser {
          const Character& character
       ) override
       {
-
+         
          bool matched =
             _optional->read(character);
-
+         
+         bool succeeded = false;
+         
          if (_optional->_result == true)
          {
-            setResult(true);
-            return true;
+         
+            _matched = true;
+            succeeded = true;
+            
          } 
          else if (_optional->_result == false)
          {
-            return false;
-  
+            _matched = false;
+            succeeded = true;
          }
 
-         return matched;
+         if (succeeded)
+            _result = true;
 
+         return matched;
       }
    
       virtual Parser* copy() const override {

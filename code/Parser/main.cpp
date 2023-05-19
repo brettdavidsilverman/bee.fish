@@ -13,7 +13,7 @@ using namespace std;
 using namespace BeeFishParser;
 
 int main(int argc, const char* argv[]) {
-
+   
    cerr << "bee.fish.parser"
            << endl
         << "C++ run time: "
@@ -29,7 +29,7 @@ int main(int argc, const char* argv[]) {
             
    }
 
-   string line;
+   std::string line;
    while (!cin.eof())
    {
       cout << "Number: ";
@@ -39,14 +39,12 @@ int main(int argc, const char* argv[]) {
       if (!line.length())
          break;
          
-      auto number = Optional(
-         Character("+") or
-            Character("-"),
-         Repeat(
-            Range("0", "9"),
-            1
-         )
-      );
+      auto number = 
+         Optional(
+            Character("+") or
+            Character("-")
+         ) and
+         Repeat(Range("0", "9"));
      
       number.read(line);
    

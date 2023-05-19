@@ -38,7 +38,7 @@ namespace BeeFishParser {
    {
       return Not(a);
    }
-
+/*
    auto Optional (
       const Parser& a,
       const Parser& b
@@ -46,7 +46,7 @@ namespace BeeFishParser {
    {
       return (a and b) or b;
    }
-   
+   */
 
    
 };

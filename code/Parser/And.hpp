@@ -13,7 +13,7 @@ namespace BeeFishParser {
    class And : public Character {
    protected:
       std::vector< std::shared_ptr<Parser> > _inputs;
-      size_t _index {0};
+      size_t _iterator {0};
 
    public:
       using Character::read;
@@ -75,24 +75,26 @@ namespace BeeFishParser {
       ) override
       {
          bool matched = false;
-
-         if ( _index == _inputs.size() ) {
-            _result = false;
+            
+         if ( _iterator == _inputs.size() ) {
+            setResult(false);
             return false;
          }
             
+         while ( !matched &&
+                 _result == std::nullopt )
+         {
 
-            std::shared_ptr<Parser> item =
-               _inputs[_index];
+            std::shared_ptr<Parser> 
+               item = _inputs[_iterator];
 
             matched =
                item->read(character);
          
             if (item->_result == true) {
             
-               if ( ++_index == 
-                    _inputs.size() )
-               {
+               if ( ++_iterator == 
+                    _inputs.size() ) {
                   setResult(true);
                }
                
@@ -100,11 +102,11 @@ namespace BeeFishParser {
             else if (item->_result == false) {
             
                setResult(false);
+               
             }
             
-        
+         }
 
-         
          return matched;
 
       }
