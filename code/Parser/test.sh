@@ -1,1 +1,1 @@
-g++ main.cpp -g -DDEBUG && ./a.out -test
+g++ main.cpp -g -DDEBUG && ./trace.sh 

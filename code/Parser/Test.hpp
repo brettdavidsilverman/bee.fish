@@ -234,9 +234,11 @@ namespace BeeFishParser {
          word._result == true &&
          word == string;
 
+      word = Word(string);
+
       success = success &&
-         word.read("Hello ☀️") == false &&
-         word._result == false;
+         (word.read("Hello ☀️") == false) &&
+         (word._result == false);
 
       if (success)
          std::cout << "😃" << std::endl;

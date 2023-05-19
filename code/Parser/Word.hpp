@@ -18,8 +18,7 @@ namespace BeeFishParser {
       using Character::read;
 
       Word(const Word& source) :
-         std::vector<Character>(source),
-         Character(source)
+         std::vector<Character>(source)
       {
       }
 
@@ -31,7 +30,7 @@ namespace BeeFishParser {
                throw std::runtime_error("Invalid read character");
 
             if (character._result == true) {
-               push_back(character);
+               std::vector<Character>::push_back(character);
                character = Character();
             }
             else if (character._result == false) {
@@ -51,6 +50,9 @@ namespace BeeFishParser {
 
       virtual bool read(const Character& character) {
          
+         if (_index >= size())
+            return false;
+
          bool matched = (character == (*this)[_index]);
          
          if (matched)
