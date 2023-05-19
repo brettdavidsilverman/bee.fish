@@ -3,6 +3,6 @@
 
 #include "../config.hpp"
 
-#define PARSER "Version 0.1.0 Rules"
+#define PARSER "Version 0.1.1 Word"
 
 #endif

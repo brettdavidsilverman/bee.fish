@@ -16,8 +16,6 @@ namespace BeeFishParser {
 
    class Parser : public ParserBase
    {
-   protected:
-      std::string _currentChars;
    public:
   
       
@@ -25,16 +23,14 @@ namespace BeeFishParser {
          const std::string& string
       )
       {
-         bool parsed = true;
 
          for (const char& c : string)
          {
-            parsed = read(c);
-            if (!parsed)
-               break;
+            if (!read(c))
+               return false;
          }
 
-         return parsed;
+         return true;
 
       }
 

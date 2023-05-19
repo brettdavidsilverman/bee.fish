@@ -23,7 +23,7 @@ namespace BeeFishParser {
       virtual bool
       read(bool bit)
       {
-         std::cerr << (bit ? 1 : 0) << std::flush;
+         //std::cerr << (bit ? 1 : 0) << std::flush;
 
          if (_bitCount >= 8)
             return false;

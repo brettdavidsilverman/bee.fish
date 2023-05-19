@@ -12,10 +12,11 @@ namespace BeeFishParser {
    {
    protected:
       Char _currentChar;
+      std::string _currentChars;
       size_t _expectedCharCount {0};
-      std::string _chars;
       bool _matchAny {false};
    public:
+      std::string _chars;
 
       using Parser::read;
 
@@ -46,12 +47,11 @@ namespace BeeFishParser {
                }
 
                _currentChars.push_back(c._char);
-               _currentChar = Char();
-
+               c = Char();
                if (_expectedCharCount ==
                    _currentChars.length())
                {
-                  UTF8Character character(_currentChars);
+                 UTF8Character character(_currentChars);
                   _currentChars.clear();
                   return read(character);
                }
@@ -65,12 +65,15 @@ namespace BeeFishParser {
       
       size_t getExpectedCharCount() {
          Char& first = _currentChar;
-         size_t count;
-         for (count = 1;
-              first._bits[8 - count];
-              ++count)
-         {
-         }
+
+         size_t count {0};
+
+         while (count < 8 &&
+                first._bits[7 - count])
+              ++count;
+
+         if (count == 0)
+            count = 1;
 
          return count;
       }
@@ -117,6 +120,13 @@ namespace BeeFishParser {
       ) const
       {
          return _chars == rhs._chars;
+      }
+
+      bool operator != (
+         const UTF8Character& rhs
+      ) const
+      {
+         return _chars != rhs._chars;
       }
 
       virtual bool read(

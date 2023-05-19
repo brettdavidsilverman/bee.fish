@@ -3,6 +3,7 @@
 #include "And.hpp"
 #include "Or.hpp"
 #include "Not.hpp"
+#include "Word.hpp"
 #include "Rules.hpp"
 
 namespace BeeFishParser {
@@ -13,6 +14,7 @@ namespace BeeFishParser {
    bool testAnd();
    bool testOr();
    bool testNot();
+   bool testWord();
    bool testComplex();
    bool testRules();
 
@@ -36,6 +38,9 @@ namespace BeeFishParser {
          return false;
 
       if (!testNot())
+         return false;
+
+      if (!testWord())
          return false;
 
       if (!testComplex())
@@ -82,6 +87,13 @@ namespace BeeFishParser {
          UTF8Character::fromWString(wstring);
 
       success &= (copy == utf8);
+      
+      Character earth("🌎");
+
+      std::stringstream stream;
+      stream << earth;
+
+      success &= stream.str() == std::string("🌎");
 
       if (success)
          std::cout << "😃" << std::endl;
@@ -99,13 +111,28 @@ namespace BeeFishParser {
 
       std::cout << "testReadCharacter: " << std::flush;
 
-      UTF8Character character("a");
+      UTF8Character character;
 
-      std::string stream("a");
+      std::string string("🌎");
 
       success = success && 
-         character.read(stream) &&
-         character._result;
+         character.read(string) &&
+         character._result == true &&
+         character._chars == string;
+
+      character = UTF8Character("🌎");
+      
+      success = success && 
+         character.read(string) &&
+         character._result == true &&
+         character._chars == string;
+
+      character = UTF8Character("a");
+
+      success = success && 
+         character.read("a") &&
+         character._result == true &&
+         character._chars == "a";
 
       if (success)
          std::cout << "😃" << std::endl;
@@ -187,6 +214,38 @@ namespace BeeFishParser {
       return success;
    }
 
+   inline bool testWord() {
+
+      bool success = true;
+
+      std::cout << "testWord: " << std::flush;
+
+      std::string string("Hello 🌎");
+
+      Word word(string);
+      std::stringstream stream;
+      stream << word;
+
+      success = success &&
+         stream.str() == string;
+
+      success = success &&
+         word.read(string) &&
+         word._result == true &&
+         word == string;
+
+      success = success &&
+         word.read("Hello ☀️") == false &&
+         word._result == false;
+
+      if (success)
+         std::cout << "😃" << std::endl;
+      else
+         std::cout << "Fail" << std::endl;
+
+      return success;
+   }
+
    inline bool testComplex() {
 
       bool success = true;
@@ -230,12 +289,12 @@ namespace BeeFishParser {
       
       Not _notb(b);
 
-      And parser =
-         a and not b;//_notb;// or (c and z);
+      auto parser =
+         a and not b or (c and z);
          //And(a, _notb);
 
       success = success &&
-         parser.read("ab") &&
+         parser.read("cz") &&
          (parser.result() == true);
 
       if (success)
