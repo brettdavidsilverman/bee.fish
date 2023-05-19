@@ -6,7 +6,7 @@
 namespace BeeFishParser {
 
    typedef UTF8Character Character;
-
+   typedef Character C;
 }
 
 #endif

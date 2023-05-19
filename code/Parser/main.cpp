@@ -13,7 +13,8 @@ using namespace std;
 using namespace BeeFishParser;
 
 int main(int argc, const char* argv[]) {
-   
+
+
    cerr << "bee.fish.parser"
            << endl
         << "C++ run time: "
@@ -48,11 +49,15 @@ int main(int argc, const char* argv[]) {
          Repeat(Range("0", "9"));
      
       number.read(line);
-   
+      if (number.result() == std::nullopt)
+         number.read(".");
+
       if (number.result() == false)
          cout << "Invalid number" << endl;
-      else
+      else if (number.result() == true)
          cout << "Valid number" << endl;
+      else
+         cout << "Insufficient data" << endl;
 
       cout << endl;
 
