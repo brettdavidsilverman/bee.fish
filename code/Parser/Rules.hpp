@@ -8,6 +8,13 @@
 
 namespace BeeFishParser {
 
+   And operator and (
+      const And& a,
+      const Parser& b
+   )
+   {
+      return And(a, b);
+   }
 
    And operator and (
       const Parser& a,

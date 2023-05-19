@@ -9,9 +9,6 @@
 
 namespace BeeFishParser {
 
-   typedef std::string String;
-   typedef BeeFishMisc::optional<bool> Optional;
-
    class UTF8Character;
 
    class Parser : public ParserBase
@@ -54,7 +51,7 @@ namespace BeeFishParser {
          {
 
             bool bit = bits[i];
-            Optional result =
+            bool result =
                read(bit);
 
             if (result == false)
@@ -75,14 +72,8 @@ namespace BeeFishParser {
       {
          return true;
       }
-
-      virtual void setup() {
-
-         _result = NullOpt;
-
-      }
       
-      virtual const String& value() const
+      virtual const std::string& value() const
       {
          return EmptyString();
       }

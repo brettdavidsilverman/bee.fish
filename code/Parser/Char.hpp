@@ -37,7 +37,7 @@ namespace BeeFishParser {
 
 
       virtual void setResult(
-         Optional result
+         std::optional<bool> result
       ) override
       {
          if (result == true) {

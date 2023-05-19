@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include "Parser.hpp"
-#include "UTF8Character.hpp"
+#include "Character.hpp"
 
 using namespace std;
 
@@ -12,21 +12,59 @@ namespace BeeFishParser {
 
    class And : public Character {
    protected:
-      std::shared_ptr<Parser> _lhs; // Left hand side
-      std::shared_ptr<Parser> _rhs; // Right hand side
- 
-   public:
+      std::vector< std::shared_ptr<Parser> > _inputs;
+      size_t _index {0};
 
+   public:
       using Character::read;
 
-      And(
-         const Parser& lhs,
-         const Parser& rhs
-      ) :
-         _lhs(lhs.copy()),
-         _rhs(rhs.copy())
-      {
+      And(const And& source) {
+         for (const std::shared_ptr<Parser> parser : source._inputs) {
+            _inputs.push_back(
+               std::shared_ptr<Parser>(
+                  parser->copy()
+               )
+            );
+         }
       }
+
+      And(const And& lhs, const Parser& rhs)
+      {
+
+         for ( std::shared_ptr<Parser> parser :
+               lhs._inputs )
+         {
+            _inputs.push_back(
+               std::shared_ptr<Parser>(
+                  parser->copy()
+               )
+            );
+         }
+
+         _inputs.push_back(
+            std::shared_ptr<Parser>(
+               rhs.copy()
+            )
+         );
+
+      }
+
+      And(const Parser& lhs, const Parser& rhs)
+      {
+         _inputs.push_back(
+            std::shared_ptr<Parser>(
+               lhs.copy()
+            )
+         );
+
+         _inputs.push_back(
+            std::shared_ptr<Parser>(
+               rhs.copy()
+            )
+         );
+
+      }
+
       
       virtual ~And()
       {
@@ -36,16 +74,59 @@ namespace BeeFishParser {
          const Character& character
       ) override
       {
+         bool matched = false;
+
+         if ( _index == _inputs.size() ) {
+            _result = false;
+            return false;
+         }
+            
+         while ( !matched &&
+                 _result == std::nullopt )
+         {
+
+            std::shared_ptr<Parser> item =
+               _inputs[_index];
+
+            matched =
+               item->read(character);
+         
+            if (item->_result == true) {
+            
+               if ( ++_index == 
+                    _inputs.size() )
+               {
+                  setResult(true);
+               }
+               
+            }
+            else if (item->_result == false) {
+            
+               setResult(false);
+               
+            }
+            
+         }
+
+         
+         return matched;
+
+      }
+/*
+      virtual bool read(
+         const Character& character
+      ) override
+      {
 
          bool matched = false;
 
-         if ( _lhs->_result == NullOpt ) {
+         if ( _lhs->_result == std::nullopt ) {
             matched = _lhs->read(character);
          }
          
          if (!matched &&
             _lhs->_result == true &&
-            _rhs->_result == NullOpt)
+            _rhs->_result == std::nullopt)
          {
             matched = _rhs->read(character);
          }
@@ -64,15 +145,14 @@ namespace BeeFishParser {
             setResult(false);
          }
 
-
          return matched;
 
          
          
       }
-
+*/
       virtual Parser* copy() const {
-         return new And(*_lhs, *_rhs);
+         return new And(*this);
       }
       
    };

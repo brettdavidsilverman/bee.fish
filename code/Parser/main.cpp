@@ -4,6 +4,8 @@
 #include <codecvt>
 #include <locale>
 
+#include "../Miscellaneous/Miscellaneous.hpp"
+
 #include "config.hpp"
 #include "Parser.hpp"
 #include "UTF8Character.hpp"
@@ -14,7 +16,6 @@ using namespace BeeFishParser;
 
 int main(int argc, const char* argv[]) {
 
-   using namespace BeeFish;
 
    cerr << "bee.fish.parser"
            << endl
@@ -24,7 +25,7 @@ int main(int argc, const char* argv[]) {
         << PARSER
            << endl;
 
-   if (hasArg(argc, argv, "-test") >= 0)
+   if (BeeFish::hasArg(argc, argv, "-test") >= 0)
    {
       if (!BeeFishParser::test())
          return 1;

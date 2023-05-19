@@ -33,12 +33,12 @@ namespace BeeFishParser {
 
          bool matched = false;
             
-         if ( _lhs->_result == NullOpt )
+         if ( _lhs->_result == std::nullopt )
          {
             matched = _lhs->read(character);
          }
          
-         if ( _rhs->_result == NullOpt )
+         if ( _rhs->_result == std::nullopt )
          {
             matched = _rhs->read(character);
          }

@@ -4,6 +4,7 @@
 #include "Or.hpp"
 #include "Not.hpp"
 #include "Word.hpp"
+#include "Optional.hpp"
 #include "Rules.hpp"
 
 namespace BeeFishParser {
@@ -15,6 +16,7 @@ namespace BeeFishParser {
    bool testOr();
    bool testNot();
    bool testWord();
+   bool testOptional();
    bool testComplex();
    bool testRules();
 
@@ -41,6 +43,9 @@ namespace BeeFishParser {
          return false;
 
       if (!testWord())
+         return false;
+
+      if (!testOptional())
          return false;
 
       if (!testComplex())
@@ -248,6 +253,42 @@ namespace BeeFishParser {
       return success;
    }
 
+   inline bool testOptional() {
+
+      bool success = true;
+
+      std::cout << "testOptional: " << std::flush;
+
+      Character a("a");
+      Character b("b");
+      Optional optb(b);
+      Character c("c");
+
+    
+      And parser = And(Optional(Character("b")), c);
+      success = success &&
+         parser.read("bc") &&
+         parser.result() == true;
+
+      parser = And(Optional(Character("b")), c);
+      success = success &&
+         parser.read("c") == true &&
+         parser.result() == true;
+
+
+      parser = And(Optional(Character("b")), c);
+      success = success &&
+         parser.read("ac") == false &&
+         parser.result() == false;
+
+      if (success)
+         std::cout << "😃" << std::endl;
+      else
+         std::cout << "Fail: " << parser.result() << std::endl;
+
+      return success;
+   }
+
    inline bool testComplex() {
 
       bool success = true;
@@ -298,6 +339,14 @@ namespace BeeFishParser {
       success = success &&
          parser.read("cz") &&
          (parser.result() == true);
+
+      auto parser2 =
+         a and b and c and z;
+         //And(a, _notb);
+
+      success = success &&
+         parser2.read("abcz") &&
+         (parser2.result() == true);
 
       if (success)
          std::cout << "😃" << std::endl;

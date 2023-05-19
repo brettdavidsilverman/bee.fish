@@ -32,8 +32,11 @@ namespace BeeFishParser {
          if (matched) {
             if (_not->_result == true)
                setResult(false);
-            else if (_not->_result == false)
-               setResult(true);
+         }
+         
+         if (_not->_result == false) {
+            setResult(true);
+            return true;
          }
 
          return matched;

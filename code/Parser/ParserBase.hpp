@@ -4,19 +4,15 @@
 #include <iostream>
 #include <string>
 #include <bitset>
-
-#include "../Miscellaneous/Miscellaneous.hpp"
+#include "../Miscellaneous/optional.h"
 
 namespace BeeFishParser {
-
-   typedef std::string String;
-   typedef BeeFishMisc::optional<bool> Optional;
 
    class UTF8Character;
 
    class ParserBase {
    public:
-      Optional _result = NullOpt;
+      std::optional<bool> _result = std::nullopt;
 
    public:
    
@@ -40,12 +36,12 @@ namespace BeeFishParser {
          return (result() == true);
       }
       
-      virtual Optional result() const
+      virtual std::optional<bool> result() const
       {
          return _result;
       }
 
-      virtual void setResult(Optional result) {
+      virtual void setResult(std::optional<bool> result) {
 
          if (_result == result) 
             return;
@@ -66,8 +62,9 @@ namespace BeeFishParser {
       virtual void fail()
       {
       }
-      static const String& EmptyString() {
-         static const String _EmptyString = {};
+
+      static const std::string& EmptyString() {
+         static const std::string _EmptyString = {};
          return _EmptyString;
       }
 

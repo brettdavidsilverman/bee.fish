@@ -25,6 +25,15 @@ namespace BeeFishParser {
       }
 
       UTF8Character(
+         const UTF8Character& source
+      ) :
+         Parser(source),
+         _matchAny(source._matchAny),
+         _chars(source._chars)
+      {
+      }
+
+      UTF8Character(
          const std::string& bytes
       ) :
          _chars(bytes)
@@ -141,6 +150,7 @@ namespace BeeFishParser {
             setResult(true);
          else {
             setResult(false);
+            return false;
          }
          return true;
       }
