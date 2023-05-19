@@ -1,34 +1,48 @@
 #ifndef BEE_FISH_PARSER__NOT_HPP
 #define BEE_FISH_PARSER__NOT_HPP
 
+#include <memory>
 #include "Character.hpp"
 
 namespace BeeFishParser {
 
    class Not : public Character {
+   protected:
+      std::shared_ptr<Parser> _not;
 
    public:
+      using Character::read;
 
-      Not(const Character& value)
-         : Character(value)
+      Not(const Parser& value) :
+         _not(value.copy())
       {
       }
-      
+
       virtual ~Not() {
       }
 
-      virtual void setResult(
-         Optional result
-      ) override
+      virtual bool read(
+         const UTF8Character& character
+      ) 
+      override
       {
-         if (result == true)
-            result = false;
-         else if (result == false)
-            result = true;
+         bool matched =
+            _not->read(character);
 
-         Parser::setResult(result);
+         if (matched) {
+            if (_not->_result == true)
+               setResult(false);
+            else if (_not->_result == false)
+               setResult(true);
+         }
+
+         return matched;
       }
-   
+
+     virtual Parser* copy() const {
+        return new Not(*_not);
+     }
+
    };
    
 };

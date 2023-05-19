@@ -1,25 +1,27 @@
 #ifndef BEE_FISH_PARSER__OR_HPP
 #define BEE_FISH_PARSER__OR_HPP
 #include <vector>
+#include <memory>
 #include "Character.hpp"
+
 
 namespace BeeFishParser {
 
    class Or : public Character {
    protected:
-      Parser& _lhs; // Left hand side
-      Parser& _rhs; // Right hand side
+      std::shared_ptr<Parser> _lhs; // Left hand side
+      std::shared_ptr<Parser> _rhs; // Right hand side
  
    public:
 
       using Parser::read;
 
       Or(
-         Parser& lhs,
-         Parser& rhs
+         const Parser& lhs,
+         const Parser& rhs
       ) :
-         _lhs(lhs),
-         _rhs(rhs)
+         _lhs(lhs.copy()),
+         _rhs(rhs.copy())
       {
       }
       
@@ -31,26 +33,26 @@ namespace BeeFishParser {
 
          bool matched = false;
             
-         if ( _lhs._result == NullOpt )
+         if ( _lhs->_result == NullOpt )
          {
-            matched = _lhs.read(character);
+            matched = _lhs->read(character);
          }
          
-         if ( _rhs._result == NullOpt )
+         if ( _rhs->_result == NullOpt )
          {
-            matched = _rhs.read(character);
+            matched = _rhs->read(character);
          }
 
          if (matched) {
-            if (_lhs._result == true ||
-                _rhs._result == true )
+            if (_lhs->_result == true ||
+                _rhs->_result == true )
             {
                setResult(true);
             }
          }
          
-         if (_lhs._result == false &&
-             _rhs._result == false )
+         if (_lhs->_result == false &&
+             _rhs->_result == false )
          {
             setResult(false);
          }
@@ -60,6 +62,10 @@ namespace BeeFishParser {
 
          
          
+      }
+
+      virtual Parser* copy() const {
+         return new Or(*_lhs, *_rhs);
       }
 
       

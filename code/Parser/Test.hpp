@@ -3,6 +3,7 @@
 #include "And.hpp"
 #include "Or.hpp"
 #include "Not.hpp"
+#include "Rules.hpp"
 
 namespace BeeFishParser {
 
@@ -12,6 +13,8 @@ namespace BeeFishParser {
    bool testAnd();
    bool testOr();
    bool testNot();
+   bool testComplex();
+   bool testRules();
 
    inline bool test() {
       
@@ -33,6 +36,12 @@ namespace BeeFishParser {
          return false;
 
       if (!testNot())
+         return false;
+
+      if (!testComplex())
+         return false;
+
+      if (!testRules())
          return false;
 
       return true;
@@ -113,15 +122,13 @@ namespace BeeFishParser {
 
       std::cout << "testAnd: " << std::flush;
 
-      Character character1("a");
-      Character character2("b");
+      Character a("a");
+      Character b("b");
 
-      And _and(character1, character2);
-
-      std::string stream("ab");
+      And _and(a, b);
 
       success = success &&
-         _and.read(stream) &&
+         _and.read("ab") &&
          _and.result() == true;
 
       if (success)
@@ -163,19 +170,78 @@ namespace BeeFishParser {
 
       std::cout << "testNot: " << std::flush;
 
-      Character character("a");
-      Not _not(character);
-
-      std::string stream("z");
+      Character a("a");
+      Not _nota(a);
+    
+      Parser& parser = _nota;
 
       success = success &&
-         _not.read(stream);// &&
-         //_not.result() == true;
+         parser.read("z") &&
+         parser.result() == true;
 
       if (success)
          std::cout << "😃" << std::endl;
       else
-         std::cout << "Fail: " << _not.result() << std::endl;
+         std::cout << "Fail: " << parser.result() << std::endl;
+
+      return success;
+   }
+
+   inline bool testComplex() {
+
+      bool success = true;
+
+      std::cout << "testComplex: " << std::flush;
+      
+      Character a("a");
+      Character b("b");
+      Not _notb(b);
+
+      And _and(
+         a,
+         _notb
+      );
+
+      Parser& parser = _and;
+
+      success = success &&
+         parser.read("ac") &&
+         (parser.result() == true);
+
+      if (success)
+         std::cout << "😃" << std::endl;
+      else
+         std::cout << "Fail: " << parser.result() << std::endl;
+
+      return success;
+   }
+
+   inline bool testRules() {
+
+      bool success = true;
+
+      std::cout << "testRules: " << std::flush;
+
+      Character a("a");
+      Character b("b");
+      Character c("c");
+      Character z("z");
+
+      
+      Not _notb(b);
+
+      And parser =
+         a and not b;//_notb;// or (c and z);
+         //And(a, _notb);
+
+      success = success &&
+         parser.read("ab") &&
+         (parser.result() == true);
+
+      if (success)
+         std::cout << "😃" << std::endl;
+      else
+         std::cout << "Fail: " << parser.result() << std::endl;
 
       return success;
    }

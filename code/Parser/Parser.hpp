@@ -25,10 +25,9 @@ namespace BeeFishParser {
          const std::string& string
       )
       {
-
          bool parsed = true;
 
-         for (char c : string)
+         for (const char& c : string)
          {
             parsed = read(c);
             if (!parsed)
@@ -37,6 +36,14 @@ namespace BeeFishParser {
 
          return parsed;
 
+      }
+
+      virtual bool read(
+         const char* stream
+      )
+      {
+         const std::string string(stream);
+         return read(string);
       }
 
       virtual bool read(
@@ -84,11 +91,11 @@ namespace BeeFishParser {
          return EmptyString();
       }
 
-   protected:
-
       virtual void capture(char character)
       {
       }
+
+      virtual Parser* copy() const = 0;
       
 
 

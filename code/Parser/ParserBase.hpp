@@ -52,9 +52,9 @@ namespace BeeFishParser {
 
          _result = result;
 
-         if (result == true)
+         if (_result == true)
             success();
-         else if (result == false)
+         else if (_result == false)
             fail();
 
       }

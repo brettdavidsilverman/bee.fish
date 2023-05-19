@@ -34,11 +34,10 @@ namespace BeeFishParser {
       override
       {
 
-         //std::cerr << (bit ? 1 : 0) << std::flush;
-
          Char& c = _currentChar;
        
          if (c.read(bit)) {
+
             if (c._result == true) {
 
                if (_currentChars.length() == 0) {
@@ -134,6 +133,10 @@ namespace BeeFishParser {
             setResult(false);
          }
          return true;
+      }
+
+      virtual Parser* copy() const {
+         return new UTF8Character(*this);
       }
    };
 
