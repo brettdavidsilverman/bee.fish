@@ -40,7 +40,7 @@ namespace BeeFishParser {
          
          if ( _rhs->_result == std::nullopt )
          {
-            matched = _rhs->read(character);
+            matched |= _rhs->read(character);
          }
 
          if (matched) {

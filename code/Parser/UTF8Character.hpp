@@ -156,7 +156,7 @@ namespace BeeFishParser {
       }
 
       virtual Parser* copy() const {
-         return new UTF8Character(*this);
+         return new UTF8Character(_chars);
       }
 
       virtual bool operator <= (

@@ -53,7 +53,9 @@ namespace BeeFishParser {
 			return matched;
 		}
 
-        virtual Parser* copy() {
+        virtual Parser* copy() const 
+        override 
+        {
            return new Range(
               *_minimum,
               *_maximum

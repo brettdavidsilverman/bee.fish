@@ -2,15 +2,18 @@
 #define BEE_FISH_PARSER__REPEAT_HPP
 
 #include <vector>
-#include "match.h"
+#include <memory>
+
+#include "Parser.hpp"
+
 namespace BeeFishParser
 {
 
-	template<class T>
-	class Repeat : public Match
+	class Repeat : public Character
 	{
-	private:
-		T *_item;
+	protected:
+		std::shared_ptr<Parser> _template;
+        Parser* _item {nullptr};
 
 	public:
 		size_t _minimum = 1;
@@ -18,13 +21,16 @@ namespace BeeFishParser
 		size_t _matchedCount = 0;
 
 	public:
+        using Parser::read;
+
 		Repeat(
+            const Parser& templ,
 			size_t minimum = 1,
 			size_t maximum = 0) :
+                _template(templ.copy()),
 				_minimum(minimum),
 				_maximum(maximum)
 		{
-			_item = nullptr;
 		}
 
 		virtual ~Repeat()
@@ -32,19 +38,27 @@ namespace BeeFishParser
 			if (_item)
 				delete _item;
 		}
-
-		virtual bool matchCharacter(const Char &character)
+/*
+        virtual bool read(
+           bool bit
+        )
+        {
+           throw std::logic_error("Should not reach here");
+        }
+*/
+		virtual bool read(
+           const Character& character
+        ) override
 		{
 
 			if (_item == nullptr)
 				_item = createItem();
 
 			bool matched =
-				_item->match(_parser, character);
+				_item->read(character);
 
 			if (_item->_result == true)
 			{
-
 				matchedItem(_item);
 
 				_item = createItem();
@@ -55,11 +69,11 @@ namespace BeeFishParser
 					_matchedCount > _maximum)
 				{
 					matched = false;
-					_result = false;
+					setResult(false);
 				}
 
 				if (_matchedCount == _maximum)
-					_result = true;
+					setResult(true);
 
 			}
 			else if (
@@ -68,26 +82,30 @@ namespace BeeFishParser
 			{
 				if (_matchedCount >= _minimum)
 				{
-					_result = true;
+					setResult(true);
 				}
 				else
 				{
 					matched = false;
-					_result = false;
+					setResult(false);
 				}
 			}
 				
 			return matched;
 		}
 
-		virtual void matchedItem(T *match)
+		virtual void matchedItem(Parser *match)
 		{
 			delete match;
 		}
 
-		virtual T* createItem() {
-			return new T();
+		virtual Parser* createItem() {
+			return _template->copy();
 		}
+
+        virtual Parser* copy() const {
+           return new Repeat(*_template, _minimum, _maximum);
+        }
 
 	};
 

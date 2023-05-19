@@ -1,22 +1,40 @@
-==312638== Memcheck, a memory error detector
-==312638== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==312638== Using Valgrind-3.16.1 and LibVEX; rerun with -h for copyright info
-==312638== Command: ./a.out -test
-==312638== Parent PID: 312636
-==312638== 
-==312638== 
-==312638== Process terminating with default action of signal 2 (SIGINT)
-==312638==    at 0x4B223CE: read (read.c:26)
-==312638==    by 0x4AB44D9: _IO_file_underflow@@GLIBC_2.2.5 (fileops.c:517)
-==312638==    by 0x4AB5741: _IO_default_uflow (genops.c:362)
-==312638==    by 0x494D96C: __gnu_cxx::stdio_sync_filebuf<char, std::char_traits<char> >::underflow() (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28)
-==312638==    by 0x490DEF9: std::basic_istream<char, std::char_traits<char> >& std::getline<char, std::char_traits<char>, std::allocator<char> >(std::basic_istream<char, std::char_traits<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, char) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28)
-==312638==    by 0x10D912: main (main.cpp:108)
-==312638== 
-==312638== HEAP SUMMARY:
-==312638==     in use at exit: 0 bytes in 0 blocks
-==312638==   total heap usage: 127 allocs, 127 frees, 82,988 bytes allocated
-==312638== 
-==312638== All heap blocks were freed -- no leaks are possible
-==312638== 
-==312638== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==315680== Memcheck, a memory error detector
+==315680== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==315680== Using Valgrind-3.16.1 and LibVEX; rerun with -h for copyright info
+==315680== Command: ./a.out -test
+==315680== Parent PID: 315678
+==315680== 
+==315680== 
+==315680== Process terminating with default action of signal 2 (SIGINT)
+==315680==    at 0x4B223CE: read (read.c:26)
+==315680==    by 0x4AB44D9: _IO_file_underflow@@GLIBC_2.2.5 (fileops.c:517)
+==315680==    by 0x4AB5741: _IO_default_uflow (genops.c:362)
+==315680==    by 0x494D96C: __gnu_cxx::stdio_sync_filebuf<char, std::char_traits<char> >::underflow() (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28)
+==315680==    by 0x490DEF9: std::basic_istream<char, std::char_traits<char> >& std::getline<char, std::char_traits<char>, std::allocator<char> >(std::basic_istream<char, std::char_traits<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, char) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28)
+==315680==    by 0x10D9DA: main (main.cpp:37)
+==315680== 
+==315680== HEAP SUMMARY:
+==315680==     in use at exit: 464 bytes in 5 blocks
+==315680==   total heap usage: 656 allocs, 651 frees, 125,852 bytes allocated
+==315680== 
+==315680== 464 (160 direct, 304 indirect) bytes in 1 blocks are definitely lost in loss record 5 of 5
+==315680==    at 0x4838DEF: operator new(unsigned long) (vg_replace_malloc.c:342)
+==315680==    by 0x11062A: BeeFishParser::Range::copy() const (Range.hpp:62)
+==315680==    by 0x110AAE: BeeFishParser::Repeat::createItem() (Repeat.hpp:103)
+==315680==    by 0x110897: BeeFishParser::Repeat::read(BeeFishParser::UTF8Character const&) (Repeat.hpp:64)
+==315680==    by 0x10EB2A: BeeFishParser::UTF8Character::read(bool) (UTF8Character.hpp:65)
+==315680==    by 0x10E4A8: BeeFishParser::Parser::read(char) (Parser.hpp:55)
+==315680==    by 0x10E321: BeeFishParser::Parser::read(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (Parser.hpp:26)
+==315680==    by 0x10E3A3: BeeFishParser::Parser::read(char const*) (Parser.hpp:39)
+==315680==    by 0x113002: BeeFishParser::testRepeat() (Test.hpp:368)
+==315680==    by 0x110C43: BeeFishParser::test() (Test.hpp:61)
+==315680==    by 0x10D97A: main (main.cpp:27)
+==315680== 
+==315680== LEAK SUMMARY:
+==315680==    definitely lost: 160 bytes in 1 blocks
+==315680==    indirectly lost: 304 bytes in 4 blocks
+==315680==      possibly lost: 0 bytes in 0 blocks
+==315680==    still reachable: 0 bytes in 0 blocks
+==315680==         suppressed: 0 bytes in 0 blocks
+==315680== 
+==315680== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)

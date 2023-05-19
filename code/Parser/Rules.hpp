@@ -38,6 +38,14 @@ namespace BeeFishParser {
    {
       return Not(a);
    }
+
+   auto Optional (
+      const Parser& a,
+      const Parser& b
+   )
+   {
+      return (a and b) or b;
+   }
    
 
    

@@ -5,6 +5,7 @@
 #include "Not.hpp"
 #include "Word.hpp"
 #include "Range.hpp"
+#include "Repeat.hpp"
 #include "Optional.hpp"
 #include "Rules.hpp"
 
@@ -18,6 +19,7 @@ namespace BeeFishParser {
    bool testNot();
    bool testWord();
    bool testRange();
+   bool testRepeat();
    bool testOptional();
    bool testComplex();
    bool testRules();
@@ -54,6 +56,9 @@ namespace BeeFishParser {
          return false;
 
       if (!testComplex())
+         return false;
+
+      if (!testRepeat())
          return false;
 
       if (!testRules())
@@ -293,22 +298,21 @@ namespace BeeFishParser {
 
       Character a("a");
       Character b("b");
-      Optional optb(b);
       Character c("c");
 
     
-      And parser = And(Optional(Character("b")), c);
+      Or parser = Optional(b, c);
       success = success &&
          parser.read("bc") &&
          parser.result() == true;
 
-      parser = And(Optional(Character("b")), c);
+      parser = Optional(b, c);
       success = success &&
          parser.read("c") == true &&
          parser.result() == true;
 
 
-      parser = And(Optional(Character("b")), c);
+      parser = Optional(b, c);
       success = success &&
          parser.read("ac") == false &&
          parser.result() == false;
@@ -346,6 +350,33 @@ namespace BeeFishParser {
          std::cout << "😃" << std::endl;
       else
          std::cout << "Fail: " << parser.result() << std::endl;
+
+      return success;
+   }
+
+   inline bool testRepeat() {
+
+      bool success = true;
+
+      std::cout << "testRepeat: " << std::flush;
+
+      Range aToZ("a", "z");
+
+      Repeat name = Repeat(aToZ, 1);
+
+      success = success &&
+         name.read("brett") &&
+         name._result == std::nullopt;
+
+      name = Repeat(aToZ, 1);
+      success = success &&
+         name.read("1") == false &&
+         name._result == false;
+
+      if (success)
+         std::cout << "😃" << std::endl;
+      else
+         std::cout << "Fail" << std::endl;
 
       return success;
    }

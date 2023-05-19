@@ -12,7 +12,6 @@ namespace BeeFishParser {
    class Optional : public Character {
    protected:
       std::shared_ptr<Parser> _optional;
-      bool _matched = false;
 
    public:
       using Parser::read;
@@ -24,14 +23,7 @@ namespace BeeFishParser {
 
       virtual ~Optional() {
       }
-      /*
-      virtual bool read(
-         bool bit
-      ) override
-      {
-         throw std::logic_error("Should not reach here");
-      }
-*/
+
       virtual bool read(
          const Character& character
       ) override
@@ -40,27 +32,18 @@ namespace BeeFishParser {
          bool matched =
             _optional->read(character);
 
-         bool succeeded = false;
-         
          if (_optional->_result == true)
          {
-            _matched = true;
-            succeeded = true;
-            
-         } 
-         else if (!matched)
-         {
-
-            _matched = false;
-            succeeded = true;
-         }
-
-         if (succeeded) {
             setResult(true);
+            return true;
+         } 
+         else if (_optional->_result == false)
+         {
+            return false;
+  
          }
 
          return matched;
-         
 
       }
    

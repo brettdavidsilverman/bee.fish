@@ -81,9 +81,6 @@ namespace BeeFishParser {
             return false;
          }
             
-         while ( !matched &&
-                 _result == std::nullopt )
-         {
 
             std::shared_ptr<Parser> item =
                _inputs[_index];
@@ -103,10 +100,9 @@ namespace BeeFishParser {
             else if (item->_result == false) {
             
                setResult(false);
-               
             }
             
-         }
+        
 
          
          return matched;
