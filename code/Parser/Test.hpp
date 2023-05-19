@@ -4,6 +4,7 @@
 #include "Or.hpp"
 #include "Not.hpp"
 #include "Word.hpp"
+#include "Range.hpp"
 #include "Optional.hpp"
 #include "Rules.hpp"
 
@@ -16,6 +17,7 @@ namespace BeeFishParser {
    bool testOr();
    bool testNot();
    bool testWord();
+   bool testRange();
    bool testOptional();
    bool testComplex();
    bool testRules();
@@ -40,6 +42,9 @@ namespace BeeFishParser {
          return false;
 
       if (!testNot())
+         return false;
+
+      if (!testRange())
          return false;
 
       if (!testWord())
@@ -244,6 +249,33 @@ namespace BeeFishParser {
       success = success &&
          (word.read("Hello ☀️") == false) &&
          (word._result == false);
+
+      if (success)
+         std::cout << "😃" << std::endl;
+      else
+         std::cout << "Fail" << std::endl;
+
+      return success;
+   }
+
+   inline bool testRange() {
+
+      bool success = true;
+
+      std::cout << "testRange: " << std::flush;
+
+      Range aToZ("a", "z");
+
+      Range parser = aToZ;
+
+      success = success &&
+         parser.read("a") &&
+         parser._result == true;
+
+      parser = aToZ;
+      success = success &&
+         parser.read("1") == false &&
+         parser._result == false;
 
       if (success)
          std::cout << "😃" << std::endl;

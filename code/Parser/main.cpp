@@ -30,18 +30,14 @@ int main(int argc, const char* argv[]) {
       if (!BeeFishParser::test())
          return 1;
             
-      return 0;
    }
 
    
-   /*
-   class Number : public Match
+   class Number : public Character
    {
    
    public:
-      Number() : Match()
-      {
-         _match = _number;
+      Number() {
       }
       
       virtual ~Number()
@@ -50,16 +46,13 @@ int main(int argc, const char* argv[]) {
       
    public:
      
-      BeeFishParser::Character* _plus =
-         new BeeFishParser::Character('+');
-         
-      BeeFishParser::Character* _minus = 
-         new BeeFishParser::Character('-');
-         
-      Or* _sign = new Or(
-         _plus,
-         _minus
-      );
+      Character _plus("+");
+      Character _minus("-");
+      auto _sign = _plus or _minus;
+      auto _integerChar = 
+         Range("0", "9");
+      auto _integer = Repeat(_integerChar);
+/*
       
       class IntegerChar : public Range {
       public:
@@ -101,9 +94,9 @@ int main(int argc, const char* argv[]) {
          out << _integer->value();
          
      }
-
+*/
    };
-   */
+   
    string line;
    while (!cin.eof())
    {

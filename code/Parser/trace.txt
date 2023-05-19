@@ -1,14 +1,22 @@
-==311970== Memcheck, a memory error detector
-==311970== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==311970== Using Valgrind-3.16.1 and LibVEX; rerun with -h for copyright info
-==311970== Command: ./a.out -test
-==311970== Parent PID: 311968
-==311970== 
-==311970== 
-==311970== HEAP SUMMARY:
-==311970==     in use at exit: 0 bytes in 0 blocks
-==311970==   total heap usage: 122 allocs, 122 frees, 81,660 bytes allocated
-==311970== 
-==311970== All heap blocks were freed -- no leaks are possible
-==311970== 
-==311970== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==312638== Memcheck, a memory error detector
+==312638== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==312638== Using Valgrind-3.16.1 and LibVEX; rerun with -h for copyright info
+==312638== Command: ./a.out -test
+==312638== Parent PID: 312636
+==312638== 
+==312638== 
+==312638== Process terminating with default action of signal 2 (SIGINT)
+==312638==    at 0x4B223CE: read (read.c:26)
+==312638==    by 0x4AB44D9: _IO_file_underflow@@GLIBC_2.2.5 (fileops.c:517)
+==312638==    by 0x4AB5741: _IO_default_uflow (genops.c:362)
+==312638==    by 0x494D96C: __gnu_cxx::stdio_sync_filebuf<char, std::char_traits<char> >::underflow() (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28)
+==312638==    by 0x490DEF9: std::basic_istream<char, std::char_traits<char> >& std::getline<char, std::char_traits<char>, std::allocator<char> >(std::basic_istream<char, std::char_traits<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, char) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28)
+==312638==    by 0x10D912: main (main.cpp:108)
+==312638== 
+==312638== HEAP SUMMARY:
+==312638==     in use at exit: 0 bytes in 0 blocks
+==312638==   total heap usage: 127 allocs, 127 frees, 82,988 bytes allocated
+==312638== 
+==312638== All heap blocks were freed -- no leaks are possible
+==312638== 
+==312638== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

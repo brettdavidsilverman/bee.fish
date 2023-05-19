@@ -1,7 +1,7 @@
 #ifndef BEE_FISH_PARSER__WORD_HPP
 #define BEE_FISH_PARSER__WORD_HPP
 #include <sstream>
-#include "Parser.hpp"
+
 #include "Character.hpp"
 
 namespace BeeFishParser {

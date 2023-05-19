@@ -158,6 +158,51 @@ namespace BeeFishParser {
       virtual Parser* copy() const {
          return new UTF8Character(*this);
       }
+
+      virtual bool operator <= (
+         const UTF8Character& right
+      )
+      {
+         if (_chars.length() < right._chars.length())
+            return true;
+
+         if (_chars.length() > right._chars.length())
+            return false;
+
+         for (size_t i = 0;
+              i < _chars.length();
+              ++i)
+         {
+            if (_chars[i] < right._chars[i])
+               return true;
+            else if (_chars[i] > right._chars[i])
+               return false;
+         }
+         return true;
+      }
+
+      virtual bool operator >= (
+         const UTF8Character& right
+      )
+      {
+         if (_chars.length() > right._chars.length())
+            return true;
+
+         if (_chars.length() < right._chars.length())
+            return false;
+
+         for (size_t i = 0;
+              i < _chars.length();
+              ++i)
+         {
+            if (_chars[i] > right._chars[i])
+               return true;
+            else if (_chars[i] < right._chars[i])
+               return false;
+         }
+         return true;
+      }
+
    };
 
    typedef UTF8Character Character;
