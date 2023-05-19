@@ -4,8 +4,6 @@
 #include <string>
 #include "optional.h"
 
-#define NullOpt BeeFishMisc::nullopt
-
 namespace BeeFish {
 
    inline int hasArg(

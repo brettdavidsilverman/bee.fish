@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace BeeFishMisc {
+namespace std {
 /*
     template<class T>
     using optional = std::optional<T>;
