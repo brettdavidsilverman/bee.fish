@@ -26,7 +26,9 @@ namespace BeeFishParser {
       {
       }
 
-      virtual bool read(char c) override {
+      virtual bool read(char c)
+      override
+      {
 
          if (_index >= size())
             return false;

@@ -41,7 +41,7 @@ namespace BeeFishParser
 /*
         virtual bool read(
            bool bit
-        )
+        ) override
         {
            throw std::logic_error("Should not reach here");
         }

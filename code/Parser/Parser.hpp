@@ -51,10 +51,8 @@ namespace BeeFishParser {
          {
 
             bool bit = bits[i];
-            bool result =
-               read(bit);
 
-            if (result == false)
+            if (!read(bit))
                return false;
          
          }

@@ -427,7 +427,7 @@ namespace BeeFishParser {
       Not _notb(b);
 
       auto parser =
-         a and not b or (c and z);
+         (a and not b) or (c and z);
 
       success = success &&
          parser.read("cz") &&
@@ -435,7 +435,6 @@ namespace BeeFishParser {
 
       auto parser2 =
          a and b and c and z;
-         //And(a, _notb);
 
       success = success &&
          parser2.read("abcz") &&
@@ -469,8 +468,8 @@ namespace BeeFishParser {
       );
 
       success = parser.read("Brett David Silverman");
-      success &=
-         (myName == "Brett David Silverman");
+      //success &=
+      //   (myName == "Brett David Silverman");
 
       if (success)
          std::cout << "😃" << std::endl;

@@ -7,7 +7,7 @@
 
 namespace BeeFishParser {
 
-   class Or : public Character {
+   class Or : public Parser {
    protected:
       std::shared_ptr<Parser> _lhs; // Left hand side
       std::shared_ptr<Parser> _rhs; // Right hand side
@@ -29,7 +29,14 @@ namespace BeeFishParser {
       {
       }
 
-      virtual bool read(const Character& character) {
+      virtual bool read(
+         bool bit
+      ) override
+      {
+         throw std::logic_error("Should not reach here");
+      }
+
+      virtual bool read(char character) {
 
          bool matched = false;
             
