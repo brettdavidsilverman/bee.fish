@@ -11,7 +11,7 @@ using namespace std;
 
 namespace BeeFishParser {
    
-   class Capture : public Character
+   class Capture : public Parser
    {
    protected:
       std::string _value;
@@ -20,7 +20,7 @@ namespace BeeFishParser {
       
    public:
       Capture() :
-         Character(),
+         Parser(),
          _valueRef(_value) 
       {
       }
@@ -29,17 +29,17 @@ namespace BeeFishParser {
       Capture(
          const Capture& source
       ) :
-         Character(source),
+         Parser(source),
          _value(""),
          _valueRef(source._valueRef)
       {
       }
 
       Capture(
-         const Character& parser,
+         const Parser& parser,
          std::string& value
       ) :
-         Character(parser),
+         Parser(parser),
          _valueRef(value)
       {
       }
@@ -64,13 +64,13 @@ namespace BeeFishParser {
       {
          return new Capture(*this);
       }
-/*
+
       virtual bool read(bool bit)
       override
       {
          throw std::logic_error("Should not be here");
       }
-*/
+
 
 
    };

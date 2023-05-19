@@ -10,13 +10,13 @@ using namespace std;
 
 namespace BeeFishParser {
 
-   class And : public Character {
+   class And : public Parser {
    protected:
       std::vector< std::shared_ptr<Parser> > _inputs;
       size_t _iterator {0};
 
    public:
-      using Character::read;
+      using Parser::read;
 
       And(const And& source) {
          for (const std::shared_ptr<Parser> parser : source._inputs) {
@@ -31,8 +31,7 @@ namespace BeeFishParser {
       And(const And& lhs, const Parser& rhs)
       {
 
-         for ( std::shared_ptr<Parser> parser :
-               lhs._inputs )
+         for ( auto parser : lhs._inputs )
          {
             _inputs.push_back(
                std::shared_ptr<Parser>(
@@ -71,7 +70,14 @@ namespace BeeFishParser {
       }
 
       virtual bool read(
-         const Character& character
+         bool bit
+      ) override
+      {
+         throw std::logic_error("Should not reach here");
+      }
+
+      virtual bool read(
+         char character
       ) override
       {
          bool matched = false;
