@@ -8,6 +8,7 @@
 #include "Repeat.hpp"
 #include "Optional.hpp"
 #include "Rules.hpp"
+#include "Capture.hpp"
 
 namespace BeeFishParser {
 
@@ -23,6 +24,7 @@ namespace BeeFishParser {
    bool testOptional();
    bool testComplex();
    bool testRules();
+   bool testCapture();
 
    inline bool test() {
       
@@ -62,6 +64,9 @@ namespace BeeFishParser {
          return false;
 
       if (!testRules())
+         return false;
+
+      if (!testCapture())
          return false;
 
       return true;
@@ -423,7 +428,6 @@ namespace BeeFishParser {
 
       auto parser =
          a and not b or (c and z);
-         //And(a, _notb);
 
       success = success &&
          parser.read("cz") &&
@@ -436,6 +440,37 @@ namespace BeeFishParser {
       success = success &&
          parser2.read("abcz") &&
          (parser2.result() == true);
+
+      if (success)
+         std::cout << "😃" << std::endl;
+      else
+         std::cout << "Fail: " << parser.result() << std::endl;
+
+      return success;
+   }
+
+   inline bool testCapture() {
+
+      bool success = true;
+
+      std::cout << "testCapture: " << std::flush;
+
+      std::string myName;
+
+      auto parser = Capture(
+         Word("Brett") and
+         Character(" ") and
+         Optional(
+            Word("David") and
+            Character(" ")
+         ) and
+         Word("Silverman"),
+         myName
+      );
+
+      success = parser.read("Brett David Silverman");
+      success &=
+         (myName == "Brett David Silverman");
 
       if (success)
          std::cout << "😃" << std::endl;

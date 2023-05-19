@@ -26,7 +26,8 @@ int main(int argc, const char* argv[]) {
    {
       if (!BeeFishParser::test())
          return 1;
-            
+
+      return 0;
    }
 
    std::string line;
