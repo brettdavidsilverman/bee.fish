@@ -63,8 +63,10 @@ int main(int argc, const char* argv[]) {
 
       if (complete.result() == false)
          cout << "Invalid number" << endl;
-      else if (complete.result() == true)
-         cout << "Valid number: " << string << endl;
+      else if (complete.result() == true) {
+         float number = atof(string.c_str());
+         cout << "Valid number: " << number << endl;
+      }
       else
          cout << "Insufficient data" << endl;
 

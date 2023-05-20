@@ -4,19 +4,21 @@
 #include "Test.hpp"
 
 namespace BeeFishParser {
+
+   auto Integer() {
+      return Repeat(Range("0", "9"));
+   }
+
    auto Number() {
    
-      auto integers =
-         Repeat(Range("0", "9"));
-
       return
          Optional(
             Character("-")
          ) and
-         integers and
+         Integer() and
          Optional(
             Character(".") and
-            integers
+            Integer()
          ) and
          Optional(
             ( Character("e") or
@@ -25,7 +27,7 @@ namespace BeeFishParser {
                Character("+") or
                Character("-")
             ) and
-            integers
+            Integer()
          );
    }
 }
