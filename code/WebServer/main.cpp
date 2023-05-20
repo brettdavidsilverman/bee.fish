@@ -8,7 +8,7 @@ int main(int argc, const char* argv[]) {
    using namespace std;
    using namespace BeeFish;
 
-   cout << "WebServer " << WEB_SERVER << endl;
+   cout << WEB_SERVER << endl;
 
 #ifdef DEBUG
    cout << "Debug mode" << endl;
@@ -45,7 +45,7 @@ int main(int argc, const char* argv[]) {
    if (threadsArgument >= 0 &&
        threadsArgument < argc)
    {
-      threads = atoi(argv[threadsArgument]);
+      threads = atoi(argv[threadsArgument + 1]);
    }
 
    if (hasArg(argc, argv, "-test") >= 0) {

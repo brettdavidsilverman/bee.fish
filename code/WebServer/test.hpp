@@ -36,10 +36,8 @@ namespace BeeFish {
       testServer.start();
       WebServer::sleep();
 
-      string command = "curl -v " + testServer.host();
-         system(command.c_str());
-
-      /*
+      //string command = "curl " + testServer.host();
+         
 
       string command = "curl " + testServer.host() + " | grep \"Hello World\"";
      
@@ -48,7 +46,7 @@ namespace BeeFish {
          cout << "WebServer tests pass" << endl;
          success = true;
       }
-       */
+       
 
       
       testServer.stop();

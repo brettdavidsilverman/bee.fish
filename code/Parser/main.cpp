@@ -42,12 +42,12 @@ int main(int argc, const char* argv[]) {
       
       if (!line.length())
          break;
-      
-      std::string string;
 
       auto lineEnd =
          Character("\r") and
          Character("\n");
+
+      std::string string;
 
       auto complete =
          Capture(

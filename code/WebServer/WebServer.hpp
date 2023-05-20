@@ -44,6 +44,7 @@ namespace BeeFish {
          std::stringstream stream;
          stream << WEB_SERVER_HOST << ":" << m_port << "/";
          m_host = stream.str();
+         std::cerr << m_host << std::endl;
       }
 
       ~WebServer() {
@@ -69,7 +70,9 @@ namespace BeeFish {
 
          cout << "Stopping WebServer" << endl;
 
-         string command = "./stop.sh " + m_host;
+         std::stringstream stream;
+         stream << "./stop.sh " << m_port;
+         std::string command = stream.str();
          system(command.c_str());
      
          throw runtime_error("Should not reach here");
@@ -130,8 +133,9 @@ namespace BeeFish {
          
          using namespace std;
 
-         char buffer[256];
+         char buffer[512];
          struct sockaddr_in serv_addr;
+         int opt = 1;
 
          if (m_serverSocket > 0) {
             ::close(m_serverSocket);    
@@ -146,13 +150,22 @@ namespace BeeFish {
             return false;
          }
 
+         // Set socket options
+         if (setsockopt(m_serverSocket, SOL_SOCKET,
+                   SO_REUSEADDR | SO_REUSEPORT, &opt,
+                   sizeof(opt)))
+         {
+            perror("setsockopt");
+            return false;
+         }
+
          // Initialize socket structure
          bzero((char *)&serv_addr, sizeof(serv_addr));
 
          serv_addr.sin_family = AF_INET;
          serv_addr.sin_addr.s_addr = INADDR_ANY;
          serv_addr.sin_port = htons(m_port);
-
+         
          // Now bind the host address using bind() call.
          if (bind(m_serverSocket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
          {
@@ -185,8 +198,9 @@ namespace BeeFish {
                   "HTTP/1.1 200 OK\r\n" \
                   "Content-Type: text/plain\r\n" \
                   "Connection: close\r\n" \
+                  "Content-Length: 11\r\n" \
                   "\r\n" \
-                  "Hello World\r\n\r\n";
+                  "Hello World";
                ::write(clientSocket, response, strlen(response));
                ::close(clientSocket);
                return;

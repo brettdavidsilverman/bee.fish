@@ -1,7 +1,11 @@
 #!/bin/bash
-
-./stop.sh
-
+PORT=$1
+if test -z "$PORT" 
+then
+      PORT=80
+fi
+./stop.sh $PORT
+PID="server-$PORT.pid"
 echo "Starting..."
-./build/WebServer &
-echo $! >> server.pid
+sudo ./build/WebServer -port $PORT &
+echo $! >> $PID

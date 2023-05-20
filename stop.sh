@@ -1,6 +1,11 @@
 #!/bin/bash
-
+PORT=$1
+if test -z "$PORT" 
+then
+      PORT=80
+fi
 echo "Stopping..."
-test -f server.pid && sudo pkill -F server.pid
-rm -f server.pid
+PID="server-$1.pid"
+test -f $PID && sudo pkill -F $PID
+rm -f $PID
 echo "Stopped"
