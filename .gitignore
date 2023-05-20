@@ -1,5 +1,4 @@
 build
-server.pid
 **/a.out
 **/trace.txt
-
+**/*.pid

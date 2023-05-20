@@ -5,7 +5,7 @@ then
       PORT=80
 fi
 echo "Stopping..."
-PID="server-$1.pid"
+PID="server-$PORT.pid"
 test -f $PID && sudo pkill -F $PID
 rm -f $PID
 echo "Stopped"
