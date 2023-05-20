@@ -8,9 +8,12 @@
 
 #include "config.hpp"
 #include "Test.hpp"
+#include "Number.hpp"
 
 using namespace std;
 using namespace BeeFishParser;
+
+
 
 int main(int argc, const char* argv[]) {
 
@@ -40,24 +43,18 @@ int main(int argc, const char* argv[]) {
       if (!line.length())
          break;
       
-      std::string numberString;
+      std::string string;
 
-      auto numberEnd =
+      auto lineEnd =
          Character("\r") and
          Character("\n");
 
-      auto number = 
-         Optional(
-            Character("+") or
-            Character("-")
-         ) and
-         Repeat(Range("0", "9"));
-
       auto complete =
          Capture(
-            number,
-            numberString
-         ) and numberEnd;
+            Number(),
+            string
+         ) and 
+         lineEnd;
          
      
       line += "\r\n";
@@ -67,7 +64,7 @@ int main(int argc, const char* argv[]) {
       if (complete.result() == false)
          cout << "Invalid number" << endl;
       else if (complete.result() == true)
-         cout << "Valid number: " << numberString << endl;
+         cout << "Valid number: " << string << endl;
       else
          cout << "Insufficient data" << endl;
 
