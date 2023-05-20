@@ -47,23 +47,26 @@ int main(int argc, const char* argv[]) {
          Character("\n");
 
       auto number = 
+         Optional(
+            Character("+") or
+            Character("-")
+         ) and
+         Repeat(Range("0", "9"));
+
+      auto complete =
          Capture(
-            Optional(
-               Character("+") or
-               Character("-")
-            ) and
-            Repeat(Range("0", "9")),
+            number,
             numberString
          ) and numberEnd;
          
      
       line += "\r\n";
 
-      number.read(line);
+      complete.read(line);
 
-      if (number.result() == false)
+      if (complete.result() == false)
          cout << "Invalid number" << endl;
-      else if (number.result() == true)
+      else if (complete.result() == true)
          cout << "Valid number: " << numberString << endl;
       else
          cout << "Insufficient data" << endl;
