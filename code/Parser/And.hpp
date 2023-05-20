@@ -3,8 +3,8 @@
 #include <ostream>
 #include <vector>
 #include <memory>
-#include "Parser.hpp"
 #include "Character.hpp"
+#include "Optional.hpp"
 
 using namespace std;
 
@@ -86,13 +86,16 @@ namespace BeeFishParser {
             setResult(false);
             return false;
          }
-            
-         while ( !matched &&
-                 _result == std::nullopt )
+         
+         
+         while (!matched &&
+                _result == std::nullopt)
          {
-
             std::shared_ptr<Parser> 
                item = _inputs[_iterator];
+
+            bool isOptional =
+               item->isOptional();
 
             matched =
                item->read(character);
@@ -100,14 +103,24 @@ namespace BeeFishParser {
             if (item->_result == true) {
             
                if ( ++_iterator == 
-                    _inputs.size() ) {
+                    _inputs.size() )
+               {
                   setResult(true);
                }
                
             }
-            else if (item->_result == false) {
-            
-               setResult(false);
+            else if (!matched) {
+               if (isOptional) {
+                  throw 1;
+                  if ( ++_iterator == 
+                       _inputs.size() )
+                  {
+                     setResult(true);
+                  }
+               }
+               else {
+                  setResult(false);
+               }
                
             }
             

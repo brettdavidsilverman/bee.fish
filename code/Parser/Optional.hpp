@@ -9,7 +9,7 @@ namespace BeeFishParser {
 
    using namespace std;
 
-   class Optional : public Character {
+   class Optional : public Parser {
    protected:
       std::shared_ptr<Parser> _optional;
       bool _matched = false;
@@ -25,12 +25,19 @@ namespace BeeFishParser {
       }
 
       virtual bool read(
-         const Character& character
+         bool bit
+      ) override
+      {
+         throw std::logic_error("Parser::read(bool) Should not reach here 🚫");
+      }
+
+      virtual bool read(
+         char c
       ) override
       {
          
          bool matched =
-            _optional->read(character);
+            _optional->read(c);
          
          bool succeeded = false;
          
@@ -56,6 +63,13 @@ namespace BeeFishParser {
       virtual Parser* copy() const override {
          return new Optional(*_optional);
       }
+
+      virtual bool isOptional() const
+      override
+      {
+         return true;
+      }
+     
    };
 
 

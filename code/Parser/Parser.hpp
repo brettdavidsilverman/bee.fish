@@ -43,7 +43,6 @@ namespace BeeFishParser {
          char character
       )
       {
-
          std::bitset<8> bits = character;
          for (int i = 7;
               i >= 0;
@@ -57,7 +56,6 @@ namespace BeeFishParser {
          
          }
 
-         capture(character);
 
          return true;
       }
@@ -76,13 +74,12 @@ namespace BeeFishParser {
          return EmptyString();
       }
 
-      virtual void capture(char character)
-      {
-      }
-
       virtual Parser* copy() const = 0;
       
-
+      virtual bool isOptional() const {
+         return false;
+      }
+     
 
    };
 

@@ -39,15 +39,23 @@ int main(int argc, const char* argv[]) {
       
       if (!line.length())
          break;
-         
-      auto number = 
-         Optional(
-            Character("+") or
-            Character("-")
-         ) and
-         Repeat(Range("0", "9")) and
+      
+      std::string numberString;
+
+      auto numberEnd =
          Character("\r") and
          Character("\n");
+
+      auto number = 
+         Capture(
+            Optional(
+               Character("+") or
+               Character("-")
+            ) and
+            Repeat(Range("0", "9")),
+            numberString
+         ) and numberEnd;
+         
      
       line += "\r\n";
 
@@ -56,7 +64,7 @@ int main(int argc, const char* argv[]) {
       if (number.result() == false)
          cout << "Invalid number" << endl;
       else if (number.result() == true)
-         cout << "Valid number" << endl;
+         cout << "Valid number: " << numberString << endl;
       else
          cout << "Insufficient data" << endl;
 

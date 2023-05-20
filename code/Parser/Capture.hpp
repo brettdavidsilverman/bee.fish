@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <memory>
 
 #include "Parser.hpp"
 
@@ -14,7 +15,7 @@ namespace BeeFishParser {
    class Capture : public Parser
    {
    protected:
-      std::shared_ptr<Parser> _parser;
+      std::shared_ptr<Parser> _capture;
       std::string _value;
    public:
       std::string& _valueRef;
@@ -33,8 +34,8 @@ namespace BeeFishParser {
       Capture(
          const Capture& source
       ) :
-         Parser(source),
-         _parser(source._parser->copy()),
+         Parser(),
+         _capture(source._capture->copy()),
          _value(""),
          _valueRef(source._valueRef)
       {
@@ -44,7 +45,7 @@ namespace BeeFishParser {
          const Parser& parser,
          std::string& value
       ) :
-         _parser(parser.copy()),
+         _capture(parser.copy()),
          _valueRef(value)
       {
       }
@@ -53,7 +54,6 @@ namespace BeeFishParser {
       }
 
       virtual void capture(char c)
-      override
       {
          _valueRef.push_back(c);
       }
@@ -73,17 +73,21 @@ namespace BeeFishParser {
       virtual bool read(bool bit)
       override
       {
-         return true;
+         throw std::logic_error("Capture::read(bool) 🚫");
       }
 
       virtual bool read(char c)
       override
       {
-         bool matched = _parser->read(c);
-         if (_parser->_result == true)
+         bool matched = _capture->read(c);
+         if (_capture->_result == true)
             setResult(true);
-         else if (_parser->_result == false)
+         else if (_capture->_result == false)
             setResult(false);
+
+         if (matched)
+            capture(c);
+
          return matched;
       }
 
