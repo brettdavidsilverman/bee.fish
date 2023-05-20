@@ -118,6 +118,20 @@ namespace BeeFish {
             if (clientSocket >= 0 &&
                 !webServer->m_stop)
             {
+
+               struct timeval tv;
+               tv.tv_sec = READ_TIMEOUT_SECONDS;
+               tv.tv_usec = 0;
+               if (setsockopt(
+                      clientSocket,
+                      SOL_SOCKET,
+                      SO_RCVTIMEO,
+                      (const char*)&tv,
+                      sizeof tv))
+               {
+                  std::cerr << "Error setting time out on client socket" << std::endl;
+               }
+
                webServer->handleRequest(clientSocket);
             }
 
@@ -133,11 +147,11 @@ namespace BeeFish {
          
          using namespace std;
 
-         char buffer[512];
+         //char buffer[128];
          struct sockaddr_in serv_addr;
          int opt = 1;
 
-         if (m_serverSocket > 0) {
+         if (m_serverSocket >= 0) {
             ::close(m_serverSocket);    
          }
 
@@ -151,11 +165,15 @@ namespace BeeFish {
          }
 
          // Set socket options
-         if (setsockopt(m_serverSocket, SOL_SOCKET,
-                   SO_REUSEADDR | SO_REUSEPORT, &opt,
-                   sizeof(opt)))
+         if ( setsockopt(
+                 m_serverSocket,
+                 SOL_SOCKET,
+                 SO_REUSEADDR |
+                    SO_REUSEPORT, &opt,
+                 sizeof(opt))
+         )
          {
-            perror("setsockopt");
+            cerr << "Error setting socket options" << endl;
             return false;
          }
 
@@ -189,19 +207,58 @@ namespace BeeFish {
 
       virtual void handleRequest(int clientSocket) {
   
-         std::cerr << "handleRequest()" << std::endl;
+         std::cerr << "handleRequest(" << clientSocket << ")" << std::endl;
 
          boost::asio::post(
             m_threadPool,
             [clientSocket]() {
-               const char* response =
-                  "HTTP/1.1 200 OK\r\n" \
-                  "Content-Type: text/plain\r\n" \
-                  "Connection: close\r\n" \
-                  "Content-Length: 11\r\n" \
-                  "\r\n" \
-                  "Hello World";
-               ::write(clientSocket, response, strlen(response));
+               fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+               struct pollfd pfds[1];
+               pfds[0].fd = clientSocket;
+               std::stringstream readInput;
+               pfds[0].events = POLLIN;
+               int num_events;
+               while (poll(pfds, 1, READ_TIMEOUT_SECONDS * 1000) > 0 &&
+                      (pfds[0].revents & POLLIN) > 0)
+               {
+                  int ret;
+                  char buff[512];
+                  
+
+                  while ((ret = ::read(
+                          clientSocket,
+                          buff,
+                          sizeof(buff))
+                       ) > 0)
+                  {
+                    //std::cerr.write(buff, ret);
+                     readInput.write(buff, ret);
+                     if (ret < sizeof(buff))
+                        break;
+                  }
+                  if (ret < sizeof(buff))
+                     break;
+               }
+         
+               const std::string
+                  output = readInput.str();
+               
+               std::stringstream writeOutput;
+               writeOutput <<
+                  "HTTP/2.0 200 OK\r\n" <<
+                  "Content-Type: text/plain\r\n" <<
+                  "Connection: keep-alive\r\n" <<
+                  "Content-Length: " << output.length() << "\r\n" <<
+                  "\r\n" <<
+                  output;
+
+               std::string response = writeOutput.str();
+               //std::cerr << response << std::endl;
+               ::write(
+                  clientSocket,
+                  response.c_str(),
+                  response.length()
+               );
                ::close(clientSocket);
                return;
             }

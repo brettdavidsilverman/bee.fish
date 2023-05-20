@@ -3,7 +3,7 @@
 
 #include "../config.hpp"
 
-#define WEB_SERVER "WebServer Version 0.0.3 Test ports"
+#define WEB_SERVER "WebServer version 0.1.0 Debug ports"
 
 #define WEB_SERVER_THREADS 10
 
@@ -15,4 +15,5 @@
    #define WEB_SERVER_PORT 8080
 #endif
 
+#define READ_TIMEOUT_SECONDS 3
 #endif

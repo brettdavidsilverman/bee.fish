@@ -8,6 +8,7 @@ int main(int argc, const char* argv[]) {
    using namespace std;
    using namespace BeeFish;
 
+   cout << endl;
    cout << WEB_SERVER << endl;
 
 #ifdef DEBUG
