@@ -118,20 +118,8 @@ namespace BeeFish {
             if (clientSocket >= 0 &&
                 !webServer->m_stop)
             {
-
-               struct timeval tv;
-               tv.tv_sec = READ_TIMEOUT_SECONDS;
-               tv.tv_usec = 0;
-               if (setsockopt(
-                      clientSocket,
-                      SOL_SOCKET,
-                      SO_RCVTIMEO,
-                      (const char*)&tv,
-                      sizeof tv))
-               {
-                  std::cerr << "Error setting time out on client socket" << std::endl;
-               }
-
+               // Set client socket to non blocking
+               fcntl(clientSocket, F_SETFL, O_NONBLOCK);
                webServer->handleRequest(clientSocket);
             }
 
@@ -211,15 +199,9 @@ namespace BeeFish {
 
          boost::asio::post(
             m_threadPool,
-            [clientSocket]() {
-               fcntl(clientSocket, F_SETFL, O_NONBLOCK);
-               struct pollfd pfds[1];
-               pfds[0].fd = clientSocket;
+            [this, clientSocket]() {
                std::stringstream readInput;
-               pfds[0].events = POLLIN;
-               int num_events;
-               while (poll(pfds, 1, READ_TIMEOUT_SECONDS * 1000) > 0 &&
-                      (pfds[0].revents & POLLIN) > 0)
+               while (pollInput(clientSocket))
                {
                   int ret;
                   char buff[512];
@@ -264,6 +246,19 @@ namespace BeeFish {
             }
          );
 
+      }
+
+      bool pollInput(int socket) {
+         struct pollfd pfds[1];
+         pfds[0].fd = socket;
+         pfds[0].events = POLLIN;
+         return (
+            poll(
+                 pfds, 1,
+                 READ_TIMEOUT_SECONDS * 1000
+              ) > 0 &&
+            (pfds[0].revents & POLLIN) > 0
+         );
       }
 
       virtual void close() {
