@@ -119,10 +119,7 @@ namespace BeeFishParser {
 
       success &= stream.str() == std::string("🌎");
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail" << std::endl;
+      BeeFishMisc::outputSuccess(success);
 
       return success;
 
@@ -158,10 +155,8 @@ namespace BeeFishParser {
          character._result == true &&
          character._chars == "a";
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail" << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
       
@@ -182,10 +177,8 @@ namespace BeeFishParser {
          _and.read("ab") &&
          _and.result() == true;
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail" << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
    }
@@ -207,10 +200,8 @@ namespace BeeFishParser {
          _or.read(stream) &&
          _or.result() == true;
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail" << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
    }
@@ -230,10 +221,8 @@ namespace BeeFishParser {
          parser.read("z") &&
          parser.result() == true;
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail: " << parser.result() << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
    }
@@ -264,10 +253,8 @@ namespace BeeFishParser {
          (word.read("Hello ☀️") == false) &&
          (word._result == false);
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail" << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
    }
@@ -291,10 +278,8 @@ namespace BeeFishParser {
          parser.read("1") == false &&
          parser._result == false;
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail" << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
    }
@@ -318,10 +303,8 @@ namespace BeeFishParser {
             parser.read(string) &&
             parser.result() == true;
 
-         if (success)
-            std::cout << "Ok" << endl;
-         else
-            std::cout << "Fail: " << parser._result << endl;
+         BeeFishMisc::outputSuccess(success);
+
       }
 
       if (success) {
@@ -332,30 +315,24 @@ namespace BeeFishParser {
             parser.read(string) &&
             parser.result() == true;
 
-         if (success)
-            std::cout << "Ok" << endl;
-         else
-            std::cout << "Fail: " << parser._result << endl;
+         BeeFishMisc::outputSuccess(success);
+
       }
 
       if (success) {
          And parser = Optional(b) and c;
          std::string string = "ac";
-         std::cout << "\t" << string << ": ";
+         std::cout << "\t" << string << ": " << std::flush;
          success =
             parser.read(string) == false &&
             parser.result() == false;
 
-         if (success)
-            std::cout << "Ok" << endl;
-         else
-            std::cout << "Fail: " << parser._result << endl;
+         BeeFishMisc::outputSuccess(success);
+
       }
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail" << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
    }
@@ -381,10 +358,8 @@ namespace BeeFishParser {
          parser.read("ac") &&
          (parser.result() == true);
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail: " << parser.result() << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
    }
@@ -408,10 +383,8 @@ namespace BeeFishParser {
          name2.read("1") == false &&
          name2._result == false;
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail" << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
    }
@@ -444,10 +417,8 @@ namespace BeeFishParser {
          parser2.read("abcz") &&
          (parser2.result() == true);
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail: " << parser.result() << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
    }
@@ -475,10 +446,8 @@ namespace BeeFishParser {
       //success &=
       //   (myName == "Brett David Silverman");
 
-      if (success)
-         std::cout << "😃" << std::endl;
-      else
-         std::cout << "Fail: " << parser.result() << std::endl;
+      BeeFishMisc::outputSuccess(success);
+
 
       return success;
    }

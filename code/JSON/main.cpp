@@ -20,7 +20,7 @@ int main(int argc, const char* argv[]) {
         << "C++ run time: "
            << __cplusplus
            << endl
-        << "Version: "
+        << "JSON Version: "
            << JSON_VERSION
            << endl
         << "Parser Version: "
@@ -30,8 +30,8 @@ int main(int argc, const char* argv[]) {
    if (hasArg(argc, argv, "-test") >= 0)
    {
       cout << "Testing json..." << endl << endl;
-     // if (!BeeFishP::test())
-     //    return 1;
+      if (!BeeFishJSON::test())
+         return 1;
             
       return 0;
    }

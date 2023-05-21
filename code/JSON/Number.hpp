@@ -1,12 +1,13 @@
 #ifndef BEE_FISH__JSON__NUMBER_HPP
 #define BEE_FISH__JSON__NUMBER_HPP
 
-#include "Test.hpp"
+#include "../Parser/Test.hpp"
 
 namespace BeeFishJSON {
 
    auto Integer() {
       using namespace BeeFishParser;
+
       return Repeat(Range("0", "9"));
    }
 

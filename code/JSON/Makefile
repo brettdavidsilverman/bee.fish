@@ -1,5 +1,6 @@
 OUTPUT = ../../build/JSON
-DEPS = Makefile main.cpp
+DEPS = Makefile main.cpp Number.hpp Test.hpp
+
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic
 

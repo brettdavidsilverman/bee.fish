@@ -6,6 +6,9 @@
 
 #include "optional.h"
 
+#define ON_SUCCESS "😃"
+#define ON_FAIL "🚫"
+
 namespace BeeFishMisc {
 
    inline int hasArg(
@@ -25,6 +28,14 @@ namespace BeeFishMisc {
 
    static void sleep(long seconds) {
       usleep(seconds * 1000L * 1000L);
+   }
+
+   inline void outputSuccess(bool success)
+   {
+      if (success)
+         std::cout << ON_SUCCESS << std::endl;
+      else
+         std::cout << ON_FAIL << std::endl;
    }
 
 }
