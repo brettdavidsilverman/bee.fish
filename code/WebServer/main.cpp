@@ -1,12 +1,13 @@
 #include <iostream>
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "WebServer.hpp"
-#include "test.hpp"
+#include "Test.hpp"
 
 int main(int argc, const char* argv[]) {
 
    using namespace std;
-   using namespace BeeFish;
+   using namespace BeeFishMisc;
+   using namespace BeeFishWebServer;
 
    cout << endl;
    cout << WEB_SERVER << endl;

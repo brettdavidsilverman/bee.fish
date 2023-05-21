@@ -11,6 +11,7 @@
 #include "Number.hpp"
 
 using namespace std;
+using namespace BeeFishMisc;
 using namespace BeeFishParser;
 
 
@@ -25,7 +26,7 @@ int main(int argc, const char* argv[]) {
         << PARSER_VERSION
            << endl;
 
-   if (BeeFish::hasArg(argc, argv, "-test") >= 0)
+   if (hasArg(argc, argv, "-test") >= 0)
    {
       if (!BeeFishParser::test())
          return 1;

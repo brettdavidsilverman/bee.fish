@@ -22,7 +22,7 @@
 
 #include "Config.hpp"
 
-namespace BeeFish {
+namespace BeeFishWebServer {
 
 
    class WebRequest;

@@ -11,8 +11,11 @@ debug:	$(OUTPUT)
 	cd ../Parser && make $(DEBUG)
 
 time:	clean
-time:	CFLAGS += -D TIME -Ofast
+time:	CFLAGS += -DTIME -Ofast
 time:	
+
+test:	$(OUTPUT)
+	$(OUTPUT) -test
 
 clean:
 	rm -f *.o

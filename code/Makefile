@@ -6,3 +6,6 @@ all:
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
 debug:	all
+
+clean:
+	cd .. && make clean

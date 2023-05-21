@@ -4,7 +4,9 @@
 #include <thread>
 #include <stdlib.h>
 
-namespace BeeFish {
+#include "WebServer.hpp"
+
+namespace BeeFishWebServer {
    
    bool testStartStop();
 

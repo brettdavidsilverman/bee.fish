@@ -3,6 +3,8 @@
 
 #include "../Parser/Test.hpp"
 #include "Version.hpp"
+#include "Number.hpp"
+
 /*
 #include "version.h"
 #include "blank-space.h"

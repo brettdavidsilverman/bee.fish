@@ -6,7 +6,7 @@
 
 #include "optional.h"
 
-namespace BeeFish {
+namespace BeeFishMisc {
 
    inline int hasArg(
       int argc,

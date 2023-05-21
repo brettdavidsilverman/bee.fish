@@ -6,12 +6,12 @@
 #include "../Parser/Parser.hpp"
 #include "../Parser/Test.hpp"
 #include "JSON.hpp"
-//#include "Test.hpp"
+#include "Test.hpp"
 
 using namespace std;
-using namespace BeeFish;
+using namespace BeeFishMisc;
 using namespace BeeFishParser;
-//using namespace BeeFishJSON;
+using namespace BeeFishJSON;
 
 int main(int argc, const char* argv[]) {
 
