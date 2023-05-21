@@ -91,8 +91,6 @@ namespace BeeFishParser {
 
 #ifdef DEBUG
             _value.push_back(c);
-cerr << c << flush;
-
 #endif
          }
 

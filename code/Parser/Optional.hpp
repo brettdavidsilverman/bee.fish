@@ -51,7 +51,7 @@ namespace BeeFishParser {
          else if (_optional->_result == false)
          {
             _matched = false;
-            succeeded = true;
+            //succeeded = true;
          }
 
          if (succeeded)

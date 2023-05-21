@@ -160,15 +160,21 @@ namespace BeeFishParser {
 
       std::cout << "testAnd: " << std::flush;
 
-      Character a("a");
-      Character b("b");
+      auto parser = []() {
+         Character a("a");
+         Character b("b");
 
-      And _and(a, b);
+         And _and(a, b);
+         return _and;
+      };
+      
+      success &= testPattern(
+         parser(),
+         "ab",
+         true
+      );
 
-      success = success &&
-         _and.read("ab") &&
-         _and.result() == true;
-
+ 
       BeeFishMisc::outputSuccess(success);
 
 
@@ -245,24 +251,29 @@ namespace BeeFishParser {
 
       std::string string("Hello 🌎");
 
-      Word word(string);
+      auto parser = [string]() {
+         return Word(string);
+      };
+
+      auto word = parser();
       std::stringstream stream;
       stream << word;
 
       success = success &&
          stream.str() == string;
-
-      success = success &&
-         word.read(string) &&
-         word._result == true &&
-         word == string;
-
-      word = Word(string);
-
-      success = success &&
-         (word.read("Hello ☀️") == false) &&
-         (word._result == false);
-
+       
+      success &= testPattern(
+         parser(),
+         string,
+         true
+      );
+      
+      success &= testPattern(
+         parser(),
+         "Hello ☀️",
+         false
+      );
+       
       BeeFishMisc::outputSuccess(success);
 
 
@@ -300,65 +311,64 @@ namespace BeeFishParser {
 
       std::cout << "testOptional:" << std::endl;
 
-      Character a("a");
-      Character b("b");
-      Character c("c");
-
+      auto parser = []() {
+     
+         Character a("a");
+         Character b("b");
+         Character c("c");
+ 
+         return Optional(b) and c;
+      };
     
-      if (success) {
-         And parser = Optional(b) and c;
-         std::string string = "bc";
-         std::cout << "\t" << string << ": ";
-         success =
-            parser.read(string) &&
-            parser.result() == true;
+      success &= testPattern(
+         parser(),
+         "bc",
+         true
+      );
 
-         BeeFishMisc::outputSuccess(success);
+      success &= testPattern(
+         parser(),
+         "c",
+         true
+      );
 
-      }
+      success &= testPattern(
+         parser(),
+         "ac",
+         false
+      );
+      
+      
+      auto parser2= []() {
+         return
+            Optional(Word("Start")) and
+            Optional(Word("Stop")) and
+            Word("Stammer");
+      };
 
-      if (success) {
-         And parser = Optional(b) and c;
-         std::string string = "c";
-         std::cout << "\t" << string << ": ";
-         success =
-            parser.read(string) &&
-            parser.result() == true;
+      success &= testPattern(
+         parser2(),
+         "StartStopStammer",
+         true
+      );
 
-         BeeFishMisc::outputSuccess(success);
+      success &= testPattern(
+         parser2(),
+         "StartStammer",
+         true
+      );
 
-      }
-
-      if (success) {
-         And parser = Optional(b) and c;
-         std::string string = "ac";
-         std::cout << "\t" << string << ": " << std::flush;
-         success =
-            parser.read(string) == false &&
-            parser.result() == false;
-
-         BeeFishMisc::outputSuccess(success);
-
-      }
-
-      if (success) {
-         auto Parser = []() {
-            return
-               Optional(Word("Start")) and
-               Optional(Word("Stop")) and
-               Word("Stammers");
-
-         };
-
-         success = testPattern(
-            Parser(),
-            "Stammers",
-            true
-         );
-
-         
-      }
-
+      success &= testPattern(
+         parser2(),
+         "StopStammer",
+         true
+      );
+  
+      success &= testPattern(
+         parser2(),
+         "Stammer",
+         true
+      );
       return success;
 
    }

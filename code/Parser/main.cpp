@@ -16,20 +16,31 @@ using namespace BeeFishParser;
 
 int main(int argc, const char* argv[]) {
 
+      auto parser2= []() {
+         return
+            Optional(Word("Start")) and
+            Optional(Word("Stop")) and
+            Word("Stammer");
+      };
+
+      testPattern(
+         parser2(),
+         "Stammer",
+         true
+      );
+
+
 
    if (true)
    {
       bool success = true;
 
-      auto parser = []() {
-         return
-            Repeat(Range("a", "z"));
-
-      };
-
       success = success &&
-         testPattern(parser(), "brett", true);
-
+         testPattern(
+            Repeat(Range("a", "z")),
+            "brett",
+            true
+         );
      // return 0;
 
    }

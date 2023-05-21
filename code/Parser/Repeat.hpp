@@ -50,6 +50,7 @@ namespace BeeFishParser
            char character
         ) override
 		{
+            using namespace std;
 
 			if (_item == nullptr)
 				_item = createItem();
@@ -83,11 +84,9 @@ namespace BeeFishParser
 				if (_matchedCount >= _minimum)
 				{
 					setResult(true);
-                    //matched = true;
 				}
 				else
 				{
-					//matched = false;
 					setResult(false);
 				}
 			}
@@ -107,6 +106,7 @@ namespace BeeFishParser
         virtual Parser* copy() const {
            return new Repeat(*_template, _minimum, _maximum);
         }
+
 
 	};
 

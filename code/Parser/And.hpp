@@ -91,57 +91,55 @@ namespace BeeFishParser {
          }
 
          _buffer.push_back(character);
-         std::shared_ptr<Parser> 
-            item;
 
+         
          bool nextItem = false;
 
+         
          while (
-            !matched &&
-            _result == std::nullopt
+            _index < _inputs.size()
          )
          {
-            item = _inputs[_index];
-            if (nextItem) {
-               matched =
-                  item->read(_buffer);
+
+            std::shared_ptr<Parser> 
+               item = _inputs[_index];
+         if (nextItem) {
+               matched = item->read(_buffer);
+
                nextItem = false;
             }
             else {
                matched =
                   item->read(character);
-            }
 
-            
-            if (!matched) {
-            //if (item->_result == false) {
-
- 
-               if (item->isOptional()) {
-                  ++_index;
-                  if ( _index == 
-                       _inputs.size() )
-                  {
-                     setResult(true);
-                  }
-                  nextItem = true;
-               }
-               else {
-                  setResult(false);
-               }
-               
             }
-            else if (item->_result == true) {
+cerr << typeid(*item).name() << ":" << character << ":" << matched << endl;
+  
+   
+            if (item->_result == true) {
                ++_index;
-               if ( _index == 
-                    _inputs.size() )
-               {
-                  setResult(true);
-               }
                _buffer.clear();
-               
+               break;
             }
+            
+            if (!matched && item->isOptional()) {
+               ++_index;
+               nextItem = true;
+               continue;
+            }
+            else {
+               setResult(false);
+               break;
+            }
+
+
+            if (matched)
+               break;
+
          }
+
+         if (_index == _inputs.size())
+            setResult(true);
 
          return matched;
 
