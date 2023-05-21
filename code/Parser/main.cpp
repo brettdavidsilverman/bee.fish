@@ -6,7 +6,7 @@
 
 #include "../Miscellaneous/Miscellaneous.hpp"
 
-#include "config.hpp"
+#include "Config.hpp"
 #include "Test.hpp"
 #include "Number.hpp"
 
@@ -22,7 +22,7 @@ int main(int argc, const char* argv[]) {
         << "C++ run time: "
            << __cplusplus
            << endl
-        << PARSER
+        << PARSER_VERSION
            << endl;
 
    if (BeeFish::hasArg(argc, argv, "-test") >= 0)

@@ -1,6 +1,7 @@
 #ifndef BEE_FISH_PARSER__TEST_HPP
 #define BEE_FISH_PARSER__TEST_HPP
 
+#include "Version.hpp"
 #include "Parser.hpp"
 #include "Character.hpp"
 #include "And.hpp"

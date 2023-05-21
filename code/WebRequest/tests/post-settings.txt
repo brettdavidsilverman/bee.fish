@@ -1,0 +1,15 @@
+POST /beehive/?key=settings HTTP/1.1
+Host: laptop
+Connection: keep-alive
+Cookie: sessionId=89a5fe177abd50e507665b3b45b139acfcdff4171fde67eee34d21f49cc4ad84;path=/;SameSite=None;Secure;HttpOnly;max-age=3600
+content-type: application/json
+content-length: 155
+
+{
+   "checkEvery": 30,
+   "takePictureEvery": 3600,
+   "wakeup": true,
+   "label": "Bloody Bees",
+   "url": "http://192.168.137.164/",
+   "sleeping": false
+}

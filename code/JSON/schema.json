@@ -1,0 +1,8 @@
+<field>
+{
+   [fieldName] : {
+      type: "string"|"number"|"boolean"|"object","array"
+      optional: "true"|"false",
+      object: <field>
+   }
+}
