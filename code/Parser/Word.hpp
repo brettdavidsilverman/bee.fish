@@ -30,8 +30,9 @@ namespace BeeFishParser {
       override
       {
 
-         if (_index >= size())
+         if (_index >= size()) {
             return false;
+         }
 
          if ((*this)[_index] == c)
          {
@@ -40,7 +41,7 @@ namespace BeeFishParser {
 
             return true;
          }
-         
+ 
          setResult(false);
          return false;
 

@@ -10,6 +10,9 @@ test:	$(OUTPUT)
 clean:
 	rm -f $(OUTPUT)
 
+run:	$(OUTPUT)
+	$(OUTPUT)
+
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	$(OUTPUT)

@@ -23,14 +23,7 @@ namespace BeeFishParser {
 
    public:
       using Parser::read;
-/*
-      Capture() :
-         Parser(),
-         _valueRef(_value) 
-      {
-      }
-      
-*/     
+
       Capture(
          const Capture& source
       ) :
@@ -38,6 +31,14 @@ namespace BeeFishParser {
          _capture(source._capture->copy()),
          _value(""),
          _valueRef(source._valueRef)
+      {
+      }
+      
+      Capture(
+         const Parser& parser
+      ) :
+         _capture(parser.copy()),
+         _valueRef(_value)
       {
       }
 

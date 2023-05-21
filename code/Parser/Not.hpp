@@ -22,24 +22,21 @@ namespace BeeFishParser {
       }
 
       virtual bool read(
-         const UTF8Character& character
+         char c
       ) 
       override
       {
          bool matched =
-            _not->read(character);
+            _not->read(c);
 
-         if (matched) {
-            if (_not->_result == true)
-               setResult(false);
-         }
-         
-         if (_not->_result == false) {
+         //std::cerr << c << ":" << _not->_result << std::flush;
+  
+         if (_not->_result == false)
             setResult(true);
-            return true;
-         }
+         else if (_not->_result == true)
+            setResult(false);
 
-         return matched;
+         return !matched;
       }
 
      virtual Parser* copy() const {

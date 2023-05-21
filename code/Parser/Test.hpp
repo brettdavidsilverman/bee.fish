@@ -212,14 +212,32 @@ namespace BeeFishParser {
 
       std::cout << "testNot: " << std::flush;
 
-      Character a("a");
-      Not _nota(a);
-    
-      Parser& parser = _nota;
+      auto Parser = []() {
+         Word a("hello");
+         Not _nota(a);
+         return _nota;
+      };
 
-      success = success &&
-         parser.read("z") &&
-         parser.result() == true;
+      if (success)
+      {
+         std::cout << "\tworld:";
+         auto parser = Parser();
+         parser.read("world");
+         success = success &&
+            parser.result() == true;
+         BeeFishMisc::outputSuccess(success);
+         
+      }
+
+      if (success)
+      {
+         std::cout << "\thello:";
+         auto parser = Parser();
+         parser.read("hello");
+         success = success &&
+            parser.result() == std::nullopt;
+         BeeFishMisc::outputSuccess(success);
+      }
 
       BeeFishMisc::outputSuccess(success);
 
@@ -354,8 +372,8 @@ namespace BeeFishParser {
 
       Parser& parser = _and;
 
+      parser.read("ac");
       success = success &&
-         parser.read("ac") &&
          (parser.result() == true);
 
       BeeFishMisc::outputSuccess(success);

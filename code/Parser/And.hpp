@@ -111,7 +111,6 @@ namespace BeeFishParser {
             }
             else if (!matched) {
                if (isOptional) {
-                  throw 1;
                   if ( ++_iterator == 
                        _inputs.size() )
                   {

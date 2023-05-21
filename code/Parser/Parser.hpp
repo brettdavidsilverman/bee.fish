@@ -23,6 +23,7 @@ namespace BeeFishParser {
 
          for (const char& c : string)
          {
+//std::cerr << c;
             if (!read(c))
                return false;
          }

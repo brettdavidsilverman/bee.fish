@@ -1,5 +1,5 @@
-#ifndef BEE_FISH_PARSER__REPEAT_HPP
-#define BEE_FISH_PARSER__REPEAT_HPP
+#ifndef BEE_FISH__PARSER__REPEAT_HPP
+#define BEE_FISH__PARSER__REPEAT_HPP
 
 #include <vector>
 #include <memory>
@@ -9,7 +9,7 @@
 namespace BeeFishParser
 {
 
-	class Repeat : public Character
+	class Repeat : public Parser
 	{
 	protected:
 		std::shared_ptr<Parser> _template;
@@ -38,16 +38,16 @@ namespace BeeFishParser
 			if (_item)
 				delete _item;
 		}
-/*
+
         virtual bool read(
            bool bit
         ) override
         {
            throw std::logic_error("Should not reach here");
         }
-*/
+
 		virtual bool read(
-           const Character& character
+           char character
         ) override
 		{
 

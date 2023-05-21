@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <codecvt>
-#
 
 #include "../Miscellaneous/Miscellaneous.hpp"
 
@@ -17,6 +16,30 @@ using namespace BeeFishParser;
 
 
 int main(int argc, const char* argv[]) {
+
+   if (false)
+   {
+      bool success = true;
+
+      auto Parser = []() {
+         return
+            Character("\"") and
+            Repeat(
+               not Character("\""),
+               0
+            ) and
+            Character("\"");
+
+      };
+
+      std::string pattern = "\"";
+
+      std::cout << "\t" << pattern << ":";
+      auto parser = Parser();
+      parser.read(pattern);
+      std::cout << "{" << parser.result() << "}" << std::endl;
+      return 0;
+   }
 
    cerr << "bee.fish.parser"
            << endl
