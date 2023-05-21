@@ -1,20 +1,12 @@
 #ifndef BEE_FISH_PARSER__TEST_HPP
 #define BEE_FISH_PARSER__TEST_HPP
 
-#include "Version.hpp"
 #include "Parser.hpp"
-#include "Character.hpp"
-#include "And.hpp"
-#include "Or.hpp"
-#include "Not.hpp"
-#include "Word.hpp"
-#include "Range.hpp"
-#include "Repeat.hpp"
-#include "Optional.hpp"
-#include "Rules.hpp"
-#include "Capture.hpp"
+#include "../Miscellaneous/Miscellaneous.hpp"
 
 namespace BeeFishParser {
+
+   using namespace BeeFishMisc;
 
    bool testUnicode();
    bool testCharacter();
@@ -210,7 +202,7 @@ namespace BeeFishParser {
 
       bool success = true;
 
-      std::cout << "testNot: " << std::flush;
+      std::cout << "testNot:" << std::endl;
 
       auto Parser = []() {
          Word a("hello");
@@ -349,10 +341,26 @@ namespace BeeFishParser {
 
       }
 
-      BeeFishMisc::outputSuccess(success);
+      if (success) {
+         auto Parser = []() {
+            return
+               Optional(Word("Start")) and
+               Optional(Word("Stop")) and
+               Word("Stammers");
 
+         };
+
+         success = testPattern(
+            Parser(),
+            "Stammers",
+            true
+         );
+
+         
+      }
 
       return success;
+
    }
 
    inline bool testComplex() {
@@ -386,21 +394,34 @@ namespace BeeFishParser {
 
       bool success = true;
 
-      std::cout << "testRepeat: " << std::flush;
+      std::cout << "testRepeat:" << std::endl;
 
       Range aToZ("a", "z");
 
       Repeat name1 = Repeat(aToZ, 1);
 
       success = success &&
-         name1.read("brett") &&
-         name1._result == std::nullopt;
+         testPattern(name1, "brett", true);
 
+      
       Repeat name2 = Repeat(aToZ, 1);
       success = success &&
          name2.read("1") == false &&
          name2._result == false;
 
+      
+
+      if (success) {
+         const Character quote("'");
+         And string =
+            quote and
+            Repeat(not quote) and
+            quote;
+         string.read("'hello world'");
+         success = string._result == true;
+      }
+
+         
       BeeFishMisc::outputSuccess(success);
 
 

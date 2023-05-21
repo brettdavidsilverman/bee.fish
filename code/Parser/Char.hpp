@@ -9,7 +9,7 @@
 
 namespace BeeFishParser {
 
-   class Char : public ParserBase
+   class Char : public Parser
    {
    public:
       std::bitset<8> _bits;
@@ -44,9 +44,14 @@ namespace BeeFishParser {
             _char = _bits.to_ulong();
          }
 
-         ParserBase::setResult(result);
+         Parser::setResult(result);
 
       }
+
+      virtual Parser* copy() const {
+throw std::logic_error("Should not reach here");
+      }
+      
    };
 
 

@@ -13,6 +13,7 @@ clean:
 run:	$(OUTPUT)
 	$(OUTPUT)
 
+debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	$(OUTPUT)

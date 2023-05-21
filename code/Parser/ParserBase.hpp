@@ -10,23 +10,28 @@ namespace BeeFishParser {
 
    class UTF8Character;
 
-   class ParserBase {
+   class Parser {
+#ifdef DEBUG
+   protected:
+      std::string _value;
+#endif
+
    public:
       std::optional<bool> _result = std::nullopt;
 
    public:
    
-      ParserBase()
+      Parser()
       {
          ++parserInstanceCount();
       }
 
-      ParserBase(const ParserBase& parser)
+      Parser(const Parser& parser)
       {
          ++parserInstanceCount();
       }
       
-      virtual ~ParserBase()
+      virtual ~Parser()
       {
          --parserInstanceCount();
       }
@@ -73,7 +78,78 @@ namespace BeeFishParser {
          return _parserInstanceCount;
       }
 
+      virtual bool read(
+         const std::string& string
+      )
+      {
+         using namespace std;
 
+         for (const char& c : string)
+         {
+            if (!read(c))
+              return false;
+
+#ifdef DEBUG
+            _value.push_back(c);
+cerr << c << flush;
+
+#endif
+         }
+
+         return true;
+
+      }
+
+      virtual bool read(
+         const char* stream
+      )
+      {
+         const std::string string(stream);
+         return read(string);
+      }
+
+      virtual bool read(
+         char character
+      )
+      {
+         std::bitset<8> bits = character;
+         for (int i = 7;
+              i >= 0;
+              --i)
+         {
+
+            bool bit = bits[i];
+
+            if (!read(bit))
+               return false;
+         
+         }
+
+
+         return true;
+      }
+      
+      virtual bool read(bool bit) = 0;
+
+      virtual bool read(
+         const UTF8Character& utf8
+      )
+      {
+         return true;
+      }
+      
+      virtual const std::string& value() const
+      {
+#ifdef DEBUG
+         return _value;
+#else
+         return EmptyString();
+#endif
+      }
+
+      virtual Parser* copy() const = 0;
+      
+      virtual bool isOptional() const;
       
 
    };

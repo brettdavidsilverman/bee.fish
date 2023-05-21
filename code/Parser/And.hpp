@@ -11,15 +11,15 @@ using namespace std;
 namespace BeeFishParser {
 
    class And : public Parser {
-   protected:
+   private:
       std::vector< std::shared_ptr<Parser> > _inputs;
-      size_t _iterator {0};
-
+      size_t _index {0};
+      std::string _buffer;
    public:
       using Parser::read;
 
       And(const And& source) {
-         for (const std::shared_ptr<Parser> parser : source._inputs) {
+         for (const std::shared_ptr<Parser>& parser : source._inputs) {
             _inputs.push_back(
                std::shared_ptr<Parser>(
                   parser->copy()
@@ -80,49 +80,67 @@ namespace BeeFishParser {
          char character
       ) override
       {
+
+         using namespace std;
+
          bool matched = false;
-            
-         if ( _iterator == _inputs.size() ) {
+
+         if ( _index == _inputs.size() ) {
             setResult(false);
             return false;
          }
-         
-         
-         while (!matched &&
-                _result == std::nullopt)
+
+         _buffer.push_back(character);
+         std::shared_ptr<Parser> 
+            item;
+
+         bool nextItem = false;
+
+         while (
+            !matched &&
+            _result == std::nullopt
+         )
          {
-            std::shared_ptr<Parser> 
-               item = _inputs[_iterator];
-
-            bool isOptional =
-               item->isOptional();
-
-            matched =
-               item->read(character);
-         
-            if (item->_result == true) {
-            
-               if ( ++_iterator == 
-                    _inputs.size() )
-               {
-                  setResult(true);
-               }
-               
+            item = _inputs[_index];
+            if (nextItem) {
+               matched =
+                  item->read(_buffer);
+               nextItem = false;
             }
-            else if (!matched) {
-               if (isOptional) {
-                  if ( ++_iterator == 
+            else {
+               matched =
+                  item->read(character);
+            }
+
+            
+            if (!matched) {
+            //if (item->_result == false) {
+
+ 
+               if (item->isOptional()) {
+                  ++_index;
+                  if ( _index == 
                        _inputs.size() )
                   {
                      setResult(true);
                   }
+                  nextItem = true;
                }
                else {
                   setResult(false);
                }
                
             }
-            
+            else if (item->_result == true) {
+               ++_index;
+               if ( _index == 
+                    _inputs.size() )
+               {
+                  setResult(true);
+               }
+               _buffer.clear();
+               
+            }
          }
 
          return matched;

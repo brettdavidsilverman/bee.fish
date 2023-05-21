@@ -14,31 +14,24 @@ using namespace BeeFishMisc;
 using namespace BeeFishParser;
 
 
-
 int main(int argc, const char* argv[]) {
 
-   if (false)
+
+   if (true)
    {
       bool success = true;
 
-      auto Parser = []() {
+      auto parser = []() {
          return
-            Character("\"") and
-            Repeat(
-               not Character("\""),
-               0
-            ) and
-            Character("\"");
+            Repeat(Range("a", "z"));
 
       };
 
-      std::string pattern = "\"";
+      success = success &&
+         testPattern(parser(), "brett", true);
 
-      std::cout << "\t" << pattern << ":";
-      auto parser = Parser();
-      parser.read(pattern);
-      std::cout << "{" << parser.result() << "}" << std::endl;
-      return 0;
+     // return 0;
+
    }
 
    cerr << "bee.fish.parser"

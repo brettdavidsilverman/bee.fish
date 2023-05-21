@@ -76,17 +76,18 @@ namespace BeeFishParser
 					setResult(true);
 
 			}
-			else if (
-				(_item->_result == false) ||
-				(!matched))
+			else if //(
+				(_item->_result == false)// ||
+				//(!matched))
 			{
 				if (_matchedCount >= _minimum)
 				{
 					setResult(true);
+                    //matched = true;
 				}
 				else
 				{
-					matched = false;
+					//matched = false;
 					setResult(false);
 				}
 			}

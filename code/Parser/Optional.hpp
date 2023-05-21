@@ -1,5 +1,5 @@
-#ifndef BEE_FISH_PARSER__OPTIONAL_HPP
-#define BEE_FISH_PARSER__OPTIONAL_HPP
+#ifndef BEE_FISH__PARSER__OPTIONAL_HPP
+#define BEE_FISH__PARSER__OPTIONAL_HPP
 #include <string>
 #include <stdexcept>
 #include <memory>
@@ -55,7 +55,7 @@ namespace BeeFishParser {
          }
 
          if (succeeded)
-            _result = true;
+            setResult(true);
 
          return matched;
       }
@@ -71,6 +71,14 @@ namespace BeeFishParser {
       }
      
    };
+
+   inline bool Parser::isOptional() const {
+      const Optional* optional =
+         dynamic_cast<const Optional*>(this);
+     if (optional == nullptr)
+         return false;
+      return true;
+   }
 
 
 }
