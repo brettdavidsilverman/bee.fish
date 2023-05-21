@@ -2,6 +2,8 @@
 #define BEE_FISH__MISCELLANEOUS__HPP
 
 #include <string>
+#include <unistd.h>
+
 #include "optional.h"
 
 namespace BeeFish {
@@ -21,6 +23,9 @@ namespace BeeFish {
       return -1;
    }
 
+   static void sleep(long seconds) {
+      usleep(seconds * 1000L * 1000L);
+   }
 
 }
 

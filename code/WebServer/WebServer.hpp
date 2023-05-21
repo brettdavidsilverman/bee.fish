@@ -20,7 +20,7 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/post.hpp>
 
-#include "config.hpp"
+#include "Config.hpp"
 
 namespace BeeFish {
 
@@ -67,15 +67,15 @@ namespace BeeFish {
 
       virtual void stop() {
          using namespace std;
-
+/*
          cout << "Stopping WebServer" << endl;
 
          std::stringstream stream;
-         stream << "./stop.sh " << _port;
+         stream << STOP_SCRIPT << " " << _port;
          std::string command = stream.str();
          system(command.c_str());
-     
-         throw runtime_error("Should not reach here");
+     */
+         throw runtime_error("Terminating");
          
       }
 
@@ -209,7 +209,8 @@ namespace BeeFish {
                   "HTTP/2.0 200 OK\r\n" <<
                   "Content-Type: text/plain\r\n" <<
                   "Connection: keep-alive\r\n" <<
-                  "Content-Length: " << output.length() << "\r\n" <<
+                  "Content-Length: " <<
+                     input.length() << "\r\n" <<
                   "\r\n" <<
                   input;
 
@@ -229,7 +230,7 @@ namespace BeeFish {
 
       virtual const std::string readInput(int clientSocket)
       {
-         std::stringstream readInput;
+         std::stringstream stream;
          while (pollInput(clientSocket))
          {
             int ret;
@@ -241,16 +242,15 @@ namespace BeeFish {
                     sizeof(buff))
                   ) > 0)
             {
-               readInput.write(buff, ret);
+               stream.write(buff, ret);
                if (ret < sizeof(buff))
                    break;
-               }
-               if (ret < sizeof(buff))
-                  break;
             }
+            if (ret < sizeof(buff))
+               break;
          }
 
-         return readInput.str();
+         return stream.str();
 
       }
 
@@ -272,11 +272,6 @@ namespace BeeFish {
             ::close(_serverSocket);
          _serverSocket = -1;
       }
-
-      static void sleep() {
-         usleep(2L * 1000L * 1000L);
-      }
-
    
    };
 

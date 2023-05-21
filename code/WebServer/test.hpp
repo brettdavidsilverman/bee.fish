@@ -34,7 +34,7 @@ namespace BeeFish {
       WebServer testServer(8080, 1);
       
       testServer.start();
-      WebServer::sleep();
+      BeeFish:sleep(2);
 
       //string command = "curl " + testServer.host();
          

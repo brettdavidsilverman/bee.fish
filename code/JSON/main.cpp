@@ -1,7 +1,7 @@
 #include <iostream>
 #include <filesystem>
 
-#include "config.hpp"
+#include "Config.hpp"
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../Parser/Parser.hpp"
 #include "../Parser/Test.hpp"

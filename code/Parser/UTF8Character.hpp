@@ -2,6 +2,8 @@
 #define BEE_FISH_PARSER__UTF8_CHARACTER_HPP
 #include <string>
 #include <vector>
+#include <locale>
+#include <codecvt>
 #include "Char.hpp"
 #include "Parser.hpp"
 
