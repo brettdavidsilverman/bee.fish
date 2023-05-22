@@ -17,19 +17,26 @@ using namespace BeeFishParser;
 
 int main(int argc, const char* argv[]) {
 
-   if (false)
+   if (true)
    {
       bool success = true;
 
-      success = success &&
-         testPattern(
-            Character("'") and
-            Repeat(not Character("'")) and
-            Character("'"),
-            "'brett'",
-            true
-         );
-     return 0;
+      auto parser = []() {
+         return not Word("hello");
+      };
+/*
+      success &= testPattern(
+         parser(),
+         "world",
+         true
+      );
+ */
+      success &= testPattern(
+         parser(),
+         "hello",
+         false
+      );
+     
 
    }
 

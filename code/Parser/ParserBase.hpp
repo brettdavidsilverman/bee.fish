@@ -89,10 +89,8 @@ namespace BeeFishParser {
             if (_result != nullopt)
                return false;
 
-            read(c);
-         
-            //if (!read(c))
-             // return false;
+            if (!read(c))
+               return false;
 
 #ifdef DEBUG
             _value.push_back(c);

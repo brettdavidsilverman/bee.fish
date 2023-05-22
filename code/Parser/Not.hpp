@@ -27,6 +27,9 @@ namespace BeeFishParser {
       override
       {
 
+         if (_result != nullopt)
+            throw 1;
+
          bool matched =
             _not->read(c);
 
@@ -37,6 +40,8 @@ namespace BeeFishParser {
          {
             setResult(true);
          }
+         else if (_not->_result == nullopt)
+            return true;
 
          return !matched;
       }
