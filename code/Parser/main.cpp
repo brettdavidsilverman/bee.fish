@@ -14,38 +14,26 @@ using namespace BeeFishMisc;
 using namespace BeeFishParser;
 
 
+
 int main(int argc, const char* argv[]) {
 
-      auto parser2= []() {
-         return
-            Optional(Word("Start")) and
-            Optional(Word("Stop")) and
-            Word("Stammer");
-      };
-
-      testPattern(
-         parser2(),
-         "Stammer",
-         true
-      );
-
-
-
-   if (true)
+   if (false)
    {
       bool success = true;
 
       success = success &&
          testPattern(
-            Repeat(Range("a", "z")),
-            "brett",
+            Character("'") and
+            Repeat(not Character("'")) and
+            Character("'"),
+            "'brett'",
             true
          );
-     // return 0;
+     return 0;
 
    }
 
-   cerr << "bee.fish.parser"
+   cout << "bee.fish.parser"
            << endl
         << "C++ run time: "
            << __cplusplus

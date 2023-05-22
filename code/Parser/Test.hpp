@@ -208,34 +208,23 @@ namespace BeeFishParser {
 
       bool success = true;
 
-      std::cout << "testNot:" << std::endl;
+      std::cout << "testNot:\"hello\"" << std::endl;
 
-      auto Parser = []() {
-         Word a("hello");
-         Not _nota(a);
-         return _nota;
+      auto parser = []() {
+         return not Word("hello");
       };
 
-      if (success)
-      {
-         std::cout << "\tworld:";
-         auto parser = Parser();
-         parser.read("world");
-         success = success &&
-            parser.result() == true;
-         BeeFishMisc::outputSuccess(success);
-         
-      }
-
-      if (success)
-      {
-         std::cout << "\thello:";
-         auto parser = Parser();
-         parser.read("hello");
-         success = success &&
-            parser.result() == std::nullopt;
-         BeeFishMisc::outputSuccess(success);
-      }
+      success &= testPattern(
+         parser(),
+         "world",
+         true
+      );
+ 
+      success &= testPattern(
+         parser(),
+         "hello",
+         false
+      );
 
       BeeFishMisc::outputSuccess(success);
 
@@ -286,21 +275,32 @@ namespace BeeFishParser {
 
       std::cout << "testRange: " << std::flush;
 
-      Range aToZ("a", "z");
+      auto _Parser = []() {
+         return Range("a", "z");
 
-      Range parser = aToZ;
+      };
 
-      success = success &&
-         parser.read("a") &&
-         parser._result == true;
+      
+      success &= testPattern(
+         _Parser(),
+         "a",
+         true
+      );
 
-      parser = aToZ;
-      success = success &&
-         parser.read("1") == false &&
-         parser._result == false;
+      success &= testPattern(
+         _Parser(),
+         "z",
+         true
+      );
+
+      success &= testPattern(
+         _Parser(),
+         "1",
+         false
+      );
+
 
       BeeFishMisc::outputSuccess(success);
-
 
       return success;
    }
@@ -369,6 +369,10 @@ namespace BeeFishParser {
          "Stammer",
          true
       );
+
+      BeeFishMisc::outputSuccess(success);
+
+
       return success;
 
    }
@@ -406,32 +410,52 @@ namespace BeeFishParser {
 
       std::cout << "testRepeat:" << std::endl;
 
-      Range aToZ("a", "z");
 
-      Repeat name1 = Repeat(aToZ, 1);
+      const Range aToZ("a", "z");
 
-      success = success &&
-         testPattern(name1, "brett", true);
+
+      success &=
+         testPattern(
+            Repeat(aToZ, 1),
+            "brett",
+            std::nullopt
+         );
+
+      success &=
+         testPattern(
+            Repeat(aToZ, 1),
+            "1",
+            false
+         );
 
       
-      Repeat name2 = Repeat(aToZ, 1);
-      success = success &&
-         name2.read("1") == false &&
-         name2._result == false;
 
-      
-
-      if (success) {
+      auto StringParser = []() {
          const Character quote("'");
-         And string =
+         return
             quote and
             Repeat(not quote) and
             quote;
-         string.read("'hello world'");
-         success = string._result == true;
-      }
-
+      };
          
+      success &= testPattern(
+         StringParser(),
+         "'hello world'",
+         true
+      );
+         
+      success &= testPattern(
+         StringParser(),
+         "'hello world",
+         std::nullopt
+      );
+
+      success &= testPattern(
+         StringParser(),
+         "hello world",
+         false
+      );
+
       BeeFishMisc::outputSuccess(success);
 
 

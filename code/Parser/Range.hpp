@@ -36,7 +36,8 @@ namespace BeeFishParser {
            const Character& character
         ) override
 		{
-				
+            using namespace std;
+
 			bool matched =
 				(*_minimum <= character) &&
 				(*_maximum >= character);

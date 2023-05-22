@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include "../Miscellaneous/Miscellaneous.hpp"
 
 #include "Parser.hpp"
 
@@ -69,7 +70,6 @@ namespace BeeFishParser
 				if (_maximum > 0 &&
 					_matchedCount > _maximum)
 				{
-					matched = false;
 					setResult(false);
 				}
 
@@ -77,9 +77,10 @@ namespace BeeFishParser
 					setResult(true);
 
 			}
-			else if //(
-				(_item->_result == false)// ||
-				//(!matched))
+			else if (
+			 	//(_item->_result == false)// ||
+				(!matched)
+            )
 			{
 				if (_matchedCount >= _minimum)
 				{
@@ -106,7 +107,13 @@ namespace BeeFishParser
         virtual Parser* copy() const {
            return new Repeat(*_template, _minimum, _maximum);
         }
-
+/*
+        virtual bool isOptional() const
+        override
+        {
+           return true;
+        }
+*/
 
 	};
 

@@ -77,7 +77,7 @@ namespace BeeFishParser {
       }
 
       virtual bool read(
-         char character
+         char c
       ) override
       {
 
@@ -90,9 +90,8 @@ namespace BeeFishParser {
             return false;
          }
 
-         _buffer.push_back(character);
+         _buffer.push_back(c);
 
-         
          bool nextItem = false;
 
          
@@ -103,39 +102,43 @@ namespace BeeFishParser {
 
             std::shared_ptr<Parser> 
                item = _inputs[_index];
-         if (nextItem) {
+            
+            if (nextItem) {
+
                matched = item->read(_buffer);
 
                nextItem = false;
             }
             else {
                matched =
-                  item->read(character);
+                  item->read(c);
 
             }
-cerr << typeid(*item).name() << ":" << character << ":" << matched << endl;
-  
-   
+
+
             if (item->_result == true) {
                ++_index;
                _buffer.clear();
-               break;
+             //  if (!matched)
+              //    _buffer.push_back(c);
             }
-            
-            if (!matched && item->isOptional()) {
-               ++_index;
-               nextItem = true;
-               continue;
+            else if (!matched) {
+               if (item->isOptional()) {
+                  ++_index;
+                  nextItem = true;
+                  continue;
+               }
+               else {
+                  setResult(false);
+                 break;
+               }
+               
             }
-            else {
-               setResult(false);
-               break;
-            }
-
 
             if (matched)
                break;
-
+            
+               
          }
 
          if (_index == _inputs.size())

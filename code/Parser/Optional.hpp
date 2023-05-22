@@ -12,7 +12,6 @@ namespace BeeFishParser {
    class Optional : public Parser {
    protected:
       std::shared_ptr<Parser> _optional;
-      bool _matched = false;
    public:
       using Parser::read;
 
@@ -38,24 +37,13 @@ namespace BeeFishParser {
          
          bool matched =
             _optional->read(c);
-         
-         bool succeeded = false;
-         
+
          if (_optional->_result == true)
          {
          
-            _matched = true;
-            succeeded = true;
+            setResult(true);
             
          } 
-         else if (_optional->_result == false)
-         {
-            _matched = false;
-            //succeeded = true;
-         }
-
-         if (succeeded)
-            setResult(true);
 
          return matched;
       }

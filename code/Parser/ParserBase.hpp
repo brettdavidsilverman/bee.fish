@@ -10,7 +10,7 @@ namespace BeeFishParser {
 
    class UTF8Character;
 
-   class Parser {
+   class ParserBase {
 #ifdef DEBUG
    protected:
       std::string _value;
@@ -21,17 +21,17 @@ namespace BeeFishParser {
 
    public:
    
-      Parser()
+      ParserBase()
       {
          ++parserInstanceCount();
       }
 
-      Parser(const Parser& parser)
+      ParserBase(const ParserBase& parser)
       {
          ++parserInstanceCount();
       }
       
-      virtual ~Parser()
+      virtual ~ParserBase()
       {
          --parserInstanceCount();
       }
@@ -86,8 +86,13 @@ namespace BeeFishParser {
 
          for (const char& c : string)
          {
-            if (!read(c))
-              return false;
+            if (_result != nullopt)
+               return false;
+
+            read(c);
+         
+            //if (!read(c))
+             // return false;
 
 #ifdef DEBUG
             _value.push_back(c);
@@ -145,12 +150,14 @@ namespace BeeFishParser {
 #endif
       }
 
-      virtual Parser* copy() const = 0;
+      virtual ParserBase* copy() const = 0;
       
       virtual bool isOptional() const;
       
 
    };
+
+   typedef ParserBase Parser;
 }
 
 #endif
