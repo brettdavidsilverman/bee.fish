@@ -5,42 +5,28 @@
 
 namespace BeeFishJSON {
 
-   auto Quote() {
+         
+   auto String() {
       using namespace BeeFishParser;
+      
+      auto quote = Character("\"");
 
-      return Character("\"");
-
-   }
-
-   auto PlainCharacter() {
-
-       using namespace BeeFishParser;
-
-       return not (
+      auto escapedCharacter =
           Character("\\") or
           Character("\"") or
           Character("\r") or
           Character("\n") or
           Character("\b") or
-          Character("\f")
-      );
-   }
+          Character("\f");
 
-   auto String() {
-      using namespace BeeFishParser;
-
+      auto stringCharacter =
+         not quote;// or
+         //escapedCharacter;
+  
       return
-         Quote() and
-         Repeat(PlainCharacter(), 0) and
-/*
-               Character("\\") and (
-                  Quote() or
-                  Character("r") or
-                  Character("n") or
-               ) and not Quote()
-            ) and
-*/
-         Quote();
+         quote and
+         Repeat(stringCharacter, 0) and
+         quote;
    }
 }
 
