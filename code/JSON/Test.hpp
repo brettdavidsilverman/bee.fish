@@ -33,10 +33,6 @@ namespace BeeFishJSON {
    inline bool testIntegers()  {
       using namespace std;
 
-      auto Integers = []() {
-         return Repeat(Range("0", "9"));
-      };
-
       bool success = true;
 
       cout << "Testing Integers:" << endl;

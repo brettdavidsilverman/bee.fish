@@ -7,34 +7,46 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   auto Number() {
-   
-      const auto integer =
-         Repeat(Range("0", "9"));
+   auto Integer() {
+      return Range("0", "9");
+   }
 
-      const auto sign =
-         Character("+") or
-         Character("-");
+   auto Integers() {
+      return Repeat(Integer());
+   }
 
-      const auto exponent =
+   auto Exponent() {
+      return
          (
             Character("e") or
-            Character("E")
+            Character("E") 
          ) and
          Optional(
-            sign
+            Character("+") or
+            Character("-")
          ) and
-         integer;
-       
-      const auto fraction =
+         Integers();
+   }
+
+   auto Fractions() {
+      return
          Character(".") and
-         integer;
+         Integers();
+   }
+
+   auto Number() {
 
       return
-         Optional(sign) and
-         integer and
-         Optional(fraction) and
-         Optional(exponent);
+         Optional(
+            Character("-")
+         ) and
+         Integers() and
+         Optional(
+            Fractions()
+         ) and
+         Optional(
+            Exponent()
+         );
    }
 }
 
