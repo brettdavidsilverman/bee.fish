@@ -36,23 +36,6 @@ int main(int argc, const char* argv[]) {
       return 0;
    }
    
-/* BeeFishJSON::JSON json;
-
-   BeeFishJSON::JSONParser parser(json);
- 
-   parser.read(cin);
-
-   if (json.matched())// || (json->result() == BeeFishMisc::nullopt))
-   {
-      cout << "Valid JSON: " << json.value() << endl;
-   }
-   else
-   {
-      cout << "Invalid JSON" << endl;
-   }
-
-   return 0;
-
    string line;
    while (!cin.eof())
    {
@@ -63,23 +46,25 @@ int main(int argc, const char* argv[]) {
       if (!line.length())
          break;
         
-      BeeFishJSON::JSON json;
-      
-      BeeFishJSON::JSONParser parser(json);
+      auto parser = BeeFishJSON::JSON();
       
       parser.read(line);
 
-      if (json.matched() || (json.result() == BeeFishMisc::nullopt))
+      if (parser.result() == true)
       {
          cout << "Valid JSON" << endl;
       }
-      else
+      else if (parser.result() == false)
       {
          cout << "Invalid JSON" << endl;
       }
-      
+      else if (parser.result() == std::nullopt)
+      {
+         cout << "Insufficient data" << endl;
+      }
+
    }
-*/
+
    cout << "Bye" << endl;
    
    return 0;

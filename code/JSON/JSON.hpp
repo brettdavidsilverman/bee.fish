@@ -4,6 +4,15 @@
 #include "../Parser/Test.hpp"
 #include "Version.hpp"
 #include "Number.hpp"
+#include "String.hpp"
+
+namespace BeeFishJSON {
+
+   auto JSON() {
+      using namespace BeeFishParser;
+      return Number() or String();
+   }
+}
 
 /*
 #include "version.h"

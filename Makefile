@@ -1,4 +1,4 @@
-all: build Makefile
+all:	build
 	cd code && make $(DEBUG)
 
 build:
@@ -8,9 +8,10 @@ install: all
 	sudo setcap cap_net_bind_service=ep ./build/WebServer
 	./start.sh $(PORT)
 
-test: all ./code/WebServer/test.hpp Makefile
+test:	all
 	./build/Parser -test
-	./build/WebServer -test
+	./build/JSON -test
+	- ./build/WebServer -test
 
 clean:
 	rm -f -r build

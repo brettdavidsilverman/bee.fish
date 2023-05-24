@@ -21,23 +21,8 @@ int main(int argc, const char* argv[]) {
    {
       bool success = true;
 
-      auto parser = []() {
-         return not Word("hello");
-      };
-/*
-      success &= testPattern(
-         parser(),
-         "world",
-         true
-      );
- */
-      success &= testPattern(
-         parser(),
-         "hello",
-         false
-      );
-     
-
+      //testNumber();
+      //return 0;
    }
 
    cout << "bee.fish.parser"

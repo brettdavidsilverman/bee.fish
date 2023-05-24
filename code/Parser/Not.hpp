@@ -28,7 +28,7 @@ namespace BeeFishParser {
       {
 
          if (_result != nullopt)
-            throw 1;
+            return true;
 
          bool matched =
             _not->read(c);

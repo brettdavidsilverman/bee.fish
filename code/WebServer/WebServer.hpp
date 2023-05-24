@@ -67,15 +67,16 @@ namespace BeeFishWebServer {
 
       virtual void stop() {
          using namespace std;
-/*
+
          cout << "Stopping WebServer" << endl;
 
          std::stringstream stream;
-         stream << STOP_SCRIPT << " " << _port;
+         stream << "sudo " << STOP_SCRIPT << " " << _port;
          std::string command = stream.str();
          system(command.c_str());
-     */
-         throw runtime_error("Terminating");
+         BeeFishMisc::sleep(2);
+
+         throw runtime_error("Should not reach here");
          
       }
 

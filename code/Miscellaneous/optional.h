@@ -95,8 +95,8 @@ namespace std {
                 return false;
             return (bool)_value;
         }
-
-        inline friend std::ostream& operator << (std::ostream& out, const optional<T> value) {
+/*
+        inline friend std::ostream& operator << (std::ostream& out, const optional<T>& value) {
             if (value.hasValue())
                 out << value.value();
             else
@@ -104,15 +104,32 @@ namespace std {
 
             return out;
         }
-/*
-        operator const T& () const {
-            if (!_hasValue)
-                throw std::runtime_error("No value");
-            return _value;
-        }
 */
-    };
-    
+        inline friend std::ostream& operator << (std::ostream& out, const optional<bool>& value) {
+            if (value == true)
+               out << "true";
+            else if (value == false)
+               out << "false";
+            else
+               out << "null";
+            return out;
+        }
+
+        
+   };
+/*
+   static ostream& operator << (ostream& out, const optional<bool>& value) {
+
+      if (value == true)
+         out << "true";
+      else if (value == false)
+         out << "false";
+      else
+         out << "null";
+
+      return out;
+   }
+    */
 }
 
 

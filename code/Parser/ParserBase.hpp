@@ -83,18 +83,25 @@ namespace BeeFishParser {
       )
       {
          using namespace std;
+         size_t count = 0;
 
          for (const char& c : string)
          {
-            if (_result != nullopt)
-               return false;
+           // if (_result == false)
+          //     return false;
 
             if (!read(c))
-               return false;
-
+               break;
+            ++count;
 #ifdef DEBUG
             _value.push_back(c);
 #endif
+         }
+
+         if (count != string.length())
+         {
+            setResult(false);
+            return false;
          }
 
          return true;

@@ -1,9 +1,10 @@
 OUTPUT = ../../build/JSON
-DEPS = Makefile main.cpp Number.hpp Test.hpp
+DEPS = Makefile main.cpp Number.hpp String.hpp Test.hpp
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic
 
+debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	$(OUTPUT)
@@ -18,12 +19,12 @@ time:
 test:	$(OUTPUT)
 	$(OUTPUT) -test
 
+run:	$(OUTPUT)
+	$(OUTPUT)
+
 clean:
-	rm -f *.o
-	rm -f a.out
-	rm -f json
+	rm -f $(OUTPUT)
 	rm -f tmp
 	rm -f callgrind.out.*
 	rm -f trace.txt
 	rm -f test.data
-	rm -f main

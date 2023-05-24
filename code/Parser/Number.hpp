@@ -11,24 +11,29 @@ namespace BeeFishParser {
 
    auto Number() {
    
+      const auto sign =
+         Character("+") or
+         Character("-");
+
+      const auto exponent =
+         (
+            Character("e") or
+            Character("E")
+         ) and
+         Optional(
+            sign
+         ) and
+         Integer();
+       
+      const auto fraction =
+         Character(".") and
+         Integer();
+
       return
-         Optional(
-            Character("-")
-         ) and
+         Optional(sign) and
          Integer() and
-         Optional(
-            Character(".") and
-            Integer()
-         ) and
-         Optional(
-            ( Character("e") or
-              Character("E") ) and
-            Optional(
-               Character("+") or
-               Character("-")
-            ) and
-            Integer()
-         );
+         Optional(fraction) and
+         Optional(exponent);
    }
 }
 

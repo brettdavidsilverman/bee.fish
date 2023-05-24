@@ -106,7 +106,6 @@ namespace BeeFishParser {
             if (nextItem) {
 
                matched = item->read(_buffer);
-
                nextItem = false;
             }
             else {
@@ -119,10 +118,11 @@ namespace BeeFishParser {
             if (item->_result == true) {
                ++_index;
                _buffer.clear();
-             //  if (!matched)
-              //    _buffer.push_back(c);
+               if (!matched)
+                  _buffer.push_back(c);
             }
-            else if (!matched) {
+            else if (!matched || item->_result == false) {
+
                if (item->isOptional()) {
                   ++_index;
                   nextItem = true;
@@ -130,7 +130,7 @@ namespace BeeFishParser {
                }
                else {
                   setResult(false);
-                 break;
+                  break;
                }
                
             }

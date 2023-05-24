@@ -35,6 +35,7 @@ namespace BeeFishParser {
       ) override
       {
          
+   
          bool matched =
             _optional->read(c);
 
@@ -42,6 +43,12 @@ namespace BeeFishParser {
          {
          
             setResult(true);
+            
+         }
+         else if(_optional->_result == false)
+         {
+            //setResult(false);
+            return false;
             
          } 
 

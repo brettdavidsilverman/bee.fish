@@ -3,20 +3,24 @@
 
 #include <thread>
 #include <stdlib.h>
-
 #include "JSON.hpp"
 
 namespace BeeFishJSON {
  
+   using namespace BeeFishMisc;
+
+   bool testIntegers();
    bool testNumbers();
-   bool testNumber(const std::string&, bool expected);
+   bool testStrings();
 
    inline bool test() {
       using namespace std;
 
       bool success = true;
 
+      success &= testIntegers();
       success &= testNumbers();
+      success &= testStrings();
 
       if (success)
          cout << "JSON tests pass" << endl;
@@ -26,6 +30,44 @@ namespace BeeFishJSON {
       return success;
    }
 
+   inline bool testIntegers()  {
+      using namespace std;
+
+      bool success = true;
+
+      cout << "Testing Integers:" << endl;
+
+      success = success &&
+         testPattern(Integers(), "123", nullopt);
+ 
+      success = success &&
+         testPattern(Integers(), "a", false);
+ 
+      success = success &&
+         testPattern(Integers(), "10b", true);
+
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+      
+   }
+
+
+   static bool testNumber(
+      const std::string& pattern,
+      const std::optional<bool>&
+          expected)
+   {
+      auto complex = Number();// and
+        // BeeFishParser::Word("\r\n");
+
+      return testPattern(
+         complex,
+         pattern,
+         expected
+      );
+   }
+
    inline bool testNumbers()  {
       using namespace std;
 
@@ -33,36 +75,54 @@ namespace BeeFishJSON {
 
       cout << "Testing Numbers:" << endl;
 
-      std::string string;
-         
-      success = success &&
-         testNumber("-1.2e-10", true);
+      success &=
+         testNumber("1", nullopt);
  
+      success &=
+         testNumber("-1", nullopt);
+ 
+      success &=
+         testNumber("-1e+1", nullopt);
+
+      success &=
+         testNumber("-1.2e-10", nullopt);
+
+      success &=
+         testNumber("10b", true);
+
+
       BeeFishMisc::outputSuccess(success);
 
       return success;
       
    }
 
-   inline bool testNumber(
-      const std::string& string,
-      bool expected
-   )
-   {
+   inline bool testStrings()  {
+      using namespace std;
+
       bool success = true;
 
-      cout << "\t" << string << ": " << flush;
-      auto number = Number();
-      number.read(string + "\r\n");
+      cout << "Testing Strings:" << endl;
+
       success = success &&
-         number.result() == expected;
+         testPattern(String(), "\"\"", true);
+ 
+      success = success &&
+         testPattern(String(), "\"", false);
+ 
+      success = success &&
+         testPattern(String(), "\"text\"", true);
+
+      success = success &&
+         testPattern(String(), "unquoted", false);
 
       BeeFishMisc::outputSuccess(success);
 
       return success;
-
+      
    }
 
+   
    
 }
 

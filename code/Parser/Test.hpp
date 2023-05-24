@@ -1,8 +1,10 @@
-#ifndef BEE_FISH_PARSER__TEST_HPP
-#define BEE_FISH_PARSER__TEST_HPP
+#ifndef BEE_FISH__PARSER__TEST_HPP
+#define BEE_FISH__PARSER__TEST_HPP
 
-#include "Parser.hpp"
+
 #include "../Miscellaneous/Miscellaneous.hpp"
+#include "Parser.hpp"
+#include "Number.hpp"
 
 namespace BeeFishParser {
 
@@ -21,6 +23,7 @@ namespace BeeFishParser {
    bool testComplex();
    bool testRules();
    bool testCapture();
+   bool testNumber();
 
    inline bool test() {
       
@@ -63,6 +66,9 @@ namespace BeeFishParser {
          return false;
 
       if (!testCapture())
+         return false;
+
+      if (!testNumber())
          return false;
 
       return true;
@@ -172,6 +178,18 @@ namespace BeeFishParser {
          parser(),
          "ab",
          true
+      );
+
+      success &= testPattern(
+         parser(),
+         "a",
+         nullopt
+      );
+
+      success &= testPattern(
+         parser(),
+         "b",
+         false
       );
 
  
@@ -518,6 +536,26 @@ namespace BeeFishParser {
       success = parser.read("Brett David Silverman");
       //success &=
       //   (myName == "Brett David Silverman");
+
+      BeeFishMisc::outputSuccess(success);
+
+
+      return success;
+   }
+
+   inline bool testNumber() {
+
+      bool success = true;
+
+      std::cout << "testNumber: " << std::flush;
+
+      std::string myName;
+
+      success &= testPattern(
+         Number(),
+         "1e+1",
+         nullopt
+      );
 
       BeeFishMisc::outputSuccess(success);
 
