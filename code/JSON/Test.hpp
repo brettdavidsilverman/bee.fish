@@ -9,7 +9,7 @@ namespace BeeFishJSON {
  
    using namespace BeeFishMisc;
 
-   bool testIntegers();
+   bool testBlankSpace();
    bool testNumbers();
    bool testStrings();
 
@@ -18,9 +18,14 @@ namespace BeeFishJSON {
 
       bool success = true;
 
-      success &= testIntegers();
-      success &= testNumbers();
-      success &= testStrings();
+      success = success &&
+         testBlankSpace();
+
+      success = success &&
+         testNumbers();
+
+      success = success &&
+         testStrings();
 
       if (success)
          cout << "JSON tests pass" << endl;
@@ -30,21 +35,48 @@ namespace BeeFishJSON {
       return success;
    }
 
-   inline bool testIntegers()  {
+   inline bool testBlankSpace()  {
       using namespace std;
 
       bool success = true;
 
-      cout << "Testing Integers:" << endl;
+      cout << "Testing Blank Space:" << endl;
+     
+      success &= testPattern(
+         BlankSpace(),
+         " ",
+         nullopt
+      );
 
-      success = success &&
-         testPattern(Integers(), "123", nullopt);
- 
-      success = success &&
-         testPattern(Integers(), "a", false);
- 
-      success = success &&
-         testPattern(Integers(), "10b", true);
+      success &= testPattern(
+         BlankSpace(),
+         "\r",
+         nullopt
+      );
+
+      success &= testPattern(
+         BlankSpace(),
+         "\n",
+         nullopt
+      );
+
+      success &= testPattern(
+         BlankSpace(),
+         "\t",
+         nullopt
+      );
+
+      success &= testPattern(
+         BlankSpace(),
+         "a",
+         false
+      );
+
+      success &= testPattern(
+         BlankSpace(),
+         " a",
+         false
+      );
 
       BeeFishMisc::outputSuccess(success);
 
@@ -52,18 +84,17 @@ namespace BeeFishJSON {
       
    }
 
-
    static bool testNumber(
       const std::string& pattern,
       const std::optional<bool>&
           expected)
    {
-      auto complex = Number();// and
-        // BeeFishParser::Word("\r\n");
+      auto complex = Number() and
+         BeeFishParser::Word("\r\n");
 
       return testPattern(
          complex,
-         pattern,
+         pattern + "\r\n",
          expected
       );
    }
@@ -76,19 +107,19 @@ namespace BeeFishJSON {
       cout << "Testing Numbers:" << endl;
 
       success &=
-         testNumber("1", nullopt);
+         testNumber("1", true);
  
       success &=
-         testNumber("-1", nullopt);
+         testNumber("-1", true);
  
       success &=
-         testNumber("-1e+1", nullopt);
+         testNumber("-1e+1", true);
 
       success &=
-         testNumber("-1.2e-10", nullopt);
+         testNumber("-1.2e-10", true);
 
       success &=
-         testNumber("10b", true);
+         testNumber("10b", false);
 
 
       BeeFishMisc::outputSuccess(success);
@@ -108,10 +139,13 @@ namespace BeeFishJSON {
          testPattern(String(), "\"\"", true);
  
       success = success &&
-         testPattern(String(), "\"", false);
+         testPattern(String(), "\"\\\"\"", true);
  
       success = success &&
          testPattern(String(), "\"text\"", true);
+
+      success = success &&
+         testPattern(String(), "\"", nullopt);
 
       success = success &&
          testPattern(String(), "unquoted", false);

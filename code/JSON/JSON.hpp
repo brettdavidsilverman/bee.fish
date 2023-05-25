@@ -5,12 +5,13 @@
 #include "Version.hpp"
 #include "Number.hpp"
 #include "String.hpp"
+#include "BlankSpace.hpp"
 
 namespace BeeFishJSON {
 
    auto JSON() {
       using namespace BeeFishParser;
-      return Number() or String();
+      return Number() or String() or BlankSpace();
    }
 }
 

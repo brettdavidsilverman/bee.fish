@@ -5,48 +5,36 @@
 
 namespace BeeFishJSON {
 
-   using namespace BeeFishParser;
-
-   auto Integer() {
-      return Range("0", "9");
-   }
-
-   auto Integers() {
-      return Repeat(Integer());
-   }
-
-   auto Exponent() {
-      return
-         (
-            Character("e") or
-            Character("E") 
-         ) and
-         Optional(
-            Character("+") or
-            Character("-")
-         ) and
-         Integers();
-   }
-
-   auto Fractions() {
-      return
-         Character(".") and
-         Integers();
-   }
-
    auto Number() {
 
+      using namespace BeeFishParser;
+
+      const auto sign =
+         Character("+") or
+         Character("-");
+
+      const auto integer =
+         Repeat(Range("0", "9"));
+
+      const auto exponent =
+         (
+            Character("e") or
+            Character("E")
+         ) and
+         Optional(
+            sign
+         ) and
+         integer;
+       
+      const auto fraction =
+         Character(".") and
+         integer;
+
       return
-         Optional(
-            Character("-")
-         ) and
-         Integers() and
-         Optional(
-            Fractions()
-         ) and
-         Optional(
-            Exponent()
-         );
+         Optional(sign) and
+         integer and
+         Optional(fraction) and
+         Optional(exponent);
    }
 }
 
