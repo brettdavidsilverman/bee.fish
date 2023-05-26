@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <bitset>
+#include <memory>
 #include "../Miscellaneous/optional.h"
 
 namespace BeeFishParser {
@@ -159,6 +160,23 @@ namespace BeeFishParser {
       
       virtual bool isOptional() const;
       
+      virtual size_t index() {
+         if (parsed())
+            return 1;
+
+         return 0;
+      }
+
+      virtual std::shared_ptr<ParserBase>
+      operator [] (size_t index)
+      {
+         if (index == 0)
+            return 
+               std::shared_ptr<ParserBase>(this);
+
+         return
+            std::shared_ptr<ParserBase>(nullptr);
+      }
 
    };
 

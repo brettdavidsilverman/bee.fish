@@ -5,6 +5,7 @@
 #include "ParserBase.hpp"
 #include "Char.hpp"
 #include "Character.hpp"
+#include "ArrayParser.hpp"
 #include "And.hpp"
 #include "Or.hpp"
 #include "Not.hpp"
@@ -14,6 +15,7 @@
 #include "Optional.hpp"
 #include "Rules.hpp"
 #include "Capture.hpp"
+//#include "LoadOnDemand.hpp"
 
 #endif
 

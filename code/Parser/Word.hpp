@@ -7,37 +7,39 @@
 namespace BeeFishParser {
 
    class Word :
-      public std::string,
       public Parser
    {
    protected:
+      std::string _word;
       size_t _index {0};
 
    public:
       using Parser::read;
 
       Word(const Word& source) :
-         std::string(source)
+         _word(source._word)
       {
       }
 
-      Word(const std::string& source) :
-         std::string(source)
+      Word(const std::string& word) :
+         _word(word)
       {
       }
 
       virtual bool read(char c)
       override
       {
+cerr << c << flush;
 
-         if (_index >= size()) {
+         if (_index >= _word.size()) {
             return false;
          }
 
-         if ((*this)[_index] == c)
+         if (_word[_index] == c)
          {
-            if (++_index == size())
+            if (++_index == _word.size()) {
                setResult(true);
+            }
 
             return true;
          }
@@ -56,9 +58,20 @@ namespace BeeFishParser {
       }
 
       bool operator == (const std::string& rhs) {
-         return ::operator == (*this, rhs);
+         return ::operator == (_word, rhs);
       }
 
+      friend std::ostream& operator <<
+      (ostream& out, const Word& word)
+      {
+         out << word._word;
+         return out;
+      }
+
+      virtual size_t index() override {
+         return _index;
+      }
+      
       
    
    };

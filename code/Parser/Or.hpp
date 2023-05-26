@@ -2,26 +2,29 @@
 #define BEE_FISH_PARSER__OR_HPP
 #include <vector>
 #include <memory>
-#include "Character.hpp"
+#include "ArrayParser.hpp"
 
 
 namespace BeeFishParser {
 
-   class Or : public Parser {
-   protected:
-      std::shared_ptr<Parser> _lhs; // Left hand side
-      std::shared_ptr<Parser> _rhs; // Right hand side
- 
+   class Or : public ArrayParser {
    public:
 
       using Parser::read;
 
-      Or(
-         const Parser& lhs,
-         const Parser& rhs
-      ) :
-         _lhs(lhs.copy()),
-         _rhs(rhs.copy())
+      Or(const Or& source)
+         : ArrayParser(source)
+      {
+      }
+
+      Or(const Or& lhs, const Parser& rhs)
+         : ArrayParser(lhs, rhs)
+      {
+
+      }
+
+      Or(const Parser& lhs, const Parser& rhs)
+         : ArrayParser(lhs, rhs)
       {
       }
       
@@ -36,35 +39,45 @@ namespace BeeFishParser {
          throw std::logic_error("Should not reach here");
       }
 
-      virtual bool read(char character) {
+      virtual bool read(char character)
+      override
+      {
 
          bool matched = false;
+         _index = 0;
+         std::shared_ptr<Parser> item = nullptr;
+
+         for ( auto
+                 it  = _inputs.begin();
+                 it != _inputs.end();
+                ++_index, ++it
+             )
+         {
+         
+            item = *it;
             
-         if ( _lhs->_result == std::nullopt )
-         {
-            matched = _lhs->read(character);
-         }
-         
-         if ( _rhs->_result == std::nullopt )
-         {
-            matched |= _rhs->read(character);
-         }
+            if ( item->_result != std::nullopt )
+               continue;
 
-         if (matched) {
-            if (_lhs->_result == true ||
-                _rhs->_result == true )
+            if ( item->read(character) )
             {
-               setResult(true);
+               matched = true;
             }
+            
+            if ( item->_result == true )
+            {
+               break;
+            }
+
+       
          }
-         
-         if (_lhs->_result == false &&
-             _rhs->_result == false )
-         {
+       
+         if (item && (item->_result == true))
+            setResult(true);
+         else if ( _result == nullopt && 
+                   !matched )
             setResult(false);
-         }
-
-
+         
          return matched;
 
          
@@ -72,10 +85,10 @@ namespace BeeFishParser {
       }
 
       virtual Parser* copy() const {
-         return new Or(*_lhs, *_rhs);
+         return new Or(*this);
       }
 
-      
+
    };
 
 };

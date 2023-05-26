@@ -5,15 +5,14 @@
 
 namespace BeeFishParser {
 
-   auto Integer() {
-      return Repeat(Range("0", "9"));
-   }
-
    auto Number() {
    
       const auto sign =
          Character("+") or
          Character("-");
+
+      const auto integer =
+         Repeat(Range("0", "9"));
 
       const auto exponent =
          (
@@ -23,15 +22,15 @@ namespace BeeFishParser {
          Optional(
             sign
          ) and
-         Integer();
+         integer;
        
       const auto fraction =
          Character(".") and
-         Integer();
+         integer;
 
       return
          Optional(sign) and
-         Integer() and
+         integer and
          Optional(fraction) and
          Optional(exponent);
    }

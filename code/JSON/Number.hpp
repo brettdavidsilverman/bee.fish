@@ -5,7 +5,7 @@
 
 namespace BeeFishJSON {
 
-   auto Number() {
+   const auto Number() {
 
       using namespace BeeFishParser;
 
@@ -30,11 +30,13 @@ namespace BeeFishJSON {
          Character(".") and
          integer;
 
-      return
+      const auto number =
          Optional(sign) and
          integer and
          Optional(fraction) and
          Optional(exponent);
+
+      return number;
    }
 }
 

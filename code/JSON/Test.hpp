@@ -10,6 +10,7 @@ namespace BeeFishJSON {
    using namespace BeeFishMisc;
 
    bool testBlankSpace();
+   bool testNull();
    bool testNumbers();
    bool testStrings();
 
@@ -20,6 +21,9 @@ namespace BeeFishJSON {
 
       success = success &&
          testBlankSpace();
+
+      success = success &&
+         testNull();
 
       success = success &&
          testNumbers();
@@ -76,6 +80,44 @@ namespace BeeFishJSON {
          BlankSpace(),
          " a",
          false
+      );
+
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+      
+   }
+
+   inline bool testNull()  {
+      using namespace std;
+      using namespace BeeFishParser;
+
+      bool success = true;
+
+      cout << "Testing Null:" << endl;
+     
+      success &= testPattern(
+         Null(),
+         "null",
+         true
+      );
+
+      success &= testPattern(
+         Null(),
+         "a",
+         false
+      );
+
+      success &= testPattern(
+         Null(),
+         "nulL",
+         false
+      );
+
+      success &= testPattern(
+         JSON(),
+         "nul",
+         nullopt
       );
 
       BeeFishMisc::outputSuccess(success);

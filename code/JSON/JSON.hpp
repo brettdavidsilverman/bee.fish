@@ -3,15 +3,13 @@
 
 #include "../Parser/Test.hpp"
 #include "Version.hpp"
-#include "Number.hpp"
-#include "String.hpp"
-#include "BlankSpace.hpp"
+#include "Object.hpp"
 
 namespace BeeFishJSON {
 
    auto JSON() {
       using namespace BeeFishParser;
-      return Number() or String() or BlankSpace();
+      return Number() or String() or Null() or BlankSpace();
    }
 }
 

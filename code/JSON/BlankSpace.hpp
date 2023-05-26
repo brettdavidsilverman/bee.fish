@@ -7,6 +7,7 @@ namespace BeeFishJSON {
 
    
    const auto BlankSpace() {
+
       using namespace BeeFishParser;
       
       const auto space =
@@ -22,12 +23,13 @@ namespace BeeFishJSON {
          Character("\t");
 
       const auto blankSpace =
-         Repeat(
-            space or
-            lineFeed or
-            carriageReturn or
-            horizontalTab,
-            0
+         Optional(
+            Repeat(
+               space or
+               lineFeed or
+               carriageReturn or
+               horizontalTab
+            )
          );
 
       return blankSpace;

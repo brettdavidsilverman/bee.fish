@@ -25,6 +25,14 @@ namespace BeeFishParser {
    }
 
    Or operator or (
+      const Or& a,
+      const Parser& b
+   )
+   {
+      return Or(a, b);
+   }
+
+   Or operator or (
       const Parser& a,
       const Parser& b
    )
