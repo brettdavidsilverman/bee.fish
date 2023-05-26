@@ -29,7 +29,6 @@ namespace BeeFishParser {
       virtual bool read(char c)
       override
       {
-cerr << c << flush;
 
          if (_index >= _word.size()) {
             return false;

@@ -13,6 +13,7 @@ namespace BeeFishJSON {
    bool testNull();
    bool testNumbers();
    bool testStrings();
+   bool testObjects();
 
    inline bool test() {
       using namespace std;
@@ -30,6 +31,9 @@ namespace BeeFishJSON {
 
       success = success &&
          testStrings();
+
+      success = success &&
+         testObjects();
 
       if (success)
          cout << "JSON tests pass" << endl;
@@ -191,6 +195,37 @@ namespace BeeFishJSON {
 
       success = success &&
          testPattern(String(), "unquoted", false);
+
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+      
+   }
+
+   inline bool testObjects()  {
+      using namespace std;
+
+      bool success = true;
+
+      cout << "Testing Objects:" << endl;
+
+      success &=
+         testPattern(Object(), "{}", true);
+ 
+      success &=
+         testPattern(Object(), "{\"a\":1}", true);
+ 
+      success &=
+         testPattern(Object(), "{\"a\":1,\"b\":2}", true);
+
+      success &=
+         testPattern(Object(), "{\"c\":{}}", true);
+
+      success &=
+         testPattern(Object(), " { \"c\" : { } }", true);
+
+      success &=
+         testPattern(Object(), "{", nullopt);
 
       BeeFishMisc::outputSuccess(success);
 

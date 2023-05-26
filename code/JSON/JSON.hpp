@@ -9,7 +9,7 @@ namespace BeeFishJSON {
 
    auto JSON() {
       using namespace BeeFishParser;
-      return Number() or String() or Null() or BlankSpace();
+      return Number() or String() or Null() or Object() or BlankSpace();
    }
 }
 

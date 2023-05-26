@@ -39,14 +39,7 @@ namespace BeeFishParser
 			if (_item)
 				delete _item;
 		}
-
-        virtual bool read(
-           bool bit
-        ) override
-        {
-           throw std::logic_error("Should not reach here");
-        }
-
+        
 		virtual bool read(
            char character
         ) override
@@ -107,13 +100,13 @@ namespace BeeFishParser
         virtual Parser* copy() const {
            return new Repeat(*_template, _minimum, _maximum);
         }
-/*
+
         virtual bool isOptional() const
         override
         {
-           return true;
+           return _minimum <= 0;
         }
-*/
+
 
 	};
 

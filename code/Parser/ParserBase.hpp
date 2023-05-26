@@ -138,7 +138,9 @@ namespace BeeFishParser {
          return true;
       }
       
-      virtual bool read(bool bit) = 0;
+      virtual bool read(bool bit) {
+         return true;
+      }
 
       virtual bool read(
          const UTF8Character& utf8

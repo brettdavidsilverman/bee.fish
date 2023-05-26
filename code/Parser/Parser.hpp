@@ -15,7 +15,7 @@
 #include "Optional.hpp"
 #include "Rules.hpp"
 #include "Capture.hpp"
-//#include "LoadOnDemand.hpp"
+#include "LoadOnDemand.hpp"
 
 #endif
 

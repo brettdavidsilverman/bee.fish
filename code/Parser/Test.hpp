@@ -164,7 +164,7 @@ namespace BeeFishParser {
 
       bool success = true;
 
-      std::cout << "testAnd: " << std::flush;
+      std::cout << "testAnd: " << std::endl;
 
       auto parser = []() {
          Character a("a");
@@ -254,7 +254,7 @@ namespace BeeFishParser {
 
       bool success = true;
 
-      std::cout << "testWord: " << std::flush;
+      std::cout << "testWord: " << std::endl;
 
       std::string string("Hello 🌎");
 
@@ -291,11 +291,10 @@ namespace BeeFishParser {
 
       bool success = true;
 
-      std::cout << "testRange: " << std::flush;
+      std::cout << "testRange: " << std::endl;
 
       auto _Parser = []() {
          return Range("a", "z");
-
       };
 
       

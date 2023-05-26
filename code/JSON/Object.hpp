@@ -13,9 +13,17 @@
 
 namespace BeeFishJSON {
 
-   Parser& JSON;
+   const BeeFishParser::And Object() {
 
-   auto Object() {
+      using namespace BeeFishParser;
+
+      auto _Object =
+         []() {
+            return
+               std::shared_ptr<Parser>(
+                  Object().copy()
+               );
+         };
 
       const auto openBrace =
          Character("{");
@@ -34,13 +42,35 @@ namespace BeeFishJSON {
          Number() or
          String() or
          Null() or
-         LoadOnDemand(Object);
+         LoadOnDemand(_Object);
+
+      const auto seperator =
+          Character(",");
+
+      const auto blankSpace =
+         BlankSpace();
+
+      const auto line =
+         blankSpace and
+         key and blankSpace and
+         colon and blankSpace and 
+         value and blankSpace;
 
       const auto object = 
-         BlankSpace() and
-         openBrace and
-          
-      
+         blankSpace and
+         openBrace and blankSpace and
+         Optional(
+            Optional(
+               line
+            ) and blankSpace and
+            Repeat(
+               seperator and line,
+               0
+            )
+         ) and blankSpace and
+         closeBrace;
+
+      return object;
 
    }
 }
