@@ -13,7 +13,9 @@ namespace BeeFishJSON {
    bool testNull();
    bool testNumbers();
    bool testStrings();
+   bool testArrays();
    bool testObjects();
+   
 
    inline bool test() {
       using namespace std;
@@ -33,6 +35,9 @@ namespace BeeFishJSON {
          testStrings();
 
       success = success &&
+         testArrays();
+
+      success = success &&
          testObjects();
 
       if (success)
@@ -45,6 +50,7 @@ namespace BeeFishJSON {
 
    inline bool testBlankSpace()  {
       using namespace std;
+      using namespace BeeFishParser;
 
       bool success = true;
 
@@ -86,6 +92,28 @@ namespace BeeFishJSON {
          false
       );
 
+      success &= testPattern(
+         BlankSpace() and
+         Character("a"),
+         " a",
+         true
+      );
+
+      success &= testPattern(
+         BlankSpace() and
+         Character("a"),
+         "a",
+         true
+      );
+
+      success &= testPattern(
+         BlankSpace() and
+         Character("a") and
+         BlankSpace(),
+         "a",
+         nullopt
+      );
+
       BeeFishMisc::outputSuccess(success);
 
       return success;
@@ -122,6 +150,12 @@ namespace BeeFishJSON {
          JSON(),
          "nul",
          nullopt
+      );
+
+      success &= testPattern(
+         JSON(),
+         "anull",
+         false
       );
 
       BeeFishMisc::outputSuccess(success);
@@ -195,6 +229,37 @@ namespace BeeFishJSON {
 
       success = success &&
          testPattern(String(), "unquoted", false);
+
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+      
+   }
+
+   inline bool testArrays()  {
+      using namespace std;
+
+      bool success = true;
+
+      cout << "Testing Arrays:" << endl;
+
+      success &=
+         testPattern(Array(), "[]", true);
+ 
+      success &=
+         testPattern(Array(), "[\"a\"]", true);
+ 
+      success &=
+         testPattern(Array(), "[,]", false);
+
+      success &=
+         testPattern(Array(), "[1,null]", true);
+
+      success &=
+         testPattern(Array(), "[1,2,3]", true);
+
+      success &=
+         testPattern(Array(), "[[]]", true);
 
       BeeFishMisc::outputSuccess(success);
 

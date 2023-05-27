@@ -14,7 +14,7 @@ namespace BeeFishParser
 	{
 	protected:
 		std::shared_ptr<Parser> _template;
-        Parser* _item {nullptr};
+        std::shared_ptr<Parser> _item {nullptr};
 
 	public:
 		size_t _minimum = 1;
@@ -36,8 +36,6 @@ namespace BeeFishParser
 
 		virtual ~Repeat()
 		{
-			if (_item)
-				delete _item;
 		}
         
 		virtual bool read(
@@ -51,8 +49,22 @@ namespace BeeFishParser
 
 			bool matched =
 				_item->read(character);
-
-			if (_item->_result == true)
+            if (
+			 	(_item->_result == false) ||
+				(!matched)
+            )
+			{
+				if (_matchedCount >= _minimum)
+				{
+					setResult(true);
+				}
+				else
+				{
+					setResult(false);
+				}
+                matched = false;
+			}
+			else if (_item->_result == true)
 			{
 				matchedItem(_item);
 
@@ -70,31 +82,21 @@ namespace BeeFishParser
 					setResult(true);
 
 			}
-			else if (
-			 	//(_item->_result == false)// ||
-				(!matched)
-            )
-			{
-				if (_matchedCount >= _minimum)
-				{
-					setResult(true);
-				}
-				else
-				{
-					setResult(false);
-				}
-			}
 				
 			return matched;
 		}
 
-		virtual void matchedItem(Parser *match)
+		virtual void matchedItem(
+           std::shared_ptr<Parser> match)
 		{
-			delete match;
 		}
 
-		virtual Parser* createItem() {
-			return _template->copy();
+		virtual std::shared_ptr<Parser>
+        createItem()
+        {
+			return std::shared_ptr<Parser>(
+               _template->copy()
+            );
 		}
 
         virtual Parser* copy() const {
@@ -104,7 +106,9 @@ namespace BeeFishParser
         virtual bool isOptional() const
         override
         {
-           return _minimum <= 0;
+           return
+              _matchedCount >=
+              _minimum;
         }
 
 

@@ -14,7 +14,12 @@ using namespace BeeFishParser;
 using namespace BeeFishJSON;
 
 int main(int argc, const char* argv[]) {
-
+   //testPattern(Array(), "[1,2,3]", true);
+   testPattern(
+      Repeat(Word("abcd"))// and Word("cd"))
+      and Word("abee")// and BeeFishJSON::Number())
+   , "abcdabcdabcdabee", true);
+return 0;
    cerr << "bee.fish.json"
            << endl
         << "C++ run time: "
@@ -36,36 +41,26 @@ int main(int argc, const char* argv[]) {
       return 0;
    }
    
-   string line;
-   while (!cin.eof())
+   static const Parser& parser = BeeFishJSON::JSON();
+  
+   cin >> parser;
+ 
+
+   if (parser.result() == true)
    {
-      cout << "JSON: ";
-      
-      getline(cin, line);
-      
-      if (!line.length())
-         break;
-        
-      auto parser = BeeFishJSON::JSON();
-      
-      parser.read(line);
-
-      if (parser.result() == true)
-      {
-         cout << "Valid JSON" << endl;
-      }
-      else if (parser.result() == false)
-      {
-         cout << "Invalid JSON" << endl;
-      }
-      else if (parser.result() == std::nullopt)
-      {
-         cout << "Insufficient data" << endl;
-      }
-
+      cout << "Valid JSON" << endl;
+      return 0;
+   }
+   else if (parser.result() == false)
+   {
+      cout << "Invalid JSON" << endl;
+      return 1;
+   }
+   else
+   {
+      cout << "Insufficient data" << endl;
+      return 1;
    }
 
-   cout << "Bye" << endl;
-   
    return 0;
 }

@@ -11,20 +11,22 @@ using namespace std;
 
 namespace BeeFishParser {
 
+   
    class LoadOnDemand : public Parser {
 
    protected:
       std::shared_ptr<Parser> _input;
    public:
       //typedef std::shared_ptr<Parser> (*Function)();
-      typedef std::function< std::shared_ptr<Parser> () > Function;
+     // typedef std::function< std::shared_ptr<Parser> () > Function;
+      typedef std::function<const Parser&()> Function;
 
    protected:
       const Function _function;
 
    public:
-      template<typename Func>
-      LoadOnDemand(Func function) :
+
+      LoadOnDemand(Function function) :
          _function(function)
       {
       }
@@ -38,8 +40,11 @@ namespace BeeFishParser {
          char character
       ) override
       {
-         if (_input == nullptr)
-            _input = _function();
+         if (_input == nullptr) {
+            _input = std::shared_ptr<Parser>(
+               _function().copy()
+            );
+         }
 
          bool matched = _input->read(
             character
@@ -47,7 +52,8 @@ namespace BeeFishParser {
 
          if (_input->_result == true)
             setResult(true);
-         else if (_input->_result == false)
+
+         if (_input->_result == false)
             setResult(false);
 
          return matched;

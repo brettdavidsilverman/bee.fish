@@ -21,6 +21,17 @@ int main(int argc, const char* argv[]) {
    {
       bool success = true;
 
+      const auto parser =
+         Character("'") and
+         Repeat(not Character("'"), 0) and
+         Character("'");
+
+      testPattern(
+         parser,
+         "'hello'",
+         true
+      );
+
       //testNumber();
       //return 0;
    }

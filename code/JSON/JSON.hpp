@@ -4,12 +4,28 @@
 #include "../Parser/Test.hpp"
 #include "Version.hpp"
 #include "Object.hpp"
+#include "Array.hpp"
+#include "Number.hpp"
+#include "String.hpp"
+#include "BlankSpace.hpp"
+#include "Null.hpp"
 
 namespace BeeFishJSON {
 
-   auto JSON() {
+   const BeeFishParser::Parser& JSON() {
       using namespace BeeFishParser;
-      return Number() or String() or Null() or Object() or BlankSpace();
+
+      static const auto json =
+         Optional(BlankSpace()) and
+         (
+            Number() or
+            String() or
+            Array() or
+            Null() or
+            Object()
+         );
+
+      return json;
    }
 }
 

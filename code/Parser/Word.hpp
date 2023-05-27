@@ -34,9 +34,9 @@ namespace BeeFishParser {
             return false;
          }
 
-         if (_word[_index] == c)
+         if (_word[_index++] == c)
          {
-            if (++_index == _word.size()) {
+            if (_index == _word.size()) {
                setResult(true);
             }
 

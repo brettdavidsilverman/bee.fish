@@ -5,34 +5,34 @@
 #include <string>
 #include <bitset>
 #include <memory>
+#include <chrono>
 #include "../Miscellaneous/optional.h"
 
 namespace BeeFishParser {
 
    class UTF8Character;
 
-   class ParserBase {
+   class Parser {
 #ifdef DEBUG
    protected:
       std::string _value;
 #endif
-
    public:
       std::optional<bool> _result = std::nullopt;
-
+      
    public:
    
-      ParserBase()
+      Parser()
       {
          ++parserInstanceCount();
       }
 
-      ParserBase(const ParserBase& parser)
+      Parser(const Parser& parser)
       {
          ++parserInstanceCount();
       }
       
-      virtual ~ParserBase()
+      virtual ~Parser()
       {
          --parserInstanceCount();
       }
@@ -84,25 +84,16 @@ namespace BeeFishParser {
       )
       {
          using namespace std;
-         size_t count = 0;
 
          for (const char& c : string)
          {
-           // if (_result == false)
-          //     return false;
 
             if (!read(c))
-               break;
-            ++count;
+               return false;
+
 #ifdef DEBUG
             _value.push_back(c);
 #endif
-         }
-
-         if (count != string.length())
-         {
-            setResult(false);
-            return false;
          }
 
          return true;
@@ -121,6 +112,7 @@ namespace BeeFishParser {
          char character
       )
       {
+
          std::bitset<8> bits = character;
          for (int i = 7;
               i >= 0;
@@ -137,7 +129,58 @@ namespace BeeFishParser {
 
          return true;
       }
-      
+
+      friend std::istream& operator >>
+      (std::istream& in, Parser& parser)
+      {
+         using namespace std;
+
+#ifdef TIME
+         cout << "Chars" << "\t" << "Parsers" << "\t" << "Time" << endl;
+         unsigned long start = now();
+         
+#endif
+         size_t charCount = 0;
+         int c = -1;
+         while ((c = in.get()) > 0)
+         {
+            ++charCount;
+
+            if (!parser.read((char)c))
+               break;
+#ifdef TIME
+            if (charCount % 100000 == 0)
+            {
+               unsigned long time =
+                  now() - start;
+               
+               cout 
+                  << charCount << " (char count)\t"
+                  << Parser::parserInstanceCount() << " (instances)\t" 
+                  << time << " (milliseconds)\t"
+                  << 10000.0 / time * 1000.0 << " (chars per second)" 
+                  << endl;
+
+               start = now();
+            }
+#endif
+
+         }
+
+         return in;
+      }
+
+      friend std::istream& operator >>
+      (std::istream& in, const Parser& parser)
+      {
+         std::unique_ptr<Parser>
+            ptr(parser.copy());
+
+         in >> *ptr;
+
+         return in;
+      }
+
       virtual bool read(bool bit) {
          return true;
       }
@@ -158,31 +201,47 @@ namespace BeeFishParser {
 #endif
       }
 
-      virtual ParserBase* copy() const = 0;
+      virtual Parser* copy() const
+      {
+         return new Parser(*this);
+      }
       
       virtual bool isOptional() const;
       
       virtual size_t index() {
+
          if (parsed())
             return 1;
 
          return 0;
       }
 
-      virtual std::shared_ptr<ParserBase>
+      virtual std::shared_ptr<Parser>
       operator [] (size_t index)
       {
          if (index == 0)
             return 
-               std::shared_ptr<ParserBase>(this);
+               std::shared_ptr<Parser>(this);
 
          return
-            std::shared_ptr<ParserBase>(nullptr);
+            std::shared_ptr<Parser>(nullptr);
       }
-
+#ifdef TIME
+      static unsigned long now()
+      {
+         return
+            std::chrono::duration_cast
+            <std::chrono::milliseconds>
+            (
+               std::chrono::system_clock
+                  ::now()
+                     .time_since_epoch()
+            ).count();
+      }
+#endif
    };
 
-   typedef ParserBase Parser;
+
 }
 
 #endif

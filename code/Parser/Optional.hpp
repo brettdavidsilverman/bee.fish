@@ -12,6 +12,7 @@ namespace BeeFishParser {
    class Optional : public Parser {
    protected:
       std::shared_ptr<Parser> _optional;
+      bool _matched {false};
    public:
       using Parser::read;
 
@@ -39,6 +40,7 @@ namespace BeeFishParser {
          bool matched =
             _optional->read(c);
 
+        
          if (_optional->_result == true)
          {
          
@@ -68,10 +70,13 @@ namespace BeeFishParser {
    };
 
    inline bool Parser::isOptional() const {
+
       const Optional* optional =
          dynamic_cast<const Optional*>(this);
-     if (optional == nullptr)
+     
+      if (optional == nullptr)
          return false;
+
       return true;
    }
 

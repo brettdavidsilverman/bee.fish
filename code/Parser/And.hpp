@@ -13,6 +13,7 @@ namespace BeeFishParser {
    class And : public ArrayParser {
    private:
       std::string _buffer;
+      bool _nextItem{true};
    public:
       using Parser::read;
 
@@ -60,8 +61,6 @@ namespace BeeFishParser {
 
          _buffer.push_back(c);
 
-         bool nextItem = false;
-
          
          while (
             _index < _inputs.size()
@@ -71,10 +70,10 @@ namespace BeeFishParser {
             std::shared_ptr<Parser> 
                item = _inputs[_index];
             
-            if (nextItem) {
+            if (_nextItem) {
 
                matched = item->read(_buffer);
-               nextItem = false;
+               _nextItem = false;
             }
             else {
                matched =
@@ -82,21 +81,28 @@ namespace BeeFishParser {
 
             }
 
-
-            if (item->_result == true) {
+            if (item->_result == true)
+            {
                ++_index;
                _buffer.clear();
-               if (!matched)
-                  _buffer.push_back(c);
-            }
-            else if (!matched || item->_result == false) {
-
-               if (item->isOptional()) {
-                  ++_index;
-                  nextItem = true;
+               _nextItem = true;
+               if (!matched) {
+                  _buffer = c;
                   continue;
                }
-               else {
+            }
+            else if (!matched ||
+               item->_result == false)
+            {
+
+
+               if ( !matched &&
+                   item->isOptional()) {
+                  ++_index;
+                  _nextItem = true;
+                  continue;
+               }
+               else if ( item->_result == false) {
                   setResult(false);
                   break;
                }

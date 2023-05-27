@@ -22,14 +22,12 @@ namespace BeeFishJSON {
       const auto horizontalTab =
          Character("\t");
 
-      const auto blankSpace =
-         Optional(
-            Repeat(
-               space or
-               lineFeed or
-               carriageReturn or
-               horizontalTab
-            )
+      const static auto blankSpace =
+         Repeat(
+            space or
+            lineFeed or
+            carriageReturn or
+            horizontalTab, 0
          );
 
       return blankSpace;

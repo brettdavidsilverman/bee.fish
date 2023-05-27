@@ -78,7 +78,7 @@ namespace BeeFishParser {
          return _index;
       }
 
-      virtual std::shared_ptr<ParserBase>
+      virtual std::shared_ptr<Parser>
       operator [] (size_t index)
       override
       {

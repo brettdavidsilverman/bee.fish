@@ -15,13 +15,16 @@ debug:	$(OUTPUT)
 
 time:	clean
 time:	CFLAGS += -DTIME -Ofast
-time:	
+time:	run_time
 
 test:	$(OUTPUT)
 	$(OUTPUT) -test
 
 run:	$(OUTPUT)
 	$(OUTPUT)
+
+run_time:	$(OUTPUT)
+	time cat large.json | $(OUTPUT)
 
 clean:
 	rm -f $(OUTPUT)

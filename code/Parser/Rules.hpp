@@ -2,9 +2,6 @@
 #define BEE_FISH_PARSER__RULES_HPP
 
 #include "Parser.hpp"
-#include "And.hpp"
-#include "Or.hpp"
-#include "Not.hpp"
 
 namespace BeeFishParser {
 
@@ -46,16 +43,6 @@ namespace BeeFishParser {
    {
       return Not(a);
    }
-/*
-   auto Optional (
-      const Parser& a,
-      const Parser& b
-   )
-   {
-      return (a and b) or b;
-   }
-   */
-
    
 };
 
