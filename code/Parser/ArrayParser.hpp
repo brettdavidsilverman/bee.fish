@@ -26,6 +26,30 @@ namespace BeeFishParser {
          }
       }
 
+      ArrayParser(const ArrayParser& lhs, const ArrayParser& rhs)
+      {
+
+         for ( auto parser : lhs._inputs )
+         {
+            _inputs.push_back(
+               std::shared_ptr<Parser>(
+                  parser->copy()
+               )
+            );
+         }
+
+         for ( auto parser : rhs._inputs )
+         {
+            _inputs.push_back(
+               std::shared_ptr<Parser>(
+                  parser->copy()
+               )
+            );
+         }
+
+
+      }
+
       ArrayParser(const ArrayParser& lhs, const Parser& rhs)
       {
 
@@ -65,13 +89,6 @@ namespace BeeFishParser {
       
       virtual ~ArrayParser()
       {
-      }
-
-      virtual bool read(
-         bool bit
-      ) override
-      {
-         throw std::logic_error("Should not reach here");
       }
 
       virtual size_t index() override {

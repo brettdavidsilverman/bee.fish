@@ -56,6 +56,9 @@ namespace BeeFishParser {
 
       virtual void capture(char c)
       {
+#ifdef DEBUG
+        std::cerr << c  << std::flush;
+#endif
          _valueRef.push_back(c);
       }
       
@@ -69,12 +72,6 @@ namespace BeeFishParser {
       override
       {
          return new Capture(*this);
-      }
-
-      virtual bool read(bool bit)
-      override
-      {
-         throw std::logic_error("Capture::read(bool) 🚫");
       }
 
       virtual bool read(char c)

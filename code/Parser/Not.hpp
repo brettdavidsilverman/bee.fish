@@ -46,13 +46,12 @@ namespace BeeFishParser {
          return !matched;
       }
 
-      virtual Parser* copy() const {
+      virtual Parser* copy()
+      const override
+      {
          return new Not(*_not);
       }
 
-      virtual bool read(bool bit) {
-         throw std::logic_error("Should not reach here");
-      }
 
    };
    

@@ -17,6 +17,12 @@ namespace BeeFishParser {
       {
       }
 
+      Or(const Or& lhs, const Or& rhs)
+         : ArrayParser(lhs, rhs)
+      {
+
+      }
+
       Or(const Or& lhs, const Parser& rhs)
          : ArrayParser(lhs, rhs)
       {
@@ -30,13 +36,6 @@ namespace BeeFishParser {
       
       virtual ~Or()
       {
-      }
-
-      virtual bool read(
-         bool bit
-      ) override
-      {
-         throw std::logic_error("Should not reach here");
       }
 
       virtual bool read(char character)

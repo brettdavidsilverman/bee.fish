@@ -88,12 +88,9 @@ namespace BeeFishParser {
          for (const char& c : string)
          {
 
-            if (!read(c))
+             if (!read(c))
                return false;
 
-#ifdef DEBUG
-            _value.push_back(c);
-#endif
          }
 
          return true;
@@ -112,8 +109,10 @@ namespace BeeFishParser {
          char character
       )
       {
+         using namespace std;
 
-         std::bitset<8> bits = character;
+  
+         bitset<8> bits = character;
          for (int i = 7;
               i >= 0;
               --i)
@@ -201,11 +200,13 @@ namespace BeeFishParser {
 #endif
       }
 
-      virtual Parser* copy() const
+      virtual Parser* copy() const = 0;
+/*
       {
          return new Parser(*this);
       }
-      
+*/
+
       virtual bool isOptional() const;
       
       virtual size_t index() {

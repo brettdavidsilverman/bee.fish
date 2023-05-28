@@ -5,7 +5,7 @@
 
 namespace BeeFishParser {
 
-   auto Number() {
+   auto NumberExample() {
    
       const auto sign =
          Character("+") or

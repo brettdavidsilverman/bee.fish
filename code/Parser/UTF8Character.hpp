@@ -5,7 +5,7 @@
 #include <locale>
 #include <codecvt>
 #include "Char.hpp"
-#include "Parser.hpp"
+#include "ParserBase.hpp"
 
 namespace BeeFishParser {
 
@@ -157,10 +157,6 @@ namespace BeeFishParser {
          return true;
       }
 
-      virtual Parser* copy() const {
-         return new UTF8Character(_chars);
-      }
-
       virtual bool operator <= (
          const UTF8Character& right
       )
@@ -205,6 +201,16 @@ namespace BeeFishParser {
          return true;
       }
 
+      virtual Parser* copy()
+      const override
+      {
+         return new UTF8Character(*this);
+      }
+      /*
+      virtual bool read(char c) {
+         throw std::logic_error("Should not reach here");
+      }
+*/
    };
 
    typedef UTF8Character Character;

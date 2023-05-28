@@ -59,7 +59,9 @@ namespace BeeFishParser {
          return matched;
       }
 
-      virtual Parser* copy() const {
+      virtual Parser* copy()
+      const override
+      {
          return new LoadOnDemand(*this);
       }
       

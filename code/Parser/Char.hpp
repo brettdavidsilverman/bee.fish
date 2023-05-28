@@ -20,6 +20,10 @@ namespace BeeFishParser {
       {
       }
 
+      Char(char c) : _char(c)
+      {
+      }
+
       virtual bool
       read(bool bit)
       {
@@ -49,9 +53,12 @@ namespace BeeFishParser {
       }
 
       virtual Parser* copy() const {
-throw std::logic_error("Should not reach here");
+         return new Char(_char);
       }
       
+      virtual bool read(char c) {
+         throw std::logic_error("Should not reach here");
+      }
    };
 
 

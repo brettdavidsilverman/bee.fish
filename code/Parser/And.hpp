@@ -13,12 +13,18 @@ namespace BeeFishParser {
    class And : public ArrayParser {
    private:
       std::string _buffer;
-      bool _nextItem{true};
+      bool _nextItem {false};
+
    public:
       using Parser::read;
 
       And(const And& source)
          : ArrayParser(source)
+      {
+      }
+
+      And(const And& lhs, const And& rhs)
+         : ArrayParser(lhs, rhs)
       {
       }
 
@@ -39,13 +45,6 @@ namespace BeeFishParser {
       }
 
       virtual bool read(
-         bool bit
-      ) override
-      {
-         throw std::logic_error("Should not reach here");
-      }
-
-      virtual bool read(
          char c
       ) override
       {
@@ -63,23 +62,22 @@ namespace BeeFishParser {
 
          
          while (
-            _index < _inputs.size()
+            _index < _inputs.size() &&
+            !matched
          )
          {
+// cerr << "<" << _buffer << ">[" << _index << "]" << flush;
 
             std::shared_ptr<Parser> 
                item = _inputs[_index];
             
-            if (_nextItem) {
-
-               matched = item->read(_buffer);
-               _nextItem = false;
-            }
-            else {
+            if (!_nextItem)
+               matched = item->read(c);
+            else
                matched =
-                  item->read(c);
+                  item->read(_buffer);
 
-            }
+            _nextItem = false;
 
             if (item->_result == true)
             {
@@ -90,28 +88,25 @@ namespace BeeFishParser {
                   _buffer = c;
                   continue;
                }
+               else
+                  break;
             }
             else if (!matched ||
                item->_result == false)
             {
-
-
-               if ( !matched &&
-                   item->isOptional()) {
+               if (item->isOptional()) {
                   ++_index;
+                  matched = false;
                   _nextItem = true;
                   continue;
                }
-               else if ( item->_result == false) {
+               else {
                   setResult(false);
                   break;
                }
                
             }
 
-            if (matched)
-               break;
-            
                
          }
 

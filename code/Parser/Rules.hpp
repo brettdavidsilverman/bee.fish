@@ -7,6 +7,14 @@ namespace BeeFishParser {
 
    And operator and (
       const And& a,
+      const And& b
+   )
+   {
+      return And(a, b);
+   }
+
+   And operator and (
+      const And& a,
       const Parser& b
    )
    {
@@ -19,6 +27,14 @@ namespace BeeFishParser {
    )
    {
       return And(a, b);
+   }
+
+   Or operator or (
+      const Or& a,
+      const Or& b
+   )
+   {
+      return Or(a, b);
    }
 
    Or operator or (

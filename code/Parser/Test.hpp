@@ -445,7 +445,12 @@ namespace BeeFishParser {
             false
          );
 
-      
+      success &=
+         testPattern(
+            Repeat(aToZ, 0),
+            "2",
+            true
+         );
 
       auto StringParser = []() {
          const Character quote("'");
@@ -472,6 +477,16 @@ namespace BeeFishParser {
          "hello world",
          false
       );
+
+      success &= testPattern(
+         Repeat(
+            Character(",") and
+            Repeat(Range("0", "9"))
+         ),
+         ",1,2,3",
+         std::nullopt
+      );
+
 
       BeeFishMisc::outputSuccess(success);
 
@@ -551,7 +566,7 @@ namespace BeeFishParser {
       std::string myName;
 
       success &= testPattern(
-         Number(),
+         NumberExample(),
          "1e+1",
          nullopt
       );

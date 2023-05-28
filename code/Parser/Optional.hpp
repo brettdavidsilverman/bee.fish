@@ -25,13 +25,6 @@ namespace BeeFishParser {
       }
 
       virtual bool read(
-         bool bit
-      ) override
-      {
-         throw std::logic_error("Parser::read(bool) Should not reach here 🚫");
-      }
-
-      virtual bool read(
          char c
       ) override
       {

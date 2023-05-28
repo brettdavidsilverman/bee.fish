@@ -14,22 +14,56 @@ using namespace BeeFishMisc;
 using namespace BeeFishParser;
 
 
+class A : public Repeat {
+
+   public:
+      A() : Repeat(
+        // Character(","),
+         Character("a")
+      )
+      {
+      }
+
+      virtual Parser* copy() const
+      {
+         return new A();
+      }
+
+      virtual bool read(char c)
+      override
+      {
+         cerr << c << flush;
+         return Repeat::read(c);
+      }
+
+
+};
 
 int main(int argc, const char* argv[]) {
 
    if (true)
    {
       bool success = true;
-
-      const auto parser =
-         Character("'") and
-         Repeat(not Character("'"), 0) and
-         Character("'");
-
+/*
       testPattern(
-         parser,
-         "'hello'",
-         true
+         Repeat(
+            Character(",") and
+             Repeat(
+               Character("a")
+             )
+         ),
+         ",aaa,aa",
+         std::nullopt
+      );
+
+*/
+      testPattern(
+         Repeat(
+            Character(",") and
+            Repeat(Character("a"))
+         ),
+         ",aa,aaa,",
+         std::nullopt
       );
 
       //testNumber();
@@ -70,7 +104,7 @@ int main(int argc, const char* argv[]) {
 
       auto complete =
          Capture(
-            Number(),
+            NumberExample(),
             string
          ) and 
          lineEnd;
