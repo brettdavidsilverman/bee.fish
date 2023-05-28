@@ -17,6 +17,7 @@ namespace BeeFishJSON {
             Character("\r") or
             Character("\n") or
             Character("\b") or
+            Character("\t") or
             Character("\f")
          );
 
@@ -24,10 +25,11 @@ namespace BeeFishJSON {
          Character("\\") and (
             Character("\\") or
             Character("\"") or
-            Character("\r") or
-            Character("\n") or
-            Character("\b") or
-            Character("\f")
+            Character("r") or
+            Character("n") or
+            Character("b") or
+            Character("t") or
+            Character("f")
          );
 
       return

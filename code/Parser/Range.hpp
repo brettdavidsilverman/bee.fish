@@ -2,38 +2,38 @@
 #define BEE_FISH_PARSER__RANGE_HPP
 #include <memory>
 
-#include "Character.hpp"
+#include "UTF8Character.hpp"
 
 namespace BeeFishParser {
 
             
-	class Range : public Character {
+	class Range : public UTF8Character {
 	protected:
-		std::shared_ptr<Character>
+		std::shared_ptr<UTF8Character>
            _minimum;
 
-        std::shared_ptr<Character>
+        std::shared_ptr<UTF8Character>
            _maximum;
 
 	public:
-        using Character::read;
+        using UTF8Character::read;
 
-		Range( const Character& minimum,
-               const Character& maximum ) :
-			_minimum((Character*)minimum.copy()),
-			_maximum((Character*)maximum.copy())
+		Range( const UTF8Character& minimum,
+               const UTF8Character& maximum ) :
+			_minimum((UTF8Character*)minimum.copy()),
+			_maximum((UTF8Character*)maximum.copy())
 		{
 		}
 
         Range( const std::string& minimum,
                const std::string& maximum ) 
-        : Range(Character(minimum),
-                Character(maximum))
+        : Range(UTF8Character(minimum),
+                UTF8Character(maximum))
 		{
 		}
 
 		virtual bool read(
-           const Character& character
+           const UTF8Character& character
         ) override
 		{
             using namespace std;

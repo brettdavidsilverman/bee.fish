@@ -145,6 +145,11 @@ namespace BeeFishParser {
          while ((c = in.get()) > 0)
          {
             ++charCount;
+
+#ifdef DEBUG
+            cerr << (char)c;
+#endif
+
             if (!parser.read((char)c))
                break;
 
@@ -169,10 +174,6 @@ namespace BeeFishParser {
 #endif
 
          }
-#ifdef DEBUG
-         if (parser.result() == false)
-            cerr << "Fail:" << escape((char)c) << endl;
-#endif
 
          return in;
       }

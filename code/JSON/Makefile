@@ -24,7 +24,7 @@ run:	$(OUTPUT)
 	$(OUTPUT)
 
 run_time:	$(OUTPUT)
-	time cat large.json | $(OUTPUT)
+	time cat tests/large.json | $(OUTPUT)
 
 clean:
 	rm -f $(OUTPUT)

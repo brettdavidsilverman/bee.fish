@@ -1,6 +1,7 @@
 #ifndef BEE_FISH_PARSER__WORD_HPP
 #define BEE_FISH_PARSER__WORD_HPP
 #include <sstream>
+#include <string>
 
 #include "Character.hpp"
 
@@ -57,11 +58,11 @@ namespace BeeFishParser {
       }
 
       bool operator == (const std::string& rhs) {
-         return ::operator == (_word, rhs);
+         return _word == rhs;
       }
 
       friend std::ostream& operator <<
-      (ostream& out, const Word& word)
+      (std::ostream& out, const Word& word)
       {
          out << word._word;
          return out;
