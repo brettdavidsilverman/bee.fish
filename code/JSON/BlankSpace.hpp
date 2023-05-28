@@ -27,7 +27,8 @@ namespace BeeFishJSON {
             space or
             lineFeed or
             carriageReturn or
-            horizontalTab, 0
+            horizontalTab,
+            0
          );
 
       return blankSpace;

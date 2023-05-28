@@ -14,12 +14,8 @@ using namespace BeeFishParser;
 using namespace BeeFishJSON;
 
 int main(int argc, const char* argv[]) {
-   //testPattern(Array(), "[1,2,3]", true);
-   testPattern(
-      Repeat(Word("abcd"))// and Word("cd"))
-      and Word("abee")// and BeeFishJSON::Number())
-   , "abcdabcdabcdabee", true);
-return 0;
+   
+
    cerr << "bee.fish.json"
            << endl
         << "C++ run time: "

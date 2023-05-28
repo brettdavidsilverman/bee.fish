@@ -41,6 +41,38 @@ namespace BeeFishMisc {
          std::cout << ON_FAIL << std::endl;
    }
 
+   static std::string escape(
+      const std::string& input
+   )
+   {
+      std::string output;
+      for (const char& c : input) {
+
+         switch(c) {
+         case '\r':
+            output += "\\r";
+            break;
+         case '\n':
+            output += "\\n";
+            break;
+         case '\t':
+            output += "\\t";
+            break;
+         case '\\':
+            output += "\\\\";
+            break;
+         case '\"':
+            output += "\\\"";
+            break;
+         default:
+            output += c;
+         }
+
+      }
+
+      return output;
+   }
+
    static bool testPattern(
       BeeFishParser::Parser&
          parser,
@@ -51,14 +83,18 @@ namespace BeeFishMisc {
       using namespace BeeFishParser;
       bool success = true;
 
-      cout << "\t" << pattern << ":" << flush;
+      cout << "\t" << escape(pattern) << ":" << flush;
 
-      parser.read(pattern);
+      Capture capture(parser);
 
-      cout << " {" << parser.result() << "}";
-      cout << parser.value();
+      capture.read(pattern);
+
+      cout << escape(capture.value())
+           << "{"
+           << capture.result()
+           << "}";
       success =
-         parser.result() == expected;
+         capture.result() == expected;
 
       BeeFishMisc::outputSuccess(success);
 

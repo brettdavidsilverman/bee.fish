@@ -1,7 +1,7 @@
 #ifndef BEE_FISH_PARSER__RULES_HPP
 #define BEE_FISH_PARSER__RULES_HPP
 
-#include "Parser.hpp"
+#include "ParserBase.hpp"
 
 namespace BeeFishParser {
 

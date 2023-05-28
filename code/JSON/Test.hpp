@@ -83,13 +83,13 @@ namespace BeeFishJSON {
       success &= testPattern(
          BlankSpace(),
          "a",
-         false
+         nullopt
       );
 
       success &= testPattern(
          BlankSpace(),
          " a",
-         false
+         true
       );
 
       success &= testPattern(
@@ -128,20 +128,22 @@ namespace BeeFishJSON {
 
       cout << "Testing Null:" << endl;
      
+      const auto Null = _Null();
+
       success &= testPattern(
-         Null(),
+         Null,
          "null",
          true
       );
 
       success &= testPattern(
-         Null(),
+         Null,
          "a",
          false
       );
 
       success &= testPattern(
-         Null(),
+         Null,
          "nulL",
          false
       );
@@ -257,6 +259,9 @@ namespace BeeFishJSON {
 
       success &=
          testPattern(Array(), "[1,2,3]", true);
+
+      success &=
+         testPattern(Array(), " [ 1 , 2 , 3 ]", true);
 
       success &=
          testPattern(Array(), "[[]]", true);

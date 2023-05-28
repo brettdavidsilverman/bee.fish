@@ -8,7 +8,7 @@
 #include "Number.hpp"
 #include "String.hpp"
 #include "BlankSpace.hpp"
-#include "Null.hpp"
+#include "Constants.hpp"
 
 namespace BeeFishJSON {
 
@@ -21,7 +21,7 @@ namespace BeeFishJSON {
             Number() or
             String() or
             Array() or
-            Null() or
+            _Null() or
             Object()
          );
 

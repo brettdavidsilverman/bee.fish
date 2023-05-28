@@ -63,7 +63,7 @@ namespace BeeFishParser
             !matched
          )
          {
-// cerr << "<" << _buffer << ">[" << character << "]" << flush;
+
             if (_item == nullptr)
                _item = createItem();
             
@@ -111,12 +111,14 @@ namespace BeeFishParser
                
          }
 
-         if (!matched) {
+         if (!matched)
+         {
             if ( _matchedCount >= _minimum &&
               (_matchedCount <= _maximum ||
                _maximum == 0) )
             {
-               setResult(true);
+               if (_matchedCount > 0)
+                  setResult(true);
             }
             else
             {

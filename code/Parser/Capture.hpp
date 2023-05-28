@@ -57,7 +57,7 @@ namespace BeeFishParser {
       virtual void capture(char c)
       {
 #ifdef DEBUG
-        std::cerr << c  << std::flush;
+      // std::cerr << c  << std::flush;
 #endif
          _valueRef.push_back(c);
       }

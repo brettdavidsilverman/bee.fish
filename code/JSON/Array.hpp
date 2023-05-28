@@ -23,10 +23,10 @@ namespace BeeFishJSON {
          Optional(BlankSpace());
 
       const auto openBracket =
-         Character("[");
+         blankSpace and Character("[");
 
       const auto closeBracket =
-         Character("]");
+         blankSpace and Character("]");
 
       const auto value =
          LoadOnDemand(JSON);
@@ -40,11 +40,10 @@ namespace BeeFishJSON {
          openBracket and
          Optional(
             value  and
-           // Optional(
-               Repeat(
-                  seperator and value
-               , 0)
-            //)
+            Repeat(
+               seperator and value,
+               0
+            )
          )  and
          closeBracket;
 

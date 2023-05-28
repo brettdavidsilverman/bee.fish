@@ -449,7 +449,7 @@ namespace BeeFishParser {
          testPattern(
             Repeat(aToZ, 0),
             "2",
-            true
+            nullopt
          );
 
       auto StringParser = []() {

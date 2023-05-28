@@ -1,12 +1,12 @@
-#ifndef BEE_FISH__JSON__NULL_HPP
-#define BEE_FISH__JSON__NULL_HPP
+#ifndef BEE_FISH__JSON__CONSTANTS_HPP
+#define BEE_FISH__JSON__CONSTANTS_HPP
 
-#include "../Parser/Parser.hpp"
+#include "../Parser/ParserBase.hpp"
 
 namespace BeeFishJSON {
 
    
-   const auto Null() {
+   const auto _Null() {
 
       using namespace BeeFishParser;
      

@@ -3,14 +3,29 @@
 
 #include <iostream>
 
+#if 0
+#include <optional>
 namespace std {
-/*
-    template<class T>
-    using optional = std::optional<T>;
+   ostream& operator << (
+      ostream& out,
+      const std::optional<bool>& value
+   )
+   {
+      if (value == nullopt)
+         out << "null";
+      else if (value == true)
+         out << "true";
+      else if (value == false)
+         out << "false";
+      else
+         throw logic_error("Optional value");
+      return out;
+   }
+}
 
-    std::nullopt_t nullopt(std::nullopt);
-*/
-    
+#else
+namespace std {
+
     struct nullopt_t {
     };
     
@@ -95,16 +110,7 @@ namespace std {
                 return false;
             return (bool)_value;
         }
-/*
-        inline friend std::ostream& operator << (std::ostream& out, const optional<T>& value) {
-            if (value.hasValue())
-                out << value.value();
-            else
-                out << "null";
 
-            return out;
-        }
-*/
         inline friend std::ostream& operator << (std::ostream& out, const optional<bool>& value) {
             if (value == true)
                out << "true";
@@ -117,20 +123,8 @@ namespace std {
 
         
    };
-/*
-   static ostream& operator << (ostream& out, const optional<bool>& value) {
 
-      if (value == true)
-         out << "true";
-      else if (value == false)
-         out << "false";
-      else
-         out << "null";
-
-      return out;
-   }
-    */
 }
-
+#endif
 
 #endif
