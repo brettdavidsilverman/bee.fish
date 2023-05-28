@@ -1,14 +1,13 @@
 #ifndef BEE_FISH__JSON__STRING_HPP
 #define BEE_FISH__JSON__STRING_HPP
 
-#include "../Parser/Test.hpp"
+#include "../Parser/Parser.hpp"
 
 namespace BeeFishJSON {
 
-   
-   auto String() {
-      using namespace BeeFishParser;
+   using namespace BeeFishParser;
       
+   auto String() {
       auto quote = Character("\"");
 
       auto plainCharacter =
@@ -38,7 +37,9 @@ namespace BeeFishJSON {
             escapedCharacter,
             0) and
          quote;
+
    }
+
 }
 
 #endif

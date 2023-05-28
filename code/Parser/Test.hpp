@@ -74,6 +74,64 @@ namespace BeeFishParser {
       return true;
    }
 
+   inline bool testPattern(
+      BeeFishParser::Parser&
+         parser,
+      const std::string& pattern,
+      const std::optional<bool>&
+          expected
+   )
+   {
+      using namespace std;
+      using namespace BeeFishMisc;
+      using namespace BeeFishParser;
+
+      bool success = true;
+
+      cout << "\t" << escape(pattern) << ":" << flush;
+
+      Capture capture(parser);
+
+      capture.read(pattern);
+
+      cout << escape(capture.value())
+           << "{"
+           << capture.result()
+           << "}";
+
+      success =
+         capture.result() == expected;
+
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+
+   }
+
+   inline bool testPattern(
+      const BeeFishParser::Parser&
+         parser,
+      const std::string& pattern,
+      const std::optional<bool>&
+          expected
+   )
+   {
+      using namespace BeeFishParser;
+
+      unique_ptr<Parser> copy =
+         unique_ptr<Parser>(
+            parser.copy()
+         );
+
+      bool success = testPattern(
+         *copy,
+         pattern,
+         expected
+      );
+
+      return success;
+   }
+
    inline bool testUnicode() {
       
       bool success = true;

@@ -5,15 +5,29 @@
 
 namespace BeeFishJSON {
 
+   using namespace BeeFishParser;
    
-   const auto _Null() {
+   auto Null() {
 
-      using namespace BeeFishParser;
-     
-      const auto _null =
-         Word("null");
-      
-      return _null;
+      return Word("null");
+
+   }
+
+   auto True() {
+
+      return Word("true");
+
+   }
+
+   auto False() {
+
+      return Word("false");
+
+   }
+
+   auto Undefined() {
+
+      return Word("undefined");
 
    }
 }

@@ -6,7 +6,7 @@
 #include <bitset>
 #include <memory>
 #include <chrono>
-#include "../Miscellaneous/optional.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
 
 namespace BeeFishParser {
 
@@ -133,6 +133,7 @@ namespace BeeFishParser {
       (std::istream& in, Parser& parser)
       {
          using namespace std;
+         using namespace BeeFishMisc;
 
 #ifdef TIME
          cout << "Chars" << "\t" << "Parsers" << "\t" << "Time" << endl;
@@ -144,9 +145,12 @@ namespace BeeFishParser {
          while ((c = in.get()) > 0)
          {
             ++charCount;
-
             if (!parser.read((char)c))
                break;
+
+            if (parser.result() != nullopt)
+               break;
+
 #ifdef TIME
             if (charCount % 100000 == 0)
             {
@@ -165,6 +169,10 @@ namespace BeeFishParser {
 #endif
 
          }
+#ifdef DEBUG
+         if (parser.result() == false)
+            cerr << "Fail:" << escape((char)c) << endl;
+#endif
 
          return in;
       }

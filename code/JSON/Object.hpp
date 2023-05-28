@@ -4,50 +4,48 @@
 #include <map>
 #include <memory>
 
-#include "../Parser/Test.hpp"
+#include "../Parser/Parser.hpp"
 
 #include "Number.hpp"
 #include "String.hpp"
 #include "BlankSpace.hpp"
-#include "Null.hpp"
 
 namespace BeeFishJSON {
 
-   const BeeFishParser::Parser& JSON();
+   using namespace BeeFishParser;
 
-   const BeeFishParser::Parser& Object() {
+   And JSON();
 
-      using namespace BeeFishParser;
+   auto Object() {
 
-      const auto openBrace =
+      auto openBrace =
          Character("{");
 
-      const auto closeBrace =
+      auto closeBrace =
          Character("}");
 
-
-      const auto key =
+      auto key =
          String();
 
-      const auto colon =
+      auto colon =
          Character(":");
 
-      const auto value =
+      auto value =
          LoadOnDemand(JSON);
 
-      const auto seperator =
+      auto seperator =
           Character(",");
 
-      const auto blankSpace =
+      auto blankSpace =
          BlankSpace();
 
-      const auto line =
+      auto line =
          blankSpace and
          key and blankSpace and
          colon and blankSpace and 
          value and blankSpace;
 
-      const static auto object = 
+      return
          blankSpace and
          openBrace and blankSpace and
          Optional(
@@ -59,9 +57,8 @@ namespace BeeFishJSON {
          )  and
          closeBrace;
 
-      return object;
-
    }
+
 }
 
 #endif

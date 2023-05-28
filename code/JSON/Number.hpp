@@ -1,22 +1,22 @@
 #ifndef BEE_FISH__JSON__NUMBER_HPP
 #define BEE_FISH__JSON__NUMBER_HPP
 
-#include "../Parser/Test.hpp"
+#include "../Parser/Parser.hpp"
 
 namespace BeeFishJSON {
 
-   const auto Number() {
+   using namespace BeeFishParser;
 
-      using namespace BeeFishParser;
+   auto Number() {
 
-      const auto sign =
+      auto sign =
          Character("+") or
          Character("-");
 
-      const auto integer =
+      auto integer =
          Repeat(Range("0", "9"));
 
-      const auto exponent =
+      auto exponent =
          (
             Character("e") or
             Character("E")
@@ -26,18 +26,18 @@ namespace BeeFishJSON {
          ) and
          integer;
        
-      const auto fraction =
+      auto fraction =
          Character(".") and
          integer;
 
-      const auto number =
+      return
          Optional(sign) and
          integer and
          Optional(fraction) and
          Optional(exponent);
 
-      return number;
    }
+
 }
 
 #endif

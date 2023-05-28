@@ -1,39 +1,37 @@
 #ifndef BEE_FISH__JSON__BLANK_SPACE_HPP
 #define BEE_FISH__JSON__BLANK_SPACE_HPP
 
-#include "../Parser/Test.hpp"
+#include "../Parser/Parser.hpp"
 
 namespace BeeFishJSON {
-
    
-   const auto BlankSpace() {
-
-      using namespace BeeFishParser;
+   using namespace BeeFishParser;
       
-      const auto space =
+   auto BlankSpace() {
+
+      auto space =
          Character(" ");
 
-      const auto lineFeed =
+      auto lineFeed =
          Character("\n");
 
-      const auto carriageReturn =
+      auto carriageReturn =
          Character("\r");
 
-      const auto horizontalTab =
+      auto horizontalTab =
          Character("\t");
 
-      const static auto blankSpace =
+      return
          Repeat(
             space or
             lineFeed or
             carriageReturn or
-            horizontalTab,
-            0
+            horizontalTab, 0
          );
 
-      return blankSpace;
 
    }
+
 }
 
 #endif

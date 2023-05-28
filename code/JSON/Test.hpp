@@ -10,7 +10,7 @@ namespace BeeFishJSON {
    using namespace BeeFishMisc;
 
    bool testBlankSpace();
-   bool testNull();
+   bool testConstants();
    bool testNumbers();
    bool testStrings();
    bool testArrays();
@@ -26,7 +26,7 @@ namespace BeeFishJSON {
          testBlankSpace();
 
       success = success &&
-         testNull();
+         testConstants();
 
       success = success &&
          testNumbers();
@@ -120,30 +120,28 @@ namespace BeeFishJSON {
       
    }
 
-   inline bool testNull()  {
+   inline bool testConstants()  {
       using namespace std;
       using namespace BeeFishParser;
 
       bool success = true;
 
-      cout << "Testing Null:" << endl;
+      cout << "Testing Constants:" << endl;
      
-      const auto Null = _Null();
-
       success &= testPattern(
-         Null,
+         Null(),
          "null",
          true
       );
 
       success &= testPattern(
-         Null,
+         Null(),
          "a",
          false
       );
 
       success &= testPattern(
-         Null,
+         Null(),
          "nulL",
          false
       );
@@ -158,6 +156,24 @@ namespace BeeFishJSON {
          JSON(),
          "anull",
          false
+      );
+
+      success &= testPattern(
+         JSON(),
+         "true",
+         true
+      );
+
+      success &= testPattern(
+         JSON(),
+         "false",
+         true
+      );
+
+      success &= testPattern(
+         JSON(),
+         "undefined",
+         true
       );
 
       BeeFishMisc::outputSuccess(success);
@@ -252,16 +268,16 @@ namespace BeeFishJSON {
          testPattern(Array(), "[\"a\"]", true);
  
       success &=
-         testPattern(Array(), "[,]", false);
+         testPattern(Array(), "[,]", true);
+
+      success &=
+         testPattern(Array(), "[,,,,1]", true);
 
       success &=
          testPattern(Array(), "[1,null]", true);
 
       success &=
          testPattern(Array(), "[1,2,3]", true);
-
-      success &=
-         testPattern(Array(), " [ 1 , 2 , 3 ]", true);
 
       success &=
          testPattern(Array(), "[[]]", true);

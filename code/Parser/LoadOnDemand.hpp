@@ -19,7 +19,7 @@ namespace BeeFishParser {
    public:
       //typedef std::shared_ptr<Parser> (*Function)();
      // typedef std::function< std::shared_ptr<Parser> () > Function;
-      typedef std::function<const Parser&()> Function;
+      typedef std::function<const And()> Function;
 
    protected:
       const Function _function;

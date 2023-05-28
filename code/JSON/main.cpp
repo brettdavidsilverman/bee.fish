@@ -14,8 +14,7 @@ using namespace BeeFishParser;
 using namespace BeeFishJSON;
 
 int main(int argc, const char* argv[]) {
-   
-
+   // testPattern(Array(), "[1,2,3]", true);
    cerr << "bee.fish.json"
            << endl
         << "C++ run time: "
@@ -37,10 +36,12 @@ int main(int argc, const char* argv[]) {
       return 0;
    }
    
-   static const Parser& parser = BeeFishJSON::JSON();
-  
+
+   auto parser = JSON();
+
    cin >> parser;
  
+   cout << endl;
 
    if (parser.result() == true)
    {
