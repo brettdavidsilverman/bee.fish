@@ -16,6 +16,10 @@ namespace BeeFishJSON {
       auto integer =
          Repeat(Range("0", "9"));
 
+      auto fraction =
+         Character(".") and
+         integer;
+
       auto exponent =
          (
             Character("e") or
@@ -26,10 +30,7 @@ namespace BeeFishJSON {
          ) and
          integer;
        
-      auto fraction =
-         Character(".") and
-         integer;
-
+      
       return
          Optional(sign) and
          integer and

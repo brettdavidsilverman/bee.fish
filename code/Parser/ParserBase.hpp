@@ -113,20 +113,32 @@ namespace BeeFishParser {
 
   
          bitset<8> bits = character;
-         for (int i = 7;
-              i >= 0;
-              --i)
-         {
+         if (!read(bits[7]))
+            return false;
 
-            bool bit = bits[i];
+         if (!read(bits[6]))
+            return false;
 
-            if (!read(bit))
-               return false;
-         
-         }
+         if (!read(bits[5]))
+            return false;
 
+         if (!read(bits[4]))
+            return false;
+
+         if (!read(bits[3]))
+            return false;
+
+         if (!read(bits[2]))
+            return false;
+
+         if (!read(bits[1]))
+            return false;
+
+         if (!read(bits[0]))
+            return false;
 
          return true;
+
       }
 
       friend std::istream& operator >>
