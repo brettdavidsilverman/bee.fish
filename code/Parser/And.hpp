@@ -68,7 +68,7 @@ namespace BeeFishParser {
          {
 // cerr << "<" << _buffer << ">[" << _index << "]" << flush;
 
-            std::shared_ptr<Parser> 
+            Parser*
                item = _inputs[_index];
             
             if (!_nextItem)

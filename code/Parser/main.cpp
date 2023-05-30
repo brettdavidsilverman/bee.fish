@@ -13,61 +13,27 @@ using namespace std;
 using namespace BeeFishMisc;
 using namespace BeeFishParser;
 
-
-class A : public Repeat {
-
-   public:
-      A() : Repeat(
-        // Character(","),
-         Character("a")
-      )
-      {
-      }
-
-      virtual Parser* copy() const
-      {
-         return new A();
-      }
-
-      virtual bool read(char c)
-      override
-      {
-         cerr << c << flush;
-         return Repeat::read(c);
-      }
-
-
-};
-
 int main(int argc, const char* argv[]) {
 
-   if (true)
+   if (false)
    {
       bool success = true;
-/*
-      testPattern(
-         Repeat(
-            Character(",") and
-             Repeat(
-               Character("a")
-             )
-         ),
-         ",aaa,aa",
-         std::nullopt
+      
+      auto parser = []() {
+         Character a("a");
+         Character b("b");
+
+         And _and(a, b);
+         return _and;
+      };
+      
+      success &= testPattern(
+         parser(),
+         "b",
+         false
       );
 
-*/
-      testPattern(
-         Repeat(
-            Character(",") and
-            Repeat(Character("a"))
-         ),
-         ",aa,aaa,",
-         std::nullopt
-      );
-
-      //testNumber();
-      //return 0;
+      return 0;
    }
 
    cout << "bee.fish.parser"

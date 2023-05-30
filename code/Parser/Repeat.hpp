@@ -13,7 +13,7 @@ namespace BeeFishParser
    class Repeat : public Parser
    {
    protected:
-      std::shared_ptr<Parser> _template;
+      Parser* _template;
       Parser* _item {nullptr};
       std::string _buffer;
       bool _nextItem {false};
@@ -49,6 +49,8 @@ namespace BeeFishParser
       {
          if (_item)
            delete _item;
+
+         delete _template;
       }
       
       virtual bool read(

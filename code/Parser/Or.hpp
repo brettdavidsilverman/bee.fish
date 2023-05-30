@@ -44,7 +44,7 @@ namespace BeeFishParser {
 
          bool matched = false;
          _index = 0;
-         std::shared_ptr<Parser> item = nullptr;
+         Parser* item = nullptr;
 
          for ( auto
                  it  = _inputs.begin();

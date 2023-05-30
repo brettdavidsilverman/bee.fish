@@ -14,7 +14,6 @@ namespace BeeFishParser {
       public Parser
    {
    protected:
-      Char _char;
       std::string _chars;
       size_t _expectedSize {0};
       bool _matchAny {false};
@@ -49,7 +48,7 @@ namespace BeeFishParser {
       {
          
       }
-
+/*
       virtual bool read(bool bit)
       override
       {
@@ -81,7 +80,48 @@ namespace BeeFishParser {
          
          return false;
       }
-      
+*/
+
+      virtual bool read(char character)
+      override
+      {
+
+         if (_chars.length() == 0)
+            setExpectedSize(character);
+
+         _chars.push_back(character);
+
+
+         if (_chars.length() >=
+             _expectedSize)
+         {
+            UTF8Character utf8(_chars);
+            _chars.clear();
+            _expectedSize = 0;
+            return read(utf8);
+         }
+         
+         return true;
+
+      }
+
+      void setExpectedSize(char first) {
+         
+         std::bitset<8> bits = first;
+
+         size_t count {0};
+
+         while (count < 8 &&
+                bits[7 - count])
+              ++count;
+
+         if (count == 0)
+            count = 1;
+
+         _expectedSize = count;
+
+      }
+/*
       size_t getExpectedCharCount() {
          Char& first = _char;
 
@@ -96,7 +136,7 @@ namespace BeeFishParser {
 
          return count;
       }
-
+*/
       static wchar_t toWChar(const std::string& bytes) {
 
          static std::wstring_convert<

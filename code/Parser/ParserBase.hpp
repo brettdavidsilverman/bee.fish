@@ -109,37 +109,7 @@ namespace BeeFishParser {
          char character
       )
       {
-         using namespace std;
-
-  
-         bitset<8> bits = character;
-
-         if (!read(bits[7]))
-            return false;
-
-         if (!read(bits[6]))
-            return false;
-
-         if (!read(bits[5]))
-            return false;
-
-         if (!read(bits[4]))
-            return false;
-
-         if (!read(bits[3]))
-            return false;
-
-         if (!read(bits[2]))
-            return false;
-
-         if (!read(bits[1]))
-            return false;
-
-         if (!read(bits[0]))
-            return false;
-
          return true;
-
       }
 
       friend std::istream& operator >>
@@ -218,10 +188,6 @@ namespace BeeFishParser {
          return in;
       }
 
-      virtual bool read(bool bit) {
-         return true;
-      }
-
       virtual bool read(
          const UTF8Character& utf8
       )
@@ -239,11 +205,6 @@ namespace BeeFishParser {
       }
 
       virtual Parser* copy() const = 0;
-/*
-      {
-         return new Parser(*this);
-      }
-*/
 
       virtual bool isOptional() const;
       
@@ -255,16 +216,15 @@ namespace BeeFishParser {
          return 0;
       }
 
-      virtual std::shared_ptr<Parser>
+      virtual Parser*
       operator [] (size_t index)
       {
          if (index == 0)
-            return 
-               std::shared_ptr<Parser>(this);
+            return this;
 
-         return
-            std::shared_ptr<Parser>(nullptr);
+         return nullptr;
       }
+
 #ifdef TIME
       static unsigned long now()
       {

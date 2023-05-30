@@ -14,16 +14,16 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   And JSON() {
+   const And JSON() {
       return BlankSpace() and
          (
-            Number() or
-            String() or
-            Array() or
+            Undefined() or
             Null() or
             True() or
             False() or
-            Undefined() or
+            Number() or
+            String() or
+            Array() or
             Object()
          );
    }

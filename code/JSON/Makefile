@@ -1,7 +1,7 @@
 OUTPUT = ../../build/JSON
 DEPS = Makefile main.cpp Number.hpp String.hpp Test.hpp
 CFLAGS = -std=c++11 -Wfatal-errors
-TEST = tests/time-zones.json
+TEST = tests/large.json
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic
@@ -22,6 +22,10 @@ perf:	clean
 perf:	CFLAGS += -DTIME -Ofast
 perf:	run_performance
 
+trace:	clean
+trace:	CFLAGS += -DTIME -Ofast
+trace:	run_trace
+
 test:	$(OUTPUT)
 	$(OUTPUT) -test
 
@@ -31,8 +35,13 @@ run:	$(OUTPUT)
 run_time:	$(OUTPUT)
 	time cat $(TEST) | $(OUTPUT)
 
+run_trace:	$(OUTPUT)
+	rm -f trace.txt
+	valgrind  -s --log-file="trace.txt" --track-origins=yes --leak-check=yes ./cat.sh $(TEST)
+	cat trace.txt
+
 run_performance:	$(OUTPUT)
-	sudo perf record ./perform.sh
+	sudo perf record ./cat.sh $(TEST)
 	sudo perf report
 
 clean:

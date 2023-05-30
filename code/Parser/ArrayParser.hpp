@@ -12,16 +12,14 @@ namespace BeeFishParser {
 
    class ArrayParser : public Parser {
    protected:
-      std::vector< std::shared_ptr<Parser> > _inputs;
+      std::vector<Parser*> _inputs;
       size_t _index {0};
    public:
 
       ArrayParser(const ArrayParser& source) {
-         for (const std::shared_ptr<Parser>& parser : source._inputs) {
+         for (auto parser : source._inputs) {
             _inputs.push_back(
-               std::shared_ptr<Parser>(
-                  parser->copy()
-               )
+               parser->copy()
             );
          }
       }
@@ -32,18 +30,14 @@ namespace BeeFishParser {
          for ( auto parser : lhs._inputs )
          {
             _inputs.push_back(
-               std::shared_ptr<Parser>(
-                  parser->copy()
-               )
+               parser->copy()
             );
          }
 
          for ( auto parser : rhs._inputs )
          {
             _inputs.push_back(
-               std::shared_ptr<Parser>(
-                  parser->copy()
-               )
+               parser->copy()
             );
          }
 
@@ -56,16 +50,12 @@ namespace BeeFishParser {
          for ( auto parser : lhs._inputs )
          {
             _inputs.push_back(
-               std::shared_ptr<Parser>(
-                  parser->copy()
-               )
+               parser->copy()
             );
          }
 
          _inputs.push_back(
-            std::shared_ptr<Parser>(
-               rhs.copy()
-            )
+            rhs.copy()
          );
 
       }
@@ -73,15 +63,11 @@ namespace BeeFishParser {
       ArrayParser(const Parser& lhs, const Parser& rhs)
       {
          _inputs.push_back(
-            std::shared_ptr<Parser>(
-               lhs.copy()
-            )
+            lhs.copy()
          );
 
          _inputs.push_back(
-            std::shared_ptr<Parser>(
-               rhs.copy()
-            )
+            rhs.copy()
          );
 
       }
@@ -89,13 +75,17 @@ namespace BeeFishParser {
       
       virtual ~ArrayParser()
       {
+         for ( auto parser : _inputs )
+         {
+            delete parser;
+         }
       }
 
       virtual size_t index() override {
          return _index;
       }
 
-      virtual std::shared_ptr<Parser>
+      virtual Parser*
       operator [] (size_t index)
       override
       {

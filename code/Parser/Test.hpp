@@ -185,19 +185,30 @@ namespace BeeFishParser {
 
       bool success = true;
 
-      std::cout << "testReadCharacter: " << std::flush;
+      std::cout << "testReadCharacter:" << std::endl;
 
       UTF8Character character;
 
       std::string string("🌎");
 
-      success = success && 
-         character.read(string) &&
-         character._result == true &&
-         character._character == L'🌎';
+      std::cout << "\tread:";
+      success =
+         character.read(string);
+      BeeFishMisc::outputSuccess(success);
+
+      std::cout << "\tresult: ";
+      success =
+         (character._result == true);
+      BeeFishMisc::outputSuccess(success);
+
+      std::cout << "\tcharacter: ";
+      success = 
+         (character._character == L'🌎');
+      BeeFishMisc::outputSuccess(success);
+
+      std::cout << "\t🌎";
 
       character = UTF8Character("🌎");
-      
       success = success && 
          character.read(string) &&
          character._result == true &&

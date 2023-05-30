@@ -9,26 +9,30 @@ namespace BeeFishParser {
             
 	class Range : public UTF8Character {
 	protected:
-		std::shared_ptr<UTF8Character>
-           _minimum;
+		wchar_t _minimum;
 
-        std::shared_ptr<UTF8Character>
-           _maximum;
+        wchar_t _maximum;
 
 	public:
         using UTF8Character::read;
 
+        Range(const Range& source) :
+           _minimum(source._minimum),
+           _maximum(source._maximum)
+        {
+        }
+
 		Range( const UTF8Character& minimum,
                const UTF8Character& maximum ) :
-			_minimum((UTF8Character*)minimum.copy()),
-			_maximum((UTF8Character*)maximum.copy())
+			_minimum(minimum._character),
+			_maximum(maximum._character)
 		{
 		}
 
         Range( const std::string& minimum,
                const std::string& maximum ) 
-        : Range(UTF8Character(minimum),
-                UTF8Character(maximum))
+        : Range(UTF8Character::toWChar(minimum),
+                UTF8Character::toWChar(maximum))
 		{
 		}
 
@@ -39,8 +43,8 @@ namespace BeeFishParser {
             using namespace std;
 
 			bool matched =
-				(*_minimum <= character) &&
-				(*_maximum >= character);
+				(_minimum <= character._character) &&
+				(_maximum >= character._character);
 				
 			if (matched)
 			{
@@ -58,8 +62,7 @@ namespace BeeFishParser {
         override 
         {
            return new Range(
-              *_minimum,
-              *_maximum
+              *this
            );
         }
 

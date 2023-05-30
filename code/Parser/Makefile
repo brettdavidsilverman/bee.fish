@@ -5,7 +5,7 @@ CFLAGS = -std=c++11 -Wfatal-errors
 $(OUTPUT):	$(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic
 
-test:	$(OUTPUT)
+test:	clean $(OUTPUT)
 	$(OUTPUT) -test
 
 clean:

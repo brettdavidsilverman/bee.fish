@@ -14,13 +14,13 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   And JSON();
+   const And JSON();
 
-   And Array() {
+   const And Array() {
 
       
       auto blankSpace =
-         Optional(BlankSpace());
+         BlankSpace();
 
       auto openBracket =
          Character("[");
@@ -29,7 +29,7 @@ namespace BeeFishJSON {
          Character("]");
 
       auto value =
-         Optional(LoadOnDemand(JSON));
+         Optional(LoadOnDemand<And>(JSON));
 
       auto seperator =
           blankSpace and

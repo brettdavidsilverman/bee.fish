@@ -49,10 +49,6 @@ namespace BeeFishParser {
 
       }
 
-      virtual bool read(bool bit) override {
-         throw std::logic_error("Should not reach here");
-      }
-
       virtual Parser* copy() const {
          return new Word(*this);
       }

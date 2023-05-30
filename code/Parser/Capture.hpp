@@ -15,7 +15,7 @@ namespace BeeFishParser {
    class Capture : public Parser
    {
    protected:
-      std::shared_ptr<Parser> _capture;
+      Parser* _capture;
       std::string _value;
    public:
       std::string& _valueRef;
@@ -52,6 +52,7 @@ namespace BeeFishParser {
       }
       
       virtual ~Capture() {
+         delete _capture;
       }
 
       virtual void capture(char c)

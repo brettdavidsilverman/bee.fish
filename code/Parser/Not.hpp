@@ -8,7 +8,7 @@ namespace BeeFishParser {
 
    class Not : public Parser {
    protected:
-      std::shared_ptr<Parser> _not;
+      Parser* _not;
 
    public:
       using Parser::read;
@@ -19,6 +19,7 @@ namespace BeeFishParser {
       }
 
       virtual ~Not() {
+         delete _not;
       }
 
       virtual bool read(

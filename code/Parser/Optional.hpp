@@ -11,7 +11,7 @@ namespace BeeFishParser {
 
    class Optional : public Parser {
    protected:
-      std::shared_ptr<Parser> _optional;
+      Parser* _optional;
       bool _matched {false};
    public:
       using Parser::read;
@@ -22,6 +22,7 @@ namespace BeeFishParser {
       }
 
       virtual ~Optional() {
+         delete _optional;
       }
 
       virtual bool read(
@@ -42,7 +43,6 @@ namespace BeeFishParser {
          }
          else if(_optional->_result == false)
          {
-            //setResult(false);
             return false;
             
          } 

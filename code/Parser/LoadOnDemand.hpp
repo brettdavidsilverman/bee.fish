@@ -11,15 +11,13 @@ using namespace std;
 
 namespace BeeFishParser {
 
-   
+   template<typename T>
    class LoadOnDemand : public Parser {
 
    protected:
-      std::shared_ptr<Parser> _input;
+      Parser* _input = nullptr;
    public:
-      //typedef std::shared_ptr<Parser> (*Function)();
-     // typedef std::function< std::shared_ptr<Parser> () > Function;
-      typedef std::function<const And()> Function;
+      typedef std::function<T()> Function;
 
    protected:
       const Function _function;
@@ -36,14 +34,17 @@ namespace BeeFishParser {
       {
       }
 
+      virtual ~LoadOnDemand() {
+         if (_input)
+            delete _input;
+      }
+
       virtual bool read(
          char character
       ) override
       {
          if (_input == nullptr) {
-            _input = std::shared_ptr<Parser>(
-               _function().copy()
-            );
+            _input = _function().copy();
          }
 
          bool matched = _input->read(

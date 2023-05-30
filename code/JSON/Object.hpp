@@ -14,9 +14,9 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   And JSON();
+   const And JSON();
 
-   And Object() {
+   const And Object() {
 
       auto openBrace =
          Character("{");
@@ -31,7 +31,7 @@ namespace BeeFishJSON {
          Character(":");
 
       auto value =
-         LoadOnDemand(JSON);
+         LoadOnDemand<And>(JSON);
 
       auto seperator =
           Character(",");
