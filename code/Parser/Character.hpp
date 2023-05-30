@@ -6,8 +6,8 @@
 
 namespace BeeFishParser {
 
-   //typedef UTF8Character Character;
-   typedef Word Character;
+   typedef UTF8Character Character;
+   //typedef Word Character;
    typedef Character C;
 }
 

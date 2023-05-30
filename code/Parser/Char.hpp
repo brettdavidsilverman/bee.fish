@@ -56,9 +56,6 @@ namespace BeeFishParser {
          return new Char(_char);
       }
       
-      virtual bool read(char c) {
-         throw std::logic_error("Should not reach here");
-      }
    };
 
 

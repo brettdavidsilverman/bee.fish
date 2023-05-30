@@ -7,7 +7,7 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   auto Number() {
+   And Number() {
 
       auto sign =
          Character("+") or

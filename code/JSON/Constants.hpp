@@ -7,25 +7,25 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
    
-   auto Null() {
+   Word Null() {
 
       return Word("null");
 
    }
 
-   auto True() {
+   Word True() {
 
       return Word("true");
 
    }
 
-   auto False() {
+   Word False() {
 
       return Word("false");
 
    }
 
-   auto Undefined() {
+   Word Undefined() {
 
       return Word("undefined");
 

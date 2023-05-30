@@ -7,7 +7,7 @@ namespace BeeFishJSON {
    
    using namespace BeeFishParser;
       
-   auto BlankSpace() {
+   Repeat BlankSpace() {
 
       auto space =
          Character(" ");

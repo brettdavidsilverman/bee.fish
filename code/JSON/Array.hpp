@@ -16,7 +16,7 @@ namespace BeeFishJSON {
 
    And JSON();
 
-   auto Array() {
+   And Array() {
 
       
       auto blankSpace =

@@ -7,7 +7,7 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
       
-   auto String() {
+   And String() {
       auto quote = Character("\"");
 
       auto plainCharacter =

@@ -16,7 +16,7 @@ namespace BeeFishJSON {
 
    And JSON();
 
-   auto Object() {
+   And Object() {
 
       auto openBrace =
          Character("{");

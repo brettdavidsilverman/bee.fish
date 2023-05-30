@@ -113,6 +113,7 @@ namespace BeeFishParser {
 
   
          bitset<8> bits = character;
+
          if (!read(bits[7]))
             return false;
 
@@ -150,7 +151,7 @@ namespace BeeFishParser {
 #ifdef TIME
          cout << "Chars" << "\t" << "Parsers" << "\t" << "Time" << endl;
          unsigned long start = now();
-         
+         unsigned long diff = start;
 #endif
          size_t charCount = 0;
          int c = -1;
@@ -172,20 +173,36 @@ namespace BeeFishParser {
             if (charCount % 100000 == 0)
             {
                unsigned long time =
-                  now() - start;
+                  now() - diff;
                
                cout 
                   << charCount << " (char count)\t"
                   << Parser::parserInstanceCount() << " (instances)\t" 
                   << time << " (milliseconds)\t"
-                  << 10000.0 / time * 1000.0 << " (chars per second)" 
+                  << (long)(10000.0 / time * 1000.0) << " (chars per second)" 
                   << endl;
 
-               start = now();
+               diff = now();
             }
 #endif
 
          }
+
+#ifdef TIME
+         unsigned long time =
+            now() - start;
+         cout 
+            << charCount << " (char count)\t"
+            << Parser::parserInstanceCount() << " (instances)\t" 
+            << time << " (milliseconds)\t"
+               << (long)(10000.0 / time * 1000.0) << " (bytes/sec)" 
+            << endl;
+
+         if (parser._result == false)
+            cerr << "Failed on {" << escape(c) << "}" << endl;
+
+#endif
+
 
          return in;
       }
