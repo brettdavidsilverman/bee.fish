@@ -59,6 +59,13 @@ namespace BeeFishParser {
    {
       return Not(a);
    }
+
+   Optional operator -(
+      const Parser& a
+   )
+   {
+      return Optional(a);
+   }
    
 };
 

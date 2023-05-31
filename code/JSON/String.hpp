@@ -7,10 +7,9 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
       
-   And String() {
-      auto quote = Character("\"");
+      const auto quote = Character("\"");
 
-      auto plainCharacter =
+      const auto plainCharacter =
          not (
             Character("\\") or
             Character("\"") or
@@ -21,7 +20,7 @@ namespace BeeFishJSON {
             Character("\f")
          );
 
-      auto escapedCharacter =
+      const auto escapedCharacter =
          Character("\\") and (
             Character("\\") or
             Character("\"") or
@@ -32,7 +31,7 @@ namespace BeeFishJSON {
             Character("f")
          );
 
-      return
+      const auto _string =
          quote and
          Repeat(
             plainCharacter or
@@ -40,7 +39,6 @@ namespace BeeFishJSON {
             0) and
          quote;
 
-   }
 
 }
 

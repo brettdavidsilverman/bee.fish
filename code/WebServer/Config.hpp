@@ -15,5 +15,4 @@
    #define WEB_SERVER_PORT 8080
 #endif
 
-#define READ_TIMEOUT_SECONDS 3
 #endif

@@ -1,11 +1,8 @@
-all:	build
+build:	clean
+	mkdir build
 	cd code && make $(DEBUG)
 
-build:
-	mkdir build
-
-install: all
-	sudo setcap cap_net_bind_service=ep ./build/WebServer
+install:	build
 	./start.sh $(PORT)
 
 test:	all

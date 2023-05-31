@@ -57,61 +57,75 @@ namespace BeeFishJSON {
       cout << "Testing Blank Space:" << endl;
      
       success &= testPattern(
-         BlankSpace(),
+         blankSpace,
          " ",
-         nullopt
+         true
       );
 
       success &= testPattern(
-         BlankSpace(),
+         blankSpace,
          "\r",
-         nullopt
+         true
       );
 
       success &= testPattern(
-         BlankSpace(),
+         blankSpace,
          "\n",
-         nullopt
+         true
       );
 
       success &= testPattern(
-         BlankSpace(),
+         blankSpace,
          "\t",
-         nullopt
+         true
       );
 
       success &= testPattern(
-         BlankSpace(),
+         blankSpace,
          "a",
-         nullopt
+         false
       );
 
       success &= testPattern(
-         BlankSpace(),
+         blankSpace,
          " a",
          true
       );
 
       success &= testPattern(
-         BlankSpace() and
+         blankSpace and
          Character("a"),
          " a",
          true
       );
 
       success &= testPattern(
-         BlankSpace() and
+         blankSpace and
          Character("a"),
          "a",
-         true
+         false
       );
 
       success &= testPattern(
-         BlankSpace() and
+         blankSpace and
          Character("a") and
-         BlankSpace(),
+         blankSpace,
          "a",
-         nullopt
+         false
+      );
+
+      success &= testPattern(
+         -blankSpace and
+         Character("a"),
+         "a",
+         true
+      );
+
+      success &= testPattern(
+         blankSpaces and
+         Character("a"),
+         "   a",
+         true
       );
 
       BeeFishMisc::outputSuccess(success);
@@ -129,19 +143,19 @@ namespace BeeFishJSON {
       cout << "Testing Constants:" << endl;
      
       success &= testPattern(
-         Null(),
+         _null,
          "null",
          true
       );
 
       success &= testPattern(
-         Null(),
+         _null,
          "a",
          false
       );
 
       success &= testPattern(
-         Null(),
+         _null,
          "nulL",
          false
       );
@@ -187,7 +201,7 @@ namespace BeeFishJSON {
       const std::optional<bool>&
           expected)
    {
-      auto complex = Number() and
+      auto complex = number and
          BeeFishParser::Word("\r\n");
 
       return testPattern(
@@ -234,19 +248,19 @@ namespace BeeFishJSON {
       cout << "Testing Strings:" << endl;
 
       success = success &&
-         testPattern(String(), "\"\"", true);
+         testPattern(_string, "\"\"", true);
  
       success = success &&
-         testPattern(String(), "\"\\\"\"", true);
+         testPattern(_string, "\"\\\"\"", true);
  
       success = success &&
-         testPattern(String(), "\"text\"", true);
+         testPattern(_string, "\"text\"", true);
 
       success = success &&
-         testPattern(String(), "\"", nullopt);
+         testPattern(_string, "\"", nullopt);
 
       success = success &&
-         testPattern(String(), "unquoted", false);
+         testPattern(_string, "unquoted", false);
 
       BeeFishMisc::outputSuccess(success);
 
@@ -262,25 +276,25 @@ namespace BeeFishJSON {
       cout << "Testing Arrays:" << endl;
 
       success &=
-         testPattern(Array(), "[]", true);
+         testPattern(array, "[]", true);
  
       success &=
-         testPattern(Array(), "[\"a\"]", true);
+         testPattern(array, "[\"a\"]", true);
  
       success &=
-         testPattern(Array(), "[,]", true);
+         testPattern(array, "[,]", true);
 
       success &=
-         testPattern(Array(), "[,,,,1]", true);
+         testPattern(array, "[,,,,1]", true);
 
       success &=
-         testPattern(Array(), "[1,null]", true);
+         testPattern(array, "[1,null]", true);
 
       success &=
-         testPattern(Array(), "[1,2,3]", true);
+         testPattern(array, "[1,2,3]", true);
 
       success &=
-         testPattern(Array(), "[[]]", true);
+         testPattern(array, "[[]]", true);
 
       BeeFishMisc::outputSuccess(success);
 
@@ -296,22 +310,22 @@ namespace BeeFishJSON {
       cout << "Testing Objects:" << endl;
 
       success &=
-         testPattern(Object(), "{}", true);
+         testPattern(object, "{}", true);
  
       success &=
-         testPattern(Object(), "{\"a\":1}", true);
+         testPattern(object, "{\"a\":1}", true);
  
       success &=
-         testPattern(Object(), "{\"a\":1,\"b\":2}", true);
+         testPattern(object, "{\"a\":1,\"b\":2}", true);
 
       success &=
-         testPattern(Object(), "{\"c\":{}}", true);
+         testPattern(object, "{\"c\":{}}", true);
 
       success &=
-         testPattern(Object(), " { \"c\" : { } }", true);
+         testPattern(object, " { \"c\" : { } }", true);
 
       success &=
-         testPattern(Object(), "{", nullopt);
+         testPattern(object, "{", nullopt);
 
       BeeFishMisc::outputSuccess(success);
 

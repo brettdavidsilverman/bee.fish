@@ -14,50 +14,44 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   And JSON();
+   const And JSON();
 
-   And Object() {
+   const auto openBrace =
+      Character("{");
 
-      auto openBrace =
-         Character("{");
+   const auto closeBrace =
+      Character("}");
 
-      auto closeBrace =
-         Character("}");
+   const auto key =
+      _string;
 
-      auto key =
-         String();
+   const auto colon =
+      Character(":");
 
-      auto colon =
-         Character(":");
+   const auto value =
+      LoadOnDemand<And>(JSON);
 
-      auto value =
-         LoadOnDemand<And>(JSON);
+   const auto seperator =
+       Character(",");
 
-      auto seperator =
-          Character(",");
+   const auto line =
+      -blankSpaces and
+      key and -blankSpaces and
+      colon and -blankSpaces and 
+      value and -blankSpaces;
 
-      auto blankSpace =
-         BlankSpace();
+   const auto object =
+      -blankSpaces and
+      openBrace and -blankSpaces and
+      Optional(
+         line and -blankSpaces and
+         Repeat(
+            seperator and line,
+            0
+         )
+      ) and
+      closeBrace;
 
-      auto line =
-         blankSpace and
-         key and blankSpace and
-         colon and blankSpace and 
-         value and blankSpace;
-
-      return
-         blankSpace and
-         openBrace and blankSpace and
-         Optional(
-            line and blankSpace and
-            Repeat(
-               seperator and line,
-               0
-            )
-         )  and
-         closeBrace;
-
-   }
 
 }
 

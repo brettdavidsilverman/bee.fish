@@ -7,30 +7,33 @@ namespace BeeFishJSON {
    
    using namespace BeeFishParser;
       
-   Repeat BlankSpace() {
 
-      auto space =
+      const auto space =
          Character(" ");
 
-      auto lineFeed =
+      const auto lineFeed =
          Character("\n");
 
-      auto carriageReturn =
+      const auto carriageReturn =
          Character("\r");
 
-      auto horizontalTab =
+      const auto tab =
          Character("\t");
 
-      return
-         Repeat(
-            space or
-            lineFeed or
-            carriageReturn or
-            horizontalTab, 0
-         );
+      const auto blank = space or tab;
+      const auto blanks = Repeat(blank);
 
+      const auto blankSpace =
+         blank or
+         lineFeed or
+         carriageReturn;
 
-   }
+      const auto blankSpaces =
+         Repeat(blankSpace);
+
+      const auto newLine =
+         Word("\r\n") or Word("\n");
+
 
 }
 

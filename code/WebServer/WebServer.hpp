@@ -1,5 +1,5 @@
-#ifndef BEE_FISH__WEB_SERVER__HPP
-#define BEE_FISH__WEB_SERVER__HPP
+#ifndef BEE_FISH__WEB__WEB_SERVER__HPP
+#define BEE_FISH__WEB__WEB_SERVER__HPP
 
 #include <stdio.h>
 #include <string.h>
@@ -21,11 +21,10 @@
 #include <boost/asio/post.hpp>
 
 #include "Config.hpp"
+#include "../WebRequest/WebRequest.hpp"
 
-namespace BeeFishWebServer {
+namespace BeeFishWeb {
 
-
-   class WebRequest;
 
    class WebServer {
    protected:
@@ -118,11 +117,9 @@ namespace BeeFishWebServer {
                 !webServer->_stop)
             {
                const char *ipAddress = inet_ntoa(cli_addr.sin_addr);
-               printf("IP address: %s\n", ipAddress);
-
                // Set client socket to non blocking
                fcntl(clientSocket, F_SETFL, O_NONBLOCK);
-               webServer->handleRequest(clientSocket);
+               webServer->handleRequest(clientSocket, ipAddress);
             }
 
          }
@@ -196,77 +193,20 @@ namespace BeeFishWebServer {
 
       }
 
-      virtual void handleRequest(int clientSocket) {
+      virtual void handleRequest(int clientSocket, std::string ipAddress) {
 #ifdef DEBUG
          std::cerr << "handleRequest(" << clientSocket << ")" << std::endl;
 #endif
          boost::asio::post(
             _threadPool,
-            [this, clientSocket]() {
-               const std::string
-                  input = readInput(clientSocket);
-               
-               std::stringstream writeOutput;
-               writeOutput <<
-                  "HTTP/2.0 200 OK\r\n" <<
-                  "Content-Type: text/plain\r\n" <<
-                  "Connection: keep-alive\r\n" <<
-                  "Content-Length: " <<
-                     input.length() << "\r\n" <<
-                  "\r\n" <<
-                  input;
-
-               std::string response = writeOutput.str();
-
-               ::write(
-                  clientSocket,
-                  response.c_str(),
-                  response.length()
-               );
-               ::close(clientSocket);
+            [this, clientSocket, ipAddress]() {
+               WebRequest* webRequest =
+                  new WebRequest(clientSocket, ipAddress);
+               webRequest->process();
                return;
             }
          );
 
-      }
-
-      virtual const std::string readInput(int clientSocket)
-      {
-         std::stringstream stream;
-         while (pollInput(clientSocket))
-         {
-            int ret;
-            char buff[512];
-
-            while ((ret = ::read(
-                    clientSocket,
-                    buff,
-                    sizeof(buff))
-                  ) > 0)
-            {
-               stream.write(buff, ret);
-               if (ret < sizeof(buff))
-                   break;
-            }
-            if (ret < sizeof(buff))
-               break;
-         }
-
-         return stream.str();
-
-      }
-
-      bool pollInput(int socket) {
-         struct pollfd pfds[1];
-         pfds[0].fd = socket;
-         pfds[0].events = POLLIN;
-         return (
-            poll(
-                 pfds, 1,
-                 READ_TIMEOUT_SECONDS * 1000
-              ) > 0 &&
-            (pfds[0].revents & POLLIN) > 0
-         );
       }
 
       virtual void close() {

@@ -6,7 +6,7 @@
 
 #include "WebServer.hpp"
 
-namespace BeeFishWebServer {
+namespace BeeFishWeb {
    
    bool testStartStop();
 
@@ -36,12 +36,12 @@ namespace BeeFishWebServer {
       WebServer testServer(8080, 1);
       
       testServer.start();
-      BeeFish:sleep(2);
+      BeeFishMisc::sleep(2);
 
       //string command = "curl " + testServer.host();
          
 
-      string command = "curl " + testServer.host() + " | grep \"Hello World\"";
+      std::string command = "curl " + testServer.host() + " | grep \"Hello World\"";
      
      
       if (system(command.c_str()) == 0) {

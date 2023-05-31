@@ -56,20 +56,30 @@ namespace BeeFishParser {
          if (_read == 0)
             setExpectedSize(character);
 
-         if (_matchAny)
-            _chars.push_back(character);
+         bool matched = false;
 
-         if (_chars[_read++] == character) {
-            if (_read == _expectedSize) {
-               UTF8Character utf8(_chars);
-               _expectedSize = 0;
-               _read = 0;
-               return read(utf8);
-            }
-            return true;
+         if (_matchAny) {
+           _chars.push_back(character);
+            matched = true;
+         }
+         else {
+            if (_chars[_read] == character)
+               matched = true;
+            else
+               setResult(false);
          }
 
-         return false;
+         ++_read;
+
+         if (matched &&
+             _read == _expectedSize)
+         {
+            UTF8Character utf8(_chars);
+            return read(utf8);
+         }
+
+         return matched;
+
 
       }
 

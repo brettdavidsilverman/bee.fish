@@ -28,8 +28,6 @@ namespace BeeFishParser {
       override
       {
 
-         if (_result != nullopt)
-            return true;
 
          bool matched =
             _not->read(c);

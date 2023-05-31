@@ -1,7 +1,8 @@
 all:
 	cd Parser && make $(DEBUG)
-	cd WebServer && make $(DEBUG)
 	cd JSON && make $(DEBUG)
+	cd WebServer && make $(DEBUG)
+
 
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG

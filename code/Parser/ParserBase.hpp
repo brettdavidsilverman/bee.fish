@@ -6,6 +6,8 @@
 #include <bitset>
 #include <memory>
 #include <chrono>
+#include <cstring>
+
 #include "../Miscellaneous/Miscellaneous.hpp"
 
 namespace BeeFishParser {
@@ -98,11 +100,27 @@ namespace BeeFishParser {
       }
 
       virtual bool read(
+         const char* string,
+         int length
+      )
+      {
+         const char* end = string + length;
+         for (const char* c = string;
+              c != end;
+              ++c)
+         {
+            if (!read(*c))
+               return false;
+
+         }
+         return true;
+      }
+
+      virtual bool read(
          const char* stream
       )
       {
-         const std::string string(stream);
-         return read(string);
+         return read(stream, strlen(stream));
       }
 
       virtual bool read(
@@ -136,7 +154,7 @@ namespace BeeFishParser {
             if (!parser.read((char)c))
                break;
 
-            if (parser.result() != nullopt)
+            if (parser._result != nullopt)
                break;
 
 #ifdef TIME

@@ -1,20 +1,25 @@
 CC = g++
 CFLAGS = -std=c++2a -fmax-errors=1
 OBJECTS=main.o
-DEPS=main.cpp content-length.h body.h new-line.h headers.h web-request.h version.h test.h Makefile
+DEPS=main.cpp WebRequest.hpp Version.hpp Test.hpp Makefile
+OUTPUT = ../../build/WebRequest
+
 %.o: %.cpp $(DEPS)
 	$(CC) $< -c $(CFLAGS)
 	
-web-request: $(OBJECTS) $(DEPS)
+$(OUTPUT): $(OBJECTS) $(DEPS)
 	@echo "Linking Web Request"
-	$(CC) $(CFLAGS) -O -o web-request $(OBJECTS) -lstdc++fs
+	$(CC) $(CFLAGS) -O -o $(OUTPUT) $(OBJECTS) -lstdc++fs
 	
 debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
-debug:	web-request
+debug:	$(OUTPUT)
+
+test:	debug
+	$(OUTPUT) -test
 
 clean:
 	rm -f $(OBJECTS)
-	rm -f web-request
+	rm -f $(OUTPUT)
 	rm -f trace.txt

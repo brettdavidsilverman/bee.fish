@@ -555,6 +555,20 @@ namespace BeeFishParser {
          std::nullopt
       );
 
+      auto SpaceParser = []() {
+         const Character space(" ");
+         const Character tab("\t");
+         const Or blank = space or tab;
+         return
+            Repeat(not space) and
+            space;
+      };
+         
+      success &= testPattern(
+         SpaceParser(),
+         "Brett ",
+         true
+      );
 
       BeeFishMisc::outputSuccess(success);
 

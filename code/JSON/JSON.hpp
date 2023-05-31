@@ -8,50 +8,35 @@
 #include "Number.hpp"
 #include "String.hpp"
 #include "BlankSpace.hpp"
-#include "Constants.hpp"
 
 namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   inline const auto blankSpace =
-      BlankSpace();
-
    inline const auto undefined =
-      Undefined();
+      Word("undefined");
 
    inline const auto _null =
-      Null();
+      Word("null");
 
    inline const auto _true =
-      True();
+      Word("true");
 
    inline const auto _false =
-      False();
+      Word("false");
 
    inline const auto boolean =
       _true or _false;
 
-   inline const auto number =
-      Number();
 
-   inline const auto string =
-      String();
-
-   inline const auto array =
-      Array();
-
-   inline const auto object =
-      Object();
-
-   And JSON() {
-      return blankSpace and
+   const And JSON() {
+      return -blankSpace and
          (
             undefined or
             _null or
             boolean or
             number or
-            string or
+            _string or
             array or
             object
          );

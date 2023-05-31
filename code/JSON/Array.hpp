@@ -14,40 +14,30 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   And JSON();
+   const And JSON();
 
-   And Array() {
+   const auto openBracket =
+      Character("[");
 
-      
-      auto blankSpace =
-         BlankSpace();
+   const auto closeBracket =
+      Character("]");
 
-      auto openBracket =
-         Character("[");
+   const auto arraySeperator =
+       -blankSpaces and
+       Character(",") and
+       -blankSpaces;
 
-      auto closeBracket =
-         Character("]");
-
-      auto value =
-         Optional(LoadOnDemand<And>(JSON));
-
-      auto seperator =
-          blankSpace and
-          Character(",") and
-          blankSpace;
-
-      return
+   const auto array =
          openBracket and
-         Optional(
-            value  and
+         -(
+            -value  and
             Repeat(
-               seperator and value,
+               arraySeperator and -value,
                0
             )
          )  and
          closeBracket;
 
-   }
 }
 
 #endif

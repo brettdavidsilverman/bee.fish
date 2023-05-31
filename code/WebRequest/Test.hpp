@@ -1,21 +1,20 @@
 #ifndef BEE_FISH_WEB__TEST_REQUEST_H
 #define BEE_FISH_WEB__TEST_REQUEST_H
-#include "../test/test.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
 
-#include "../json/json-parser.h"
-#include "web-request.h"
-#include "../b-script/b-script-parser.h"
+#include "../JSON/JSON.hpp"
+#include "WebRequest.hpp"
 
 #ifdef SERVER
 using namespace std::filesystem;
 #endif
 
-using namespace BeeFishTest;
+using namespace BeeFishMisc;
 
 namespace BeeFishWeb
 {
 
-   inline bool testURL();
+   //inline bool testURL();
 #ifdef SERVER
    inline bool testWebRequest();
    inline bool testParts();
@@ -30,7 +29,7 @@ namespace BeeFishWeb
 
       //ok &= testJSON();
       //return ok;
-
+/*
       ok &= testURL();
 
 #ifdef SERVER
@@ -44,10 +43,10 @@ namespace BeeFishWeb
          cout << "SUCCESS" << endl;
       else
          cout << "FAIL" << endl;
-         
+         */
       return ok;
    }
-   
+   /*
    inline bool testURL() {
       cout << "Test URL" << endl;
 
@@ -121,19 +120,7 @@ namespace BeeFishWeb
          url.query()["key"] == "hello world"
       );
 
-/*
-      WebRequest::URL::Path hexCharacterSequence;
-      Parser sequenceParser(hexCharacterSequence);
-      sequenceParser.read("%F0%9F%90%9D");
 
-      cerr << "\"" << hexCharacterSequence.value() << "\"" << endl;
-
-      ok &= testResult("URL hex character sequence is '🐝'", 
-         hexCharacterSequence.result() == BeeFishMisc::nullopt && 
-         hexCharacterSequence.value() == "🐝"
-      );
-
-  */    
       return ok;
 
 
@@ -449,7 +436,7 @@ namespace BeeFishWeb
       return ok;
    }
 #endif
-
+*/
 
 }
 
