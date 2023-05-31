@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#if 0
+#if 1
 #include <optional>
 namespace std {
    ostream& operator << (
