@@ -14,34 +14,34 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   inline const static auto blankSpace =
+   inline const auto blankSpace =
       BlankSpace();
 
-   inline const static auto undefined =
+   inline const auto undefined =
       Undefined();
 
-   inline const static auto _null =
+   inline const auto _null =
       Null();
 
-   inline const static auto _true =
+   inline const auto _true =
       True();
 
-   inline const static auto _false =
+   inline const auto _false =
       False();
 
-   inline const static auto boolean =
+   inline const auto boolean =
       _true or _false;
 
-   inline const static auto number =
+   inline const auto number =
       Number();
 
-   inline const static auto string =
+   inline const auto string =
       String();
 
-   inline const static auto array =
+   inline const auto array =
       Array();
 
-   inline const static auto object =
+   inline const auto object =
       Object();
 
    And JSON() {

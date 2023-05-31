@@ -26,7 +26,11 @@ trace:	clean
 trace:	CFLAGS += -DTIME -Ofast
 trace:	run_trace
 
-test:	$(OUTPUT)
+test:	clean
+test:	CFLAGS += -g
+test:	run_test
+
+run_test:	$(OUTPUT)
 	$(OUTPUT) -test
 
 run:	$(OUTPUT)

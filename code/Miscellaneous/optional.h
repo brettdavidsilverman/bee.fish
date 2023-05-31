@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#if 1
+#if (__cplusplus >= 201703L)
 #include <optional>
 namespace std {
    ostream& operator << (

@@ -149,7 +149,7 @@ namespace BeeFishParser {
                   << charCount << " (char count)\t"
                   << Parser::parserInstanceCount() << " (instances)\t" 
                   << time << " (milliseconds)\t"
-                  << (long)(10000.0 / time * 1000.0) << " (chars per second)" 
+                  << (100000.0 / time) << " (kb/sec)" 
                   << endl;
 
                diff = now();
@@ -165,7 +165,7 @@ namespace BeeFishParser {
             << charCount << " (char count)\t"
             << Parser::parserInstanceCount() << " (instances)\t" 
             << time << " (milliseconds)\t"
-               << (long)(10000.0 / time * 1000.0) << " (bytes/sec)" 
+               << ((float)charCount / time) << " (kb/sec)" 
             << endl;
 
          if (parser._result == false)
