@@ -14,9 +14,9 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   const And JSON();
+   And JSON();
 
-   const And Array() {
+   And Array() {
 
       
       auto blankSpace =

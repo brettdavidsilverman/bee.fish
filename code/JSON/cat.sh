@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cat $1 | ../../build/JSON
+time cat $1 | ../../build/JSON
 

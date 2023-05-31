@@ -1,6 +1,6 @@
 OUTPUT = ../../build/JSON
 DEPS = Makefile main.cpp Number.hpp String.hpp Test.hpp
-CFLAGS = -std=c++11 -Wfatal-errors
+CFLAGS = -std=c++17 -Wfatal-errors
 TEST = tests/large.json
 
 $(OUTPUT): $(DEPS)
