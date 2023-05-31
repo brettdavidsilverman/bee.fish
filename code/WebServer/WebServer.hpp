@@ -106,30 +106,31 @@ namespace BeeFishWebServer {
             // Process will wait here till connection is accepted
             clilen = sizeof(cli_addr);
 
-            cerr << "accept" << endl;
-
             clientSocket = accept(
                webServer->_serverSocket,
                (struct sockaddr *)&cli_addr,
                &clilen
             );
 
-            cerr << "accepted" << endl;
-               
+
+            
             if (clientSocket >= 0 &&
                 !webServer->_stop)
             {
+               const char *ipAddress = inet_ntoa(cli_addr.sin_addr);
+               printf("IP address: %s\n", ipAddress);
+
                // Set client socket to non blocking
                fcntl(clientSocket, F_SETFL, O_NONBLOCK);
                webServer->handleRequest(clientSocket);
             }
 
          }
-         
-         webServer->close();
- 
+
          cout << "WebServer loop ended" << endl;
 
+         webServer->close();
+ 
       }
 
       bool initializeServerSocket() {
@@ -196,9 +197,9 @@ namespace BeeFishWebServer {
       }
 
       virtual void handleRequest(int clientSocket) {
-  
+#ifdef DEBUG
          std::cerr << "handleRequest(" << clientSocket << ")" << std::endl;
-
+#endif
          boost::asio::post(
             _threadPool,
             [this, clientSocket]() {

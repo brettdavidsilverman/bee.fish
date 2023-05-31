@@ -9,6 +9,9 @@ all:	$(OUTPUT)
 test:	$(OUTPUT)
 	$(OUTPUT) -test
 
+run:	$(OUTPUT)
+	$(OUTPUT)
+
 debug:	DEBUG=debug
 debug:	CFLAGS+=-g -DDEBUG
 debug:	$(OUTPUT)

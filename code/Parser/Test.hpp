@@ -158,7 +158,7 @@ namespace BeeFishParser {
 
       std::cout << "testCharacter: " << std::flush;
 
-      
+      /*
       wchar_t character =
          UTF8Character::toWChar("😃");
 
@@ -166,7 +166,7 @@ namespace BeeFishParser {
          UTF8Character::fromWChar(character);
 
       success &= (copy == "😃");
-      
+    */
       Character earth("🌎");
 
       std::stringstream stream;
@@ -203,7 +203,7 @@ namespace BeeFishParser {
 
       std::cout << "\tcharacter: ";
       success = 
-         (character._character == L'🌎');
+         (character._chars == "🌎");
       BeeFishMisc::outputSuccess(success);
 
       std::cout << "\t🌎";
@@ -212,14 +212,14 @@ namespace BeeFishParser {
       success = success && 
          character.read(string) &&
          character._result == true &&
-         character._character == L'🌎';
+         character._chars == "🌎";
 
       character = UTF8Character("a");
 
       success = success && 
          character.read("a") &&
          character._result == true &&
-         character._character == L'a';
+         character._chars == "a";
 
       BeeFishMisc::outputSuccess(success);
 

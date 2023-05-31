@@ -14,12 +14,12 @@ namespace BeeFishParser {
       public Parser
    {
    protected:
-      std::string _chars;
+      
       size_t _expectedSize {0};
       bool _matchAny {false};
-      
+      size_t _read {0};
    public:
-      wchar_t _character {0};
+      std::string _chars;
       
       using Parser::read;
 
@@ -31,77 +31,45 @@ namespace BeeFishParser {
          const UTF8Character& source
       ) :
          _matchAny(source._matchAny),
-         _character(source._character)
+         _chars(source._chars)
       {
       }
 
       UTF8Character(
          wchar_t source
       ) :
-         _character(source)
+         _chars(UTF8Character::fromWChar(source))
       {
       }
 
       UTF8Character(
          const std::string& bytes
-      ) : _character(toWChar(bytes))
+      ) : _chars(bytes)
       {
          
       }
-/*
-      virtual bool read(bool bit)
-      override
-      {
-
-         Char& c = _char;
-       
-         if (c.read(bit)) {
-
-            if (c._result == true) {
-
-               if (_chars.length() == 0) {
-                  _expectedSize =
-                     getExpectedCharCount();
-               }
-
-               _chars.push_back(c._char);
-               c = Char();
-               if (_expectedSize ==
-                   _chars.length())
-               {
-                 UTF8Character character(_chars);
-                  _chars.clear();
-                  return read(character);
-               }
-               return true;
-            }
-            return true;
-         }
-         
-         return false;
-      }
-*/
 
       virtual bool read(char character)
       override
       {
 
-         if (_chars.length() == 0)
+         if (_read == 0)
             setExpectedSize(character);
 
-         _chars.push_back(character);
+         if (_matchAny)
+            _chars.push_back(character);
 
-
-         if (_chars.length() >=
-             _expectedSize)
-         {
-            UTF8Character utf8(_chars);
-            _chars.clear();
-            _expectedSize = 0;
-            return read(utf8);
+         if (_chars[_read++] == character) {
+            if (_read == _expectedSize) {
+               UTF8Character utf8(_chars);
+               _expectedSize = 0;
+               _read = 0;
+               return read(utf8);
+            }
+            return true;
          }
-         
-         return true;
+
+         return false;
 
       }
 
@@ -121,22 +89,8 @@ namespace BeeFishParser {
          _expectedSize = count;
 
       }
-/*
-      size_t getExpectedCharCount() {
-         Char& first = _char;
 
-         size_t count {0};
 
-         while (count < 8 &&
-                first._bits[7 - count])
-              ++count;
-
-         if (count == 0)
-            count = 1;
-
-         return count;
-      }
-*/
       static wchar_t toWChar(const std::string& bytes) {
 
          static std::wstring_convert<
@@ -174,7 +128,7 @@ namespace BeeFishParser {
          const UTF8Character& character
       )
       {
-         out << fromWChar(character._character);
+         out << character._chars;
          return out;
       }
 
@@ -182,14 +136,14 @@ namespace BeeFishParser {
          const UTF8Character& rhs
       ) const
       {
-         return _character == rhs._character;
+         return _chars == rhs._chars;
       }
 
       bool operator != (
          const UTF8Character& rhs
       ) const
       {
-         return _character != rhs._character;
+         return _chars != rhs._chars;
       }
 
       virtual bool read(
@@ -197,10 +151,10 @@ namespace BeeFishParser {
       ) override
       {
          if (_matchAny) {
-            _character = character._character;
+            _chars = character._chars;
             setResult(true);
          }
-         else if (character._character == _character)
+         else if (character._chars == _chars)
             setResult(true);
          else {
             setResult(false);
@@ -213,8 +167,7 @@ namespace BeeFishParser {
          const UTF8Character& right
       )
       {
-         return _character <= right._character;
-/*
+
          if (_chars.length() < right._chars.length())
             return true;
 
@@ -231,16 +184,14 @@ namespace BeeFishParser {
                return false;
          }
          return true;
-*/
+
       }
 
       virtual bool operator >= (
          const UTF8Character& right
       )
       {
-         return _character >= right._character;
 
-/*
          if (_chars.length() > right._chars.length())
             return true;
 
@@ -257,7 +208,7 @@ namespace BeeFishParser {
                return false;
          }
          return true;
-*/
+
       }
 
       virtual Parser* copy()

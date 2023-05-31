@@ -9,9 +9,9 @@ namespace BeeFishParser {
             
 	class Range : public UTF8Character {
 	protected:
-		wchar_t _minimum;
+		UTF8Character _minimum;
 
-        wchar_t _maximum;
+        UTF8Character _maximum;
 
 	public:
         using UTF8Character::read;
@@ -24,15 +24,15 @@ namespace BeeFishParser {
 
 		Range( const UTF8Character& minimum,
                const UTF8Character& maximum ) :
-			_minimum(minimum._character),
-			_maximum(maximum._character)
+			_minimum(minimum),
+			_maximum(maximum)
 		{
 		}
 
         Range( const std::string& minimum,
                const std::string& maximum ) 
-        : Range(UTF8Character::toWChar(minimum),
-                UTF8Character::toWChar(maximum))
+        : Range(UTF8Character(minimum),
+                UTF8Character(maximum))
 		{
 		}
 
@@ -43,8 +43,8 @@ namespace BeeFishParser {
             using namespace std;
 
 			bool matched =
-				(_minimum <= character._character) &&
-				(_maximum >= character._character);
+				(_minimum <= character) &&
+				(_maximum >= character);
 				
 			if (matched)
 			{
