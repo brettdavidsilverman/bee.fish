@@ -16,6 +16,7 @@
 #include "Rules.hpp"
 #include "Capture.hpp"
 #include "LoadOnDemand.hpp"
+#include "Invoke.hpp"
 
 #endif
 

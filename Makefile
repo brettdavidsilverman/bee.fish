@@ -5,9 +5,10 @@ build:	clean
 install:	build
 	./start.sh $(PORT)
 
-test:	all
+test:	build
 	./build/Parser -test
 	./build/JSON -test
+	./build/WebRequest -test
 	- ./build/WebServer -test
 
 clean:

@@ -23,6 +23,7 @@ namespace BeeFishParser {
    bool testComplex();
    bool testRules();
    bool testCapture();
+   bool testInvoke();
    bool testNumber();
 
    inline bool test() {
@@ -66,6 +67,9 @@ namespace BeeFishParser {
          return false;
 
       if (!testCapture())
+         return false;
+
+      if (!testInvoke())
          return false;
 
       if (!testNumber())
@@ -668,6 +672,53 @@ namespace BeeFishParser {
 
       BeeFishMisc::outputSuccess(success);
 
+
+      return success;
+   }
+
+
+   inline bool testInvoke() {
+
+      bool success = true;
+
+      std::cout << "testInvoke: " << std::flush;
+
+      std::string myName;
+
+      auto parser = Capture(
+         Word("Brett") and
+         Character(" ") and
+         Optional(
+            Word("David") and
+            Character(" ")
+         ) and
+         Word("Silverman"),
+         myName
+      );
+
+      string value;
+
+      Invoke invoke(
+         parser,
+         [&value](Parser* parser) {
+            Capture* capture =
+               dynamic_cast<Capture*>(parser);
+            value = capture->value();
+         }
+      );
+
+      success = testPattern(
+         invoke,
+         "Brett David Silverman",
+         true
+      );
+      
+      success = testValue(
+         "Brett David Silverman",
+         value
+      );
+
+      BeeFishMisc::outputSuccess(success);
 
       return success;
    }

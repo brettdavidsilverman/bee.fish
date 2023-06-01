@@ -1,16 +1,11 @@
 CC = g++
-CFLAGS = -std=c++2a -fmax-errors=1
-OBJECTS=main.o
+CFLAGS = -std=c++17 -fmax-errors=1
 DEPS=main.cpp WebRequest.hpp Version.hpp Test.hpp Makefile
 OUTPUT = ../../build/WebRequest
 
-%.o: %.cpp $(DEPS)
-	$(CC) $< -c $(CFLAGS)
-	
-$(OUTPUT): $(OBJECTS) $(DEPS)
-	@echo "Linking Web Request"
-	$(CC) $(CFLAGS) -O -o $(OUTPUT) $(OBJECTS) -lstdc++fs
-	
+$(OUTPUT):	$(DEPS)
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic -lstdc++fs
+
 debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
