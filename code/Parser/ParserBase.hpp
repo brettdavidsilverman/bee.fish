@@ -117,10 +117,20 @@ namespace BeeFishParser {
       }
 
       virtual bool read(
-         const char* stream
+         const char* string
       )
       {
-         return read(stream, strlen(stream));
+         for (const char* c = string;
+              *c != 0;
+              ++c)
+         {
+            if (!read(*c))
+               return false;
+
+         }
+
+         return true;
+
       }
 
       virtual bool read(

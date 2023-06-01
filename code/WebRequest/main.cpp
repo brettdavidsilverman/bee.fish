@@ -10,9 +10,10 @@
 using namespace std;
 using namespace BeeFishParser;
 using namespace BeeFishJSON;
+using namespace BeeFishWeb;
 
 int main(int argc, const char* argv[]) {
-
+ 
    cout << "bee.fish.web-request"
            << endl
         << "C++ run time: "
@@ -27,8 +28,8 @@ int main(int argc, const char* argv[]) {
 
    if (hasArg(argc, argv, "-test") >= 0)
    {
-      cout << "Testing web-request..." << endl << endl;
-      if (!BeeFishWeb::testRequest())
+      cout << "Testing WebRequest..." << endl << endl;
+      if (!BeeFishWeb::testWebRequest())
          return 1;
    }
 

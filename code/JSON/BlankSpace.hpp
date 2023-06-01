@@ -24,7 +24,8 @@ namespace BeeFishJSON {
       const auto blanks = Repeat(blank);
 
       const auto blankSpace =
-         blank or
+         space or
+         tab or
          lineFeed or
          carriageReturn;
 

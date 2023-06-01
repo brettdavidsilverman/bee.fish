@@ -74,6 +74,19 @@ namespace BeeFishParser {
       return true;
    }
 
+   inline bool testValue(
+      string expected,
+      string value
+   )
+   {
+      bool success = (expected == value);
+      cout << "\t" << expected << ": {" << value << "}" << flush;
+     
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+   }
+
    inline bool testPattern(
       BeeFishParser::Parser&
          parser,
@@ -90,17 +103,17 @@ namespace BeeFishParser {
 
       cout << "\t" << escape(pattern) << ":" << flush;
 
-      Capture capture(parser);
+ //     Capture capture(parser);
 
-      capture.read(pattern);
+      parser.read(pattern);
 
-      cout << escape(capture.value())
-           << "{"
-           << capture.result()
+      //cout << escape(parser.value())
+      cout << "{"
+           << parser.result()
            << "}";
 
       success =
-         capture.result() == expected;
+         parser.result() == expected;
 
       BeeFishMisc::outputSuccess(success);
 
@@ -296,20 +309,40 @@ namespace BeeFishParser {
 
       std::cout << "testNot:\"hello\"" << std::endl;
 
-      auto parser = []() {
-         return not Word("hello");
-      };
+      const auto word =
+         not Word("hello");
 
       success &= testPattern(
-         parser(),
+         word,
          "world",
          true
       );
  
       success &= testPattern(
-         parser(),
+         word,
          "hello",
          false
+      );
+
+      const auto newLine =
+         Character("\r") or
+         Character("\n");
+
+      string value;
+      auto line = Capture(
+         Repeat(not newLine),
+         value
+      ) and Word("\r\n");
+
+      success &= testPattern(
+         line,
+         "value\r\n",
+         true
+      );
+
+      success &= testValue(
+         "value",
+         value
       );
 
       BeeFishMisc::outputSuccess(success);

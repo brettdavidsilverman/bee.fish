@@ -6,7 +6,7 @@
 
 namespace BeeFishParser {
 
-   class Not : public Parser {
+   class Not : public UTF8Character {
    protected:
       Parser* _not;
 
@@ -23,11 +23,30 @@ namespace BeeFishParser {
       }
 
       virtual bool read(
-         char c
+         char character
       ) 
       override
       {
+         if (_not->_result != nullopt ||
+              _result != nullopt)
+            return true;
 
+         bool matched =
+            _not->read(character);
+         
+         if (_not->_result == false) {
+            setResult(true);
+         }
+         else if (_not->_result == true) {
+            setResult(false);
+         }
+         else if (_not->_result == nullopt)
+            return true;
+
+         return !matched;
+/*
+         if (_result != nullopt)
+            return false;
 
          bool matched =
             _not->read(c);
@@ -39,10 +58,11 @@ namespace BeeFishParser {
          {
             setResult(true);
          }
-         else if (_not->_result == nullopt)
+         else if (!matched || _not->_result == nullopt)
             return true;
 
          return !matched;
+*/
       }
 
       virtual Parser* copy()

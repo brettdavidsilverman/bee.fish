@@ -7,11 +7,13 @@
 
 namespace BeeFishParser {
 
+   using namespace std;
+
    class Word :
       public Parser
    {
    protected:
-      std::string _word;
+      string _word;
       size_t _index {0};
 
    public:
@@ -22,7 +24,7 @@ namespace BeeFishParser {
       {
       }
 
-      Word(const std::string& word) :
+      Word(const string& word) :
          _word(word)
       {
       }
@@ -37,6 +39,7 @@ namespace BeeFishParser {
 
          if (_word[_index++] == c)
          {
+
             if (_index == _word.size()) {
                setResult(true);
             }
@@ -53,12 +56,12 @@ namespace BeeFishParser {
          return new Word(*this);
       }
 
-      bool operator == (const std::string& rhs) {
+      bool operator == (const string& rhs) {
          return _word == rhs;
       }
 
-      friend std::ostream& operator <<
-      (std::ostream& out, const Word& word)
+      friend ostream& operator <<
+      (ostream& out, const Word& word)
       {
          out << word._word;
          return out;

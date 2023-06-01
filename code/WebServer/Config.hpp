@@ -7,12 +7,5 @@
 
 #define WEB_SERVER_THREADS 10
 
-#ifndef DEBUG
-   #define WEB_SERVER_HOST "http://bee.fish"
-   #define WEB_SERVER_PORT 80
-#else
-   #define WEB_SERVER_HOST "http://dev.bee.fish"
-   #define WEB_SERVER_PORT 8080
-#endif
 
 #endif

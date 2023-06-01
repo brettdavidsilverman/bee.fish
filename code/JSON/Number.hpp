@@ -11,8 +11,13 @@ namespace BeeFishJSON {
          Character("+") or
          Character("-");
 
-      const auto integer =
-         Repeat(Range("0", "9"));
+      const auto digit =
+         Range("0", "9");
+
+      const auto digits =
+         Repeat(digit);
+
+      const auto integer = digits;
 
       const auto fraction =
          Character(".") and

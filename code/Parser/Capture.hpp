@@ -79,14 +79,16 @@ namespace BeeFishParser {
       override
       {
          bool matched = _capture->read(c);
+
+         if (matched)
+            capture(c);
+
          if (_capture->_result == true)
             setResult(true);
          else if (_capture->_result == false)
             setResult(false);
 
-         if (matched)
-            capture(c);
-
+         
          return matched;
       }
 
