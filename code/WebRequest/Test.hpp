@@ -80,8 +80,16 @@ namespace BeeFishWeb
             header._value
          );
 
-      //And headers = Headers() and newLine;
-      Headers headers;
+      map<string, string> _headers;
+
+      Headers headers(
+         [&_headers](Header* header) {
+            _headers.emplace(
+               header->_key,
+               header->_value
+            );
+         }
+      );
       success &=
          testPattern(
             headers,
@@ -94,13 +102,13 @@ namespace BeeFishWeb
       success &=
          testValue(
             "value1",
-            headers["header1"]
+            _headers["header1"]
          );
 
       success &=
          testValue(
             "value2",
-            headers["header2"]
+            _headers["header2"]
          );
 
       outputSuccess(success);
@@ -116,10 +124,11 @@ namespace BeeFishWeb
       bool success = true;
       
       string method, url, version;
+      map<string, string> headers;
 
       success &=
          testPattern(
-            _WebRequest(method, url, version),
+            _WebRequest(method, url, version, headers),
             "GET / HTTP/1.1\r\n" \
             "Host: " HOST "\r\n" \
             "\r\n",
@@ -153,8 +162,12 @@ namespace BeeFishWeb
       success &=
          testValue("/", webRequest._url);
 
-       success &=
+      success &=
          testValue("HTTP/1.1", webRequest._version);
+
+      success &=
+         testValue(HOST, webRequest._headers["host"]);
+
 
       BeeFishMisc::outputSuccess(success);
 

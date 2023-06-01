@@ -1,6 +1,7 @@
 all:
 	cd Parser && make $(DEBUG)
 	cd JSON && make $(DEBUG)
+	cd WebRequest && make $(DEBUG)
 	cd WebServer && make $(DEBUG)
 
 

@@ -33,7 +33,7 @@ namespace BeeFishWeb {
          -blanks and colon and
          -blanks and
          Capture(
-            Repeat(not blankSpace),
+            Repeat(not (carriageReturn or lineFeed)),
             value
          ) and
          newLine;
@@ -88,18 +88,22 @@ namespace BeeFishWeb {
    };
 
    class Headers :
-      public map<std::string, std::string>,
       public Repeat
    {
    public:
-      Headers() : Repeat(Header())
+      typedef std::function<void(Header*)> Function;
+      Function _function;
+
+      Headers(Function func = nullptr) :
+         Repeat(Header()),
+         _function(func)
       {
       }
 
       Headers(const Headers& source)
       :
-         map<std::string, std::string>(source),
-         Repeat(Header())
+         Repeat(Header()),
+         _function(source._function)
       {
       }
 
@@ -111,8 +115,8 @@ namespace BeeFishWeb {
          Header* header =
             dynamic_cast<Header*>(item);
 
-         if (header)
-            emplace(header->_key, header->_value);
+         if (_function)
+            _function(header);
       }
 
       virtual Parser* copy() const
@@ -121,19 +125,13 @@ namespace BeeFishWeb {
          return new Headers(*this);
       }
 
-      const string& operator[] (const string& key) const
-      {
-         return at(key);
-      }
-
    };
-
-   const Headers headers;
 
    auto _WebRequest =
    []( string& method,
        string& url,
-       string& version )
+       string& version,
+       map<string, string>& headers )
    {
       return
          Capture(
@@ -153,7 +151,14 @@ namespace BeeFishWeb {
             fraction,
             version
          ) and newLine and
-         headers and
+         Headers(
+            [&headers](Header* header) {
+               headers.emplace(
+                  header->_key,
+                  header->_value
+               );
+            }
+         ) and
          newLine;
 
    };
@@ -167,7 +172,7 @@ namespace BeeFishWeb {
       string _method;
       string _url;
       string _version;
-      const int _headersIndex = 6;
+      map<string, string> _headers;
 
    public:
       using Parser::read;
@@ -177,7 +182,8 @@ namespace BeeFishWeb {
             _WebRequest(
                _method,
                _url,
-               _version
+               _version,
+               _headers
             )
          ),
          _socket(-1)
@@ -189,7 +195,8 @@ namespace BeeFishWeb {
             _WebRequest(
                _method,
                _url,
-               _version
+               _version,
+               _headers
             )
          ),
          _socket(socket),
@@ -202,7 +209,8 @@ namespace BeeFishWeb {
             _WebRequest(
                _method,
                _url,
-               _version
+               _version,
+               _headers
             )
          ),
          _socket(-1),
@@ -224,13 +232,11 @@ namespace BeeFishWeb {
             request._url << " " <<
             request._version << "\r\n";
 
-         const Headers& headers = request.headers();
-
-         for (auto pair : headers)
+         for (auto pair : request._headers)
          {
             out
                << pair.first
-               << ":"
+               << ": "
                << pair.second
                << "\r\n";
          }
@@ -298,8 +304,6 @@ cerr << "Read failure" << endl;
                         sizeof(buffer))
                      ) > 0)
             {
-               cerr.write((char*)buff, ret);
-
                if (!read((const char*)buff, ret))
                {
                   return false;
@@ -340,18 +344,6 @@ cerr << "Read failure" << endl;
          return new WebRequest(*this);
       }
 
-      const Headers& headers() const {
-         Parser* parser = _inputs[_headersIndex];
-
-         Headers* value =
-            dynamic_cast<Headers*>(parser);
-
-         if (value == nullptr)
-            throw logic_error("Invalid headers index");
-
-         return *value;
-
-      }
 
    };
 }

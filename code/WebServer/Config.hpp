@@ -3,7 +3,7 @@
 
 #include "../Config.hpp"
 
-#define WEB_SERVER "WebServer version 0.1.0 Debug ports"
+#define WEB_SERVER "WebServer-v0.2.0-headers"
 
 #define WEB_SERVER_THREADS 10
 
