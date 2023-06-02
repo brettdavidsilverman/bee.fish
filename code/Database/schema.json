@@ -1,0 +1,44 @@
+{
+   type : {
+      id: "string",
+      type: "string",
+      property: "string",
+      value: "object"
+   },
+   "object": {
+      id: {
+         property: {
+            type: "string",
+            value: "object"
+         }
+      },
+      type: {
+         property: {
+            value: "id"
+         }
+      }
+   },
+   "authentication": {
+      email: {
+         hash: "string",
+         ipAddress: "string",
+         "isAuthenticated": "boolean",
+         "sessionId": "Id"
+      }
+   },
+   session: {
+      email: "sessionId",
+      lastTransaction: "dateTime",
+      sessionId: {
+         email: "string",
+         tempFilename: "string"
+      }
+   },
+   "authentication": {
+      "brettdavidsilverman@gmail.com": {
+         hash: "abc342ef==",
+         ipAddress: "127.0.0.1",
+         sessionId: "124577889076544"
+      }
+   }
+}

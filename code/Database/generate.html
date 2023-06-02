@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="../../head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <script src="../console/console.js"></script>
+      <link rel="stylesheet" type="text/css" href="../../style.css" />
+      <title>Generate</title>
+   </head>
+   <body>
+      <h1>Generate</h1>
+      <button onclick="copy()">Copy</button>
+      <script>
+function copy()
+{
+   const codeEle = document.getElementById('code');
+
+   const selection = window.getSelection();
+
+    // Save the current selection
+   const currentRange = selection.rangeCount === 0
+        ? null : selection.getRangeAt(0);
+
+   // Select the text content of code element
+   const range = document.createRange();
+   range.selectNodeContents(codeEle);
+   selection.removeAllRanges();
+   selection.addRange(range);
+
+   // Copy to the clipboard
+   try
+   {
+      document.execCommand('copy');
+      alert("Copied");
+   }
+   catch (err)
+   {
+      // Unable to copy
+      copyButton.innerHTML = 'Copy';
+   }
+   finally
+   {
+       // Restore the previous selection
+       selection.removeAllRanges();
+       currentRange && selection.addRange(currentRange);
+   }
+}
+
+      </script>
+      <div id="response"></div>
+      <script>
+document.writeln("<pre id='code'>")
+document.writeln("inline vector&lt;StringEncoding::writeBits&gt; StringEncoding::chars = ");
+document.writeln("{");
+for (var c = 0; c < 256; ++c)
+{
+   document.writeln("   [](StringEncoding&amp; encoding)")
+   document.writeln("   {");
+   for (var i = 7; i >= 0 ; --i)
+   {
+      var mask = 1 << i;
+      var bit = (c & mask) > 0;
+      document.write("      ");
+      if (bit)
+         document.writeln("encoding.writeBit(true);");
+      else
+         document.writeln("encoding.writeBit(false);")
+   }
+   document.write("   }");
+   if (c < 255)
+      document.write(",");
+   document.writeln();
+}
+
+document.writeln("};");
+document.writeln("</pre>");
+      </script>
+   </body>
+</html>

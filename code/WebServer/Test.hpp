@@ -31,29 +31,31 @@ namespace BeeFishWeb {
 
       cout << "WebServer start/stop on port 8080" << endl;
 
-      bool success = false;
+      bool success = true;
 
       WebServer testServer(8080, 1);
       
       testServer.start();
-      BeeFishMisc::sleep(2);
+      //BeeFishMisc::sleep(2);
 
       //string command = "curl " + testServer.host();
          
+      std::string command = "curl " + testServer.host() + " > /dev/null 2>&1";
 
-      std::string command = "curl " + testServer.host() + " | grep \"Hello World\"";
-     
-     
-      if (system(command.c_str()) == 0) {
-         cout << "WebServer tests pass" << endl;
-         success = true;
+      for (int i = 0; i < 1000; ++i) {
+         if (system(command.c_str()) != 0) {
+            cout << "WebServer tests fail" << endl;
+            success = false;
+            break;
+         }
+         if (i % 100 == 0)
+            cerr << i << endl;
       }
        
 
       
       testServer.stop();
 
-      success = true;
 
       if (success)
          cout << "Ok" << endl;

@@ -3,8 +3,6 @@
 
 #include "../Config.hpp"
 
-#define WEB_SERVER "WebServer-v0.2.0-headers"
-
 #define WEB_SERVER_THREADS 10
 
 

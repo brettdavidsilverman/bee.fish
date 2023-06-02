@@ -22,6 +22,7 @@
 
 #include "Config.hpp"
 #include "../WebRequest/WebRequest.hpp"
+#include "Version.hpp"
 
 namespace BeeFishWeb {
 
@@ -200,9 +201,11 @@ namespace BeeFishWeb {
          boost::asio::post(
             _threadPool,
             [this, clientSocket, ipAddress]() {
-               WebRequest* webRequest =
-                  new WebRequest(clientSocket, ipAddress);
-               webRequest->process();
+               WebRequest webRequest(
+                  clientSocket,
+                  ipAddress
+               );
+               webRequest.process();
                return;
             }
          );

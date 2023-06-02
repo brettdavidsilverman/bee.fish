@@ -219,8 +219,13 @@ namespace BeeFishWeb {
       }
 
       virtual ~WebRequest() {
+         close();
+      }
+
+      void close() {
          if(_socket > 0)
             ::close(_socket);
+         _socket = -1;
       }
 
       friend ostream& operator << 
@@ -251,7 +256,7 @@ namespace BeeFishWeb {
 
          if (!read()) {
 cerr << "Read failure" << endl;
-            delete this;
+            close();
             return false;
          };
 
@@ -282,8 +287,6 @@ cerr << "Read failure" << endl;
             );
 
         
-         delete this;
-
          return true;
 
       }

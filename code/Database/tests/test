@@ -1,0 +1,12 @@
+#!/bin/sh
+cd .. && make clean
+make
+cd tests
+rm -f data
+cat ~/shuffle | ../database 1 > new_1.txt
+cat ~/words | shuf > ~/shuffle
+cat ~/shuffle | ../database 1 > count_1.txt
+cat ~/shuffle | ../database > read_1.txt
+#cat ~/shuffle | ../database 2 > read_2.txt
+#cat ~/shuffle | ../database 4 > read_4.txt
+tar -cf tests.tar *.txt
