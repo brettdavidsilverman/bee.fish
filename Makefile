@@ -1,4 +1,4 @@
-build:	clean
+build:
 	mkdir build
 	cd code && make $(DEBUG)
 
@@ -8,8 +8,10 @@ install:	build
 test:	build
 	./build/Parser -test
 	./build/JSON -test
+	./build/PowerEncoding -test
+	./build/Database -test
 	./build/WebRequest -test
-	- ./build/WebServer -test
+	./build/WebServer -test
 
 clean:
 	rm -f -r build

@@ -18,9 +18,11 @@ namespace BeeFishWeb {
       success &= testStartStop();
 
       if (success)
-         cout << "WebServer tests pass" << endl;
+         cout << "WebServer tests pass";
       else
-         cout << "WebServer tests failed" << endl;
+         cout << "WebServer tests failed";
+
+      outputSuccess(success);
 
       return success;
    }
@@ -33,34 +35,18 @@ namespace BeeFishWeb {
 
       bool success = true;
 
-      WebServer testServer(8080, 1);
+      WebServer testServer(8080, 2);
       
       testServer.start();
-      //BeeFishMisc::sleep(2);
-
-      //string command = "curl " + testServer.host();
-         
-      std::string command = "curl " + testServer.host() + " > /dev/null 2>&1";
-
-      for (int i = 0; i < 1000; ++i) {
-         if (system(command.c_str()) != 0) {
-            cout << "WebServer tests fail" << endl;
-            success = false;
-            break;
-         }
-         if (i % 100 == 0)
-            cerr << i << endl;
-      }
-       
-
       
+      stringstream stream;
+      stream << "curl " << testServer.host();
+      string command = stream.str();
+      success &= (system(command.c_str()) == 0);
+
       testServer.stop();
 
-
-      if (success)
-         cout << "Ok" << endl;
-      else
-         cout << "Fail" << endl;
+      outputSuccess(success);
 
     
       return success;

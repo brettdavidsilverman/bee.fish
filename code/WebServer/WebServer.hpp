@@ -42,13 +42,17 @@ namespace BeeFishWeb {
          _threadPool(threads)
       {
          std::stringstream stream;
-         stream << WEB_SERVER_HOST << ":" << _port << "/";
+         stream << WEB_SERVER_HOST;
+         if (port != 80)
+            stream << ":" << port;
+         stream << "/";
          _host = stream.str();
          std::cerr << _host << std::endl;
       }
 
       ~WebServer() {
-         stop();
+         if (_loopThread)
+            delete _loopThread;
       }
       
       virtual void start() {
@@ -68,16 +72,26 @@ namespace BeeFishWeb {
       virtual void stop() {
          using namespace std;
 
+         if (_loopThread == nullptr)
+            return;
+
          cout << "Stopping WebServer" << endl;
+         _stop = true;
 
+         // Flush a request through
+         // the system using curl
          std::stringstream stream;
-         stream << "sudo " << STOP_SCRIPT << " " << _port;
+         stream << "curl " << host();
          std::string command = stream.str();
-         system(command.c_str());
-         BeeFishMisc::sleep(2);
 
-         throw runtime_error("Should not reach here");
+         system(command.c_str());
+
+         _loopThread->join();
+
+         delete _loopThread;
+         _loopThread = nullptr;
          
+         cout << "WebServer stopped 🛑" << endl;
       }
 
       virtual void join() {
@@ -95,7 +109,7 @@ namespace BeeFishWeb {
 
          using namespace std;
 
-         cout << "WebServer loop started" << endl;
+         cout << "WebServer loop started 🟢" << endl;
 
          while (!webServer->_stop) {
 
@@ -111,11 +125,9 @@ namespace BeeFishWeb {
                (struct sockaddr *)&cli_addr,
                &clilen
             );
-
-
             
-            if (clientSocket >= 0 &&
-                !webServer->_stop)
+            if (clientSocket >= 0) //&&
+               // !webServer->_stop)
             {
                const char *ipAddress = inet_ntoa(cli_addr.sin_addr);
                // Set client socket to non blocking
@@ -125,10 +137,13 @@ namespace BeeFishWeb {
 
          }
 
+         webServer->close();
+
+        // delete webServer->_loopThread;
+        // webServer->_loopThread = nullptr;
+
          cout << "WebServer loop ended" << endl;
 
-         webServer->close();
- 
       }
 
       bool initializeServerSocket() {

@@ -7,7 +7,7 @@
    #define HOST "bee.fish"
    #define WEB_SERVER_PORT 80
 #else
-   #define HOST "dev.bee.fish:8080"
+   #define HOST "dev.bee.fish"
    #define WEB_SERVER_PORT 8080
 #endif
 
