@@ -126,11 +126,13 @@ namespace BeeFishWeb
       string method, url, version;
       map<string, string> headers;
 
+      string host = WEB_SERVER_HOST;
+
       success &=
          testPattern(
             _WebRequest(method, url, version, headers),
             "GET / HTTP/1.1\r\n" \
-            "Host: " HOST "\r\n" \
+            "Host: " + host + "\r\n" \
             "\r\n",
             true
          );
@@ -141,9 +143,8 @@ namespace BeeFishWeb
       success &=
          testValue("/", url);
 
-       success &=
+      success &=
          testValue("HTTP/1.1", version);
-
 
       WebRequest webRequest;
 
@@ -151,7 +152,7 @@ namespace BeeFishWeb
          testPattern(
             webRequest,
             "GET / HTTP/1.1\r\n" \
-            "Host: " HOST "\r\n" \
+            "Host: " + host + "\r\n" \
             "\r\n",
             true
          );
@@ -166,9 +167,7 @@ namespace BeeFishWeb
          testValue("HTTP/1.1", webRequest._version);
 
       success &=
-         testValue(HOST, webRequest._headers["host"]);
-
-
+         testValue(host, webRequest._headers["host"]);
       BeeFishMisc::outputSuccess(success);
 
       return success;

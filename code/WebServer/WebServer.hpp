@@ -21,11 +21,13 @@
 #include <boost/asio/post.hpp>
 
 #include "Config.hpp"
+#include "../Database/Database.hpp"
 #include "../WebRequest/WebRequest.hpp"
 #include "Version.hpp"
 
 namespace BeeFishWeb {
 
+   using namespace BeeFishDatabase;
 
    class WebServer {
    protected:
@@ -35,22 +37,23 @@ namespace BeeFishWeb {
       std::thread* _loopThread = nullptr;
       bool _stop = false;
       std::string _host;
+      Database _database;
 
    public:
-      WebServer(int port = WEB_SERVER_PORT, int threads = WEB_SERVER_THREADS) :
+      WebServer(
+         string host = WEB_SERVER_HOST,
+         int port = WEB_SERVER_PORT,
+         int threads = WEB_SERVER_THREADS,
+         string databaseFilename = DATABASE_FILENAME)
+      :
+         _host(host),
          _port(port),
-         _threadPool(threads)
+         _threadPool(threads),
+         _database(databaseFilename)
       {
-         std::stringstream stream;
-         stream << WEB_SERVER_HOST;
-         if (port != 80)
-            stream << ":" << port;
-         stream << "/";
-         _host = stream.str();
-         std::cerr << _host << std::endl;
       }
 
-      ~WebServer() {
+      virtual ~WebServer() {
          if (_loopThread)
             delete _loopThread;
       }
@@ -81,7 +84,7 @@ namespace BeeFishWeb {
          // Flush a request through
          // the system using curl
          std::stringstream stream;
-         stream << "curl " << host();
+         stream << "curl " << url();
          std::string command = stream.str();
 
          system(command.c_str());
@@ -101,8 +104,24 @@ namespace BeeFishWeb {
          _threadPool.join();
       }
 
-      virtual std::string host() {
+      virtual std::string host() const {
          return _host;
+      }
+
+      virtual int port() const {
+         return _port;
+      }
+
+      virtual string url() const {
+         stringstream stream;
+         stream << "http://"
+                <<  host()
+                << ":"
+                <<  port()
+                << "/";
+
+         return stream.str();
+       
       }
 
       static void loop(WebServer* webServer) {
@@ -132,7 +151,19 @@ namespace BeeFishWeb {
                const char *ipAddress = inet_ntoa(cli_addr.sin_addr);
                // Set client socket to non blocking
                fcntl(clientSocket, F_SETFL, O_NONBLOCK);
-               webServer->handleRequest(clientSocket, ipAddress);
+
+               // Delegate to thread
+               boost::asio::post(
+                  webServer->_threadPool,
+                  [webServer, clientSocket, ipAddress]() {
+                     handleWebRequest(
+                        webServer,
+                        clientSocket,
+                        ipAddress
+                     );
+                  }
+               );
+
             }
 
          }
@@ -209,24 +240,12 @@ namespace BeeFishWeb {
 
       }
 
-      virtual void handleRequest(int clientSocket, std::string ipAddress) {
-#ifdef DEBUG
-         std::cerr << "handleRequest(" << clientSocket << ")" << std::endl;
-#endif
-         boost::asio::post(
-            _threadPool,
-            [this, clientSocket, ipAddress]() {
-               WebRequest webRequest(
-                  clientSocket,
-                  ipAddress
-               );
-               webRequest.process();
-               return;
-            }
-         );
-
-      }
-
+      static void handleWebRequest(
+         WebServer* webServer,
+         int clientSocket,
+         std::string ipAddress
+      );
+      
       virtual void close() {
          if (_serverSocket > -1)
             ::close(_serverSocket);

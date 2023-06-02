@@ -1,8 +1,6 @@
 #include <iostream>
-#include "../Miscellaneous/Miscellaneous.hpp"
-#include "WebServer.hpp"
-#include "../Parser/Test.hpp"
 #include "Test.hpp"
+
 
 int main(int argc, const char* argv[]) {
 
@@ -22,15 +20,15 @@ int main(int argc, const char* argv[]) {
 
    if (hasArg(argc, argv, "-help") >= 0) {
       cout
-         << "   Usage: WebServer [arguments]" << endl
+         << "   Usage: DBServer [arguments]" << endl
          << "   Arguments:" << endl
-         << ".     [-host host]" << endl
+         << "      [-host host]" << endl
          << "      [-port port]" << endl
          << "      [-threads threads]" << endl
-         << ".     [-database database]" << endl
-         << ".     [-test]" << endl
+         << "      [-database database]" << endl
+         << "      [-test]" << endl
          << "   Example:" << endl
-         << "      ./WebServer -port 80 -threads 10 -database bee.fish.data" << endl;
+         << "      ./DBServer -port 80 -threads 10 -database bee.fish.data" << endl;
       return 0;
    }
    string host = WEB_SERVER_HOST;
@@ -72,8 +70,8 @@ int main(int argc, const char* argv[]) {
    }
 
    if (hasArg(argc, argv, "-test") >= 0) {
-      if (!testWebServer()) {
-         throw runtime_error("WebServer tests failed");
+      if (!BeeFish::test()) {
+         throw runtime_error("BeeFish DBServer tests failed");
       }
       return 0;
    }

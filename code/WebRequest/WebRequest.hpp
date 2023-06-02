@@ -9,8 +9,8 @@
 #include <string>
 #include <poll.h>
 
-#include "../Parser/Test.hpp"
-#include "../JSON/Test.hpp"
+#include "../Parser/Parser.hpp"
+#include "../JSON/JSON.hpp"
 
 #include "Config.hpp"
 
@@ -164,8 +164,12 @@ namespace BeeFishWeb {
    };
 
  
+   class WebServer;
+
    class WebRequest : public And {
    protected:
+      WebServer* _webServer;
+
       int _socket;
    public:
       string _ipAddress;
@@ -186,25 +190,12 @@ namespace BeeFishWeb {
                _headers
             )
          ),
+         _webServer(nullptr),
          _socket(-1)
       {
       }
 
-      WebRequest(int socket, const std::string& ipAddress)
-      :  And(
-            _WebRequest(
-               _method,
-               _url,
-               _version,
-               _headers
-            )
-         ),
-         _socket(socket),
-         _ipAddress(ipAddress)
-      {
-      }
-
-      WebRequest(const WebRequest& source)
+      WebRequest(WebServer* webServer, int socket, const std::string& ipAddress)
       : And(
             _WebRequest(
                _method,
@@ -213,6 +204,16 @@ namespace BeeFishWeb {
                _headers
             )
          ),
+         _webServer(webServer),
+         _socket(socket),
+         _ipAddress(ipAddress)
+      {
+      }
+
+      WebRequest(const WebRequest& source)
+      :
+         And(source),
+         _webServer(source._webServer),
          _socket(-1),
          _ipAddress(source._ipAddress)
       {
@@ -349,6 +350,8 @@ cerr << "Read failure" << endl;
 
 
    };
+
+   
 }
 
 #endif

@@ -8,6 +8,8 @@
 
 namespace BeeFishWeb {
    
+   using namespace BeeFishMisc;
+
    bool testStartStop();
 
    inline bool testWebServer() {
@@ -35,12 +37,14 @@ namespace BeeFishWeb {
 
       bool success = true;
 
-      WebServer testServer(8080, 2);
+      WebServer testServer(
+         WEB_SERVER_HOST, 8080, 2
+      );
       
       testServer.start();
       
       stringstream stream;
-      stream << "curl " << testServer.host();
+      stream << "curl " << testServer.url();
       string command = stream.str();
       success &= (system(command.c_str()) == 0);
 

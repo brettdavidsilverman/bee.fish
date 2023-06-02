@@ -4,13 +4,11 @@
 #include "../Config.hpp"
 
 #ifndef DEBUG
-   #define HOST "bee.fish"
    #define WEB_SERVER_PORT 80
+   #define WEB_SERVER_HOST "bee.fish"
 #else
-   #define HOST "dev.bee.fish"
    #define WEB_SERVER_PORT 8080
+   #define WEB_SERVER_HOST "dev.bee.fish"
 #endif
-
-#define WEB_SERVER_HOST "http://" HOST
 
 #endif

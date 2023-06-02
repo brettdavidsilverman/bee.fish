@@ -7,5 +7,5 @@ fi
 ./stop.sh $PORT
 PID="server-$PORT.pid"
 echo "Starting..."
-sudo ./build/WebServer -port $PORT &
+sudo ./build/DBServer -port $PORT &
 echo $! >> $PID

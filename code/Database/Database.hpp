@@ -70,7 +70,9 @@ namespace BeeFishDatabase {
     
          checkHeader();
          
-         
+         cout << "Database "
+              << filePath
+              << endl;
       }
       
       Database(const Database& source) :
