@@ -15,17 +15,9 @@ namespace BeeFishWeb {
       typedef std::function<void (std::string)> Function;
       Function _onpath;
 
-      Invoke::Function _oninvoke =
-      [this](Parser* parser) {
-         Capture* capture =
-            dynamic_cast<Capture*>
-            (parser);
+      Invoke::Function _oninvoke = nullptr;;
 
-         if (_onpath)
-            _onpath(parser->value());
-      };
-
-      And _urlParser = createParser();
+      Parser* _urlParser = nullptr;
    public:
 
       using Parser::read;
@@ -33,19 +25,39 @@ namespace BeeFishWeb {
       URL(const URL& url) :
          _onpath(url._onpath)
       {
+         _oninvoke =
+            [this](Parser*) {
+               if (_onpath) {
+                  _onpath(_path);
+               }
+               _path.clear();
+            };
+         _urlParser = createParser();
       }
 
       URL(Function onpath) :
          _onpath(onpath)
       {
+
+         _oninvoke =
+            [this](Parser*) {
+               if (_onpath)
+                  _onpath(_path);
+               _path.clear();
+            };
+         _urlParser = createParser();
       }
 
-      And createParser() {
+      virtual ~URL() {
+         delete _urlParser;
+      }
+
+      Parser* createParser() {
          const auto seperator =
             Character("/") or
             Character("?");
 
-         return
+         And parser =
          Repeat(
             seperator and
             Invoke(
@@ -64,15 +76,17 @@ namespace BeeFishWeb {
             1
          ) and Optional(seperator);
 
+         return parser.copy();
+
       }
 
       virtual bool read(char c)
       override
       {
-         bool matched = _urlParser.read(c);
+         bool matched = _urlParser->read(c);
 
-         if (_urlParser._result != nullopt)
-            setResult(_urlParser._result);
+         if (_urlParser->_result != nullopt)
+            setResult(_urlParser->_result);
 
          return matched;
       }

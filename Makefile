@@ -5,14 +5,9 @@ all:
 install:	all
 	./start.sh $(PORT)
 
-test:	all
-	./build/Parser -test
-	./build/JSON -test
-	./build/PowerEncoding -test
-	./build/Database -test
-	./build/WebRequest -test
-	./build/WebServer -test
-	./build/DBServer -test
+test:
+	-  mkdir build
+	cd code && make test
 
 clean:
 	rm -f -r build

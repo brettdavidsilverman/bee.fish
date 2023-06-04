@@ -9,6 +9,9 @@
 extern "C" uint8_t _binary_404_html_start[];
 extern "C" uint8_t _binary_404_html_end[];
 
+extern "C" uint8_t _binary_HomePage_html_start[];
+extern "C" uint8_t _binary_HomePage_html_end[];
+
 
 namespace BeeFishWeb {
 
@@ -66,7 +69,7 @@ namespace BeeFishWeb {
          };
 
          if ( webRequest._url == "/" ) {
-            outputRootPage(clientSocket);
+            outputHomePage(clientSocket);
             return;
          }
 
@@ -120,36 +123,7 @@ namespace BeeFishWeb {
 
       }
 
-      virtual void outputRootPage(int clientSocket) {
-         stringstream output;
-
-         output << "DB Server" << endl;
-         output << *this << endl;
-
-         string out = output.str();
-
-         stringstream writeOutput;
-
-         writeOutput <<
-            "HTTP/2.0 200 OK\r\n" <<
-            "Content-Type: text/plain; charset=utf-8\r\n" <<
-            "Connection: keep-alive\r\n" <<
-            "Content-Length: " <<
-               out.length() << "\r\n" <<
-            "\r\n" <<
-            out;
-
-         std::string response =
-            writeOutput.str();
-
-         ::write(
-            clientSocket,
-            response.c_str(),
-            response.length()
-         );
-
-      }
-
+      
       virtual void output404NotFound(int clientSocket)
       {
 
@@ -163,6 +137,41 @@ namespace BeeFishWeb {
 
          writeOutput <<
             "HTTP/2.0 404 OK\r\n" <<
+            "Content-Type: text/html; charset=utf-8\r\n" <<
+            "Connection: keep-alive\r\n" <<
+            "Content-Length: " <<
+               size<< "\r\n" <<
+            "\r\n";
+
+         writeOutput.write(
+            html,
+            size
+         );
+
+         std::string response =
+            writeOutput.str();
+
+         ::write(
+            clientSocket,
+            response.c_str(),
+            response.length()
+         );
+
+      }
+
+      virtual void outputHomePage(int clientSocket)
+      {
+
+         stringstream writeOutput;
+
+         const char * html = (const char *)(&_binary_HomePage_html_start[0]);
+
+         const size_t size =
+            _binary_HomePage_html_end -
+            _binary_HomePage_html_start;
+
+         writeOutput <<
+            "HTTP/2.0 200 OK\r\n" <<
             "Content-Type: text/html; charset=utf-8\r\n" <<
             "Connection: keep-alive\r\n" <<
             "Content-Length: " <<
