@@ -263,12 +263,16 @@ namespace BeeFishWeb {
          string ipAddress
       )
       {
-         string out = "Error handleWebRequest needs to be overridden";
+         stringstream outStream;
+
+         outStream << version() << endl;
+
+         string out = outStream.str();
 
          stringstream writeOutput;
 
          writeOutput <<
-            "HTTP/2.0 500 OK\r\n" <<
+            "HTTP/2.0 500 Error\r\n" <<
             "Content-Type: text/plain; charset=utf-8\r\n" <<
             "Connection: keep-alive\r\n" <<
             "Content-Length: " <<
