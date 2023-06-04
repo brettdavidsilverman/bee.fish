@@ -46,11 +46,11 @@ namespace BeeFishWeb {
       };
 
       auto urlParser =
-        URL(path, onpath);
+        URL(path, onpath) and newLine;
 
       bool success = false;
       success = urlParser.read(
-         webRequest._url
+         webRequest._url + "\r\n"
       );
     
       success = success &&
