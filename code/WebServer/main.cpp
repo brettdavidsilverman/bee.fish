@@ -1,6 +1,7 @@
 #include <iostream>
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "WebServer.hpp"
+#include "../DBServer.hpp"
 #include "../Parser/Test.hpp"
 #include "Test.hpp"
 

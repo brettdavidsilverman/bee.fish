@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -std=c++17 -fmax-errors=1
+CFLAGS = -std=gnu++17 -fmax-errors=1
 DEPS=main.cpp WebRequest.hpp Version.hpp Test.hpp Makefile
 OUTPUT = ../../build/WebRequest
 

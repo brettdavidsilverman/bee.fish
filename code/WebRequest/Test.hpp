@@ -3,6 +3,8 @@
 #include "../Miscellaneous/Miscellaneous.hpp"
 
 #include "../JSON/JSON.hpp"
+#include "../Test/Test.hpp"
+
 #include "WebRequest.hpp"
 
 
@@ -11,9 +13,11 @@ namespace BeeFishWeb
 {
    using namespace BeeFishJSON;
    using namespace BeeFishMisc;
+   using namespace BeeFishTest;
 
    inline bool testHeaders();
    inline bool testWebRequestClass();
+   inline bool testURL();
 
    inline bool testWebRequest()
    {
@@ -25,6 +29,9 @@ namespace BeeFishWeb
 
       if (success)
          success = testWebRequestClass();
+
+      if (success)
+         success = testURL();
 
       BeeFishMisc::outputSuccess(success);
 
@@ -173,6 +180,81 @@ namespace BeeFishWeb
       return success;
       
    }
+
+   inline bool testURL()
+   {
+      
+      cout << "Test URL" << endl;
+      
+      std::string path;
+      std::string fullPath;
+
+      auto onpath =
+      [&path, &fullPath](Parser* parser)
+      {
+         cout << "{" << path << "}";
+         fullPath += "/" + path;
+         path = "";
+      };
+
+      bool success = true;
+
+      fullPath = "";
+      success &= testPattern(
+         URL(path, onpath),
+         "/",
+         nullopt
+      );
+
+      success &= testValue(
+         "",
+         fullPath
+      );
+      
+      fullPath = "";
+
+      success &= testPattern(
+         URL(path, onpath),
+         "/path/",
+         nullopt
+      );
+
+      success &= testValue(
+         "/path",
+         fullPath
+      );
+      
+      fullPath = "";
+
+      success &= testPattern(
+         URL(path, onpath),
+         "/path1/path2/",
+         nullopt
+      );
+
+      success &= testValue(
+         "/path1/path2",
+         fullPath
+      );
+
+      fullPath = "";
+
+      success &= testPattern(
+         URL(path, onpath) and newLine,
+         "/path3/path4\r\n",
+         true
+      );
+
+      success &= testValue(
+         "/path3/path4",
+         fullPath
+      );
+      
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+   }
+    
 
 }
 

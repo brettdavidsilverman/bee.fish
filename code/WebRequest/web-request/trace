@@ -1,2 +1,0 @@
-rm -f trace.txt
-valgrind --log-file="trace.txt" ./web-request -test

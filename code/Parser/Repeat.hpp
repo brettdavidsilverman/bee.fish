@@ -133,63 +133,6 @@ namespace BeeFishParser
 
       }
 
-/*
-      virtual bool read(
-         char character
-      ) override
-      {
-         using namespace std;
-
-         if (_item == nullptr)
-            _item = createItem();
-
-         bool matched =
-            _item->read(character);
-
-         if ( (_item->_result == true) )//|| 
-            // (!matched && _item->isOptional()))
-         {
-            matchedItem(_item);
-
-            _item = createItem();
-
-            ++_matchedCount;
-  cerr << "<" << _matchedCount << "," << character << ":" << matched << ">" << flush;
-
-            if (_maximum > 0) {
-            
-               if (_matchedCount > _maximum)
-               {
-                  setResult(false);
-            
-               }
-               else if (_matchedCount ==
-                        _maximum)
-               {
-                  setResult(true);
-               }
-
-            }
-         }
-         else if (
-            (_item->_result == false) ||
-            (!matched)
-         )
-         {
-            if (_matchedCount >= _minimum)
-            {
-               setResult(true);
-            }
-            else
-            {
-               setResult(false);
-            }
-            matched = false;
-         }
-            
-         return matched;
-      }
-*/
       virtual void matchedItem(
          Parser* item
       )

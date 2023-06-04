@@ -12,6 +12,15 @@ int main(int argc, const char* argv[]) {
    cout << endl;
    cout << WEB_SERVER << endl;
 
+   cout << "bee.fish.db-server"
+           << endl
+        << "C++ run time: "
+           << __cplusplus
+           << endl
+        << "Version: "
+           << DBSERVER_VERSION
+           << endl;
+
 #ifdef DEBUG
    cout << "Debug mode" << endl;
 #else

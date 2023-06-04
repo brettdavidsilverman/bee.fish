@@ -31,7 +31,7 @@ namespace BeeFishParser {
       }
 
       Invoke(
-         Parser& parser,
+         const Parser& parser,
          Function func
       ) :
          _parser(parser.copy()),

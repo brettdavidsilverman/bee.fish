@@ -127,6 +127,42 @@ namespace BeeFishPowerEncoding
          _count = 0;
 
       }
+
+      friend PowerEncoding &operator<<(
+          PowerEncoding &stream,
+          const char* string)
+      {
+         stream.writeBit(1);
+
+         for (const char* c = string;
+              *c != 0;
+              ++c)
+         {
+            stream << *c;
+         }
+
+         stream.writeBit(0);
+
+         return stream;
+      }
+
+      friend PowerEncoding &operator<<(
+          PowerEncoding &stream,
+          const std::string& string)
+      {
+
+         stream.writeBit(1);
+
+         for (auto character : string)
+         {
+            stream << character;
+         }
+
+         stream.writeBit(0);
+
+         return stream;
+      }
+
    };
    
 }

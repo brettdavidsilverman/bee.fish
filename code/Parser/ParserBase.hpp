@@ -89,10 +89,8 @@ namespace BeeFishParser {
 
          for (const char& c : string)
          {
-
-             if (!read(c))
+            if (!read(c))
                return false;
-
          }
 
          return true;

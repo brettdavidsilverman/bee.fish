@@ -17,6 +17,13 @@ namespace BeeFishPowerEncoding
       
       cout << "Test PowerEncoding" << endl;
 
+      EncodeToStream encoder(cin, cout);
+      encoder << 1;
+      cout << endl;
+
+      encoder << "Hello World";
+      cout << endl;
+
       outputSuccess(success);
 
       return success;

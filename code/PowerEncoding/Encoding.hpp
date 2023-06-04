@@ -24,9 +24,6 @@ namespace BeeFishPowerEncoding
       
       virtual void writeBit(bool bit)
       {
-#ifdef DEBUG
-         cerr << 'w' << (bit ? '1' : '0');
-#endif
          _out << ( bit ? '1' : '0' );
 
          PowerEncoding::writeBit(bit);

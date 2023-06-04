@@ -38,6 +38,7 @@ namespace BeeFishParser {
          const Parser& parser
       ) :
          _capture(parser.copy()),
+         _value(""),
          _valueRef(_value)
       {
       }

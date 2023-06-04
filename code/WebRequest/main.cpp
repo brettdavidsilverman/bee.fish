@@ -14,6 +14,7 @@ using namespace BeeFishWeb;
 
 int main(int argc, const char* argv[]) {
  
+
    cout << "bee.fish.web-request"
            << endl
         << "C++ run time: "
@@ -31,6 +32,41 @@ int main(int argc, const char* argv[]) {
       cout << "Testing WebRequest..." << endl << endl;
       if (!BeeFishWeb::testWebRequest())
          return 1;
+      return 0;
+   }
+
+   string line;
+   string path;
+
+   auto onpath = [&path](Parser*) {
+      cout << path << endl;
+      path = "";
+   };
+
+   while (true) {
+
+      getline(cin, line);
+
+      if (line == "")
+         break;
+
+      auto _url = URL(path, onpath);
+
+      path = "";
+
+      bool read = _url.read(line + "\r\n");
+
+      if (read)
+         cout << "Read 😆" << endl;
+      else
+         cout << "Read 🚫" << endl;
+
+      if (_url.result() == true)
+         cout << "Result True" << endl;
+      else if (_url.result() == false)
+         cout << "Result False" << endl;
+      else
+         cout << "Result Null" << endl;
    }
 
    return 0;

@@ -28,6 +28,9 @@
 namespace BeeFishWeb {
 
    using namespace BeeFishDatabase;
+   using namespace BeeFishPowerEncoding;
+
+   typedef Path<PowerEncoding> Path;
 
    class WebServer {
    protected:
@@ -38,6 +41,7 @@ namespace BeeFishWeb {
       bool _stop = false;
       std::string _host;
       Database _database;
+      Path     _rootPath;
 
    public:
       WebServer(
@@ -49,7 +53,8 @@ namespace BeeFishWeb {
          _host(host),
          _port(port),
          _threadPool(threads),
-         _database(databaseFilename)
+         _database(databaseFilename),
+         _rootPath(Path(_database)[_host])
       {
       }
 
@@ -104,12 +109,16 @@ namespace BeeFishWeb {
          _threadPool.join();
       }
 
-      virtual std::string host() const {
+      string host() const {
          return _host;
       }
 
-      virtual int port() const {
+      int port() const {
          return _port;
+      }
+
+      virtual Path root() {
+         return _rootPath;
       }
 
       virtual string url() const {
@@ -122,6 +131,11 @@ namespace BeeFishWeb {
 
          return stream.str();
        
+      }
+
+      virtual string version() const
+      {
+         return WEB_SERVER;
       }
 
       static void loop(WebServer* webServer) {

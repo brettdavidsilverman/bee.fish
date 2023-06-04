@@ -19,22 +19,17 @@ namespace BeeFishDatabase
          return _left  == 0 &&
                 _right == 0;
       }
-      /*
+      
       friend ostream& operator << 
       (ostream& out, Branch& branch)
       {
-         using namespace BeeFishBScript;
+         out <<
+            "{\"parent\": " << branch._parent << ", " <<
+            "\"left\": " <<  branch._left << ", " <<
+            "\"right\": " << branch._right << "}";
 
-         Object object = {
-            {"parent", (Number)branch._parent},
-            {"left",   (Number)branch._left},
-            {"right",  (Number)branch._right}
-         };
-
-         out << object;
-          
          return out;
-      }*/
+      }
       
       inline static const Index Root = 0;
          

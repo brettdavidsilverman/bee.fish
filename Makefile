@@ -1,17 +1,18 @@
-build:
+all:	clean
 	mkdir build
 	cd code && make $(DEBUG)
 
-install:	build
+install:	all
 	./start.sh $(PORT)
 
-test:	build
+test:	all
 	./build/Parser -test
 	./build/JSON -test
 	./build/PowerEncoding -test
 	./build/Database -test
 	./build/WebRequest -test
 	./build/WebServer -test
+	./build/DBServer -test
 
 clean:
 	rm -f -r build

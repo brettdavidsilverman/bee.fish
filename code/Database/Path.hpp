@@ -8,7 +8,7 @@
 #include "Data.hpp"
 #include "File.hpp"
 #include "Branch.hpp"
-#include "Database.hpp"
+#include "DatabaseBase.hpp"
 
 using namespace std;
 using namespace BeeFishPowerEncoding;
