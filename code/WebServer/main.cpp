@@ -25,13 +25,12 @@ int main(int argc, const char* argv[]) {
       cout
          << "   Usage: WebServer [arguments]" << endl
          << "   Arguments:" << endl
-         << ".     [-host host]" << endl
+         << "      [-host host]" << endl
          << "      [-port port]" << endl
          << "      [-threads threads]" << endl
-         << ".     [-database database]" << endl
-         << ".     [-test]" << endl
+         << "      [-test]" << endl
          << "   Example:" << endl
-         << "      ./WebServer -port 80 -threads 10 -database bee.fish.data" << endl;
+         << "      ./WebServer -port 80 -threads 10" << endl;
       return 0;
    }
    string host = WEB_SERVER_HOST;
@@ -63,15 +62,6 @@ int main(int argc, const char* argv[]) {
       threads = atoi(argv[threadsArgument + 1]);
    }
 
-   string filename = DATABASE_FILENAME;
-   int filenameArgument = hasArg(argc, argv, "-database");
-
-   if (filenameArgument >= 0 &&
-       filenameArgument < argc)
-   {
-      filename = argv[filenameArgument + 1];
-   }
-
    if (hasArg(argc, argv, "-test") >= 0) {
       if (!testWebServer()) {
          throw runtime_error("WebServer tests failed");
@@ -79,7 +69,7 @@ int main(int argc, const char* argv[]) {
       return 0;
    }
 
-   WebServer webServer(host, port, threads, filename);
+   WebServer webServer(host, port, threads);
 
    webServer.start();
    webServer.join();

@@ -40,21 +40,17 @@ namespace BeeFishWeb {
       std::thread* _loopThread = nullptr;
       bool _stop = false;
       std::string _host;
-      Database _database;
-      Path     _rootPath;
 
    public:
       WebServer(
          string host = WEB_SERVER_HOST,
          int port = WEB_SERVER_PORT,
-         int threads = WEB_SERVER_THREADS,
-         string databaseFilename = DATABASE_FILENAME)
+         int threads = WEB_SERVER_THREADS
+      )
       :
          _host(host),
          _port(port),
-         _threadPool(threads),
-         _database(databaseFilename),
-         _rootPath(Path(_database)[_host])
+         _threadPool(threads)
       {
       }
 
@@ -109,16 +105,12 @@ namespace BeeFishWeb {
          _threadPool.join();
       }
 
-      string host() const {
+      virtual string host() const {
          return _host;
       }
 
-      int port() const {
+      virtual int port() const {
          return _port;
-      }
-
-      virtual Path root() {
-         return _rootPath;
       }
 
       virtual string url() const {
@@ -258,7 +250,43 @@ namespace BeeFishWeb {
          WebServer* webServer,
          int clientSocket,
          std::string ipAddress
-      );
+      )
+      {
+         webServer->handleWebRequest(
+            clientSocket,
+            ipAddress
+         );
+      }
+
+      virtual void handleWebRequest(
+         int clientSocket,
+         string ipAddress
+      )
+      {
+         string out = "Error handleWebRequest needs to be overridden";
+
+         stringstream writeOutput;
+
+         writeOutput <<
+            "HTTP/2.0 500 OK\r\n" <<
+            "Content-Type: text/plain; charset=utf-8\r\n" <<
+            "Connection: keep-alive\r\n" <<
+            "Content-Length: " <<
+               out.length() << "\r\n" <<
+            "\r\n" <<
+            out;
+
+         std::string response =
+            writeOutput.str();
+
+         ::write(
+            clientSocket,
+            response.c_str(),
+            response.length()
+         );
+
+
+      }
       
       virtual void close() {
          if (_serverSocket > -1)

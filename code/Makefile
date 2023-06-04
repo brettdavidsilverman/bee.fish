@@ -10,9 +10,13 @@ all:
 	cd Database && make $(DEBUG)
 	cd WebRequest && make $(DEBUG)
 	cd WebServer && make $(DEBUG)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic -lstdc++fs
+	objcopy --input binary \
+            --output elf64-x86-64 \
+            --binary-architecture i386:x86-64 404.html 404.o
+	g++ $(CFLAGS) 404.o main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic -lstdc++fs
 
-test:	all
+test:
+	cd .. && make test
 	$(OUTPUT) -test
 
 debug:	DEBUG = debug
@@ -20,4 +24,5 @@ debug:	CFLAGS += -g -D DEBUG
 debug:	all
 
 clean:
+	rm -f 404.o
 	cd .. && make clean

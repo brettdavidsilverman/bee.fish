@@ -5,93 +5,187 @@
 #include "WebRequest/WebRequest.hpp"
 #include "Version.hpp"
 
+
+extern "C" uint8_t _binary_404_html_start[];
+extern "C" uint8_t _binary_404_html_end[];
+
+
 namespace BeeFishWeb {
 
-   void WebServer::handleWebRequest(
-      WebServer* webServer,
-      int clientSocket,
-      std::string ipAddress
-   )
+   class DBServer :
+      public WebServer,
+      public Database
    {
+   public:
+      DBServer(
+         string host = WEB_SERVER_HOST,
+         int port = WEB_SERVER_PORT,
+         int threads = WEB_SERVER_THREADS,
+         string databaseFilename = DATABASE_FILENAME)
+      :
+         WebServer(host, port, threads),
+         Database(databaseFilename)
+      {
+      }
+
+      Path root() {
+         return Path(*this)[host()];
+      }
+
+
+      virtual void handleWebRequest(
+         int clientSocket,
+         string ipAddress
+      ) override
+      {
 #ifdef DEBUG
          std::cerr << "handleRequest(" << clientSocket << ")" << std::endl;
 #endif
-         
-      WebRequest webRequest(
-         webServer,
-         clientSocket,
-         ipAddress
-      );
 
-      BeeFishDatabase::Path dbPath(
-         webServer->root()
-      );
+         WebRequest webRequest(
+            this,
+            clientSocket,
+            ipAddress
+         );
 
-      if (!webRequest.read())
-         return;
+         BeeFishDatabase::Path dbPath = root();
 
-      std::stringstream output;
+         if (!webRequest.read())
+            return;
 
-      output << webServer->version() << endl;
-      output << webServer->_database << endl;
-      output << endl;
+         stringstream output;
 
-      string path;
-      auto onpath =
-      [&path, &dbPath, &output](Parser* parser)
-      {
-         output << path << endl;
-         dbPath << path;
-         path = "";
-      };
+         output << *this << endl;
+         output << endl;
 
-      auto urlParser =
-        URL(path, onpath) and newLine;
+         auto onpath =
+         [&dbPath, &output](string path)
+         {
+            output << path << endl;
+            dbPath << path;
+         };
 
-      bool success = false;
-      success = urlParser.read(
-         webRequest._url + "\r\n"
-      );
-    
-      success = success &&
-         urlParser._result != false;
-
-      if (success) {
-         if (dbPath.isDeadEnd()) {
-            output << "First 🥇" << endl;
-            dbPath << "content-type";
+         if ( webRequest._url == "/" ) {
+            outputRootPage(clientSocket);
+            return;
          }
-         else
-            output << "Second 🥈" << endl;
+
+         auto urlParser =
+           URL(onpath) and newLine;
+
+         bool success;
+
+         success = urlParser.read(
+            webRequest._url + "\r\n"
+         );
+    
+         success = success &&
+            urlParser._result != false;
+
+         if (success) {
+            if (!dbPath.contains("content-type")) {
+               output404NotFound(clientSocket);
+               return;
+               dbPath << "content-type";
+            }
+            else
+               output << "Second 🥈" << endl;
+         }
+         else {
+            output << "Error: " << webRequest._url << endl;
+         }
+
+         string out = output.str();
+
+         stringstream writeOutput;
+
+         writeOutput <<
+            "HTTP/2.0 200 OK\r\n" <<
+            "Content-Type: text/plain; charset=utf-8\r\n" <<
+            "Connection: keep-alive\r\n" <<
+            "Content-Length: " <<
+               out.length() << "\r\n" <<
+            "\r\n" <<
+            out;
+
+         std::string response =
+            writeOutput.str();
+
+         ::write(
+            clientSocket,
+            response.c_str(),
+            response.length()
+         );
+
+
       }
-      else {
-         output << "Error: " << webRequest._url << endl;
+
+      virtual void outputRootPage(int clientSocket) {
+         stringstream output;
+
+         output << "DB Server" << endl;
+         output << *this << endl;
+
+         string out = output.str();
+
+         stringstream writeOutput;
+
+         writeOutput <<
+            "HTTP/2.0 200 OK\r\n" <<
+            "Content-Type: text/plain; charset=utf-8\r\n" <<
+            "Connection: keep-alive\r\n" <<
+            "Content-Length: " <<
+               out.length() << "\r\n" <<
+            "\r\n" <<
+            out;
+
+         std::string response =
+            writeOutput.str();
+
+         ::write(
+            clientSocket,
+            response.c_str(),
+            response.length()
+         );
+
       }
 
-      std::string out = output.str();
+      virtual void output404NotFound(int clientSocket)
+      {
 
-      std::stringstream writeOutput;
+         stringstream writeOutput;
 
-      writeOutput <<
-         "HTTP/2.0 200 OK\r\n" <<
-         "Content-Type: text/plain; charset=utf-8\r\n" <<
-         "Connection: keep-alive\r\n" <<
-         "Content-Length: " <<
-            out.length() << "\r\n" <<
-         "\r\n" <<
-         out;
+         const char * html = (const char *)(&_binary_404_html_start[0]);
 
-      std::string response =
-         writeOutput.str();
+         const size_t size =
+            _binary_404_html_end -
+            _binary_404_html_start;
 
-      ::write(
-         clientSocket,
-         response.c_str(),
-         response.length()
-      );
+         writeOutput <<
+            "HTTP/2.0 404 OK\r\n" <<
+            "Content-Type: text/html; charset=utf-8\r\n" <<
+            "Connection: keep-alive\r\n" <<
+            "Content-Length: " <<
+               size<< "\r\n" <<
+            "\r\n";
 
+         writeOutput.write(
+            html,
+            size
+         );
 
-   }
+         std::string response =
+            writeOutput.str();
+
+         ::write(
+            clientSocket,
+            response.c_str(),
+            response.length()
+         );
+
+      }
+
+   };
 
 }
 

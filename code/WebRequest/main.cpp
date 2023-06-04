@@ -36,11 +36,9 @@ int main(int argc, const char* argv[]) {
    }
 
    string line;
-   string path;
 
-   auto onpath = [&path](Parser*) {
+   auto onpath = [](string path) {
       cout << path << endl;
-      path = "";
    };
 
    while (true) {
@@ -50,9 +48,7 @@ int main(int argc, const char* argv[]) {
       if (line == "")
          break;
 
-      auto _url = URL(path, onpath);
-
-      path = "";
+      auto _url = URL(onpath);
 
       bool read = _url.read(line + "\r\n");
 

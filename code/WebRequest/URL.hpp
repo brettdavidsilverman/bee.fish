@@ -4,33 +4,85 @@
 
 namespace BeeFishWeb {
 
+   using namespace std;
    using namespace BeeFishParser;
    using namespace BeeFishJSON;
 
-   auto URL(std::string& path, Invoke::Function onpath) {
-      const auto seperator =
-         Character("/") or
-         Character("?");
+   class URL : public Parser {
+   protected:
+      string _path;
+      
+      typedef std::function<void (std::string)> Function;
+      Function _onpath;
 
-      const auto url =
+      Invoke::Function _oninvoke =
+      [this](Parser* parser) {
+         Capture* capture =
+            dynamic_cast<Capture*>
+            (parser);
+
+         if (_onpath)
+            _onpath(parser->value());
+      };
+
+      And _urlParser = createParser();
+   public:
+
+      using Parser::read;
+
+      URL(const URL& url) :
+         _onpath(url._onpath)
+      {
+      }
+
+      URL(Function onpath) :
+         _onpath(onpath)
+      {
+      }
+
+      And createParser() {
+         const auto seperator =
+            Character("/") or
+            Character("?");
+
+         return
          Repeat(
             seperator and
             Invoke(
                Capture(
                   Repeat(
-                     not (seperator or blankSpace),
+                     not (
+                        seperator or
+                        blankSpace
+                     ),
                      0
                   ),
-                  path
+                  _path
                ),
-               onpath
+               _oninvoke
             ),
             1
          ) and Optional(seperator);
 
-      return url;
+      }
 
-    }
+      virtual bool read(char c)
+      override
+      {
+         bool matched = _urlParser.read(c);
+
+         if (_urlParser._result != nullopt)
+            setResult(_urlParser._result);
+
+         return matched;
+      }
+
+      Parser* copy() const override
+      {
+         return new URL(*this);
+      }
+
+   };
 
 }
 

@@ -1,5 +1,5 @@
-all:	clean
-	mkdir build
+all:
+	- mkdir build
 	cd code && make $(DEBUG)
 
 install:	all

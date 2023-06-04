@@ -186,22 +186,20 @@ namespace BeeFishWeb
       
       cout << "Test URL" << endl;
       
-      std::string path;
       std::string fullPath;
 
       auto onpath =
-      [&path, &fullPath](Parser* parser)
+      [&fullPath](std::string path)
       {
          cout << "{" << path << "}";
          fullPath += "/" + path;
-         path = "";
       };
 
       bool success = true;
 
       fullPath = "";
       success &= testPattern(
-         URL(path, onpath),
+         URL(onpath),
          "/",
          nullopt
       );
@@ -214,7 +212,7 @@ namespace BeeFishWeb
       fullPath = "";
 
       success &= testPattern(
-         URL(path, onpath),
+         URL(onpath),
          "/path/",
          nullopt
       );
@@ -227,7 +225,7 @@ namespace BeeFishWeb
       fullPath = "";
 
       success &= testPattern(
-         URL(path, onpath),
+         URL(onpath),
          "/path1/path2/",
          nullopt
       );
@@ -240,7 +238,7 @@ namespace BeeFishWeb
       fullPath = "";
 
       success &= testPattern(
-         URL(path, onpath) and newLine,
+         URL(onpath) and newLine,
          "/path3/path4\r\n",
          true
       );

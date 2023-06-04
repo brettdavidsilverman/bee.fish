@@ -9,9 +9,6 @@ int main(int argc, const char* argv[]) {
    using namespace BeeFishWeb;
    using namespace BeeFishParser;
 
-   cout << endl;
-   cout << WEB_SERVER << endl;
-
    cout << "bee.fish.db-server"
            << endl
         << "C++ run time: "
@@ -85,10 +82,10 @@ int main(int argc, const char* argv[]) {
       return 0;
    }
 
-   WebServer webServer(host, port, threads, filename);
+   DBServer dbServer(host, port, threads, filename);
 
-   webServer.start();
-   webServer.join();
+   dbServer.start();
+   dbServer.join();
 
    return 0;
 }
