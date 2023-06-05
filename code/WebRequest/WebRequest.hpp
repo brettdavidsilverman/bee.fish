@@ -127,47 +127,10 @@ namespace BeeFishWeb {
       }
 
    };
-
-   auto _WebRequest =
-   []( string& method,
-       string& url,
-       string& version,
-       map<string, string>& headers )
-   {
-      return
-         Capture(
-            Word("GET") or
-            Word("POST") or
-            Word("DELETE"),
-            method
-         ) and blanks and
-         Capture(
-            Character("/") and
-            Repeat(not blank, 0),
-            url
-         ) and blanks and
-         Capture(
-            Word("HTTP/") and
-            integer and
-            fraction,
-            version
-         ) and newLine and
-         Headers(
-            [&headers](Header* header) {
-               headers.emplace(
-                  header->_key,
-                  header->_value
-               );
-            }
-         ) and
-         newLine;
-
-   };
-
  
    class WebServer;
 
-   class WebRequest : public And {
+   class WebRequest : public Parser {
    protected:
       WebServer* _webServer;
 
@@ -178,33 +141,22 @@ namespace BeeFishWeb {
       string _url;
       string _version;
       map<string, string> _headers;
+      Parser* _body = nullptr;
+      string _capture;
+      string _contentType;
+      And* _parser = createParser();
 
    public:
       using Parser::read;
 
       WebRequest() :
-         And(
-            _WebRequest(
-               _method,
-               _url,
-               _version,
-               _headers
-            )
-         ),
          _webServer(nullptr),
          _socket(-1)
       {
       }
 
       WebRequest(WebServer* webServer, int socket, const std::string& ipAddress)
-      : And(
-            _WebRequest(
-               _method,
-               _url,
-               _version,
-               _headers
-            )
-         ),
+      :
          _webServer(webServer),
          _socket(socket),
          _ipAddress(ipAddress)
@@ -213,7 +165,6 @@ namespace BeeFishWeb {
 
       WebRequest(const WebRequest& source)
       :
-         And(source),
          _webServer(source._webServer),
          _socket(-1),
          _ipAddress(source._ipAddress)
@@ -222,6 +173,7 @@ namespace BeeFishWeb {
 
       virtual ~WebRequest() {
          close();
+         delete _parser;
       }
 
       void close() {
@@ -253,77 +205,30 @@ namespace BeeFishWeb {
          return out;
       }
 
-      bool process() {
-         using namespace std;
-
-         if (!read()) {
-cerr << "Read failure" << endl;
-            close();
-            return false;
-         };
-
-         std::stringstream output;
-
-         output << *this;
-
-         std::string out = output.str();
-
-         std::stringstream writeOutput;
-
-         writeOutput <<
-            "HTTP/2.0 200 OK\r\n" <<
-            "Content-Type: text/plain\r\n" <<
-            "Connection: keep-alive\r\n" <<
-            "Content-Length: " <<
-               out.length() << "\r\n" <<
-            "\r\n" <<
-            out;
-
-         std::string response =
-            writeOutput.str();
-
-         ::write(
-            _socket,
-            response.c_str(),
-               response.length()
-            );
-
-        
-         return true;
-
-      }
-
       virtual bool read()
       {
-         while (_result == std::nullopt &&
-                pollInput())
+         int ret;
+         char buffer[512];
+         char *buff = &(buffer[0]);
+         _result = nullopt;
+
+         while ( _result == nullopt &&
+                 pollInput() &&
+                 (ret = ::read(
+                     _socket,
+                     buff,
+                     sizeof(buffer))
+                  ) > 0)
          {
-            int ret;
-            char buffer[512];
-            char *buff = &(buffer[0]);
-
-            while (_result == nullopt &&
-                     (ret = ::read(
-                        _socket,
-                        buff,
-                        sizeof(buffer))
-                     ) > 0)
+            if (!read(buff, ret))
             {
-               if (!read((const char*)buff, ret))
-               {
-                  return false;
-               }
-
-               if (ret < sizeof(buffer))
-                  return true;
-
+               return false;
             }
 
             if (ret < sizeof(buffer))
                return true;
-
-
          }
+
 
          return true;
 
@@ -347,6 +252,99 @@ cerr << "Read failure" << endl;
       override
       {
          return new WebRequest(*this);
+      }
+
+      virtual bool read(char c)
+      override
+      {
+
+         if (_parser->_result != nullopt)
+            return false;
+
+         bool matched = _parser->read(c);
+
+         //cerr << c << flush;
+
+
+         if (_parser->_result != nullopt)
+            setResult(_parser->_result);
+
+         return matched;
+      }
+
+      virtual void success()
+      override
+      {
+         Parser::success();
+      }
+
+      virtual void fail()
+      override
+      {
+         Parser::fail();
+      }
+
+      And* createParser() {
+         And parser = Capture(
+            Word("GET") or
+            Word("POST") or
+            Word("DELETE"),
+            _method
+         ) and blanks and
+         Capture(
+            Character("/") and
+            Repeat(not blank, 0),
+            _url
+         ) and blanks and
+         Capture(
+            Word("HTTP/") and
+            integer and
+            fraction,
+            _version
+         ) and newLine and
+         Headers(
+            [this](Header* header) {
+               _headers.emplace(
+                  header->_key,
+                  header->_value
+               );
+            }
+         ) and
+         Invoke(
+            newLine,
+            [this](Parser * parser)
+            {
+               if ( _method == "POST" &&
+                    _headers.count("content-type") > 0 )
+               {
+                  _contentType =
+                     _headers["content-type"];
+
+                  if (_contentType == "application/json")
+                  {
+                     _capture.clear();
+                     _body = Capture(JSON(), _capture).copy();
+                     _parser->_inputs.push_back(_body);
+                     return true;
+                  }
+               }
+               
+               if ( _method == "POST" &&
+                    _headers.count("content-length") > 0)
+               {
+                  string _contentLength =
+                     _headers["content-length"];
+                  
+                  size_t contentLength =
+                     atol(_contentLength.c_str());
+
+                  cerr << "@@@@@@@" << contentLength << endl;
+               }
+               return true;
+            }
+         );
+
+         return (And*)(parser.copy());
       }
 
 

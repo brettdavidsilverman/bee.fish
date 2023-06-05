@@ -16,16 +16,24 @@ namespace BeeFishParser {
    {
    public:
    
-      typedef std::function<void(Parser*)> Function;
+      typedef std::function<bool(Parser*)> Function;
       Function _function;
       Parser* _parser {nullptr};
 
    public:
 
       using Parser::read;
-   
+      using Parser::setResult;
+
       Invoke(const Parser& parser) :
          _parser(parser.copy())
+      {
+
+      }
+
+      Invoke(const Invoke& source) :
+         _parser(source._parser->copy()),
+         _function(source._function)
       {
 
       }
@@ -44,13 +52,22 @@ namespace BeeFishParser {
             delete _parser;
       }
 
-      virtual void success()
+      virtual void setResult(
+         std::optional<bool> result
+      )
       override
       {
-         Parser::success();
-         if (_function)
-            _function(_parser);
-         
+         if (result == true) {
+            if (_function) {
+               if (!_function(_parser)) {
+                  setResult(false);
+                  return;
+               }
+            }
+         }
+
+         Parser::setResult(result);
+
       }
 
       virtual bool read(char c)
@@ -66,7 +83,7 @@ namespace BeeFishParser {
       virtual Parser* copy() const
       override
       {
-          return new Invoke(*_parser, _function);
+         return new Invoke(*this);
       }
       
    

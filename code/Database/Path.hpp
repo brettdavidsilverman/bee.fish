@@ -167,11 +167,22 @@ namespace BeeFishDatabase {
          return (T&)data;
       }
 
+      void getData(std::string& destination)
+      {
+         Data data;
+         getData(data);
+         destination =
+            std::string(
+               (const char*)data._data,
+               data._size
+            );
+      }
+
       operator string()
       {
          Data data;
          getData(data);
-         std::string string(data._data, data._size);
+         std::string string((const char*)data._data, data._size);
 
          return string;
       }
@@ -222,7 +233,15 @@ namespace BeeFishDatabase {
          memcpy(data->getData(), value._data, data->_size);
          
       }
-      
+
+      void setData(
+         const std::string& source
+      )
+      {
+         Data data(source, true);
+         setData(data);
+      }
+
       void setData(
          const char* source
       )

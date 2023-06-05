@@ -12,12 +12,21 @@ namespace BeeFishWeb {
    protected:
       string _path;
       
-      typedef std::function<void (std::string)> Function;
+      typedef std::function<bool (std::string)> Function;
       Function _onpath;
 
-      Invoke::Function _oninvoke = nullptr;;
-
       Parser* _urlParser = nullptr;
+
+      Invoke::Function  _oninvoke =
+         [this](Parser*) {
+            bool success = true;
+            if (_onpath) {
+               success = _onpath(_path);
+            }
+            _path.clear();
+            return success;
+         };
+ 
    public:
 
       using Parser::read;
@@ -25,26 +34,12 @@ namespace BeeFishWeb {
       URL(const URL& url) :
          _onpath(url._onpath)
       {
-         _oninvoke =
-            [this](Parser*) {
-               if (_onpath) {
-                  _onpath(_path);
-               }
-               _path.clear();
-            };
-         _urlParser = createParser();
+        _urlParser = createParser();
       }
 
       URL(Function onpath) :
          _onpath(onpath)
       {
-
-         _oninvoke =
-            [this](Parser*) {
-               if (_onpath)
-                  _onpath(_path);
-               _path.clear();
-            };
          _urlParser = createParser();
       }
 

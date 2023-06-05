@@ -130,28 +130,7 @@ namespace BeeFishWeb
       
       bool success = true;
       
-      string method, url, version;
-      map<string, string> headers;
-
       string host = WEB_SERVER_HOST;
-
-      success &=
-         testPattern(
-            _WebRequest(method, url, version, headers),
-            "GET / HTTP/1.1\r\n" \
-            "Host: " + host + "\r\n" \
-            "\r\n",
-            true
-         );
-
-      success &=
-         testValue("GET", method);
-
-      success &=
-         testValue("/", url);
-
-      success &=
-         testValue("HTTP/1.1", version);
 
       WebRequest webRequest;
 
@@ -175,6 +154,7 @@ namespace BeeFishWeb
 
       success &=
          testValue(host, webRequest._headers["host"]);
+
       BeeFishMisc::outputSuccess(success);
 
       return success;
@@ -193,6 +173,7 @@ namespace BeeFishWeb
       {
          cout << "{" << path << "}";
          fullPath += "/" + path;
+         return true;
       };
 
       bool success = true;

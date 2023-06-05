@@ -53,19 +53,21 @@ namespace BeeFishWeb {
 
          BeeFishDatabase::Path dbPath = root();
 
-         if (!webRequest.read())
+         webRequest.read();
+
+         if (webRequest._result == false)
+         {
+            cerr << "Error reading from client" << endl;
             return;
+         }
 
          stringstream output;
-
-         output << *this << endl;
-         output << endl;
 
          auto onpath =
          [&dbPath, &output](string path)
          {
-            output << path << endl;
             dbPath << path;
+            return true;
          };
 
          if ( webRequest._url == "/" ) {
@@ -85,14 +87,26 @@ namespace BeeFishWeb {
          success = success &&
             urlParser._result != false;
 
+         string contentType = "text/plain; charset=utf-8";
+
          if (success) {
-            if (!dbPath.contains("content-type")) {
+            if (webRequest._method == "POST") {
+               dbPath["content-type"].setData(
+                  webRequest._contentType
+               );
+               dbPath.setData(webRequest._capture);
+               output << webRequest._capture;
+            }
+            else if (!dbPath.hasData()) {
                output404NotFound(clientSocket);
                return;
-               dbPath << "content-type";
             }
-            else
-               output << "Second 🥈" << endl;
+            else {
+               dbPath["content-type"].getData(contentType);
+               string body;
+               dbPath.getData(body);
+               output << body;
+            }
          }
          else {
             output << "Error: " << webRequest._url << endl;
@@ -104,7 +118,7 @@ namespace BeeFishWeb {
 
          writeOutput <<
             "HTTP/2.0 200 OK\r\n" <<
-            "Content-Type: text/plain; charset=utf-8\r\n" <<
+            "Content-Type: " << contentType << "\r\n" <<
             "Connection: keep-alive\r\n" <<
             "Content-Length: " <<
                out.length() << "\r\n" <<

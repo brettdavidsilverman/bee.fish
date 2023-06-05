@@ -14,7 +14,8 @@
 #include "File.hpp"
 #include "Index.hpp"
 #include "Branch.hpp"
-#include "DatabaseBase.hpp"#include "Path.hpp"
+#include "DatabaseBase.hpp"
+#include "Data.hpp"#include "Path.hpp"
 
 #endif
 

@@ -11,7 +11,7 @@ using namespace std;
 namespace BeeFishParser {
 
    class ArrayParser : public Parser {
-   protected:
+   public:
       std::vector<Parser*> _inputs;
       size_t _index {0};
    public:

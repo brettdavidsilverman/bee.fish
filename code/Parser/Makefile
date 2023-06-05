@@ -1,5 +1,5 @@
 OUTPUT = ../../build/Parser
-DEPS = Makefile ../../Config.hpp ../Config.hpp Config.hpp ../Miscellaneous/Miscellaneous.hpp Parser.hpp UTF8Character.hpp Character.hpp And.hpp Or.hpp Not.hpp Optional.hpp Word.hpp Range.hpp Repeat.hpp Char.hpp Rules.hpp Capture.hpp Test.hpp main.cpp
+DEPS = Makefile ../../Config.hpp ../Config.hpp Config.hpp ../Miscellaneous/Miscellaneous.hpp Parser.hpp UTF8Character.hpp Character.hpp And.hpp Or.hpp Not.hpp Optional.hpp Word.hpp Range.hpp Repeat.hpp Char.hpp Rules.hpp Capture.hpp Invoke.hpp Test.hpp main.cpp
 CFLAGS = -std=c++17 -Wfatal-errors
 
 $(OUTPUT):	$(DEPS)

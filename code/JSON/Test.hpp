@@ -15,7 +15,7 @@ namespace BeeFishJSON {
    bool testStrings();
    bool testArrays();
    bool testObjects();
-   
+   bool testUnicode();
 
    inline bool test() {
       using namespace std;
@@ -39,6 +39,9 @@ namespace BeeFishJSON {
 
       success = success &&
          testObjects();
+
+      success = success &&
+         testUnicode();
 
       if (success)
          cout << "JSON tests pass" << endl;
@@ -333,6 +336,27 @@ namespace BeeFishJSON {
       
    }
 
+   inline bool testUnicode()
+   {
+      using namespace std;
+
+      bool success = true;
+
+      cout << "Testing unicode" << endl;
+
+      string captured;
+
+      success &=
+         testPattern(Capture(JSON(), captured), "{\"🐝\":\"🌎\"}", true);
+
+      success &=
+         testValue("{\"🐝\":\"🌎\"}", captured);
+
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+      
+   }
    
    
 }

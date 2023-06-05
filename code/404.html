@@ -4,26 +4,86 @@
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <title>bee.fish 404</title>
+      <script>
+window.onerror =
+function (message, source, lineno, colno, error)
+{
+
+   
+   if (!error)
+      error = {}
+
+   var stack = "";
+   if (error.stack)
+      stack = String(error.stack);
+
+   if (message instanceof Object)
+      message = JSON.stringify(message, null, "   ");
+   
+   var string = 
+      [
+         message,
+         source,
+         "line: " + lineno,
+         "col: " + colno,
+         stack
+      ].join("\n");
       
+   if (alert.silent)
+      console.log(string);
+   else
+      alert(string);
+   
+};
+
+      </script>
    </head>
    <body>
       <h1 id="h1">bee.fish 404</h1>
-      <form action="post">
+      <form onsubmit="return false;">
          <label for="jsonText">JSON Text</label><br />
          <textarea id="jsonText">
+{"🐝":"🌎"}
          </textarea><br />
-         <button type="submit" _onclick="postJSON()">Submit</button>
-
+         <button onclick="postJSON()">Submit</button>
       </form><br />
 
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
 
       <script>
+var contentType =
+   document.getElementById("contentType");
+
 var jsonText =
    document.getElementById("jsonText");
 
 function postJSON() {
-   
+
+   var response =
+      fetch(
+         window.location.href,
+         {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json"
+            },
+            body: jsonText.value
+         }
+      ).then(
+         function (response) {
+            return response.text();
+         }
+      ).then(
+         function (text) {
+            alert(text);
+         }
+      ).catch(
+         function(error) {
+            alert(error);
+         }
+      );
+
+   return response;
 }
 
       </script>

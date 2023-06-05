@@ -39,6 +39,7 @@ int main(int argc, const char* argv[]) {
 
    auto onpath = [](string path) {
       cout << path << endl;
+      return true;
    };
 
    while (true) {

@@ -636,6 +636,7 @@ namespace BeeFishParser {
             Capture* capture =
                dynamic_cast<Capture*>(parser);
             value = capture->value();
+            return true;
          }
       );
 

@@ -103,11 +103,11 @@ namespace BeeFishParser {
       )
       {
          const char* end = string + length;
-         for (const char* c = string;
-              c != end;
-              ++c)
+         for (const char* pc = string;
+              pc != end;
+              ++pc)
          {
-            if (!read(*c))
+            if (!read(*pc))
                return false;
 
          }
@@ -118,11 +118,11 @@ namespace BeeFishParser {
          const char* string
       )
       {
-         for (const char* c = string;
-              *c != 0;
-              ++c)
+         for (const char* pc = string;
+              *pc != 0;
+              ++pc)
          {
-            if (!read(*c))
+            if (!read(*pc))
                return false;
 
          }
