@@ -8,8 +8,16 @@
    </head>
    <body>
       <h1 id="h1">bee.fish</h1>
-      
+      <form>
+         <input type="url" id="url" ></input>
+         <button onclick="loadURL()">Go</button>
+      </form>
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
-
+      <script>
+function loadURL() {
+   window.location.href =
+      document.getElementById("url").value;
+}
+      </script>
    </body>
 </html>

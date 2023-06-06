@@ -76,6 +76,7 @@ function postJSON() {
       ).then(
          function (text) {
             alert(text);
+            window.location.reload();
          }
       ).catch(
          function(error) {
