@@ -18,11 +18,9 @@ namespace BeeFishMisc {
 
    }
 
-   void log(int priority, const std::string& message)
+   void logMessage(int priority, const std::string& message)
    {
-   
-      syslog (priority, message.c_str());
-
+      syslog(priority, message.c_str());
    }
 
    void closeLog() {

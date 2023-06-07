@@ -13,6 +13,7 @@
 #include "File.hpp"
 #include "Index.hpp"
 #include "Branch.hpp"
+#include "Data.hpp"
 
 using namespace std;
 
@@ -138,24 +139,7 @@ namespace BeeFishDatabase {
       }
          
       
-   public:
-      
-   
-      struct Data
-      {
-         Size  _size;
-         char _bytes[];
-         void* getData()
-         {
-            return &(_bytes[0]);
-         }
-         
-         Size getSize()
-         {
-            return _size;
-         }
-         
-      };
+   public:
       
       inline Index getNextIndex(const Index& parent = 0)
       {
@@ -190,9 +174,9 @@ namespace BeeFishDatabase {
             resize(_size + byteSize);
          }
         
-         Database::Data* data = getData(dataIndex);
+         Data* data = getData(dataIndex);
          
-         data->_size = byteSize;
+         data->setSize(byteSize);
          
          return dataIndex;
             
@@ -208,13 +192,13 @@ namespace BeeFishDatabase {
          return _root[index];
       }
       
-      inline Database::Data* getData(const Index& dataIndex)
+      inline Data* getData(const Index& dataIndex)
       {
          if (dataIndex == 0)
             return nullptr;
          
-         Database::Data* data =
-            (Database::Data*)
+         Data* data =
+            (Data*)
                (&(_root[dataIndex]));
             
          return data;

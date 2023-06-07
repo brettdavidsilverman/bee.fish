@@ -323,7 +323,7 @@ namespace BeeFishWeb {
                     << _url << " "
                     << _version << endl;
 
-               log(LOG_NOTICE, logStream.str());
+               logMessage(LOG_NOTICE, logStream.str());
 
                if ( _method == "POST" &&
                     _headers.count("content-type") > 0 )

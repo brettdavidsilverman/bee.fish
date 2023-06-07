@@ -87,6 +87,9 @@ int main(int argc, const char* argv[]) {
    DBServer dbServer(host, port, threads, filename);
 
    dbServer.start();
+
+   syslog(LOG_NOTICE, "DBServer %s on port %i", host.c_str(), port);
+
    dbServer.join();
 
    closeLog();

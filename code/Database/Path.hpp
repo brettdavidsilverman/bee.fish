@@ -113,13 +113,13 @@ namespace BeeFishDatabase {
          if (branch._dataIndex)
          {
          
-            Database::Data* data =
+            Data* data =
                _database->getData(
                   branch._dataIndex
                );
                
             if (data)
-               return data->_size;
+               return data->size();
          }
          
          return 0;
@@ -130,59 +130,59 @@ namespace BeeFishDatabase {
          return getDataSize() > 0;
       }
       
-      void getData(Data& destination) {
+      Data& getData() {
 
          Branch& branch =
             _database->getBranch(_index);
             
          if (branch._dataIndex)
          {
-            Database::Data* source =
+            Data* source =
                _database->getData(
                   branch._dataIndex
                );
-            
-            destination = Data(
-               source->getData(),
-               source->getSize()
-            );
+
+            return *source;
 
          }
+
+         throw runtime_error("Path::getData() No data at this index");
 
       }
 
       template<typename T>
       void getData(T& destination)
       {
-         Data data;
-         getData(data);
+         Data& data = getData();
          destination = data;
       }
 
       template<typename T>
       operator T()
       {
-         Data data;
-         getData(data);
+         Data& data = getData(data);
          return (T&)data;
       }
 
       void getData(std::string& destination)
       {
-         Data data;
-         getData(data);
-         destination =
-            std::string(
-               (const char*)data._data,
-               data._size
-            );
+         Data& data = getData();
+
+         std::string string(
+            data.data(),
+            data.size()
+         );
+
+         destination = string;
       }
 
       operator string()
       {
-         Data data;
-         getData(data);
-         std::string string((const char*)data._data, data._size);
+         Data& data = getData(data);
+         std::string string(
+            data.data(),
+            data.size()
+         );
 
          return string;
       }
@@ -192,25 +192,24 @@ namespace BeeFishDatabase {
          const T& value
       )
       {
-         BeeFishDatabase::Data
-            data(value);
+         Data data(value);
         
          setData(data);
       }
 
-      void setData(const BeeFishDatabase::Data& value) {
+      void setData(const std::string& value) {
          Branch& branch =
             _database->getBranch(_index);
          
-         Database::Data* data =
+         Data* destination =
             _database->getData(
                branch._dataIndex
             );
                
-         if ( ( data == nullptr ) || 
-              ( data->_size < value.size() ) )
+         if ( ( destination == nullptr ) || 
+              ( destination->size() < value.size() ) )
          {
-            if (data)
+            if (destination)
                deleteData();
             
             Index dataIndex = 
@@ -221,33 +220,28 @@ namespace BeeFishDatabase {
                
             branch._dataIndex = dataIndex;
          
-            data =
+            destination =
                _database->getData(
                   branch._dataIndex
                );
             
          }
 
-         data->_size = value.size();
+         destination->setSize(value.size());
          
-         memcpy(data->getData(), value._data, data->_size);
+         memcpy(
+            destination->data(),
+            value.data(),
+            destination->size()
+         );
          
-      }
-
-      void setData(
-         const std::string& source
-      )
-      {
-         Data data(source, true);
-         setData(data);
       }
 
       void setData(
          const char* source
       )
       {
-         std::string string(source);
-         setData(string);
+         setData(std::string(source));
       }
       
       Branch& getBranch()
@@ -263,15 +257,15 @@ namespace BeeFishDatabase {
 
 
          if (branch._dataIndex) {
-            Database::Data* data =
+            Data* data =
                _database->getData(
                   branch._dataIndex
                );
 
             memset(
-               data->getData(),
+               data->data(),
                0,
-               data->getSize()
+               data->size()
             );
 
             branch._dataIndex = 0;

@@ -21,6 +21,22 @@ namespace BeeFishDatabase
 
       cout << "Test Database" << endl;
 
+      Database db("temp.data");
+
+      Path start(db);
+      Path next = start["Hello"];
+
+      next.setData("world");
+
+      std::string world;
+      next.getData(world);
+
+      success &=
+         testValue(
+            "world",
+            world
+         );
+
       outputSuccess(success);
 
       return success;
