@@ -4,4 +4,4 @@ build/**
 **/*.pid
 **/perf.data
 **/perf.data.old
-
+**/*.data
