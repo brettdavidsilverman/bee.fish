@@ -4,8 +4,9 @@
 #include <string>
 #include <unistd.h>
 #include <memory>
-
+#include "Log.hpp"
 #include "optional.h"
+
 
 #define ON_SUCCESS "😃"
 #define ON_FAIL "🚫"

@@ -9,6 +9,8 @@
 #include <string>
 #include <poll.h>
 
+#include "../Miscellaneous/Miscellaneous.hpp"
+
 #include "../Parser/Parser.hpp"
 #include "../JSON/JSON.hpp"
 #include "URL.hpp"
@@ -18,6 +20,7 @@
 namespace BeeFishWeb {
 
    using namespace std;
+   using namespace BeeFishMisc;
    using namespace BeeFishParser;
    using namespace BeeFishJSON;
 
@@ -312,8 +315,16 @@ namespace BeeFishWeb {
          ) and
          Invoke(
             newLine,
-            [this](Parser * parser)
+            [this](Parser *)
             {
+               stringstream logStream;
+               logStream << _ipAddress << " "
+                    << _method << " "
+                    << _url << " "
+                    << _version << endl;
+
+               log(LOG_NOTICE, logStream.str());
+
                if ( _method == "POST" &&
                     _headers.count("content-type") > 0 )
                {
@@ -339,6 +350,7 @@ namespace BeeFishWeb {
                      atol(_contentLength.c_str());
 
                   cerr << "@@@@@@@" << contentLength << endl;
+                  return false;
                }
                return true;
             }

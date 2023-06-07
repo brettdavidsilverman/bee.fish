@@ -82,10 +82,14 @@ int main(int argc, const char* argv[]) {
       return 0;
    }
 
+   openLog();
+
    DBServer dbServer(host, port, threads, filename);
 
    dbServer.start();
    dbServer.join();
+
+   closeLog();
 
    return 0;
 }

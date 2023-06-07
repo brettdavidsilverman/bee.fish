@@ -1,5 +1,6 @@
 #ifndef BEE_FISH__WEB__DBSERVER_HPP
 #define BEE_FISH__WEB__DBSERVER_HPP
+#include "Miscellaneous/Miscellaneous.hpp"
 #include "WebServer/WebServer.hpp"
 #include "Database/Database.hpp"
 #include "WebRequest/WebRequest.hpp"
@@ -15,6 +16,8 @@ extern "C" uint8_t _binary_HomePage_html_end[];
 
 namespace BeeFishWeb {
 
+   using namespace BeeFishMisc;
+
    class DBServer :
       public WebServer,
       public Database
@@ -29,6 +32,9 @@ namespace BeeFishWeb {
          WebServer(host, port, threads),
          Database(databaseFilename)
       {
+      }
+
+      virtual ~DBServer() {
       }
 
       Path root() {
