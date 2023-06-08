@@ -96,17 +96,17 @@ namespace BeeFishDatabase {
       {
          Header& header = _tree->_header;
          //memset(&header, '\0', sizeof(Header));
-         strcpy(header._version, BEE_FISH__DATABASE_VERSION);
+         strcpy(header._version, DATABASE_VERSION);
          header._nextIndex = Branch::Root;
       }
       
       virtual void checkHeader()
       {
-         if (strcmp(_tree->_header._version, BEE_FISH__DATABASE_VERSION) != 0)
+         if (strcmp(_tree->_header._version, DATABASE_VERSION) != 0)
          {
             std::string error = "Invalid file version.";
             error += " Program version ";
-            error += BEE_FISH__DATABASE_VERSION;
+            error += DATABASE_VERSION;
             error += ". File version ";
             error += _tree->_header._version;
             throw runtime_error(error);

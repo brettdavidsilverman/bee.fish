@@ -21,7 +21,7 @@ int main(int argc, const char* argv[]) {
            << __cplusplus
            << endl
         << "Version: "
-           << BEE_FISH__DATABASE_VERSION
+           << DATABASE_VERSION
            << endl;
  
    bool test =

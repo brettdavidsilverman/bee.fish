@@ -14,8 +14,13 @@ int main(int argc, const char* argv[]) {
         << "C++ run time: "
            << __cplusplus
            << endl
+        << "Database version: "
+           << DATABASE_VERSION
+           << endl
+        << "Web Server version: "
+           << WEB_SERVER_VERSION
         << "Version: "
-           << DBSERVER_VERSION
+           << DB_SERVER_VERSION
            << endl;
 
 #ifdef DEBUG

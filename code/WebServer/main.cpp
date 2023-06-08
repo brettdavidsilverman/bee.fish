@@ -13,7 +13,7 @@ int main(int argc, const char* argv[]) {
    using namespace BeeFishParser;
 
    cout << endl;
-   cout << WEB_SERVER << endl;
+   cout << WEB_SERVER_VERSION << endl;
 
 #ifdef DEBUG
    cout << "Debug mode" << endl;

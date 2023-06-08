@@ -29,7 +29,7 @@ namespace BeeFishDatabase
       next.setData("world");
 
       std::string world;
-      next.getData(world);
+      start["Hello"].getData(world);
 
       success &=
          testValue(

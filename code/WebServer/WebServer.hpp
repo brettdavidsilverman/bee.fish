@@ -127,7 +127,7 @@ namespace BeeFishWeb {
 
       virtual string version() const
       {
-         return WEB_SERVER;
+         return WEB_SERVER_VERSION;
       }
 
       static void loop(WebServer* webServer) {

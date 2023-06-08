@@ -47,9 +47,7 @@ namespace BeeFishWeb {
          string ipAddress
       ) override
       {
-#ifdef DEBUG
-         std::cerr << "handleRequest(" << clientSocket << ")" << std::endl;
-#endif
+         syslog(LOG_DEBUG, "DBServer::handleWebRequest(%s)", ipAddress.c_str() );
 
          WebRequest webRequest(
             this,
@@ -61,9 +59,10 @@ namespace BeeFishWeb {
 
          webRequest.read();
 
-         if (webRequest._result == false)
+         if (webRequest._result != true)
          {
-            cerr << "Error reading from client" << endl;
+            syslog(LOG_WARNING, "Error reading from client %s", ipAddress.c_str());
+            ::close(clientSocket);
             return;
          }
 

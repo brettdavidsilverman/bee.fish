@@ -179,22 +179,12 @@ namespace BeeFishDatabase {
       operator string()
       {
          Data& data = getData(data);
-         std::string string(
+
+         return std::string(
             data.data(),
             data.size()
          );
 
-         return string;
-      }
-
-      template<typename T>
-      void setData(
-         const T& value
-      )
-      {
-         Data data(value);
-        
-         setData(data);
       }
 
       void setData(const std::string& value) {
@@ -346,7 +336,7 @@ namespace BeeFishDatabase {
          setData(value);
          return value;
       }
-      
+      /*
       Data& operator=(Data& rhs)
       {
          setData(rhs);
@@ -357,7 +347,7 @@ namespace BeeFishDatabase {
          Data data;
          getData(data);
          return data;
-      }
+      }*/
 
       bool operator == (const Path& rhs)
       {
