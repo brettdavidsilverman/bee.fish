@@ -16,13 +16,19 @@ namespace BeeFishParser {
    public:
       using Parser::read;
 
+      Optional() :
+        _optional(nullptr)
+      {
+      }
+
       Optional(const Parser& optional) :
          _optional(optional.copy())
       {
       }
 
       virtual ~Optional() {
-         delete _optional;
+         if (_optional)
+            delete _optional;
       }
 
       virtual bool read(
@@ -30,7 +36,11 @@ namespace BeeFishParser {
       ) override
       {
          
-   
+         if (_optional == nullptr) {
+            setResult(true);
+            return false;
+         }
+
          bool matched =
             _optional->read(c);
 
@@ -51,7 +61,9 @@ namespace BeeFishParser {
       }
    
       virtual Parser* copy() const override {
-         return new Optional(*_optional);
+         if (_optional)
+            return new Optional(*_optional);
+         return new Optional();
       }
 
       virtual bool isOptional() const

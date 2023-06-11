@@ -28,9 +28,19 @@ namespace BeeFishJSON {
    inline const auto boolean =
       _true or _false;
 
+   enum Type {
+      UNDEFINED,
+      _NULL,
+      BOOLEAN,
+      NUMBER,
+      STRING,
+      ARRAY,
+      OBJECT
+   };
 
-   const And JSON() {
-      return -blankSpace and
+   And _JSON(Parser* parent) {
+      return
+         -blankSpace and
          (
             undefined or
             _null or
@@ -40,6 +50,10 @@ namespace BeeFishJSON {
             array or
             object
          );
+   }
+
+   Parser* JSON(Parser* parent) {
+      return _JSON(parent).copy();
    }
 
 }

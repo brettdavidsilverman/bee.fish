@@ -8,6 +8,7 @@
 namespace BeeFishJSON {
  
    using namespace BeeFishMisc;
+   using namespace BeeFishScript;
 
    bool testBlankSpace();
    bool testConstants();
@@ -16,6 +17,7 @@ namespace BeeFishJSON {
    bool testArrays();
    bool testObjects();
    bool testUnicode();
+   bool testVariables();
 
    inline bool test() {
       using namespace std;
@@ -42,6 +44,9 @@ namespace BeeFishJSON {
 
       success = success &&
          testUnicode();
+
+      success = success &&
+         testVariables();
 
       if (success)
          cout << "JSON tests pass" << endl;
@@ -164,31 +169,31 @@ namespace BeeFishJSON {
       );
 
       success &= testPattern(
-         JSON(),
+         _JSON(nullptr),
          "nul",
          nullopt
       );
 
       success &= testPattern(
-         JSON(),
+         _JSON(nullptr),
          "anull",
          false
       );
 
       success &= testPattern(
-         JSON(),
+         _JSON(nullptr),
          "true",
          true
       );
 
       success &= testPattern(
-         JSON(),
+         _JSON(nullptr),
          "false",
          true
       );
 
       success &= testPattern(
-         JSON(),
+         _JSON(nullptr),
          "undefined",
          true
       );
@@ -347,7 +352,7 @@ namespace BeeFishJSON {
       string captured;
 
       success &=
-         testPattern(Capture(JSON(), captured), "{\"🐝\":\"🌎\"}", true);
+         testPattern(Capture(_JSON(nullptr), captured), "{\"🐝\":\"🌎\"}", true);
 
       success &=
          testValue("{\"🐝\":\"🌎\"}", captured);
@@ -356,6 +361,47 @@ namespace BeeFishJSON {
 
       return success;
       
+   }
+
+   inline bool testVariables()
+   {
+      using namespace std;
+
+      cout << "Testing variables" << endl;
+
+      bool success = true;
+
+      {
+         Variable v = "Hello World";
+         stringstream out;
+         out << v;
+
+         success = success &&
+            testValue("\"Hello World\"", out.str());
+
+      }
+
+      {
+         Variable v = "Hello\\World";
+         stringstream out;
+         out << v;
+
+         success = success &&
+            testValue("\"Hello\\\\World\"", out.str());
+      }
+
+      {
+         Variable v = BeeFishScript::Object{{"🐝","🌎"}};
+         stringstream out;
+         out << v;
+
+         success = success &&
+            testValue("{\n   \"🐝\":\"🌎\"\n}", out.str());
+      }
+   
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
    }
    
    

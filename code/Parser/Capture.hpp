@@ -25,7 +25,8 @@ namespace BeeFishParser {
       using Parser::read;
 
       Capture(
-         const Capture& source
+         const Capture& source,
+         bool copy
       ) :
          Parser(),
          _capture(source._capture->copy()),
@@ -58,8 +59,8 @@ namespace BeeFishParser {
 
       virtual void capture(char c)
       {
-#ifdef DEBUG
-      // std::cerr << c  << std::flush;
+#if 0
+      std::cerr << c  << std::flush;
 #endif
          _valueRef.push_back(c);
       }
@@ -73,7 +74,7 @@ namespace BeeFishParser {
       virtual Parser* copy() const
       override
       {
-         return new Capture(*this);
+         return new Capture(*this, true);
       }
 
       virtual bool read(char c)

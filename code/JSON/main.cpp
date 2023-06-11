@@ -6,6 +6,7 @@
 #include "../Parser/Parser.hpp"
 #include "../Parser/Test.hpp"
 #include "JSON.hpp"
+#include "Variable.hpp"
 #include "Test.hpp"
 
 using namespace std;
@@ -13,8 +14,9 @@ using namespace BeeFishMisc;
 using namespace BeeFishParser;
 using namespace BeeFishJSON;
 
+
 int main(int argc, const char* argv[]) {
-   // testPattern(Array(), "[1,2,3]", true);
+   
    cerr << "bee.fish.json"
            << endl
         << "C++ run time: "
@@ -37,7 +39,7 @@ int main(int argc, const char* argv[]) {
    }
    
 
-   auto parser = JSON();
+   auto parser = _JSON(nullptr);
 
    cin >> parser;
  

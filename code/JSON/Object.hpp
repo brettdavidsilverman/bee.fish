@@ -14,7 +14,7 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   const And JSON();
+   Parser* JSON(Parser* params);
 
    const auto openBrace =
       Character("{");
@@ -29,7 +29,7 @@ namespace BeeFishJSON {
       Character(":");
 
    const auto value =
-      LoadOnDemand<And>(JSON);
+      LoadOnDemand(JSON);
 
    const auto seperator =
        Character(",");
@@ -44,7 +44,7 @@ namespace BeeFishJSON {
       -blankSpaces and
       openBrace and -blankSpaces and
       Optional(
-         line and -blankSpaces and
+         line and
          Repeat(
             seperator and line,
             0

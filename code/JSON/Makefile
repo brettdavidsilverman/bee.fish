@@ -1,5 +1,5 @@
 OUTPUT = ../../build/JSON
-DEPS = Makefile main.cpp Number.hpp String.hpp Test.hpp
+DEPS = Makefile main.cpp Number.hpp String.hpp Variable.hpp Test.hpp
 CFLAGS = -std=gnu++17 -Wfatal-errors
 TEST = tests/large.json
 

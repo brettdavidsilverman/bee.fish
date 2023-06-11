@@ -57,6 +57,8 @@ namespace BeeFishWeb {
 
          BeeFishDatabase::Path dbPath = root();
 
+         bool success = true;
+         
          webRequest.read();
 
          if (webRequest._result != true)
@@ -65,6 +67,15 @@ namespace BeeFishWeb {
             ::close(clientSocket);
             return;
          }
+
+         stringstream logStream;
+         logStream 
+            << webRequest._ipAddress << " "
+            << webRequest._method << " "
+            << webRequest._url << " "
+            << webRequest._version << endl;
+
+         logMessage(LOG_NOTICE, logStream.str());
 
          stringstream output;
 
@@ -83,15 +94,13 @@ namespace BeeFishWeb {
          auto urlParser =
            URL(onpath) and newLine;
 
-         bool success;
-
          success = urlParser.read(
             webRequest._url + "\r\n"
          );
     
          success = success &&
             urlParser._result != false;
-
+ 
          string contentType = "text/plain; charset=utf-8";
 
          if (success) {
@@ -159,7 +168,7 @@ namespace BeeFishWeb {
             "Content-Type: text/html; charset=utf-8\r\n" <<
             "Connection: keep-alive\r\n" <<
             "Content-Length: " <<
-               size<< "\r\n" <<
+               size << "\r\n" <<
             "\r\n";
 
          writeOutput.write(

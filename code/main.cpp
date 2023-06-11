@@ -19,6 +19,7 @@ int main(int argc, const char* argv[]) {
            << endl
         << "Web Server version: "
            << WEB_SERVER_VERSION
+           << endl
         << "Version: "
            << DB_SERVER_VERSION
            << endl;

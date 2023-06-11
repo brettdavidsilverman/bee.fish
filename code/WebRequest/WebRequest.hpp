@@ -288,6 +288,7 @@ namespace BeeFishWeb {
       }
 
       And* createParser() {
+
          And parser = Capture(
             Word("GET") or
             Word("POST") or
@@ -313,51 +314,64 @@ namespace BeeFishWeb {
                );
             }
          ) and
-         Invoke(
-            newLine,
-            [this](Parser *)
-            {
-               stringstream logStream;
-               logStream << _ipAddress << " "
-                    << _method << " "
-                    << _url << " "
-                    << _version << endl;
-
-               logMessage(LOG_NOTICE, logStream.str());
-
-               if ( _method == "POST" &&
-                    _headers.count("content-type") > 0 )
-               {
-                  _contentType =
-                     _headers["content-type"];
-
-                  if (_contentType == "application/json")
-                  {
-                     _capture.clear();
-                     _body = Capture(JSON(), _capture).copy();
-                     _parser->_inputs.push_back(_body);
-                     return true;
-                  }
-               }
-               
-               if ( _method == "POST" &&
-                    _headers.count("content-length") > 0)
-               {
-                  string _contentLength =
-                     _headers["content-length"];
-                  
-                  size_t contentLength =
-                     atol(_contentLength.c_str());
-
-                  cerr << "@@@@@@@" << contentLength << endl;
-                  return false;
-               }
-               return true;
-            }
-         );
+         newLine and
+         LoadOnDemand(loadBody, this);
 
          return (And*)(parser.copy());
       }
+
+      static Parser* loadBody(Parser* params) {
+         
+         if (!params)
+            throw logic_error("WebRequest::loadBody invalid params");
+
+         WebRequest* request =
+            dynamic_cast<WebRequest*>(params);
+
+         if (!request)
+            throw logic_error("WebRequest::loadBody invalid webRequest");
+
+         if ( request->_method == "POST" &&
+              request->_headers.count("content-type") > 0 )
+         {
+            request->_contentType =
+               request->_headers["content-type"];
+
+            const string prefix = "application/json";
+
+            if (
+               request->_contentType
+                  .rfind(prefix, 0) == 0)
+            {
+
+               Capture* capture =
+                  new Capture(
+                     _JSON(request),
+                     request->_capture
+                  );
+               request->_body = capture;
+               return request->_body;
+            }
+         }
+               
+         if ( request->_method == "POST" &&
+              request->_headers.count("content-length") > 0)
+         {
+            string _contentLength =
+               request->_headers["content-length"];
+                  
+            size_t contentLength =
+               atol(_contentLength.c_str());
+
+            cerr << "@@@@@@@" << contentLength << endl;
+            throw logic_error("Not implemented yet");
+         }
+
+         request->_body = new Optional(newLine);
+         return request->_body;
+      }
+
+      
 
 
    };

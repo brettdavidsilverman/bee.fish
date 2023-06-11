@@ -16,10 +16,10 @@ namespace BeeFishWeb
    using namespace BeeFishTest;
 
    inline bool testHeaders();
-   inline bool testWebRequestClass();
+   inline bool testWebRequest();
    inline bool testURL();
 
-   inline bool testWebRequest()
+   inline bool test()
    {
    
       bool success = true;
@@ -28,7 +28,7 @@ namespace BeeFishWeb
          success = testHeaders();
 
       if (success)
-         success = testWebRequestClass();
+         success = testWebRequest();
 
       if (success)
          success = testURL();
@@ -123,7 +123,7 @@ namespace BeeFishWeb
       return success;
    }
 
-   inline bool testWebRequestClass()
+   inline bool testWebRequest()
    {
       
       cout << "Test WebRequest" << endl;
@@ -140,7 +140,7 @@ namespace BeeFishWeb
             "GET / HTTP/1.1\r\n" \
             "Host: " + host + "\r\n" \
             "\r\n",
-            true
+            nullopt
          );
 
       success &=
@@ -154,6 +154,22 @@ namespace BeeFishWeb
 
       success &=
          testValue(host, webRequest._headers["host"]);
+
+      WebRequest webRequestJSON;
+      success &=
+         testPattern(
+            webRequestJSON,
+            "POST / HTTP/1.1\r\n" \
+            "Host: " + host + "\r\n" \
+            "Content-type: application/json\r\n" \
+            "\r\n" \
+            "{}",
+            true
+         );
+
+      success &=
+         testValue("{}", webRequestJSON._capture);
+
 
       BeeFishMisc::outputSuccess(success);
 
@@ -233,6 +249,7 @@ namespace BeeFishWeb
 
       return success;
    }
+
     
 
 }

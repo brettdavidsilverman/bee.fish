@@ -11,50 +11,61 @@ using namespace std;
 
 namespace BeeFishParser {
 
-   template<typename T>
    class LoadOnDemand : public Parser {
 
    protected:
-      Parser* _input = nullptr;
+      Parser* _loadOnDemand = nullptr;
    public:
-      typedef std::function<T()> Function;
+      typedef std::function<Parser*(Parser*)> Function;
 
    protected:
       const Function _function;
-
+      Parser* _params = nullptr;
    public:
 
-      LoadOnDemand(Function function) :
-         _function(function)
+      LoadOnDemand(Function function, Parser* params = nullptr) :
+         _function(function),
+         _params(params)
       {
       }
 
       LoadOnDemand(const LoadOnDemand& source)
-         : _function(source._function)
+         : _function(source._function),
+           _params(source._params)
       {
       }
 
       virtual ~LoadOnDemand() {
-         if (_input)
-            delete _input;
+         if (_loadOnDemand)
+            delete _loadOnDemand;
+      }
+
+      virtual bool isOptional() const {
+         if (_loadOnDemand)
+            return
+               _loadOnDemand->isOptional();
+         else
+            return true;
+
       }
 
       virtual bool read(
          char character
       ) override
       {
-         if (_input == nullptr) {
-            _input = _function().copy();
+ 
+         if (_loadOnDemand == nullptr) {
+            _loadOnDemand = _function(_params);
          }
 
-         bool matched = _input->read(
+         bool matched = _loadOnDemand->read(
             character
          );
 
-         if (_input->_result == true)
+         if (_loadOnDemand->_result == true)
             setResult(true);
 
-         if (_input->_result == false)
+         if (_loadOnDemand->_result == false)
             setResult(false);
 
          return matched;
