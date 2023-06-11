@@ -60,6 +60,7 @@ namespace BeeFishWeb {
          bool success = true;
          
          webRequest.read();
+         webRequest.read(-1);
 
          if (webRequest._result != true)
          {
