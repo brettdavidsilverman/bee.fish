@@ -5,13 +5,15 @@
 #include <string>
 #include <sstream>
 #include <memory>
-
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "ParserBase.hpp"
 
 using namespace std;
 
 namespace BeeFishParser {
    
+   using namespace BeeFishMisc;
+
    class Capture : public Parser
    {
    protected:
@@ -25,8 +27,7 @@ namespace BeeFishParser {
       using Parser::read;
 
       Capture(
-         const Capture& source,
-         bool copy
+         const Capture& source
       ) :
          Parser(),
          _capture(source._capture->copy()),
@@ -59,10 +60,8 @@ namespace BeeFishParser {
 
       virtual void capture(char c)
       {
-#if 0
-      std::cerr << c  << std::flush;
-#endif
-         _valueRef.push_back(c);
+         _valueRef += c;
+        // _valueRef.push_back(c);
       }
       
       virtual const std::string& value() const
@@ -74,7 +73,7 @@ namespace BeeFishParser {
       virtual Parser* copy() const
       override
       {
-         return new Capture(*this, true);
+         return new Capture(*this);
       }
 
       virtual bool read(char c)

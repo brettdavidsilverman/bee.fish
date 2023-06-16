@@ -14,7 +14,7 @@
 #include "../Parser/Parser.hpp"
 #include "../JSON/JSON.hpp"
 #include "URL.hpp"
-
+#include "Header.hpp"
 #include "Config.hpp"
 
 namespace BeeFishWeb {
@@ -24,113 +24,6 @@ namespace BeeFishWeb {
    using namespace BeeFishParser;
    using namespace BeeFishJSON;
 
-   class Headers;
-
-   const auto colon = Character(":");
-   auto _Header =
-   [](string& key, string& value) {
-      return
-         Capture(
-            Repeat(not (colon or blankSpace)),
-            key
-         ) and
-         -blanks and colon and
-         -blanks and
-         Capture(
-            Repeat(not (carriageReturn or lineFeed)),
-            value
-         ) and
-         newLine;
-   };
-
-   class Header : public And {
-   public:
-      string _key;
-      string _value;
-
-   public:
-
-      Header() : And(
-        _Header(_key, _value)
-      )
-      {
-      }
-
-      Header(const Header& source) :
-           _key(source._key),
-           _value(source._value),
-          And(_Header(_key, _value))
-      {
-
-      }
-
-      virtual void success()
-      override
-      {
-
-         // Convert key to lower case
-         // Note that this only works
-         // for latin characters
-         std::transform(
-            _key.begin(),
-            _key.end(),
-            _key.begin(),
-            [](unsigned char c) {
-               return std::tolower(c);
-            }
-         );
-
-         And::success();
-
-      }
-
-      virtual Parser* copy() const
-      override
-      {
-         return new Header(*this);
-      }
-   };
-
-   class Headers :
-      public Repeat
-   {
-   public:
-      typedef std::function<void(Header*)> Function;
-      Function _function;
-
-      Headers(Function func = nullptr) :
-         Repeat(Header()),
-         _function(func)
-      {
-      }
-
-      Headers(const Headers& source)
-      :
-         Repeat(Header()),
-         _function(source._function)
-      {
-      }
-
-      virtual void matchedItem(
-         Parser* item
-      )
-      override
-      {
-         Header* header =
-            dynamic_cast<Header*>(item);
-
-         if (_function)
-            _function(header);
-      }
-
-      virtual Parser* copy() const
-      override
-      {
-         return new Headers(*this);
-      }
-
-   };
- 
    class WebServer;
 
    class WebRequest : public Parser {
@@ -229,11 +122,12 @@ namespace BeeFishWeb {
             }
 
             if (ret < sizeof(buffer))
-               return true;
+               break;
          }
 
-
-         return true;
+         // Read an additional
+         // "End of file" character
+         return readEndOfFile();
 
       }
 
@@ -265,9 +159,6 @@ namespace BeeFishWeb {
             return false;
 
          bool matched = _parser->read(c);
-
-         //cerr << c << flush;
-
 
          if (_parser->_result != nullopt)
             setResult(_parser->_result);
@@ -363,8 +254,8 @@ namespace BeeFishWeb {
             size_t contentLength =
                atol(_contentLength.c_str());
 
-            cerr << "@@@@@@@" << contentLength << endl;
-            throw logic_error("Not implemented yet");
+            cerr << "@@@@@@@Not implemented" << contentLength << endl;
+            //throw logic_error("Not implemented yet");
          }
 
          request->_body = new Optional(newLine);

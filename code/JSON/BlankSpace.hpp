@@ -11,14 +11,16 @@ namespace BeeFishJSON {
       const auto space =
          Character(" ");
 
+      const auto tab =
+         Character("\t");
+
       const auto lineFeed =
          Character("\n");
 
       const auto carriageReturn =
          Character("\r");
 
-      const auto tab =
-         Character("\t");
+      
 
       const auto blank = space or tab;
       const auto blanks = Repeat(blank);

@@ -6,7 +6,7 @@
 
 namespace BeeFishParser {
 
-   class Not : public UTF8Character {
+   class Not : public Parser {
    protected:
       Parser* _not;
 
@@ -15,6 +15,11 @@ namespace BeeFishParser {
 
       Not(const Parser& value) :
          _not(value.copy())
+      {
+      }
+
+      Not(const Not& source) :
+         _not(source._not->copy())
       {
       }
 
@@ -27,21 +32,37 @@ namespace BeeFishParser {
       ) 
       override
       {
-         if (_not->_result != nullopt ||
-              _result != nullopt)
-            return true;
 
-         bool matched =
-            _not->read(character);
-         
-         if (_not->_result == false) {
+         if (_result != nullopt)
+         {
+            //return false;
+            return _result == true;
+
+         }
+
+         bool matched = true;
+
+         if (_not->_result == nullopt)
+         {
+            matched = _not->read(character);
+         }
+
+         if (_not->_result == false)
+         {
             setResult(true);
-         }
-         else if (_not->_result == true) {
-            setResult(false);
-         }
-         else if (_not->_result == nullopt)
             return true;
+         }
+         else if (_not->_result == true) 
+         {
+            setResult(false);
+            return false;
+         }
+         else if ( _not->_result == nullopt)
+         {
+            return true;
+         }
+
+         
 
          return !matched;
 /*
@@ -65,10 +86,16 @@ namespace BeeFishParser {
 */
       }
 
+      virtual bool isOptional() const
+      override
+      {
+         return _not->_result == false;
+      }
+
       virtual Parser* copy()
       const override
       {
-         return new Not(*_not);
+         return new Not(*this);
       }
 
 

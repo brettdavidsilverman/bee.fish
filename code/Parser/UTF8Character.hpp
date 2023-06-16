@@ -36,6 +36,13 @@ namespace BeeFishParser {
       }
 
       UTF8Character(
+         char source
+      )
+      {
+         _chars.push_back(source);
+      }
+
+      UTF8Character(
          wchar_t source
       ) :
          _chars(UTF8Character::fromWChar(source))
@@ -85,6 +92,11 @@ namespace BeeFishParser {
 
       void setExpectedSize(char first) {
          
+         if (first == -1) {
+            _expectedSize = 1;
+            return;
+         }
+
          std::bitset<8> bits = first;
 
          size_t count {0};

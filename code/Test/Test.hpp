@@ -8,6 +8,7 @@
 namespace BeeFishTest {
 
    using namespace std;
+   using namespace BeeFishMisc;
 
    inline bool testValue(
       string expected,
@@ -15,7 +16,7 @@ namespace BeeFishTest {
    )
    {
       bool success = (expected == value);
-      cout << "\t" << expected << ": {" << value << "}" << flush;
+      cout << "\t" << escape(expected) << ":{" << escape(value) << "}" << flush;
      
       BeeFishMisc::outputSuccess(success);
 
@@ -35,20 +36,27 @@ namespace BeeFishTest {
       using namespace BeeFishParser;
 
       bool success = true;
-
+    
       cout << "\t" << escape(pattern) << ":" << flush;
 
- //     Capture capture(parser);
+      string captured;
 
-      parser.read(pattern);
+      BeeFishParser::Parser& capture = parser;
+        //Capture(parser, captured);
+      
+      success =
+         capture.read(pattern);
 
-      //cout << escape(parser.value())
+      //success =
+      //   capture.readEndOfFile();
+
       cout << "{"
-           << parser.result()
+           << capture.result() << ":"
+           << escape(captured)
            << "}";
 
       success =
-         parser.result() == expected;
+        ( capture.result() == expected );
 
       BeeFishMisc::outputSuccess(success);
 

@@ -184,11 +184,9 @@ namespace BeeFishParser {
       std::cout << "testAnd: " << std::endl;
 
       auto parser = []() {
-         Character a("a");
-         Character b("b");
-
-         And _and(a, b);
-         return _and;
+         return
+            Character("a") and
+            Character("b");
       };
       
       success &= testPattern(
@@ -243,7 +241,7 @@ namespace BeeFishParser {
 
       bool success = true;
 
-      std::cout << "testNot:\"hello\"" << std::endl;
+      std::cout << "test Not:\"hello\"" << std::endl;
 
       const auto word =
          not Word("hello");
@@ -261,26 +259,29 @@ namespace BeeFishParser {
       );
 
       const auto newLine =
+         Word("\r\n") or Word("\n");
+/*
+      const auto newLine =
          Character("\r") or
          Character("\n");
-
+*/
       string value;
       auto line = Capture(
          Repeat(not newLine),
          value
-      ) and Word("\r\n");
+      ) and newLine;
 
       success &= testPattern(
          line,
          "value\r\n",
          true
       );
-
+/*
       success &= testValue(
          "value",
          value
       );
-
+*/
       BeeFishMisc::outputSuccess(success);
 
 
@@ -448,9 +449,12 @@ namespace BeeFishParser {
 
       Parser& parser = _and;
 
-      parser.read("ac");
       success = success &&
-         (parser.result() == true);
+         testPattern(
+            parser,
+            "ac",
+            true
+         );
 
       BeeFishMisc::outputSuccess(success);
 

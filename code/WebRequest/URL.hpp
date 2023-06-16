@@ -48,15 +48,16 @@ namespace BeeFishWeb {
       }
 
       Parser* createParser() {
+
          const auto seperator =
             Character("/") or
             Character("?");
 
-         And parser =
+         const auto parser =
          Repeat(
-            seperator and
-            Invoke(
-               Capture(
+            Character("/") and
+            Capture(
+               Invoke(
                   Repeat(
                      not (
                         seperator or
@@ -64,12 +65,13 @@ namespace BeeFishWeb {
                      ),
                      0
                   ),
-                  _path
+                  _oninvoke
                ),
-               _oninvoke
+               _path
             ),
             1
-         ) and Optional(seperator);
+         )
+         and Optional(seperator);
 
          return parser.copy();
 

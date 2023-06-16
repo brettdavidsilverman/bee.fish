@@ -203,6 +203,11 @@ namespace BeeFishParser {
          return in;
       }
 
+      bool readEndOfFile() {
+         return read(-1);
+      }
+
+ 
       friend std::istream& operator >>
       (std::istream& in, const Parser& parser)
       {

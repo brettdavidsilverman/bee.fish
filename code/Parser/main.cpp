@@ -15,25 +15,30 @@ using namespace BeeFishParser;
 
 int main(int argc, const char* argv[]) {
 
-   if (false)
+   if (true)
    {
-      bool success = true;
-      
-      auto parser = []() {
-         Character a("a");
-         Character b("b");
 
-         And _and(a, b);
-         return _and;
-      };
-      
-      success &= testPattern(
-         parser(),
-         "b",
-         false
+      std::string capture;
+/*
+      const auto word =
+         Capture(
+            not Word("hello") and
+            Invoke(
+               Word("boo"),
+               
+            capture
+         );
+
+      bool success = testPattern(
+         word,
+         "worldboo",
+         nullopt
       );
 
+      cerr << endl << "*" << capture << endl;
+
       return 0;
+*/
    }
 
    cout << "bee.fish.parser"

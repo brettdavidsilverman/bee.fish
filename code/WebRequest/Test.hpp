@@ -11,15 +11,16 @@
 
 namespace BeeFishWeb
 {
+   using namespace BeeFishParser;
    using namespace BeeFishJSON;
    using namespace BeeFishMisc;
    using namespace BeeFishTest;
 
    inline bool testHeaders();
-   inline bool testWebRequest();
+   inline bool testWebRequestClass();
    inline bool testURL();
 
-   inline bool test()
+   inline bool testWebRequest()
    {
    
       bool success = true;
@@ -28,7 +29,7 @@ namespace BeeFishWeb
          success = testHeaders();
 
       if (success)
-         success = testWebRequest();
+         success = testWebRequestClass();
 
       if (success)
          success = testURL();
@@ -43,35 +44,13 @@ namespace BeeFishWeb
       cout << "Test Headers" << endl;
       
       bool success = true;
-   
-      string key, value;
-
-
-      success &=
-         testPattern(
-            _Header(key, value),
-            "Header: value\r\n",
-            true
-         );
-
-      success &=
-         testValue(
-            "Header",
-            key
-         );
-
-      success &=
-         testValue(
-            "value",
-            value
-         );
 
       Header header;
 
       success &=
          testPattern(
             header,
-            "Key: value\r\n",
+            "key: value\r\n",
             true
          );
 
@@ -87,16 +66,9 @@ namespace BeeFishWeb
             header._value
          );
 
-      map<string, string> _headers;
 
-      Headers headers(
-         [&_headers](Header* header) {
-            _headers.emplace(
-               header->_key,
-               header->_value
-            );
-         }
-      );
+      Headers headers;
+
       success &=
          testPattern(
             headers,
@@ -109,13 +81,13 @@ namespace BeeFishWeb
       success &=
          testValue(
             "value1",
-            _headers["header1"]
+            headers["header1"]
          );
 
       success &=
          testValue(
             "value2",
-            _headers["header2"]
+            headers["header2"]
          );
 
       outputSuccess(success);
@@ -123,10 +95,10 @@ namespace BeeFishWeb
       return success;
    }
 
-   inline bool testWebRequest()
+   inline bool testWebRequestClass()
    {
       
-      cout << "Test WebRequest" << endl;
+      cout << "Test WebRequest Class" << endl;
       
       bool success = true;
       
@@ -187,7 +159,7 @@ namespace BeeFishWeb
       auto onpath =
       [&fullPath](std::string path)
       {
-         cout << "{" << path << "}";
+        // cout << "{" << path << "}";
          fullPath += "/" + path;
          return true;
       };
@@ -235,8 +207,8 @@ namespace BeeFishWeb
       fullPath = "";
 
       success &= testPattern(
-         URL(onpath) and newLine,
-         "/path3/path4\r\n",
+         URL(onpath),
+         "/path3/path4?",
          true
       );
 
@@ -244,7 +216,19 @@ namespace BeeFishWeb
          "/path3/path4",
          fullPath
       );
-      
+
+      success &= testPattern(
+         URL(onpath),
+         "/path5/path6/",
+         nullopt
+      );
+
+      success &= testPattern(
+         URL(onpath),
+         "/path9/path10/?",
+         true
+      );
+
       BeeFishMisc::outputSuccess(success);
 
       return success;

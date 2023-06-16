@@ -90,49 +90,49 @@ namespace BeeFishJSON {
 
       success &= testPattern(
          blankSpace,
-         "a",
+         "z",
          false
       );
 
       success &= testPattern(
          blankSpace,
          " a",
+         true	
+      );
+
+      success &= testPattern(
+         blankSpace and
+         Character("b"),
+         " b",
          true
       );
 
       success &= testPattern(
          blankSpace and
-         Character("a"),
-         " a",
-         true
-      );
-
-      success &= testPattern(
-         blankSpace and
-         Character("a"),
-         "a",
+         Character("c"),
+         "c",
          false
       );
 
       success &= testPattern(
          blankSpace and
-         Character("a") and
+         Character("d") and
          blankSpace,
-         "a",
+         "d",
          false
       );
 
       success &= testPattern(
          -blankSpace and
-         Character("a"),
-         "a",
+         Character("e"),
+         "e",
          true
       );
 
       success &= testPattern(
          blankSpaces and
-         Character("a"),
-         "   a",
+         Character("f"),
+         "   f",
          true
       );
 

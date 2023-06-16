@@ -53,10 +53,12 @@ namespace BeeFishMisc {
             return "\\n";
          case '\t':
             return "\\t";
-         //case '\\':
-         //   return "\\\\";
-         //case '\"':
-         //   return "\\\"";
+         case '\\':
+            return "\\\\";
+         case '\"':
+             return "\\\"";
+         case -1:
+             return "{eof}";
          default: {
             std::string str;
             str = c;

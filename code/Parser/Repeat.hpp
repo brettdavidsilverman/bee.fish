@@ -30,10 +30,10 @@ namespace BeeFishParser
          const Parser& templ,
          size_t minimum = 1,
          size_t maximum = 0) :
-            _template(templ.copy()),
             _minimum(minimum),
             _maximum(maximum)
       {
+         _template = templ.copy();
       }
 
       Repeat(const Repeat& source) :
@@ -57,6 +57,7 @@ namespace BeeFishParser
          char character
       ) override
       {
+
          _buffer.push_back(character);
 
          bool matched = false;
