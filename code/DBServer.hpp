@@ -58,8 +58,7 @@ namespace BeeFishWeb {
          BeeFishDatabase::Path dbPath = root();
          
          // Read from the client socket
-         bool success =
-            webRequest.read();
+         webRequest.read();
 
          if (webRequest._result != true)
          {
@@ -84,6 +83,16 @@ namespace BeeFishWeb {
             return;
          }
 
+         if (webRequest._url[
+                webRequest._url.size() - 1
+             ] != '/' &&
+             webRequest._url.find("?") == 
+                std::string::npos
+            )
+         {
+            webRequest._url += "/";
+         }
+
          auto onpath =
          [&dbPath, &output](string path)
          {
@@ -93,8 +102,7 @@ namespace BeeFishWeb {
 
          auto urlParser =
            URL(onpath);
-
-         
+         bool success = true;
 
          success = success &&
             urlParser.read(
@@ -102,10 +110,7 @@ namespace BeeFishWeb {
             );
 
          success = success &&
-            urlParser.readEndOfFile();
-
-         success = success &&
-            (urlParser._result == true);
+            (urlParser._result != false);
 
          string contentType = "text/plain; charset=utf-8";
 

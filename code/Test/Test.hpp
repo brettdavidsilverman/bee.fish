@@ -38,25 +38,16 @@ namespace BeeFishTest {
       bool success = true;
     
       cout << "\t" << escape(pattern) << ":" << flush;
-
-      string captured;
-
-      BeeFishParser::Parser& capture = parser;
-        //Capture(parser, captured);
       
       success =
-         capture.read(pattern);
-
-      //success =
-      //   capture.readEndOfFile();
+         parser.read(pattern);
 
       cout << "{"
-           << capture.result() << ":"
-           << escape(captured)
+           << parser.result()
            << "}";
 
       success =
-        ( capture.result() == expected );
+        ( parser.result() == expected );
 
       BeeFishMisc::outputSuccess(success);
 

@@ -95,7 +95,7 @@ namespace BeeFishWeb {
          delete _loopThread;
          _loopThread = nullptr;
          
-         cout << "WebServer stopped 🛑" << endl;
+         cout << "WebServer stopped" << endl;
       }
 
       virtual void join() {

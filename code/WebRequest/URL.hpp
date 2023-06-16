@@ -69,9 +69,9 @@ namespace BeeFishWeb {
                ),
                _path
             ),
-            1
+            0
          )
-         and Optional(seperator);
+         and seperator;
 
          return parser.copy();
 

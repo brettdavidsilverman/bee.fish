@@ -40,7 +40,7 @@ namespace BeeFishWeb {
       Parser* _body = nullptr;
       string _capture;
       string _contentType;
-      And* _parser = createParser();
+      And _parser = createParser();
 
    public:
       using Parser::read;
@@ -69,7 +69,6 @@ namespace BeeFishWeb {
 
       virtual ~WebRequest() {
          close();
-         delete _parser;
       }
 
       void close() {
@@ -155,13 +154,13 @@ namespace BeeFishWeb {
       override
       {
 
-         if (_parser->_result != nullopt)
+         if (_parser._result != nullopt)
             return false;
 
-         bool matched = _parser->read(c);
+         bool matched = _parser.read(c);
 
-         if (_parser->_result != nullopt)
-            setResult(_parser->_result);
+         if (_parser._result != nullopt)
+            setResult(_parser._result);
 
          return matched;
       }
@@ -178,7 +177,7 @@ namespace BeeFishWeb {
          Parser::fail();
       }
 
-      And* createParser() {
+      And createParser() {
 
          And parser = Capture(
             Word("GET") or
@@ -208,7 +207,7 @@ namespace BeeFishWeb {
          newLine and
          LoadOnDemand(loadBody, this);
 
-         return (And*)(parser.copy());
+         return parser;
       }
 
       static Parser* loadBody(Parser* params) {
