@@ -231,7 +231,7 @@ namespace BeeFishWeb {
 
             if (
                request->_contentType
-                  .rfind(prefix, 0) == 0)
+                  .find(prefix) != std::string::npos )
             {
 
                Capture* capture =

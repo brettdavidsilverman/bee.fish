@@ -1,8 +1,9 @@
 CC = g++
 CFLAGS = -std=c++17 -fmax-errors=1
-DEPS=main.cpp DBServer.hpp Makefile HomePage.html 404.html
+DEPS=main.cpp DBServer.hpp Test.hpp Makefile HomePage.html 404.html
 BUILD = ../build
 OUTPUT = $(BUILD)/DBServer
+TEMP = /var/tmp
 
 all: $(OUTPUT)
 	cd Parser && make $(DEBUG)
@@ -12,19 +13,19 @@ all: $(OUTPUT)
 	cd WebRequest && make $(DEBUG)
 	cd WebServer && make $(DEBUG)
 	
-$(OUTPUT):	$(DEPS) $(BUILD)/404.o $(BUILD)/HomePage.o
-	g++ $(CFLAGS) $(BUILD)/404.o $(BUILD)/HomePage.o main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic -lstdc++fs
+$(OUTPUT):	$(DEPS) $(TEMP)/404.o $(TEMP)/HomePage.o
+	g++ $(CFLAGS) $(TEMP)/404.o $(TEMP)/HomePage.o main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic -lstdc++fs
 
 
-$(BUILD)/404.o: 404.html
+$(TEMP)/404.o: 404.html
 	objcopy --input binary \
             --output elf64-x86-64 \
-            --binary-architecture i386:x86-64 404.html $(BUILD)/404.o
+            --binary-architecture i386:x86-64 404.html $(TEMP)/404.o
 
-$(BUILD)/HomePage.o: HomePage.html
+$(TEMP)/HomePage.o: HomePage.html
 	objcopy --input binary \
             --output elf64-x86-64 \
-            --binary-architecture i386:x86-64 HomePage.html $(BUILD)/HomePage.o
+            --binary-architecture i386:x86-64 HomePage.html $(TEMP)/HomePage.o
 
 test:	all
 	$(BUILD)/Parser -test
@@ -40,5 +41,6 @@ debug:	CFLAGS += -g -D DEBUG
 debug:	all
 
 clean:
-	rm -f 404.o
+	rm -f $(TEMP)/404.o
+	rm -f $(TEMP)/HomePage.o
 	cd .. && make clean

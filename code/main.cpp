@@ -85,6 +85,8 @@ int main(int argc, const char* argv[]) {
       if (!BeeFish::test()) {
          throw runtime_error("BeeFish DBServer tests failed");
       }
+      else
+         cout << "All tests pass 😍" << endl;
       return 0;
    }
 
