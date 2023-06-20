@@ -251,8 +251,8 @@ namespace BeeFishScript {
 
       istream& operator >> (istream& in) {
          Variable variable;
-         auto _object = object;
-         return in >> _object;
+         auto object = BeeFishJSON::Object();
+         return in >> object;
       }
 
       static Variable& Undefined() {

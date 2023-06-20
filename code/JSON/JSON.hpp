@@ -48,12 +48,12 @@ namespace BeeFishJSON {
             number or
             _string or
             array or
-            object
+            Object()
          );
    }
 
-   Parser* JSON(Parser* parent) {
-      return _JSON(parent).copy();
+   Parser* JSON(Parser* params) {
+      return _JSON(params).copy();
    }
 
 }

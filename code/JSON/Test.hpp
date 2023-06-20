@@ -318,22 +318,22 @@ namespace BeeFishJSON {
       cout << "Testing Objects:" << endl;
 
       success &=
-         testPattern(object, "{}", true);
+         testPattern(Object(), "{}", true);
  
       success &=
-         testPattern(object, "{\"a\":1}", true);
+         testPattern(Object(), "{\"a\":1}", true);
  
       success &=
-         testPattern(object, "{\"a\":1,\"b\":2}", true);
+         testPattern(Object(), "{\"a\":1,\"b\":2}", true);
 
       success &=
-         testPattern(object, "{\"c\":{}}", true);
+         testPattern(Object(), "{\"c\":{}}", true);
 
       success &=
-         testPattern(object, " { \"c\" : { } }", true);
+         testPattern(Object(), " { \"c\" : { } }", true);
 
       success &=
-         testPattern(object, "{", nullopt);
+         testPattern(Object(), "{", nullopt);
 
       BeeFishMisc::outputSuccess(success);
 

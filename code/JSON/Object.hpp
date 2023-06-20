@@ -16,41 +16,82 @@ namespace BeeFishJSON {
 
    Parser* JSON(Parser* params);
 
-   const auto openBrace =
-      Character("{");
+   class Object : public Parser {
+      And _parser = createParser();
 
-   const auto closeBrace =
-      Character("}");
+   public:
 
-   const auto key =
-      _string;
+      Object() {
+      }
 
-   const auto colon =
-      Character(":");
+      Object(const Object& source) {
+      }
 
-   const auto value =
-      LoadOnDemand(JSON);
+      And createParser() {
 
-   const auto seperator =
-       Character(",");
+         const auto openBrace =
+            Character("{");
 
-   const auto line =
-      -blankSpaces and
-      key and -blankSpaces and
-      colon and -blankSpaces and 
-      value and -blankSpaces;
+         const auto closeBrace =
+            Character("}");
 
-   const auto object =
-      -blankSpaces and
-      openBrace and -blankSpaces and
-      Optional(
-         line and
-         Repeat(
-            seperator and line,
-            0
-         )
-      ) and
-      closeBrace;
+         const auto key =
+            _string;
+
+         const auto colon =
+            Character(":");
+
+         const auto value =
+            LoadOnDemand(JSON, this);
+
+         const auto seperator =
+             Character(",");
+
+         const auto line =
+            -blankSpaces and
+            key and -blankSpaces and
+            colon and -blankSpaces and 
+            value and -blankSpaces;
+
+         const auto object =
+            -blankSpaces and
+            openBrace and -blankSpaces and
+            Optional(
+               line and
+               Repeat(
+                  seperator and line,
+                  0
+               )
+            ) and
+            closeBrace;
+
+         return object;
+
+      }
+
+      virtual Parser* copy() const
+      override
+      {
+         return new Object(*this);
+      }
+
+      virtual bool read(char c)
+      override
+      {
+
+         if (_parser._result != nullopt)
+            return false;
+
+         bool matched = _parser.read(c);
+
+         if (_parser._result != nullopt)
+            setResult(_parser._result);
+
+         return matched;
+      }
+
+
+   };
 
 
 }
