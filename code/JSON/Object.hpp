@@ -14,20 +14,27 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   Parser* JSON(Parser* params);
+   Parser* _JSON(Parser* params);
 
    class Object : public Parser {
-      And _parser = createParser();
-
+   protected:
+      Parser* _params = nullptr;
+      And _parser;
    public:
 
-      Object() {
+      Object(Parser* params = nullptr) :
+         _params(params),
+         _parser(createParser(params))
+      {
       }
 
-      Object(const Object& source) {
+      Object(const Object& source) :
+         _params(source._params),
+         _parser(createParser(_params))
+      {
       }
 
-      And createParser() {
+      And createParser(Parser* params) {
 
          const auto openBrace =
             Character("{");
@@ -42,7 +49,7 @@ namespace BeeFishJSON {
             Character(":");
 
          const auto value =
-            LoadOnDemand(JSON, this);
+            LoadOnDemand(_JSON, params);
 
          const auto seperator =
              Character(",");

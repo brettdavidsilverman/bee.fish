@@ -13,21 +13,6 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   inline const auto undefined =
-      Word("undefined");
-
-   inline const auto _null =
-      Word("null");
-
-   inline const auto _true =
-      Word("true");
-
-   inline const auto _false =
-      Word("false");
-
-   inline const auto boolean =
-      _true or _false;
-
    enum Type {
       UNDEFINED,
       _NULL,
@@ -38,22 +23,79 @@ namespace BeeFishJSON {
       OBJECT
    };
 
-   And _JSON(Parser* parent) {
-      return
-         -blankSpace and
-         (
-            undefined or
-            _null or
-            boolean or
-            number or
-            _string or
-            array or
-            Object()
-         );
-   }
+   class JSON : public Parser
+   {
+   protected:
+      Parser* _params {nullptr};
+      And _parser;
 
-   Parser* JSON(Parser* params) {
-      return _JSON(params).copy();
+   public:
+      JSON(Parser* params = nullptr) :
+         _params(params),
+         _parser(createParser(params))
+      {
+      }
+
+      JSON(const JSON& source) :
+          _params(source._params),
+          _parser(createParser(_params))
+      {
+      }
+
+      Parser* copy() const override {
+         return new JSON(*this);
+      }
+
+      virtual bool read(char c)
+      override
+      {
+
+         if (_parser._result != nullopt)
+            return false;
+
+         bool matched = _parser.read(c);
+
+         if (_parser._result != nullopt)
+            setResult(_parser._result);
+
+         return matched;
+      }
+
+      And createParser(Parser* params) {
+      
+
+         auto undefined =
+            Word("undefined");
+
+         auto _null =
+            Word("null");
+
+         auto _true =
+            Word("true");
+
+         auto _false =
+            Word("false");
+
+         auto boolean =
+            _true or _false;
+
+         return
+            -blankSpace and
+            (
+               undefined or
+               _null or
+               boolean or
+               number or
+               _string or
+               array or
+               Object(params)
+            );
+      }
+
+   };
+
+   Parser* _JSON(Parser* params) {
+      return JSON(params).copy();
    }
 
 }

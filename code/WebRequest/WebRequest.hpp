@@ -233,10 +233,10 @@ namespace BeeFishWeb {
                request->_contentType
                   .find(prefix) != std::string::npos )
             {
-
+#warning "Resume here"
                Capture* capture =
                   new Capture(
-                     _JSON(request),
+                     JSON(request),
                      request->_capture
                   );
                request->_body = capture;

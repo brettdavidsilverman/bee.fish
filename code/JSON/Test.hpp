@@ -151,49 +151,49 @@ namespace BeeFishJSON {
       cout << "Testing Constants:" << endl;
      
       success &= testPattern(
-         _null,
+         JSON(),
          "null",
          true
       );
 
       success &= testPattern(
-         _null,
+         JSON(),
          "a",
          false
       );
 
       success &= testPattern(
-         _null,
+         JSON(),
          "nulL",
          false
       );
 
       success &= testPattern(
-         _JSON(nullptr),
+         JSON(),
          "nul",
          nullopt
       );
 
       success &= testPattern(
-         _JSON(nullptr),
+         JSON(),
          "anull",
          false
       );
 
       success &= testPattern(
-         _JSON(nullptr),
+         JSON(),
          "true",
          true
       );
 
       success &= testPattern(
-         _JSON(nullptr),
+         JSON(),
          "false",
          true
       );
 
       success &= testPattern(
-         _JSON(nullptr),
+         JSON(),
          "undefined",
          true
       );
@@ -352,7 +352,7 @@ namespace BeeFishJSON {
       string captured;
 
       success &=
-         testPattern(Capture(_JSON(nullptr), captured), "{\"🐝\":\"🌎\"}", true);
+         testPattern(Capture(JSON(), captured), "{\"🐝\":\"🌎\"}", true);
 
       success &=
          testValue("{\"🐝\":\"🌎\"}", captured);

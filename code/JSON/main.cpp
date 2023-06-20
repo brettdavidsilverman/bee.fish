@@ -39,7 +39,7 @@ int main(int argc, const char* argv[]) {
    }
    
 
-   auto parser = _JSON(nullptr);
+   auto parser = JSON();
 
    cin >> parser;
  
