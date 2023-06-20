@@ -63,7 +63,7 @@ int main(int argc, const char* argv[]) {
    
    Database database(fileName);
    cerr << database;
-   Path<PowerEncoding> root(database);
+   Path<Database::Encoding> root(database);
    Path path(root);
    
    if (output)

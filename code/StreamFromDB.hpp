@@ -46,7 +46,7 @@ namespace BeeFishWebDB {
    public:
 
       StreamFromDB(
-         const Path<PowerEncoding>& path,
+         const Path<Database::Encoding>& path,
          ostream& output
       ) :
          Path(path),
