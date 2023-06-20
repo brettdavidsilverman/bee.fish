@@ -26,6 +26,8 @@ namespace BeeFishDatabase {
    class Database :
       public File
    {
+   public:
+      typedef PowerEncoding Encoding;
    private:
       
       struct Header

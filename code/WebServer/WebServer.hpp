@@ -30,7 +30,7 @@ namespace BeeFishWeb {
    using namespace BeeFishDatabase;
    using namespace BeeFishPowerEncoding;
 
-   typedef Path<PowerEncoding> Path;
+   typedef Path<Database::Encoding> Path;
 
    class WebServer {
    protected:
@@ -233,7 +233,7 @@ namespace BeeFishWeb {
          }
 
          // Now start listening for the clients,
-         int res = listen(_serverSocket, WEB_SERVER_THREADS);
+         int res = listen(_serverSocket, WEB_SERVER_LISTEN_BUFFER);
 
          if (res != 0) {
             cerr << "Invalid listen result" << endl;

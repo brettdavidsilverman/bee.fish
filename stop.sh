@@ -6,7 +6,6 @@ then
 fi
 
 echo "Stopping $PORT..."
-
 PID=$(sudo lsof -t -i:$PORT)
 if [ -z "$PID" ]
 then

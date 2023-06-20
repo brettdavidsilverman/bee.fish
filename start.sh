@@ -7,7 +7,7 @@ then
 fi
 
 ./stop.sh $PORT
-PID="server-$PORT.pid"
 echo "Starting..."
-sudo ./build/DBServer -port $PORT &>> ~/bee.fish.log &
-echo $! > $PID
+sudo ./build/DBServer -port $PORT &
+# >> ~/bee.fish.log &
+
