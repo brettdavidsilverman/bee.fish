@@ -185,10 +185,22 @@ namespace BeeFishWeb {
             Word("DELETE"),
             _method
          ) and blanks and
-         Capture(
-            Character("/") and
-            Repeat(not blank, 0),
-            _url
+         Invoke(
+            Capture(
+               Character("/") and
+               Repeat(not blank, 0),
+               _url
+            ),
+            [this](Parser* match) {
+               if (_url[_url.size() - 1] 
+                   != '/' &&
+                   _url.find("?") == 
+                   std::string::npos)
+               {
+                  _url += "/";
+               }
+               return true;
+            }
          ) and blanks and
          Capture(
             Word("HTTP/") and
@@ -234,9 +246,7 @@ namespace BeeFishWeb {
             if ( _contentType
                   .find(prefix) != std::string::npos )
             {
-#warning "Resume here"
                _body = createJSONBody();
-               
                return _body;
             }
          }

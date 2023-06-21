@@ -13,10 +13,10 @@ namespace BeeFishWebDB {
    using namespace BeeFishPowerEncoding;
 
    class StreamToDB :
-      public Capture,
-      public Path<Database::Encoding>
+      public Capture
    {
    protected:
+      Path<Database::Encoding> _path;
       char*   _page = nullptr;
       size_t  _position {0};
       size_t  _pageCount {0};
@@ -24,11 +24,12 @@ namespace BeeFishWebDB {
 
       StreamToDB(
          const Parser& parser,
-         const Path<Database::Encoding>& path
+         const Path<Database::Encoding> path
       ) :
          Capture(parser),
-         Path(path)
+         _path(path)
       {
+         
          allocatePage();
       }
 
@@ -36,7 +37,7 @@ namespace BeeFishWebDB {
          const StreamToDB& source
       ) :
          Capture(source),
-         Path(source)
+         _path(source._path)
       {
          allocatePage();
       }
@@ -46,17 +47,16 @@ namespace BeeFishWebDB {
          delete[] _page;
       }
 
-   protected:
       void allocatePage()
       {
-         _page = new char[pageSize()];
+         _page = new char[_path.pageSize()];
       }
 
       virtual void capture(char c)
       override
       {
          _page[_position] = c;
-         if (++_position >= pageSize())
+         if (++_position >= _path.pageSize())
          {
             flush();
          }
@@ -66,24 +66,26 @@ namespace BeeFishWebDB {
       {
          std::string data(_page, _position);
 
-         Path::operator []
-            (_pageCount++)
-            .setData(data);
+         Path page =
+            _path[_pageCount++];
+            
+         page.setData(data);
 
          _position = 0;
       }
 
       virtual void success() override
       {
-         if (_position > 0)
+         if (_position > 0) {
             flush();
+         }
 
       }
 
-      const size_t size() const {
+      const size_t getSize() const {
          return
             _position +
-            _pageCount * pageSize();
+            _pageCount * _path.pageSize();
       }
 
       virtual Parser* copy()

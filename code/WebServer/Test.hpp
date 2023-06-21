@@ -44,7 +44,7 @@ namespace BeeFishWeb {
       testServer.start();
       
       stringstream stream;
-      stream << "curl " << testServer.url();
+      stream << "curl " << testServer.url() << " > /dev/null";
       string command = stream.str();
       success &= (system(command.c_str()) == 0);
 

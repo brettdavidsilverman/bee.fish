@@ -108,6 +108,18 @@ namespace BeeFishDatabase
          outputSuccess(success);
       }
 
+      cout << "\tTesting get/set data: ";
+      {
+         Path data = start;
+         Size count = 22;
+         data = 22;
+         count = (Size)data;
+         success =
+            (count == 22);
+
+         outputSuccess(success);
+      }
+
 
       return success;
    }

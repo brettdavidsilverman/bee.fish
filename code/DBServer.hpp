@@ -5,6 +5,7 @@
 #include "Database/Database.hpp"
 #include "WebRequest/WebRequest.hpp"
 #include "StreamToDB.hpp"
+#include "StreamFromDB.hpp"
 #include "DBWebRequest.hpp"
 #include "Version.hpp"
 
@@ -50,6 +51,27 @@ namespace BeeFishWebDB {
          return root()["json"];
       }
 
+      Path urlPath(const string& url) {
+         Path path = jsonPath();
+
+         auto onpath =
+         [&path](string segment)
+         {
+            path = path[segment];
+            return true;
+         };
+
+         auto urlParser =
+           BeeFishWeb::URL(onpath);
+
+         urlParser.read(
+            url
+         );
+
+         return path;
+ 
+      }
+
       virtual void handleWebRequest(
          int clientSocket,
          string ipAddress
@@ -63,8 +85,6 @@ namespace BeeFishWebDB {
             ipAddress
          );
 
-         BeeFishDatabase::Path dbPath = root();
-         
          // Read from the client socket
          webRequest.read();
 
@@ -84,68 +104,34 @@ namespace BeeFishWebDB {
 
          logMessage(LOG_NOTICE, logStream.str());
 
-         stringstream output;
-
          if ( webRequest._url == "/" ) {
             outputHomePage(clientSocket);
             return;
          }
 
-         if (webRequest._url[
-                webRequest._url.size() - 1
-             ] != '/' &&
-             webRequest._url.find("?") == 
-                std::string::npos
-            )
-         {
-            webRequest._url += "/";
-         }
-
-         auto onpath =
-         [&dbPath, &output](string path)
-         {
-            dbPath << path;
-            return true;
-         };
-
-         auto urlParser =
-           URL(onpath);
-         bool success = true;
-
-         success = success &&
-            urlParser.read(
-               webRequest._url
-            );
-
-         success = success &&
-            (urlParser._result != false);
-
          string contentType = "text/plain; charset=utf-8";
+         stringstream stream;
 
-         if (success) {
-            if (webRequest._method == "POST") {
-               dbPath["content-type"].setData(
-                  webRequest._contentType
-               );
-               dbPath.setData(webRequest._capture);
-               output << webRequest._capture;
-            }
-            else if (!dbPath.hasData()) {
-               output404NotFound(clientSocket);
-               return;
-            }
-            else {
-               dbPath["content-type"].getData(contentType);
-               string body;
-               dbPath.getData(body);
-               output << body;
-            }
+         Path path = urlPath(webRequest._url);
+
+         if (webRequest._method == "POST") {
+            path.setData(
+               webRequest._contentType
+            );
+            contentType = webRequest._contentType;
+            streamFromDB(stream, path);
+         }
+         else if (!path.hasData()) {
+            output404NotFound(clientSocket);
+            return;
          }
          else {
-            output << "Error: " << webRequest._url << endl;
+            path.getData(contentType);
+#warning "Here"
+            streamFromDB(stream, path);
          }
 
-         string out = output.str();
+         string output = stream.str();
 
          stringstream writeOutput;
 
@@ -154,9 +140,9 @@ namespace BeeFishWebDB {
             "Content-Type: " << contentType << "\r\n" <<
             "Connection: keep-alive\r\n" <<
             "Content-Length: " <<
-               out.length() << "\r\n" <<
+               output.length() << "\r\n" <<
             "\r\n" <<
-            out;
+            output;
 
          std::string response =
             writeOutput.str();
@@ -253,13 +239,11 @@ namespace BeeFishWebDB {
 
    Parser* DBWebRequest::createJSONBody()
    {
-      return new Capture(
+      return new
          StreamToDB(
             JSON(),
-            dbServer()->jsonPath()
-         ),
-         _capture
-      );
+            dbServer()->urlPath(_url)
+         );
    };
 
 

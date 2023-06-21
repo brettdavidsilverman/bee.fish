@@ -133,7 +133,7 @@ namespace BeeFishPowerEncoding
 
       }
 
-      friend PowerEncoding &operator<<(
+      friend PowerEncoding& operator<<(
           PowerEncoding &stream,
           const char* string)
       {
@@ -151,7 +151,7 @@ namespace BeeFishPowerEncoding
          return stream;
       }
 
-      friend PowerEncoding &operator<<(
+      friend PowerEncoding& operator<<(
           PowerEncoding &stream,
           const std::string& string)
       {

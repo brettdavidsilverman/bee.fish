@@ -23,7 +23,7 @@ namespace BeeFish
       std::filesystem::remove(TEMP_FILENAME);
 
       DBServer dbServer(
-         WEB_SERVER_HOST, 8080, 2, TEMP_FILENAME
+         WEB_SERVER_HOST, 8080, 1, TEMP_FILENAME
       );
 
       dbServer.start();
@@ -32,7 +32,7 @@ namespace BeeFish
       {
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
-            "| grep \"404\"";
+            "| grep \"404\" > /dev/null";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
       }
@@ -42,7 +42,7 @@ namespace BeeFish
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
             " --header \"content-type: application/json\" " <<
-            " --data 123 | grep 123";
+            " --data 123 | grep 123 > /dev/null";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
       }
@@ -51,7 +51,7 @@ namespace BeeFish
       {
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
-            " | grep 123";
+            " | grep 123 > /dev/null";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
       }

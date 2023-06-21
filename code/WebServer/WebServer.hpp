@@ -85,7 +85,7 @@ namespace BeeFishWeb {
          // Flush a request through
          // the system using curl
          std::stringstream stream;
-         stream << "curl " << url();
+         stream << "curl " << url() << " > /dev/null";
          std::string command = stream.str();
 
          system(command.c_str());

@@ -84,7 +84,8 @@ int main(int argc, const char* argv[]) {
 
    if (hasArg(argc, argv, "-test") >= 0) {
       if (!BeeFish::test()) {
-         throw runtime_error("BeeFish DBServer tests failed");
+         cerr << "BeeFish DBServer tests failed" << endl;
+         return 1;
       }
       else
          cout << "All tests pass 😍" << endl;

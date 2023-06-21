@@ -160,8 +160,8 @@ namespace BeeFishDatabase {
       template<typename T>
       operator T()
       {
-         Data& data = getData(data);
-         return (T&)data;
+         Data& data = getData();
+         return (T&)(*data.data());
       }
 
       void getData(std::string& destination)
@@ -224,6 +224,15 @@ namespace BeeFishDatabase {
             value.data(),
             destination->size()
          );
+         
+      }
+
+      template<typename T>
+      void setData(const T& source)
+      {
+         const char* data = (const char*)&source;
+         std::string string(data, sizeof(T));
+         setData(string);
          
       }
 
@@ -355,18 +364,17 @@ namespace BeeFishDatabase {
       template<typename T>
       T operator=(const T& rhs)
       {
-         Data data(rhs);
-         setData(data);
+         setData(rhs);
          return rhs;
       }
-
+/*
       string operator=(const char* rhs)
       {
          string value(rhs);
          setData(value);
          return value;
       }
-      /*
+      
       Data& operator=(Data& rhs)
       {
          setData(rhs);

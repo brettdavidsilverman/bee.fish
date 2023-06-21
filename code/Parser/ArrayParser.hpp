@@ -86,7 +86,7 @@ namespace BeeFishParser {
       }
 
       virtual Parser*
-      operator [] (size_t index)
+      getByIndex(size_t index)
       override
       {
          return

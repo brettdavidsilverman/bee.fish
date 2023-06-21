@@ -12,29 +12,43 @@ namespace BeeFishWebDB {
    using namespace BeeFishDatabase;
    using namespace BeeFishPowerEncoding;
 
-   ostream& operator <<
-   (
+   inline void streamFromDB (
       ostream& output,
-      const Path<Database::Encoding>& path
+      Path<Database::Encoding> path
    )
    {
 
-      size_t position {0};
+      if (path.isDeadEnd()) {
+         throw std::runtime_error("Path is dead end");
+      }
+
       size_t pageCount {0};
       size_t min = path.min();
       size_t max = path.max();
 
-
       for ( pageCount = min;
-            pageCount < max;
+            pageCount <= max;
             ++pageCount )
       {
-         Data data =
-            path.getDataPage(pageCount);
-         output << page;
-      }
-   }
+         std::string data;
 
+         Path page = path[pageCount];
+
+         if (page.hasData()) {
+            page.getData(data); 
+            output.write(
+               data.data(),
+               data.size()
+            );
+         }
+         else {
+            throw std::runtime_error("Page has no data");
+         }
+      }
+
+
+   }
+/*
    class StreamFromDB :
       public Path<Database::Encoding>
    {
@@ -82,7 +96,7 @@ namespace BeeFishWebDB {
       }
 
    };
-
+*/
 }
 
 #endif

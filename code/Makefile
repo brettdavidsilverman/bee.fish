@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -std=c++17 -fmax-errors=1
-DEPS=main.cpp DBServer.hpp Test.hpp Makefile HomePage.html 404.html
+DEPS=main.cpp DBServer.hpp Test.hpp StreamToDB.hpp StreamFromDB.hpp Makefile HomePage.html 404.html
 BUILD = ../build
 OUTPUT = $(BUILD)/DBServer
 TEMP = /var/tmp
