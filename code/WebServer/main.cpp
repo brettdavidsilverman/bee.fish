@@ -1,9 +1,9 @@
 #include <iostream>
 #include "../Miscellaneous/Miscellaneous.hpp"
-#include "WebServer.hpp"
-#include "../DBServer.hpp"
+#include "../DBServer/DBServer.hpp"
 #include "../Parser/Test.hpp"
 #include "Test.hpp"
+#include "WebServer.hpp"
 
 int main(int argc, const char* argv[]) {
 

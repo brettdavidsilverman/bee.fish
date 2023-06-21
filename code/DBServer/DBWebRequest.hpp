@@ -1,7 +1,7 @@
 #ifndef BEE_FISH__WEB_DB__WEB_REQUEST_HPP
 #define BEE_FISH__WEB_DB__WEB_REQUEST_HPP
 
-#include "WebRequest/WebRequest.hpp"
+#include "../WebRequest/WebRequest.hpp"
 
 namespace BeeFishWebDB {
 

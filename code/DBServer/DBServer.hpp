@@ -1,9 +1,9 @@
-#ifndef BEE_FISH__WEB__DBSERVER_HPP
-#define BEE_FISH__WEB__DBSERVER_HPP
-#include "Miscellaneous/Miscellaneous.hpp"
-#include "WebServer/WebServer.hpp"
-#include "Database/Database.hpp"
-#include "WebRequest/WebRequest.hpp"
+#ifndef BEE_FISH__WEBDB__DBSERVER_HPP
+#define BEE_FISH__WEBDB__DBSERVER_HPP
+#include "../Miscellaneous/Miscellaneous.hpp"
+#include "../WebServer/WebServer.hpp"
+#include "../Database/Database.hpp"
+#include "../WebRequest/WebRequest.hpp"
 #include "StreamToDB.hpp"
 #include "StreamFromDB.hpp"
 #include "DBWebRequest.hpp"

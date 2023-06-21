@@ -1,8 +1,8 @@
-#ifndef BEEFISH__WEB__STREAM_FROM_DB
-#define BEEFISH__WEB__STREAM_FROM_DB
+#ifndef BEEFISH__WEBDB__STREAM_FROM_DB
+#define BEEFISH__WEBDB__STREAM_FROM_DB
 
-#include "Parser/Parser.hpp"
-#include "Database/Database.hpp"
+#include "../Parser/Parser.hpp"
+#include "../Database/Database.hpp"
 
 
 namespace BeeFishWebDB {

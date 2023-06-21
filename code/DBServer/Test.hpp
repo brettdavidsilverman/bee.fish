@@ -1,7 +1,7 @@
 #ifndef BEE_FISH__TEST_HPP
 #define BEE_FISH__TEST_HPP
 #include <filesystem>
-#include "Miscellaneous/Miscellaneous.hpp"
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "DBServer.hpp"
 
 #define TEMP_FILENAME "/var/tmp/temp.data"
