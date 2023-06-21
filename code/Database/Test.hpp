@@ -98,7 +98,34 @@ namespace BeeFishDatabase
 
          outputSuccess(success);
       }
+#warning "Fix power encoding to have zero count to solve the below"
+ /*
+      cout << "\tTesting Data Path Max through: ";
+      {
+         PowerEncodingStack stack;
+         data[10][1];
+        size_t max = data.max();
 
+         int count = 0;
+         for (auto bit : stack)
+         {
+            if (bit) {
+               ++count;
+            }
+            else {
+               --count;
+            }
+         }
+
+         Size maximum;
+         stack >> maximum;
+  
+         success = success && (maximum == 10);
+         success = success && (count == -1);
+
+         outputSuccess(success);
+      }
+*/
       cout << "\tTesting Path Min/Max: ";
       {
          success =
@@ -120,6 +147,7 @@ namespace BeeFishDatabase
          outputSuccess(success);
       }
 
+      remove(filename.c_str());
 
       return success;
    }

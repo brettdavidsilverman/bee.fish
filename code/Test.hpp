@@ -32,7 +32,7 @@ namespace BeeFish
       {
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
-            "| grep \"404\" > /dev/null";
+            " -s | grep \"404\"";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
       }
@@ -42,7 +42,7 @@ namespace BeeFish
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
             " --header \"content-type: application/json\" " <<
-            " --data 123 | grep 123 > /dev/null";
+            " --data 123 -s | grep 123";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
       }
@@ -51,7 +51,7 @@ namespace BeeFish
       {
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
-            " | grep 123 > /dev/null";
+            " -s | grep 123";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
       }

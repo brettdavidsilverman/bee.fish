@@ -127,10 +127,9 @@ namespace BeeFishWebDB {
          }
          else {
             path.getData(contentType);
-#warning "Here"
             streamFromDB(stream, path);
          }
-
+#warning "Store size and stream output"
          string output = stream.str();
 
          stringstream writeOutput;
