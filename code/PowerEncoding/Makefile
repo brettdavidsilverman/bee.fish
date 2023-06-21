@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -std=c++17 -fmax-errors=1
-DEPS=main.cpp PowerEncoding.hpp Version.hpp Test.hpp Makefile
+DEPS=main.cpp PowerEncoding.hpp Stack.hpp Version.hpp Test.hpp Makefile
 OUTPUT = ../../build/PowerEncoding
 
 $(OUTPUT):	$(DEPS)

@@ -309,6 +309,36 @@ namespace BeeFishDatabase {
          return 0;
       }
       
+      void min(
+         vector<bool>& stack
+      ) const
+      {
+         return min(_index, stack);
+      }
+
+      void max(
+         vector<bool>& stack
+      ) const
+      {
+         return max(_index, stack);
+      }
+
+      Size min() const {
+         PowerEncodingStack stack;
+         min(_index, stack);
+         Size minimum;
+         stack >> minimum;
+         return minimum;
+      }
+
+      Size max() const {
+         PowerEncodingStack stack;
+         max(_index, stack);
+         Size maximum;
+         stack >> maximum;
+         return maximum;
+      }
+
       Path& operator=(const Path& rhs)
       { 
          _database = rhs._database;
@@ -481,6 +511,52 @@ namespace BeeFishDatabase {
             
          return;
 
+      }
+
+      void min(
+         Index index,
+         vector<bool>& stack
+      ) const
+      {
+         Branch branch =
+            _database->getBranch(index);
+         
+         if (branch._left)
+         {
+            stack.push_back(false);
+            return
+               min(branch._left, stack);
+         }
+         else if (branch._right)
+         {
+            stack.push_back(true);
+            return
+               min(branch._right, stack);
+         }
+         
+      }
+
+      void max(
+         Index index,
+         vector<bool>& stack
+      ) const
+      {
+         Branch branch =
+            _database->getBranch(index);
+         
+         if (branch._right)
+         {
+            stack.push_back(true);
+            return
+               max(branch._right, stack);
+         }
+         else if (branch._left)
+         {
+            stack.push_back(false);
+            return
+               max(branch._left, stack);
+         }
+         
       }
 
    protected:
