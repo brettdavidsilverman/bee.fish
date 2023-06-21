@@ -388,7 +388,9 @@ namespace BeeFishDatabase {
          return *_database;
       }
       
-      
+      Size pageSize() const {
+         return _database->pageSize();
+      }
    
    
    protected:
@@ -478,102 +480,9 @@ namespace BeeFishDatabase {
             Path::writeBit(out, false);
             
          return;
-         /*
-         Branch branch =
-            getBranch(index);
-         
-         bool lastWasLeft = false;
-         
-         while (1)
-         {
-            // go least (bottom left)
-            while(branch._left || branch._right)
-            {
-               if (branch._left)
-               {
-                  out << '1';
-                  branch =
-                     getBranch(branch._left);
-                  lastWasLeft = true;
-               }
-               else
-               {
-                  out << '0';
-
-                  branch =
-                     getBranch(branch._right);
-                  lastWasLeft = false;
-               }
-               
-            }
-            
-            // go next least (up and right)
-            while(branch._parent)
-            {
-               if (branch._right &&
-                   lastWasLeft)
-               {
-                  out << '1';
-                  
-                  // go right
-                  branch =
-                     getBranch(branch._right);
-                  
-                  lastWasLeft = false;
-                  break;
-               }
-               
-               out << '0';
-               
-               // go up
-               branch = 
-                  getBranch(branch._parent);
-            }
-            
-            if (!branch._parent)
-               break;
-         }
-         
-         return;
-         */
-        
-
-        
 
       }
-   public:
-   
-      template<typename T>
-      Path& next(T& destination)
-      {
-         Encoding::operator >> (destination);
-         return *this;
-      }
-      
-      void first(ostream& out)
-      {
-         Branch branch =
-            _database->getBranch(_index);
-            
-         while (!branch.isDeadEnd())
-         {
-            if (branch._left)
-            {
-               out << '0';
-               _index = branch._left;
-            }
-            else
-            {
-               out << '1';
-               _index = branch._right;
-            }
-            
-            branch = 
-               _database->getBranch(_index);
-         }
-         
-      }
-      
+
    protected:
       
       class Contains :

@@ -6,7 +6,7 @@
 #include <memory>
 #include "Log.hpp"
 #include "optional.h"
-
+#include "../Config.hpp"
 
 #define ON_SUCCESS "😃"
 #define ON_FAIL "🚫"
@@ -81,6 +81,10 @@ namespace BeeFishMisc {
       }
 
       return output;
+   }
+
+   inline size_t getPageSize() {
+      return PAGE_SIZE;
    }
 
    

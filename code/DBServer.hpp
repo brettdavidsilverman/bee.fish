@@ -4,6 +4,8 @@
 #include "WebServer/WebServer.hpp"
 #include "Database/Database.hpp"
 #include "WebRequest/WebRequest.hpp"
+#include "StreamToDB.hpp"
+#include "DBWebRequest.hpp"
 #include "Version.hpp"
 
 
@@ -14,15 +16,18 @@ extern "C" uint8_t _binary_HomePage_html_start[];
 extern "C" uint8_t _binary_HomePage_html_end[];
 
 
-namespace BeeFishWeb {
+namespace BeeFishWebDB {
 
    using namespace BeeFishMisc;
+   using namespace BeeFishWeb;
 
    class DBServer :
       public WebServer,
       public Database
    {
    public:
+      typedef BeeFishDatabase::Path<Database::Encoding> Path;
+
       DBServer(
          string host = WEB_SERVER_HOST,
          int port = WEB_SERVER_PORT,
@@ -41,6 +46,9 @@ namespace BeeFishWeb {
          return Path(*this)[host()];
       }
 
+      Path jsonPath() {
+         return root()["json"];
+      }
 
       virtual void handleWebRequest(
          int clientSocket,
@@ -49,7 +57,7 @@ namespace BeeFishWeb {
       {
          syslog(LOG_DEBUG, "DBServer::handleWebRequest(%s)", ipAddress.c_str() );
 
-         WebRequest webRequest(
+         DBWebRequest webRequest(
             this,
             clientSocket,
             ipAddress
@@ -234,6 +242,26 @@ namespace BeeFishWeb {
       }
 
    };
+
+   DBServer* DBWebRequest::dbServer()
+   {
+      DBServer* dbServer =
+         dynamic_cast<DBServer*>(_webServer);
+
+      return dbServer;
+   }
+
+   Parser* DBWebRequest::createJSONBody()
+   {
+      return new Capture(
+         StreamToDB(
+            JSON(),
+            dbServer()->jsonPath()
+         ),
+         _capture
+      );
+   };
+
 
 }
 

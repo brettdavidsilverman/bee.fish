@@ -21,7 +21,9 @@ namespace BeeFishDatabase
 
       cout << "Test Database" << endl;
 
-      Database db("temp.data");
+      const string filename = "/var/tmp/temp.data";
+      remove(filename.c_str());
+      Database db(filename);
 
       Path start(db);
       Path next = start["Hello"];

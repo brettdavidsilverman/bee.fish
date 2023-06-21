@@ -7,6 +7,7 @@ int main(int argc, const char* argv[]) {
    using namespace std;
    using namespace BeeFishMisc;
    using namespace BeeFishWeb;
+   using namespace BeeFishWebDB;
    using namespace BeeFishParser;
 
    cout << "bee.fish.db-server"

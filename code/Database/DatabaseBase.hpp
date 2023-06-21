@@ -19,6 +19,8 @@ using namespace std;
 
 namespace BeeFishDatabase {
    
+   using namespace BeeFishMisc;
+
    // Store [left, right] branch elements.
    // A zero is stored if the branch
    // hasnt been visited yet.
@@ -33,6 +35,7 @@ namespace BeeFishDatabase {
       struct Header
       {
          char   _version[256];
+         size_t _pageSize;
          Index  _nextIndex;
       };
     
@@ -48,6 +51,7 @@ namespace BeeFishDatabase {
       Branch* _root;
       Index*  _nextIndex;
       Size    _branchCount;
+      Size    _pageSize;
 
    public:
       std::mutex _lock;
@@ -55,13 +59,15 @@ namespace BeeFishDatabase {
       Database(
          string filePath,
          const Size initialSize = 1000 * 1000,
-         const Size incrementSize = 1000 * 1000
+         const Size incrementSize = 1000 * 1000,
+         const Size pageSize = getPageSize()
       ) :
          File(
             filePath,
-            getPageAlignedSize(initialSize)
+            initialSize
          ),
-         _incrementSize(incrementSize)
+         _incrementSize(incrementSize),
+         _pageSize(pageSize)
       {
          
          mapFile();
@@ -81,7 +87,8 @@ namespace BeeFishDatabase {
       Database(const Database& source) :
          File(source),
          _incrementSize(source._incrementSize),
-         _size(source._size)
+         _size(source._size),
+         _pageSize(source._pageSize)
       {
          mapFile();
       }
@@ -99,6 +106,7 @@ namespace BeeFishDatabase {
          Header& header = _tree->_header;
          //memset(&header, '\0', sizeof(Header));
          strcpy(header._version, DATABASE_VERSION);
+         header._pageSize = _pageSize;
          header._nextIndex = Branch::Root;
       }
       
@@ -112,6 +120,17 @@ namespace BeeFishDatabase {
             error += ". File version ";
             error += _tree->_header._version;
             throw runtime_error(error);
+         }
+
+         if (_tree->_header._pageSize != getPageSize())
+         {
+            std::stringstream stream;
+            stream
+               << "Invalid page size."
+               << "Program is " << _pageSize
+               << ". Database is " << _tree->_header._pageSize
+               << ".";
+            throw runtime_error(stream.str());
          }
 
       }
@@ -142,7 +161,10 @@ namespace BeeFishDatabase {
          
       
    public:
-      
+      Size pageSize() const {
+         return _pageSize;
+      }
+
       inline Index getNextIndex(const Index& parent = 0)
       {
          Index nextIndex =
@@ -216,9 +238,6 @@ namespace BeeFishDatabase {
             size = File::size() +
                    _incrementSize;
          
- 
-         size = getPageAlignedSize(size);
-            
          if (size <= _size)
             size = _size;
          else
@@ -253,32 +272,7 @@ namespace BeeFishDatabase {
 
    protected:
    
-      static Size getPageAlignedSize
-      (
-         const Size value,
-         const Size minimum = 0
-      )
-      {
-
-         if (value == 0)
-            return 0;
-   
-         Size newValue = value;
-         if (newValue < minimum)
-            newValue = minimum;
       
-         Size mod =
-            newValue % PAGE_SIZE;
-   
-         if (mod != 0)
-            newValue += (
-               PAGE_SIZE - mod
-            );
-   
-         return newValue;
-
-      }
-   
       friend ostream& operator <<
       (ostream& out, const Database& db)
       {

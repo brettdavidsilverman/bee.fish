@@ -11,6 +11,7 @@ namespace BeeFish
    using namespace BeeFishJSON;
    using namespace BeeFishMisc;
    using namespace BeeFishWeb;
+   using namespace BeeFishWebDB;
 
    inline bool test()
    {

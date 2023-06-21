@@ -208,10 +208,6 @@ namespace BeeFishDatabase {
          PowerEncoding& stream,
          const Data& data
       );
-
-      static Size getPageSize() {
-         return PAGE_SIZE;
-      }
          
    };
    

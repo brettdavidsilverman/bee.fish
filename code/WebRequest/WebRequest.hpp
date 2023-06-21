@@ -218,37 +218,34 @@ namespace BeeFishWeb {
          WebRequest* request =
             dynamic_cast<WebRequest*>(params);
 
-         if (!request)
-            throw logic_error("WebRequest::loadBody invalid webRequest");
+         return request->createBody();
+      }
 
-         if ( request->_method == "POST" &&
-              request->_headers.count("content-type") > 0 )
+      virtual Parser* createBody() {
+ 
+         if ( _method == "POST" &&
+             _headers.count("content-type") > 0 )
          {
-            request->_contentType =
-               request->_headers["content-type"];
+            _contentType =
+               _headers["content-type"];
 
             const string prefix = "application/json";
 
-            if (
-               request->_contentType
+            if ( _contentType
                   .find(prefix) != std::string::npos )
             {
 #warning "Resume here"
-               Capture* capture =
-                  new Capture(
-                     JSON(request),
-                     request->_capture
-                  );
-               request->_body = capture;
-               return request->_body;
+               _body = createJSONBody();
+               
+               return _body;
             }
          }
                
-         if ( request->_method == "POST" &&
-              request->_headers.count("content-length") > 0)
+         if ( _method == "POST" &&
+              _headers.count("content-length") > 0)
          {
             string _contentLength =
-               request->_headers["content-length"];
+               _headers["content-length"];
                   
             size_t contentLength =
                atol(_contentLength.c_str());
@@ -257,11 +254,21 @@ namespace BeeFishWeb {
             //throw logic_error("Not implemented yet");
          }
 
-         request->_body = new Optional(newLine);
-         return request->_body;
+         _body = new Optional(newLine);
+         return _body;
       }
 
-      
+      virtual Parser* createJSONBody()
+      {
+         Capture* capture =
+            new Capture(
+               JSON(),
+               _capture
+            );
+
+         return capture;
+      };
+
 
 
    };

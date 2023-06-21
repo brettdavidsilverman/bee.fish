@@ -49,14 +49,14 @@ namespace BeeFishWebDB {
    protected:
       void allocatePage()
       {
-         _page = new char[pageSize];
+         _page = new char[pageSize()];
       }
 
       virtual void capture(char c)
       override
       {
          _page[_position] = c;
-         if (++_position >= pageSize)
+         if (++_position >= pageSize())
          {
             flush();
          }
@@ -64,9 +64,12 @@ namespace BeeFishWebDB {
 
       virtual void flush()
       {
-         (*this)
-            [_pageCount++]
-            .setDataPage(_page, pageSize);
+         std::string data(_page, _position);
+
+         Path::operator []
+            (_pageCount++)
+            .setData(data);
+
          _position = 0;
       }
 
@@ -80,7 +83,7 @@ namespace BeeFishWebDB {
       const size_t size() const {
          return
             _position +
-            _pageCount * pageSize;
+            _pageCount * pageSize();
       }
 
       virtual Parser* copy()
