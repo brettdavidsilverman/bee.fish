@@ -130,6 +130,21 @@ namespace BeeFishWeb {
 
       }
 
+      virtual bool write(
+         const char* data,
+         size_t size
+      )
+      {
+         size_t written = 
+            ::write(
+               _socket,
+               data,
+               size
+            );
+
+         return (written == size);
+      }
+
       bool pollInput() {
          struct pollfd pfds[1];
          pfds[0].fd = _socket;

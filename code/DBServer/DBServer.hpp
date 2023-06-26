@@ -110,16 +110,15 @@ namespace BeeFishWebDB {
          }
 
          string contentType = "text/plain; charset=utf-8";
-         stringstream stream;
 
          Path path = urlPath(webRequest._url);
-
+         
          if (webRequest._method == "POST") {
             path.setData(
                webRequest._contentType
             );
             contentType = webRequest._contentType;
-            streamFromDB(stream, path);
+            
          }
          else if (!path.hasData()) {
             output404NotFound(clientSocket);
@@ -127,30 +126,32 @@ namespace BeeFishWebDB {
          }
          else {
             path.getData(contentType);
-            streamFromDB(stream, path);
          }
-#warning "Store size and stream output"
-         string output = stream.str();
 
-         stringstream writeOutput;
+         stringstream stream;
+         size_t size = path["size"];
+         
 
-         writeOutput <<
+         stream <<
             "HTTP/2.0 200 OK\r\n" <<
-            "Content-Type: " << contentType << "\r\n" <<
             "Connection: keep-alive\r\n" <<
+            "Content-Type: " <<
+               contentType << "\r\n" <<
             "Content-Length: " <<
-               output.length() << "\r\n" <<
-            "\r\n" <<
-            output;
+               size << "\r\n" <<
+            "\r\n";
+
+            
 
          std::string response =
-            writeOutput.str();
+            stream.str();
 
-         ::write(
-            clientSocket,
+         webRequest.write(
             response.c_str(),
             response.length()
          );
+
+         streamFromDB(webRequest, path);
 
 
       }

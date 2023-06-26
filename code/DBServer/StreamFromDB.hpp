@@ -3,7 +3,7 @@
 
 #include "../Parser/Parser.hpp"
 #include "../Database/Database.hpp"
-
+#include "../WebRequest/WebRequest.hpp"
 
 namespace BeeFishWebDB {
 
@@ -12,8 +12,8 @@ namespace BeeFishWebDB {
    using namespace BeeFishDatabase;
    using namespace BeeFishPowerEncoding;
 
-   inline void streamFromDB (
-      ostream& output,
+   inline size_t streamFromDB (
+      BeeFishWeb::WebRequest& output,
       Path<Database::Encoding> path
    )
    {
@@ -22,10 +22,10 @@ namespace BeeFishWebDB {
          throw std::runtime_error("Path is dead end");
       }
 
-      size_t pageCount {0};
+      size_t pageCount = 0;
       size_t min = path.min();
       size_t max = path.max();
-
+      size_t byteCount = 0;
       for ( pageCount = min;
             pageCount <= max;
             ++pageCount )
@@ -40,11 +40,14 @@ namespace BeeFishWebDB {
                data.data(),
                data.size()
             );
+            byteCount += data.size();
          }
          else {
             throw std::runtime_error("Page has no data");
          }
       }
+
+      return byteCount;
 
 
    }

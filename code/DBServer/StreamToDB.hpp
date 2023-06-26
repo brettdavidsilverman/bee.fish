@@ -76,6 +76,8 @@ namespace BeeFishWebDB {
 
       virtual void success() override
       {
+         _path["size"] = getSize();
+
          if (_position > 0) {
             flush();
          }

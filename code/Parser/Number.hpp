@@ -14,6 +14,10 @@ namespace BeeFishParser {
       const auto integer =
          Repeat(Range("0", "9"));
 
+      const auto fraction =
+         Character(".") and
+         integer;
+
       const auto exponent =
          (
             Character("e") or
@@ -22,10 +26,6 @@ namespace BeeFishParser {
          Optional(
             sign
          ) and
-         integer;
-       
-      const auto fraction =
-         Character(".") and
          integer;
 
       return
