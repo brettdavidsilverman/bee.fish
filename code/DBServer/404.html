@@ -41,11 +41,13 @@ function (message, source, lineno, colno, error)
    <body>
       <h1 id="h1">bee.fish 404</h1>
       <form onsubmit="return false;">
-         <label for="jsonText">JSON Text</label><br />
-         <textarea id="jsonText">
+         <label for="contentType">Content Type</label><br />
+         <input type="text" id="contentType" value="application/json"></input><br />
+         <label for="bodyText">Body Text</label><br />
+         <textarea id="bodyText">
 {"🐝":"🌎"}
          </textarea><br />
-         <button onclick="postJSON()">Submit</button>
+         <button onclick="postBody()">Submit</button>
       </form><br />
 
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
@@ -54,10 +56,10 @@ function (message, source, lineno, colno, error)
 var contentType =
    document.getElementById("contentType");
 
-var jsonText =
-   document.getElementById("jsonText");
+var bodyText =
+   document.getElementById("bodyText");
 
-function postJSON() {
+function postBody() {
 
    var response =
       fetch(
@@ -65,9 +67,9 @@ function postJSON() {
          {
             method: "POST",
             headers: {
-               "Content-Type": "application/json"
+               "Content-Type": contentType.value
             },
-            body: jsonText.value
+            body: bodyText.value
          }
       ).then(
          function (response) {

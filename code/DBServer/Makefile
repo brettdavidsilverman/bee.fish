@@ -29,4 +29,4 @@ debug:	$(OUTPUT)
 clean:
 	rm -f $(TEMP)/404.o
 	rm -f $(TEMP)/HomePage.o
-	cd .. && make clean
+	rm -f $(OUTPUT)

@@ -110,48 +110,57 @@ namespace BeeFishWebDB {
          }
 
          string contentType = "text/plain; charset=utf-8";
-
+         if (webRequest._contentType.size())
+         {
+            contentType = webRequest._contentType;
+         }
+  
          Path path = urlPath(webRequest._url);
          
-         if (webRequest._method == "POST") {
-            path.setData(
-               webRequest._contentType
-            );
-            contentType = webRequest._contentType;
-            
+         if (webRequest._method == "POST")
+         {
+            path.setData(contentType);
          }
-         else if (!path.hasData()) {
+         
+         if (!path.hasData()) {
             output404NotFound(clientSocket);
             return;
          }
-         else {
-            path.getData(contentType);
-         }
+         
 
          stringstream stream;
-         size_t size = path["size"];
-         
+         size_t size = 0;
+
+         if (path.contains("size") &&
+             path["size"].hasData())
+         {
+            size = path["size"];
+         }
 
          stream <<
             "HTTP/2.0 200 OK\r\n" <<
             "Connection: keep-alive\r\n" <<
             "Content-Type: " <<
-               contentType << "\r\n" <<
-            "Content-Length: " <<
-               size << "\r\n" <<
+               contentType << "\r\n";
+         if (size > 0)
+            stream << "Content-Length: " <<
+               size << "\r\n";
+
+         stream <<
             "\r\n";
 
-            
-
-         std::string response =
+         std::string headers =
             stream.str();
 
+         // Send the headers
          webRequest.write(
-            response.c_str(),
-            response.length()
+            headers.c_str(),
+            headers.length()
          );
 
-         streamFromDB(webRequest, path);
+         // Send the body
+         if (!path.isDeadEnd())
+            streamFromDB(webRequest, path);
 
 
       }
@@ -242,6 +251,17 @@ namespace BeeFishWebDB {
       return new
          StreamToDB(
             JSON(),
+            dbServer()->urlPath(_url)
+         );
+   };
+
+   Parser* DBWebRequest::createContentLengthBody(
+      size_t contentLength
+   )
+   {
+      return new
+         StreamToDB(
+            ContentLength(contentLength),
             dbServer()->urlPath(_url)
          );
    };

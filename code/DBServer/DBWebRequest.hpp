@@ -54,7 +54,7 @@ namespace BeeFishWebDB {
       DBServer* dbServer();
 
       virtual Parser* createJSONBody() override;
-
+      virtual Parser* createContentLengthBody(size_t contentLength) override;
    };
 
    

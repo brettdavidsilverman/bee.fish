@@ -249,7 +249,7 @@ namespace BeeFishWeb {
       }
 
       virtual Parser* createBody() {
- 
+
          if ( _method == "POST" &&
              _headers.count("content-type") > 0 )
          {
@@ -265,7 +265,7 @@ namespace BeeFishWeb {
                return _body;
             }
          }
-               
+
          if ( _method == "POST" &&
               _headers.count("content-length") > 0)
          {
@@ -275,9 +275,12 @@ namespace BeeFishWeb {
             size_t contentLength =
                atol(_contentLength.c_str());
 
-            cerr << "@@@@@@@Not implemented" << contentLength << endl;
-            //throw logic_error("Not implemented yet");
+            _body = createContentLengthBody(contentLength);
+
+            return _body;
          }
+
+         //throw logic_error("Shouldnt reach here");
 
          _body = new Optional(newLine);
          return _body;
@@ -294,6 +297,50 @@ namespace BeeFishWeb {
          return capture;
       };
 
+      virtual Parser*
+      createContentLengthBody(
+         size_t contentLength
+      )
+      {
+         return new
+            ContentLength(
+               contentLength
+            );
+      }
+      
+      class ContentLength :
+         public Parser
+      {
+      protected:
+         size_t _contentLength;
+         size_t _count {0};
+      public:
+         ContentLength(size_t contentLength) :
+            _contentLength(contentLength)
+         {
+         }
+
+         virtual bool read(char c)
+         override
+         {
+
+            if (_count >= _contentLength)
+               return false;
+
+            ++_count;
+
+            if (_count == _contentLength)
+               setResult(true);
+
+            return true;
+         }
+
+         virtual Parser* copy() const
+         override
+         {
+            return new ContentLength(_contentLength);
+         }
+      };
 
 
    };

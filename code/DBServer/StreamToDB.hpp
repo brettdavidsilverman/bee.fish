@@ -56,6 +56,7 @@ namespace BeeFishWebDB {
       override
       {
          _page[_position] = c;
+
          if (++_position >= _path.pageSize())
          {
             flush();
@@ -64,7 +65,9 @@ namespace BeeFishWebDB {
 
       virtual void flush()
       {
-         std::string data(_page, _position);
+
+         const std::string
+            data(_page, _position);
 
          Path page =
             _path[_pageCount++];

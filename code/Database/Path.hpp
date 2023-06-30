@@ -191,11 +191,16 @@ namespace BeeFishDatabase {
          Branch& branch =
             _database->getBranch(_index);
          
-         Data* destination =
-            _database->getData(
-               branch._dataIndex
-            );
-               
+         Data* destination = nullptr;
+
+         if (branch._dataIndex)
+         {
+            destination =
+               _database->getData(
+                  branch._dataIndex
+               );
+         }
+
          if ( ( destination == nullptr ) || 
               ( destination->size() < value.size() ) )
          {
