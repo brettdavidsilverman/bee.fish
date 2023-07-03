@@ -1,7 +1,7 @@
 OUTPUT = ../../build/JSON
 DEPS = Makefile main.cpp Number.hpp String.hpp Variable.hpp Test.hpp
 CFLAGS = -std=gnu++17 -Wfatal-errors
-TEST = tests/large.json
+TEST = ../../large.json
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic
@@ -15,7 +15,7 @@ debug:	$(OUTPUT)
 	cd ../Parser && make $(DEBUG)
 
 time:	clean
-time:	CFLAGS += -DTIME -Ofast
+time:	CFLAGS += -DTIME -pg -g
 time:	run_time
 
 perf:	clean

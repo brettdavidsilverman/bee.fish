@@ -20,6 +20,8 @@ namespace BeeFishWebDB {
       char*   _page = nullptr;
       size_t  _position {0};
       size_t  _pageCount {0};
+      size_t  _size {0};
+
    public:
 
       StreamToDB(
@@ -56,7 +58,7 @@ namespace BeeFishWebDB {
       override
       {
          _page[_position] = c;
-
+         ++_size;
          if (++_position >= _path.pageSize())
          {
             flush();
@@ -65,32 +67,25 @@ namespace BeeFishWebDB {
 
       virtual void flush()
       {
+cerr << "StreamToDB::flush:" << _pageCount << ", " << _pageCount * getpagesize() << endl;
 
-         const std::string
-            data(_page, _position);
+         if (_position > 0) {
+            const std::string
+               data(_page, _position);
 
-         Path page =
-            _path[_pageCount++];
-            
-         page.setData(data);
+            _path[_pageCount++]
+               .setData(data);
 
-         _position = 0;
+           _position = 0;
+         }
       }
 
       virtual void success() override
       {
-         _path["size"] = getSize();
+         _path["size"] = _size;
 
-         if (_position > 0) {
-            flush();
-         }
+         flush();
 
-      }
-
-      const size_t getSize() const {
-         return
-            _position +
-            _pageCount * _path.pageSize();
       }
 
       virtual Parser* copy()

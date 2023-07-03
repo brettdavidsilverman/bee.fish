@@ -14,6 +14,9 @@ debug:	$(OUTPUT)
 test:	debug
 	$(OUTPUT) -test
 
+run:	debug
+	$(OUTPUT)
+
 clean:
 	rm -f $(OBJECTS)
 	rm -f $(OUTPUT)

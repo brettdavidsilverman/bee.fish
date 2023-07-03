@@ -13,7 +13,7 @@ namespace BeeFishPowerEncoding
 {
    class PowerEncoding
    {
-   protected:
+   public:
       long int _count = 0;
       long int _index = 0;
 
@@ -57,23 +57,30 @@ namespace BeeFishPowerEncoding
       PowerEncoding& operator <<
       (const T& value)
       {
-      
+
+         writeBit(1);
+         output(value);
+
+         return *this;
+      }
+
+      template<typename T>
+      void output(const T& value)
+      {
          if (value == 0)
             writeBit(0);
          else
          {
-            writeBit(1);
-            
             auto _power     =
                  power(value);
                
             auto _remainder =
                  remainder(value, _power);
 
-            *this << _power;
-            *this << _remainder;
+            writeBit(1);
+            output(_power);
+            output(_remainder);
          }
-         return *this;
       }
      
       template<typename T>
@@ -81,21 +88,34 @@ namespace BeeFishPowerEncoding
       (T& value)
       {
          bool bit = readBit();
+
+         if (bit != 1)
+            throw runtime_error("Expected 1 bit");
+
+         input(value);
+
+         return *this;
+      }
+
+      template<typename T>
+      void input(T& value)
+      {
+         bool bit = readBit();
+
          if (bit == 0)
          {
             value = T();
-            return *this;
+            return;
          }
             
          unsigned long _power;
-         (*this) >> _power;
+         input(_power);
          
          unsigned long _remainder;
-         (*this) >> _remainder;
+         input(_remainder);
          
          value = exp2(_power) + _remainder;
          
-         return *this;
       }
       
       template<typename T>
@@ -139,11 +159,11 @@ namespace BeeFishPowerEncoding
       {
          stream.writeBit(1);
 
-         for (const char* c = string;
-              *c != 0;
-              ++c)
+         for (const char* pc = string;
+              *pc != 0;
+              ++pc)
          {
-            stream << *c;
+            stream << *pc;
          }
 
          stream.writeBit(0);

@@ -30,7 +30,9 @@ namespace BeeFishParser {
       UTF8Character(
          const UTF8Character& source
       ) :
+         _expectedSize(source._expectedSize),
          _matchAny(source._matchAny),
+         _read(source._read),
          _chars(source._chars)
       {
       }

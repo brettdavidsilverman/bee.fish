@@ -17,7 +17,7 @@ namespace BeeFishParser {
       Parser* _loadOnDemand = nullptr;
    public:
       typedef std::function<Parser*(Parser*)> Function;
-
+      //typedef Parser*(*Function)(Parser*);
    protected:
       const Function _function;
       Parser* _params = nullptr;
@@ -62,11 +62,8 @@ namespace BeeFishParser {
             character
          );
 
-         if (_loadOnDemand->_result == true)
-            setResult(true);
-
-         if (_loadOnDemand->_result == false)
-            setResult(false);
+         if (_loadOnDemand->_result != nullopt)
+            setResult(_loadOnDemand->_result);
 
          return matched;
       }

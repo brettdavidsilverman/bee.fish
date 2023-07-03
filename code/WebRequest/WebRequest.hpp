@@ -38,9 +38,10 @@ namespace BeeFishWeb {
       string _version;
       map<string, string> _headers;
       Parser* _body = nullptr;
-      string _capture;
       string _contentType;
       And _parser = createParser();
+
+      size_t _index {0};
 
    public:
       using Parser::read;
@@ -102,25 +103,26 @@ namespace BeeFishWeb {
 
       virtual bool read()
       {
-         int ret;
+         int size;
          char buffer[512];
          char *buff = &(buffer[0]);
          _result = nullopt;
 
          while ( _result == nullopt &&
                  pollInput() &&
-                 (ret = ::read(
+                 (size = ::read(
                      _socket,
                      buff,
                      sizeof(buffer))
                   ) > 0)
          {
-            if (!read(buff, ret))
+
+            if (!read(buff, size))
             {
                return false;
             }
 
-            if (ret < sizeof(buffer))
+            if (size < sizeof(buffer))
                break;
          }
 
@@ -168,11 +170,15 @@ namespace BeeFishWeb {
       virtual bool read(char c)
       override
       {
-
          if (_parser._result != nullopt)
             return false;
 
          bool matched = _parser.read(c);
+
+         if (matched) {
+            //cerr << c;
+            ++_index;
+         }
 
          if (_parser._result != nullopt)
             setResult(_parser._result);
@@ -261,7 +267,8 @@ namespace BeeFishWeb {
             if ( _contentType
                   .find(prefix) != std::string::npos )
             {
-               _body = createJSONBody();
+
+              _body = createJSONBody();
                return _body;
             }
          }
@@ -288,13 +295,7 @@ namespace BeeFishWeb {
 
       virtual Parser* createJSONBody()
       {
-         Capture* capture =
-            new Capture(
-               JSON(),
-               _capture
-            );
-
-         return capture;
+         return new JSON();
       };
 
       virtual Parser*

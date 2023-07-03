@@ -33,7 +33,7 @@ namespace BeeFishJSON {
 
    const auto array =
          openBracket and
-         -(
+         (
             -value  and
             Repeat(
                arraySeperator and -value,

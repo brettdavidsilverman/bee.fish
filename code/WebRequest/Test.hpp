@@ -139,10 +139,6 @@ namespace BeeFishWeb
             true
          );
 
-      success &=
-         testValue("{}", webRequestJSON._capture);
-
-
       BeeFishMisc::outputSuccess(success);
 
       return success;

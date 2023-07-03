@@ -3,6 +3,6 @@
 
 #include "../Config.hpp"
 
-#define READ_TIMEOUT_SECONDS 3
+#define READ_TIMEOUT_SECONDS 100
 
 #endif

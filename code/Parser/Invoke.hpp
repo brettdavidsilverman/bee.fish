@@ -17,6 +17,7 @@ namespace BeeFishParser {
    public:
    
       typedef std::function<bool(Parser*)> Function;
+      //typedef bool (*Function)(Parser*);
       Function _function;
       Parser* _parser {nullptr};
 

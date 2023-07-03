@@ -17,12 +17,20 @@ namespace BeeFishPowerEncoding
       
       cout << "Test PowerEncoding" << endl;
 
-      EncodeToStream encoder(cin, cout);
-      encoder << 1;
+      stringstream stream;
+      EncodeToStream encoder(stream, stream);
+
+      const unsigned long number = 19750926;
+      encoder << number;
       cout << endl;
 
-      encoder << "Hello World";
-      cout << endl;
+      unsigned long value;
+      encoder >> value;
+      cout << "Value: " << value << endl;
+      success &= (value == number);
+
+      cout << "Count: " << encoder._count << endl;
+      success &= (encoder._count == 0);
 
       outputSuccess(success);
 

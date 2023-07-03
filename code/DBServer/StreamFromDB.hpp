@@ -22,17 +22,20 @@ namespace BeeFishWebDB {
          throw std::runtime_error("Path is dead end");
       }
 
-      size_t pageCount = 0;
+      size_t pageIndex  = 0;
       size_t min = path.min();
       size_t max = path.max();
       size_t byteCount = 0;
-      for ( pageCount = min;
-            pageCount <= max;
-            ++pageCount )
+std::cerr << "StreamFromDB::min " << min << ", max " << max << endl;
+
+      for ( pageIndex = min;
+            pageIndex <= max;
+            ++pageIndex )
       {
+
          std::string data;
 
-         Path page = path[pageCount];
+         Path page = path[pageIndex];
 
          if (page.hasData()) {
             page.getData(data); 

@@ -38,10 +38,6 @@ namespace BeeFishPowerEncoding
 
          char bit; 
          _in >> bit;
-      
-#ifdef DEBUG
-         cerr << 'r' << bit;
-#endif
 
          bool b = ( bit != '0' );
       

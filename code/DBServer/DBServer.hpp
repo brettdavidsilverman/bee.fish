@@ -90,7 +90,7 @@ namespace BeeFishWebDB {
 
          if (webRequest._result != true)
          {
-            syslog(LOG_WARNING, "Error reading from client %s", ipAddress.c_str());
+            syslog(LOG_WARNING, "Error reading from client %s at position %i", ipAddress.c_str(), webRequest._index);
             ::close(clientSocket);
             return;
          }
@@ -138,7 +138,7 @@ namespace BeeFishWebDB {
          }
 
          stream <<
-            "HTTP/2.0 200 OK\r\n" <<
+            "HTTP/2.0 200 OK" << "\r\n" <<
             "Connection: keep-alive\r\n" <<
             "Content-Type: " <<
                contentType << "\r\n";
@@ -248,10 +248,20 @@ namespace BeeFishWebDB {
 
    Parser* DBWebRequest::createJSONBody()
    {
+cerr << "DBServer.hpp DBWebRequest create JSON body" << endl;
+
+ 
+      DBServer::Path path = dbServer()->urlPath(_url);
+     
+      if (_method == "POST") {
+         path.clear();
+         path.setData(_headers["content-type"]);
+      }
+
       return new
          StreamToDB(
             JSON(),
-            dbServer()->urlPath(_url)
+            path
          );
    };
 

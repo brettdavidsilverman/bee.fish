@@ -17,6 +17,7 @@ namespace BeeFishParser {
    public:
 
       ArrayParser(const ArrayParser& source) {
+         _inputs.reserve(source._inputs.size());
          for (auto parser : source._inputs) {
             _inputs.push_back(
                parser->copy()
@@ -26,6 +27,11 @@ namespace BeeFishParser {
 
       ArrayParser(const ArrayParser& lhs, const ArrayParser& rhs)
       {
+
+         _inputs.reserve(
+            lhs._inputs.size() +
+            rhs._inputs.size()
+         );
 
          for ( auto parser : lhs._inputs )
          {
@@ -47,6 +53,10 @@ namespace BeeFishParser {
       ArrayParser(const ArrayParser& lhs, const Parser& rhs)
       {
 
+         _inputs.reserve(
+            lhs._inputs.size() + 1
+         );
+
          for ( auto parser : lhs._inputs )
          {
             _inputs.push_back(
@@ -62,6 +72,8 @@ namespace BeeFishParser {
 
       ArrayParser(const Parser& lhs, const Parser& rhs)
       {
+         _inputs.reserve(2);
+
          _inputs.push_back(
             lhs.copy()
          );

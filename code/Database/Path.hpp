@@ -537,14 +537,12 @@ namespace BeeFishDatabase {
          if (branch._left)
          {
             stack.push_back(false);
-            return
-               min(branch._left, stack);
+            min(branch._left, stack);
          }
          else if (branch._right)
          {
             stack.push_back(true);
-            return
-               min(branch._right, stack);
+            min(branch._right, stack);
          }
          
       }
@@ -560,14 +558,12 @@ namespace BeeFishDatabase {
          if (branch._right)
          {
             stack.push_back(true);
-            return
-               max(branch._right, stack);
+            max(branch._right, stack);
          }
          else if (branch._left)
          {
             stack.push_back(false);
-            return
-               max(branch._left, stack);
+            max(branch._left, stack);
          }
          
       }

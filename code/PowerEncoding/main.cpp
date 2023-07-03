@@ -41,9 +41,10 @@ int main(int argc, const char* argv[])
       
       if (line.size() == 0)
          break;
-      
-      cout << line
-           << endl;
+  
+      encoding << atoi(line.c_str());
+      cout << endl;
+
       
    }
    
