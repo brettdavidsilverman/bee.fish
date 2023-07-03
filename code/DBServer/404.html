@@ -3,7 +3,7 @@
    <head>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <title>bee.fish 404</title>
+      <title>bee.fish</title>
       <script>
 window.onerror =
 function (message, source, lineno, colno, error)
@@ -39,7 +39,7 @@ function (message, source, lineno, colno, error)
       </script>
    </head>
    <body>
-      <h1 id="h1">bee.fish 404</h1>
+      <h1 id="h1">bee.fish Page not found yet</h1>
       <form onsubmit="return false;">
          <label for="contentType">Content Type</label><br />
          <input type="text" id="contentType" value="application/json"></input><br />
@@ -73,12 +73,13 @@ function postBody() {
          }
       ).then(
          function (response) {
-            return response.text();
+            return response.json();
          }
       ).then(
-         function (text) {
-            alert(text);
-            window.location.reload();
+         function (json) {
+            alert(JSON.stringify(json));
+            if (json.success)
+               window.location.reload();
          }
       ).catch(
          function(error) {

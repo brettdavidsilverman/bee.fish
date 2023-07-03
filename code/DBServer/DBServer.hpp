@@ -109,22 +109,35 @@ namespace BeeFishWebDB {
             return;
          }
 
-         string contentType = "text/plain; charset=utf-8";
-         if (webRequest._contentType.size())
-         {
-            contentType = webRequest._contentType;
-         }
-  
          Path path = urlPath(webRequest._url);
-         
+  
+         string contentType;
+
+     
          if (webRequest._method == "POST")
          {
-            path.setData(contentType);
+            if (webRequest._headers
+                 .count("content-type")
+                 > 0)
+            {
+               contentType =
+                  webRequest.
+                  _headers["content-type"];
+
+               path.setData(contentType);
+               outputSuccess(clientSocket);
+               return;
+            }
          }
-         
-         if (!path.hasData()) {
-            output404NotFound(clientSocket);
-            return;
+         else {
+            if (path.hasData())
+            {
+               path.getData(contentType);
+            }
+            else {
+               output404NotFound(clientSocket);
+               return;
+            }
          }
          
 
@@ -165,7 +178,33 @@ namespace BeeFishWebDB {
 
       }
 
-      
+      virtual void outputSuccess(int clientSocket)
+      {
+         stringstream stream;
+
+         string json = "{\"success\": true}";
+
+         size_t size = json.size();
+
+         stream <<
+            "HTTP/2.0 200 OK\r\n" <<
+            "Content-Type: application/json; charset=utf-8\r\n" <<
+            "Connection: keep-alive\r\n" <<
+            "Content-Length: " <<
+               size << "\r\n" <<
+            "\r\n" <<
+             json;
+
+         std::string response =
+            stream.str();
+
+         ::write(
+            clientSocket,
+            response.c_str(),
+            response.length()
+         );
+      }
+
       virtual void output404NotFound(int clientSocket)
       {
 
@@ -178,7 +217,7 @@ namespace BeeFishWebDB {
             _binary_404_html_start;
 
          writeOutput <<
-            "HTTP/2.0 404 OK\r\n" <<
+            "HTTP/2.0 404 Not Found\r\n" <<
             "Content-Type: text/html; charset=utf-8\r\n" <<
             "Connection: keep-alive\r\n" <<
             "Content-Length: " <<
@@ -252,11 +291,7 @@ cerr << "DBServer.hpp DBWebRequest create JSON body" << endl;
 
  
       DBServer::Path path = dbServer()->urlPath(_url);
-     
-      if (_method == "POST") {
-         path.clear();
-         path.setData(_headers["content-type"]);
-      }
+      path.clear();
 
       return new
          StreamToDB(
@@ -269,10 +304,13 @@ cerr << "DBServer.hpp DBWebRequest create JSON body" << endl;
       size_t contentLength
    )
    {
+      DBServer::Path path = dbServer()->urlPath(_url);
+      path.clear();
+
       return new
          StreamToDB(
             ContentLength(contentLength),
-            dbServer()->urlPath(_url)
+            path
          );
    };
 

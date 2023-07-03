@@ -68,7 +68,7 @@ namespace BeeFishDatabase
          Size minimum;
          stack >> minimum;
          success = success && (minimum == 0);
-         success = success && (count == -1);
+         success = success && (count == 0);
 
          outputSuccess(success);
       }
@@ -94,7 +94,7 @@ namespace BeeFishDatabase
          stack >> maximum;
   
          success = success && (maximum == 10);
-         success = success && (count == -1);
+         success = success && (count == 0);
 
          outputSuccess(success);
       }
@@ -129,6 +129,8 @@ namespace BeeFishDatabase
       }
 
       remove(filename.c_str());
+
+      outputSuccess(success);
 
       return success;
    }

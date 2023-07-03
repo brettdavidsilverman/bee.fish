@@ -38,7 +38,6 @@ namespace BeeFishWeb {
       string _version;
       map<string, string> _headers;
       Parser* _body = nullptr;
-      string _contentType;
       And _parser = createParser();
 
       size_t _index {0};
@@ -255,19 +254,17 @@ namespace BeeFishWeb {
       }
 
       virtual Parser* createBody() {
-
-         if ( _method == "POST" &&
-             _headers.count("content-type") > 0 )
+         
+         if ( _method == "POST" )
          {
-            _contentType =
+            string contentType =
                _headers["content-type"];
 
             const string prefix = "application/json";
 
-            if ( _contentType
+            if ( contentType
                   .find(prefix) != std::string::npos )
             {
-
               _body = createJSONBody();
                return _body;
             }

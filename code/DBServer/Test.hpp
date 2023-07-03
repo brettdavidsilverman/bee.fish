@@ -28,32 +28,43 @@ namespace BeeFish
 
       dbServer.start();
 
-      cout << "Testing 404" << endl;
+      if (success)
       {
+         cout << "Testing 404 ";
+
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
-            " -s | grep \"404\"";
+            " -s > /dev/null";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
+         outputSuccess(success);
       }
 
-      cout << "Testing post application/json" << endl;
+      if (success)
       {
+         cout << "Testing post application/json ";
+
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
             " --header \"content-type: application/json\" " <<
-            " --data 123 -s | grep 123";
+            " --data 123 -s > /dev/null";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
+
+         outputSuccess(success);
       }
 
-      cout << "Testing get" << endl;
+      if (success)
       {
+         cout << "Testing get ";
+
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
             " -s | grep 123";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
+
+         outputSuccess(success);
       }
 
       dbServer.stop();

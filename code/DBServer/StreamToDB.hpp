@@ -83,7 +83,6 @@ cerr << "StreamToDB::flush:" << _pageCount << ", " << _pageCount * getpagesize()
       virtual void success() override
       {
          _path["size"] = _size;
-
          flush();
 
       }
