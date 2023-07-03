@@ -287,9 +287,6 @@ namespace BeeFishWebDB {
 
    Parser* DBWebRequest::createJSONBody()
    {
-cerr << "DBServer.hpp DBWebRequest create JSON body" << endl;
-
- 
       DBServer::Path path = dbServer()->urlPath(_url);
       path.clear();
 

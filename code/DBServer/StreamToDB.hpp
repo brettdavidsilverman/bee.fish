@@ -67,15 +67,13 @@ namespace BeeFishWebDB {
 
       virtual void flush()
       {
-cerr << "StreamToDB::flush:" << _pageCount << ", " << _pageCount * getpagesize() << endl;
-
          if (_position > 0) {
             const std::string
                data(_page, _position);
 
             _path[_pageCount++]
                .setData(data);
-
+cerr << "StreamToDB: pageCount:" << _pageCount << endl;
            _position = 0;
          }
       }
