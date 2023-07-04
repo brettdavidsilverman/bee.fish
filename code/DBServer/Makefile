@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -std=c++17 -fmax-errors=1
+CFLAGS = -std=c++17 -fmax-errors=1 -Ofast
 DEPS=main.cpp DBServer.hpp Test.hpp StreamToDB.hpp StreamFromDB.hpp Makefile HomePage.html 404.html
 BUILD = ../../build
 OUTPUT = $(BUILD)/DBServer

@@ -20,6 +20,8 @@ namespace BeeFishDatabase
    
       bool success = true;
 
+      const size_t max = 1106;
+
       cout << "Test Database" << endl;
 
       const string filename = "/var/tmp/temp.data";
@@ -44,7 +46,7 @@ namespace BeeFishDatabase
 
       // Min / Max
       Path data = start["data"];
-      for (int i = 0; i <= 10; ++i)
+      for (int i = 0; i <= max; ++i)
       {
          data[i];
       }
@@ -93,7 +95,7 @@ namespace BeeFishDatabase
          Size maximum;
          stack >> maximum;
   
-         success = success && (maximum == 10);
+         success = success && (maximum == max);
          success = success && (count == 0);
 
          outputSuccess(success);
@@ -101,9 +103,9 @@ namespace BeeFishDatabase
 
       cout << "\tTesting Data Path Max through: ";
       {
-         data[10][1];
-         size_t max = data.max();
-         success = success && (max == 10);
+         data[max][0];
+         data[max][1];
+         success = success && (data.max() == max);
          outputSuccess(success);
       }
 
@@ -111,7 +113,7 @@ namespace BeeFishDatabase
       {
          success =
             (data.min() == 0) &&
-            (data.max() == 10);
+            (data.max() == max);
 
          outputSuccess(success);
       }

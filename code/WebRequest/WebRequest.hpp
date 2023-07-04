@@ -37,6 +37,9 @@ namespace BeeFishWeb {
       string _url;
       string _version;
       map<string, string> _headers;
+      size_t _contentLength {0};
+      size_t _bytesRead {0};
+
       Parser* _body = nullptr;
       And _parser = createParser();
 
@@ -103,31 +106,36 @@ namespace BeeFishWeb {
       virtual bool read()
       {
          int size;
-         char buffer[512];
-         char *buff = &(buffer[0]);
+         size_t bufferSize = getpagesize();
+         char* buffer = new char[bufferSize];
+         bool success = true;
          _result = nullopt;
 
-         while ( _result == nullopt &&
-                 pollInput() &&
-                 (size = ::read(
-                     _socket,
-                     buff,
-                     sizeof(buffer))
-                  ) > 0)
+         while ( _result == nullopt )
          {
+            size = ::read(
+                _socket,
+                buffer,
+                bufferSize);
+            
+            if (size == 0)
+               continue;
 
-            if (!read(buff, size))
+            if (!read(buffer, size))
             {
-               return false;
+               success = false;
+               break;
             }
 
-            if (size < sizeof(buffer))
-               break;
+            if (size < bufferSize) {
+//cerr << "Read less than buffer size: " << _result << endl;
+              // break;
+            }
          }
 
-         // Read an additional
-         // "End of file" character
-         return readEndOfFile();
+         delete[] buffer;
+
+         return success;
 
       }
 
@@ -174,13 +182,17 @@ namespace BeeFishWeb {
 
          bool matched = _parser.read(c);
 
-         if (matched) {
-            //cerr << c;
-            ++_index;
-         }
-
          if (_parser._result != nullopt)
             setResult(_parser._result);
+         else if (_contentLength > 0) {
+            if (++_bytesRead == _contentLength)
+            {
+               if (_body)
+                  _body->setResult(true);
+               _parser.setResult(true);
+               setResult(true);
+            }
+         }
 
          return matched;
       }
@@ -236,7 +248,14 @@ namespace BeeFishWeb {
                );
             }
          ) and
-         newLine and
+         Invoke(
+            newLine,
+            [this](Parser*) {
+               if (_method == "GET")
+                  _result = true;
+               return true;
+            }
+         ) and
          LoadOnDemand(loadBody, this);
 
          return parser;
@@ -255,6 +274,16 @@ namespace BeeFishWeb {
 
       virtual Parser* createBody() {
          
+         if (_headers.count("content-length") > 0)
+         {
+            string contentLength =
+               _headers["content-length"];
+                  
+            _contentLength =
+               atol(contentLength.c_str());
+            _bytesRead = 0;
+         }
+
          if ( _method == "POST" )
          {
             string contentType =
@@ -268,21 +297,17 @@ namespace BeeFishWeb {
               _body = createJSONBody();
                return _body;
             }
+            else if (_contentLength > 0)
+            {
+               _body = createContentLengthBody(
+                  _contentLength
+               );
+
+               return _body;
+            }
+
          }
 
-         if ( _method == "POST" &&
-              _headers.count("content-length") > 0)
-         {
-            string _contentLength =
-               _headers["content-length"];
-                  
-            size_t contentLength =
-               atol(_contentLength.c_str());
-
-            _body = createContentLengthBody(contentLength);
-
-            return _body;
-         }
 
          //throw logic_error("Shouldnt reach here");
 

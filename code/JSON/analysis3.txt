@@ -1,0 +1,753 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  us/call  us/call  name    
+ 14.89      6.41     6.41 1333022807     0.00     0.01  BeeFishParser::UTF8Character::copy() const
+ 12.90     11.96     5.55 1407328497     0.00     0.00  frame_dummy
+  9.56     16.08     4.12 1335051108     0.00     0.00  BeeFishParser::UTF8Character::~UTF8Character()
+  8.13     19.58     3.50 275869108     0.01     0.05  BeeFishParser::Or::copy() const
+  7.90     22.98     3.40 275869109     0.01     0.03  BeeFishParser::Or::~Or()
+  6.34     25.71     2.73 89585129     0.03     0.04  BeeFishParser::And::~And()
+  4.61     27.69     1.99 419545067     0.00     0.00  std::vector<BeeFishParser::Parser*, std::allocator<BeeFishParser::Parser*> >::reserve(unsigned long)
+  3.53     29.21     1.52 89585129     0.02     0.04  BeeFishParser::And::copy() const
+  3.42     30.68     1.47 54494850     0.03     0.03  BeeFishParser::And::read(char)
+  2.65     31.82     1.14 25015589     0.05     0.44  BeeFishParser::And::~And()
+  2.49     32.89     1.07 187959562     0.01     0.01  BeeFishParser::Repeat::copy() const
+  2.38     33.92     1.03 200129308     0.01     0.01  BeeFishParser::Repeat::~Repeat()
+  2.24     34.88     0.97 153137523     0.01     0.01  BeeFishParser::Optional::~Optional()
+  2.01     35.75     0.87 28734130     0.03     0.03  BeeFishParser::LoadOnDemand::copy() const
+  1.96     36.59     0.85                             BeeFishParser::Capture::read(char)
+  1.66     37.31     0.72 148404841     0.00     0.01  BeeFishParser::Optional::copy() const
+  1.34     37.88     0.58 39891991     0.01     0.01  BeeFishParser::Not::~Not()
+  1.02     38.32     0.44 27354835     0.02     0.03  BeeFishParser::Or::read(char)
+  1.00     38.75     0.43  2028290     0.21     7.56  BeeFishParser::NumberExample()
+  0.95     39.16     0.41 28734130     0.01     0.02  BeeFishParser::LoadOnDemand::~LoadOnDemand()
+  0.84     39.52     0.36 39891991     0.01     0.01  BeeFishParser::Not::copy() const
+  0.72     39.83     0.31   676097     0.46     0.50  BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::ArrayParser const&)
+  0.67     40.12     0.29 20959007     0.01     0.04  BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&)
+  0.60     40.38     0.26 18912344     0.01     1.77  BeeFishParser::Repeat::read(char)
+  0.50     40.60     0.22 14896507     0.01     0.36  BeeFishParser::LoadOnDemand::read(char)
+  0.45     40.79     0.20 14896507     0.01     0.01  BeeFishJSON::JSON::read(char)
+  0.41     40.97     0.18                             BeeFishScript::Variable::operator==(BeeFishScript::Variable const&) const
+  0.38     41.13     0.17  4732679     0.03     0.23  BeeFishParser::ArrayParser::~ArrayParser()
+  0.38     41.30     0.17                             BeeFishParser::Capture::~Capture()
+  0.37     41.46     0.16 25912840     0.01     0.01  BeeFishParser::UTF8Character::read(char)
+  0.35     41.61     0.15                             BeeFishScript::Variable::operator==(char const*) const
+  0.33     41.75     0.14 17002532     0.01     0.01  BeeFishParser::Optional::read(char)
+  0.27     41.86     0.12 18930718     0.01     0.01  BeeFishParser::Word::~Word()
+  0.27     41.98     0.12                             BeeFishParser::Or::~Or()
+  0.24     42.08     0.11  5091347     0.02     0.02  BeeFishJSON::Object::read(char)
+  0.21     42.17     0.09 16226328     0.01     0.01  BeeFishParser::Word::copy() const
+  0.21     42.26     0.09 10587686     0.01     0.01  BeeFishParser::Range::~Range()
+  0.21     42.35     0.09 10536148     0.01     0.01  BeeFishParser::UTF8Character::UTF8Character(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+  0.20     42.44     0.09 10587685     0.01     0.02  BeeFishParser::Range::copy() const
+  0.20     42.52     0.09  2570515     0.03     0.03  BeeFishParser::Parser::isOptional() const
+  0.19     42.60     0.08  6760970     0.01     0.02  BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&)
+  0.16     42.67     0.07 63553138     0.00     0.00  std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)
+  0.14     42.73     0.06  1352194     0.04     0.05  BeeFishJSON::Object::~Object()
+  0.14     42.79     0.06 43750719     0.00     0.00  BeeFishParser::Parser::setResult(std::optional<bool>)
+  0.13     42.85     0.06                             BeeFishScript::Variable::operator=(BeeFishScript::Variable const&)
+  0.05     42.87     0.02  2705129     0.01     0.01  BeeFishParser::Not::read(char)
+  0.05     42.89     0.02  1976765     0.01     0.01  BeeFishParser::UTF8Character::read(BeeFishParser::UTF8Character const&)
+  0.05     42.91     0.02   338048     0.06    15.14  BeeFishJSON::_JSON(BeeFishParser::Parser*)
+  0.05     42.93     0.02                             BeeFishJSON::testBlankSpace()
+  0.05     42.95     0.02                             BeeFishJSON::JSON::~JSON()
+  0.03     42.96     0.02                             std::_Sp_counted_ptr<BeeFishScript::Object*, (__gnu_cxx::_Lock_policy)2>::_M_destroy()
+  0.02     42.97     0.01 10536148     0.00     0.00  BeeFishParser::UTF8Character::~UTF8Character()
+  0.02     42.98     0.01  1774471     0.01     0.01  BeeFishParser::Word::read(char)
+  0.02     42.99     0.01   446219     0.02     0.02  BeeFishParser::Range::read(BeeFishParser::UTF8Character const&)
+  0.02     43.00     0.01   338048     0.03     0.03  BeeFishJSON::JSON::~JSON()
+  0.02     43.01     0.01                             BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::Parser const&, BeeFishParser::Parser const&)
+  0.02     43.02     0.01                             BeeFishParser::Range::~Range()
+  0.02     43.03     0.01                             BeeFishParser::Parser::value[abi:cxx11]() const
+  0.01     43.04     0.01                             BeeFishParser::Word::Word(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+  0.01     43.04     0.01                             std::_Sp_counted_ptr<BeeFishScript::Object*, (__gnu_cxx::_Lock_policy)2>::_M_get_deleter(std::type_info const&)
+  0.00     43.04     0.00  2704388     0.00     0.00  BeeFishParser::operator-(BeeFishParser::Parser const&)
+  0.00     43.04     0.00  2028291     0.00     0.13  BeeFishParser::Repeat::~Repeat()
+  0.00     43.04     0.00  1352194     0.00     0.00  BeeFishJSON::Object::copy() const
+  0.00     43.04     0.00  1337543     0.00     0.00  BeeFishParser::Optional::isOptional() const
+  0.00     43.04     0.00   338048     0.00     0.00  std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_invoke(std::_Any_data const&, BeeFishParser::Parser*&&)
+  0.00     43.04     0.00   322633     0.00     0.00  BeeFishParser::Repeat::isOptional() const
+  0.00     43.04     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN11BeeFishMisc7openLogEv
+  0.00     43.04     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int) [clone .constprop.0]
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 2 byte(s) for 0.02% of 43.04 seconds
+
+index % time    self  children    called     name
+[2]     87.6    7.97   29.74 5083130+767727962 <cycle 1 as a whole> [2]
+                0.43   14.91 2028290+676097      BeeFishParser::NumberExample() <cycle 1> [4]
+                3.50   11.49 275869108             BeeFishParser::Or::copy() const <cycle 1> [5]
+                1.52    2.44 89585129+30427411     BeeFishParser::And::copy() const <cycle 1> [14]
+                1.07    0.16 187959562             BeeFishParser::Repeat::copy() const <cycle 1> [18]
+                0.72    0.14 148404841             BeeFishParser::Optional::copy() const <cycle 1> [23]
+                0.29    0.55 20959007             BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+                0.36    0.00 39891991             BeeFishParser::Not::copy() const <cycle 1> [29]
+                0.08    0.05 6760970             BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&) <cycle 1> [40]
+                0.00    0.00 1352194             BeeFishJSON::Object::copy() const <cycle 1> [77]
+-----------------------------------------------
+                             1363849             BeeFishParser::Optional::read(char) <cycle 3> [39]
+                             17548495             BeeFishParser::And::read(char) <cycle 3> [17]
+[3]     77.6    0.26   33.16 18912344         BeeFishParser::Repeat::read(char) <cycle 3> [3]
+                6.38   23.81 4068978/5083130     BeeFishParser::Or::copy() const <cycle 1> [5]
+                0.53    1.98  338048/5083130     BeeFishParser::And::copy() const <cycle 1> [14]
+                0.25    0.11 2903982/106664136     BeeFishParser::Or::~Or() <cycle 2> [9]
+                0.05    0.00 1523816/2570515     BeeFishParser::Parser::isOptional() const [46]
+                0.03    0.01  317277/106664136     BeeFishParser::And::~And() <cycle 2> [15]
+                0.00    0.00  446219/10587685     BeeFishParser::Range::copy() const [35]
+                0.00    0.00  446219/25912840     BeeFishParser::UTF8Character::read(char) [31]
+                0.00    0.00 1523743/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+                0.00    0.00  108170/10587686     BeeFishParser::Range::~Range() [45]
+                             14171210             BeeFishParser::And::read(char) <cycle 3> [17]
+                             4311292             BeeFishParser::Or::read(char) <cycle 3> [26]
+-----------------------------------------------
+                              676097             BeeFishParser::NumberExample() <cycle 1> [4]
+                             1352194             BeeFishJSON::Object::copy() const <cycle 1> [77]
+                1.06    3.96  676096/5083130     BeeFishJSON::_JSON(BeeFishParser::Parser*) [12]
+[4]     35.6    0.43   14.91 2028290+676097  BeeFishParser::NumberExample() <cycle 1> [4]
+                1.14    9.98 25015589/25015589     BeeFishParser::And::~And() [8]
+                1.05    0.48 12169746/106664136     BeeFishParser::Repeat::~Repeat() <cycle 2> [19]
+                0.17    0.95 4732679/4732679     BeeFishParser::ArrayParser::~ArrayParser() [20]
+                0.31    0.03  676097/676097      BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::ArrayParser const&) [30]
+                0.00    0.25 2028291/2028291     BeeFishParser::Repeat::~Repeat() [32]
+                0.17    0.08 2028291/106664136     BeeFishParser::And::~And() <cycle 2> [15]
+                0.07    0.03 8113164/10536148     BeeFishParser::UTF8Character::UTF8Character(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) [41]
+                0.06    0.03  676097/106664136     BeeFishParser::Or::~Or() <cycle 2> [9]
+                0.07    0.00 17578522/1407328497     frame_dummy [10]
+                0.02    0.02 4056582/1333022807     BeeFishParser::UTF8Character::copy() const [7]
+                0.01    0.00 2028291/419545067     std::vector<BeeFishParser::Parser*, std::allocator<BeeFishParser::Parser*> >::reserve(unsigned long) [16]
+                0.01    0.00 8113164/10536148     BeeFishParser::UTF8Character::~UTF8Character() [62]
+                0.01    0.00 6084873/63553138     std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation) [47]
+                0.00    0.00 2704388/2704388     BeeFishParser::operator-(BeeFishParser::Parser const&) [76]
+                             20959007             BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+                             12845843             BeeFishParser::Or::copy() const <cycle 1> [5]
+                             6760970             BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&) <cycle 1> [40]
+                             4056582             BeeFishParser::And::copy() const <cycle 1> [14]
+                             2028291             BeeFishParser::Repeat::copy() const <cycle 1> [18]
+                              676097             BeeFishParser::NumberExample() <cycle 1> [4]
+-----------------------------------------------
+                                   1             BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+                             1352196             BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&) <cycle 1> [40]
+                             6760976             BeeFishParser::Optional::copy() const <cycle 1> [23]
+                             12845843             BeeFishParser::NumberExample() <cycle 1> [4]
+                             39891991             BeeFishParser::Not::copy() const <cycle 1> [29]
+                             43272478             BeeFishParser::And::copy() const <cycle 1> [14]
+                             167676641             BeeFishParser::Repeat::copy() const <cycle 1> [18]
+                0.00    0.00       1/5083130     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::Parser const&, BeeFishParser::Parser const&) [58]
+                0.00    0.00       3/5083130     BeeFishParser::Repeat::Repeat(BeeFishParser::Parser const&, unsigned long, unsigned long) [65]
+                6.38   23.81 4068978/5083130     BeeFishParser::Repeat::read(char) <cycle 3> [3]
+[5]     34.8    3.50   11.49 275869108         BeeFishParser::Or::copy() const <cycle 1> [5]
+                5.58    4.58 1160273110/1333022807     BeeFishParser::UTF8Character::copy() const [7]
+                1.31    0.00 275869111/419545067     std::vector<BeeFishParser::Parser*, std::allocator<BeeFishParser::Parser*> >::reserve(unsigned long) [16]
+                0.02    0.01 2704388/16226328     BeeFishParser::Word::copy() const [37]
+                             41920281             BeeFishParser::And::copy() const <cycle 1> [14]
+                             39891990             BeeFishParser::Not::copy() const <cycle 1> [29]
+                              676097             BeeFishJSON::Object::copy() const <cycle 1> [77]
+-----------------------------------------------
+[6]     31.0    9.18    4.18 106664136+682373296 <cycle 2 as a whole> [6]
+                3.40    3.59 275869109             BeeFishParser::Or::~Or() <cycle 2> [9]
+                2.73    0.46 89585129+30427411     BeeFishParser::And::~And() <cycle 2> [15]
+                1.03    0.09 200129308             BeeFishParser::Repeat::~Repeat() <cycle 2> [19]
+                0.97    0.00 153137523             BeeFishParser::Optional::~Optional() <cycle 2> [21]
+                0.58    0.00 39891991             BeeFishParser::Not::~Not() <cycle 2> [27]
+                0.41    0.03 28734130             BeeFishParser::LoadOnDemand::~LoadOnDemand() <cycle 2> [28]
+                0.06    0.01 1352194             BeeFishJSON::Object::~Object() <cycle 2> [48]
+                0.01    0.00  338048             BeeFishJSON::JSON::~JSON() <cycle 2> [59]
+-----------------------------------------------
+                0.01    0.01 2028298/1333022807     BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&) <cycle 1> [40]
+                0.02    0.02 4056582/1333022807     BeeFishParser::NumberExample() <cycle 1> [4]
+                0.09    0.07 18254682/1333022807     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+                0.71    0.59 148410135/1333022807     BeeFishParser::And::copy() const <cycle 1> [14]
+                5.58    4.58 1160273110/1333022807     BeeFishParser::Or::copy() const <cycle 1> [5]
+[7]     27.1    6.41    5.26 1333022807         BeeFishParser::UTF8Character::copy() const [7]
+                5.26    0.00 1333022807/1407328497     frame_dummy [10]
+-----------------------------------------------
+                1.14    9.98 25015589/25015589     BeeFishParser::NumberExample() <cycle 1> [4]
+[8]     25.8    1.14    9.98 25015589         BeeFishParser::And::~And() [8]
+                4.54    2.07 52735582/106664136     BeeFishParser::Optional::~Optional() <cycle 2> [21]
+                1.40    0.64 16226330/106664136     BeeFishParser::And::~And() <cycle 2> [15]
+                0.52    0.24 6084873/106664136     BeeFishParser::LoadOnDemand::~LoadOnDemand() <cycle 2> [28]
+                0.35    0.16 4056590/106664136     BeeFishParser::Repeat::~Repeat() <cycle 2> [19]
+                0.07    0.00 23663406/1335051108     BeeFishParser::UTF8Character::~UTF8Character() [13]
+                0.00    0.00       4/106664136     BeeFishParser::Or::~Or() <cycle 2> [9]
+-----------------------------------------------
+                              338048             BeeFishJSON::JSON::~JSON() <cycle 2> [59]
+                             7437074             BeeFishParser::Optional::~Optional() <cycle 2> [21]
+                             39891991             BeeFishParser::Not::~Not() <cycle 2> [27]
+                             43272478             BeeFishParser::And::~And() <cycle 2> [15]
+                             181011383             BeeFishParser::Repeat::~Repeat() <cycle 2> [19]
+                0.00    0.00       1/106664136     BeeFishParser::Not::~Not() [66]
+                0.00    0.00       3/106664136     BeeFishParser::Repeat::~Repeat() [32]
+                0.00    0.00       4/106664136     BeeFishParser::And::~And() [8]
+                0.03    0.01  338048/106664136     BeeFishJSON::_JSON(BeeFishParser::Parser*) [12]
+                0.06    0.03  676097/106664136     BeeFishParser::NumberExample() <cycle 1> [4]
+                0.25    0.11 2903982/106664136     BeeFishParser::Repeat::read(char) <cycle 3> [3]
+[9]     16.2    3.40    3.59 275869109         BeeFishParser::Or::~Or() <cycle 2> [9]
+                3.58    0.00 1160273110/1335051108     BeeFishParser::UTF8Character::~UTF8Character() [13]
+                0.02    0.00 2704388/18930718     BeeFishParser::Word::~Word() [43]
+                             41920281             BeeFishParser::And::~And() <cycle 2> [15]
+                             39891990             BeeFishParser::Not::~Not() <cycle 2> [27]
+                              676097             BeeFishJSON::Object::~Object() <cycle 2> [48]
+-----------------------------------------------
+                0.00    0.00       2/1407328497     BeeFishParser::Word::Word(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) [63]
+                0.00    0.00       2/1407328497     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::Parser const&, BeeFishParser::Parser const&) [58]
+                0.00    0.00       4/1407328497     BeeFishParser::Range::Range(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) [67]
+                0.03    0.00 8789284/1407328497     BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&) <cycle 1> [40]
+                0.04    0.00 10536176/1407328497     BeeFishParser::UTF8Character::UTF8Character(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) [41]
+                0.06    0.00 16226328/1407328497     BeeFishParser::Word::copy() const [37]
+                0.07    0.00 17578522/1407328497     BeeFishParser::NumberExample() <cycle 1> [4]
+                0.08    0.00 21175372/1407328497     BeeFishParser::Range::copy() const [35]
+                5.26    0.00 1333022807/1407328497     BeeFishParser::UTF8Character::copy() const [7]
+[10]    12.9    5.55    0.00 1407328497         frame_dummy [10]
+-----------------------------------------------
+                             4712490             BeeFishParser::And::read(char) <cycle 3> [17]
+                             10184017             BeeFishParser::Optional::read(char) <cycle 3> [39]
+[11]    12.4    0.22    5.12 14896507         BeeFishParser::LoadOnDemand::read(char) <cycle 3> [11]
+                0.02    5.10  338048/338048      BeeFishJSON::_JSON(BeeFishParser::Parser*) [12]
+                0.00    0.00  338048/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+                0.00    0.00  338048/338048      std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_invoke(std::_Any_data const&, BeeFishParser::Parser*&&) [79]
+                             14896507             BeeFishJSON::JSON::read(char) <cycle 3> [33]
+-----------------------------------------------
+                0.02    5.10  338048/338048      BeeFishParser::LoadOnDemand::read(char) <cycle 3> [11]
+[12]    11.9    0.02    5.10  338048         BeeFishJSON::_JSON(BeeFishParser::Parser*) [12]
+                1.06    3.96  676096/5083130     BeeFishParser::NumberExample() <cycle 1> [4]
+                0.03    0.01  338048/106664136     BeeFishParser::Or::~Or() <cycle 2> [9]
+                0.03    0.01  338048/106664136     BeeFishParser::Optional::~Optional() <cycle 2> [21]
+-----------------------------------------------
+                0.00    0.00       8/1335051108     BeeFishParser::Or::~Or() [42]
+                0.00    0.00      61/1335051108     BeeFishParser::ArrayParser::~ArrayParser() [20]
+                0.01    0.00 2704388/1335051108     BeeFishJSON::Object::~Object() <cycle 2> [48]
+                0.07    0.00 23663406/1335051108     BeeFishParser::And::~And() [8]
+                0.46    0.00 148410135/1335051108     BeeFishParser::And::~And() <cycle 2> [15]
+                3.58    0.00 1160273110/1335051108     BeeFishParser::Or::~Or() <cycle 2> [9]
+[13]     9.6    4.12    0.00 1335051108         BeeFishParser::UTF8Character::~UTF8Character() [13]
+-----------------------------------------------
+                             30427411             BeeFishParser::And::copy() const <cycle 1> [14]
+                             4056582             BeeFishParser::NumberExample() <cycle 1> [4]
+                             4056583             BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&) <cycle 1> [40]
+                             10141458             BeeFishParser::Repeat::copy() const <cycle 1> [18]
+                             10817555             BeeFishParser::Optional::copy() const <cycle 1> [23]
+                             18254620             BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+                             41920281             BeeFishParser::Or::copy() const <cycle 1> [5]
+                0.00    0.00       1/5083130     BeeFishParser::Repeat::Repeat(BeeFishParser::Parser const&, unsigned long, unsigned long) [65]
+                0.00    0.00       1/5083130     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::Parser const&, BeeFishParser::Parser const&) [58]
+                0.53    1.98  338048/5083130     BeeFishParser::Repeat::read(char) <cycle 3> [3]
+[14]     9.2    1.52    2.44 89585129+30427411 BeeFishParser::And::copy() const <cycle 1> [14]
+                0.71    0.59 148410135/1333022807     BeeFishParser::UTF8Character::copy() const [7]
+                0.55    0.02 18256142/28734130     BeeFishParser::LoadOnDemand::copy() const [22]
+                0.57    0.00 120012542/419545067     std::vector<BeeFishParser::Parser*, std::allocator<BeeFishParser::Parser*> >::reserve(unsigned long) [16]
+                             95669263             BeeFishParser::Optional::copy() const <cycle 1> [23]
+                             53413193             BeeFishParser::Repeat::copy() const <cycle 1> [18]
+                             43272478             BeeFishParser::Or::copy() const <cycle 1> [5]
+                             30427411             BeeFishParser::And::copy() const <cycle 1> [14]
+-----------------------------------------------
+                             30427411             BeeFishParser::And::~And() <cycle 2> [15]
+                             10162229             BeeFishParser::Repeat::~Repeat() <cycle 2> [19]
+                             10817555             BeeFishParser::Optional::~Optional() <cycle 2> [21]
+                             41920281             BeeFishParser::Or::~Or() <cycle 2> [9]
+                0.03    0.01  317277/106664136     BeeFishParser::Repeat::read(char) <cycle 3> [3]
+                0.17    0.08 2028291/106664136     BeeFishParser::NumberExample() <cycle 1> [4]
+                0.17    0.08 2028292/106664136     BeeFishParser::Repeat::~Repeat() [32]
+                0.52    0.24 6084874/106664136     BeeFishParser::ArrayParser::~ArrayParser() [20]
+                1.40    0.64 16226330/106664136     BeeFishParser::And::~And() [8]
+[15]     7.4    2.73    0.46 89585129+30427411 BeeFishParser::And::~And() <cycle 2> [15]
+                0.46    0.00 148410135/1335051108     BeeFishParser::UTF8Character::~UTF8Character() [13]
+                             95669263             BeeFishParser::Optional::~Optional() <cycle 2> [21]
+                             53413193             BeeFishParser::Repeat::~Repeat() <cycle 2> [19]
+                             43272478             BeeFishParser::Or::~Or() <cycle 2> [9]
+                             18256142             BeeFishParser::LoadOnDemand::~LoadOnDemand() <cycle 2> [28]
+                             30427411             BeeFishParser::And::~And() <cycle 2> [15]
+-----------------------------------------------
+                0.00    0.00  676097/419545067     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::ArrayParser const&) [30]
+                0.01    0.00 2028291/419545067     BeeFishParser::NumberExample() <cycle 1> [4]
+                0.10    0.00 20959026/419545067     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+                0.57    0.00 120012542/419545067     BeeFishParser::And::copy() const <cycle 1> [14]
+                1.31    0.00 275869111/419545067     BeeFishParser::Or::copy() const <cycle 1> [5]
+[16]     4.6    1.99    0.00 419545067         std::vector<BeeFishParser::Parser*, std::allocator<BeeFishParser::Parser*> >::reserve(unsigned long) [16]
+-----------------------------------------------
+                             15486837             BeeFishParser::And::read(char) <cycle 3> [17]
+                             4778568             BeeFishParser::Optional::read(char) <cycle 3> [39]
+                             5091347             BeeFishJSON::Object::read(char) <cycle 3> [44]
+                             14171210             BeeFishParser::Repeat::read(char) <cycle 3> [3]
+                             14896507             BeeFishJSON::JSON::read(char) <cycle 3> [33]
+                             15557218             BeeFishParser::Or::read(char) <cycle 3> [26]
+[17]     3.5    1.47    0.06 54494850+15486837 BeeFishParser::And::read(char) <cycle 3> [17]
+                0.03    0.00 1046699/2570515     BeeFishParser::Parser::isOptional() const [46]
+                0.01    0.01 1969021/25912840     BeeFishParser::UTF8Character::read(char) [31]
+                0.00    0.00 2492595/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+                0.00    0.00 1337543/1337543     BeeFishParser::Optional::isOptional() const [78]
+                0.00    0.00  322633/322633      BeeFishParser::Repeat::isOptional() const [80]
+                             19662316             BeeFishParser::Or::read(char) <cycle 3> [26]
+                             17548495             BeeFishParser::Repeat::read(char) <cycle 3> [3]
+                             17002532             BeeFishParser::Optional::read(char) <cycle 3> [39]
+                             4712490             BeeFishParser::LoadOnDemand::read(char) <cycle 3> [11]
+                             15486837             BeeFishParser::And::read(char) <cycle 3> [17]
+-----------------------------------------------
+                             2028291             BeeFishParser::NumberExample() <cycle 1> [4]
+                             2028295             BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+                             4056587             BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&) <cycle 1> [40]
+                             53413193             BeeFishParser::And::copy() const <cycle 1> [14]
+                             126433196             BeeFishParser::Optional::copy() const <cycle 1> [23]
+[18]     2.9    1.07    0.16 187959562         BeeFishParser::Repeat::copy() const <cycle 1> [18]
+                0.08    0.08 10141465/10587685     BeeFishParser::Range::copy() const [35]
+                             167676641             BeeFishParser::Or::copy() const <cycle 1> [5]
+                             10141458             BeeFishParser::And::copy() const <cycle 1> [14]
+-----------------------------------------------
+                             53413193             BeeFishParser::And::~And() <cycle 2> [15]
+                             130489779             BeeFishParser::Optional::~Optional() <cycle 2> [21]
+                0.35    0.16 4056590/106664136     BeeFishParser::And::~And() [8]
+                1.05    0.48 12169746/106664136     BeeFishParser::NumberExample() <cycle 1> [4]
+[19]     2.6    1.03    0.09 200129308         BeeFishParser::Repeat::~Repeat() <cycle 2> [19]
+                0.09    0.00 10479514/10587686     BeeFishParser::Range::~Range() [45]
+                             181011383             BeeFishParser::Or::~Or() <cycle 2> [9]
+                             10162229             BeeFishParser::And::~And() <cycle 2> [15]
+-----------------------------------------------
+                0.17    0.95 4732679/4732679     BeeFishParser::NumberExample() <cycle 1> [4]
+[20]     2.6    0.17    0.95 4732679         BeeFishParser::ArrayParser::~ArrayParser() [20]
+                0.52    0.24 6084874/106664136     BeeFishParser::And::~And() <cycle 2> [15]
+                0.10    0.00 16226328/18930718     BeeFishParser::Word::~Word() [43]
+                0.06    0.03  676097/106664136     BeeFishJSON::Object::~Object() <cycle 2> [48]
+                0.00    0.00      61/1335051108     BeeFishParser::UTF8Character::~UTF8Character() [13]
+                0.00    0.00       1/106664136     BeeFishParser::Not::~Not() <cycle 2> [27]
+-----------------------------------------------
+                              338048             BeeFishJSON::JSON::~JSON() <cycle 2> [59]
+                             4056582             BeeFishJSON::Object::~Object() <cycle 2> [48]
+                             95669263             BeeFishParser::And::~And() <cycle 2> [15]
+                0.03    0.01  338048/106664136     BeeFishJSON::_JSON(BeeFishParser::Parser*) [12]
+                4.54    2.07 52735582/106664136     BeeFishParser::And::~And() [8]
+[21]     2.2    0.97    0.00 153137523         BeeFishParser::Optional::~Optional() <cycle 2> [21]
+                             130489779             BeeFishParser::Repeat::~Repeat() <cycle 2> [19]
+                             10817555             BeeFishParser::And::~And() <cycle 2> [15]
+                             7437074             BeeFishParser::Or::~Or() <cycle 2> [9]
+                             4393115             BeeFishParser::LoadOnDemand::~LoadOnDemand() <cycle 2> [28]
+-----------------------------------------------
+                0.00    0.00       1/28734130     BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&) <cycle 1> [40]
+                0.13    0.00 4393114/28734130     BeeFishParser::Optional::copy() const <cycle 1> [23]
+                0.18    0.01 6084873/28734130     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+                0.55    0.02 18256142/28734130     BeeFishParser::And::copy() const <cycle 1> [14]
+[22]     2.1    0.87    0.03 28734130         BeeFishParser::LoadOnDemand::copy() const [22]
+                0.03    0.00 28734132/63553138     std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation) [47]
+-----------------------------------------------
+                             52735577             BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+                             95669263             BeeFishParser::And::copy() const <cycle 1> [14]
+                0.00    0.00       1/5083130     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::Parser const&, BeeFishParser::Parser const&) [58]
+[23]     2.0    0.72    0.14 148404841         BeeFishParser::Optional::copy() const <cycle 1> [23]
+                0.13    0.00 4393114/28734130     BeeFishParser::LoadOnDemand::copy() const [22]
+                             126433196             BeeFishParser::Repeat::copy() const <cycle 1> [18]
+                             10817555             BeeFishParser::And::copy() const <cycle 1> [14]
+                             6760976             BeeFishParser::Or::copy() const <cycle 1> [5]
+-----------------------------------------------
+                                                 <spontaneous>
+[24]     2.0    0.85    0.00                 BeeFishParser::Capture::read(char) [24]
+-----------------------------------------------
+                             20959007             BeeFishParser::NumberExample() <cycle 1> [4]
+[25]     2.0    0.29    0.55 20959007         BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+                0.18    0.01 6084873/28734130     BeeFishParser::LoadOnDemand::copy() const [22]
+                0.09    0.07 18254682/1333022807     BeeFishParser::UTF8Character::copy() const [7]
+                0.06    0.04 10817552/16226328     BeeFishParser::Word::copy() const [37]
+                0.10    0.00 20959026/419545067     std::vector<BeeFishParser::Parser*, std::allocator<BeeFishParser::Parser*> >::reserve(unsigned long) [16]
+                             52735577             BeeFishParser::Optional::copy() const <cycle 1> [23]
+                             18254620             BeeFishParser::And::copy() const <cycle 1> [14]
+                             2028295             BeeFishParser::Repeat::copy() const <cycle 1> [18]
+                              676097             BeeFishJSON::Object::copy() const <cycle 1> [77]
+                                   1             BeeFishParser::Or::copy() const <cycle 1> [5]
+-----------------------------------------------
+                              676098             BeeFishParser::Optional::read(char) <cycle 3> [39]
+                             2705129             BeeFishParser::Not::read(char) <cycle 3> [51]
+                             4311292             BeeFishParser::Repeat::read(char) <cycle 3> [3]
+                             19662316             BeeFishParser::And::read(char) <cycle 3> [17]
+[26]     1.6    0.44    0.26 27354835         BeeFishParser::Or::read(char) <cycle 3> [26]
+                0.15    0.09 23497600/25912840     BeeFishParser::UTF8Character::read(char) [31]
+                0.01    0.00 1774471/1774471     BeeFishParser::Word::read(char) [56]
+                0.01    0.00 8046057/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+                             15557218             BeeFishParser::And::read(char) <cycle 3> [17]
+                             5091347             BeeFishJSON::Object::read(char) <cycle 3> [44]
+                             2705129             BeeFishParser::Not::read(char) <cycle 3> [51]
+-----------------------------------------------
+                             39891990             BeeFishParser::Or::~Or() <cycle 2> [9]
+                0.00    0.00       1/106664136     BeeFishParser::ArrayParser::~ArrayParser() [20]
+[27]     1.3    0.58    0.00 39891991         BeeFishParser::Not::~Not() <cycle 2> [27]
+                             39891991             BeeFishParser::Or::~Or() <cycle 2> [9]
+-----------------------------------------------
+                             4393115             BeeFishParser::Optional::~Optional() <cycle 2> [21]
+                             18256142             BeeFishParser::And::~And() <cycle 2> [15]
+                0.52    0.24 6084873/106664136     BeeFishParser::And::~And() [8]
+[28]     1.0    0.41    0.03 28734130         BeeFishParser::LoadOnDemand::~LoadOnDemand() <cycle 2> [28]
+                0.03    0.00 28734132/63553138     std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation) [47]
+                              338048             BeeFishJSON::JSON::~JSON() <cycle 2> [59]
+-----------------------------------------------
+                             39891990             BeeFishParser::Or::copy() const <cycle 1> [5]
+                0.00    0.00       1/5083130     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::Parser const&, BeeFishParser::Parser const&) [58]
+[29]     0.8    0.36    0.00 39891991         BeeFishParser::Not::copy() const <cycle 1> [29]
+                             39891991             BeeFishParser::Or::copy() const <cycle 1> [5]
+-----------------------------------------------
+                0.31    0.03  676097/676097      BeeFishParser::NumberExample() <cycle 1> [4]
+[30]     0.8    0.31    0.03  676097         BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::ArrayParser const&) [30]
+                0.02    0.01 2704388/16226328     BeeFishParser::Word::copy() const [37]
+                0.00    0.00  676097/419545067     std::vector<BeeFishParser::Parser*, std::allocator<BeeFishParser::Parser*> >::reserve(unsigned long) [16]
+-----------------------------------------------
+                0.00    0.00  446219/25912840     BeeFishParser::Repeat::read(char) <cycle 3> [3]
+                0.01    0.01 1969021/25912840     BeeFishParser::And::read(char) <cycle 3> [17]
+                0.15    0.09 23497600/25912840     BeeFishParser::Or::read(char) <cycle 3> [26]
+[31]     0.6    0.16    0.10 25912840         BeeFishParser::UTF8Character::read(char) [31]
+                0.03    0.00 23489856/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+                0.02    0.01 2422984/10536148     BeeFishParser::UTF8Character::UTF8Character(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) [41]
+                0.02    0.00 1976765/1976765     BeeFishParser::UTF8Character::read(BeeFishParser::UTF8Character const&) [52]
+                0.01    0.00  446219/446219      BeeFishParser::Range::read(BeeFishParser::UTF8Character const&) [57]
+                0.00    0.00 2422984/10536148     BeeFishParser::UTF8Character::~UTF8Character() [62]
+-----------------------------------------------
+                0.00    0.25 2028291/2028291     BeeFishParser::NumberExample() <cycle 1> [4]
+[32]     0.6    0.00    0.25 2028291         BeeFishParser::Repeat::~Repeat() [32]
+                0.17    0.08 2028292/106664136     BeeFishParser::And::~And() <cycle 2> [15]
+                0.00    0.00       3/106664136     BeeFishParser::Or::~Or() <cycle 2> [9]
+                0.00    0.00       2/10587686     BeeFishParser::Range::~Range() [45]
+-----------------------------------------------
+                             14896507             BeeFishParser::LoadOnDemand::read(char) <cycle 3> [11]
+[33]     0.5    0.20    0.00 14896507         BeeFishJSON::JSON::read(char) <cycle 3> [33]
+                0.00    0.00  338048/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+                             14896507             BeeFishParser::And::read(char) <cycle 3> [17]
+-----------------------------------------------
+                                                 <spontaneous>
+[34]     0.4    0.18    0.00                 BeeFishScript::Variable::operator==(BeeFishScript::Variable const&) const [34]
+-----------------------------------------------
+                0.00    0.00       1/10587685     BeeFishParser::Repeat::Repeat(BeeFishParser::Parser const&, unsigned long, unsigned long) [65]
+                0.00    0.00  446219/10587685     BeeFishParser::Repeat::read(char) <cycle 3> [3]
+                0.08    0.08 10141465/10587685     BeeFishParser::Repeat::copy() const <cycle 1> [18]
+[35]     0.4    0.09    0.08 10587685         BeeFishParser::Range::copy() const [35]
+                0.08    0.00 21175372/1407328497     frame_dummy [10]
+-----------------------------------------------
+                                                 <spontaneous>
+[36]     0.4    0.17    0.00                 BeeFishParser::Capture::~Capture() [36]
+-----------------------------------------------
+                0.02    0.01 2704388/16226328     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::ArrayParser const&) [30]
+                0.02    0.01 2704388/16226328     BeeFishParser::Or::copy() const <cycle 1> [5]
+                0.06    0.04 10817552/16226328     BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+[37]     0.4    0.09    0.06 16226328         BeeFishParser::Word::copy() const [37]
+                0.06    0.00 16226328/1407328497     frame_dummy [10]
+-----------------------------------------------
+                                                 <spontaneous>
+[38]     0.3    0.15    0.00                 BeeFishScript::Variable::operator==(char const*) const [38]
+-----------------------------------------------
+                             17002532             BeeFishParser::And::read(char) <cycle 3> [17]
+[39]     0.3    0.14    0.00 17002532         BeeFishParser::Optional::read(char) <cycle 3> [39]
+                0.00    0.00  704014/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+                             10184017             BeeFishParser::LoadOnDemand::read(char) <cycle 3> [11]
+                             4778568             BeeFishParser::And::read(char) <cycle 3> [17]
+                             1363849             BeeFishParser::Repeat::read(char) <cycle 3> [3]
+                              676098             BeeFishParser::Or::read(char) <cycle 3> [26]
+-----------------------------------------------
+                             6760970             BeeFishParser::NumberExample() <cycle 1> [4]
+[40]     0.3    0.08    0.05 6760970         BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&) <cycle 1> [40]
+                0.03    0.00 8789284/1407328497     frame_dummy [10]
+                0.01    0.01 2028298/1333022807     BeeFishParser::UTF8Character::copy() const [7]
+                0.00    0.00       1/28734130     BeeFishParser::LoadOnDemand::copy() const [22]
+                             4056587             BeeFishParser::Repeat::copy() const <cycle 1> [18]
+                             4056583             BeeFishParser::And::copy() const <cycle 1> [14]
+                             1352196             BeeFishParser::Or::copy() const <cycle 1> [5]
+-----------------------------------------------
+                0.02    0.01 2422984/10536148     BeeFishParser::UTF8Character::read(char) [31]
+                0.07    0.03 8113164/10536148     BeeFishParser::NumberExample() <cycle 1> [4]
+[41]     0.3    0.09    0.04 10536148         BeeFishParser::UTF8Character::UTF8Character(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) [41]
+                0.04    0.00 10536176/1407328497     frame_dummy [10]
+-----------------------------------------------
+                                                 <spontaneous>
+[42]     0.3    0.12    0.00                 BeeFishParser::Or::~Or() [42]
+                0.00    0.00       8/1335051108     BeeFishParser::UTF8Character::~UTF8Character() [13]
+                0.00    0.00       2/18930718     BeeFishParser::Word::~Word() [43]
+-----------------------------------------------
+                0.00    0.00       2/18930718     BeeFishParser::Or::~Or() [42]
+                0.02    0.00 2704388/18930718     BeeFishParser::Or::~Or() <cycle 2> [9]
+                0.10    0.00 16226328/18930718     BeeFishParser::ArrayParser::~ArrayParser() [20]
+[43]     0.3    0.12    0.00 18930718         BeeFishParser::Word::~Word() [43]
+-----------------------------------------------
+                             5091347             BeeFishParser::Or::read(char) <cycle 3> [26]
+[44]     0.2    0.11    0.00 5091347         BeeFishJSON::Object::read(char) <cycle 3> [44]
+                0.00    0.00  338049/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+                             5091347             BeeFishParser::And::read(char) <cycle 3> [17]
+-----------------------------------------------
+                0.00    0.00       2/10587686     BeeFishParser::Repeat::~Repeat() [32]
+                0.00    0.00  108170/10587686     BeeFishParser::Repeat::read(char) <cycle 3> [3]
+                0.09    0.00 10479514/10587686     BeeFishParser::Repeat::~Repeat() <cycle 2> [19]
+[45]     0.2    0.09    0.00 10587686         BeeFishParser::Range::~Range() [45]
+-----------------------------------------------
+                0.03    0.00 1046699/2570515     BeeFishParser::And::read(char) <cycle 3> [17]
+                0.05    0.00 1523816/2570515     BeeFishParser::Repeat::read(char) <cycle 3> [3]
+[46]     0.2    0.09    0.00 2570515         BeeFishParser::Parser::isOptional() const [46]
+-----------------------------------------------
+                0.00    0.00       1/63553138     BeeFishParser::LoadOnDemand::~LoadOnDemand() [68]
+                0.01    0.00 6084873/63553138     BeeFishParser::NumberExample() <cycle 1> [4]
+                0.03    0.00 28734132/63553138     BeeFishParser::LoadOnDemand::copy() const [22]
+                0.03    0.00 28734132/63553138     BeeFishParser::LoadOnDemand::~LoadOnDemand() <cycle 2> [28]
+[47]     0.2    0.07    0.00 63553138         std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation) [47]
+-----------------------------------------------
+                              676097             BeeFishParser::Or::~Or() <cycle 2> [9]
+                0.06    0.03  676097/106664136     BeeFishParser::ArrayParser::~ArrayParser() [20]
+[48]     0.2    0.06    0.01 1352194         BeeFishJSON::Object::~Object() <cycle 2> [48]
+                0.01    0.00 2704388/1335051108     BeeFishParser::UTF8Character::~UTF8Character() [13]
+                             4056582             BeeFishParser::Optional::~Optional() <cycle 2> [21]
+-----------------------------------------------
+                0.00    0.00  338048/43750719     BeeFishParser::LoadOnDemand::read(char) <cycle 3> [11]
+                0.00    0.00  338048/43750719     BeeFishJSON::JSON::read(char) <cycle 3> [33]
+                0.00    0.00  338049/43750719     BeeFishJSON::Object::read(char) <cycle 3> [44]
+                0.00    0.00  446219/43750719     BeeFishParser::Range::read(BeeFishParser::UTF8Character const&) [57]
+                0.00    0.00  704014/43750719     BeeFishParser::Optional::read(char) <cycle 3> [39]
+                0.00    0.00 1352196/43750719     BeeFishParser::Word::read(char) [56]
+                0.00    0.00 1523743/43750719     BeeFishParser::Repeat::read(char) <cycle 3> [3]
+                0.00    0.00 1976765/43750719     BeeFishParser::UTF8Character::read(BeeFishParser::UTF8Character const&) [52]
+                0.00    0.00 2492595/43750719     BeeFishParser::And::read(char) <cycle 3> [17]
+                0.00    0.00 2705129/43750719     BeeFishParser::Not::read(char) <cycle 3> [51]
+                0.01    0.00 8046057/43750719     BeeFishParser::Or::read(char) <cycle 3> [26]
+                0.03    0.00 23489856/43750719     BeeFishParser::UTF8Character::read(char) [31]
+[49]     0.1    0.06    0.00 43750719         BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+-----------------------------------------------
+                                                 <spontaneous>
+[50]     0.1    0.06    0.00                 BeeFishScript::Variable::operator=(BeeFishScript::Variable const&) [50]
+-----------------------------------------------
+                             2705129             BeeFishParser::Or::read(char) <cycle 3> [26]
+[51]     0.1    0.02    0.00 2705129         BeeFishParser::Not::read(char) <cycle 3> [51]
+                0.00    0.00 2705129/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+                             2705129             BeeFishParser::Or::read(char) <cycle 3> [26]
+-----------------------------------------------
+                0.02    0.00 1976765/1976765     BeeFishParser::UTF8Character::read(char) [31]
+[52]     0.1    0.02    0.00 1976765         BeeFishParser::UTF8Character::read(BeeFishParser::UTF8Character const&) [52]
+                0.00    0.00 1976765/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+-----------------------------------------------
+                                                 <spontaneous>
+[53]     0.0    0.02    0.00                 BeeFishJSON::testBlankSpace() [53]
+-----------------------------------------------
+                                                 <spontaneous>
+[54]     0.0    0.02    0.00                 BeeFishJSON::JSON::~JSON() [54]
+-----------------------------------------------
+                                                 <spontaneous>
+[55]     0.0    0.02    0.00                 std::_Sp_counted_ptr<BeeFishScript::Object*, (__gnu_cxx::_Lock_policy)2>::_M_destroy() [55]
+-----------------------------------------------
+                0.01    0.00 1774471/1774471     BeeFishParser::Or::read(char) <cycle 3> [26]
+[56]     0.0    0.01    0.00 1774471         BeeFishParser::Word::read(char) [56]
+                0.00    0.00 1352196/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+-----------------------------------------------
+                0.01    0.00  446219/446219      BeeFishParser::UTF8Character::read(char) [31]
+[57]     0.0    0.01    0.00  446219         BeeFishParser::Range::read(BeeFishParser::UTF8Character const&) [57]
+                0.00    0.00  446219/43750719     BeeFishParser::Parser::setResult(std::optional<bool>) [49]
+-----------------------------------------------
+                                                 <spontaneous>
+[58]     0.0    0.01    0.00                 BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::Parser const&, BeeFishParser::Parser const&) [58]
+                0.00    0.00       1/5083130     BeeFishParser::Not::copy() const <cycle 1> [29]
+                0.00    0.00       1/5083130     BeeFishParser::Or::copy() const <cycle 1> [5]
+                0.00    0.00       1/5083130     BeeFishParser::And::copy() const <cycle 1> [14]
+                0.00    0.00       1/5083130     BeeFishParser::Optional::copy() const <cycle 1> [23]
+                0.00    0.00       2/1407328497     frame_dummy [10]
+-----------------------------------------------
+                              338048             BeeFishParser::LoadOnDemand::~LoadOnDemand() <cycle 2> [28]
+[59]     0.0    0.01    0.00  338048         BeeFishJSON::JSON::~JSON() <cycle 2> [59]
+                              338048             BeeFishParser::Or::~Or() <cycle 2> [9]
+                              338048             BeeFishParser::Optional::~Optional() <cycle 2> [21]
+-----------------------------------------------
+                                                 <spontaneous>
+[60]     0.0    0.01    0.00                 BeeFishParser::Range::~Range() [60]
+-----------------------------------------------
+                                                 <spontaneous>
+[61]     0.0    0.01    0.00                 BeeFishParser::Parser::value[abi:cxx11]() const [61]
+-----------------------------------------------
+                0.00    0.00 2422984/10536148     BeeFishParser::UTF8Character::read(char) [31]
+                0.01    0.00 8113164/10536148     BeeFishParser::NumberExample() <cycle 1> [4]
+[62]     0.0    0.01    0.00 10536148         BeeFishParser::UTF8Character::~UTF8Character() [62]
+-----------------------------------------------
+                                                 <spontaneous>
+[63]     0.0    0.01    0.00                 BeeFishParser::Word::Word(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) [63]
+                0.00    0.00       2/1407328497     frame_dummy [10]
+-----------------------------------------------
+                                                 <spontaneous>
+[64]     0.0    0.01    0.00                 std::_Sp_counted_ptr<BeeFishScript::Object*, (__gnu_cxx::_Lock_policy)2>::_M_get_deleter(std::type_info const&) [64]
+-----------------------------------------------
+                                                 <spontaneous>
+[65]     0.0    0.00    0.00                 BeeFishParser::Repeat::Repeat(BeeFishParser::Parser const&, unsigned long, unsigned long) [65]
+                0.00    0.00       3/5083130     BeeFishParser::Or::copy() const <cycle 1> [5]
+                0.00    0.00       1/5083130     BeeFishParser::And::copy() const <cycle 1> [14]
+                0.00    0.00       1/10587685     BeeFishParser::Range::copy() const [35]
+-----------------------------------------------
+                                                 <spontaneous>
+[66]     0.0    0.00    0.00                 BeeFishParser::Not::~Not() [66]
+                0.00    0.00       1/106664136     BeeFishParser::Or::~Or() <cycle 2> [9]
+-----------------------------------------------
+                                                 <spontaneous>
+[67]     0.0    0.00    0.00                 BeeFishParser::Range::Range(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) [67]
+                0.00    0.00       4/1407328497     frame_dummy [10]
+-----------------------------------------------
+                                                 <spontaneous>
+[68]     0.0    0.00    0.00                 BeeFishParser::LoadOnDemand::~LoadOnDemand() [68]
+                0.00    0.00       1/63553138     std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation) [47]
+-----------------------------------------------
+                0.00    0.00 2704388/2704388     BeeFishParser::NumberExample() <cycle 1> [4]
+[76]     0.0    0.00    0.00 2704388         BeeFishParser::operator-(BeeFishParser::Parser const&) [76]
+-----------------------------------------------
+                              676097             BeeFishParser::Or::copy() const <cycle 1> [5]
+                              676097             BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) <cycle 1> [25]
+[77]     0.0    0.00    0.00 1352194         BeeFishJSON::Object::copy() const <cycle 1> [77]
+                             1352194             BeeFishParser::NumberExample() <cycle 1> [4]
+-----------------------------------------------
+                0.00    0.00 1337543/1337543     BeeFishParser::And::read(char) <cycle 3> [17]
+[78]     0.0    0.00    0.00 1337543         BeeFishParser::Optional::isOptional() const [78]
+-----------------------------------------------
+                0.00    0.00  338048/338048      BeeFishParser::LoadOnDemand::read(char) <cycle 3> [11]
+[79]     0.0    0.00    0.00  338048         std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_invoke(std::_Any_data const&, BeeFishParser::Parser*&&) [79]
+-----------------------------------------------
+                0.00    0.00  322633/322633      BeeFishParser::And::read(char) <cycle 3> [17]
+[80]     0.0    0.00    0.00  322633         BeeFishParser::Repeat::isOptional() const [80]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [177]
+[81]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN11BeeFishMisc7openLogEv [81]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [177]
+[82]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [clone .constprop.0] [82]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+  [81] _GLOBAL__sub_I__ZN11BeeFishMisc7openLogEv [17] BeeFishParser::And::read(char) [7] BeeFishParser::UTF8Character::copy() const
+  [82] __static_initialization_and_destruction_0(int, int) [clone .constprop.0] [15] BeeFishParser::And::~And() [5] BeeFishParser::Or::copy() const
+  [53] BeeFishJSON::testBlankSpace() [8] BeeFishParser::And::~And() [14] BeeFishParser::And::copy() const
+  [33] BeeFishJSON::JSON::read(char) [51] BeeFishParser::Not::read(char) [29] BeeFishParser::Not::copy() const
+  [59] BeeFishJSON::JSON::~JSON() [27] BeeFishParser::Not::~Not() [37] BeeFishParser::Word::copy() const
+  [54] BeeFishJSON::JSON::~JSON() [56] BeeFishParser::Word::read(char) [35] BeeFishParser::Range::copy() const
+  [12] BeeFishJSON::_JSON(BeeFishParser::Parser*) [63] BeeFishParser::Word::Word(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) [46] BeeFishParser::Parser::isOptional() const
+  [44] BeeFishJSON::Object::read(char) [43] BeeFishParser::Word::~Word() [61] BeeFishParser::Parser::value[abi:cxx11]() const
+  [48] BeeFishJSON::Object::~Object() [57] BeeFishParser::Range::read(BeeFishParser::UTF8Character const&) [80] BeeFishParser::Repeat::isOptional() const
+  [58] BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::Parser const&, BeeFishParser::Parser const&) [45] BeeFishParser::Range::~Range() [18] BeeFishParser::Repeat::copy() const
+  [25] BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::Parser const&) [60] BeeFishParser::Range::~Range() [78] BeeFishParser::Optional::isOptional() const
+  [30] BeeFishParser::ArrayParser::ArrayParser(BeeFishParser::ArrayParser const&, BeeFishParser::ArrayParser const&) [49] BeeFishParser::Parser::setResult(std::optional<bool>) [23] BeeFishParser::Optional::copy() const
+  [20] BeeFishParser::ArrayParser::~ArrayParser() [3] BeeFishParser::Repeat::read(char) [38] BeeFishScript::Variable::operator==(char const*) const
+  [11] BeeFishParser::LoadOnDemand::read(char) [19] BeeFishParser::Repeat::~Repeat() [34] BeeFishScript::Variable::operator==(BeeFishScript::Variable const&) const
+  [28] BeeFishParser::LoadOnDemand::~LoadOnDemand() [32] BeeFishParser::Repeat::~Repeat() [55] std::_Sp_counted_ptr<BeeFishScript::Object*, (__gnu_cxx::_Lock_policy)2>::_M_destroy()
+   [4] BeeFishParser::NumberExample() [24] BeeFishParser::Capture::read(char) [64] std::_Sp_counted_ptr<BeeFishScript::Object*, (__gnu_cxx::_Lock_policy)2>::_M_get_deleter(std::type_info const&)
+  [52] BeeFishParser::UTF8Character::read(BeeFishParser::UTF8Character const&) [36] BeeFishParser::Capture::~Capture() [47] std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)
+  [31] BeeFishParser::UTF8Character::read(char) [39] BeeFishParser::Optional::read(char) [79] std::_Function_handler<BeeFishParser::Parser* (BeeFishParser::Parser*), BeeFishParser::Parser* (*)(BeeFishParser::Parser*)>::_M_invoke(std::_Any_data const&, BeeFishParser::Parser*&&)
+  [41] BeeFishParser::UTF8Character::UTF8Character(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) [21] BeeFishParser::Optional::~Optional() [16] std::vector<BeeFishParser::Parser*, std::allocator<BeeFishParser::Parser*> >::reserve(unsigned long)
+  [13] BeeFishParser::UTF8Character::~UTF8Character() [76] BeeFishParser::operator-(BeeFishParser::Parser const&) [10] frame_dummy
+  [62] BeeFishParser::UTF8Character::~UTF8Character() [40] BeeFishParser::operator||(BeeFishParser::Or const&, BeeFishParser::Parser const&) [2] <cycle 1>
+  [26] BeeFishParser::Or::read(char) [50] BeeFishScript::Variable::operator=(BeeFishScript::Variable const&) [6] <cycle 2>
+   [9] BeeFishParser::Or::~Or() [77] BeeFishJSON::Object::copy() const (1) <cycle 3>
+  [42] BeeFishParser::Or::~Or() [22] BeeFishParser::LoadOnDemand::copy() const

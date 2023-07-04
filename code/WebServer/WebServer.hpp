@@ -156,7 +156,7 @@ namespace BeeFishWeb {
             {
                const char *ipAddress = inet_ntoa(cli_addr.sin_addr);
                // Set client socket to non blocking
-               fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+               //fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 
                // Delegate to thread
                boost::asio::post(

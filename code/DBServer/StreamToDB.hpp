@@ -73,7 +73,7 @@ namespace BeeFishWebDB {
 
             _path[_pageCount++]
                .setData(data);
-cerr << "StreamToDB: pageCount:" << _pageCount << endl;
+cerr << "StreamToDB: pageCount, max:" << _pageCount << ", " << _path.max() << endl;
            _position = 0;
          }
       }

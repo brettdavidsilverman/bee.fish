@@ -90,6 +90,7 @@ namespace BeeFishWebDB {
 
          if (webRequest._result != true)
          {
+cerr << "Error at position " << webRequest._index << endl;
             syslog(LOG_WARNING, "Error reading from client %s at position %i", ipAddress.c_str(), webRequest._index);
             ::close(clientSocket);
             return;
@@ -125,7 +126,7 @@ namespace BeeFishWebDB {
                   _headers["content-type"];
 
                path.setData(contentType);
-               outputSuccess(clientSocket);
+               outputPostSuccess(clientSocket);
                return;
             }
          }
@@ -147,7 +148,7 @@ namespace BeeFishWebDB {
          if (path.contains("size") &&
              path["size"].hasData())
          {
-            size = path["size"];
+            path["size"].getData(size);
          }
 
          stream <<
@@ -178,7 +179,7 @@ namespace BeeFishWebDB {
 
       }
 
-      virtual void outputSuccess(int clientSocket)
+      virtual void outputPostSuccess(int clientSocket)
       {
          stringstream stream;
 

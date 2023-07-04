@@ -34,7 +34,7 @@ namespace BeeFish
 
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
-            " -s > /dev/null";
+            " -s | grep \"html\"";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
          outputSuccess(success);
@@ -47,7 +47,7 @@ namespace BeeFish
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
             " --header \"content-type: application/json\" " <<
-            " --data 123 -s > /dev/null";
+            " --data 123 -s | grep success";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
 
@@ -65,6 +65,7 @@ namespace BeeFish
          success &= (system(command.c_str()) == 0);
 
          outputSuccess(success);
+
       }
 
       dbServer.stop();

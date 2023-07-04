@@ -112,7 +112,7 @@ namespace BeeFishWeb
             "GET / HTTP/1.1\r\n" \
             "Host: " + host + "\r\n" \
             "\r\n",
-            nullopt
+            true
          );
 
       success &=

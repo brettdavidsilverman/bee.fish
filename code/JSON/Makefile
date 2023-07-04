@@ -15,7 +15,7 @@ debug:	$(OUTPUT)
 	cd ../Parser && make $(DEBUG)
 
 time:	clean
-time:	CFLAGS += -DTIME -pg -g
+time:	CFLAGS += -DTIME -pg -Ofast
 time:	run_time
 
 perf:	clean
