@@ -34,6 +34,7 @@ namespace BeeFishJSON {
          _params(params),
          _parser(createParser(params))
       {
+
       }
 
       JSON(const JSON& source) :

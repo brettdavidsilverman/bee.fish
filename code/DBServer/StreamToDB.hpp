@@ -70,19 +70,17 @@ namespace BeeFishWebDB {
          if (_position > 0) {
             const std::string
                data(_page, _position);
-
+cerr << "StreamToDB.hpp Writing page " << _pageIndex << endl;
+ 
             _path[_pageIndex++]
                .setData(data);
-cerr << "StreamToDB: pageIndex, max:" << _pageIndex << ", " << _path.max() << endl;
-           _position = 0;
+          _position = 0;
          }
       }
 
       virtual void success() override
       {
          flush();
-         //_path["size"] = _size;
-
       }
 
       virtual Parser* copy()

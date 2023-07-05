@@ -130,18 +130,7 @@ cerr << "DBServer.hpp webRequest._result: " << webRequest._result << endl;
          }
          
          stringstream stream;
-         size_t size = 0;
-/*
-         if (path.contains("size") &&
-             path["size"].hasData())
-         {
-            path["size"].getData(size);
-         }
-*/
-         size_t max = path.max();
-         std::string lastPage;
-         path[max].getData(lastPage);
-         size = max * path.pageSize() + lastPage.size();
+         size_t size = getSize(path);
 
          stream <<
             "HTTP/2.0 200 OK" << "\r\n" <<
@@ -171,6 +160,16 @@ cerr << "DBServer.hpp webRequest._result: " << webRequest._result << endl;
             streamFromDB(webRequest, path);
          }
 
+      }
+ 
+      size_t getSize(Path& path)
+      {
+         size_t size;
+         size_t max = path.max();
+         std::string lastPage;
+         path[max].getData(lastPage);
+         size = max * path.pageSize() + lastPage.size();
+         return size;
       }
 
       virtual void outputJSON(int clientSocket, bool success, std::string reason = "")
@@ -227,7 +226,11 @@ cerr << "DBServer.hpp webRequest._result: " << webRequest._result << endl;
 
       virtual void outputFail(int clientSocket, const std::string& reason)
       {
-         outputJSON(clientSocket, false, reason);
+         outputJSON(
+            clientSocket,
+            false,
+            reason
+         );
       }
 
       virtual void outputSuccess(int clientSocket)
@@ -320,10 +323,9 @@ cerr << "DBServer.hpp webRequest._result: " << webRequest._result << endl;
       DBServer::Path path = dbServer()->urlPath(_url);
       if (path.hasData())
       {
-cerr << "DBServer.hpp createJSONBody has data" << endl;
          return nullptr;
       }
-      path.setData("application/json");
+      path.setData(_headers["content-type"]);
 
       return new
          StreamToDB(
@@ -339,7 +341,6 @@ cerr << "DBServer.hpp createJSONBody has data" << endl;
       DBServer::Path path = dbServer()->urlPath(_url);
       if (path.hasData())
       {
-cerr << "DBServer.hpp createContentLengthBody has data" << endl;
          return nullptr;
       }
       path.setData("text/plain");

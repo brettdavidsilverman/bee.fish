@@ -119,7 +119,7 @@ namespace BeeFishWeb {
                 bufferSize);
             
             if (size == 0)
-               continue;
+               usleep(1000);
 
             if (!read(buffer, size))
             {
@@ -187,7 +187,6 @@ namespace BeeFishWeb {
          else if (_contentLength > 0) {
             if (++_bytesRead == _contentLength)
             {
-cerr << "WebRequest.hpp set result content length" << endl;
                if (_body)
                   _body->setResult(true);
                _parser.setResult(true);
@@ -272,8 +271,6 @@ cerr << "WebRequest.hpp set result content length" << endl;
 
          Parser* body = request->createBody();
 
-cerr << "WebRequest.hpp loadBody: " << body << endl;
-
          return body;
       }
 
@@ -297,7 +294,8 @@ cerr << "WebRequest.hpp loadBody: " << body << endl;
             const string prefix = "application/json";
 
             if ( contentType
-                  .find(prefix) != std::string::npos )
+                    .find(prefix) !=
+                    std::string::npos )
             {
               _body = createJSONBody();
                return _body;
