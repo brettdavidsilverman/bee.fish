@@ -88,14 +88,6 @@ namespace BeeFishWebDB {
          // Read from the client socket
          webRequest.read();
 
-         if (webRequest._result != true)
-         {
-cerr << "Error at position " << webRequest._index << endl;
-            syslog(LOG_WARNING, "Error reading from client %s at position %i", ipAddress.c_str(), webRequest._index);
-            ::close(clientSocket);
-            return;
-         }
-
          stringstream logStream;
          logStream 
             << webRequest._ipAddress << " "
@@ -114,21 +106,17 @@ cerr << "Error at position " << webRequest._index << endl;
   
          string contentType;
 
-     
          if (webRequest._method == "POST")
          {
-            if (webRequest._headers
-                 .count("content-type")
-                 > 0)
+            if (webRequest._result == false)
             {
-               contentType =
-                  webRequest.
-                  _headers["content-type"];
-
-               path.setData(contentType);
-               outputPostSuccess(clientSocket);
+               outputFail(clientSocket, "Taken");
                return;
             }
+cerr << "DBServer.hpp webRequest._result: " << webRequest._result << endl;
+
+            outputSuccess(clientSocket);
+            return;
          }
          else {
             if (path.hasData())
@@ -141,15 +129,19 @@ cerr << "Error at position " << webRequest._index << endl;
             }
          }
          
-
          stringstream stream;
          size_t size = 0;
-
+/*
          if (path.contains("size") &&
              path["size"].hasData())
          {
             path["size"].getData(size);
          }
+*/
+         size_t max = path.max();
+         std::string lastPage;
+         path[max].getData(lastPage);
+         size = max * path.pageSize() + lastPage.size();
 
          stream <<
             "HTTP/2.0 200 OK" << "\r\n" <<
@@ -173,26 +165,51 @@ cerr << "Error at position " << webRequest._index << endl;
          );
 
          // Send the body
-         if (!path.isDeadEnd())
+         if (webRequest._result == true &&
+             !path.isDeadEnd())
+         {
             streamFromDB(webRequest, path);
-
+         }
 
       }
 
-      virtual void outputPostSuccess(int clientSocket)
+      virtual void outputJSON(int clientSocket, bool success, std::string reason = "")
       {
          stringstream stream;
 
-         string json = "{\"success\": true}";
+         stringstream jsonStream;
+         jsonStream
+            << "{"
+               << "\"success\""
+               << ":";
 
-         size_t size = json.size();
+         if (success)
+            jsonStream << "true";
+         else
+            jsonStream << "false";
+
+         if (reason.size()) {
+            jsonStream
+               << ","
+               << "\"reason\""
+               << ":"
+               << "\""
+                  << escape(reason)
+               << "\"";
+         }
+
+         jsonStream << "}";
+
+         string json = jsonStream.str();
+
+         size_t contentLength = json.size();
 
          stream <<
             "HTTP/2.0 200 OK\r\n" <<
             "Content-Type: application/json; charset=utf-8\r\n" <<
             "Connection: keep-alive\r\n" <<
             "Content-Length: " <<
-               size << "\r\n" <<
+               contentLength << "\r\n" <<
             "\r\n" <<
              json;
 
@@ -204,6 +221,18 @@ cerr << "Error at position " << webRequest._index << endl;
             response.c_str(),
             response.length()
          );
+         
+
+      }
+
+      virtual void outputFail(int clientSocket, const std::string& reason)
+      {
+         outputJSON(clientSocket, false, reason);
+      }
+
+      virtual void outputSuccess(int clientSocket)
+      {
+         outputJSON(clientSocket, true);
       }
 
       virtual void output404NotFound(int clientSocket)
@@ -289,7 +318,12 @@ cerr << "Error at position " << webRequest._index << endl;
    Parser* DBWebRequest::createJSONBody()
    {
       DBServer::Path path = dbServer()->urlPath(_url);
-      path.clear();
+      if (path.hasData())
+      {
+cerr << "DBServer.hpp createJSONBody has data" << endl;
+         return nullptr;
+      }
+      path.setData("application/json");
 
       return new
          StreamToDB(
@@ -303,7 +337,13 @@ cerr << "Error at position " << webRequest._index << endl;
    )
    {
       DBServer::Path path = dbServer()->urlPath(_url);
-      path.clear();
+      if (path.hasData())
+      {
+cerr << "DBServer.hpp createContentLengthBody has data" << endl;
+         return nullptr;
+      }
+      path.setData("text/plain");
+
 
       return new
          StreamToDB(

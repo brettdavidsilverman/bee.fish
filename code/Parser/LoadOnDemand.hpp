@@ -45,7 +45,7 @@ namespace BeeFishParser {
             return
                _loadOnDemand->isOptional();
          else
-            return true;
+            return false;
 
       }
 
@@ -54,8 +54,17 @@ namespace BeeFishParser {
       ) override
       {
  
+         if (_result == false)
+            return false;
+
          if (_loadOnDemand == nullptr) {
             _loadOnDemand = _function(_params);
+            if (_loadOnDemand == nullptr) {
+               setResult(false);
+cerr << "LoadOnDemand.hpp returned nullptr result: " << _result << endl;
+  
+               return false;
+            }
          }
 
          bool matched = _loadOnDemand->read(

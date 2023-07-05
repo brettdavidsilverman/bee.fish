@@ -177,7 +177,7 @@ namespace BeeFishWeb {
       virtual bool read(char c)
       override
       {
-         if (_parser._result != nullopt)
+         if (_result != nullopt)
             return false;
 
          bool matched = _parser.read(c);
@@ -187,6 +187,7 @@ namespace BeeFishWeb {
          else if (_contentLength > 0) {
             if (++_bytesRead == _contentLength)
             {
+cerr << "WebRequest.hpp set result content length" << endl;
                if (_body)
                   _body->setResult(true);
                _parser.setResult(true);
@@ -252,7 +253,7 @@ namespace BeeFishWeb {
             newLine,
             [this](Parser*) {
                if (_method == "GET")
-                  _result = true;
+                  setResult(true);
                return true;
             }
          ) and
@@ -269,7 +270,11 @@ namespace BeeFishWeb {
          WebRequest* request =
             dynamic_cast<WebRequest*>(params);
 
-         return request->createBody();
+         Parser* body = request->createBody();
+
+cerr << "WebRequest.hpp loadBody: " << body << endl;
+
+         return body;
       }
 
       virtual Parser* createBody() {

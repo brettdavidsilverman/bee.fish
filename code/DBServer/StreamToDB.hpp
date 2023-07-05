@@ -19,7 +19,7 @@ namespace BeeFishWebDB {
       Path<Database::Encoding> _path;
       char*   _page = nullptr;
       size_t  _position {0};
-      size_t  _pageCount {0};
+      size_t  _pageIndex {0};
       size_t  _size {0};
 
    public:
@@ -71,17 +71,17 @@ namespace BeeFishWebDB {
             const std::string
                data(_page, _position);
 
-            _path[_pageCount++]
+            _path[_pageIndex++]
                .setData(data);
-cerr << "StreamToDB: pageCount, max:" << _pageCount << ", " << _path.max() << endl;
+cerr << "StreamToDB: pageIndex, max:" << _pageIndex << ", " << _path.max() << endl;
            _position = 0;
          }
       }
 
       virtual void success() override
       {
-         _path["size"] = _size;
          flush();
+         //_path["size"] = _size;
 
       }
 
