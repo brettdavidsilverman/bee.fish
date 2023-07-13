@@ -81,7 +81,7 @@ namespace BeeFishJSON {
             _true or _false;
 
          return
-            -blankSpace and
+            -blankSpaces and
             (
                undefined or
                _null or
@@ -96,7 +96,7 @@ namespace BeeFishJSON {
    };
 
    Parser* _JSON(Parser* params) {
-      return JSON(params).copy();
+      return new JSON(params);
    }
 
 }

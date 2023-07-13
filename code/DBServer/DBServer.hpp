@@ -113,7 +113,6 @@ namespace BeeFishWebDB {
                outputFail(clientSocket, "Taken");
                return;
             }
-cerr << "DBServer.hpp webRequest._result: " << webRequest._result << endl;
 
             outputSuccess(clientSocket);
             return;
@@ -235,6 +234,7 @@ cerr << "DBServer.hpp webRequest._result: " << webRequest._result << endl;
 
       virtual void outputSuccess(int clientSocket)
       {
+         cerr << "Success" << endl;
          outputJSON(clientSocket, true);
       }
 

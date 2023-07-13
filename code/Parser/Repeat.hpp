@@ -105,7 +105,7 @@ namespace BeeFishParser
                   continue;
                }
                else {
-                  //setResult(false);
+                  //  setResult(false);
                   matched = false;
                   break;
                }

@@ -15,15 +15,15 @@ debug:	$(OUTPUT)
 	cd ../Parser && make $(DEBUG)
 
 time:	clean
-time:	CFLAGS += -DTIME -pg -Ofast
+time:	CFLAGS += -DTIME -O3
 time:	run_time
 
 perf:	clean
-perf:	CFLAGS += -DTIME -Ofast
+perf:	CFLAGS += -DTIME -O3
 perf:	run_performance
 
 trace:	clean
-trace:	CFLAGS += -DTIME -Ofast
+trace:	CFLAGS += -DTIME -g -O3
 trace:	run_trace
 
 test:	clean
