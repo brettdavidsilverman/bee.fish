@@ -7,6 +7,7 @@
 #include "StreamToDB.hpp"
 #include "StreamFromDB.hpp"
 #include "DBWebRequest.hpp"
+#include "JSONParser.hpp"
 #include "Version.hpp"
 
 
@@ -15,6 +16,9 @@ extern "C" uint8_t _binary_404_html_end[];
 
 extern "C" uint8_t _binary_HomePage_html_start[];
 extern "C" uint8_t _binary_HomePage_html_end[];
+
+extern "C" uint8_t _binary_ErrorPage_html_start[];
+extern "C" uint8_t _binary_ErrorPage_html_end[];
 
 
 namespace BeeFishWebDB {
@@ -88,14 +92,27 @@ namespace BeeFishWebDB {
          // Read from the client socket
          webRequest.read();
 
-         stringstream logStream;
-         logStream 
-            << webRequest._ipAddress << " "
-            << webRequest._method << " "
-            << webRequest._url << " "
-            << webRequest._version << endl;
+         if (webRequest._result == true) {
 
-         logMessage(LOG_NOTICE, logStream.str());
+            stringstream logStream;
+            logStream 
+               << webRequest._ipAddress << " "
+               << webRequest._method << " "
+               << webRequest._url << " "
+               << webRequest._version << endl;
+
+            logMessage(LOG_NOTICE, logStream.str());
+         }
+         else {
+            stringstream logStream;
+            logStream 
+               << webRequest._ipAddress << " "
+               << "Invalid web request";
+
+            logMessage(LOG_WARNING, logStream.str());
+            outputErrorPage(clientSocket);
+            return;
+         }
 
          if ( webRequest._url == "/" ) {
             outputHomePage(clientSocket);
@@ -307,6 +324,42 @@ namespace BeeFishWebDB {
          );
 
       }
+
+      virtual void outputErrorPage(int clientSocket)
+      {
+
+         stringstream writeOutput;
+
+         const char * html = (const char *)(&_binary_404_html_start[0]);
+
+         const size_t size =
+            _binary_ErrorPage_html_end -
+            _binary_ErrorPage_html_start;
+
+         writeOutput <<
+            "HTTP/2.0 500 Error\r\n" <<
+            "Content-Type: text/html; charset=utf-8\r\n" <<
+            "Connection: keep-alive\r\n" <<
+            "Content-Length: " <<
+               size << "\r\n" <<
+            "\r\n";
+
+         writeOutput.write(
+            html,
+            size
+         );
+
+         std::string response =
+            writeOutput.str();
+
+         ::write(
+            clientSocket,
+            response.c_str(),
+            response.length()
+         );
+
+      }
+
 
    };
 

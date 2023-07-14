@@ -4,7 +4,7 @@ CFLAGS = -std=gnu++17 -Wfatal-errors
 TEST = ../../large.json
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -latomic
 
 debug:	clean
 debug:	DEBUG = debug
@@ -37,7 +37,7 @@ run:	$(OUTPUT)
 	$(OUTPUT)
 
 run_time:	$(OUTPUT)
-	time cat $(TEST) | $(OUTPUT)
+	time cat $(TEST) | $(OUTPUT) -use boost
 
 run_trace:	$(OUTPUT)
 	rm -f trace.txt

@@ -203,7 +203,7 @@ namespace BeeFishWeb {
             cerr << "Error creating server socket" << endl;
             return false;
          }
-
+/*
          // Set socket options
          if ( setsockopt(
                  _serverSocket,
@@ -217,7 +217,7 @@ namespace BeeFishWeb {
             cerr << "Error setting socket options" << endl;
             return false;
          }
-
+*/
          // Initialize socket structure
          bzero((char *)&serv_addr, sizeof(serv_addr));
 

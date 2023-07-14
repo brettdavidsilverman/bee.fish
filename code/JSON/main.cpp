@@ -1,6 +1,6 @@
 #include <iostream>
 #include <filesystem>
-
+#include <boost/json/src.hpp>
 #include "Config.hpp"
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../Parser/Parser.hpp"
@@ -14,6 +14,8 @@ using namespace BeeFishMisc;
 using namespace BeeFishParser;
 using namespace BeeFishJSON;
 
+std::optional<bool> homeGrownParser();
+std::optional<bool> boostParser();
 
 int main(int argc, const char* argv[]) {
    
@@ -37,29 +39,80 @@ int main(int argc, const char* argv[]) {
             
       return 0;
    }
+
+   bool useHomeGrown = true;
+   int useArg = -1;
+   if (useArg = hasArg(argc, argv, "-use") >= 0 && argc >= (useArg + 1))
+   {
+      if (argv[useArg + 1] == string("home"))
+         useHomeGrown = true;
+      else if (argv[useArg + 1] == string("boost"))
+         useHomeGrown = false;
+      else {
+         cout << "Invalid use arg;" << endl;
+         useHomeGrown = false;
+         return 1;
+      }
+   }
+
+   std::optional<bool> result;
+
+   if (useHomeGrown) {
+      cout << "Using home grown parser" << endl;
+      result = homeGrownParser();
+   }
+   else {
+      cout << "Using boost parser" << endl;
+      result = boostParser();
+   }
+
+   if (result == false) {
+      cout << "Invalid JSON" << endl;
+      return 2;
+   }
+   else if (result == nullopt) {
+      cout << "Insufficient data";
+      return 3;
+   }
    
 
+   cout << "Valid JSON" << endl;
+   return 0;
+
+}
+
+std::optional<bool> homeGrownParser() {
    auto parser = JSON();
 
    cin >> parser;
  
    cout << endl;
 
-   if (parser.result() == true)
-   {
-      cout << "Valid JSON" << endl;
-      return 0;
-   }
-   else if (parser.result() == false)
-   {
-      cout << "Invalid JSON" << endl;
-      return 1;
-   }
-   else
-   {
-      cout << "Insufficient data" << endl;
-      return 1;
-   }
+   return parser.result();
 
-   return 0;
+}
+
+std::optional<bool> boostParser()
+{
+
+    using namespace boost::json;
+
+    stream_parser p;
+    std::string line;
+    boost::json::error_code ec;
+
+    while( std::getline( cin, line ) )
+    {
+        p.write( line, ec );
+        if( ec )
+            return false;
+
+    }
+
+    p.finish( ec );
+
+    if( ec )
+        return nullopt;
+
+    return true;// p.release();
 }

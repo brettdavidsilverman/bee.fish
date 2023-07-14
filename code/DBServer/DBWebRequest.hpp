@@ -52,7 +52,6 @@ namespace BeeFishWebDB {
 
       // Implemented in DBServer.hpp
       DBServer* dbServer();
-
       virtual Parser* createJSONBody() override;
       virtual Parser* createContentLengthBody(size_t contentLength) override;
    };

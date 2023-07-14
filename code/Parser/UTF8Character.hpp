@@ -68,7 +68,7 @@ namespace BeeFishParser {
          bool matched = false;
 
          if (_matchAny) {
-            _chars.push_back(character);
+           _chars.push_back(character);
             matched = true;
          }
          else {
@@ -83,7 +83,7 @@ namespace BeeFishParser {
          if (matched &&
              _read == _expectedSize)
          {
-            UTF8Character utf8(*this);
+            UTF8Character utf8(_chars);
             return read(utf8);
          }
 
@@ -174,7 +174,6 @@ namespace BeeFishParser {
          const UTF8Character& character
       ) override
       {
-
          if (_matchAny) {
             _chars = character._chars;
             setResult(true);
@@ -185,7 +184,6 @@ namespace BeeFishParser {
             setResult(false);
             return false;
          }
-
          return true;
       }
 

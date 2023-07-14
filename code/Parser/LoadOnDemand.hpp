@@ -61,6 +61,8 @@ namespace BeeFishParser {
             _loadOnDemand = _function(_params);
             if (_loadOnDemand == nullptr) {
                setResult(false);
+cerr << "LoadOnDemand.hpp returned nullptr result: " << _result << endl;
+  
                return false;
             }
          }

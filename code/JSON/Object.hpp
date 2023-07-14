@@ -52,11 +52,10 @@ namespace BeeFishJSON {
             LoadOnDemand(_JSON, params);
 
          const auto seperator =
-             -blankSpaces and
-             Character(",") and
-             -blankSpaces;
+             Character(",");
 
          const auto line =
+            -blankSpaces and
             key and -blankSpaces and
             colon and -blankSpaces and 
             value and -blankSpaces;
