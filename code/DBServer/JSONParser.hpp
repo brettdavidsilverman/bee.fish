@@ -33,8 +33,10 @@ namespace BeeFishWebDB {
 
          if (ec)
             setResult(false);
-         else if (_parser.done())
+         else if (_parser.done()) {
+cerr << "JSONParser done" << endl;
             setResult(true);
+         }
 
          return n = 1;
 
