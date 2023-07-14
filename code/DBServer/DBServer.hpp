@@ -251,7 +251,6 @@ namespace BeeFishWebDB {
 
       virtual void outputSuccess(int clientSocket)
       {
-         cerr << "Success" << endl;
          outputJSON(clientSocket, true);
       }
 
@@ -330,7 +329,7 @@ namespace BeeFishWebDB {
 
          stringstream writeOutput;
 
-         const char * html = (const char *)(&_binary_404_html_start[0]);
+         const char * html = (const char *)(&_binary_ErrorPage_html_start[0]);
 
          const size_t size =
             _binary_ErrorPage_html_end -
@@ -382,7 +381,7 @@ namespace BeeFishWebDB {
 
       return new
          StreamToDB(
-            JSON(),
+            JSONParser(),
             path
          );
    };

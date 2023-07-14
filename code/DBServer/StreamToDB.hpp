@@ -70,11 +70,9 @@ namespace BeeFishWebDB {
          if (_position > 0) {
             const std::string
                data(_page, _position);
-cerr << "StreamToDB.hpp Writing page " << _pageIndex << endl;
- 
             _path[_pageIndex++]
                .setData(data);
-          _position = 0;
+            _position = 0;
          }
       }
 

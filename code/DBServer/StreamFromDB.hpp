@@ -26,7 +26,6 @@ namespace BeeFishWebDB {
       size_t min = path.min();
       size_t max = path.max();
       size_t byteCount = 0;
-std::cerr << "StreamFromDB::min " << min << ", max " << max << endl;
 
       for ( pageIndex = min;
             pageIndex <= max;

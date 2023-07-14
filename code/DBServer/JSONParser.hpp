@@ -7,11 +7,44 @@
 #include "../JSON/JSON.hpp"
 
 using namespace BeeFishParser;
+using namespace BeeFishJSON;
 
 namespace BeeFishWebDB {
 
    class JSONParser : public Parser
    {
+   protected:
+      boost::json::stream_parser _parser;
+
+   public:
+
+      JSONParser() : Parser() {
+      }
+
+      virtual ~JSONParser() {
+      }
+
+      virtual bool read(char c)
+      override
+      {
+         boost::json::error_code ec;
+
+         size_t n = _parser.write( &c, 1, ec );
+
+         if (ec)
+            setResult(false);
+         else if (_parser.done())
+            setResult(true);
+
+         return n = 1;
+
+      }
+
+      virtual Parser* copy() const
+      override
+      {
+         return new JSONParser();
+      }
    };
 
 }
