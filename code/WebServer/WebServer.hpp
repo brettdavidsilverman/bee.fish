@@ -59,17 +59,18 @@ namespace BeeFishWeb {
             delete _loopThread;
       }
       
-      virtual void start() {
+      virtual bool start() {
          using namespace std;
 
          cout << "Starting WebServer " << _host << endl;
          
          if (!initializeServerSocket()) {
-            throw runtime_error("initializeServerSocket failed");
+            return false;
          }
 
          _stop = false;
          _loopThread = new std::thread(WebServer::loop, this); 
+         return true;
 
       }
 
@@ -203,7 +204,7 @@ namespace BeeFishWeb {
             cerr << "Error creating server socket" << endl;
             return false;
          }
-/*
+
          // Set socket options
          if ( setsockopt(
                  _serverSocket,
@@ -217,7 +218,7 @@ namespace BeeFishWeb {
             cerr << "Error setting socket options" << endl;
             return false;
          }
-*/
+
          // Initialize socket structure
          bzero((char *)&serv_addr, sizeof(serv_addr));
 
@@ -228,7 +229,8 @@ namespace BeeFishWeb {
          // Now bind the host address using bind() call.
          if (bind(_serverSocket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
          {
-            cerr << "Error binding server socket" << endl;
+            perror("Bind server socket");
+            //cerr << "Error binding server socket" << endl;
             return false;
          }
 

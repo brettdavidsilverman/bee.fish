@@ -31,7 +31,7 @@ namespace BeeFishWebDB {
       public Database
    {
    public:
-      typedef BeeFishDatabase::Path<Database::Encoding> Path;
+      typedef DBWebRequest::Path Path;
 
       DBServer(
          string host = WEB_SERVER_HOST,
@@ -92,25 +92,36 @@ namespace BeeFishWebDB {
          // Read from the client socket
          webRequest.read();
 
-         if (webRequest._result == true) {
+         stringstream logStream;
+         logStream 
+            << webRequest._ipAddress << " "
+            << webRequest._method << " "
+            << webRequest._url << " "
+            << webRequest._version << endl;
 
-            stringstream logStream;
-            logStream 
-               << webRequest._ipAddress << " "
-               << webRequest._method << " "
-               << webRequest._url << " "
-               << webRequest._version << endl;
-
-            logMessage(LOG_NOTICE, logStream.str());
+         logMessage(LOG_NOTICE, logStream.str());
+         
+      
+         if (webRequest._method == "POST" &&
+             webRequest._body == nullptr)
+         {
+            outputFail(clientSocket, "Taken");
+            return;
          }
-         else {
+
+         if (webRequest._result != true) {
+
             stringstream logStream;
             logStream 
                << webRequest._ipAddress << " "
                << "Invalid web request";
 
             logMessage(LOG_WARNING, logStream.str());
-            outputErrorPage(clientSocket);
+            
+            if (webRequest._method == "POST")
+               outputFail(clientSocket, "Invalid content in post request");
+            else
+               outputErrorPage(clientSocket);
             return;
          }
 
@@ -125,12 +136,6 @@ namespace BeeFishWebDB {
 
          if (webRequest._method == "POST")
          {
-            if (webRequest._result == false)
-            {
-               outputFail(clientSocket, "Taken");
-               return;
-            }
-
             outputSuccess(clientSocket);
             return;
          }
@@ -377,17 +382,16 @@ namespace BeeFishWebDB {
       {
          return nullptr;
       }
-      path.setData(_headers["content-type"]);
-
+      setContentType(path);
       return new
          StreamToDB(
-            JSONParser(),
-            path
+            JSONParser(path, _contentLength),
+            path,
+            _contentLength
          );
    };
 
    Parser* DBWebRequest::createContentLengthBody(
-      size_t contentLength
    )
    {
       DBServer::Path path = dbServer()->urlPath(_url);
@@ -395,13 +399,15 @@ namespace BeeFishWebDB {
       {
          return nullptr;
       }
-      path.setData("text/plain");
+
+      setContentType(path);
 
 
       return new
          StreamToDB(
-            ContentLength(contentLength),
-            path
+            ContentLength(_contentLength),
+            path,
+            _contentLength
          );
    };
 

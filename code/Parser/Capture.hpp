@@ -93,6 +93,15 @@ namespace BeeFishParser {
          return matched;
       }
 
+      virtual bool flush()
+      override
+      {
+         if (!Parser::flush())
+            return false;
+
+         return _capture->flush();
+      }
+
 
 
    };

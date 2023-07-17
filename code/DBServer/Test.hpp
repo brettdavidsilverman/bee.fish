@@ -26,7 +26,8 @@ namespace BeeFish
          WEB_SERVER_HOST, 8080, 1, TEMP_FILENAME
       );
 
-      dbServer.start();
+      if (!dbServer.start())
+         return false;
 
       if (success)
       {

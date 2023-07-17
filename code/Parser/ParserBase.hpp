@@ -235,6 +235,10 @@ namespace BeeFishParser {
 #endif
       }
 
+      virtual bool flush() {
+         return true;
+      }
+
       virtual Parser* copy() const = 0;
 
       virtual bool isOptional() const;

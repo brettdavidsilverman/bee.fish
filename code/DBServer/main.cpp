@@ -84,7 +84,7 @@ int main(int argc, const char* argv[]) {
 
    if (hasArg(argc, argv, "-test") >= 0) {
       if (!BeeFish::test()) {
-         cerr << "BeeFish DBServer tests failed" << endl;
+         cout << "BeeFish DBServer tests failed" << endl;
          return 1;
       }
       else
@@ -96,7 +96,10 @@ int main(int argc, const char* argv[]) {
 
    DBServer dbServer(host, port, threads, filename);
 
-   dbServer.start();
+   if (!dbServer.start()) {
+      cout << "Could not start DBServer" << endl;
+      return 1;
+   }
 
    syslog(LOG_NOTICE, "DBServer %s on port %i", host.c_str(), port);
 

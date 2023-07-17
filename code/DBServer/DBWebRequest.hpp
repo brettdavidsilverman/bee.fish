@@ -17,7 +17,8 @@ namespace BeeFishWebDB {
    class DBWebRequest : public WebRequest {
 
    public:
-      
+      typedef BeeFishDatabase::Path<Database::Encoding> Path;
+
       DBWebRequest() : WebRequest()
       {
       }
@@ -50,10 +51,21 @@ namespace BeeFishWebDB {
          return new DBWebRequest(*this);
       }
 
+      virtual void setContentType(DBWebRequest::Path path)
+      {
+         string contentType;
+         if (_headers.count("content-type") > 0)
+            contentType = _headers["content-type"];
+         else
+            contentType = "text/plain; charset=utf-8";
+
+         path.setData(contentType);
+      }
+
       // Implemented in DBServer.hpp
       DBServer* dbServer();
       virtual Parser* createJSONBody() override;
-      virtual Parser* createContentLengthBody(size_t contentLength) override;
+      virtual Parser* createContentLengthBody() override;
    };
 
    

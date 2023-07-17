@@ -41,7 +41,8 @@ namespace BeeFishWeb {
          WEB_SERVER_HOST, 8080, 2
       );
       
-      testServer.start();
+      if (!testServer.start())
+         return false;
       
       stringstream stream;
       stream << "curl " << testServer.url() << " -s";

@@ -118,8 +118,10 @@ namespace BeeFishWeb {
                 buffer,
                 bufferSize);
             
-            if (size == 0)
+            if (size == 0) {
                usleep(1000);
+               continue;
+            }
 
             if (!read(buffer, size))
             {
@@ -129,14 +131,31 @@ namespace BeeFishWeb {
 
             if (size < bufferSize) {
 //cerr << "Read less than buffer size: " << _result << endl;
-              // break;
+               
             }
          }
 
          delete[] buffer;
 
+         success = success && flush();
+
+         if (!success)
+            setResult(false);
+
          return success;
 
+      }
+
+      virtual bool flush()
+      override
+      {
+         if (!Parser::flush())
+            return false;
+
+         if (_body && !_body->flush())
+            return false;
+
+         return _parser.flush();
       }
 
       virtual bool write(
@@ -302,9 +321,7 @@ namespace BeeFishWeb {
             }
             else if (_contentLength > 0)
             {
-               _body = createContentLengthBody(
-                  _contentLength
-               );
+               _body = createContentLengthBody();
 
                return _body;
             }
@@ -325,12 +342,11 @@ namespace BeeFishWeb {
 
       virtual Parser*
       createContentLengthBody(
-         size_t contentLength
       )
       {
          return new
             ContentLength(
-               contentLength
+               _contentLength
             );
       }
       

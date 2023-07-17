@@ -21,15 +21,17 @@ namespace BeeFishWebDB {
       size_t  _position {0};
       size_t  _pageIndex {0};
       size_t  _size {0};
-
+      size_t  _contentLength {0};
    public:
 
       StreamToDB(
          const Parser& parser,
-         const Path<Database::Encoding> path
+         const Path<Database::Encoding> path,
+         const size_t contentLength
       ) :
          Capture(parser),
-         _path(path)
+         _path(path),
+         _contentLength(contentLength)
       {
          
          allocatePage();
@@ -39,7 +41,8 @@ namespace BeeFishWebDB {
          const StreamToDB& source
       ) :
          Capture(source),
-         _path(source._path)
+         _path(source._path),
+         _contentLength(source._contentLength)
       {
          allocatePage();
       }
@@ -59,14 +62,20 @@ namespace BeeFishWebDB {
       {
          _page[_position] = c;
          ++_size;
-         if (++_position >= _path.pageSize())
+         if (++_position >= _path.pageSize() ||
+             (_contentLength > 0 &&
+              _size >= _contentLength ))
          {
             flush();
          }
       }
 
-      virtual void flush()
+      virtual bool flush()
+      override
       {
+         if (!Capture::flush())
+            return false;
+
          if (_position > 0) {
             const std::string
                data(_page, _position);
@@ -74,6 +83,8 @@ namespace BeeFishWebDB {
                .setData(data);
             _position = 0;
          }
+
+         return true;
       }
 
       virtual void success() override
