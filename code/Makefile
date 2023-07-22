@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -std=c++17 -fmax-errors=1
 DEPS=main.cpp DBServer.hpp Test.hpp StreamToDB.hpp StreamFromDB.hpp Makefile HomePage.html 404.html
-BUILD = ../build
+BUILD = ../../build
 TEMP = /var/tmp
 
 all:
@@ -14,13 +14,13 @@ all:
 	cd DBServer && make $(DEBUG)
 	
 test:	all
-	$(BUILD)/Parser -test
-	$(BUILD)/JSON -test
-	$(BUILD)/PowerEncoding -test
-	$(BUILD)/Database -test
-	$(BUILD)/WebRequest -test
-	$(BUILD)/WebServer -test
-	$(BUILD)/DBServer -test
+	cd Parser && $(BUILD)/Parser -test
+	cd JSON && $(BUILD)/JSON -test
+	cd PowerEncoding && $(BUILD)/PowerEncoding -test
+	cd Database && $(BUILD)/Database -test
+	cd WebRequest && $(BUILD)/WebRequest -test
+	cd WebServer && $(BUILD)/WebServer -test
+	cd DBServer && $(BUILD)/DBServer -test
 
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
