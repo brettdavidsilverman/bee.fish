@@ -14,7 +14,7 @@ class JSONDBHandler
 {
 public:
 
-    enum JSONType {
+    enum class JSONType {
        INT64,
        UINT64,
        DOUBLE,
@@ -87,9 +87,9 @@ public:
 
     bool isNumber(JSONType type) {
        return
-          ( (type == INT64) ||
-            (type == UINT64) ||
-            (type == DOUBLE) );
+          ( (type == JSONType::INT64) ||
+            (type == JSONType::UINT64) ||
+            (type == JSONType::DOUBLE) );
     }
 
     void push_back(JSONValue value) {
@@ -114,14 +114,14 @@ public:
     void setData(JSONType type, const T& data) {
 
         JSONType _lastType = lastType();
-        if (_lastType == KEY) {
+        if (_lastType == JSONType::KEY) {
             lastPath()[type]
                .setData(data);
 
-            assert(lastType() == KEY);
+            assert(lastType() == JSONType::KEY);
             pop_back();
         }
-        else if (_lastType == ARRAY) {
+        else if (_lastType == JSONType::ARRAY) {
             size_t& index = lastArrayIndex();
             lastPath()
                 [index++]
@@ -136,34 +136,34 @@ public:
     friend ostream& operator << (ostream& out, const JSONType& type)
     {
        switch(type) {
-           case INT64:
+           case JSONType::INT64:
                out << "INT64";
                break;
-           case UINT64:
+           case JSONType::UINT64:
                out << "UINT64";
                break;
-           case DOUBLE:
+           case JSONType::DOUBLE:
                out << "DOUBLE";
                break;
-           case BOOL:
+           case JSONType::BOOL:
                out << "BOOL";
                break;
-           case _NULL:
+           case JSONType::_NULL:
                out << "_NULL";
                break;
-           case STRING:
+           case JSONType::STRING:
                out << "STRING";
                break;
-           case OBJECT:
+           case JSONType::OBJECT:
                out << "OBJECT";
                break;
-           case ARRAY:
+           case JSONType::ARRAY:
                out << "ARRAY";
                break;
-           case KEY:
+           case JSONType::KEY:
                out << "KEY";
                break;
-           case ROOT:
+           case JSONType::ROOT:
                out << "ROOT";
                break;
            default:
@@ -193,7 +193,7 @@ public:
     bool on_document_begin( error_code& ec )
     {
         push_back(
-            JSONValue {ROOT, 0, _rootPath}
+            JSONValue {JSONType::ROOT, 0, _rootPath}
         );
 
         return true;
@@ -220,7 +220,7 @@ public:
     {
 
         push_back(
-           {ARRAY, 0, lastPath()[ARRAY]}
+           {JSONType::ARRAY, 0, lastPath()[JSONType::ARRAY]}
         );
 
         return true;
@@ -234,9 +234,9 @@ public:
     ///
     bool on_array_end( std::size_t n, error_code& ec )
     {
-        assert(lastType() == ARRAY);
+        assert(lastType() == JSONType::ARRAY);
         pop_back();
-        setData(ARRAY, n);
+        setData(JSONType::ARRAY, n);
         return true;
     }
 
@@ -248,7 +248,7 @@ public:
     bool on_object_begin( error_code& ec )
     {
         push_back(
-           {OBJECT, 0, lastPath()[OBJECT][OBJECT_KEYS]}
+           {JSONType::OBJECT, 0, lastPath()[JSONType::OBJECT][OBJECT_KEYS]}
         );
 
         return true;
@@ -262,10 +262,10 @@ public:
     ///
     bool on_object_end( std::size_t n, error_code& ec )
     {
-        assert(lastType() == OBJECT);
+        assert(lastType() == JSONType::OBJECT);
         pop_back();
 
-        setData(OBJECT, n);
+        setData(JSONType::OBJECT, n);
 
         return true;
     }
@@ -295,7 +295,7 @@ public:
         std::string key(s);
 
         push_back(
-           {KEY, 0, lastPath()[key]}
+           {JSONType::KEY, 0, lastPath()[key]}
         );
 
         return true;
@@ -335,7 +335,7 @@ public:
     {
         std::string data(s);
 
-        setData(STRING, data);
+        setData(JSONType::STRING, data);
 
         return true;
     }
@@ -350,7 +350,7 @@ public:
     ///
     bool on_int64( int64_t i, string_view s, error_code& ec )
     {
-        setData(INT64, i);
+        setData(JSONType::INT64, i);
         return true;
     }
 
@@ -363,7 +363,7 @@ public:
     ///
     bool on_uint64( uint64_t u, string_view s, error_code& ec )
     {
-        setData(UINT64, u);
+        setData(JSONType::UINT64, u);
  
         return true;
     }
@@ -377,7 +377,7 @@ public:
     ///
     bool on_double( double d, string_view s, error_code& ec )
     {
-        setData(DOUBLE, d);
+        setData(JSONType::DOUBLE, d);
 
         return true;
     }
@@ -391,7 +391,7 @@ public:
     ///
     bool on_bool( bool b, error_code& ec )
     {
-        setData(BOOL, b);
+        setData(JSONType::BOOL, b);
 
         return true;
     }
@@ -403,7 +403,7 @@ public:
     ///
     bool on_null( error_code& ec )
     {
-        setData(_NULL, 0);
+        setData(JSONType::_NULL, 0);
 
 
         return true;
