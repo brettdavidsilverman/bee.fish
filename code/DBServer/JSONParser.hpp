@@ -1,7 +1,7 @@
 #ifndef BEE_FISH__JSON_PARSER__HPP
 #define BEE_FISH__JSON_PARSER__HPP
 #include <vector>
-#include <boost/json.hpp>
+#include <boost/json/basic_parser.hpp>
 #include "../Parser/Parser.hpp"
 #include "../Database/Path.hpp"
 
@@ -41,6 +41,8 @@ protected:
     BeeFishWeb::Path _rootPath;
     vector<JSONValue> _stack;
     size_t _count {0};
+    JSONType _lastType = (JSONType)-1;
+
 public:
 
     JSONDBHandler(BeeFishWeb::Path path) :
@@ -54,7 +56,7 @@ public:
         const JSONType& data
     )
     {
-       stream << (long)data;
+       stream << (int)data;
        return stream;
     }
 
@@ -77,6 +79,17 @@ public:
 
     size_t size() {
         return _stack.size();
+    }
+
+    bool lastIsNumber() {
+        return isNumber(_lastType);
+    }
+
+    bool isNumber(JSONType type) {
+       return
+          ( (type == INT64) ||
+            (type == UINT64) ||
+            (type == DOUBLE) );
     }
 
     void push_back(JSONValue value) {
@@ -115,7 +128,9 @@ public:
                 [type]
                 .setData(data);
         }
-  
+
+        _lastType = type;
+
     }
 
     friend ostream& operator << (ostream& out, const JSONType& type)
@@ -447,6 +462,8 @@ public:
          _rootPath(path),
          _contentLength(contentLength)
       {
+         if (_contentLength <= 0)
+            throw runtime_error("Invalid content length");
       }
 
       virtual ~JSONParser() {
@@ -458,8 +475,8 @@ public:
          ++_bytesRead;
 
          _buffer.push_back(c);
-         if (_buffer.size() == _pageSize ||
-             _bytesRead == _contentLength)
+         if ( (_buffer.size() == _pageSize) ||
+              (_bytesRead >= _contentLength) )
          {
             return flush();
          }
@@ -477,28 +494,43 @@ public:
 
          boost::json::error_code ec;
 
+         bool more =
+            (_bytesRead < _contentLength);
+
          size_t n =
             _parser.write_some(
-                true,
-               _buffer.c_str(),
+                more,
+               _buffer.data(),
                _buffer.size(),
                 ec
             );
 
          _buffer.clear();
 
-         if (ec) {
+         if (_parser.done()) {
+            setResult(true);
+         }
+         else if (!more)
+         {
+            // Numbers can continue,
+            // So the parser is never
+            // done() even though we
+            // are past end of content
+            // length
+            
+            if ( _parser.handler()
+                 .lastIsNumber() )
+            {
+               setResult(true);
+            }
+            else {
+               setResult(false);
+               return false;
+            }
+         }
+         else if (ec) {
             setResult(false);
             return false;
-         }
-         else if (_parser.done()) {
-            setResult(true);
-         }
-         else if (_contentLength > 0 && 
-                  _bytesRead >= _contentLength)
-         {
-#warning "Make sure json is complete"
-            setResult(true);
          }
 
          return true;

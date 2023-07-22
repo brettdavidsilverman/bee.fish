@@ -33,7 +33,7 @@ namespace BeeFishWebDB {
          _path(path),
          _contentLength(contentLength)
       {
-         
+         _path.setData(contentLength);
          allocatePage();
       }
 
@@ -81,6 +81,7 @@ namespace BeeFishWebDB {
                data(_page, _position);
             _path[_pageIndex++]
                .setData(data);
+            
             _position = 0;
          }
 

@@ -260,7 +260,7 @@ namespace BeeFishWeb {
          );
       }
 
-      virtual void handleWebRequest(
+      virtual bool handleWebRequest(
          int clientSocket,
          string ipAddress
       )
@@ -291,6 +291,7 @@ namespace BeeFishWeb {
             response.length()
          );
 
+         return false;
 
       }
       

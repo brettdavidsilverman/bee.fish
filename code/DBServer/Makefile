@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -std=c++17 -fmax-errors=1 -Ofast
-DEPS=main.cpp DBServer.hpp Test.hpp StreamToDB.hpp StreamFromDB.hpp Makefile HomePage.html 404.html ErrorPage.html JSONParser.hpp
+DEPS=main.cpp DBServer.hpp Test.hpp StreamToDB.hpp StreamFromDB.hpp Makefile HomePage.html 404.html ErrorPage.html JSONParser.hpp DBWebRequest.hpp
 BUILD = ../../build
 OUTPUT = $(BUILD)/DBServer
 TEMP = /var/tmp

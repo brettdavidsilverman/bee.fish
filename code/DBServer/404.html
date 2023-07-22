@@ -39,10 +39,10 @@ function (message, source, lineno, colno, error)
       </script>
    </head>
    <body>
-      <h1 id="h1">bee.fish Page not found yet</h1>
+      <h1 id="h1">bee.fish <span id="path"></span> page not taken yet</h1>
       <form onsubmit="return false;">
          <label for="contentType">Content Type</label><br />
-         <input type="text" id="contentType" value="application/json"></input><br />
+         <input type="text" id="contentType" value="application/json; charset=utf-8"></input><br />
          <label for="bodyText">Body Text</label><br />
          <textarea id="bodyText">
 {"🐝":"🌎"}
@@ -53,6 +53,11 @@ function (message, source, lineno, colno, error)
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
 
       <script>
+var path =
+   document.getElementById("path");
+
+path.innerHTML = document.location.pathname;
+
 var contentType =
    document.getElementById("contentType");
 

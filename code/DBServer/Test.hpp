@@ -50,8 +50,9 @@ namespace BeeFish
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
             " --header \"content-type: application/json\" " <<
-            " --data 123 -s | grep success";
+            " --data 123 -s | grep \"true\"";
          string command = stream.str();
+         cout << command << endl;
          success &= (system(command.c_str()) == 0);
 
          outputSuccess(success);
@@ -82,32 +83,15 @@ namespace BeeFish
             testFile(dbServer.url(), "TestError1.json");
 
          success = success &&
+            testFile(dbServer.url(), "LargeNumber.json");
+
+         success = success &&
             testFile(dbServer.url(), "large.json");
 
          outputSuccess(success);
 
       }
-/*
-      if (success)
-      {
-         cout << "Testing large.json " << flush;
 
-         stringstream stream;
-         stream << 
-            "curl -X POST " <<
-            dbServer.url() <<
-            "large.json " <<
-            "-H \"Content-Type: application/json; charset=utf-8\" " <<
-            "-H Expect: " <<
-            "-T large.json -s | grep \"success\"";
-
-         string command = stream.str();
-         success &= (system(command.c_str()) == 0);
-
-         outputSuccess(success);
-
-      }
-*/
       dbServer.stop();
 
       std::filesystem::remove(TEMP_FILENAME);
@@ -119,7 +103,7 @@ namespace BeeFish
    
    inline bool testFile(string url, string file)
    {
-      cout << "Testing file " << file << flush;
+      cout << "Testing file " << file << endl;
       stringstream stream;
       bool success = true;
 
@@ -132,6 +116,7 @@ namespace BeeFish
          "-T tests/" << file << " -s | grep \"true\"";
 
       string command = stream.str();
+      cerr << "   Executing..." << endl << command << endl;
       success &= (system(command.c_str()) == 0);
 
       outputSuccess(success);

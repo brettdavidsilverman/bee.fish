@@ -1,3 +1,23 @@
 {
-    "approvals" : {}
+    "approvals" : [ {
+        "reviewedAt" : 1557088625,
+        "reviewedAutomatically" : true,
+        "state" : "approved",
+        "submissionId" : 819766,
+        "submissionObject" : "public_audience_request",
+        "submissionOutcome" : "change_audience",
+        "submittedAt" : 1557088625,
+        "workflowId" : 2184,
+        "submissionDetails" : {
+          "permissionType" : "READ"
+        },
+        "submissionOutcomeApplication" : {
+          "failureCount" : 0,
+          "status" : "success"
+        },
+        "submitter" : {
+          "id" : "cvy9-n6sb",
+          "displayName" : "Tyler Kleykamp"
+        }
+      } ]
 }

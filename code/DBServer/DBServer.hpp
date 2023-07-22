@@ -5,21 +5,9 @@
 #include "../Database/Database.hpp"
 #include "../WebRequest/WebRequest.hpp"
 #include "StreamToDB.hpp"
-#include "StreamFromDB.hpp"
+
 #include "DBWebRequest.hpp"
-#include "JSONParser.hpp"
 #include "Version.hpp"
-
-
-extern "C" uint8_t _binary_404_html_start[];
-extern "C" uint8_t _binary_404_html_end[];
-
-extern "C" uint8_t _binary_HomePage_html_start[];
-extern "C" uint8_t _binary_HomePage_html_end[];
-
-extern "C" uint8_t _binary_ErrorPage_html_start[];
-extern "C" uint8_t _binary_ErrorPage_html_end[];
-
 
 namespace BeeFishWebDB {
 
@@ -47,41 +35,12 @@ namespace BeeFishWebDB {
       virtual ~DBServer() {
       }
 
-      Path root() {
-         return Path(*this)[host()];
-      }
-
-      Path jsonPath() {
-         return root()["json"];
-      }
-
-      Path urlPath(const string& url) {
-         Path path = jsonPath();
-
-         auto onpath =
-         [&path](string segment)
-         {
-            path = path[segment];
-            return true;
-         };
-
-         auto urlParser =
-           BeeFishWeb::URL(onpath);
-
-         urlParser.read(
-            url
-         );
-
-         return path;
- 
-      }
-
-      virtual void handleWebRequest(
+      
+      virtual bool handleWebRequest(
          int clientSocket,
          string ipAddress
       ) override
       {
-         syslog(LOG_DEBUG, "DBServer::handleWebRequest(%s)", ipAddress.c_str() );
 
          DBWebRequest webRequest(
             this,
@@ -90,327 +49,25 @@ namespace BeeFishWebDB {
          );
 
          // Read from the client socket
-         webRequest.read();
-
-         stringstream logStream;
-         logStream 
-            << webRequest._ipAddress << " "
-            << webRequest._method << " "
-            << webRequest._url << " "
-            << webRequest._version << endl;
-
-         logMessage(LOG_NOTICE, logStream.str());
-         
-      
-         if (webRequest._method == "POST" &&
-             webRequest._body == nullptr)
-         {
-            outputFail(clientSocket, "Taken");
-            return;
+         if (!webRequest.process()) {
+            return false;
          }
 
-         if (webRequest._result != true) {
-
-            stringstream logStream;
-            logStream 
-               << webRequest._ipAddress << " "
-               << "Invalid web request";
-
-            logMessage(LOG_WARNING, logStream.str());
-            
-            if (webRequest._method == "POST")
-               outputFail(clientSocket, "Invalid content in post request");
-            else
-               outputErrorPage(clientSocket);
-            return;
-         }
-
-         if ( webRequest._url == "/" ) {
-            outputHomePage(clientSocket);
-            return;
-         }
-
-         Path path = urlPath(webRequest._url);
-  
-         string contentType;
-
-         if (webRequest._method == "POST")
-         {
-            outputSuccess(clientSocket);
-            return;
-         }
-         else {
-            if (path.hasData())
-            {
-               path.getData(contentType);
-            }
-            else {
-               output404NotFound(clientSocket);
-               return;
-            }
-         }
-         
-         stringstream stream;
-         size_t size = getSize(path);
-
-         stream <<
-            "HTTP/2.0 200 OK" << "\r\n" <<
-            "Connection: keep-alive\r\n" <<
-            "Content-Type: " <<
-               contentType << "\r\n";
-         if (size > 0)
-            stream << "Content-Length: " <<
-               size << "\r\n";
-
-         stream <<
-            "\r\n";
-
-         std::string headers =
-            stream.str();
-
-         // Send the headers
-         webRequest.write(
-            headers.c_str(),
-            headers.length()
-         );
-
-         // Send the body
-         if (webRequest._result == true &&
-             !path.isDeadEnd())
-         {
-            streamFromDB(webRequest, path);
-         }
+         return true;
 
       }
- 
-      size_t getSize(Path& path)
-      {
-         size_t size;
-         size_t max = path.max();
-         std::string lastPage;
-         path[max].getData(lastPage);
-         size = max * path.pageSize() + lastPage.size();
-         return size;
-      }
-
-      virtual void outputJSON(int clientSocket, bool success, std::string reason = "")
-      {
-         stringstream stream;
-
-         stringstream jsonStream;
-         jsonStream
-            << "{"
-               << "\"success\""
-               << ":";
-
-         if (success)
-            jsonStream << "true";
-         else
-            jsonStream << "false";
-
-         if (reason.size()) {
-            jsonStream
-               << ","
-               << "\"reason\""
-               << ":"
-               << "\""
-                  << escape(reason)
-               << "\"";
-         }
-
-         jsonStream << "}";
-
-         string json = jsonStream.str();
-
-         size_t contentLength = json.size();
-
-         stream <<
-            "HTTP/2.0 200 OK\r\n" <<
-            "Content-Type: application/json; charset=utf-8\r\n" <<
-            "Connection: keep-alive\r\n" <<
-            "Content-Length: " <<
-               contentLength << "\r\n" <<
-            "\r\n" <<
-             json;
-
-         std::string response =
-            stream.str();
-
-         ::write(
-            clientSocket,
-            response.c_str(),
-            response.length()
-         );
-         
-
-      }
-
-      virtual void outputFail(int clientSocket, const std::string& reason)
-      {
-         outputJSON(
-            clientSocket,
-            false,
-            reason
-         );
-      }
-
-      virtual void outputSuccess(int clientSocket)
-      {
-         outputJSON(clientSocket, true);
-      }
-
-      virtual void output404NotFound(int clientSocket)
-      {
-
-         stringstream writeOutput;
-
-         const char * html = (const char *)(&_binary_404_html_start[0]);
-
-         const size_t size =
-            _binary_404_html_end -
-            _binary_404_html_start;
-
-         writeOutput <<
-            "HTTP/2.0 404 Not Found\r\n" <<
-            "Content-Type: text/html; charset=utf-8\r\n" <<
-            "Connection: keep-alive\r\n" <<
-            "Content-Length: " <<
-               size << "\r\n" <<
-            "\r\n";
-
-         writeOutput.write(
-            html,
-            size
-         );
-
-         std::string response =
-            writeOutput.str();
-
-         ::write(
-            clientSocket,
-            response.c_str(),
-            response.length()
-         );
-
-      }
-
-      virtual void outputHomePage(int clientSocket)
-      {
-
-         stringstream writeOutput;
-
-         const char * html = (const char *)(&_binary_HomePage_html_start[0]);
-
-         const size_t size =
-            _binary_HomePage_html_end -
-            _binary_HomePage_html_start;
-
-         writeOutput <<
-            "HTTP/2.0 200 OK\r\n" <<
-            "Content-Type: text/html; charset=utf-8\r\n" <<
-            "Connection: keep-alive\r\n" <<
-            "Content-Length: " <<
-               size<< "\r\n" <<
-            "\r\n";
-
-         writeOutput.write(
-            html,
-            size
-         );
-
-         std::string response =
-            writeOutput.str();
-
-         ::write(
-            clientSocket,
-            response.c_str(),
-            response.length()
-         );
-
-      }
-
-      virtual void outputErrorPage(int clientSocket)
-      {
-
-         stringstream writeOutput;
-
-         const char * html = (const char *)(&_binary_ErrorPage_html_start[0]);
-
-         const size_t size =
-            _binary_ErrorPage_html_end -
-            _binary_ErrorPage_html_start;
-
-         writeOutput <<
-            "HTTP/2.0 500 Error\r\n" <<
-            "Content-Type: text/html; charset=utf-8\r\n" <<
-            "Connection: keep-alive\r\n" <<
-            "Content-Length: " <<
-               size << "\r\n" <<
-            "\r\n";
-
-         writeOutput.write(
-            html,
-            size
-         );
-
-         std::string response =
-            writeOutput.str();
-
-         ::write(
-            clientSocket,
-            response.c_str(),
-            response.length()
-         );
-
-      }
-
 
    };
+   
+   // Defined in DBWebRequest.hpp
+   BeeFishWeb::Path DBWebRequest::root() {
+      Database* database =
+         dynamic_cast<Database*>
+            (_webServer);
 
-   DBServer* DBWebRequest::dbServer()
-   {
-      DBServer* dbServer =
-         dynamic_cast<DBServer*>(_webServer);
-
-      return dbServer;
+      return BeeFishWeb::Path(*database)
+         [_webServer->host()];
    }
-
-   Parser* DBWebRequest::createJSONBody()
-   {
-      DBServer::Path path = dbServer()->urlPath(_url);
-      if (path.hasData())
-      {
-         return nullptr;
-      }
-      setContentType(path);
-      return new
-         StreamToDB(
-            JSONParser(path, _contentLength),
-            path,
-            _contentLength
-         );
-   };
-
-   Parser* DBWebRequest::createContentLengthBody(
-   )
-   {
-      DBServer::Path path = dbServer()->urlPath(_url);
-      if (path.hasData())
-      {
-         return nullptr;
-      }
-
-      setContentType(path);
-
-
-      return new
-         StreamToDB(
-            ContentLength(_contentLength),
-            path,
-            _contentLength
-         );
-   };
-
 
 }
 

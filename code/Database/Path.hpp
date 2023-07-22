@@ -154,7 +154,7 @@ namespace BeeFishDatabase {
       void getData(T& destination)
       {
          Data& data = getData();
-         destination = data;
+         destination = *(T*)data.data();
       }
 
       template<typename T>
@@ -188,8 +188,7 @@ namespace BeeFishDatabase {
       }
 
       void setData(const std::string& value) {
-         Branch& branch =
-            _database->getBranch(_index);
+         Branch& branch = getBranch();
          
          Data* destination = nullptr;
 
@@ -211,7 +210,7 @@ namespace BeeFishDatabase {
                _database->allocate(value.size());
                
             Branch& branch =
-               _database->getBranch(_index);
+               getBranch();
                
             branch._dataIndex = dataIndex;
          
@@ -256,9 +255,7 @@ namespace BeeFishDatabase {
       
       void deleteData()
       {
-         Branch& branch =
-            _database->getBranch(_index);
-
+         Branch& branch = getBranch();
 
          if (branch._dataIndex) {
             Data* data =
@@ -279,8 +276,7 @@ namespace BeeFishDatabase {
       void clear()
       {
          deleteData();
-         Branch& branch =
-            _database->getBranch(_index);
+         Branch& branch = getBranch();
          
          branch._left = 0;
          branch._right = 0;

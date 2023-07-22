@@ -34,7 +34,7 @@ namespace BeeFishWebDB {
 
          std::string data;
 
-         Path page = path[pageIndex];
+         BeeFishWeb::Path page = path[pageIndex];
 
          if (page.hasData()) {
             page.getData(data); 
