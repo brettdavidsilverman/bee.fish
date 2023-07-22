@@ -441,6 +441,7 @@ public:
       std::string _buffer;
       const size_t _contentLength;
       size_t _bytesRead = 0;
+      size_t _bytesWritten {0};
       const size_t _pageSize = getpagesize();
 
       JSONParser(const JSONParser& source) :
@@ -505,9 +506,20 @@ public:
                 ec
             );
 
+         _bytesWritten += n;
+         more = _bytesWritten < _contentLength;
+
          _buffer.clear();
 
-         if (_parser.done()) {
+         if (ec && (ec != boost::json::error::incomplete)) {
+            setResult(false);
+            return false;
+         }
+         else if (_parser.done()) {
+            if (more) {
+               setResult(false);
+               return false;
+            }
             setResult(true);
          }
          else if (!more)
@@ -527,10 +539,6 @@ public:
                setResult(false);
                return false;
             }
-         }
-         else if (ec) {
-            setResult(false);
-            return false;
          }
 
          return true;

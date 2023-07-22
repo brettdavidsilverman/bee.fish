@@ -13,7 +13,7 @@ namespace BeeFish
    using namespace BeeFishWeb;
    using namespace BeeFishWebDB;
 
-   inline bool testFile(string url, string file);
+   inline bool testFile(string url, string file, bool expect = true);
 
    inline bool test()
    {
@@ -86,6 +86,9 @@ namespace BeeFish
             testFile(dbServer.url(), "LargeNumber.json");
 
          success = success &&
+            testFile(dbServer.url(), "Extra.json", false);
+
+         success = success &&
             testFile(dbServer.url(), "large.json");
 
          outputSuccess(success);
@@ -101,7 +104,7 @@ namespace BeeFish
       return success;
    }
    
-   inline bool testFile(string url, string file)
+   inline bool testFile(string url, string file, bool expect)
    {
       cout << "Testing file " << file << endl;
       stringstream stream;
@@ -113,7 +116,7 @@ namespace BeeFish
          file << " "
          "-H \"Content-Type: application/json; charset=utf-8\" " <<
          "-H Expect: " <<
-         "-T tests/" << file << " -s | grep \"true\"";
+         "-T tests/" << file << " -s | grep \"" << (expect ? "true" : "false") << "\"";
 
       string command = stream.str();
       cerr << "   Executing..." << endl << command << endl;
