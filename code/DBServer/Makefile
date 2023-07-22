@@ -27,6 +27,7 @@ $(TEMP)/ErrorPage.o: ErrorPage.html
 test:	$(OUTPUT)
 	$(BUILD)/DBServer -test
 
+debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
 debug:	$(OUTPUT)

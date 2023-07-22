@@ -359,20 +359,14 @@ namespace BeeFishDatabase {
          _index = rhs._index;
          return *this;
       }
-      /*
-      Path& operator=(const Index& rhs)
-      { 
-         _index = rhs;
-         return *this;
-      }
-      */
+      
       template<typename T>
       T operator=(const T& rhs)
       {
          setData(rhs);
          return rhs;
       }
-/*
+
       string operator=(const char* rhs)
       {
          string value(rhs);
@@ -380,17 +374,6 @@ namespace BeeFishDatabase {
          return value;
       }
       
-      Data& operator=(Data& rhs)
-      {
-         setData(rhs);
-         return rhs;
-      }
-
-      operator Data() {
-         Data data;
-         getData(data);
-         return data;
-      }*/
 
       bool operator == (const Path& rhs)
       {

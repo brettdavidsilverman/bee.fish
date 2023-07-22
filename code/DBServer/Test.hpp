@@ -13,6 +13,8 @@ namespace BeeFish
    using namespace BeeFishWeb;
    using namespace BeeFishWebDB;
 
+   inline bool testFile(string url, string file);
+
    inline bool test()
    {
 
@@ -31,7 +33,7 @@ namespace BeeFish
 
       if (success)
       {
-         cout << "Testing 404 ";
+         cout << "Testing 404 " << flush;
 
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
@@ -43,7 +45,7 @@ namespace BeeFish
 
       if (success)
       {
-         cout << "Testing post application/json ";
+         cout << "Testing post application/json " << flush;
 
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
@@ -57,7 +59,7 @@ namespace BeeFish
 
       if (success)
       {
-         cout << "Testing get ";
+         cout << "Testing get " << flush;
 
          stringstream stream;
          stream << "curl " << dbServer.url() << "bee"
@@ -69,6 +71,43 @@ namespace BeeFish
 
       }
 
+      if (success)
+      {
+         cout << "Testing test files " << flush;
+
+         success = success &&
+            testFile(dbServer.url(), "Simple.json");
+
+         success = success &&
+            testFile(dbServer.url(), "TestError1.json");
+
+         success = success &&
+            testFile(dbServer.url(), "large.json");
+
+         outputSuccess(success);
+
+      }
+/*
+      if (success)
+      {
+         cout << "Testing large.json " << flush;
+
+         stringstream stream;
+         stream << 
+            "curl -X POST " <<
+            dbServer.url() <<
+            "large.json " <<
+            "-H \"Content-Type: application/json; charset=utf-8\" " <<
+            "-H Expect: " <<
+            "-T large.json -s | grep \"success\"";
+
+         string command = stream.str();
+         success &= (system(command.c_str()) == 0);
+
+         outputSuccess(success);
+
+      }
+*/
       dbServer.stop();
 
       std::filesystem::remove(TEMP_FILENAME);
@@ -78,6 +117,26 @@ namespace BeeFish
       return success;
    }
    
+   inline bool testFile(string url, string file)
+   {
+      cout << "Testing file " << file << flush;
+      stringstream stream;
+      bool success = true;
+
+      stream << 
+         "curl -X POST " <<
+         url <<
+         file << " "
+         "-H \"Content-Type: application/json; charset=utf-8\" " <<
+         "-H Expect: " <<
+         "-T tests/" << file << " -s | grep \"true\"";
+
+      string command = stream.str();
+      success &= (system(command.c_str()) == 0);
+
+      outputSuccess(success);
+      return success;
+   }
 
 }
 

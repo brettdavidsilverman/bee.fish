@@ -12,14 +12,150 @@ namespace BeeFishWebDB {
 
 class JSONDBHandler
 {
-protected:
-    BeeFishWeb::Path _rootPath;
-    vector<BeeFishWeb::Path> _pathStack;
-
 public:
+
+    enum JSONType {
+       INT64,
+       UINT64,
+       DOUBLE,
+       BOOL,
+       _NULL,
+       STRING,
+       OBJECT,
+       ARRAY,
+       KEY,
+       ROOT
+    };
+
+
+    const int OBJECT_INDEXES = 0;
+    const int OBJECT_KEYS = 1;
+
+protected:
+    struct JSONValue {
+       JSONType _type;
+       size_t _arrayIndex;
+       BeeFishWeb::Path _path;
+    };
+
+    BeeFishWeb::Path _rootPath;
+    vector<JSONValue> _stack;
+    size_t _count {0};
+public:
+
     JSONDBHandler(BeeFishWeb::Path path) :
         _rootPath(path)
     {
+    }
+
+    friend PowerEncoding& operator <<
+    ( 
+        PowerEncoding& stream,
+        const JSONType& data
+    )
+    {
+       stream << (long)data;
+       return stream;
+    }
+
+    JSONValue& lastValue() {
+        assert(size() > 0);
+        return _stack[size() - 1];
+    }
+
+    JSONType& lastType() {
+        return lastValue()._type;
+    }
+
+    size_t& lastArrayIndex() {
+        return lastValue()._arrayIndex;
+    }
+
+    BeeFishWeb::Path lastPath() {
+        return lastValue()._path;
+    }
+
+    size_t size() {
+        return _stack.size();
+    }
+
+    void push_back(JSONValue value) {
+       ++_count;
+       _stack.push_back(value);
+    }
+
+    JSONValue pop_back()
+    {
+        assert(size() > 0);
+
+        JSONValue value =
+           _stack[size() - 1];
+
+        _stack.pop_back();
+
+        --_count;
+        return value;
+    }
+
+    template<typename T>
+    void setData(JSONType type, const T& data) {
+
+        JSONType _lastType = lastType();
+        if (_lastType == KEY) {
+            lastPath()[type]
+               .setData(data);
+
+            assert(lastType() == KEY);
+            pop_back();
+        }
+        else if (_lastType == ARRAY) {
+            size_t& index = lastArrayIndex();
+            lastPath()
+                [index++]
+                [type]
+                .setData(data);
+        }
+  
+    }
+
+    friend ostream& operator << (ostream& out, const JSONType& type)
+    {
+       switch(type) {
+           case INT64:
+               out << "INT64";
+               break;
+           case UINT64:
+               out << "UINT64";
+               break;
+           case DOUBLE:
+               out << "DOUBLE";
+               break;
+           case BOOL:
+               out << "BOOL";
+               break;
+           case _NULL:
+               out << "_NULL";
+               break;
+           case STRING:
+               out << "STRING";
+               break;
+           case OBJECT:
+               out << "OBJECT";
+               break;
+           case ARRAY:
+               out << "ARRAY";
+               break;
+           case KEY:
+               out << "KEY";
+               break;
+           case ROOT:
+               out << "ROOT";
+               break;
+           default:
+              out << "<Unknown type: " << (int)type << ">";
+        };
+
+        return out;
     }
 
     /// The maximum number of elements allowed in an array
@@ -41,7 +177,10 @@ public:
     ///
     bool on_document_begin( error_code& ec )
     {
-        _pathStack.push_back(_rootPath);
+        push_back(
+            JSONValue {ROOT, 0, _rootPath}
+        );
+
         return true;
     }
 
@@ -52,8 +191,8 @@ public:
     ///
     bool on_document_end( error_code& ec )
     {
-        _pathStack.pop_back();
-        assert(_pathStack.size() == 0);
+        pop_back();
+        assert(size() == 0);
         return true;
     }
 
@@ -64,6 +203,11 @@ public:
     ///
     bool on_array_begin( error_code& ec )
     {
+
+        push_back(
+           {ARRAY, 0, lastPath()[ARRAY]}
+        );
+
         return true;
     }
 
@@ -75,6 +219,9 @@ public:
     ///
     bool on_array_end( std::size_t n, error_code& ec )
     {
+        assert(lastType() == ARRAY);
+        pop_back();
+        setData(ARRAY, n);
         return true;
     }
 
@@ -85,6 +232,10 @@ public:
     ///
     bool on_object_begin( error_code& ec )
     {
+        push_back(
+           {OBJECT, 0, lastPath()[OBJECT][OBJECT_KEYS]}
+        );
+
         return true;
     }
 
@@ -96,30 +247,11 @@ public:
     ///
     bool on_object_end( std::size_t n, error_code& ec )
     {
-        return true;
-    }
+        assert(lastType() == OBJECT);
+        pop_back();
 
-    /// Called with characters corresponding to part of the current string.
-    ///
-    /// @return `true` on success.
-    /// @param s The partial characters
-    /// @param n The total size of the string thus far
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_string_part( string_view s, std::size_t n, error_code& ec )
-    {
-        return true;
-    }
+        setData(OBJECT, n);
 
-    /// Called with the last characters corresponding to the current string.
-    ///
-    /// @return `true` on success.
-    /// @param s The remaining characters
-    /// @param n The total size of the string
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_string( string_view s, std::size_t n, error_code& ec )
-    {
         return true;
     }
 
@@ -145,7 +277,12 @@ public:
     ///
     bool on_key( string_view s, std::size_t n, error_code& ec )
     {
-cerr << "Key: " << s << endl;
+        std::string key(s);
+
+        push_back(
+           {KEY, 0, lastPath()[key]}
+        );
+
         return true;
     }
 
@@ -160,6 +297,35 @@ cerr << "Key: " << s << endl;
         return true;
     }
 
+    /// Called with characters corresponding to part of the current string.
+    ///
+    /// @return `true` on success.
+    /// @param s The partial characters
+    /// @param n The total size of the string thus far
+    /// @param ec Set to the error, if any occurred.
+    ///
+    bool on_string_part( string_view s, std::size_t n, error_code& ec )
+    {
+        return true;
+    }
+
+    /// Called with the last characters corresponding to the current string.
+    ///
+    /// @return `true` on success.
+    /// @param s The remaining characters
+
+    /// @param ec Set to the error, if any occurred.
+    ///
+    bool on_string( string_view s, std::size_t n, error_code& ec )
+    {
+        std::string data(s);
+
+        setData(STRING, data);
+
+        return true;
+    }
+
+
     /// Called when a signed integer is parsed.
     ///
     /// @return `true` on success.
@@ -169,6 +335,7 @@ cerr << "Key: " << s << endl;
     ///
     bool on_int64( int64_t i, string_view s, error_code& ec )
     {
+        setData(INT64, i);
         return true;
     }
 
@@ -181,6 +348,8 @@ cerr << "Key: " << s << endl;
     ///
     bool on_uint64( uint64_t u, string_view s, error_code& ec )
     {
+        setData(UINT64, u);
+ 
         return true;
     }
 
@@ -193,6 +362,8 @@ cerr << "Key: " << s << endl;
     ///
     bool on_double( double d, string_view s, error_code& ec )
     {
+        setData(DOUBLE, d);
+
         return true;
     }
 
@@ -205,6 +376,8 @@ cerr << "Key: " << s << endl;
     ///
     bool on_bool( bool b, error_code& ec )
     {
+        setData(BOOL, b);
+
         return true;
     }
 
@@ -215,6 +388,9 @@ cerr << "Key: " << s << endl;
     ///
     bool on_null( error_code& ec )
     {
+        setData(_NULL, 0);
+
+
         return true;
     }
 
@@ -303,7 +479,7 @@ cerr << "Key: " << s << endl;
 
          size_t n =
             _parser.write_some(
-               true,
+                true,
                _buffer.c_str(),
                _buffer.size(),
                 ec
