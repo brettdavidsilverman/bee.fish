@@ -63,10 +63,10 @@ namespace BeeFishDatabase {
          if (bit == false)
          {
             if (!branch._left) {
-               std::lock_guard<std::mutex> lock(_database->_lock);
+               scoped_lock lock(_database->_mutex);
                if (!branch._left) {
                   branch._left =
-                     _database->getNextIndex(branch._left);
+                     _database->getNextIndex();
                }
             }
             _index = branch._left;
@@ -75,10 +75,10 @@ namespace BeeFishDatabase {
          else
          {
             if (!branch._right) {
-               std::lock_guard<std::mutex> lock(_database->_lock);
+               scoped_lock lock(_database->_mutex);
                if (!branch._right) {
                   branch._right =
-                     _database->getNextIndex(branch._right);
+                     _database->getNextIndex();
                }
             }
             _index = branch._right;
@@ -221,7 +221,7 @@ namespace BeeFishDatabase {
             
          }
 
-         destination->setSize(value.size());
+         destination->_size = value.size();
          
          memcpy(
             destination->data(),

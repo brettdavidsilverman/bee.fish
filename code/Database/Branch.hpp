@@ -9,24 +9,24 @@ namespace BeeFishDatabase
 
    struct Branch
    {
-      Index _parent;
       Index _left;
       Index _right;
       Index _dataIndex;
       
       bool isDeadEnd()
       {
-         return _left  == 0 &&
-                _right == 0;
+         return ( _left  == 0 ) &&
+                ( _right == 0 );
       }
       
       friend ostream& operator << 
       (ostream& out, Branch& branch)
       {
          out <<
-            "{\"parent\": " << branch._parent << ", " <<
-            "\"left\": " <<  branch._left << ", " <<
-            "\"right\": " << branch._right << "}";
+            "{" <<
+               "\"left\":" <<  branch._left << ", " <<
+               "\"right\": " << branch._right <<
+            "}";
 
          return out;
       }

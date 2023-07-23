@@ -197,7 +197,7 @@ namespace BeeFishDatabase {
       void open() {
          // Open the file
          _file = fopen(
-            _filename.c_str(), "rb+"
+            _filename.c_str(), "rw+"
          );
       
          if (_file == NULL) {
@@ -218,9 +218,7 @@ namespace BeeFishDatabase {
             newSize
          );
          
-         Size size = getFileSize(_fileNumber);
-         
-         return size;
+         return size();
    
       }
 
@@ -240,7 +238,7 @@ namespace BeeFishDatabase {
       {
          int result =
             ftruncate(fileNumber, newSize);
-    
+
          if (result != 0)
          {
             string str = "Couldn't resize file. ";

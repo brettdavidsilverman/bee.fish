@@ -95,7 +95,7 @@ namespace BeeFishWebDB {
       virtual bool setContentType(DBWebRequest::Path path)
       {
 
-         std::scoped_lock lock{_mutex};
+         std::scoped_lock lock(_mutex);
 
          if (path.hasData())
             return false;
@@ -415,20 +415,7 @@ namespace BeeFishWebDB {
 
       }
 
-      size_t getSize(Path path)
-      {
-         if (path.isDeadEnd())
-            return 0;
-
-         size_t size;
-         size_t max = path.max();
-         cerr << "DBWebRequest.hpp::getSize.max: " << max << endl;
-         std::string lastPage;
-         path[max].getData(lastPage);
-         size = max * path.pageSize() + lastPage.size();
-         return size;
-      }
-
+      
 
    };
 

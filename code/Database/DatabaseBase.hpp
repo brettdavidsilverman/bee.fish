@@ -47,14 +47,14 @@ namespace BeeFishDatabase {
       
       Size    _incrementSize;
       Size    _size;
-      Tree*   _tree;
+      Tree*   _tree {nullptr};
       Branch* _root;
       Index*  _nextIndex;
       Size    _branchCount;
       Size    _pageSize;
 
    public:
-      std::mutex _lock;
+      std::mutex _mutex;
    
       Database(
          string filePath,
@@ -95,7 +95,8 @@ namespace BeeFishDatabase {
       
       ~Database()
       {
-         munmap(_tree, _size);
+         if (_tree)
+            munmap(_tree, _size);
       }
       
       
@@ -122,7 +123,7 @@ namespace BeeFishDatabase {
             throw runtime_error(error);
          }
 
-         if (_tree->_header._pageSize != getPageSize())
+         if (_tree->_header._pageSize != _pageSize)
          {
             std::stringstream stream;
             stream
@@ -137,7 +138,10 @@ namespace BeeFishDatabase {
       
       virtual void mapFile()
       {
-         _size = fileSize();
+         if (_tree)
+            munmap(_tree, _size);
+
+         _size = size();
          
          _tree = (Tree*)
             mmap(
@@ -148,15 +152,24 @@ namespace BeeFishDatabase {
                _fileNumber,
                0
             );
+
+         setMembers();
             
+      }
+
+      void setMembers() {
+
+         _size = size();
+
          _root = _tree->_root;
          
          _branchCount =
-            (_size - sizeof(Header)) /
-            sizeof(Branch);
+            floor((float)(_size - sizeof(Header)) /
+               (float)sizeof(Branch));
             
          _nextIndex = 
            &(_tree->_header._nextIndex);
+
       }
          
       
@@ -165,58 +178,58 @@ namespace BeeFishDatabase {
          return _pageSize;
       }
 
-      inline Index getNextIndex(const Index& parent = 0)
+      inline Index getNextIndex()
       {
-         Index nextIndex =
-            ++(*_nextIndex);
-         
-         if (parent > 0) {
+         Index& index = *_nextIndex;
+         return ++index;
 
-            Branch& nextBranch =
-               getBranch(nextIndex);
-
-            nextBranch._parent = parent;
-         }
-
-         return nextIndex;
       }
   
       inline Index allocate(Size byteSize)
       {
+         
+
          Size size = sizeof(Size) + byteSize;
   
          Index branchCount =
-            ceil(size / sizeof(Branch));
-            
-         Index dataIndex = getNextIndex();
-         
-         (*_nextIndex) += (branchCount);
-         
-         // Check for resize
-         if ( *_nextIndex >= _branchCount )
+            ceil((float)size /
+                 (float)sizeof(Branch));
+
+         Index dataIndex;
+
          {
-            resize(_size + byteSize);
+            scoped_lock lock(_mutex);
+            dataIndex = getNextIndex();
+         
+            (*_nextIndex) += (branchCount);
+         }
+
+         // Check for resize
+         while ( *_nextIndex >= _branchCount )
+         {
+            growFile();
          }
         
          Data* data = getData(dataIndex);
          
-         data->setSize(byteSize);
+         data->_size = byteSize;
          
          return dataIndex;
             
       }
       
-      inline Branch& getBranch(const Index& index)
+      inline Branch& getBranch(Index index)
       {
-         if ( index >= _branchCount )
+         while (index >= _branchCount)
          {
-            resize();
+            growFile();
          }
-         
+
          return _root[index];
+         
       }
       
-      inline Data* getData(const Index& dataIndex)
+      inline Data* getData(Index dataIndex)
       {
          if (dataIndex == 0)
             return nullptr;
@@ -228,20 +241,15 @@ namespace BeeFishDatabase {
          return data;
       }
  
-      virtual Size resize(
-         Size size = 0
-      )
+      virtual Size growFile()
       {
-            
-         
-         if (size == 0)
-            size = File::size() +
-                   _incrementSize;
-         
-         if (size <= _size)
-            size = _size;
-         else
-            size = File::resize(size);
+
+         scoped_lock lock(_mutex);
+
+         Size size = _size + _incrementSize;
+
+
+         File::resize(size);
          
          _tree = (Tree*)
             mremap(
@@ -251,17 +259,8 @@ namespace BeeFishDatabase {
                MREMAP_MAYMOVE
             );
             
-         _root = _tree->_root;
-         
-         _size = size;
-         
-         _branchCount =
-            (_size - sizeof(Header)) /
-            sizeof(Branch);
-            
-         _nextIndex = 
-           &(_tree->_header._nextIndex);
-           
+         setMembers();
+
          return _size;
 
       }

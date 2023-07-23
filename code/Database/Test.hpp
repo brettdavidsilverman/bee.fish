@@ -24,7 +24,7 @@ namespace BeeFishDatabase
 
       cout << "Test Database" << endl;
 
-      const string filename = "/var/tmp/temp.data";
+      const string filename = "/var/tmp/DBServer.data";
       remove(filename.c_str());
 
       Database db(filename);

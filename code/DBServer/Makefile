@@ -36,4 +36,5 @@ clean:
 	rm -f $(TEMP)/404.o
 	rm -f $(TEMP)/HomePage.o
 	rm -f $(TEMP)/ErrorPage.o
+	rm -f $(TEMP)/DBServer.data
 	rm -f $(OUTPUT)

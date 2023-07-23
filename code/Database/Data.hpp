@@ -26,54 +26,10 @@ namespace BeeFishDatabase {
 
    struct Data
    {
-   protected:
+   public:
       size_t _size = 0;
       char _data[];
-   public:
- /*
-      Data(char* data, size_t size)
-      :
-         _data(data),
-         _size(size)
-      {
-      }
-
-
-      virtual ~Data() {
-      }
-      
-      template<typename T>
-      Data(vector<T>& source)
-      :
-         _data(source.data()),
-         _size(source.size() * sizeof(T))
-      {
-      }
-
-      Data(void* data, size_t size)
-      :
-         _data((char*)data), _size(size)
-      {
-      }
-      
-      Data(char* source)
-      :
-         Data(source, strlen(source))
-      {
-         
-      }
-      
-      Data(std::string string) : Data(string.data(), string.size()) {
-         
-      }
-
-      // Implemented in misc.h
-
-      Data(const string& source);
-      operator string() const;
-      */
-
-
+   
       template<typename T>
       Data& operator = (const T& rhs) {
 
@@ -96,10 +52,6 @@ namespace BeeFishDatabase {
 
       size_t size() const {
          return _size;
-      }
-
-      void setSize(size_t size) {
-         _size = size;
       }
 
       template<typename T>
@@ -202,12 +154,6 @@ namespace BeeFishDatabase {
 
       }
       
-      // Implemented in misc.h
-      friend PowerEncoding& operator <<
-      ( 
-         PowerEncoding& stream,
-         const Data& data
-      );
          
    };
    
