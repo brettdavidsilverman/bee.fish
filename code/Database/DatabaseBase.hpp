@@ -205,7 +205,7 @@ namespace BeeFishDatabase {
          }
 
          // Check for resize
-         while ( *_nextIndex >= _branchCount )
+         while ( _branchCount < *_nextIndex  )
          {
             growFile();
          }
