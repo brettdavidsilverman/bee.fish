@@ -24,7 +24,8 @@ namespace BeeFishMisc {
    {
 
       fprintf(stderr, message.c_str(), args ...);
-      
+      fprintf(stderr, "\n");
+
       syslog(priority, message.c_str(), args ...);
       
    }

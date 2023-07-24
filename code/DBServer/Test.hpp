@@ -4,7 +4,7 @@
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "DBServer.hpp"
 
-#define TEMP_FILENAME "/var/tmp/temp.data"
+#define TEMP_FILENAME "/var/tmp/bee.fish.tmp"
 
 namespace BeeFish
 {

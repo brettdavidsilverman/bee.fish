@@ -14,7 +14,22 @@ using namespace BeeFishMisc;
 
 
 int main(int argc, const char* argv[]) {
+/*
+      const string filename = "/var/tmp/DBServer.data";
+      remove(filename.c_str());
 
+      Database db(filename);
+
+      Path start(db);
+      Path next = start["Hello"];
+      std::string str = "My Content Type";
+      next.setData(str);
+      std::string str2;
+      next.getData(str2);
+      cerr << str2 << endl;
+
+return 0;
+*/
    cout << "bee.fish.database"
            << endl
         << "C++ run time: "

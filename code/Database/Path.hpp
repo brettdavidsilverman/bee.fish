@@ -457,9 +457,16 @@ namespace BeeFishDatabase {
       friend ostream& operator <<
       (ostream& out, Path& path)
       {
-         Path::writeBit(out, true);
-         path.output(out);
-      
+         out << "{\"path\":" << path._index
+             << ", \"hasData\": " <<
+                ( path.hasData() ?
+                  "true" :
+                  "false"
+                )
+             << ", \"branch\": "
+             << path.getBranch()
+             << "}";
+     
          return out;
       }
       

@@ -106,7 +106,7 @@ namespace BeeFishWebDB {
          
          if (contentType == "")
             contentType = "text/plain; charset=utf-8";
-
+cerr << "Setting content type: " << contentType << endl;
          path.setData(contentType);
 
          return true;
@@ -122,7 +122,7 @@ namespace BeeFishWebDB {
 
          return new
             StreamToDB(
-               JSONParser(path["json"], _contentLength),
+               JSONParser(path["JSON"], _contentLength),
                path["document"],
                _contentLength
             );
@@ -160,10 +160,15 @@ namespace BeeFishWebDB {
 
          logMessage(LOG_NOTICE, logStream.str());
          
-      
+         Path path =
+            DBWebRequest::path();
+
          if (_method == "POST" &&
              _body == nullptr)
+             
          {
+#warning "Need to fix Alreaady Taken with user credentials"
+
             outputFail("Already taken");
             return false;
          }
@@ -171,28 +176,27 @@ namespace BeeFishWebDB {
          if (_result != true) {
 
             stringstream logStream;
-            logStream 
-               << _ipAddress << " "
-               << "Invalid web request";
 
-            logMessage(LOG_WARNING, logStream.str());
+            logMessage(LOG_WARNING, "Invalid content from %s", _ipAddress.c_str());
             
             if (_method == "POST") {
-               path().clear();
+               path.clear();
                outputFail("Invalid content");
             }
             else
-               outputErrorPage();
+               outputError();
+
+            close();
+
             return false;
          }
 
-         if ( _url == "/" ) {
+         if ( _method == "GET" &&
+              _url == "/" )
+         {
             outputHomePage();
             return true;
          }
-
-         
-         string contentType;
 
          if (_method == "POST")
          {
@@ -200,47 +204,23 @@ namespace BeeFishWebDB {
             return true;
          }
 
-         Path path =
-            DBWebRequest::path();
-
-         if (path.hasData())
+         
+         if (!path.hasData() ||
+             path.isDeadEnd())
          {
-            path.getData(contentType);
-         }
-         else {
             output404NotFound();
             return true;
          }
          
-         stringstream stream;
-         Path document = path["document"];
-
-         size_t size = (size_t)document;
-
-         stream <<
-            "HTTP/2.0 200 OK" << "\r\n" <<
-            "Connection: keep-alive\r\n" <<
-            "Content-Type: " <<
-               contentType << "\r\n" <<
-            "Content-Length: " <<
-               size << "\r\n" <<
-            "\r\n";
-
-         std::string headers =
-            stream.str();
-
-         // Send the headers
-         write(
-            headers.c_str(),
-            headers.length()
-         );
 
          // Send the body
-         if (_result == true &&
-             !document.isDeadEnd())
+         if (_result == true)
          {
-            streamFromDB(*this, document);
+            if (streamFromDB(*this, path, true))
+               return true;
          }
+
+         outputError();
 
          return true;
       }
@@ -380,7 +360,7 @@ namespace BeeFishWebDB {
 
       }
 
-      virtual void outputErrorPage()
+      virtual void outputError()
       {
 
          stringstream writeOutput;
