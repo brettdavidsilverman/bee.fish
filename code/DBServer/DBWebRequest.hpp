@@ -167,8 +167,6 @@ cerr << "Setting content type: " << contentType << endl;
              _body == nullptr)
              
          {
-#warning "Need to fix Alreaady Taken with user credentials"
-
             outputFail("Already taken");
             return false;
          }
@@ -389,8 +387,8 @@ cerr << "Setting content type: " << contentType << endl;
 
          ::write(
             _socket,
-            response.c_str(),
-            response.length()
+            response.data(),
+            response.size()
          );
 
       }

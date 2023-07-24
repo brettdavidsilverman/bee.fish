@@ -13,6 +13,7 @@
 
 #include "../Parser/Parser.hpp"
 #include "../JSON/JSON.hpp"
+#include "../Database/Database.hpp"
 #include "URL.hpp"
 #include "Header.hpp"
 #include "Config.hpp"
@@ -23,6 +24,7 @@ namespace BeeFishWeb {
    using namespace BeeFishMisc;
    using namespace BeeFishParser;
    using namespace BeeFishJSON;
+   using namespace BeeFishDatabase;
 
    class WebServer;
 
@@ -158,19 +160,26 @@ namespace BeeFishWeb {
          return _parser.flush();
       }
 
-      virtual bool write(
+      virtual Size write(
          const char* data,
          size_t size
       )
       {
-         size_t written = 
+         Size written = 
             ::write(
                _socket,
                data,
                size
             );
 
-         return (written == size);
+         return written;
+      }
+
+      virtual Size write(
+         const std::string& data
+      )
+      {
+         return write(data.data(), data.size());
       }
 
       bool pollInput() {

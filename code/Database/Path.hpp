@@ -105,15 +105,14 @@ namespace BeeFishDatabase {
             (string(key));
       }
 
-      Size getDataSize()
+      Size getDataSize() const
       {
-         Branch& branch =
+         const Branch& branch =
             _database->getBranch(_index);
             
          if (branch._dataIndex)
          {
-         
-            Data* data =
+            const Data* data =
                _database->getData(
                   branch._dataIndex
                );
@@ -125,7 +124,7 @@ namespace BeeFishDatabase {
          return 0;
       }
       
-      bool hasData()
+      bool hasData() const
       {
          return getDataSize() > 0;
       }
@@ -231,6 +230,52 @@ namespace BeeFishDatabase {
          
       }
 
+      Data* createData(Size byteSize) 
+      {
+         Branch& branch = getBranch();
+         Data* destination = nullptr;
+
+         if (branch._dataIndex)
+         {
+            destination =
+               _database->getData(
+                  branch._dataIndex
+               );
+         }
+
+         if (byteSize == 0)
+         {
+            deleteData();
+            return nullptr;
+         }
+         else if ( ( destination == nullptr ) || 
+              ( destination->size() < byteSize ) )
+         {
+         
+            if (destination)
+               deleteData();
+            
+            Index dataIndex = 
+               _database->allocate(byteSize);
+               
+            Branch& branch =
+               getBranch();
+               
+            branch._dataIndex = dataIndex;
+         
+            destination =
+               _database->getData(
+                  branch._dataIndex
+               );
+            
+         }
+
+         destination->_size = byteSize;
+         
+         return destination;
+         
+      }
+      
       template<typename T>
       void setData(const T& source)
       {
@@ -248,6 +293,12 @@ namespace BeeFishDatabase {
       }
       
       Branch& getBranch()
+      {
+         return
+            _database->getBranch(_index);
+      }
+
+      const Branch& getBranch() const
       {
          return
             _database->getBranch(_index);
@@ -386,9 +437,9 @@ namespace BeeFishDatabase {
          return _index;
       }
       
-      virtual bool isDeadEnd()
+      virtual bool isDeadEnd() const
       {
-         Branch& branch =
+         const Branch& branch =
             _database->getBranch(_index);
             
          return branch.isDeadEnd();
@@ -415,6 +466,22 @@ namespace BeeFishDatabase {
       }
    
    
+      friend ostream& operator <<
+      (ostream& out, const Path& path)
+      {
+         out << "{\"path\":" << path._index
+             << ", \"hasData\": " <<
+                ( path.hasData() ?
+                  "true" :
+                  "false"
+                )
+             << ", \"branch\": "
+             << path.getBranch()
+             << "}";
+     
+         return out;
+      }
+      
    protected:
       
       static bool readBit(istream& in)
@@ -454,21 +521,6 @@ namespace BeeFishDatabase {
          }
       }
       
-      friend ostream& operator <<
-      (ostream& out, Path& path)
-      {
-         out << "{\"path\":" << path._index
-             << ", \"hasData\": " <<
-                ( path.hasData() ?
-                  "true" :
-                  "false"
-                )
-             << ", \"branch\": "
-             << path.getBranch()
-             << "}";
-     
-         return out;
-      }
       
       virtual void output(ostream& out)
       {
@@ -625,6 +677,5 @@ namespace BeeFishDatabase {
       
    };
 
-   
 }
 #endif

@@ -220,10 +220,19 @@ namespace BeeFishDatabase {
       
       inline Branch& getBranch(Index index)
       {
-         while (index >= _branchCount)
+         if (index >= _branchCount)
          {
             growFile();
          }
+
+         return _root[index];
+         
+      }
+
+      inline const Branch& getBranch(Index index) const
+      {
+         if (index >= _branchCount)
+            throw runtime_error("Index out of bounds");
 
          return _root[index];
          
@@ -235,6 +244,18 @@ namespace BeeFishDatabase {
             return nullptr;
          
          Data* data =
+            (Data*)
+               (&(_root[dataIndex]));
+            
+         return data;
+      }
+
+      inline const Data* getData(Index dataIndex) const
+      {
+         if (dataIndex == 0)
+            return nullptr;
+         
+         const Data* data =
             (Data*)
                (&(_root[dataIndex]));
             

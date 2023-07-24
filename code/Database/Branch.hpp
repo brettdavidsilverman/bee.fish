@@ -13,14 +13,14 @@ namespace BeeFishDatabase
       Index _right;
       Index _dataIndex;
       
-      bool isDeadEnd()
+      bool isDeadEnd() const
       {
          return ( _left  == 0 ) &&
                 ( _right == 0 );
       }
       
       friend ostream& operator << 
-      (ostream& out, Branch& branch)
+      (ostream& out, const Branch& branch)
       {
          out <<
             "{" <<

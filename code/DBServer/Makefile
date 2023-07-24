@@ -3,10 +3,10 @@ CFLAGS = -std=c++17 -fmax-errors=1 -Ofast
 DEPS=main.cpp DBServer.hpp Test.hpp StreamToDB.hpp StreamFromDB.hpp Makefile HomePage.html 404.html ErrorPage.html JSONParser.hpp DBWebRequest.hpp
 BUILD = ../../build
 OUTPUT = $(BUILD)/DBServer
-TEMP = /var/tmp
+TEMP = $(BUILD)
 
 $(OUTPUT):	$(DEPS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o
-	g++ $(CFLAGS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic -lstdc++fs
+	g++ $(CFLAGS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o main.cpp -o $(OUTPUT) -lpthread -latomic -lstdc++fs
 
 
 $(TEMP)/404.o: 404.html

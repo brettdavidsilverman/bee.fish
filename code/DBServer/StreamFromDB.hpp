@@ -4,6 +4,7 @@
 #include "../Parser/Parser.hpp"
 #include "../Database/Database.hpp"
 #include "../WebRequest/WebRequest.hpp"
+#include "JSONParser.hpp"
 
 namespace BeeFishWebDB {
 
@@ -11,6 +12,7 @@ namespace BeeFishWebDB {
    using namespace BeeFishParser;
    using namespace BeeFishDatabase;
    using namespace BeeFishPowerEncoding;
+   using namespace BeeFishWebDB;
 
    inline size_t streamDocumentFromDB (
       BeeFishWeb::WebRequest& output,
@@ -24,8 +26,8 @@ namespace BeeFishWebDB {
 
    inline bool writeHeaders(
       BeeFishWeb::WebRequest& output,
-      Path<Database::Encoding> path,
-      std::string contentType
+      std::string contentType,
+      Size contentLength
    );
 
    inline size_t streamFromDB (
@@ -34,30 +36,153 @@ namespace BeeFishWebDB {
       bool original
    )
    {
-      if (original) {
-
-         if (!path.contains("document"))
-            return 0;
-
-         return streamDocumentFromDB(
-            output, path
-         );
+      if (path.isDeadEnd() ||
+            !path.hasData())
+      {
+         throw std::runtime_error("Path is dead end");
       }
-      else if (path.contains("JSON"))
+
+      string contentType;
+      path.getData(contentType);
+
+      if (path.contains("JSON"))
+      {
+         if (!writeHeaders(
+               output,
+               contentType,
+               0))
+         {
+            return 0;
+         }
+
          return streamJSONFromDB(
             output, path["JSON"]
          );
+      }
+
+      if (path.contains("document"))
+      {
+         Size contentLength = (Size)
+            path["document"];
+
+         if (!writeHeaders(
+            output,
+            contentType,
+            contentLength))
+         {
+            return 0;
+         }
+
+         return streamDocumentFromDB(
+            output, path["document"]
+         );
+      }
 
       return 0;
-
    }
 
    inline size_t streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
-      Path<Database::Encoding> path
+      Path<Database::Encoding> jsonPath
    )
    {
-      return 0;
+//#warning here
+              
+      if (!jsonPath.hasData())
+         throw runtime_error("JSON path has no data");
+
+      Size size = 0;
+
+      JSONValue* value = (JSONValue*)
+         jsonPath.getData().data();
+
+      switch (value->_type)
+      {
+         case JSONType::INT64:
+         {
+            stringstream stream;
+            stream << *(int64_t*)(value->_data);
+            string str = stream.str();
+            size += output.write(str);
+            break;
+         }
+         case JSONType::UINT64:
+         {
+            stringstream stream;
+            stream << *(uint64_t*)(value->_data);
+            string str = stream.str();
+            size += output.write(str);
+            break;
+         }
+         case JSONType::DOUBLE:
+         {
+            stringstream stream;
+            
+            stream << *(double*)(value->_data);
+            string str = stream.str();
+            size += output.write(str);
+            break;
+         }
+         case JSONType::STRING:
+         {
+            std::string str((char*)value->_data, value->_size);
+            str = "\"" + escape(str) + "\"";
+            size += output.write(str);
+            break;
+         }
+         case JSONType::BOOL:
+         {
+            string str = (*(bool*)(value->_data)
+                ? "true" : "false");
+            size += output.write(str);
+            break;
+         }
+         case JSONType::_NULL:
+         {
+            string str = "null";
+            size += output.write(str);
+            break;
+         }
+         case JSONType::OBJECT:
+         {
+            size += output.write("{}");
+            break;
+         }
+         case JSONType::ARRAY:
+         {
+            size += output.write("[");
+
+            if (!jsonPath.isDeadEnd())
+            {
+
+               Size min = jsonPath.min();
+               Size max = jsonPath.max();
+
+               for (Size i = min;
+                    i <= max;
+                    ++i)
+               {
+                  size += streamJSONFromDB (
+                     output,
+                     jsonPath[i]
+                  );
+
+                  if (i < max)
+                     size += output.write(", ");
+   
+               }
+            }
+
+            size += output.write("]");
+
+            break;
+         }
+         default:
+            throw runtime_error("Invalid type");
+      }
+
+      return size;
+      
    }
 
    inline size_t streamDocumentFromDB (
@@ -66,22 +191,7 @@ namespace BeeFishWebDB {
    )
    {
 
-      if (path.isDeadEnd() ||
-         !path.hasData())
-      {
-         throw std::runtime_error("Path is dead end");
-      }
-
-      string contentType;
-      path.getData(contentType);
-
-      Path document = path["document"];
-
-      if (!writeHeaders(
-            output,
-            document,
-            contentType))
-         return 0;
+      Path document = path;
 
       // Output the document content
       size_t pageIndex  = 0;
@@ -119,27 +229,21 @@ namespace BeeFishWebDB {
 
    bool writeHeaders(
       BeeFishWeb::WebRequest& output,
-      Path<Database::Encoding> document,
-      std::string contentType
+      std::string contentType,
+      Size contentLength
    )
    {
       
       stringstream stream;
-
-      size_t size = 0;
-
-      if (document.hasData())
-         size = (size_t)document;
-        
       stream <<
          "HTTP/2.0 200 OK" << "\r\n" <<
          "Connection: keep-alive\r\n" <<
          "Content-Type: " <<
             contentType << "\r\n";
-         if (size > 0)
+         if (contentLength > 0)
             stream <<
                "Content-Length: " <<
-               size << "\r\n";
+               contentLength << "\r\n";
       stream << "\r\n";
 
       std::string headers =

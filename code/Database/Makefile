@@ -4,7 +4,7 @@ DEPS=main.cpp Database.hpp DatabaseBase.hpp Data.hpp Version.hpp Test.hpp File.h
 OUTPUT = ../../build/Database
 
 $(OUTPUT):	$(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic -lstdc++fs
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -latomic -lstdc++fs
 
 debug:	clean
 debug:	DEBUG = debug

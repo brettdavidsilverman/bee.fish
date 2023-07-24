@@ -1,5 +1,5 @@
 {
-    "approvals" : [ {
+    "approvals" : {
         "reviewedAt" : 1557088625,
         "reviewedAutomatically" : true,
         "state" : "approved",
@@ -19,5 +19,5 @@
           "id" : "cvy9-n6sb",
           "displayName" : "Tyler Kleykamp"
         }
-      } ]
+    }
 }

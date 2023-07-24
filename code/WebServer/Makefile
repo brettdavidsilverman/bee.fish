@@ -3,7 +3,7 @@ DEPS = Makefile ../../Config.hpp ../Config.hpp Config.hpp ../Miscellaneous/Misce
 CFLAGS = -std=c++17 -Wfatal-errors
 
 $(OUTPUT):	$(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -latomic
 	sudo setcap cap_net_bind_service=ep $(OUTPUT)
 
 all:	$(OUTPUT)

@@ -14,7 +14,7 @@ namespace BeeFish
    using namespace BeeFishWebDB;
 
    inline bool testFile(string url, string file, bool expect = true);
-
+   inline bool testData(string url, string label, string data, bool expect = true);
    inline bool test()
    {
 
@@ -77,6 +77,21 @@ namespace BeeFish
          cout << "Testing test files " << flush;
 
          success = success &&
+            testData(dbServer.url(), "Integer", "1234");
+
+         success = success &&
+            testData(dbServer.url(), "Double", "1234.1235");
+
+         success = success &&
+            testData(dbServer.url(), "EmptyObject", "{}");
+
+         success = success &&
+            testData(dbServer.url(), "EmptyArray", "[]");
+
+         success = success &&
+            testData(dbServer.url(), "Array", "[1,2,3]");
+
+         success = success &&
             testFile(dbServer.url(), "Simple.json");
 
          success = success &&
@@ -117,6 +132,26 @@ namespace BeeFish
          "-H \"Content-Type: application/json; charset=utf-8\" " <<
          "-H Expect: " <<
          "-T tests/" << file << " -s | grep \"" << (expect ? "true" : "false") << "\"";
+
+      string command = stream.str();
+      cerr << "   Executing..." << endl << command << endl;
+      success &= (system(command.c_str()) == 0);
+
+      outputSuccess(success);
+      return success;
+   }
+
+   inline bool testData(string url, string label, string data, bool expect)
+   {
+      cout << "Testing data " << label << endl;
+      stringstream stream;
+      bool success = true;
+
+      stream << 
+         "curl " <<
+         url << label <<
+         " -H \"Content-Type: application/json; charset=utf-8\"" <<
+         " -d " << data << " -s | grep \"" << (expect ? "true" : "false") << "\"";
 
       string command = stream.str();
       cerr << "   Executing..." << endl << command << endl;

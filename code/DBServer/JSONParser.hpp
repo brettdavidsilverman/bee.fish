@@ -3,19 +3,15 @@
 #include <vector>
 #include <boost/json/basic_parser.hpp>
 #include "../Parser/Parser.hpp"
-#include "../Database/Path.hpp"
+#include "../Database/Database.hpp"
 
 using namespace BeeFishParser;
 using namespace BeeFishDatabase;
 
 namespace BeeFishWebDB {
 
-class JSONDBHandler
-{
-public:
-
-    enum class JSONType {
-       INT64,
+   enum class JSONType {
+      INT64,
        UINT64,
        DOUBLE,
        BOOL,
@@ -25,419 +21,399 @@ public:
        ARRAY,
        KEY,
        ROOT
-    };
+   };
 
+   ostream& operator << (ostream& out, const JSONType& type);
+   
+   struct JSONValue {
+      Size     _size;
+      JSONType _type;
+      char     _data[];
+   };
 
-    const int OBJECT_INDEXES = 0;
-    const int OBJECT_KEYS = 1;
+   class JSONDBHandler
+   {
+   public:
+      const int OBJECT_INDEXES = 0;
+      const int OBJECT_KEYS = 1;
 
-protected:
-    struct JSONValue {
-       JSONType _type;
-       size_t _arrayIndex;
-       BeeFishWeb::Path _path;
-    };
+   protected:
+      struct JSONStackValue {
+         JSONType _type;
+         size_t _arrayIndex;
+         string _key;
+         Path<Database::Encoding> _path;
+      };
 
-    BeeFishWeb::Path _rootPath;
-    vector<JSONValue> _stack;
-    size_t _count {0};
-    JSONType _lastType = (JSONType)-1;
+      Path<Database::Encoding> _rootPath;
+      vector<JSONStackValue> _stack;
+      size_t _count {0};
+      JSONType _lastType = (JSONType)-1;
 
-public:
+   public:
 
-    JSONDBHandler(BeeFishWeb::Path path) :
-        _rootPath(path)
-    {
-    }
+      JSONDBHandler(Path<Database::Encoding> path) :
+         _rootPath(path)
+      {
+      }
 
-    friend PowerEncoding& operator <<
-    ( 
-        PowerEncoding& stream,
-        const JSONType& data
-    )
-    {
-       stream << (int)data;
-       return stream;
-    }
+         
+      JSONStackValue& lastValue() {
+         assert(size() > 0);
+         return _stack[size() - 1];
+      }
 
-    JSONValue& lastValue() {
-        assert(size() > 0);
-        return _stack[size() - 1];
-    }
+      JSONType& lastType() {
+         return lastValue()._type;
+      }
 
-    JSONType& lastType() {
-        return lastValue()._type;
-    }
+      size_t& lastArrayIndex() {
+         return lastValue()._arrayIndex;
+      }
 
-    size_t& lastArrayIndex() {
-        return lastValue()._arrayIndex;
-    }
+      const std::string& lastKey() {
+         return lastValue()._key;
+      }
 
-    BeeFishWeb::Path lastPath() {
-        return lastValue()._path;
-    }
+      BeeFishWeb::Path lastPath() {
+         return lastValue()._path;
+      }
 
-    size_t size() {
-        return _stack.size();
-    }
+      size_t size() {
+         return _stack.size();
+      }
 
-    bool lastIsNumber() {
-        return isNumber(_lastType);
-    }
+      bool lastIsNumber() {
+         return isNumber(_lastType);
+      }
 
-    bool isNumber(JSONType type) {
-       return
-          ( (type == JSONType::INT64) ||
-            (type == JSONType::UINT64) ||
-            (type == JSONType::DOUBLE) );
-    }
+      bool isNumber(JSONType type) {
+         return
+            ( (type == JSONType::INT64) ||
+              (type == JSONType::UINT64) ||
+              (type == JSONType::DOUBLE) );
+      }
 
-    void push_back(JSONValue value) {
-       ++_count;
-       _stack.push_back(value);
-    }
+      void push_back(JSONStackValue value) {
+         ++_count;
+         _stack.push_back(value);
+      }
 
-    JSONValue pop_back()
-    {
-        assert(size() > 0);
+      JSONStackValue pop_back()
+      {
+         assert(size() > 0);
 
-        JSONValue value =
-           _stack[size() - 1];
+         JSONStackValue value =
+            _stack[size() - 1];
 
-        _stack.pop_back();
+         _stack.pop_back();
 
-        --_count;
-        return value;
-    }
+         --_count;
+         return value;
+      }
 
-    template<typename T>
-    void setData(JSONType type, const T& data) {
+      void setData(JSONType type, Size size = 0, void* value = nullptr) {
 
-        JSONType _lastType = lastType();
-        if (_lastType == JSONType::KEY) {
-            lastPath()[type]
-               .setData(data);
+         Path<Database::Encoding> path
+            = lastPath();
+         
+         JSONType _lastType = lastType();
 
-            assert(lastType() == JSONType::KEY);
+         if (_lastType == JSONType::KEY) {
+            string key = lastKey();
             pop_back();
-        }
-        else if (_lastType == JSONType::ARRAY) {
-            size_t& index = lastArrayIndex();
-            lastPath()
-                [index++]
-                [type]
-                .setData(data);
-        }
+            assert(lastType() == JSONType::OBJECT);
+            path = path[key];
+         }
+         else if (_lastType == JSONType::ARRAY) {
+            Size& index = lastArrayIndex();
+            path = path[index++];
+         }
 
-        _lastType = type;
+         Size totalSize = sizeof(JSONValue) + size;
 
-    }
+         Data* data =
+            path.createData(totalSize);
 
-    friend ostream& operator << (ostream& out, const JSONType& type)
-    {
-       switch(type) {
-           case JSONType::INT64:
-               out << "INT64";
-               break;
-           case JSONType::UINT64:
-               out << "UINT64";
-               break;
-           case JSONType::DOUBLE:
-               out << "DOUBLE";
-               break;
-           case JSONType::BOOL:
-               out << "BOOL";
-               break;
-           case JSONType::_NULL:
-               out << "_NULL";
-               break;
-           case JSONType::STRING:
-               out << "STRING";
-               break;
-           case JSONType::OBJECT:
-               out << "OBJECT";
-               break;
-           case JSONType::ARRAY:
-               out << "ARRAY";
-               break;
-           case JSONType::KEY:
-               out << "KEY";
-               break;
-           case JSONType::ROOT:
-               out << "ROOT";
-               break;
-           default:
-              out << "<Unknown type: " << (int)type << ">";
-        };
+         JSONValue* jsonValue = (JSONValue*) data->data();
+         jsonValue->_size = size;
+         jsonValue->_type = type;
 
-        return out;
-    }
+         if (size > 0 && value)
+            memcpy(&(jsonValue->_data[0]), value, size);
 
-    /// The maximum number of elements allowed in an array
-    static constexpr std::size_t max_array_size = -1;
 
-    /// The maximum number of elements allowed in an object
-    static constexpr std::size_t max_object_size = -1;
+      }
 
-    /// The maximum number of characters allowed in a string
-    static constexpr std::size_t max_string_size = -1;
+      /// The maximum number of elements allowed in an array
+      static constexpr std::size_t max_array_size = -1;
 
-    /// The maximum number of characters allowed in a key
-    static constexpr std::size_t max_key_size = -1;
+      /// The maximum number of elements allowed in an object
+      static constexpr std::size_t max_object_size = -1;
 
-    /// Called once when the JSON parsing begins.
-    ///
-    /// @return `true` on success.
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_document_begin( error_code& ec )
-    {
-        push_back(
-            JSONValue {JSONType::ROOT, 0, _rootPath}
-        );
+      /// The maximum number of characters allowed in a string
+      static constexpr std::size_t max_string_size = -1;
 
+      /// The maximum number of characters allowed in a key
+      static constexpr std::size_t max_key_size = -1;
+
+      /// Called once when the JSON parsing begins.
+      ///
+      /// @return `true` on success.
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_document_begin( error_code& ec )
+      {
+         push_back(
+            JSONStackValue {JSONType::ROOT, 0, "", _rootPath}
+         );
+
+         return true;
+      }
+
+      /// Called when the JSON parsing is done.
+      ///
+      /// @return `true` on success.
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_document_end( error_code& ec )
+      {
+         pop_back();
+         assert(size() == 0);
+         return true;
+      }
+
+      /// Called when the beginning of an array is encountered.
+      ///
+      /// @return `true` on success.
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_array_begin( error_code& ec )
+      {
+         push_back(
+            {JSONType::ARRAY, 0, "", lastPath()}
+         );
+
+         return true;
+      }
+
+      /// Called when the end of the current array is encountered.
+      ///
+      /// @return `true` on success.
+      /// @param n The number of elements in the array.
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_array_end( std::size_t n, error_code& ec )
+      {
+         assert(lastType() == JSONType::ARRAY);
+         pop_back();
+         setData(JSONType::ARRAY, sizeof(n), &n);
+         
+         return true;
+      }
+
+      /// Called when the beginning of an object is encountered.
+      ///
+      /// @return `true` on success.
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_object_begin( error_code& ec )
+      {
+         Path path = lastPath();
+
+         push_back(
+            {JSONType::OBJECT, 0, "", path}
+         );
+
+         //setData(JSONType::OBJECT);
+
+         return true;
+      }
+
+      /// Called when the end of the current object is encountered.
+      ///
+      /// @return `true` on success.
+      /// @param n The number of elements in the object.
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_object_end( std::size_t n, error_code& ec )
+      {
+         assert(lastType() == JSONType::OBJECT);
+         
+         pop_back();
+
+         setData(JSONType::OBJECT, sizeof(n), &n);
+         
+         return true;
+      }
+
+      /// Called with characters corresponding to part of the current key.
+      ///
+      /// @return `true` on success.
+      /// @param s The partial characters
+      /// @param n The total size of the key thus far
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_key_part( string_view s, std::size_t n, error_code& ec )
+      {
+
+         return true;
+      }
+
+      /// Called with the last characters corresponding to the current key.
+      ///
+      /// @return `true` on success.
+      /// @param s The remaining characters
+      /// @param n The total size of the key
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_key( string_view s, std::size_t n, error_code& ec )
+      {
+         std::string key(s);
+
+         push_back(
+            {JSONType::KEY, 0, key, lastPath()}
+         );
+
+         return true;
+      }
+
+      /// Called with the characters corresponding to part of the current number.
+      ///
+      /// @return `true` on success.
+      /// @param s The partial characters
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_number_part( string_view s, error_code& ec )
+      {
+         return true;
+      }
+
+      /// Called with characters corresponding to part of the current string.
+      ///
+      /// @return `true` on success.
+      /// @param s The partial characters
+      /// @param n The total size of the string thus far
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_string_part( string_view s, std::size_t n, error_code& ec )
+      {
         return true;
-    }
+      }
 
-    /// Called when the JSON parsing is done.
-    ///
-    /// @return `true` on success.
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_document_end( error_code& ec )
-    {
-        pop_back();
-        assert(size() == 0);
-        return true;
-    }
+      /// Called with the last characters corresponding to the current string.
+      ///
+      /// @return `true` on success.
+      /// @param s The remaining characters
 
-    /// Called when the beginning of an array is encountered.
-    ///
-    /// @return `true` on success.
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_array_begin( error_code& ec )
-    {
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_string( string_view s, std::size_t n, error_code& ec )
+      {
+         std::string data(s);
 
-        push_back(
-           {JSONType::ARRAY, 0, lastPath()[JSONType::ARRAY]}
-        );
+         setData(JSONType::STRING, data.size(), data.data());
 
-        return true;
-    }
-
-    /// Called when the end of the current array is encountered.
-    ///
-    /// @return `true` on success.
-    /// @param n The number of elements in the array.
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_array_end( std::size_t n, error_code& ec )
-    {
-        assert(lastType() == JSONType::ARRAY);
-        pop_back();
-        setData(JSONType::ARRAY, n);
-        return true;
-    }
-
-    /// Called when the beginning of an object is encountered.
-    ///
-    /// @return `true` on success.
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_object_begin( error_code& ec )
-    {
-        push_back(
-           {JSONType::OBJECT, 0, lastPath()[JSONType::OBJECT][OBJECT_KEYS]}
-        );
-
-        return true;
-    }
-
-    /// Called when the end of the current object is encountered.
-    ///
-    /// @return `true` on success.
-    /// @param n The number of elements in the object.
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_object_end( std::size_t n, error_code& ec )
-    {
-        assert(lastType() == JSONType::OBJECT);
-        pop_back();
-
-        setData(JSONType::OBJECT, n);
-
-        return true;
-    }
-
-    /// Called with characters corresponding to part of the current key.
-    ///
-    /// @return `true` on success.
-    /// @param s The partial characters
-    /// @param n The total size of the key thus far
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_key_part( string_view s, std::size_t n, error_code& ec )
-    {
-
-        return true;
-    }
-
-    /// Called with the last characters corresponding to the current key.
-    ///
-    /// @return `true` on success.
-    /// @param s The remaining characters
-    /// @param n The total size of the key
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_key( string_view s, std::size_t n, error_code& ec )
-    {
-        std::string key(s);
-
-        push_back(
-           {JSONType::KEY, 0, lastPath()[key]}
-        );
-
-        return true;
-    }
-
-    /// Called with the characters corresponding to part of the current number.
-    ///
-    /// @return `true` on success.
-    /// @param s The partial characters
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_number_part( string_view s, error_code& ec )
-    {
-        return true;
-    }
-
-    /// Called with characters corresponding to part of the current string.
-    ///
-    /// @return `true` on success.
-    /// @param s The partial characters
-    /// @param n The total size of the string thus far
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_string_part( string_view s, std::size_t n, error_code& ec )
-    {
-        return true;
-    }
-
-    /// Called with the last characters corresponding to the current string.
-    ///
-    /// @return `true` on success.
-    /// @param s The remaining characters
-
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_string( string_view s, std::size_t n, error_code& ec )
-    {
-        std::string data(s);
-
-        setData(JSONType::STRING, data);
-
-        return true;
-    }
+         return true;
+      }
 
 
-    /// Called when a signed integer is parsed.
-    ///
-    /// @return `true` on success.
-    /// @param i The value
-    /// @param s The remaining characters
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_int64( int64_t i, string_view s, error_code& ec )
-    {
-        setData(JSONType::INT64, i);
-        return true;
-    }
+      /// Called when a signed integer is parsed.
+      ///
+      /// @return `true` on success.
+      /// @param i The value
+      /// @param s The remaining characters
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_int64( int64_t i, string_view s, error_code& ec )
+      {
+         setData(JSONType::INT64, sizeof(i), &i);
+         return true;
+      }
 
-    /// Called when an unsigend integer is parsed.
-    ///
-    /// @return `true` on success.
-    /// @param u The value
-    /// @param s The remaining characters
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_uint64( uint64_t u, string_view s, error_code& ec )
-    {
-        setData(JSONType::UINT64, u);
+      /// Called when an unsigend integer is parsed.
+      ///
+      /// @return `true` on success.
+      /// @param u The value
+      /// @param s The remaining characters
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_uint64( uint64_t u, string_view s, error_code& ec )
+      {
+         setData(JSONType::UINT64, sizeof(u), &u);
  
-        return true;
-    }
+         return true;
+      }
 
-    /// Called when a double is parsed.
-    ///
-    /// @return `true` on success.
-    /// @param d The value
-    /// @param s The remaining characters
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_double( double d, string_view s, error_code& ec )
-    {
-        setData(JSONType::DOUBLE, d);
+      /// Called when a double is parsed.
+      ///
+      /// @return `true` on success.
+      /// @param d The value
+      /// @param s The remaining characters
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_double( double d, string_view s, error_code& ec )
+      {
+         setData(JSONType::DOUBLE, sizeof(d), &d);
 
-        return true;
-    }
+         return true;
+      }
 
-    /// Called when a boolean is parsed.
-    ///
-    /// @return `true` on success.
-    /// @param b The value
-    /// @param s The remaining characters
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_bool( bool b, error_code& ec )
-    {
-        setData(JSONType::BOOL, b);
+      /// Called when a boolean is parsed.
+      ///
+      /// @return `true` on success.
+      /// @param b The value
+      /// @param s The remaining characters
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_bool( bool b, error_code& ec )
+      {
+         setData(JSONType::BOOL, sizeof(b), &b);
 
-        return true;
-    }
+         return true;
+      }
 
-    /// Called when a null is parsed.
-    ///
-    /// @return `true` on success.
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_null( error_code& ec )
-    {
-        setData(JSONType::_NULL, 0);
+      /// Called when a null is parsed.
+      ///
+      /// @return `true` on success.
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_null( error_code& ec )
+      {
+         setData(JSONType::_NULL, 0, nullptr);
 
+         return true;
+      }
 
-        return true;
-    }
+      /// Called with characters corresponding to part of the current comment.
+      ///
+      /// @return `true` on success.
+      /// @param s The partial characters.
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_comment_part( string_view s, error_code& ec )
+      {
+         return true;
+      }
 
-    /// Called with characters corresponding to part of the current comment.
-    ///
-    /// @return `true` on success.
-    /// @param s The partial characters.
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_comment_part( string_view s, error_code& ec )
-    {
-        return true;
-    }
+      /// Called with the last characters corresponding to the current comment.
+      ///
+      /// @return `true` on success.
+      /// @param s The remaining characters
+      /// @param ec Set to the error, if any occurred.
+      ///
+      bool on_comment( string_view s, error_code& ec )
+      {
+         return true;
+      }
 
-    /// Called with the last characters corresponding to the current comment.
-    ///
-    /// @return `true` on success.
-    /// @param s The remaining characters
-    /// @param ec Set to the error, if any occurred.
-    ///
-    bool on_comment( string_view s, error_code& ec )
-    {
-        return true;
-    }
-
-};
+   };
 
    class JSONParser : public Parser
    {
    protected:
       boost::json::basic_parser<JSONDBHandler> _parser;
-      BeeFishWeb::Path _rootPath;
+      Path<Database::Encoding> _rootPath;
       std::string _buffer;
       const size_t _contentLength;
       size_t _bytesRead = 0;
@@ -455,7 +431,7 @@ public:
    public:
 
       JSONParser(
-         BeeFishWeb::Path path,
+         Path<Database::Encoding> path,
          size_t contentLength
       ) :
          Parser(),
@@ -552,7 +528,58 @@ public:
       }
    };
 
+   ostream& operator << (ostream& out, const JSONType& type)
+   {
+      switch(type) {
+         case JSONType::INT64:
+            out << "INT64";
+            break;
+         case JSONType::UINT64:
+            out << "UINT64";
+            break;
+         case JSONType::DOUBLE:
+            out << "DOUBLE";
+            break;
+         case JSONType::BOOL:
+            out << "BOOL";
+            break;
+         case JSONType::_NULL:
+            out << "_NULL";
+            break;
+         case JSONType::STRING:
+            out << "STRING";
+            break;
+         case JSONType::OBJECT:
+            out << "OBJECT";
+            break;
+         case JSONType::ARRAY:
+            out << "ARRAY";
+            break;
+         case JSONType::KEY:
+            out << "KEY";
+            break;
+         case JSONType::ROOT:
+            out << "ROOT";
+            break;
+         default:
+            out << "<Unknown type: " << (int)type << ">";
+      };
+
+      return out;
+   }
+   
+   PowerEncoding& operator <<
+   ( 
+      PowerEncoding& stream,
+      const JSONType& data
+   )
+   {
+      stream << (int)data;
+      return stream;
+   }
+
 }
+
 
 
 #endif
