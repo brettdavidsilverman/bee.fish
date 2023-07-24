@@ -135,7 +135,7 @@ namespace BeeFishWeb {
 
          using namespace std;
 
-         cout << "WebServer loop started 🟢" << endl;
+         logMessage(LOG_NOTICE, "WebServer loop started  🟢");
 
          while (!webServer->_stop) {
 
@@ -180,7 +180,7 @@ namespace BeeFishWeb {
         // delete webServer->_loopThread;
         // webServer->_loopThread = nullptr;
 
-         cout << "WebServer loop ended" << endl;
+         logMessage(LOG_NOTICE, "WebServer loop ended");
 
       }
 
@@ -296,6 +296,7 @@ namespace BeeFishWeb {
       }
       
       virtual void close() {
+         logMessage(LOG_NOTICE, "Closing web server");
          if (_serverSocket > -1)
             ::close(_serverSocket);
          _serverSocket = -1;

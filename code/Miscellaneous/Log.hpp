@@ -3,6 +3,7 @@
 
 #include <syslog.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 // Should log to /var/log/messages
 
@@ -18,9 +19,14 @@ namespace BeeFishMisc {
 
    }
 
-   void logMessage(int priority, const std::string& message)
+   template<typename ... Args>
+   void logMessage(int priority, const std::string& message, Args ... args)
    {
-      syslog(priority, message.c_str());
+
+      fprintf(stderr, message.c_str(), args ...);
+      
+      syslog(priority, message.c_str(), args ...);
+      
    }
 
    void closeLog() {

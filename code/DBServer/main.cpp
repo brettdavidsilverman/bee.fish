@@ -10,7 +10,8 @@ int main(int argc, const char* argv[]) {
    using namespace BeeFishWebDB;
    using namespace BeeFishParser;
 
-   cout << "bee.fish.db-server"
+   cout << endl
+        << "bee.fish.db-server"
            << endl
         << "C++ run time: "
            << __cplusplus
@@ -97,15 +98,14 @@ int main(int argc, const char* argv[]) {
    DBServer dbServer(host, port, threads, filename);
 
    if (!dbServer.start()) {
-      cout << "Could not start DBServer" << endl;
+      logMessage(LOG_ERR, "Could not start DBServer");
       return 1;
    }
 
-   syslog(LOG_NOTICE, "DBServer %s on port %i", host.c_str(), port);
+   logMessage(LOG_INFO, "DBServer %s on port %i", host.c_str(), port);
 
    dbServer.join();
 
-   closeLog();
 
    return 0;
 }
