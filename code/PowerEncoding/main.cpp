@@ -10,7 +10,7 @@ using namespace BeeFishPowerEncoding;
 
 int main(int argc, const char* argv[])
 {
-   cerr << "bee.fish.server.power-encoding "
+   cout << "bee.fish.server.power-encoding "
            << endl
         << "C++ run time: "
            << __cplusplus

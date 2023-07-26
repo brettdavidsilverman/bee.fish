@@ -461,9 +461,6 @@ namespace BeeFishScript {
                out << "\\t";
                break;
             default:
-         
-         //cerr << value ;
-         //cerr << "{" << value << "," << std::hex << (uint32_t)value << "}";
 
                if ((uint16_t)c <= 0x001F) {
                   // Control chars

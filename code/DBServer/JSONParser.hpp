@@ -112,7 +112,7 @@ namespace BeeFishWebDB {
          return value;
       }
 
-      void setData(JSONType type, Size size = 0, void* value = nullptr) {
+      void setData(JSONType type, Size size = 0, const void* value = nullptr) {
 
          Path<Database::Encoding> path
             = lastPath();
@@ -310,9 +310,9 @@ namespace BeeFishWebDB {
       ///
       bool on_string( string_view s, std::size_t n, error_code& ec )
       {
-         std::string data(s);
+         std::string string(s);
 
-         setData(JSONType::STRING, data.size(), data.data());
+         setData(JSONType::STRING, string.size(), string.c_str());
 
          return true;
       }

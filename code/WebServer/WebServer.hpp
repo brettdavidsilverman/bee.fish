@@ -201,7 +201,7 @@ namespace BeeFishWeb {
 
          if (_serverSocket < 0)
          {
-            cerr << "Error creating server socket" << endl;
+            perror("Error creating server socket");
             return false;
          }
 
@@ -215,7 +215,7 @@ namespace BeeFishWeb {
                  sizeof(opt))
          )
          {
-            cerr << "Error setting socket options" << endl;
+            perror("Error setting socket options");
             return false;
          }
 
@@ -230,7 +230,6 @@ namespace BeeFishWeb {
          if (bind(_serverSocket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
          {
             perror("Bind server socket");
-            //cerr << "Error binding server socket" << endl;
             return false;
          }
 
@@ -238,7 +237,7 @@ namespace BeeFishWeb {
          int res = listen(_serverSocket, WEB_SERVER_LISTEN_BUFFER);
 
          if (res != 0) {
-            cerr << "Invalid listen result" << endl;
+            perror("Invalid listen result");
             return false;
          }
 

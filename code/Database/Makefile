@@ -9,7 +9,7 @@ $(OUTPUT):	$(DEPS)
 all:	$(OUTPUT)
 
 debug:	clean
-debug:	DEBUG = 1
+debug:	DEBUG = debug
 debug:	CFLAGS += -g -rdynamic -DDEBUG
 debug:	$(OUTPUT)
 

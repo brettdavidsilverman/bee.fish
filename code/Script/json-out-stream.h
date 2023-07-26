@@ -57,7 +57,7 @@ namespace BeeFishBScript {
          float temp;
          _path >> temp;
          type = (BeeFishJSON::Type)temp;
-         cerr << "Read type:" << type << endl;
+         cout << "Read type:" << type << endl;
          switch (type) {
             case UNDEFINED:
                return undefined;

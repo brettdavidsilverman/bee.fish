@@ -54,14 +54,14 @@ namespace BeeFishDatabase
       }
 
       if (success) {
-         cerr << "\tTesting Data Path Min: " << flush;
+         cout << "\tTesting Data Path Min: " << flush;
 
          Stack stack;
 
          Size minimum =
             data.min<Size>(stack);
 
-         cerr << "\tMinimum: " << minimum << flush;
+         cout << "\tMinimum: " << minimum << flush;
 
          success = (minimum == min);
 
@@ -78,7 +78,7 @@ namespace BeeFishDatabase
 
          success = (maximum == max);
 
-         cerr << "\tMaximum: " << maximum << endl;
+         cout << "\tMaximum: " << maximum << endl;
          outputSuccess(success);
       }
 
@@ -153,7 +153,7 @@ namespace BeeFishDatabase
  
          cout << "\t" << "data.next: " << success << endl;
          if (success)
-            cerr << "Read second: " << second << endl;
+            cout << "Read second: " << second << endl;
          success &= (second == 1);
          outputSuccess(success);
       }
@@ -175,7 +175,7 @@ namespace BeeFishDatabase
  
          cout << "\t" << "data.next: " << success << endl;
          if (success)
-            cerr << "Read second: \"" << second << "\"" << endl;
+            cout << "Read second: \"" << second << "\"" << endl;
          success &= (second == "second");
          outputSuccess(success);
       }
@@ -192,7 +192,7 @@ namespace BeeFishDatabase
          int i = data.min<int>(stack);
          int check = 1;
          do {
-            cerr << i << ",";
+            cout << i << ",";
             success &= (i == check++);
          }
          while (data.next(stack, i));

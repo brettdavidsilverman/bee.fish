@@ -131,10 +131,6 @@ namespace BeeFishWeb {
                break;
             }
 
-            if (size < bufferSize) {
-//cerr << "Read less than buffer size: " << _result << endl;
-               
-            }
          }
 
          delete[] buffer;

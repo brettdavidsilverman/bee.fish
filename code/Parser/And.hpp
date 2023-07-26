@@ -66,7 +66,6 @@ namespace BeeFishParser {
             !matched
          )
          {
-// cerr << "<" << _buffer << ">[" << _index << "]" << flush;
 
             Parser*
                item = _inputs[_index];

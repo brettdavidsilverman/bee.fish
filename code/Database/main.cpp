@@ -26,8 +26,6 @@ int main(int argc, const char* argv[]) {
       next.setData(str);
       std::string str2;
       next.getData(str2);
-      cerr << str2 << endl;
-
 return 0;
 */
    cout << "bee.fish.database"
@@ -58,7 +56,7 @@ return 0;
    
    if (read)
    {
-      cerr << "Read" << endl;
+      cout << "Read" << endl;
    }
    
    bool output =
@@ -66,7 +64,7 @@ return 0;
       
    if (output)
    {
-      cerr << "Output" << endl;
+      cout << "Output" << endl;
    }
 
    bool input =
@@ -74,13 +72,13 @@ return 0;
       
    if (input)
    {
-      cerr << "Input" << endl;
+      cout << "Input" << endl;
    }
    
    string fileName = "data";
    
    Database database(fileName);
-   cerr << database;
+   cout << database;
    Path<Database::Encoding> root(database);
    Path path(root);
    

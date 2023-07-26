@@ -15,7 +15,7 @@ using namespace BeeFishBScript;
 
 int main(int argc, const char* argv[]) {
 
-   cerr << "bee.fish.b-script"
+   cout << "bee.fish.b-script"
            << endl
         << "C++ run time: "
            << __cplusplus

@@ -106,7 +106,7 @@ namespace BeeFishWebDB {
          
          if (contentType == "")
             contentType = "text/plain; charset=utf-8";
-cerr << "Setting content type: " << contentType << endl;
+
          path.setData(contentType);
 
          return true;

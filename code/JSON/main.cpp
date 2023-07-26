@@ -19,7 +19,7 @@ std::optional<bool> boostParser();
 
 int main(int argc, const char* argv[]) {
    
-   cerr << "bee.fish.json"
+   cout << "bee.fish.json"
            << endl
         << "C++ run time: "
            << __cplusplus

@@ -156,7 +156,7 @@ namespace BeeFishParser {
             ++charCount;
 
 #ifdef DEBUG
-            cerr << (char)c;
+            cout << (char)c;
 #endif
 
             if (!parser.read((char)c))
@@ -195,7 +195,7 @@ namespace BeeFishParser {
             << endl;
 
          if (parser._result == false)
-            cerr << "Failed on {" << escape(c) << "}" << endl;
+            cout << "Failed on {" << escape(c) << "}" << endl;
 
 #endif
 

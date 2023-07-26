@@ -35,7 +35,7 @@ int main(int argc, const char* argv[]) {
          nullopt
       );
 
-      cerr << endl << "*" << capture << endl;
+      cout << endl << "*" << capture << endl;
 
       return 0;
 */

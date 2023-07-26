@@ -395,10 +395,7 @@ namespace BeeFishDatabase {
          Branch branch =
             getBranch(index);
 
-         
-#ifdef DEBUG
-         cerr << endl << "Min: " << branch;
-#endif
+
          while (not branch.isDeadEnd())
          {
             stack.push_back(branch);
