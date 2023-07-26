@@ -9,6 +9,7 @@
 #include "File.hpp"
 #include "Branch.hpp"
 #include "DatabaseBase.hpp"
+#include "Stack.hpp"
 
 using namespace std;
 using namespace BeeFishPowerEncoding;
@@ -57,8 +58,7 @@ namespace BeeFishDatabase {
       virtual void writeBit(bool bit)
       {
 
-         Branch& branch =
-            _database->getBranch(_index);
+         Branch& branch = getBranch();
 
          if (bit == false)
          {
@@ -108,7 +108,7 @@ namespace BeeFishDatabase {
       Size getDataSize() const
       {
          const Branch& branch =
-            _database->getBranch(_index);
+            getBranch();
             
          if (branch._dataIndex)
          {
@@ -132,7 +132,7 @@ namespace BeeFishDatabase {
       Data& getData() {
 
          Branch& branch =
-            _database->getBranch(_index);
+            getBranch();
             
          if (branch._dataIndex)
          {
@@ -145,7 +145,7 @@ namespace BeeFishDatabase {
 
          }
 
-         throw runtime_error("Path::getData() No data at this index");
+         assert(false);
 
       }
 
@@ -294,14 +294,25 @@ namespace BeeFishDatabase {
       
       Branch& getBranch()
       {
-         return
-            _database->getBranch(_index);
+         return getBranch(_index);
       }
 
-      const Branch& getBranch() const
+      Branch getBranch() const
+      {
+         return getBranch(_index);
+      }
+      
+      Branch& getBranch(Size index)
       {
          return
-            _database->getBranch(_index);
+            _database->getBranch(index);
+      }
+
+      const Branch& getBranch(Size index)
+      const
+      {
+         return
+            _database->getBranch(index);
       }
       
       void deleteData()
@@ -337,67 +348,186 @@ namespace BeeFishDatabase {
       
       virtual bool readBit()
       {
-         PowerEncoding::readBit();
+         Encoding::readBit();
 
-         Branch& branch =
-            _database->getBranch(_index);
+         const Branch& branch =
+            getBranch(_index);
             
          if (branch._left)
          {
             _index = branch._left;
-            return false;
+            return 0;
          }
          else if (branch._right)
          {
             _index = branch._right;
-            return true;
+            return 1;
          }
          
-         throw runtime_error("Path read bit past end of file");
+         // Path read bit past end of file
+         assert(false);
          
       }
       
       virtual bool peekBit()
       {
-         Branch& branch =
-            _database->getBranch(_index);
+         const Branch& branch =
+            getBranch();
                
          if (branch._left)
-            return false;
+            return 0;
          else if (branch._right)
-            return true;
+            return 1;
                
-         return 0;
+         // Path peek bit past end of file
+         assert(false);
+
       }
       
+   protected:
+
       void min(
-         vector<bool>& stack
+         Index index,
+         Stack<Encoding>& stack,
+         bool debug = false
       ) const
       {
-         return min(_index, stack);
+         Branch branch =
+            getBranch(index);
+
+         
+#ifdef DEBUG
+         cerr << endl << "Min: " << branch;
+#endif
+         while (not branch.isDeadEnd())
+         {
+            stack.push_back(branch);
+         
+            if (branch._left)
+               branch = getBranch(branch._left);
+            else if (branch._right)
+               branch = getBranch(branch._right);
+         }
       }
 
       void max(
-         vector<bool>& stack
+         Index index,
+         Stack<Encoding>& stack
       ) const
       {
-         return max(_index, stack);
+         Branch branch =
+            getBranch(index);
+
+         while (not branch.isDeadEnd())
+         {
+            stack.push_back(branch);
+         
+            if (branch._right)
+               branch = getBranch(branch._right);
+            else if (branch._left)
+               branch = getBranch(branch._left);
+         }
+      
       }
 
-      Size min() const {
-         PowerEncodingStack stack;
+   public:
+      template<typename T>
+      T min(
+         Stack<Encoding>& stack
+      ) const
+      {
+         stack._aggregate =
+            Stack<Encoding>::Aggregate::MIN;
+
          min(_index, stack);
-         Size minimum;
+         T minimum;
+         stack >> minimum;
+         assert(stack.count() == 0);
+         return minimum;
+      }
+
+      template<typename T>
+      T max(
+         Stack<Encoding>& stack
+      ) 
+      {
+         stack._aggregate =
+            Stack<Encoding>::Aggregate::MAX;
+
+         max(_index, stack);
+         T maximum;
+         stack >> maximum;
+         return maximum;
+      }
+
+      template<typename T>
+      T min() const {
+         Stack<Encoding> stack;
+         stack._aggregate =
+            Stack<Encoding>::Aggregate::MIN;
+         min(_index, stack);
+         T minimum;
          stack >> minimum;
          return minimum;
       }
 
-      Size max() const {
-         PowerEncodingStack stack;
+      template<typename T>
+      T max() const {
+
+         Stack<Encoding> stack;
+         stack._aggregate =
+            Stack<Encoding>::Aggregate::MAX;
+
          max(_index, stack);
-         Size maximum;
+         T maximum;
          stack >> maximum;
          return maximum;
+      }
+
+      template<typename T>
+      bool next(Stack<Encoding>& stack, T& value) {
+         // Algorithm:
+         // Up the tree until first
+         // right with a left
+
+         // Take that right, then
+         // follow using min algo
+
+         assert (stack.size() > 0);
+
+      
+         Branch branch;
+
+         // Up the tree until first right
+         do 
+         {
+            branch = stack.last();
+            stack.pop_back();
+         }
+         while (stack.size() && 
+                not (branch._left &&
+                     branch._right));
+
+         if (not (branch._left and
+                  branch._right) )
+            return false;
+
+         assert(branch._left and branch._right);
+
+         // Clear the left branch
+         branch._left = 0;
+         stack.push_back(branch);
+
+         // Follow the next min from
+         // this right
+         min(branch._right, stack);
+
+         // Get this value
+         stack.reset();
+         stack >> value;
+
+         return true;
+
       }
 
       Path& operator=(const Path& rhs)
@@ -437,10 +567,10 @@ namespace BeeFishDatabase {
          return _index;
       }
       
-      virtual bool isDeadEnd() const
+      bool isDeadEnd() const
       {
          const Branch& branch =
-            _database->getBranch(_index);
+            getBranch();
             
          return branch.isDeadEnd();
       }
@@ -522,9 +652,9 @@ namespace BeeFishDatabase {
       }
       
       
-      virtual void output(ostream& out)
+      virtual void write(ostream& out)
       {
-         output(out, _index);
+         write(out, _index);
       }
    
       static void writeBit(ostream& out, bool bit)
@@ -535,7 +665,7 @@ namespace BeeFishDatabase {
             out << '0';
       }
       
-      void output(ostream& out, Index index)
+      void write(ostream& out, Index index)
       {
          Branch branch =
             _database->getBranch(index);
@@ -544,7 +674,7 @@ namespace BeeFishDatabase {
          {
             // Write the left branch
             Path::writeBit(out, true);
-            output(out, branch._left);
+            write(out, branch._left);
          }
          else
             // Deadend, close the branch
@@ -554,7 +684,7 @@ namespace BeeFishDatabase {
          {
             // Write the right branch
             Path::writeBit(out, true);
-            output(out, branch._right);
+            write(out, branch._right);
          }
          else
             // Deadend, close the branch
@@ -564,47 +694,7 @@ namespace BeeFishDatabase {
 
       }
 
-      void min(
-         Index index,
-         vector<bool>& stack
-      ) const
-      {
-         Branch branch =
-            _database->getBranch(index);
-         
-         if (branch._left)
-         {
-            stack.push_back(false);
-            min(branch._left, stack);
-         }
-         else if (branch._right)
-         {
-            stack.push_back(true);
-            min(branch._right, stack);
-         }
-         
-      }
 
-      void max(
-         Index index,
-         vector<bool>& stack
-      ) const
-      {
-         Branch branch =
-            _database->getBranch(index);
-         
-         if (branch._right)
-         {
-            stack.push_back(true);
-            max(branch._right, stack);
-         }
-         else if (branch._left)
-         {
-            stack.push_back(false);
-            max(branch._left, stack);
-         }
-         
-      }
 
    protected:
       
@@ -613,19 +703,19 @@ namespace BeeFishDatabase {
       {
       protected:
          bool _isDeadEnd;
-         Database* _database;
+         const Database* _database;
          Index _index;
          bool _contains;
       public:
          Contains
          (
-            Database* database,
+            const Database* database,
             Index index
          ) :
             _database(database),
             _index(index)
          {
-            Branch& branch =
+            const Branch& branch =
                _database->getBranch(_index);
                
             _contains = !branch.isDeadEnd();
@@ -636,7 +726,7 @@ namespace BeeFishDatabase {
             if (!_contains)
                return;
             
-            Branch& branch =
+            const Branch& branch =
                _database->getBranch(_index);
             
             if (!bit && branch._left)
@@ -654,12 +744,12 @@ namespace BeeFishDatabase {
          
          virtual bool readBit()
          {
-            throw logic_error("readBit() not implemented.");
+            assert(false);
          }
          
          virtual bool peekBit()
          {
-            throw logic_error("peekBit() not implemented.");
+            assert(false);
          }
          
          template <class T>

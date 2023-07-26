@@ -14,12 +14,12 @@ namespace BeeFishWebDB {
    using namespace BeeFishPowerEncoding;
    using namespace BeeFishWebDB;
 
-   inline size_t streamDocumentFromDB (
+   inline Size streamDocumentFromDB (
       BeeFishWeb::WebRequest& output,
       Path<Database::Encoding> path
    );
 
-   inline size_t streamJSONFromDB (
+   inline Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
       Path<Database::Encoding> path
    );
@@ -30,7 +30,7 @@ namespace BeeFishWebDB {
       Size contentLength
    );
 
-   inline size_t streamFromDB (
+   inline Size streamFromDB (
       BeeFishWeb::WebRequest& output,
       Path<Database::Encoding> path,
       bool original
@@ -81,12 +81,11 @@ namespace BeeFishWebDB {
       return 0;
    }
 
-   inline size_t streamJSONFromDB (
+   inline Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
       Path<Database::Encoding> jsonPath
    )
    {
-//#warning here
               
       if (!jsonPath.hasData())
          throw runtime_error("JSON path has no data");
@@ -145,7 +144,27 @@ namespace BeeFishWebDB {
          }
          case JSONType::OBJECT:
          {
-            size += output.write("{}");
+            size += output.write("{");
+            if (!jsonPath.isDeadEnd())
+            {
+               Stack stack;
+               string key = jsonPath.min<string>(stack);
+               string label;
+               do {
+                  label = "\"" + escape(key) + "\":";
+
+                  size += output.write(
+                     label
+                  );
+
+                  size += streamJSONFromDB(
+                     output,
+                     jsonPath[key]
+                  );
+               }
+               while(jsonPath.next(stack, key));
+            }
+            size += output.write("}");
             break;
          }
          case JSONType::ARRAY:
@@ -155,8 +174,8 @@ namespace BeeFishWebDB {
             if (!jsonPath.isDeadEnd())
             {
 
-               Size min = jsonPath.min();
-               Size max = jsonPath.max();
+               Size min = jsonPath.min<Size>();
+               Size max = jsonPath.max<Size>();
 
                for (Size i = min;
                     i <= max;
@@ -185,7 +204,7 @@ namespace BeeFishWebDB {
       
    }
 
-   inline size_t streamDocumentFromDB (
+   inline Size streamDocumentFromDB (
       BeeFishWeb::WebRequest& output,
       Path<Database::Encoding> path
    )
@@ -194,10 +213,10 @@ namespace BeeFishWebDB {
       Path document = path;
 
       // Output the document content
-      size_t pageIndex  = 0;
-      size_t min = document.min();
-      size_t max = document.max();
-      size_t byteCount = 0;
+      Size pageIndex  = 0;
+      Size min = document.min<Size>();
+      Size max = document.max<Size>();
+      Size byteCount = 0;
 
       for ( pageIndex = min;
             pageIndex <= max;
@@ -299,7 +318,7 @@ namespace BeeFishWebDB {
          _page = new char[pageSize];
       }
 
-      const size_t size() const {
+      const Size size() const {
          return
             _position +
             _pageCount * pageSize;

@@ -1,10 +1,10 @@
 CC = g++
 CFLAGS = -std=c++17 -fmax-errors=1
-DEPS=main.cpp PowerEncoding.hpp Stack.hpp Version.hpp Test.hpp Makefile
+DEPS=main.cpp PowerEncoding.hpp Version.hpp Test.hpp Makefile
 OUTPUT = ../../build/PowerEncoding
 
 $(OUTPUT):	$(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic -lstdc++fs
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -lstdc++fs
 
 debug:	clean
 debug:	DEBUG = debug

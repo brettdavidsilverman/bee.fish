@@ -1,10 +1,10 @@
 OUTPUT = ../../build/JSON
 DEPS = Makefile main.cpp Number.hpp String.hpp Variable.hpp Test.hpp
-CFLAGS = -std=gnu++17 -Wfatal-errors
+CFLAGS = -std=c++17 -Wfatal-errors
 TEST = ../../large.json
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -latomic
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
 
 debug:	clean
 debug:	DEBUG = debug
@@ -37,7 +37,7 @@ run:	$(OUTPUT)
 	$(OUTPUT)
 
 run_time:	$(OUTPUT)
-	time cat $(TEST) | $(OUTPUT) -use boost
+	time cat $(TEST) | $(OUTPUT) -use home
 
 run_trace:	$(OUTPUT)
 	rm -f trace.txt

@@ -6,7 +6,7 @@ OUTPUT = $(BUILD)/DBServer
 TEMP = $(BUILD)
 
 $(OUTPUT):	$(DEPS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o
-	g++ $(CFLAGS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o main.cpp -o $(OUTPUT) -lpthread -latomic -lstdc++fs
+	g++ $(CFLAGS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o main.cpp -o $(OUTPUT) -lpthread -lstdc++fs
 
 
 $(TEMP)/404.o: 404.html
@@ -25,7 +25,7 @@ $(TEMP)/ErrorPage.o: ErrorPage.html
             --binary-architecture i386:x86-64 ErrorPage.html $(TEMP)/ErrorPage.o
 
 test:	$(OUTPUT)
-	$(BUILD)/DBServer -test
+	$(BUILD)/DBServer -test 2>&1 | c++filt
 
 debug:	clean
 debug:	DEBUG = debug

@@ -2,7 +2,11 @@
 #include "Test.hpp"
 #include <boost/json/src.hpp>
 
+#include "../Miscellaneous/SigHandler.hpp"
+
 int main(int argc, const char* argv[]) {
+   signal(SIGSEGV, sigHandler);
+   signal(SIGABRT, sigHandler);
 
    using namespace std;
    using namespace BeeFishMisc;

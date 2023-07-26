@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "../Miscellaneous/Miscellaneous.hpp"
+#include "../Miscellaneous/SigHandler.hpp"
 
 #include "Database.hpp"
 #include "Path.hpp"
@@ -11,7 +12,6 @@
 
 using namespace BeeFishDatabase;
 using namespace BeeFishMisc;
-
 
 int main(int argc, const char* argv[]) {
 /*
@@ -38,7 +38,10 @@ return 0;
         << "Version: "
            << DATABASE_VERSION
            << endl;
- 
+
+   signal(SIGSEGV, sigHandler);
+   signal(SIGABRT, sigHandler);
+
    bool test =
       (hasArg(argc, argv, "-test") != -1);
    

@@ -1,5 +1,7 @@
 #ifndef BEE_FISH__DATABASE__BRANCH_HPP
 #define BEE_FISH__DATABASE__BRANCH_HPP
+
+#include <iomanip>
 #include "Index.hpp"
 
 using namespace std;
@@ -9,6 +11,9 @@ namespace BeeFishDatabase
 
    struct Branch
    {
+#ifdef DEBUG
+      Index _index;
+#endif
       Index _left;
       Index _right;
       Index _dataIndex;
@@ -22,11 +27,20 @@ namespace BeeFishDatabase
       friend ostream& operator << 
       (ostream& out, const Branch& branch)
       {
-         out <<
-            "{" <<
-               "\"left\":" <<  branch._left << ", " <<
-               "\"right\": " << branch._right <<
-            "}";
+         
+#ifdef DEBUG
+         out
+             << setw(4) << branch._index
+             << ": ";
+#endif
+         out << "["
+             << setw(4) << branch._left
+             << ", "
+             << setw(4) << branch._right
+             << "]";
+
+         if (branch._dataIndex)
+            out << setw(4) << branch._dataIndex;
 
          return out;
       }

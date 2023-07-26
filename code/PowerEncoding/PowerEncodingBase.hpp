@@ -13,61 +13,20 @@ namespace BeeFishPowerEncoding
 {
    class PowerEncoding
    {
-   public:
-      long int _count = 0;
-      long int _index = 0;
+   protected:
+      long int _count {0};
 
-   public:
-      virtual void writeBit(bool bit)
-      {
-         if (bit)
-            ++_count;
-         else
-            --_count;
-
-          ++_index;
-      }
-
-      virtual bool readBit()
-      {
-         bool bit = peekBit();
-
-         ++_index;
-
-         if (bit)
-            ++_count;
-         else
-            --_count;
-
-         return bit;
-      }
-   
-      virtual bool peekBit()
-      {
-         return 0;
-      }
-
-      
    public:
       PowerEncoding()
       {
       }
-     
-      template<typename T>
-      PowerEncoding& operator <<
-      (const T& value)
-      {
-
-         writeBit(1);
-         output(value);
-
-         return *this;
-      }
 
       template<typename T>
-      void output(const T& value)
+      void write(const T& value)
       {
-         if (value == 0)
+         static const T zero {};
+
+         if (value == zero)
             writeBit(0);
          else
          {
@@ -78,27 +37,13 @@ namespace BeeFishPowerEncoding
                  remainder(value, _power);
 
             writeBit(1);
-            output(_power);
-            output(_remainder);
+            write(_power);
+            write(_remainder);
          }
       }
-     
+      
       template<typename T>
-      PowerEncoding& operator >>
-      (T& value)
-      {
-         bool bit = readBit();
-
-         if (bit != 1)
-            throw runtime_error("Expected 1 bit");
-
-         input(value);
-
-         return *this;
-      }
-
-      template<typename T>
-      void input(T& value)
+      void read(T& value)
       {
          bool bit = readBit();
 
@@ -109,15 +54,15 @@ namespace BeeFishPowerEncoding
          }
             
          unsigned long _power;
-         input(_power);
+         read(_power);
          
          unsigned long _remainder;
-         input(_remainder);
+         read(_remainder);
          
          value = exp2(_power) + _remainder;
          
       }
-      
+
       template<typename T>
       unsigned long power(T value)
       {
@@ -140,54 +85,42 @@ namespace BeeFishPowerEncoding
          return remainder;
       }
 
-      long int count() {
+      virtual long int count() const {
          return _count;
       }
 
       virtual void reset() {
-         resetCount();
-      }
-
-      virtual void resetCount() {
          _count = 0;
-
       }
 
-      friend PowerEncoding& operator<<(
-          PowerEncoding &stream,
-          const char* string)
+   public:
+      virtual void writeBit(bool bit)
       {
-         stream.writeBit(1);
+         if (bit)
+            ++_count;
+         else
+            --_count;
 
-         for (const char* pc = string;
-              *pc != 0;
-              ++pc)
-         {
-            stream << *pc;
-         }
-
-         stream.writeBit(0);
-
-         return stream;
       }
 
-      friend PowerEncoding& operator<<(
-          PowerEncoding &stream,
-          const std::string& string)
+      virtual bool readBit()
       {
+         bool bit = peekBit();
 
-         stream.writeBit(1);
+         if (bit)
+            ++_count;
+         else
+            --_count;
 
-         for (auto character : string)
-         {
-            stream << character;
-         }
-
-         stream.writeBit(0);
-
-         return stream;
+         return bit;
+      }
+   
+      virtual bool peekBit() const
+      {
+         assert(false);
       }
 
+      
    };
    
 }

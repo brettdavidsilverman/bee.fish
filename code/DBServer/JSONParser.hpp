@@ -12,15 +12,15 @@ namespace BeeFishWebDB {
 
    enum class JSONType {
       INT64,
-       UINT64,
-       DOUBLE,
-       BOOL,
-       _NULL,
-       STRING,
-       OBJECT,
-       ARRAY,
-       KEY,
-       ROOT
+      UINT64,
+      DOUBLE,
+      BOOL,
+      _NULL,
+      STRING,
+      OBJECT,
+      ARRAY,
+      KEY,
+      ROOT
    };
 
    ostream& operator << (ostream& out, const JSONType& type);
