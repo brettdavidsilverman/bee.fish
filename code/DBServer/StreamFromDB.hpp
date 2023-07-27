@@ -95,12 +95,16 @@ namespace BeeFishWebDB {
       JSONValue* value = (JSONValue*)
          jsonPath.getData().data();
 
+      void* data = value->data();
+
       switch (value->_type)
       {
          case JSONType::INT64:
          {
             stringstream stream;
-            stream << *(int64_t*)(value->_data);
+            //stream << *(int64_t*)(value->_data);
+            int64_t* i = (int64_t*)data;
+            stream << *i;
             string str = stream.str();
             size += output.write(str);
             break;
@@ -108,7 +112,7 @@ namespace BeeFishWebDB {
          case JSONType::UINT64:
          {
             stringstream stream;
-            stream << *(uint64_t*)(value->_data);
+            stream << *(uint64_t*)data;
             string str = stream.str();
             size += output.write(str);
             break;
@@ -117,21 +121,21 @@ namespace BeeFishWebDB {
          {
             stringstream stream;
             
-            stream << *(double*)(value->_data);
+            stream << *(double*)data;
             string str = stream.str();
             size += output.write(str);
             break;
          }
          case JSONType::STRING:
          {
-            std::string str((char*)value->_data, value->_size);
+            std::string str((char*)data, value->_size);
             str = "\"" + escape(str) + "\"";
             size += output.write(str);
             break;
          }
          case JSONType::BOOL:
          {
-            string str = (*(bool*)(value->_data)
+            string str = (*(bool*)data
                 ? "true" : "false");
             size += output.write(str);
             break;
@@ -149,6 +153,8 @@ namespace BeeFishWebDB {
             {
                Stack stack;
                string key = jsonPath.min<string>(stack);
+               string last = jsonPath.max<string>();
+
                string label;
                do {
                   label = "\"" + escape(key) + "\":";
@@ -161,6 +167,9 @@ namespace BeeFishWebDB {
                      output,
                      jsonPath[key]
                   );
+
+                  if (key != last)
+                     size += output.write(",");
                }
                while(jsonPath.next(stack, key));
             }
@@ -174,22 +183,24 @@ namespace BeeFishWebDB {
             if (!jsonPath.isDeadEnd())
             {
 
-               Size min = jsonPath.min<Size>();
+               Stack stack;
+
+               Size index = jsonPath.min<Size>(stack);
                Size max = jsonPath.max<Size>();
 
-               for (Size i = min;
-                    i <= max;
-                    ++i)
+               do
                {
                   size += streamJSONFromDB (
                      output,
-                     jsonPath[i]
+                     jsonPath[index]
                   );
 
-                  if (i < max)
-                     size += output.write(", ");
+                  if (index != max)
+                     size += output.write(",");
    
                }
+               while(jsonPath.next(stack, index));
+
             }
 
             size += output.write("]");

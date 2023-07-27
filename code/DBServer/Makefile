@@ -29,8 +29,11 @@ test:	$(OUTPUT)
 
 debug:	clean
 debug:	DEBUG = debug
-debug:	CFLAGS += -g -D DEBUG
+debug:	CFLAGS += -g -D DEBUG -rdynamic
 debug:	$(OUTPUT)
+
+install:	$(OUTPUT)
+	cd ../.. && ./start.sh $(PORT)
 
 clean:
 	rm -f $(TEMP)/404.o

@@ -29,6 +29,11 @@ namespace BeeFishWebDB {
       Size     _size;
       JSONType _type;
       char     _data[];
+      void* data()
+      {
+         assert(_size);
+         return &(_data[0]);
+      }
    };
 
    class JSONDBHandler
@@ -120,10 +125,11 @@ namespace BeeFishWebDB {
          JSONType _lastType = lastType();
 
          if (_lastType == JSONType::KEY) {
-            string key = lastKey();
+
+            //string key = lastKey();
             pop_back();
             assert(lastType() == JSONType::OBJECT);
-            path = path[key];
+            //path = path[key];
          }
          else if (_lastType == JSONType::ARRAY) {
             Size& index = lastArrayIndex();
@@ -140,8 +146,7 @@ namespace BeeFishWebDB {
          jsonValue->_type = type;
 
          if (size > 0 && value)
-            memcpy(&(jsonValue->_data[0]), value, size);
-
+            memcpy(jsonValue->data(), value, size);
 
       }
 
@@ -178,6 +183,7 @@ namespace BeeFishWebDB {
       ///
       bool on_document_end( error_code& ec )
       {
+         assert(lastType() == JSONType::ROOT);
          pop_back();
          assert(size() == 0);
          return true;
@@ -225,7 +231,7 @@ namespace BeeFishWebDB {
             {JSONType::OBJECT, 0, "", path}
          );
 
-         //setData(JSONType::OBJECT);
+         //etData(JSONType::OBJECT);
 
          return true;
       }
@@ -272,7 +278,7 @@ namespace BeeFishWebDB {
          std::string key(s);
 
          push_back(
-            {JSONType::KEY, 0, key, lastPath()}
+            {JSONType::KEY, 0, key, lastPath()[key]}
          );
 
          return true;
@@ -312,7 +318,7 @@ namespace BeeFishWebDB {
       {
          std::string string(s);
 
-         setData(JSONType::STRING, string.size(), string.c_str());
+         setData(JSONType::STRING, string.size(), string.data());
 
          return true;
       }

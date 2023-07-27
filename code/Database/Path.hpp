@@ -189,43 +189,15 @@ namespace BeeFishDatabase {
       void setData(const std::string& value) {
          Branch& branch = getBranch();
          
-         Data* destination = nullptr;
+         Data* destination = createData(value.size());
 
-         if (branch._dataIndex)
-         {
-            destination =
-               _database->getData(
-                  branch._dataIndex
-               );
-         }
+         if ( destination == nullptr )
+            return;
 
-         if ( ( destination == nullptr ) || 
-              ( destination->size() < value.size() ) )
-         {
-            if (destination)
-               deleteData();
-            
-            Index dataIndex = 
-               _database->allocate(value.size());
-               
-            Branch& branch =
-               getBranch();
-               
-            branch._dataIndex = dataIndex;
-         
-            destination =
-               _database->getData(
-                  branch._dataIndex
-               );
-            
-         }
-
-         destination->_size = value.size();
-         
          memcpy(
             destination->data(),
             value.data(),
-            destination->size()
+            value.size()
          );
          
       }

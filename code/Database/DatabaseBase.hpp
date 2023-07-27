@@ -181,14 +181,10 @@ namespace BeeFishDatabase {
       inline Index getNextIndex()
       {
          Index& index = *_nextIndex;
-#ifdef DEBUG
-         Branch& branch = getBranch(index);
-         branch._index = index;
-#endif
          return ++index;
 
       }
-  
+ 
       inline Index allocate(Size byteSize)
       {
          

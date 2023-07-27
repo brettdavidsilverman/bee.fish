@@ -1,6 +1,7 @@
 #ifndef BEE_FISH__TEST_HPP
 #define BEE_FISH__TEST_HPP
 #include <filesystem>
+#include <bits/stdc++.h>
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "DBServer.hpp"
 
@@ -66,33 +67,11 @@ namespace BeeFish
          cout << "Testing get " << flush;
 
          stringstream stream;
-         stream << "curl " << dbServer->url() << "bee"
-            " -s | grep 123";
+         stream << "curl -s " << dbServer->url() << "bee"
+            " | grep 123";
          string command = stream.str();
+         cerr << command << endl;
          success &= (system(command.c_str()) == 0);
-
-         outputSuccess(success);
-
-      }
-
-      if (success)
-      {
-         cout << "Testing test files " << flush;
-
-         success = success &&
-            testData(dbServer->url(), "Integer", "1234");
-
-         success = success &&
-            testData(dbServer->url(), "Double", "1234.1235");
-
-         success = success &&
-            testData(dbServer->url(), "EmptyObject", "{}");
-
-         success = success &&
-            testData(dbServer->url(), "EmptyArray", "[]");
-
-         success = success &&
-            testData(dbServer->url(), "Array", "[1,2,3]");
 
          outputSuccess(success);
 
@@ -119,10 +98,18 @@ namespace BeeFish
 
       bool success = true;
       
-      string path = directory;
-      for (const auto & entry : directory_iterator(path))
+      vector<string> files;
+
+      for (const auto & entry : directory_iterator(directory))
       {
-         success = testFile(url, entry.path());
+         files.push_back(entry.path());
+      }
+
+      sort(files.begin(), files.end());
+
+      for (auto file : files) {
+         if (success)
+            success = testFile(url, file);
       }
 
       outputSuccess(success);

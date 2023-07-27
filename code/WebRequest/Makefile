@@ -4,7 +4,7 @@ DEPS=main.cpp WebRequest.hpp Version.hpp Test.hpp Makefile
 OUTPUT = ../../build/WebRequest
 
 $(OUTPUT):	$(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_system -lboost_thread -lpthread -latomic -lstdc++fs
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -lstdc++fs
 
 debug:	clean
 debug:	DEBUG = debug
