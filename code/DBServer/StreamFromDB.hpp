@@ -121,7 +121,7 @@ namespace BeeFishWebDB {
          {
             stringstream stream;
             
-            stream << *(double*)data;
+            stream << std::setprecision(16)  << *(double*)data;
             string str = stream.str();
             size += output.write(str);
             break;
