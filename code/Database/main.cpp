@@ -37,8 +37,8 @@ return 0;
            << DATABASE_VERSION
            << endl;
 
-   signal(SIGSEGV, sigHandler);
-   signal(SIGABRT, sigHandler);
+  // signal(SIGSEGV, sigHandler);
+ //  signal(SIGABRT, sigHandler);
 
    bool test =
       (hasArg(argc, argv, "-test") != -1);

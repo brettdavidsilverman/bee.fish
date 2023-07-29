@@ -175,7 +175,7 @@ namespace BeeFishDatabase {
          destination = string;
       }
 
-      operator string()
+      operator string() const
       {
          Data& data = getData(data);
 
@@ -462,10 +462,17 @@ namespace BeeFishDatabase {
          // Take that right, then
          // follow using min algo
 
-         assert (stack.size() > 0);
+         if (isDeadEnd())
+            return false;
 
-      
          Branch branch;
+         if (stack.size() == 0)
+         {
+            min(_index, stack);
+            stack >> value;
+            return true;
+         }
+         
 
          // Up the tree until first right
          do 
@@ -473,15 +480,15 @@ namespace BeeFishDatabase {
             branch = stack.last();
             stack.pop_back();
          }
-         while (stack.size() && 
+         while (      stack.size() && 
                 not (branch._left &&
                      branch._right));
 
-         if (not (branch._left and
-                  branch._right) )
+         if (not (branch._left &&
+                 branch._right) )
             return false;
 
-         assert(branch._left and branch._right);
+         assert(branch._left && branch._right);
 
          // Clear the left branch
          branch._left = 0;

@@ -38,12 +38,9 @@ namespace BeeFishDatabase
       std::string world;
       start["Hello"].getData(world);
 
-      success &=
-         testValue(
-            "world",
-            world
-         );
-
+      cout << "\t" << "Hello: " << world;
+      success = (world == "world");
+      outputSuccess(success);
 
       // Min / Max
       Path data = start["data"];
@@ -61,7 +58,7 @@ namespace BeeFishDatabase
          Size minimum =
             data.min<Size>(stack);
 
-         cout << "\tMinimum: " << minimum << flush;
+         cout << minimum << flush;
 
          success = (minimum == min);
 
@@ -78,7 +75,16 @@ namespace BeeFishDatabase
 
          success = (maximum == max);
 
-         cout << "\tMaximum: " << maximum << endl;
+         cout << maximum << endl;
+         outputSuccess(success);
+      }
+
+      if (success) {
+         cout << "\tTesting Path Min/Max: ";
+
+         (data.min<Size>() == min) &&
+         (data.max<Size>() == max);
+
          outputSuccess(success);
       }
 
@@ -91,14 +97,6 @@ namespace BeeFishDatabase
          outputSuccess(success);
       }
 
-      if (success) {
-         cout << "\tTesting Path Min/Max: ";
-
-         (data.min<Size>() == min) &&
-         (data.max<Size>() == max);
-
-         outputSuccess(success);
-      }
 
       if (success) {
          cout << "\tTesting get/set data: ";
@@ -137,7 +135,7 @@ namespace BeeFishDatabase
       }
 
       if (success) {
-         cout << "\tTesting int first, next ";
+         cout << "\tTesting int first, next" << endl;
 
          Path data = start["skip3"];
          data[0];
@@ -145,21 +143,39 @@ namespace BeeFishDatabase
          //data[2];
 
          Stack stack;
-         success =
-            (data.min<int>(stack) == 0);
-         int second = -1;
-         success =
-            data.next(stack, second);
+         int first;
+         bool next =
+            data.next<int>(stack, first);
+         if (next)
+            cout << "\t\tFirst: " << first << endl;
+         success = (first == 0) && next;
+         outputSuccess(success);
+         if (success) {
+            int second = -1;
+            next=
+               data.next(stack, second);
  
-         cout << "\t" << "data.next: " << success << endl;
-         if (success)
-            cout << "Read second: " << second << endl;
-         success &= (second == 1);
+            cout << "\t\t" << "Second data.next: " << next << endl;
+            if (next)
+               cout << "\t\t" << "Read second: " << second << endl;
+
+            success &= (second == 1) && next;
+         }
+         if (success) {
+            int third = -1;
+            next=
+               data.next(stack, third);
+ 
+            cout << "\t\t" << "Third data.next: " << next << endl;
+            success &= (third == -1) && !next;
+         }
+
+
          outputSuccess(success);
       }
 
       if (success) {
-         cout << "\tTesting string first, next ";
+         cout << "\tTesting string first to next " << endl;
 
          Path data = start["skip4"];
          data["first"];
@@ -170,13 +186,26 @@ namespace BeeFishDatabase
          success =
             (data.min<string>(stack) == "first");
          string second;
-         success =
+         bool next =
             data.next(stack, second);
  
-         cout << "\t" << "data.next: " << success << endl;
-         if (success)
-            cout << "Read second: \"" << second << "\"" << endl;
-         success &= (second == "second");
+         if (success) {
+            cout << "\tRead second: \"" << second << "\"" << next << endl;
+            success = (second == "second") && next;
+         }
+
+         if (success) {
+            string third;
+            next = data.next(stack, third);
+            cout << "\tRead third: \"" << third << "\"" << next << endl;
+            success = (third == "third") && next;
+         }
+         if (success) {
+            string empty;
+            next = data.next(stack, empty);
+            cout << "\tString last next: " << next << endl;
+            success = (next == false);
+         }
          outputSuccess(success);
       }
 
@@ -189,13 +218,35 @@ namespace BeeFishDatabase
             data[i];
 
          Stack stack;
-         int i = data.min<int>(stack);
+         int i;
          int check = 1;
-         do {
-            cout << i << ",";
+         int last = data.max<int>();
+         while (data.next(stack, i)) {
+            cout << i;
+            if (i != last)
+               cout << ",";
             success &= (i == check++);
          }
-         while (data.next(stack, i));
+         
+
+         success &= (i == 10);
+         outputSuccess(success);
+      }
+
+      if (success)
+      {
+         cout << "\tTesting string next" << endl;
+
+         Path data = start["skip6"];
+         data["one"];
+         data["two"];
+         data["three"];
+         Stack stack;
+         string key;
+         while (data.next(stack, key)) {
+            cout << key << endl;
+         }
+         
 
          success &= (i == 10);
          outputSuccess(success);

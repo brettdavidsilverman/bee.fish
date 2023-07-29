@@ -1,3 +1,6 @@
+#ifndef BEEFISH__MISC__SIGHANDLER_HPP
+#define BEEFISH__MISC__SIGHANDLER_HPP
+
 #include <stdio.h>
 #include <execinfo.h>
 #include <signal.h>
@@ -5,7 +8,7 @@
 #include <unistd.h>
 
 
-void sigHandler(int sig) {
+inline void sigHandler(int sig) {
    void *array[10];
    size_t size;
 
@@ -15,5 +18,6 @@ void sigHandler(int sig) {
    // print out all the frames to stderr
    fprintf(stderr, "Error: signal %d:\n", sig);
    backtrace_symbols_fd(array, size, STDERR_FILENO);
-   exit(1);
 }
+
+#endif

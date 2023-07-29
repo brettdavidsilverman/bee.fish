@@ -35,6 +35,11 @@ namespace BeeFish
       if (!dbServer->start())
          return false;
 
+      success = testFile(dbServer->url(), "tests/04-Object.json");
+
+      outputSuccess(success);
+      success = false;
+
       if (success)
       {
          cout << "Testing 404 " << flush;

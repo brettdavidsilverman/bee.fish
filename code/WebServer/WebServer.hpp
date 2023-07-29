@@ -20,6 +20,8 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/post.hpp>
 
+#include "../Miscellaneous/SigHandler.hpp"
+
 #include "Config.hpp"
 #include "../Database/Database.hpp"
 #include "../WebRequest/WebRequest.hpp"
@@ -264,6 +266,7 @@ namespace BeeFishWeb {
          string ipAddress
       )
       {
+
          stringstream outStream;
 
          outStream << version() << endl;

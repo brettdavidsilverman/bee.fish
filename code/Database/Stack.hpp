@@ -111,7 +111,7 @@ namespace BeeFishDatabase {
          for (auto branch : stack)
          {
             out << branch;
-            if (branch._left and branch._right)
+            if (branch._left && branch._right)
                out << "****";
             out << endl;
          

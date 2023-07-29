@@ -5,8 +5,8 @@
 #include "../Miscellaneous/SigHandler.hpp"
 
 int main(int argc, const char* argv[]) {
-   signal(SIGSEGV, sigHandler);
-   signal(SIGABRT, sigHandler);
+   //signal(SIGSEGV, sigHandler);
+   //signal(SIGABRT, sigHandler);
 
    using namespace std;
    using namespace BeeFishMisc;

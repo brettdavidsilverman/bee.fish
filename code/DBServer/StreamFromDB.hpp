@@ -86,25 +86,22 @@ namespace BeeFishWebDB {
       Path<Database::Encoding> jsonPath
    )
    {
-              
-      if (!jsonPath.hasData())
-         throw runtime_error("JSON path has no data");
+
+      assert(jsonPath.hasData());
 
       Size size = 0;
 
-      JSONValue* value = (JSONValue*)
+      JSONData* jsonData = (JSONData*)
          jsonPath.getData().data();
 
-      void* data = value->data();
+      void* data = jsonData->data();
 
-      switch (value->_type)
+      switch (jsonData->_type)
       {
          case JSONType::INT64:
          {
             stringstream stream;
-            //stream << *(int64_t*)(value->_data);
-            int64_t* i = (int64_t*)data;
-            stream << *i;
+            stream << *(int64_t*)data;
             string str = stream.str();
             size += output.write(str);
             break;
@@ -128,7 +125,7 @@ namespace BeeFishWebDB {
          }
          case JSONType::STRING:
          {
-            std::string str((char*)data, value->_size);
+            std::string str((char*)data, jsonData->_size);
             str = "\"" + escape(str) + "\"";
             size += output.write(str);
             break;
@@ -148,31 +145,37 @@ namespace BeeFishWebDB {
          }
          case JSONType::OBJECT:
          {
+            cerr << "OBJECT ";
+
+            Size count = *(Size*)data;
+            cerr << count << endl;
             size += output.write("{");
-            if (!jsonPath.isDeadEnd())
+
+            Stack stack;
+            string key;
+            int i = 0;
+            while (jsonPath.next(stack, key))
             {
-               Stack stack;
-               string key = jsonPath.min<string>(stack);
-               string last = jsonPath.max<string>();
 
-               string label;
-               do {
-                  label = "\"" + escape(key) + "\":";
+               string label = "\"" + escape(key) + "\":";
+cerr << label << jsonPath << endl;
+               size += output.write(
+                  label
+               );
 
-                  size += output.write(
-                     label
-                  );
+               size += streamJSONFromDB(
+                  output,
+                  jsonPath[key]
+               );
 
-                  size += streamJSONFromDB(
-                     output,
-                     jsonPath[key]
-                  );
+                  
+               if (++i != count)
+                  size += output.write(",");
 
-                  if (key != last)
-                     size += output.write(",");
-               }
-               while(jsonPath.next(stack, key));
+               key.clear();
+
             }
+
             size += output.write("}");
             break;
          }
@@ -185,21 +188,21 @@ namespace BeeFishWebDB {
 
                Stack stack;
 
-               Size index = jsonPath.min<Size>(stack);
-               Size max = jsonPath.max<Size>();
+               Size index;
+               Size last = jsonPath.max<Size>();
 
-               do
+               while(jsonPath.next(stack, index))
                {
                   size += streamJSONFromDB (
                      output,
                      jsonPath[index]
                   );
 
-                  if (index != max)
+                  if (index != last)
                      size += output.write(",");
    
                }
-               while(jsonPath.next(stack, index));
+               
 
             }
 
@@ -287,56 +290,6 @@ namespace BeeFishWebDB {
 
       return true;
    }
-
-/*
-   class StreamFromDB :
-      public Path<Database::Encoding>
-   {
-   protected:
-      ostream& _output;
-      char* _page = nullptr;
-      int   _position {0};
-      int   _pageCount {0};
-   public:
-
-      StreamFromDB(
-         const Path<Database::Encoding>& path,
-         ostream& output
-      ) :
-         Path(path),
-         _output(output)
-      {
-         allocatePage();
-      }
-
-      StreamFromDB(
-         const StreamFromDB& source
-      ) :
-         Path(source),
-         _output(source._output)
-      {
-         allocatePage();
-      }
-
-      virtual ~StreamFromDB()
-      {
-         delete[] _page;
-      }
-
-   protected:
-      void allocatePage()
-      {
-         _page = new char[pageSize];
-      }
-
-      const Size size() const {
-         return
-            _position +
-            _pageCount * pageSize;
-      }
-
-   };
-*/
 }
 
 #endif
