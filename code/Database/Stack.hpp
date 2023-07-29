@@ -13,11 +13,7 @@
       long int _count {0};
 
    public:
-      enum class Aggregate {
-         MIN,
-         MAX
-      } _aggregate = Aggregate::MIN;
-
+      
       Stack()
       {
       }
@@ -26,31 +22,6 @@
       override
       {
          return (*this)[_index]._bit;
-/*
-         const Branch& branch =
-            (*this)[_index].getBranch();
-      
-         if (_aggregate ==
-            Aggregate::MIN)
-         {
-            if (branch._left)
-               return 0;
-
-            if (branch._right)
-               return 1;
-         }
-         else if (_aggregate ==
-                  Aggregate::MAX)
-         {
-            if (branch._right)
-               return 1;
-
-            if (branch._left)
-               return 0;
-         }
-      
-         assert(false);
-*/
       }
 
       virtual bool readBit()
@@ -109,10 +80,10 @@
 
       }
  
-      Path<Encoding> last() {
+      StackValue last() {
          size_t size = vector<StackValue>::size();
          assert(size);
-         return (*this)[size - 1]._path;
+         return (*this)[size - 1];
       }
 
    };

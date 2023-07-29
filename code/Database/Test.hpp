@@ -75,7 +75,7 @@ namespace BeeFishDatabase
 
          success = (maximum == max);
 
-         cout << maximum << endl;
+         cout << maximum;
          outputSuccess(success);
       }
 
@@ -146,17 +146,14 @@ namespace BeeFishDatabase
          int first = - 1;
          bool next =
             data.next(stack, first);
-cerr << "First: " << endl << stack << endl;
          if (next)
             cout << "\t\tFirst: " << first << "," << next << endl;
          success = (first == 0) && next;
-         outputSuccess(success);
-         
+
          if (success) {
             int second = -1;
             next =
                data.next(stack, second);
- cerr << "Second: " << endl << stack << endl;
             cout << "\t\t" << "Second: " << second << ", " << next << endl;
             success &= (second == 1) && next;
          }
@@ -190,14 +187,14 @@ cerr << "First: " << endl << stack << endl;
             data.next(stack, second);
  
          if (success) {
-            cout << "\tRead second: \"" << second << "\"" << next << endl;
+            cout << "\t\tRead second: \"" << second << "\", " << next << endl;
             success = (second == "second") && next;
          }
 
          if (success) {
             string third;
             next = data.next(stack, third);
-            cout << "\tRead third: \"" << third << "\"" << next << endl;
+            cout << "\t\tRead third: \"" << third << "\", " << next << endl;
             success = (third == "third") && next;
          }
          if (success) {
@@ -243,12 +240,15 @@ cerr << "First: " << endl << stack << endl;
          data["three"];
          Stack stack;
          string key;
+         string last;
          while (data.next(stack, key)) {
             cout << key << endl;
+            last = key;
+            key.clear();
          }
          
 
-         success &= (key == "two");
+         success &= (last == "two");
          outputSuccess(success);
       }
 

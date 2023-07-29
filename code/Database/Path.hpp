@@ -434,9 +434,6 @@ namespace BeeFishDatabase {
          Stack& stack
       ) const
       {
-         stack._aggregate =
-            Stack::Aggregate::MIN;
-
          min(_index, stack);
          T minimum;
          stack >> minimum;
@@ -449,9 +446,6 @@ namespace BeeFishDatabase {
          Stack& stack
       ) 
       {
-         stack._aggregate =
-            Stack::Aggregate::MAX;
-
          max(_index, stack);
          T maximum;
          stack >> maximum;
@@ -461,8 +455,6 @@ namespace BeeFishDatabase {
       template<typename T>
       T min() const {
          Stack stack;
-         stack._aggregate =
-            Stack::Aggregate::MIN;
          min(_index, stack);
          T minimum;
          stack >> minimum;
@@ -473,15 +465,47 @@ namespace BeeFishDatabase {
       T max() const {
 
          Stack stack;
-         stack._aggregate =
-            Stack::Aggregate::MAX;
-
          max(_index, stack);
          T maximum;
          stack >> maximum;
          return maximum;
       }
+/*
+         assert (stack.size() > 0);
 
+      
+         Branch branch;
+
+         // Up the tree until first right
+         do 
+         {
+            branch = stack.last();
+            stack.pop_back();
+         }
+         while (stack.size() && 
+                not (branch._left &&
+                     branch._right));
+
+         if (not (branch._left and
+                  branch._right) )
+            return false;
+
+         assert(branch._left and branch._right);
+
+         // Clear the left branch
+         branch._left = 0;
+         stack.push_back(branch);
+
+         // Follow the next min from
+         // this right
+         min(branch._right, stack);
+
+         // Get this value
+         stack.reset();
+         stack >> value;
+
+         return true;
+*/
       template<typename T>
       bool next(Stack& stack, T& value) {
          // Algorithm:
@@ -501,35 +525,33 @@ namespace BeeFishDatabase {
             return true;
          }
          
-         Path path = stack.last();
-         Branch branch = path.getBranch();
-         // Up the stack until first right
-         while (!(branch._left &&
-                  branch._right))
+         Branch branch;
+         Path path;
+         StackValue entry;
+         // Up the tree until first right
+         do 
          {
-            stack.pop_back();
-
-            if (!stack.size())
-               break;
-
-            path = stack.last();
-            
+            entry = stack.last();
+            path = entry._path;
             branch = path.getBranch();
-            
+            stack.pop_back();
          }
-         
+         while (stack.size() && 
+                ( !(branch._left &&
+                     branch._right) ||
+                entry._bit == 1) );
 
-         if (! (branch._left &&
-                branch._right) )
+         if ( ! (branch._left and
+                  branch._right) ||
+              (entry._bit == 1) )
             return false;
 
-         assert(branch._left && branch._right);
 
-         
+         assert(branch._left && branch._right && entry._bit == 0);
+
          // Follow the next min from
          // this right
-         stack[stack.size() - 1]._bit = 1;
-
+         stack.push_back({path, 1});
          min(branch._right, stack);
 
          // Get this value
