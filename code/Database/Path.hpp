@@ -9,7 +9,6 @@
 #include "File.hpp"
 #include "Branch.hpp"
 #include "DatabaseBase.hpp"
-#include "Stack.hpp"
 
 using namespace std;
 using namespace BeeFishPowerEncoding;
@@ -25,7 +24,9 @@ namespace BeeFishDatabase {
       Database* _database;
       Index     _index;
    public:
-   
+
+#include "Stack.hpp"
+
       Path( Database* database = nullptr,
             Index index = Branch::Root ) :
          Encoding(),
@@ -38,6 +39,14 @@ namespace BeeFishDatabase {
             Index index = Branch::Root ) :
          Encoding(),
          _database(&database),
+         _index(index)
+      {
+      }
+
+      Path( const Path& source,
+            Index index) :
+         Encoding(),
+         _database(source._database),
          _index(index)
       {
       }
@@ -360,41 +369,61 @@ namespace BeeFishDatabase {
 
       void min(
          Index index,
-         Stack<Encoding>& stack,
-         bool debug = false
+         Stack& stack
       ) const
       {
          Branch branch =
             getBranch(index);
 
-
-         while (not branch.isDeadEnd())
+         while (!branch.isDeadEnd())
          {
-            stack.push_back(branch);
-         
-            if (branch._left)
-               branch = getBranch(branch._left);
-            else if (branch._right)
-               branch = getBranch(branch._right);
+            Path path(*this, index);
+            
+            bool bit;
+
+            if (branch._left) {
+               index = branch._left;
+               bit = 0;
+            }
+            else if (branch._right) {
+               index = branch._right;
+               bit = 1;
+            }
+
+            stack.push_back({path, bit});
+
+            branch = getBranch(index);
          }
       }
 
       void max(
          Index index,
-         Stack<Encoding>& stack
+         Stack& stack
       ) const
       {
+
+         
          Branch branch =
             getBranch(index);
 
-         while (not branch.isDeadEnd())
+         while (!branch.isDeadEnd())
          {
-            stack.push_back(branch);
+            Path path(*this, index);
+
+            bool bit;
          
-            if (branch._right)
-               branch = getBranch(branch._right);
-            else if (branch._left)
-               branch = getBranch(branch._left);
+            if (branch._right) {
+               index = branch._right;
+               bit = 1;
+            }
+            else if (branch._left) {
+               index = branch._left;
+               bit = 0;
+            }
+
+            stack.push_back({path, bit});
+
+            branch = getBranch(index);
          }
       
       }
@@ -402,11 +431,11 @@ namespace BeeFishDatabase {
    public:
       template<typename T>
       T min(
-         Stack<Encoding>& stack
+         Stack& stack
       ) const
       {
          stack._aggregate =
-            Stack<Encoding>::Aggregate::MIN;
+            Stack::Aggregate::MIN;
 
          min(_index, stack);
          T minimum;
@@ -417,11 +446,11 @@ namespace BeeFishDatabase {
 
       template<typename T>
       T max(
-         Stack<Encoding>& stack
+         Stack& stack
       ) 
       {
          stack._aggregate =
-            Stack<Encoding>::Aggregate::MAX;
+            Stack::Aggregate::MAX;
 
          max(_index, stack);
          T maximum;
@@ -431,9 +460,9 @@ namespace BeeFishDatabase {
 
       template<typename T>
       T min() const {
-         Stack<Encoding> stack;
+         Stack stack;
          stack._aggregate =
-            Stack<Encoding>::Aggregate::MIN;
+            Stack::Aggregate::MIN;
          min(_index, stack);
          T minimum;
          stack >> minimum;
@@ -443,9 +472,9 @@ namespace BeeFishDatabase {
       template<typename T>
       T max() const {
 
-         Stack<Encoding> stack;
+         Stack stack;
          stack._aggregate =
-            Stack<Encoding>::Aggregate::MAX;
+            Stack::Aggregate::MAX;
 
          max(_index, stack);
          T maximum;
@@ -454,7 +483,7 @@ namespace BeeFishDatabase {
       }
 
       template<typename T>
-      bool next(Stack<Encoding>& stack, T& value) {
+      bool next(Stack& stack, T& value) {
          // Algorithm:
          // Up the tree until first
          // right with a left
@@ -465,7 +494,6 @@ namespace BeeFishDatabase {
          if (isDeadEnd())
             return false;
 
-         Branch branch;
          if (stack.size() == 0)
          {
             min(_index, stack);
@@ -473,29 +501,35 @@ namespace BeeFishDatabase {
             return true;
          }
          
-
-         // Up the tree until first right
-         do 
+         Path path = stack.last();
+         Branch branch = path.getBranch();
+         // Up the stack until first right
+         while (!(branch._left &&
+                  branch._right))
          {
-            branch = stack.last();
             stack.pop_back();
-         }
-         while (      stack.size() && 
-                not (branch._left &&
-                     branch._right));
 
-         if (not (branch._left &&
-                 branch._right) )
+            if (!stack.size())
+               break;
+
+            path = stack.last();
+            
+            branch = path.getBranch();
+            
+         }
+         
+
+         if (! (branch._left &&
+                branch._right) )
             return false;
 
          assert(branch._left && branch._right);
 
-         // Clear the left branch
-         branch._left = 0;
-         stack.push_back(branch);
-
+         
          // Follow the next min from
          // this right
+         stack[stack.size() - 1]._bit = 1;
+
          min(branch._right, stack);
 
          // Get this value
@@ -575,15 +609,15 @@ namespace BeeFishDatabase {
       friend ostream& operator <<
       (ostream& out, const Path& path)
       {
-         out << "{\"path\":" << path._index
+         out /*<< "{\"path\":" << path._index
              << ", \"hasData\": " <<
                 ( path.hasData() ?
                   "true" :
                   "false"
                 )
-             << ", \"branch\": "
-             << path.getBranch()
-             << "}";
+             << ", \"branch\": "*/
+             << path.getBranch();
+             //<< "}";
      
          return out;
       }
@@ -739,7 +773,6 @@ namespace BeeFishDatabase {
          
          
       };
-      
       
    };
 

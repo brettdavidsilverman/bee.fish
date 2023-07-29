@@ -1,18 +1,12 @@
-#ifndef BEE_FISH__DATABASE__STACK_HPP
-#define BEE_FISH__DATABASE__STACK_HPP
-#include <vector>
-#include "Database.hpp"
 
-using namespace std;
-using namespace BeeFishPowerEncoding;
+   struct StackValue {
+      Path<Encoding> _path;
+      bool _bit;
+   };
 
-namespace BeeFishDatabase {
-
-
-   template <class Encoding = Database::Encoding>
    class Stack :
       public Encoding,
-      public vector< Branch >
+      public vector<StackValue>
    {
    protected:
       Size _index {0};
@@ -31,8 +25,10 @@ namespace BeeFishDatabase {
       virtual bool peekBit() const
       override
       {
-         Branch branch =
-            (*this)[_index];
+         return (*this)[_index]._bit;
+/*
+         const Branch& branch =
+            (*this)[_index].getBranch();
       
          if (_aggregate ==
             Aggregate::MIN)
@@ -54,6 +50,7 @@ namespace BeeFishDatabase {
          }
       
          assert(false);
+*/
       }
 
       virtual bool readBit()
@@ -95,34 +92,28 @@ namespace BeeFishDatabase {
       {
          return _count;
       }
-
-      Branch last()
-      {
-         assert(size() > 0);
-         Branch branch =
-            (*this)[size() - 1];
-         return branch;
-      }
+      
 
       friend ostream& operator << (ostream& out, const Stack& stack)
       {
          int index = 0;
         
-         for (auto branch : stack)
+         for (auto value : stack)
          {
-            out << branch;
-            if (branch._left && branch._right)
-               out << "****";
-            out << endl;
-         
+            out << value._path << ":" 
+                << value._bit
+                << endl;
          }
 
          return out;
 
       }
+ 
+      Path<Encoding> last() {
+         size_t size = vector<StackValue>::size();
+         assert(size);
+         return (*this)[size - 1]._path;
+      }
 
    };
 
-}
-
-#endif

@@ -29,7 +29,7 @@ namespace BeeFishDatabase
 
       Database db(filename);
 
-      Path start(db);
+      Path<Database::Encoding> start(db);
 
       Path next = start["Hello"];
 
@@ -101,7 +101,7 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tTesting get/set data: ";
 
-         Path data = start;
+         Path<Database::Encoding> data = start;
          Size count = 22;
          data = 22;
          count = (Size)data;
@@ -135,7 +135,7 @@ namespace BeeFishDatabase
       }
 
       if (success) {
-         cout << "\tTesting int first, next" << endl;
+         cout << "\tTesting int next" << endl;
 
          Path data = start["skip3"];
          data[0];
@@ -143,30 +143,30 @@ namespace BeeFishDatabase
          //data[2];
 
          Stack stack;
-         int first;
+         int first = - 1;
          bool next =
-            data.next<int>(stack, first);
+            data.next(stack, first);
+cerr << "First: " << endl << stack << endl;
          if (next)
-            cout << "\t\tFirst: " << first << endl;
+            cout << "\t\tFirst: " << first << "," << next << endl;
          success = (first == 0) && next;
          outputSuccess(success);
+         
          if (success) {
             int second = -1;
-            next=
+            next =
                data.next(stack, second);
- 
-            cout << "\t\t" << "Second data.next: " << next << endl;
-            if (next)
-               cout << "\t\t" << "Read second: " << second << endl;
-
+ cerr << "Second: " << endl << stack << endl;
+            cout << "\t\t" << "Second: " << second << ", " << next << endl;
             success &= (second == 1) && next;
          }
+
          if (success) {
             int third = -1;
             next=
                data.next(stack, third);
  
-            cout << "\t\t" << "Third data.next: " << next << endl;
+            cout << "\t\t" << "End: " << third << ", " << next << endl;
             success &= (third == -1) && !next;
          }
 
@@ -248,7 +248,7 @@ namespace BeeFishDatabase
          }
          
 
-         success &= (i == 10);
+         success &= (key == "two");
          outputSuccess(success);
       }
 

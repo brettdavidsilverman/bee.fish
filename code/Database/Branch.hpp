@@ -11,9 +11,6 @@ namespace BeeFishDatabase
 
    struct Branch
    {
-#ifdef DEBUG
-      Index _index;
-#endif
       Index _left;
       Index _right;
       Index _dataIndex;
@@ -28,11 +25,6 @@ namespace BeeFishDatabase
       (ostream& out, const Branch& branch)
       {
          
-#ifdef DEBUG
-         out
-             << setw(4) << branch._index
-             << ": ";
-#endif
          out << "["
              << setw(4) << branch._left
              << ", "
