@@ -195,6 +195,11 @@ namespace BeeFishDatabase {
 
       }
 
+      void setData(const void* value, Size size) {
+         const string string((const char*)value, size);
+         setData(string);
+      }
+         
       void setData(const std::string& value) {
          Branch& branch = getBranch();
          
@@ -470,42 +475,7 @@ namespace BeeFishDatabase {
          stack >> maximum;
          return maximum;
       }
-/*
-         assert (stack.size() > 0);
 
-      
-         Branch branch;
-
-         // Up the tree until first right
-         do 
-         {
-            branch = stack.last();
-            stack.pop_back();
-         }
-         while (stack.size() && 
-                not (branch._left &&
-                     branch._right));
-
-         if (not (branch._left and
-                  branch._right) )
-            return false;
-
-         assert(branch._left and branch._right);
-
-         // Clear the left branch
-         branch._left = 0;
-         stack.push_back(branch);
-
-         // Follow the next min from
-         // this right
-         min(branch._right, stack);
-
-         // Get this value
-         stack.reset();
-         stack >> value;
-
-         return true;
-*/
       template<typename T>
       bool next(Stack& stack, T& value) {
          // Algorithm:
@@ -556,10 +526,19 @@ namespace BeeFishDatabase {
 
          // Get this value
          stack.reset();
+         value = T();
          stack >> value;
 
          return true;
 
+      }
+
+      template<typename T>
+      T value() const
+      {
+         if (isDeadEnd())
+            return T();
+         return min<T>();
       }
 
       Path& operator=(const Path& rhs)
@@ -631,15 +610,15 @@ namespace BeeFishDatabase {
       friend ostream& operator <<
       (ostream& out, const Path& path)
       {
-         out /*<< "{\"path\":" << path._index
+         out << "{\"path\":" << path._index
              << ", \"hasData\": " <<
                 ( path.hasData() ?
                   "true" :
                   "false"
                 )
-             << ", \"branch\": "*/
-             << path.getBranch();
-             //<< "}";
+             << ", \"branch\": "
+             << path.getBranch()
+             << "}";
      
          return out;
       }

@@ -252,6 +252,47 @@ namespace BeeFishDatabase
          outputSuccess(success);
       }
 
+      if (success)
+      {
+         cout << "\tTesting string value" << endl;
+
+         Path data = start["skip7"];
+         data["one"];
+         data["two"];
+         data["three"];
+         string first = data.value<string>();
+         success &= (first == "one");
+         outputSuccess(success);
+      }
+
+      if (success)
+      {
+         cout << "\tTesting size_t contains" << endl;
+
+         Path data = start["skip8"];
+         Size size = 1;
+         data[size];
+
+         bool contains = data.contains(size);
+
+         success &= (contains == true);
+         outputSuccess(success);
+      }
+
+      if (success)
+      {
+         cout << "\tTesting size_t does not contain" << endl;
+
+         Path data = start["skip9"];
+         Size size = 1;
+         data[size];
+
+         bool contains = data.contains(Size(2));
+
+         success &= (contains == false);
+         outputSuccess(success);
+      }
+
       remove(filename.c_str());
 
       outputSuccess(success);

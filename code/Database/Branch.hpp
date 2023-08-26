@@ -31,8 +31,8 @@ namespace BeeFishDatabase
              << setw(4) << branch._right
              << "]";
 
-         if (branch._dataIndex)
-            out << setw(4) << branch._dataIndex;
+         //if (branch._dataIndex)
+         //   out << setw(4) << branch._dataIndex;
 
          return out;
       }

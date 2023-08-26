@@ -165,11 +165,11 @@ namespace BeeFishWeb {
                boost::asio::post(
                   webServer->_threadPool,
                   [webServer, clientSocket, ipAddress]() {
-                     handleWebRequest(
-                        webServer,
+                     webServer->handleWebRequest(
                         clientSocket,
                         ipAddress
                      );
+                     return true;
                   }
                );
 
@@ -249,17 +249,6 @@ namespace BeeFishWeb {
 
       }
 
-      static void handleWebRequest(
-         WebServer* webServer,
-         int clientSocket,
-         std::string ipAddress
-      )
-      {
-         webServer->handleWebRequest(
-            clientSocket,
-            ipAddress
-         );
-      }
 
       virtual bool handleWebRequest(
          int clientSocket,

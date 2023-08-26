@@ -22,9 +22,33 @@ namespace BeeFishWebDB {
       KEY,
       ROOT
    };
+   
+   PowerEncoding& operator <<
+   ( 
+      PowerEncoding& stream,
+      const JSONType& type
+   )
+   {
+      stream << (int)type;
+      return stream;
+   }
+
+   PowerEncoding& operator >>
+   (
+      PowerEncoding &output,
+      JSONType& type
+   )
+   {
+      int read;
+      output >> read;
+
+      type = (JSONType)read;
+
+      return output;
+   }
 
    ostream& operator << (ostream& out, const JSONType& type);
-   
+   /*
    struct JSONData {
       Size     _size;
       JSONType _type;
@@ -35,7 +59,7 @@ namespace BeeFishWebDB {
          return &(_data[0]);
       }
    };
-
+*/
    class JSONDBHandler
    {
    public:
@@ -47,13 +71,15 @@ namespace BeeFishWebDB {
          JSONType _type;
          Size _arrayIndex;
          Path<Database::Encoding> _path;
+         Path<Database::Encoding> _arrayRootPath;
       };
 
       Path<Database::Encoding> _rootPath;
       vector<JSONStackValue> _stack;
-      Size _count {0};
+      int _count {0};
       JSONType _lastType = (JSONType)-1;
 
+      
    public:
 
       JSONDBHandler(Path<Database::Encoding> path) :
@@ -75,9 +101,14 @@ namespace BeeFishWebDB {
          return lastValue()._arrayIndex;
       }
 
-      BeeFishWeb::Path lastPath() {
+      BeeFishWeb::Path& lastPath() {
          return lastValue()._path;
       }
+
+      BeeFishWeb::Path& lastArrayRootPath() {
+         return lastValue()._arrayRootPath;
+      }
+
 
       Size size() {
          return _stack.size();
@@ -99,48 +130,65 @@ namespace BeeFishWebDB {
          _stack.push_back(value);
       }
 
+      void push_back(JSONType type)
+      {
+         Path path = lastPath()[type];
+
+         _stack.push_back(
+            {
+               type,
+               0,
+               path,
+               path
+            }
+         );
+      }
+
       JSONStackValue pop_back()
       {
          assert(size() > 0);
 
-         JSONStackValue value =
+         JSONStackValue last =
             _stack[size() - 1];
 
          _stack.pop_back();
 
          --_count;
-         return value;
+
+         return last;
       }
 
-      void setData(JSONType type, Size size, const void* value) {
+      void setValue(const string& value) {
 
-         Path<Database::Encoding> path
-            = lastPath();
+         JSONStackValue last =
+            pop_back();
+
+         BeeFishWeb::Path
+            path = last._path;
+
+         if (lastType() == JSONType::ARRAY) {
+            path =
+               lastArrayRootPath()
+                  [lastArrayIndex()++];
+           // lastPath() = path;
+         }
          
-         JSONType _lastType = lastType();
+         
+         path.setData(value);
+cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*" << path << endl;
 
-         if (_lastType == JSONType::KEY)
+         if (lastType() == JSONType::KEY)
          {
             pop_back();
          }
-         else if (_lastType == JSONType::ARRAY) {
-            Size& index = lastArrayIndex();
-            path = path[index++];
-         }
 
 
-         Size totalSize = sizeof(JSONData) + size;
+      }
 
-         Data* data =
-            path.createData(totalSize);
-
-         JSONData* jsonData = (JSONData*) data->data();
-         jsonData->_size = size;
-         jsonData->_type = type;
-
-         if (value && size > 0)
-            memcpy(jsonData->data(), value, size);
-
+      void setValue(const size_t value) {
+         stringstream stream;
+         stream << value;
+         setValue(stream.str());
       }
 
       /// The maximum number of elements allowed in an array
@@ -163,7 +211,7 @@ namespace BeeFishWebDB {
       bool on_document_begin( error_code& ec )
       {
          push_back(
-            JSONStackValue {JSONType::ROOT, 0, _rootPath}
+            JSONStackValue {JSONType::ROOT, 0, _rootPath, _rootPath}
          );
 
          return true;
@@ -190,7 +238,7 @@ namespace BeeFishWebDB {
       bool on_array_begin( error_code& ec )
       {
          push_back(
-            {JSONType::ARRAY, 0, lastPath()}
+            JSONType::ARRAY
          );
 
          return true;
@@ -204,10 +252,8 @@ namespace BeeFishWebDB {
       ///
       bool on_array_end( std::size_t n, error_code& ec )
       {
-         assert(lastType() == JSONType::ARRAY);
-         pop_back();
-         Size count = n;
-         setData(JSONType::ARRAY, sizeof(Size), &count);
+
+         setValue(n);
          
          return true;
       }
@@ -220,10 +266,8 @@ namespace BeeFishWebDB {
       bool on_object_begin( error_code& ec )
       {
 
-         Path path = lastPath();
-
          push_back(
-            {JSONType::OBJECT, 0, path}
+            JSONType::OBJECT
          );
 
          return true;
@@ -237,13 +281,9 @@ namespace BeeFishWebDB {
       ///
       bool on_object_end( std::size_t n, error_code& ec )
       {
-         assert(lastType() == JSONType::OBJECT);
          
-         pop_back();
-         Size count = n;
+         setValue(n);
 
-         setData(JSONType::OBJECT, sizeof(Size), &count);
-         
          return true;
       }
 
@@ -271,13 +311,17 @@ namespace BeeFishWebDB {
       {
          std::string key(s);
 
-         Path path = lastPath();
-         path = path[key];
+         Path path = lastPath()[key];
 
          push_back(
-            {JSONType::KEY, 0, path}
+            {
+               JSONType::KEY,
+               0,
+               path,
+               path
+            }
          );
-
+         _count++;
          return true;
       }
 
@@ -315,7 +359,11 @@ namespace BeeFishWebDB {
       {
          std::string string(s);
 
-         setData(JSONType::STRING, string.size(), string.data());
+         push_back(
+            JSONType::STRING
+         );
+
+         setValue(string);
 
          return true;
       }
@@ -330,7 +378,12 @@ namespace BeeFishWebDB {
       ///
       bool on_int64( int64_t i, string_view s, error_code& ec )
       {
-         setData(JSONType::INT64, sizeof(i), &i);
+         push_back(
+            JSONType::INT64
+         );
+
+         setValue(string(s));
+
          return true;
       }
 
@@ -343,7 +396,12 @@ namespace BeeFishWebDB {
       ///
       bool on_uint64( uint64_t u, string_view s, error_code& ec )
       {
-         setData(JSONType::UINT64, sizeof(u), &u);
+
+         push_back(
+            JSONType::UINT64
+         );
+
+         setValue(string(s));
  
          return true;
       }
@@ -357,7 +415,12 @@ namespace BeeFishWebDB {
       ///
       bool on_double( double d, string_view s, error_code& ec )
       {
-         setData(JSONType::DOUBLE, sizeof(d), &d);
+ 
+         push_back(
+            JSONType::DOUBLE
+         );
+
+         setValue(string(s));
 
          return true;
       }
@@ -371,7 +434,18 @@ namespace BeeFishWebDB {
       ///
       bool on_bool( bool b, error_code& ec )
       {
-         setData(JSONType::BOOL, sizeof(b), &b);
+         push_back(
+            JSONType::BOOL
+         );
+
+         string boolean;
+
+         if (b)
+            boolean = "true";
+         else
+            boolean = "false";
+
+         setValue(boolean);
 
          return true;
       }
@@ -383,7 +457,11 @@ namespace BeeFishWebDB {
       ///
       bool on_null( error_code& ec )
       {
-         setData(JSONType::_NULL, 0, nullptr);
+         push_back(
+            JSONType::_NULL
+         );
+
+         setValue(string("null"));
 
          return true;
       }
@@ -547,7 +625,7 @@ namespace BeeFishWebDB {
             out << "BOOL";
             break;
          case JSONType::_NULL:
-            out << "_NULL";
+            out << "NULL";
             break;
          case JSONType::STRING:
             out << "STRING";
@@ -571,15 +649,7 @@ namespace BeeFishWebDB {
       return out;
    }
    
-   PowerEncoding& operator <<
-   ( 
-      PowerEncoding& stream,
-      const JSONType& data
-   )
-   {
-      stream << (int)data;
-      return stream;
-   }
+   
 
 }
 

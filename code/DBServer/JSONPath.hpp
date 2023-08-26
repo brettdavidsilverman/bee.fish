@@ -1,0 +1,4 @@
+#ifndef BEE_FISH__DBSERVER__JSON_PATH
+#define BEE_FISH__DBSERVER__JSON_PATH
+
+#endif

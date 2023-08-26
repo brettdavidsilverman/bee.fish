@@ -83,58 +83,80 @@ namespace BeeFishWebDB {
 
    inline Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
-      Path<Database::Encoding> jsonPath
+      BeeFishWeb::Path jsonPath
    )
    {
 
-      assert(jsonPath.hasData());
-
       Size size = 0;
 
-      JSONData* jsonData = (JSONData*)
-         jsonPath.getData().data();
+      JSONType type =
+         jsonPath.value<JSONType>();
 
-      void* data = jsonData->data();
+cerr << "$$$$$$$ type: " << type << endl;
 
-      switch (jsonData->_type)
+      assert(jsonPath.contains(type));
+
+      Path path = jsonPath[type];
+
+      
+      assert(path.hasData());
+      string value;
+      path.getData(value);
+
+      switch (type)
       {
+         case JSONType::OBJECT:
+         {
+            size += output.write("{");
+            Size count = atol(value.c_str());
+            string key;
+            Stack stack;
+            Path object = path;
+            int i = 0;
+            while (object.next(stack, key))
+            {
+               string label = "\"" + escape(key) + "\":";
+
+               size += output.write(label);
+               Path value = object[key];
+
+               size += streamJSONFromDB(
+                  output,
+                  value
+               );
+
+               if (++i < count)
+                  size += output.write(",");
+
+            }
+
+            size += output.write("}");
+            break;
+         }
          case JSONType::INT64:
          {
-            stringstream stream;
-            stream << *(int64_t*)data;
-            string str = stream.str();
-            size += output.write(str);
+            size += output.write(value);
             break;
          }
          case JSONType::UINT64:
          {
-            stringstream stream;
-            stream << *(uint64_t*)data;
-            string str = stream.str();
-            size += output.write(str);
+            size += output.write(value);
             break;
          }
          case JSONType::DOUBLE:
          {
-            stringstream stream;
-            
-            stream << std::setprecision(16)  << *(double*)data;
-            string str = stream.str();
-            size += output.write(str);
+            size += output.write(value);
             break;
          }
          case JSONType::STRING:
          {
-            std::string str((char*)data, jsonData->_size);
-            str = "\"" + escape(str) + "\"";
+            string str = "\"" + escape(value) + "\"";
             size += output.write(str);
             break;
          }
          case JSONType::BOOL:
          {
-            string str = (*(bool*)data
-                ? "true" : "false");
-            size += output.write(str);
+            size += output.write(value);
             break;
          }
          case JSONType::_NULL:
@@ -143,67 +165,29 @@ namespace BeeFishWebDB {
             size += output.write(str);
             break;
          }
-         case JSONType::OBJECT:
-         {
-            cerr << "OBJECT ";
-
-            Size count = *(Size*)data;
-            cerr << count << endl;
-            size += output.write("{");
-
-            Stack stack;
-            string key;
-            int i = 0;
-            while (jsonPath.next(stack, key))
-            {
-
-               string label = "\"" + escape(key) + "\":";
-cerr << label << jsonPath << endl;
-               size += output.write(
-                  label
-               );
-
-               size += streamJSONFromDB(
-                  output,
-                  jsonPath[key]
-               );
-
-                  
-               if (++i != count)
-                  size += output.write(",");
-
-               key.clear();
-
-            }
-
-            size += output.write("}");
-            break;
-         }
          case JSONType::ARRAY:
          {
             size += output.write("[");
 
-            if (!jsonPath.isDeadEnd())
+            Size count = atol(value.c_str());
+cerr << "###### Value: " << value << endl;
+
+            for (Size index = 0;
+                 index < count;
+                 ++index)
             {
+cerr << "💜Index: " << index << ":" << path.contains(index) << endl;
 
-               Stack stack;
-
-               Size index;
-               Size last = jsonPath.max<Size>();
-
-               while(jsonPath.next(stack, index))
-               {
+               if (path.contains(index)) {
                   size += streamJSONFromDB (
                      output,
-                     jsonPath[index]
+                     path[index]
                   );
-
-                  if (index != last)
-                     size += output.write(",");
-   
                }
-               
 
+               if ((index + 1) < count)
+                  size += output.write(", ");
+   
             }
 
             size += output.write("]");
@@ -211,7 +195,10 @@ cerr << label << jsonPath << endl;
             break;
          }
          default:
-            throw runtime_error("Invalid type");
+         {
+            size += output.write(value);
+         }
+         
       }
 
       return size;
