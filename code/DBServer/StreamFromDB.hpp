@@ -89,15 +89,16 @@ namespace BeeFishWebDB {
 
       Size size = 0;
 
+      assert(!jsonPath.isDeadEnd());
+
       JSONType type =
          jsonPath.value<JSONType>();
-
-cerr << "$$$$$$$ type: " << type << endl;
 
       assert(jsonPath.contains(type));
 
       Path path = jsonPath[type];
 
+cerr << "GETTING: " << type << ", " << path._index << endl;
       
       assert(path.hasData());
       string value;
@@ -170,20 +171,18 @@ cerr << "$$$$$$$ type: " << type << endl;
             size += output.write("[");
 
             Size count = atol(value.c_str());
-cerr << "###### Value: " << value << endl;
 
             for (Size index = 0;
                  index < count;
                  ++index)
             {
-cerr << "💜Index: " << index << ":" << path.contains(index) << endl;
 
-               if (path.contains(index)) {
-                  size += streamJSONFromDB (
-                     output,
-                     path[index]
-                  );
-               }
+               assert(path.contains(index));
+
+               size += streamJSONFromDB (
+                  output,
+                  path[index]
+               );
 
                if ((index + 1) < count)
                   size += output.write(", ");

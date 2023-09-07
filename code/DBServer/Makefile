@@ -12,20 +12,20 @@ $(OUTPUT):	$(DEPS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o
 $(TEMP)/404.o: 404.html
 	objcopy --input binary \
             --output elf64-x86-64 \
-            --binary-architecture i386:x86-64 404.html $(TEMP)/404.o
+            404.html $(TEMP)/404.o
 
 $(TEMP)/HomePage.o: HomePage.html
 	objcopy --input binary \
             --output elf64-x86-64 \
-            --binary-architecture i386:x86-64 HomePage.html $(TEMP)/HomePage.o
+            HomePage.html $(TEMP)/HomePage.o
 
 $(TEMP)/ErrorPage.o: ErrorPage.html
 	objcopy --input binary \
             --output elf64-x86-64 \
-            --binary-architecture i386:x86-64 ErrorPage.html $(TEMP)/ErrorPage.o
+            ErrorPage.html $(TEMP)/ErrorPage.o
 
 test:	$(OUTPUT)
-	$(BUILD)/DBServer -test 2>&1 | c++filt
+	$(BUILD)/DBServer -test
 
 debug:	clean
 debug:	DEBUG = debug

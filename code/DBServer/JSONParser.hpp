@@ -132,7 +132,7 @@ namespace BeeFishWebDB {
 
       void push_back(JSONType type)
       {
-         Path path = lastPath()[type];
+         Path path = lastPath();
 
          _stack.push_back(
             {
@@ -158,7 +158,7 @@ namespace BeeFishWebDB {
          return last;
       }
 
-      void setValue(const string& value) {
+      void setValue(const string& value, const JSONType type) {
 
          JSONStackValue last =
             pop_back();
@@ -167,15 +167,23 @@ namespace BeeFishWebDB {
             path = last._path;
 
          if (lastType() == JSONType::ARRAY) {
+            
+            Size index =
+               lastArrayIndex()++;
+
             path =
-               lastArrayRootPath()
-                  [lastArrayIndex()++];
-           // lastPath() = path;
+               lastArrayRootPath();
+
+            path = path[index];
+
          }
-         
-         
+
+         if (lastType() != JSONType::KEY)
+            path = path[type];
+
          path.setData(value);
-cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*" << path << endl;
+
+cerr << "SETTING: " << type << ", " << path._index << " , " << value << endl;
 
          if (lastType() == JSONType::KEY)
          {
@@ -185,10 +193,10 @@ cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*
 
       }
 
-      void setValue(const size_t value) {
+      void setValue(const size_t value, const JSONType type) {
          stringstream stream;
          stream << value;
-         setValue(stream.str());
+         setValue(stream.str(), type);
       }
 
       /// The maximum number of elements allowed in an array
@@ -253,7 +261,7 @@ cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*
       bool on_array_end( std::size_t n, error_code& ec )
       {
 
-         setValue(n);
+         setValue(n, JSONType::ARRAY);
          
          return true;
       }
@@ -282,7 +290,7 @@ cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*
       bool on_object_end( std::size_t n, error_code& ec )
       {
          
-         setValue(n);
+         setValue(n, JSONType::OBJECT);
 
          return true;
       }
@@ -363,7 +371,7 @@ cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*
             JSONType::STRING
          );
 
-         setValue(string);
+         setValue(string, JSONType::STRING);
 
          return true;
       }
@@ -382,7 +390,7 @@ cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*
             JSONType::INT64
          );
 
-         setValue(string(s));
+         setValue(string(s), JSONType::INT64);
 
          return true;
       }
@@ -401,7 +409,7 @@ cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*
             JSONType::UINT64
          );
 
-         setValue(string(s));
+         setValue(string(s), JSONType::UINT64);
  
          return true;
       }
@@ -420,7 +428,7 @@ cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*
             JSONType::DOUBLE
          );
 
-         setValue(string(s));
+         setValue(string(s), JSONType::DOUBLE);
 
          return true;
       }
@@ -445,7 +453,7 @@ cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*
          else
             boolean = "false";
 
-         setValue(boolean);
+         setValue(boolean, JSONType::BOOL);
 
          return true;
       }
@@ -461,7 +469,7 @@ cerr << "$$$$$ " << value << ":" << (lastPath() == path ? "equal": "diff") << "*
             JSONType::_NULL
          );
 
-         setValue(string("null"));
+         setValue(string("null"), JSONType::_NULL);
 
          return true;
       }
