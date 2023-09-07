@@ -14,7 +14,7 @@ namespace BeeFishParser {
    public:
       std::bitset<8> _bits;
       int _bitCount {0};
-      char _char {-1};
+      char _char= -1;
 
       Char()
       {

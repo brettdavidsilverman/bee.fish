@@ -536,8 +536,11 @@ namespace BeeFishDatabase {
       template<typename T>
       T value() const
       {
-         if (isDeadEnd())
-            return T();
+     //    if (isDeadEnd())
+     //       return T();
+
+         assert(!isDeadEnd());
+
          return min<T>();
       }
 

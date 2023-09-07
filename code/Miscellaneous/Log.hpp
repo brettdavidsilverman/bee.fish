@@ -23,8 +23,8 @@ namespace BeeFishMisc {
    void logMessage(int priority, const std::string& message, Args ... args)
    {
 
-      fprintf(stderr, message.c_str(), args ...);
-      fprintf(stderr, "\n");
+      //fprintf(stderr, message.c_str(), args ...);
+      //fprintf(stderr, "\n");
 
       syslog(priority, message.c_str(), args ...);
       
