@@ -46,7 +46,7 @@ namespace BeeFishMisc {
    )
    {
       
-      switch(c) {
+      switch((int)c) {
          case '\r':
             return "\\r";
          case '\n':
