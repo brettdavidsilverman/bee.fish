@@ -32,7 +32,7 @@ namespace BeeFishJSON {
          carriageReturn;
 
       const auto blankSpaces =
-         Repeat(blankSpace);
+         Repeat(blankSpace, 0);
 
       const auto newLine =
          Word("\r\n") or Word("\n");

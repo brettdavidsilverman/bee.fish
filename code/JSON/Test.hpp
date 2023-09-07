@@ -290,10 +290,7 @@ namespace BeeFishJSON {
          testPattern(array, "[\"a\"]", true);
  
       success &=
-         testPattern(array, "[,]", true);
-
-      success &=
-         testPattern(array, "[,,,,1]", true);
+         testPattern(array, "[1,2]", true);
 
       success &=
          testPattern(array, "[1,null]", true);

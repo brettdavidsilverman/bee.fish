@@ -225,7 +225,7 @@ namespace BeeFishParser {
       {
          return true;
       }
-      
+
       virtual const std::string& value() const
       {
 #ifdef DEBUG

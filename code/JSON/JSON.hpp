@@ -81,7 +81,7 @@ namespace BeeFishJSON {
             _true or _false;
 
          return
-            -blankSpace and
+            blankSpaces and
             (
                undefined or
                _null or
