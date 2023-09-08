@@ -4,7 +4,7 @@ DEPS=main.cpp DBServer.hpp Test.hpp StreamToDB.hpp StreamFromDB.hpp Makefile Hom
 BUILD = ../../build
 OUTPUT = $(BUILD)/DBServer
 TEMP = $(BUILD)
-RESOURCE = elf64-x86-64
+RESOURCE = elf64-aarch64
 
 $(OUTPUT):	$(DEPS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o
 	g++ $(CFLAGS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o main.cpp -o $(OUTPUT) -lpthread -lstdc++fs
