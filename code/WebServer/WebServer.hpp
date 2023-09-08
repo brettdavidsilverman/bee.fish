@@ -243,7 +243,7 @@ namespace BeeFishWeb {
             return false;
          }
 
-         cout << "Server listening on port " << _port << endl;
+         cout << "Server listening on port " << _port << " 🟢" << endl;
 
          return true;
 
