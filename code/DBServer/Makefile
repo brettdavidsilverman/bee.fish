@@ -4,29 +4,16 @@ DEPS=main.cpp DBServer.hpp Test.hpp StreamToDB.hpp StreamFromDB.hpp Makefile Hom
 BUILD = ../../build
 OUTPUT = $(BUILD)/DBServer
 TEMP = $(BUILD)
-RESOURCE = elf64-aarch64
 
 $(OUTPUT):	$(DEPS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o
 	g++ $(CFLAGS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o main.cpp -o $(OUTPUT) -lpthread -lstdc++fs
 
 
-$(TEMP)/404.o: 404.html
-	llvm-objcopy \
-	--input-target binary \
-	--output-target $(RESOURCE) \
-	404.html $(TEMP)/404.o
+$(TEMP)/404.o:	ld -r -b binary 404.html -o 404.o
 
-$(TEMP)/HomePage.o: HomePage.html
-	llvm-objcopy \
-        --input-target binary \
-	--output-target $(RESOURCE)  \
-        HomePage.html $(TEMP)/HomePage.o
+$(TEMP)/HomePage.o:	ld -r -b binary HomePage.html -o HomePage.o
 
-$(TEMP)/ErrorPage.o: ErrorPage.html
-	llvm-objcopy \
-        --input-target binary \
-	--output-target $(RESOURCE) \
-        ErrorPage.html $(TEMP)/ErrorPage.o
+$(TEMP)/ErrorPage.o:	ld -r -b binary ErrorPage.html -o ErrorPage.o
 
 test:	$(OUTPUT)
 	$(BUILD)/DBServer -test
