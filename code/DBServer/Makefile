@@ -10,19 +10,19 @@ $(OUTPUT):	$(DEPS) $(TEMP)/404.o $(TEMP)/HomePage.o $(TEMP)/ErrorPage.o
 
 
 $(TEMP)/404.o: 404.html
-	objcopy --input binary \
-            --output elf64-x86-64 \
-            404.html $(TEMP)/404.o
+	llvm-objcopy \
+	--input-target binary \
+	404.html $(TEMP)/404.o
 
 $(TEMP)/HomePage.o: HomePage.html
-	objcopy --input binary \
-            --output elf64-x86-64 \
-            HomePage.html $(TEMP)/HomePage.o
+	llvm-objcopy \
+        --input-target binary \
+        HomePage.html $(TEMP)/HomePage.o
 
 $(TEMP)/ErrorPage.o: ErrorPage.html
-	objcopy --input binary \
-            --output elf64-x86-64 \
-            ErrorPage.html $(TEMP)/ErrorPage.o
+	llvm-objcopy \
+        --input-target binary \
+        ErrorPage.html $(TEMP)/ErrorPage.o
 
 test:	$(OUTPUT)
 	$(BUILD)/DBServer -test
