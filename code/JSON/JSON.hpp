@@ -2,6 +2,7 @@
 #define BEE_FISH__JSON_H
 
 #include "../Parser/Parser.hpp"
+#include "../PowerEncoding/PowerEncoding.hpp"
 #include "Version.hpp"
 #include "Object.hpp"
 #include "Array.hpp"
