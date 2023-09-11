@@ -182,6 +182,12 @@ namespace BeeFishScript {
          _type(BeeFishJSON::Type::UNDEFINED)
       {
 
+      }
+
+      Variable(BeeFishJSON::Type type)
+      {
+         memset(this, '\0', sizeof(Variable));
+         _type = type;
       } 
 
       Variable(const Variable& source) : 

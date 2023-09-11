@@ -237,9 +237,9 @@ namespace BeeFish
          cout << "\tTesting number " << flush;
          JSONPath path(root["json-number"]);
          Variable i = 22;
-         path = i;
+         path.setVariable(i);
          JSONPath path2(root["json-number"]);
-         Variable i2 = path2.variable();
+         Variable i2 = path2.getVariable();
          success = ((int)i2 == 22);
 
          outputSuccess(success);
@@ -249,11 +249,23 @@ namespace BeeFish
          cout << "\tTesting string " << flush;
          JSONPath path(root["json-string"]);
          Variable str = "My String";
-         path = str;
-         JSONPath path2(root["json-string"]);
-         Variable str2 = path2.variable();
+         path.setVariable(str);
 
-         success = ((string)str2 == "My String");
+         JSONPath jsonPath(path);
+
+         Variable var = jsonPath.getVariable();
+
+         success = ((String)var == "My String");
+
+         outputSuccess(success);
+      }
+
+      {
+         cout << "\tTesting string retrieve " << flush;
+         JSONPath path(root["json-string"]);
+         Variable var = path.getVariable();
+
+         success = ((String)var == "My String");
 
          outputSuccess(success);
       }
@@ -261,10 +273,10 @@ namespace BeeFish
       {
          cout << "\tTesting array " << flush;
          JSONPath path(root["json-array"]);
-         Variable array = {1,2,3};
-         path = array;
+         Variable array = Array{1,2,3};
+         path.setVariable(array);
          JSONPath path2(root["json-array"]);
-         Variable array2 = path2.variable();
+         Variable array2 = path2.getVariable();
          ArrayPointer a = array2;
          success = ((int)((*a)[2]) == 3);
 
@@ -277,21 +289,76 @@ namespace BeeFish
          Variable object =
             BeeFishScript::Object
             {
-               {"a", "b"},
-               {"c", "d"},
+               {"a", 1},
+               {"c", 2},
                {"e", BeeFishScript::Object()}
             };
 
-         path = object;
+         path.setVariable(object);
+
          JSONPath path2(root["json-object"]);
-         Variable object2 = path2.variable();
+         Variable object2 = path2.getVariable();
+
          ObjectPointer o = object2;
          success = success &&
-            ((string)((*o)["c"]) == "d");
+            ((Number)((*o)["c"]) == 2);
 
          Variable e = (*o)["e"];
          success = success &&
             e._type == BeeFishJSON::Type::OBJECT;
+
+         outputSuccess(success);
+      }
+
+      {
+         cout << "\tTesting complex " << flush;
+         JSONPath path(root["json-complex"]);
+         Variable object =
+            BeeFishScript::Object
+            {
+               {"a", "b"},
+               {"c", BeeFishScript::Array{1,2,3}},
+               {"e", BeeFishScript::Object{
+                     {"f", "g"}
+                     }
+               }
+            };
+
+         path.setVariable(object);
+         JSONPath path2(root["json-complex"]);
+         Variable object2 = path2.getVariable();
+         ObjectPointer o = object2;
+         ArrayPointer a = (*o)["c"];
+         success = success &&
+            ((Number)((*a)[1]) == 2);
+
+         Variable f = (*o)["e"]["f"];
+         success = success &&
+            f._type == BeeFishJSON::Type::STRING &&
+            (String)f == "g";
+         outputSuccess(success);
+      }
+
+      {
+         cout << "\tTesting object map " << flush;
+         JSONPath path(root["json-map"]);
+         Variable object =
+            BeeFishScript::Object
+            {
+               {"a", "b"},
+               {"c", BeeFishScript::Array{1,2,3}},
+               {"e", BeeFishScript::Object{
+                     {"f", "g"}
+                     }
+               }
+            };
+
+         path.setVariable(object);
+         Variable var =
+            path["a"].getVariable();
+
+         success = success &&
+            (String)(path["a"].getVariable()) == "b";
          outputSuccess(success);
       }
 

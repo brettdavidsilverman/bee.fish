@@ -12,6 +12,7 @@ namespace BeeFishDBServer {
    class JSONPath : protected BeeFishWeb::Path
    {
    public:
+      const int DATA = 0;
       const int OBJECT_TABLE = 0;
       const int OBJECT_VALUES = 1;
 
@@ -21,27 +22,31 @@ namespace BeeFishDBServer {
       {
       }
 
-      JSONPath& operator = (const Variable& source)
+      void setVariable(const Variable& source)
       {
-         setData(source);
-
+         setData(source._type);
+         Path path(*this);
          switch (source._type) {
             case BeeFishJSON::Type::UNDEFINED:
                break;
             case BeeFishJSON::Type::_NULL:
                break;
             case BeeFishJSON::Type::BOOLEAN:
+               path[DATA].setData(source._value._boolean);
                break;
             case BeeFishJSON::Type::NUMBER:
+               path[DATA].setData(source._value._number);
                break;
             case BeeFishJSON::Type::STRING:
+               path[DATA].setData(source._value._string);
                break;
             case BeeFishJSON::Type::ARRAY:
             {
                ArrayPointer array (source._value._array);
                for (Size i = 0; i < array->size(); ++i)
                {
-                  (*this)[i] = (*array)[i];
+                  Variable element = (*array)[i];
+                  (*this)[i].setVariable(element);
                }
                break;
             }
@@ -49,15 +54,19 @@ namespace BeeFishDBServer {
             {
                ObjectPointer object =
                   (source._value._object);
-               JSONPath table = (*this)[OBJECT_TABLE];
-               JSONPath values = (*this)[OBJECT_VALUES];
+               
+               Path table = path[OBJECT_TABLE];
+               Path map = path[OBJECT_VALUES];
                Size i = 0;
-               for (auto it = object->_table.cbegin(); it != object->_table.cend(); ++it)
+               for (auto it = object->cbegin(); it != object->cend(); ++it)
                {
                   
                   String key = *it;
-                  table[i++].setData(key);
-                  values[key] = (*object)[key];
+                  table[i].setData(key);
+                  Variable item = (*object)[key];
+                  JSONPath(map[key])
+                     .setVariable(item);
+                  ++i;
                }
 
                break;
@@ -66,13 +75,86 @@ namespace BeeFishDBServer {
                throw std::logic_error("JSON::Variable::Value::copy constructor");
          }
          
-         return *this;
+      }
+
+      Variable getVariable() {
+         BeeFishJSON::Type type;
+         getData(type);
+         Variable var(type);
+         Path path(*this);
+         switch (type) {
+            case BeeFishJSON::Type::UNDEFINED:
+               break;
+            case BeeFishJSON::Type::_NULL:
+               break;
+            case BeeFishJSON::Type::BOOLEAN:
+               path[DATA]
+                  .getData(var._value._boolean);
+               break;
+            case BeeFishJSON::Type::NUMBER:
+               path[DATA]
+                  .getData(var._value._number);
+               break;
+            case BeeFishJSON::Type::STRING:
+               path[DATA]
+                  .getData(var._value._string);
+               break;
+            case BeeFishJSON::Type::ARRAY:
+            {
+               ArrayPointer array = ArrayPointer(new Array());
+               var._value._array = array;
+               Size max = this->max<Size>();
+
+               for (Size i = 0; i <= max; ++i)
+               {
+                  JSONPath value = path[i];
+                  array->push_back(
+                     value.getVariable()
+                  );
+               }
+               break;
+            }
+            case BeeFishJSON::Type::OBJECT:
+            {
+               BeeFishScript::ObjectPointer
+               object = BeeFishScript::ObjectPointer(
+                  new BeeFishScript::Object()
+               );
+               var._value._object = object;
+
+               Path table = path[OBJECT_TABLE];
+               Path map = path[OBJECT_VALUES];
+
+
+               Path::Stack stack;
+               String key;
+               Size i;
+               while (table.next(stack, i))
+               {
+                  table[i].getData(key);
+                  JSONPath json = map[key];
+                  Variable value = json.getVariable();
+                  (*object)[key] = value;
+               }
+               break;
+            }
+            default:
+               throw std::logic_error("JSON::Variable::Value::copy constructor");
+         }
+         return var;
       }
 
       JSONPath operator [] (const string& key)
       {
          Path path(*this);
-         
+         BeeFishJSON::Type type;
+         getData(type);
+
+         if (type == BeeFishJSON::Type::OBJECT)
+         {
+             path << OBJECT_VALUES;
+         }
+
          path << key;
          
          return JSONPath(path);
@@ -88,58 +170,30 @@ namespace BeeFishDBServer {
       JSONPath operator [] (const Size& index)
       {
          Path path(*this);
-         
-         path << index;
+         BeeFishJSON::Type type;
+         getData(type);
+
+
+         if (type == BeeFishJSON::Type::OBJECT)
+         {
+             Path table = path[OBJECT_TABLE];
+             String key;
+             table.getData(key);
+             path << OBJECT_VALUES << key;
+
+         }
+         else
+            path << index;
          
          return JSONPath(path);
       }
 
-      Variable variable() {
-          Variable var;
-          getData(var);
-          switch (var._type) {
-            case BeeFishJSON::Type::UNDEFINED:
-               break;
-            case BeeFishJSON::Type::_NULL:
-               break;
-            case BeeFishJSON::Type::BOOLEAN:
-               break;
-            case BeeFishJSON::Type::NUMBER:
-               break;
-            case BeeFishJSON::Type::STRING:
-               break;
-            case BeeFishJSON::Type::ARRAY:
-            {
-               ArrayPointer array (var._value._array);
-               Size max = this->max<Size>();
-               for (Size i = 0; i <= max; ++i)
-               {
-                  (*array)[i] = (*this)[i].variable();
-               }
-               break;
-            }
-            case BeeFishJSON::Type::OBJECT:
-            {
-               ObjectPointer object(var._value._object);
-
-               JSONPath table = (*this)[OBJECT_TABLE];
-               JSONPath values = (*this)[OBJECT_VALUES];
-
-
-               Path::Stack stack;
-               String key;
-               Size i;
-               while (this->next(stack, i))
-               {
-                  table[i].getData(key);
-                  (*object)[key] = values[key].variable();
-               }
-               break;
-            }
-            default:
-               throw std::logic_error("JSON::Variable::Value::copy constructor");
-         }
-         return var;
+      
+      friend ostream& operator << (ostream& out, const JSONPath& jsonPath)
+      {
+         Path path = jsonPath;
+         out << path;
+         return out;
       }
 
 
