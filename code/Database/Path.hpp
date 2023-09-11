@@ -164,14 +164,14 @@ namespace BeeFishDatabase {
          Data& data = getData();
          destination = *(T*)data.data();
       }
-
+/*
       template<typename T>
       operator T()
       {
          Data& data = getData();
          return (T&)(*data.data());
       }
-
+*/
       void getData(std::string& destination)
       {
          Data& data = getData();

@@ -102,9 +102,9 @@ namespace BeeFishDatabase
          cout << "\tTesting get/set data: ";
 
          Path<Database::Encoding> data = start;
-         Size count = 22;
+         Size count = -1;
          data = 22;
-         count = (Size)data;
+         data.getData(count);
          success =
             (count == 22);
 

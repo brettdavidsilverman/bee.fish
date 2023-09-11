@@ -8,7 +8,6 @@
 namespace BeeFishJSON {
  
    using namespace BeeFishMisc;
-   using namespace BeeFishScript;
 
    bool testBlankSpace();
    bool testConstants();
@@ -17,7 +16,6 @@ namespace BeeFishJSON {
    bool testArrays();
    bool testObjects();
    bool testUnicode();
-   bool testVariables();
 
    inline bool test() {
       using namespace std;
@@ -44,9 +42,6 @@ namespace BeeFishJSON {
 
       success = success &&
          testUnicode();
-
-      success = success &&
-         testVariables();
 
       if (success)
          cout << "JSON tests pass" << endl;
@@ -360,46 +355,6 @@ namespace BeeFishJSON {
       
    }
 
-   inline bool testVariables()
-   {
-      using namespace std;
-
-      cout << "Testing variables" << endl;
-
-      bool success = true;
-
-      {
-         Variable v = "Hello World";
-         stringstream out;
-         out << v;
-
-         success = success &&
-            testValue("\"Hello World\"", out.str());
-
-      }
-
-      {
-         Variable v = "Hello\\World";
-         stringstream out;
-         out << v;
-
-         success = success &&
-            testValue("\"Hello\\\\World\"", out.str());
-      }
-
-      {
-         Variable v = BeeFishScript::Object{{"🐝","🌎"}};
-         stringstream out;
-         out << v;
-
-         success = success &&
-            testValue("{\n   \"🐝\":\"🌎\"\n}", out.str());
-      }
-   
-      BeeFishMisc::outputSuccess(success);
-
-      return success;
-   }
    
    
 }

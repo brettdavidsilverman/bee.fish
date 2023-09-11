@@ -17,6 +17,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <chrono>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/post.hpp>
 
@@ -28,6 +29,8 @@
 #include "Version.hpp"
 
 namespace BeeFishWeb {
+
+   using namespace std::chrono;
 
    using namespace BeeFishDatabase;
    using namespace BeeFishPowerEncoding;
@@ -41,6 +44,8 @@ namespace BeeFishWeb {
       boost::asio::thread_pool _threadPool;
       std::thread* _loopThread = nullptr;
       bool _stop = false;
+      bool _isRunning = false;
+      std::mutex _running;
       std::string _host;
 
    public:
@@ -64,14 +69,22 @@ namespace BeeFishWeb {
       virtual bool start() {
          using namespace std;
 
-         cout << "Starting WebServer " << _host << endl;
+         logMessage(
+            LOG_NOTICE,
+            "Starting WebServer %s",
+            _host.c_str()
+         );
          
          if (!initializeServerSocket()) {
             return false;
          }
 
          _stop = false;
+         _isRunning = false;
+
          _loopThread = new std::thread(WebServer::loop, this); 
+
+         
          return true;
 
       }
@@ -82,23 +95,40 @@ namespace BeeFishWeb {
          if (_loopThread == nullptr)
             return;
 
-         cout << "Stopping WebServer" << endl;
-         _stop = true;
+         logMessage(LOG_NOTICE, "Stopping WebServer");
 
          // Flush a request through
          // the system using curl
          std::stringstream stream;
-         stream << "curl " << url() << " -s > /dev/null";
+         stream << "curl " << url() << " --max-time 1 -s ";//> /dev/null ";
          std::string command = stream.str();
+         
+         _stop = true;
 
-         system(command.c_str());
+         while (_isRunning) {
+logMessage(LOG_NOTICE, "WebServer flush");
 
+            system(command.c_str());
+         }
+
+         logMessage(LOG_NOTICE, "Waiting on lock guard");
+
+         lock_guard<mutex>
+            guard(_running);
+
+         logMessage(LOG_NOTICE, "Waiting on loop thread");
          _loopThread->join();
 
          delete _loopThread;
          _loopThread = nullptr;
-         
-         cout << "WebServer stopped" << endl;
+
+         logMessage(LOG_NOTICE, "Waiting on thread pool");
+
+         _threadPool.join();
+
+         close();
+
+         logMessage(LOG_NOTICE, "WebServer stopped 🔴");
       }
 
       virtual void join() {
@@ -138,8 +168,12 @@ namespace BeeFishWeb {
          using namespace std;
 
          logMessage(LOG_NOTICE, "WebServer loop started  🟢");
+         
+         lock_guard<mutex> guard(webServer->_running);
 
          while (!webServer->_stop) {
+
+            webServer->_isRunning = true;
 
             socklen_t clilen;
             struct sockaddr_in cli_addr;
@@ -154,10 +188,13 @@ namespace BeeFishWeb {
                &clilen
             );
             
-            if (clientSocket >= 0) //&&
-               // !webServer->_stop)
+            if (clientSocket >= 0 &&
+                !webServer->_stop)
             {
                const char *ipAddress = inet_ntoa(cli_addr.sin_addr);
+
+               logMessage(LOG_NOTICE, ipAddress);
+         
                // Set client socket to non blocking
                //fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 
@@ -177,13 +214,13 @@ namespace BeeFishWeb {
 
          }
 
-         webServer->close();
+         webServer->_isRunning = false;
 
         // delete webServer->_loopThread;
         // webServer->_loopThread = nullptr;
 
          logMessage(LOG_NOTICE, "WebServer loop ended");
-
+         
       }
 
       bool initializeServerSocket() {

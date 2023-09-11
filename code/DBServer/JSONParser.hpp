@@ -4,6 +4,7 @@
 #include <boost/json/basic_parser.hpp>
 #include "../Parser/Parser.hpp"
 #include "../Database/Database.hpp"
+#include "JSONPath.hpp"
 
 using namespace BeeFishParser;
 using namespace BeeFishDatabase;
@@ -70,11 +71,11 @@ namespace BeeFishWebDB {
       struct JSONStackValue {
          JSONType _type;
          Size _arrayIndex;
-         Path<Database::Encoding> _path;
-         Path<Database::Encoding> _arrayRootPath;
+         BeeFishWeb::Path  _path;
+         BeeFishWeb::Path  _arrayRootPath;
       };
 
-      Path<Database::Encoding> _rootPath;
+      BeeFishWeb::Path _rootPath;
       vector<JSONStackValue> _stack;
       int _count {0};
       JSONType _lastType = (JSONType)-1;
@@ -82,7 +83,7 @@ namespace BeeFishWebDB {
       
    public:
 
-      JSONDBHandler(Path<Database::Encoding> path) :
+      JSONDBHandler(BeeFishWeb::Path path) :
          _rootPath(path)
       {
       }

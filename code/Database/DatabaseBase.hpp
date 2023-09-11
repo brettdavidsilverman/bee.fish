@@ -93,10 +93,12 @@ namespace BeeFishDatabase {
          mapFile();
       }
       
-      ~Database()
+      virtual ~Database()
       {
          if (_tree)
             munmap(_tree, _size);
+
+         logMessage(LOG_NOTICE, "~Database()");
       }
       
       

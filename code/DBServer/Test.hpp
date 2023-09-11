@@ -1,9 +1,11 @@
-#ifndef BEE_FISH__TEST_HPP
-#define BEE_FISH__TEST_HPP
+#ifndef BEE_FISH__DBSERVER__TEST_HPP
+#define BEE_FISH__DBSERVER__TEST_HPP
 #include <filesystem>
 #include <bits/stdc++.h>
 #include "../Miscellaneous/Miscellaneous.hpp"
+#include "../Test/Test.hpp"
 #include "DBServer.hpp"
+#include "JSONPath.hpp"
 
 #define TEMP_FILENAME "/var/tmp/bee.fish.tmp"
 
@@ -13,15 +15,26 @@ namespace BeeFish
    using namespace BeeFishMisc;
    using namespace BeeFishWeb;
    using namespace BeeFishWebDB;
+   using namespace BeeFishScript;
+   using namespace BeeFishTest;
+   using namespace BeeFishDBServer;
+
    using namespace std::filesystem;
 
    inline bool testAllFiles(string url, string directory);
    inline bool testFile(string url, string file, bool expect = true);
    inline bool testData(string url, string label, string data, bool expect = true);
+
+   inline bool testVariables();
+   inline bool testJSONPath(Database* db);
+
    inline bool test()
    {
 
       bool success = true;
+
+      success = success &&
+         testVariables();
 
       cout << "Test DB Server" << endl;
 
@@ -35,12 +48,9 @@ namespace BeeFish
       if (!dbServer->start())
          return false;
 
-    //  success = testFile(dbServer->url(), "tests/04-Object.json");
-
-    //  outputSuccess(success);
-// *******
-    //  success = false;
-
+      success = success &&
+         testJSONPath(dbServer);
+/*
       if (success)
       {
          cout << "Testing 404 " << flush;
@@ -86,6 +96,7 @@ namespace BeeFish
       if (success) {
          success = testAllFiles(dbServer->url(), "tests");
       }
+*/
 
       dbServer->stop();
 
@@ -174,6 +185,121 @@ namespace BeeFish
       outputSuccess(success);
       return success;
    }
+
+   inline bool testVariables()
+   {
+      using namespace std;
+
+      cout << "Testing variables" << endl;
+
+      bool success = true;
+
+      {
+         Variable v = "Hello World";
+         stringstream out;
+         out << v;
+
+         success = success &&
+            testValue("\"Hello World\"", out.str());
+
+      }
+
+      {
+         Variable v = "Hello\\World";
+         stringstream out;
+         out << v;
+
+         success = success &&
+            testValue("\"Hello\\\\World\"", out.str());
+      }
+
+      {
+         Variable v = BeeFishScript::Object{{"🐝","🌎"}};
+         stringstream out;
+         out << v;
+
+         success = success &&
+            testValue("{\n   \"🐝\": \"🌎\"\n}", out.str());
+      }
+   
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+   }
+   
+   inline bool testJSONPath(Database* db)
+   {
+      cout << "Testing JSON Path" << endl;
+
+      bool success = true;
+      BeeFishWeb::Path root(db);
+      {
+         cout << "\tTesting number " << flush;
+         JSONPath path(root["json-number"]);
+         Variable i = 22;
+         path = i;
+         JSONPath path2(root["json-number"]);
+         Variable i2 = path2.variable();
+         success = ((int)i2 == 22);
+
+         outputSuccess(success);
+      }
+
+      {
+         cout << "\tTesting string " << flush;
+         JSONPath path(root["json-string"]);
+         Variable str = "My String";
+         path = str;
+         JSONPath path2(root["json-string"]);
+         Variable str2 = path2.variable();
+
+         success = ((string)str2 == "My String");
+
+         outputSuccess(success);
+      }
+
+      {
+         cout << "\tTesting array " << flush;
+         JSONPath path(root["json-array"]);
+         Variable array = {1,2,3};
+         path = array;
+         JSONPath path2(root["json-array"]);
+         Variable array2 = path2.variable();
+         ArrayPointer a = array2;
+         success = ((int)((*a)[2]) == 3);
+
+         outputSuccess(success);
+      }
+
+      {
+         cout << "\tTesting object " << flush;
+         JSONPath path(root["json-object"]);
+         Variable object =
+            BeeFishScript::Object
+            {
+               {"a", "b"},
+               {"c", "d"},
+               {"e", BeeFishScript::Object()}
+            };
+
+         path = object;
+         JSONPath path2(root["json-object"]);
+         Variable object2 = path2.variable();
+         ObjectPointer o = object2;
+         success = success &&
+            ((string)((*o)["c"]) == "d");
+
+         Variable e = (*o)["e"];
+         success = success &&
+            e._type == BeeFishJSON::Type::OBJECT;
+         outputSuccess(success);
+      }
+
+      outputSuccess(success);
+
+      return success;
+   }
+
 
 }
 

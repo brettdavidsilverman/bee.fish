@@ -6,7 +6,7 @@
 #include <memory>
 #include <cmath>
 
-#include "JSON.hpp"
+#include "../JSON/JSON.hpp"
 #include "Config.hpp"
 
 namespace BeeFishScript {
@@ -31,10 +31,12 @@ namespace BeeFishScript {
    typedef std::shared_ptr<BeeFishScript::Object> ObjectPointer;
    typedef std::shared_ptr<BeeFishScript::Array> ArrayPointer;
 
+   inline std::string escapeString(const String& string);
+
    #define undefined BeeFishScript::Variable::Undefined()
 
    class Object : public Map {
-   protected:
+   public:
       Table _table;
       typedef Table::const_iterator const_iterator;
    public:
@@ -431,79 +433,6 @@ namespace BeeFishScript {
          }
       }
 
-      static std::string escapeString(const String& string)
-      {
-   
-         stringstream out;
-
-         for (const char& c: string) {
-            switch (c)
-            {
-            case '\"':
-               out << "\\\"";
-               break;
-            case '\\':
-               out << "\\\\";
-               break;
-            case '\b':
-               out << "\\b";
-               break;
-            case '\f':
-               out << "\\f";
-               break;
-            case '\r':
-               out << "\\r";
-               break;
-            case '\n':
-               out << "\\n";
-               break;
-            case '\t':
-               out << "\\t";
-               break;
-            default:
-
-               if ((uint16_t)c <= 0x001F) {
-                  // Control chars
-                  out << "\\u" 
-                     << std::hex
-                     << std::setw(4)
-                     << std::setfill('0')
-                     << (uint16_t)c;
-
-               }
-               else {
-                  out << c;
-/*
-               if (value > 0x10FFFF)
-               {
-                  // Uhicode chars
-                  out << "\\u" 
-                     << std::hex
-                     << std::setw(4)
-                     << std::setfill('0')
-                     << 
-                     ((value & 0xFFFF0000) >>
-                        16);
-                  out << "\\u" 
-                     << std::hex
-                     << std::setw(4)
-                     << std::setfill('0')
-                     <<
-                     (value & 0x0000FFFF);
-                  }
-               else {
-                  writeCharacter(out, value);
-               }
-*/
-               }
-            }
-      
-         }
-         return out.str();
-
-      }
-
-
       virtual String str() const {
          std::stringstream stream;
          stream << *this;
@@ -573,42 +502,47 @@ namespace BeeFishScript {
          return _value._object;
       }
 
+      operator const ObjectPointer() const {
+         CHECK_TYPE(BeeFishJSON::Type::OBJECT);
+         return _value._object;
+      }
+
    };
 
    inline void Object::write(ostream& out, size_t tabs) const {
 
       ostream& output = out;
-      output << "{" << endl;
+      
+      bool emptySet = (_table.size() == 0);
+
+      if (emptySet) {
+         output << "{}";
+         return;
+      }
 
       if (tabs == 0)
          tabs++;
 
-      bool emptySet = (_table.size() == 0);
+      output << "{" << endl;
 
       for (Object::const_iterator it = cbegin(); it != cend();) {
          const String& key = *it;
          const Variable& value = at(key);
-         if (value._type != BeeFishJSON::UNDEFINED) {
+         if (value._type != BeeFishJSON::Type::UNDEFINED) {
             if (tabs > 0)
                output << std::string(tabs * TAB_SPACES, ' ');
             output << "\"";
-            output << Variable::escapeString(key);
-            output << "\":";
+            output << escapeString(key);
+            output << "\": ";
             value.write(output, tabs);
          }
 
-         while (++it != _table.cend()) {
-            const String& key = *it;
-            const Variable& value = at(key);
-            if (value._type != BeeFishJSON::UNDEFINED) {
-               output << "," << endl;
-               break;
-            }
-         }
+         if (++it != cend())
+            output << "," << endl;
+
       }
 
-      if (!emptySet)
-         output << endl;
+      output << endl;
 
       if (tabs > 0)
          --tabs;
@@ -639,6 +573,77 @@ namespace BeeFishScript {
       }
    }
 
+   inline std::string escapeString(const String& string)
+   {
+   
+      stringstream out;
+
+      for (const char& c: string) {
+         switch (c)
+            {
+            case '\"':
+               out << "\\\"";
+               break;
+            case '\\':
+               out << "\\\\";
+               break;
+            case '\b':
+               out << "\\b";
+               break;
+            case '\f':
+               out << "\\f";
+               break;
+            case '\r':
+               out << "\\r";
+               break;
+            case '\n':
+               out << "\\n";
+               break;
+            case '\t':
+               out << "\\t";
+               break;
+            default:
+
+               if ((uint16_t)c <= 0x001F) {
+                  // Control chars
+                  out << "\\u" 
+                     << std::hex
+                     << std::setw(4)
+                     << std::setfill('0')
+                     << (uint16_t)c;
+
+               }
+               else {
+                  out << c;
+/*
+               if (value > 0x10FFFF)
+               {
+                  // Uhicode chars
+                  out << "\\u" 
+                     << std::hex
+                     << std::setw(4)
+                     << std::setfill('0')
+                     << 
+                     ((value & 0xFFFF0000) >>
+                        16);
+                  out << "\\u" 
+                     << std::hex
+                     << std::setw(4)
+                     << std::setfill('0')
+                     <<
+                     (value & 0x0000FFFF);
+                  }
+               else {
+                  writeCharacter(out, value);
+               }
+*/
+            }
+         }
+      
+      }
+      return out.str();
+
+   }
 
 /*
    inline Variable Object::operator[] (const BString& key) const {

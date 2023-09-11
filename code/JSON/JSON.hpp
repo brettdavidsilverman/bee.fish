@@ -13,7 +13,7 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   enum Type {
+   enum class Type {
       UNDEFINED,
       _NULL,
       BOOLEAN,
