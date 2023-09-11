@@ -84,7 +84,10 @@ namespace BeeFishWeb {
 
          _loopThread = new std::thread(WebServer::loop, this); 
 
-         
+         while (!_isRunning) {
+            this_thread::sleep_for(milliseconds(100));
+         }
+
          return true;
 
       }
@@ -95,40 +98,45 @@ namespace BeeFishWeb {
          if (_loopThread == nullptr)
             return;
 
-         logMessage(LOG_NOTICE, "Stopping WebServer");
+         logMessage(LOG_NOTICE, 
+            "Stopping WebServer");
 
          // Flush a request through
          // the system using curl
          std::stringstream stream;
-         stream << "curl " << url() << " --max-time 1 -s ";//> /dev/null ";
+         stream << "curl " << url() << " -s > /dev/null &";
          std::string command = stream.str();
          
          _stop = true;
 
          while (_isRunning) {
-logMessage(LOG_NOTICE, "WebServer flush");
-
+            logMessage(LOG_NOTICE, "WebServer flush");
             system(command.c_str());
+            this_thread::sleep_for(milliseconds(100));
          }
 
-         logMessage(LOG_NOTICE, "Waiting on lock guard");
+         logMessage(LOG_NOTICE, 
+            "Waiting on lock guard");
 
          lock_guard<mutex>
             guard(_running);
 
-         logMessage(LOG_NOTICE, "Waiting on loop thread");
+         logMessage(LOG_NOTICE,
+            "Waiting on loop thread");
          _loopThread->join();
 
          delete _loopThread;
          _loopThread = nullptr;
 
-         logMessage(LOG_NOTICE, "Waiting on thread pool");
+         logMessage(LOG_NOTICE,
+            "Waiting on thread pool");
 
          _threadPool.join();
 
          close();
 
-         logMessage(LOG_NOTICE, "WebServer stopped 🔴");
+         logMessage(LOG_NOTICE,
+            "WebServer stopped 🔴");
       }
 
       virtual void join() {
