@@ -348,7 +348,8 @@ namespace BeeFish
                {"a", "b"},
                {"c", BeeFishScript::Array{1,2,3}},
                {"e", BeeFishScript::Object{
-                     {"f", "g"}
+                     {"f", "g"},
+                     {"h", BeeFishScript::Array{1,2,3}}
                      }
                }
             };
@@ -358,7 +359,7 @@ namespace BeeFish
             path["a"].getVariable();
 
          success = success &&
-            (String)(path["a"].getVariable()) == "b";
+            (Number)(path["e"]["h"][0].getVariable()) == 1;
          outputSuccess(success);
       }
 

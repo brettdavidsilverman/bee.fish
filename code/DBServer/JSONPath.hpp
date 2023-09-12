@@ -104,7 +104,7 @@ namespace BeeFishDBServer {
                ArrayPointer array = ArrayPointer(new Array());
                var._value._array = array;
                Size max = this->max<Size>();
-
+               array->reserve(max);
                for (Size i = 0; i <= max; ++i)
                {
                   JSONPath value = path[i];
@@ -188,6 +188,10 @@ namespace BeeFishDBServer {
          return JSONPath(path);
       }
 
+      JSONPath operator [] (int index)
+      {
+         return (*this)[(Size)index];
+      }
       
       friend ostream& operator << (ostream& out, const JSONPath& jsonPath)
       {
