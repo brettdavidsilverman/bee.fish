@@ -41,18 +41,19 @@ int main(int argc, const char* argv[]) {
 
    bool useHomeGrown = true;
    int useArg = -1;
-   if (useArg = hasArg(argc, argv, "-use") >= 0 && argc >= (useArg + 1))
+   if ((useArg = hasArg(argc, argv, "-use")) >= 0 && argc > (useArg + 1))
    {
       if (argv[useArg + 1] == string("home"))
          useHomeGrown = true;
       else if (argv[useArg + 1] == string("boost"))
          useHomeGrown = false;
       else {
-         cout << "Invalid use arg;" << endl;
+         cout << "Invalid use arg; [home|boost]" << endl;
          useHomeGrown = false;
          return 1;
       }
    }
+
 
    std::optional<bool> result;
 
@@ -94,24 +95,27 @@ std::optional<bool> homeGrownParser() {
 std::optional<bool> boostParser()
 {
 
-    using namespace boost::json;
+   using namespace boost::json;
 
-    stream_parser p;
-    std::string line;
-    boost::json::error_code ec;
+   stream_parser p;
+   boost::json::error_code ec;
 
-    while( std::getline( cin, line ) )
-    {
-        p.write( line, ec );
-        if( ec )
-            return false;
-
-    }
-
-    p.finish( ec );
-
-    if( ec )
-        return nullopt;
-
-    return true;// p.release();
+   char buffer[1026];
+   while (!cin.eof()) {
+      cin.read(buffer, sizeof(buffer));
+      size_t read = cin.gcount();
+      p.write(
+         std::string(buffer, read),
+         ec
+      );
+      if (ec)
+         return false;
+      if (read < sizeof(buffer))
+         break;
+   }
+   
+   if (p.done())
+      return true;
+   else
+      return nullopt;
 }

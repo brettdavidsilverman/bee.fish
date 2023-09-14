@@ -179,7 +179,8 @@ namespace BeeFishDBServer {
              Path table = path[OBJECT_TABLE];
              String key;
              table.getData(key);
-             path << OBJECT_VALUES << key;
+             path << OBJECT_VALUES
+                  << key;
 
          }
          else
