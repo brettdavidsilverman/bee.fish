@@ -17,7 +17,6 @@ namespace BeeFish
    using namespace BeeFishWebDB;
    using namespace BeeFishScript;
    using namespace BeeFishTest;
-   using namespace BeeFishDBServer;
 
    using namespace std::filesystem;
 
@@ -360,6 +359,7 @@ namespace BeeFish
 
          success = success &&
             (Number)(path["e"]["h"][0].getVariable()) == 1;
+
          outputSuccess(success);
       }
 

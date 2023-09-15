@@ -6,15 +6,15 @@
 
 using namespace BeeFishDatabase;
 using namespace BeeFishScript;
+using namespace BeeFishJSON;
 
-namespace BeeFishDBServer {
+namespace BeeFishScript {
 
    class JSONPath : protected BeeFishWeb::Path
    {
    public:
-      const int DATA = 0;
-      const int OBJECT_TABLE = 0;
-      const int OBJECT_VALUES = 1;
+      inline static const int OBJECT_TABLE = 0;
+      inline static const int OBJECT_KEYS = 1;
 
    public:
       JSONPath(const Path& source) :
@@ -24,39 +24,54 @@ namespace BeeFishDBServer {
 
       void setVariable(const Variable& source)
       {
-         setData(source._type);
          Path path(*this);
-         switch (source._type) {
-            case BeeFishJSON::Type::UNDEFINED:
+         path << source._type;
+         string value;
+         switch (source._type)
+         {
+            case Type::UNDEFINED:
+               path.setData("undefined");
                break;
-            case BeeFishJSON::Type::_NULL:
+            case Type::_NULL:
+               path.setData("null");
                break;
-            case BeeFishJSON::Type::BOOLEAN:
-               path[DATA].setData(source._value._boolean);
+            case Type::BOOLEAN:
+               if (source._value._boolean)
+                  path.setData("true");
+               else
+                  path.setData("false");
                break;
-            case BeeFishJSON::Type::NUMBER:
-               path[DATA].setData(source._value._number);
-               break;
-            case BeeFishJSON::Type::STRING:
-               path[DATA].setData(source._value._string);
-               break;
-            case BeeFishJSON::Type::ARRAY:
+            case Type::NUMBER:
             {
-               ArrayPointer array (source._value._array);
-               for (Size i = 0; i < array->size(); ++i)
-               {
-                  Variable element = (*array)[i];
-                  (*this)[i].setVariable(element);
-               }
+               stringstream stream;
+               stream << source._value._number;
+               path.setData(stream.str());
                break;
             }
-            case BeeFishJSON::Type::OBJECT:
+            case Type::STRING:
+               path.setData(source._value._string);
+               break;
+            case Type::ARRAY:
+            {
+               ArrayPointer array (source._value._array);
+               Size i;
+               for (i = 0; i < array->size(); ++i)
+               {
+                  Variable element = (*array)[i];
+                  JSONPath(path[i]).setVariable(element);
+               }
+               stringstream stream;
+               stream << i;
+               path.setData(stream.str());
+               break;
+            }
+            case Type::OBJECT:
             {
                ObjectPointer object =
                   (source._value._object);
                
                Path table = path[OBJECT_TABLE];
-               Path map = path[OBJECT_VALUES];
+               Path map = path[OBJECT_KEYS];
                Size i = 0;
                for (auto it = object->cbegin(); it != object->cend(); ++it)
                {
@@ -68,6 +83,9 @@ namespace BeeFishDBServer {
                      .setVariable(item);
                   ++i;
                }
+               stringstream stream;
+               stream << i;
+               path.setData(stream.str());
 
                break;
             }
@@ -78,32 +96,44 @@ namespace BeeFishDBServer {
       }
 
       Variable getVariable() {
-         BeeFishJSON::Type type;
-         getData(type);
-         Variable var(type);
          Path path(*this);
-         switch (type) {
-            case BeeFishJSON::Type::UNDEFINED:
+
+         if (path.isDeadEnd())
+            return undefined;
+
+         Type type =
+            path.value<Type>();
+         path << type;
+         Variable var(type);
+         string value;
+         path.getData(value);
+         switch (type)
+         {
+            case Type::UNDEFINED:
                break;
-            case BeeFishJSON::Type::_NULL:
+            case Type::_NULL:
                break;
-            case BeeFishJSON::Type::BOOLEAN:
-               path[DATA]
-                  .getData(var._value._boolean);
+            case Type::BOOLEAN:
+               if (value == "true")
+                  var._value._boolean = true;
+               else
+                  var._value._boolean = false;
                break;
-            case BeeFishJSON::Type::NUMBER:
-               path[DATA]
-                  .getData(var._value._number);
+            case Type::NUMBER:
+            {
+               stringstream stream;
+               stream << value;
+               stream >> var._value._number;
                break;
-            case BeeFishJSON::Type::STRING:
-               path[DATA]
-                  .getData(var._value._string);
+            }
+            case Type::STRING:
+               var._value._string = value;
                break;
-            case BeeFishJSON::Type::ARRAY:
+            case Type::ARRAY:
             {
                ArrayPointer array = ArrayPointer(new Array());
                var._value._array = array;
-               Size max = this->max<Size>();
+               Size max = path.max<Size>();
                array->reserve(max);
                for (Size i = 0; i <= max; ++i)
                {
@@ -112,9 +142,10 @@ namespace BeeFishDBServer {
                      value.getVariable()
                   );
                }
+
                break;
             }
-            case BeeFishJSON::Type::OBJECT:
+            case Type::OBJECT:
             {
                BeeFishScript::ObjectPointer
                object = BeeFishScript::ObjectPointer(
@@ -123,7 +154,7 @@ namespace BeeFishDBServer {
                var._value._object = object;
 
                Path table = path[OBJECT_TABLE];
-               Path map = path[OBJECT_VALUES];
+               Path map = path[OBJECT_KEYS];
 
 
                Path::Stack stack;
@@ -147,15 +178,13 @@ namespace BeeFishDBServer {
       JSONPath operator [] (const string& key)
       {
          Path path(*this);
-         BeeFishJSON::Type type;
-         getData(type);
 
-         if (type == BeeFishJSON::Type::OBJECT)
-         {
-             path << OBJECT_VALUES;
-         }
+         Type type =
+            path.value<Type>();
 
-         path << key;
+         path << type;
+
+         path << OBJECT_KEYS << key;
          
          return JSONPath(path);
       }
@@ -170,21 +199,23 @@ namespace BeeFishDBServer {
       JSONPath operator [] (const Size& index)
       {
          Path path(*this);
-         BeeFishJSON::Type type;
-         getData(type);
 
+         Type type =
+            path.value<Type>();
 
-         if (type == BeeFishJSON::Type::OBJECT)
+         path << type;
+
+         if (type == Type::OBJECT)
          {
-             Path table = path[OBJECT_TABLE];
-             String key;
-             table.getData(key);
-             path << OBJECT_VALUES
-                  << key;
-
+            Path table = path[OBJECT_TABLE];
+            String key;
+            table.getData(key);
+            path << OBJECT_KEYS
+                 << key;
          }
-         else
+         else //if (type == Type::ARRAY)
             path << index;
+         
          
          return JSONPath(path);
       }

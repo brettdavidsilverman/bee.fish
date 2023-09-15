@@ -91,8 +91,8 @@ namespace BeeFishWebDB {
 
       assert(!jsonPath.isDeadEnd());
 
-      JSONType type =
-         jsonPath.value<JSONType>();
+      BeeFishJSON::Type type =
+         jsonPath.value<BeeFishJSON::Type>();
 
       assert(jsonPath.contains(type));
 
@@ -106,7 +106,7 @@ cerr << "GETTING: " << type << ", " << path._index << endl;
 
       switch (type)
       {
-         case JSONType::OBJECT:
+         case BeeFishJSON::Type::OBJECT:
          {
             size += output.write("{");
             Size count = atol(value.c_str());
@@ -134,39 +134,29 @@ cerr << "GETTING: " << type << ", " << path._index << endl;
             size += output.write("}");
             break;
          }
-         case JSONType::INT64:
+         case BeeFishJSON::Type::NUMBER:
          {
             size += output.write(value);
             break;
          }
-         case JSONType::UINT64:
-         {
-            size += output.write(value);
-            break;
-         }
-         case JSONType::DOUBLE:
-         {
-            size += output.write(value);
-            break;
-         }
-         case JSONType::STRING:
+         case BeeFishJSON::Type::STRING:
          {
             string str = "\"" + escape(value) + "\"";
             size += output.write(str);
             break;
          }
-         case JSONType::BOOL:
+         case BeeFishJSON::Type::BOOLEAN:
          {
             size += output.write(value);
             break;
          }
-         case JSONType::_NULL:
+         case BeeFishJSON::Type::_NULL:
          {
             string str = "null";
             size += output.write(str);
             break;
          }
-         case JSONType::ARRAY:
+         case BeeFishJSON::Type::ARRAY:
          {
             size += output.write("[");
 
