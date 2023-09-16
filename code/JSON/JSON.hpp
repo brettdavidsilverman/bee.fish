@@ -20,8 +20,10 @@ namespace BeeFishJSON {
       BOOLEAN,
       NUMBER,
       STRING,
+      KEY,
       ARRAY,
-      OBJECT
+      OBJECT,
+      ROOT
    };
 
    ostream& operator << (ostream& out, const Type& type)

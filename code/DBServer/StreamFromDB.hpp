@@ -13,15 +13,16 @@ namespace BeeFishWebDB {
    using namespace BeeFishDatabase;
    using namespace BeeFishPowerEncoding;
    using namespace BeeFishWebDB;
+   using namespace BeeFishJSON;
 
    inline Size streamDocumentFromDB (
       BeeFishWeb::WebRequest& output,
-      Path<Database::Encoding> path
+      BeeFishWeb::Path path
    );
 
    inline Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
-      Path<Database::Encoding> path
+      BeeFishWeb::Path path
    );
 
    inline bool writeHeaders(
@@ -32,7 +33,7 @@ namespace BeeFishWebDB {
 
    inline Size streamFromDB (
       BeeFishWeb::WebRequest& output,
-      Path<Database::Encoding> path,
+      BeeFishWeb::Path path,
       bool original
    )
    {
@@ -62,8 +63,8 @@ namespace BeeFishWebDB {
 
       if (path.contains("document"))
       {
-         Size contentLength = (Size)
-            path["document"];
+         Size contentLength;
+         path["document"].getData(contentLength);
 
          if (!writeHeaders(
             output,
@@ -83,47 +84,55 @@ namespace BeeFishWebDB {
 
    inline Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
-      BeeFishWeb::Path jsonPath
+      BeeFishWeb::Path path
    )
    {
 
       Size size = 0;
 
-      assert(!jsonPath.isDeadEnd());
+      assert(!path.isDeadEnd());
 
-      BeeFishJSON::Type type =
-         jsonPath.value<BeeFishJSON::Type>();
+      Type type =
+         path.value<Type>();
+  
+      assert(path.contains(type));
 
-      assert(jsonPath.contains(type));
+      path << type;
 
-      Path path = jsonPath[type];
-
-cerr << "GETTING: " << type << ", " << path._index << endl;
-      
       assert(path.hasData());
+
       string value;
       path.getData(value);
 
+
       switch (type)
       {
-         case BeeFishJSON::Type::OBJECT:
+         case Type::OBJECT:
          {
             size += output.write("{");
-            Size count = atol(value.c_str());
-            string key;
-            Stack stack;
-            Path object = path;
-            int i = 0;
-            while (object.next(stack, key))
+
+            stringstream stream;
+            Size count;
+            stream << value;
+            stream >> count;
+
+            Path table = path[JSONPath::OBJECT_TABLE];
+            Path keys = path[JSONPath::OBJECT_KEYS];
+
+            for (int i = 0; i < count;)
             {
+               string key;
+               table[i].getData(key);
+
+               assert(keys.contains(key));
+
                string label = "\"" + escape(key) + "\":";
 
                size += output.write(label);
-               Path value = object[key];
 
                size += streamJSONFromDB(
                   output,
-                  value
+                  keys[key]
                );
 
                if (++i < count)
@@ -134,34 +143,42 @@ cerr << "GETTING: " << type << ", " << path._index << endl;
             size += output.write("}");
             break;
          }
-         case BeeFishJSON::Type::NUMBER:
+         case Type::NUMBER:
          {
             size += output.write(value);
             break;
          }
-         case BeeFishJSON::Type::STRING:
+         case Type::STRING:
          {
             string str = "\"" + escape(value) + "\"";
             size += output.write(str);
             break;
          }
-         case BeeFishJSON::Type::BOOLEAN:
+         case Type::BOOLEAN:
          {
             size += output.write(value);
             break;
          }
-         case BeeFishJSON::Type::_NULL:
+         case Type::_NULL:
          {
             string str = "null";
             size += output.write(str);
             break;
          }
-         case BeeFishJSON::Type::ARRAY:
+         case Type::UNDEFINED:
+         {
+            string str = "undefined";
+            size += output.write(str);
+            break;
+         }
+         case Type::ARRAY:
          {
             size += output.write("[");
 
-            Size count = atol(value.c_str());
-
+            stringstream stream;
+            Size count;
+            stream << value;
+            stream >> count;
             for (Size index = 0;
                  index < count;
                  ++index)
@@ -175,7 +192,7 @@ cerr << "GETTING: " << type << ", " << path._index << endl;
                );
 
                if ((index + 1) < count)
-                  size += output.write(", ");
+                  size += output.write(",");
    
             }
 
@@ -196,7 +213,7 @@ cerr << "GETTING: " << type << ", " << path._index << endl;
 
    inline Size streamDocumentFromDB (
       BeeFishWeb::WebRequest& output,
-      Path<Database::Encoding> path
+      BeeFishWeb::Path path
    )
    {
 

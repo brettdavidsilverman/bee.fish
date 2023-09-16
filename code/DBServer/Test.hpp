@@ -49,7 +49,7 @@ namespace BeeFish
 
       success = success &&
          testJSONPath(dbServer);
-/*
+
       if (success)
       {
          cout << "Testing 404 " << flush;
@@ -95,7 +95,6 @@ namespace BeeFish
       if (success) {
          success = testAllFiles(dbServer->url(), "tests");
       }
-*/
 
       dbServer->stop();
 
@@ -158,7 +157,7 @@ namespace BeeFish
       outputSuccess(success);
       return success;
    }
-
+/*
    inline bool testData(string url, string label, string data, bool expect)
    {
       cout << "Testing data " << label << endl;
@@ -184,7 +183,7 @@ namespace BeeFish
       outputSuccess(success);
       return success;
    }
-
+*/
    inline bool testVariables()
    {
       using namespace std;

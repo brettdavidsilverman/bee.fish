@@ -12,65 +12,13 @@ using namespace BeeFishDatabase;
 using namespace BeeFishJSON;
 
 namespace BeeFishScript {
-/*
-   enum class BeeFishJSON::Type {
-      INT64,
-      UINT64,
-      DOUBLE,
-      BOOL,
-      _NULL,
-      STRING,
-      OBJECT,
-      ARRAY,
-      KEY,
-      ROOT
-   };
-   
-   PowerEncoding& operator <<
-   ( 
-      PowerEncoding& stream,
-      const BeeFishJSON::Type& type
-   )
-   {
-      stream << (int)type;
-      return stream;
-   }
 
-   PowerEncoding& operator >>
-   (
-      PowerEncoding &output,
-      BeeFishJSON::Type& type
-   )
-   {
-      int read;
-      output >> read;
-
-      type = (BeeFishJSON::Type)read;
-
-      return output;
-   }
-
-   ostream& operator << (ostream& out, const BeeFishJSON::Type& type);
-   */
-   /*
-   struct JSONData {
-      Size     _size;
-      BeeFishJSON::Type _type;
-      char     _data[];
-      void* data()
-      {
-         assert(_size);
-         return &(_data[0]);
-      }
-   };
-*/
    class JSONDBHandler
    {
    protected:
       struct JSONStackValue {
-         BeeFishJSON::Type _type;
+         Type _type;
          Size _index;
-         String _key;
          BeeFishWeb::Path  _path;
       };
 
@@ -90,16 +38,12 @@ namespace BeeFishScript {
          return _stack[size() - 1];
       }
 
-      BeeFishJSON::Type& lastType() {
+      Type& lastType() {
          return lastValue()._type;
       }
 
       Size& lastIndex() {
          return lastValue()._index;
-      }
-
-      String& lastKey() {
-         return lastValue()._key;
       }
 
       BeeFishWeb::Path& lastPath() {
@@ -114,83 +58,76 @@ namespace BeeFishScript {
          return isNumber(lastType());
       }
 
-      bool isNumber(BeeFishJSON::Type type) {
+      bool isNumber(Type type) {
          return 
-            (type == BeeFishJSON::Type::NUMBER);
+            (type == Type::NUMBER);
 
-     //       ( (type == BeeFishJSON::Type::INT64) ||
-     //         (type == BeeFishJSON::Type::UINT64) ||
-     //         (type == BeeFishJSON::Type::DOUBLE) );
+     //       ( (type == Type::INT64) ||
+     //         (type == Type::UINT64) ||
+     //         (type == Type::DOUBLE) );
       }
 
       void push_back(JSONStackValue value) {
          _stack.push_back(value);
       }
 
-      void push_back(BeeFishJSON::Type type)
+      void push_back(Type type)
       {
          Path path = lastPath();
+
+         if (lastType() == Type::ARRAY)
+            path << lastIndex()++;
+
+         path << type;
 
          _stack.push_back(
             {
                type,
                0,
-               "",
                path
             }
          );
       }
 
-      void pop_back(const string& value, const BeeFishJSON::Type type) {
+      void pop_back(const string& value) {
 
          assert(size() > 0);
-
-         JSONStackValue last =
-            _stack[size() - 1];
-
-         _stack.pop_back();
 
          BeeFishWeb::Path
             path = lastPath();
 
-         if (lastType() == BeeFishJSON::Type::ARRAY) {
+         Type type = lastType();
+
+         JSONStackValue last =
+            lastValue();
+
+         _stack.pop_back();
+
+         /*
+         if (lastType() == Type::ARRAY) {
             
-            Size index =
-               lastIndex()++;
-
-            path << type << index;
-
-         }
-         else if (lastType() == BeeFishJSON::Type::KEY)
-         {
             Size& index =
                lastIndex();
-
-            path[JSONPath::OBJECT_TABLE]
-                [index].setData(value);
-
-            path[JSONPath::OBJECT_KEYS]
-                [lastKey()].setData(value);
-
+            path << index << type;
             ++index;
-
-            _stack.pop_back();
          }
-         else
-            path << type;
-
-         if (lastType() != BeeFishJSON::Type::KEY)
+         else*/ if (lastType() == Type::KEY)
          {
-            path.setData(value);
+            _stack.pop_back();
+
+            assert(lastType() == Type::OBJECT);
+
          }
+
+         path.setData(value);
 
 
       }
 
-      void pop_back(const size_t value, const BeeFishJSON::Type type) {
+      void pop_back(const size_t value) {
          stringstream stream;
          stream << value;
-         pop_back(stream.str(), type);
+         pop_back(stream.str());
       }
 
       /// The maximum number of elements allowed in an array
@@ -213,7 +150,7 @@ namespace BeeFishScript {
       bool on_document_begin( error_code& ec )
       {
          push_back(
-            JSONStackValue {BeeFishJSON::Type::ROOT, 0, "", _rootPath}
+            JSONStackValue {Type::ROOT, 0, _rootPath}
          );
 
          return true;
@@ -226,7 +163,7 @@ namespace BeeFishScript {
       ///
       bool on_document_end( error_code& ec )
       {
-         assert(lastType() == BeeFishJSON::Type::ROOT);
+         assert(lastType() == Type::ROOT);
          _stack.pop_back();
          assert(size() == 0);
          return true;
@@ -240,7 +177,7 @@ namespace BeeFishScript {
       bool on_array_begin( error_code& ec )
       {
          push_back(
-            BeeFishJSON::Type::ARRAY
+            Type::ARRAY
          );
 
          return true;
@@ -255,7 +192,7 @@ namespace BeeFishScript {
       bool on_array_end( std::size_t n, error_code& ec )
       {
 
-         pop_back(n, BeeFishJSON::Type::ARRAY);
+         pop_back(n);
          
          return true;
       }
@@ -269,7 +206,7 @@ namespace BeeFishScript {
       {
 
          push_back(
-            BeeFishJSON::Type::OBJECT
+            Type::OBJECT
          );
 
          return true;
@@ -284,7 +221,7 @@ namespace BeeFishScript {
       bool on_object_end( std::size_t n, error_code& ec )
       {
          
-         pop_back(n, BeeFishJSON::Type::OBJECT);
+         pop_back(n);
 
          return true;
       }
@@ -314,12 +251,20 @@ namespace BeeFishScript {
          std::string key(s);
 
          Path path = lastPath();
+         Size& index = lastIndex();
+
+         path[JSONPath::OBJECT_TABLE]
+             [index++]
+              .setData(key);
+
+         path =
+            path[JSONPath::OBJECT_KEYS]
+                [key];
 
          push_back(
             {
-               BeeFishJSON::Type::KEY,
+               Type::KEY,
                0,
-               key,
                path
             }
          );
@@ -362,10 +307,10 @@ namespace BeeFishScript {
          std::string string(s);
 
          push_back(
-            BeeFishJSON::Type::STRING
+            Type::STRING
          );
 
-         pop_back(string, BeeFishJSON::Type::STRING);
+         pop_back(string);
 
          return true;
       }
@@ -381,10 +326,10 @@ namespace BeeFishScript {
       bool on_int64( int64_t i, string_view s, error_code& ec )
       {
          push_back(
-            BeeFishJSON::Type::NUMBER
+            Type::NUMBER
          );
 
-         pop_back(string(s), BeeFishJSON::Type::NUMBER);
+         pop_back(string(s));
 
          return true;
       }
@@ -400,10 +345,10 @@ namespace BeeFishScript {
       {
 
          push_back(
-            BeeFishJSON::Type::NUMBER
+            Type::NUMBER
          );
 
-         pop_back(string(s), BeeFishJSON::Type::NUMBER);
+         pop_back(string(s));
  
          return true;
       }
@@ -419,10 +364,10 @@ namespace BeeFishScript {
       {
  
          push_back(
-            BeeFishJSON::Type::NUMBER
+            Type::NUMBER
          );
 
-         pop_back(string(s), BeeFishJSON::Type::NUMBER);
+         pop_back(string(s));
 
          return true;
       }
@@ -437,7 +382,7 @@ namespace BeeFishScript {
       bool on_bool( bool b, error_code& ec )
       {
          push_back(
-            BeeFishJSON::Type::BOOLEAN
+            Type::BOOLEAN
          );
 
          string boolean;
@@ -447,7 +392,7 @@ namespace BeeFishScript {
          else
             boolean = "false";
 
-         pop_back(boolean, BeeFishJSON::Type::BOOLEAN);
+         pop_back(boolean);
 
          return true;
       }
@@ -460,10 +405,10 @@ namespace BeeFishScript {
       bool on_null( error_code& ec )
       {
          push_back(
-            BeeFishJSON::Type::_NULL
+            Type::_NULL
          );
 
-         pop_back(string("null"), BeeFishJSON::Type::_NULL);
+         pop_back(string("null"));
 
          return true;
       }
@@ -566,7 +511,6 @@ namespace BeeFishScript {
             );
 
          _bytesWritten += n;
-         more = _bytesWritten < _contentLength;
 
          _buffer.clear();
 

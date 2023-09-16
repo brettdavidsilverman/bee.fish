@@ -77,11 +77,10 @@ namespace BeeFishScript {
                {
                   
                   String key = *it;
-                  table[i].setData(key);
+                  table[i++].setData(key);
                   Variable item = (*object)[key];
                   JSONPath(map[key])
                      .setVariable(item);
-                  ++i;
                }
                stringstream stream;
                stream << i;
