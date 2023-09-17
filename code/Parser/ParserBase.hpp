@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <bitset>
 #include <memory>
 #include <chrono>
@@ -12,16 +13,19 @@
 
 namespace BeeFishParser {
 
+   using namespace std;
+
    class UTF8Character;
 
    class Parser {
 #ifdef DEBUG
    protected:
       std::string _value;
+      
 #endif
    public:
       std::optional<bool> _result = std::nullopt;
-      
+      size_t _byteCount = 0;
    public:
    
       Parser()
@@ -69,6 +73,13 @@ namespace BeeFishParser {
    
       virtual void fail()
       {
+      }
+
+      virtual string getErrorMessage() const {
+         stringstream stream;
+         stream << "Invalid content at position "
+                << _byteCount;
+         return stream.str();
       }
 
       static const std::string& EmptyString() {
@@ -135,6 +146,7 @@ namespace BeeFishParser {
          char character
       )
       {
+         ++_byteCount;
          return true;
       }
 
@@ -193,12 +205,12 @@ namespace BeeFishParser {
             << time << " (milliseconds)\t"
                << ((float)charCount / time) << " (kb/sec)" 
             << endl;
-
-         if (parser._result == false)
-            cout << "Failed on {" << escape(c) << "}" << endl;
-
+         
 #endif
 
+         if (parser._result == false) {
+            cerr << "Failed on {" << escape(c) << "}" << " at " << charCount << endl;
+         }
 
          return in;
       }

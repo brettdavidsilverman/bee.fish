@@ -28,18 +28,22 @@ namespace BeeFishJSON {
        blankSpaces;
 
    const auto value =
-       LoadOnDemand(_JSON);
+       Optional(
+          LoadOnDemand(_JSON)
+       );
 
+   const auto items =
+      value and
+      Repeat(
+         arraySeperator and value,
+         0
+      );
 
    const auto array =
       openBracket and
-      Optional(
-         value  and
-         Repeat(
-            arraySeperator and value,
-            0
-         )
-      )  and
+         Optional(
+            items
+         ) and
       closeBracket;
 
 }

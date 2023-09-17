@@ -79,6 +79,8 @@ namespace BeeFishParser {
       virtual bool read(char c)
       override
       {
+         Parser::read(c);
+
          bool matched = _capture->read(c);
 
          if (matched)

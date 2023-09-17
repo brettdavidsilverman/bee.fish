@@ -8,6 +8,7 @@
 #include "JSONPath.hpp"
 
 #define TEMP_FILENAME "/var/tmp/bee.fish.tmp"
+//#define TEMP_FILENAME "/home/bee/bee.fish.data"
 
 namespace BeeFish
 {
@@ -135,6 +136,7 @@ namespace BeeFish
    inline bool testFile(string url, string file, bool expect)
    {
       cout << "Testing file " << file << " " << flush;
+      cout << endl << url << endl;
       stringstream stream;
       bool success = true;
 

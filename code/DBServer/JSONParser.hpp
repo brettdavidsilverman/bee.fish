@@ -24,7 +24,7 @@ namespace BeeFishScript {
 
       BeeFishWeb::Path _rootPath;
       vector<JSONStackValue> _stack;
-      
+
    public:
 
       JSONDBHandler(BeeFishWeb::Path path) :
@@ -479,7 +479,10 @@ namespace BeeFishScript {
       {
          ++_bytesRead;
 
+         Parser::read(c);
+
          _buffer.push_back(c);
+
          if ( (_buffer.size() == _pageSize) ||
               (_bytesRead >= _contentLength) )
          {

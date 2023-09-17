@@ -103,6 +103,8 @@ namespace BeeFishJSON {
          if (_parser._result != nullopt)
             return false;
 
+         Parser::read(c);
+
          bool matched = _parser.read(c);
 
          if (_parser._result != nullopt)
@@ -114,19 +116,19 @@ namespace BeeFishJSON {
       And createParser(Parser* params) {
       
 
-         auto undefined =
+         static const auto undefined =
             Word("undefined");
 
-         auto _null =
+         static const auto _null =
             Word("null");
 
-         auto _true =
+         static const auto _true =
             Word("true");
 
-         auto _false =
+         static const auto _false =
             Word("false");
 
-         auto boolean =
+         static const auto boolean =
             _true or _false;
 
          return

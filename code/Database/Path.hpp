@@ -135,7 +135,21 @@ namespace BeeFishDatabase {
       
       bool hasData() const
       {
-         return getDataSize() > 0;
+         const Branch& branch =
+            getBranch();
+         
+         if (branch._dataIndex)
+         {
+            const Data* data =
+               _database->getData(
+                  branch._dataIndex
+               );
+               
+            if (data)
+               return true;
+         }
+
+         return false;
       }
       
       Data& getData() {
@@ -175,18 +189,24 @@ namespace BeeFishDatabase {
       void getData(std::string& destination)
       {
          Data& data = getData();
+         if (data.size() == 0)
+            destination = "";
+         else {
+            std::string string(
+               data.data(),
+               data.size()
+            );
 
-         std::string string(
-            data.data(),
-            data.size()
-         );
-
-         destination = string;
+            destination = string;
+         }
       }
 
       operator string() const
       {
          Data& data = getData(data);
+
+         if (data.size() == 0)
+            return "";
 
          return std::string(
             data.data(),
@@ -205,14 +225,14 @@ namespace BeeFishDatabase {
          
          Data* destination = createData(value.size());
 
-         if ( destination == nullptr )
-            return;
+         assert(destination);
 
-         memcpy(
-            destination->data(),
-            value.data(),
-            value.size()
-         );
+         if (value.size())
+            memcpy(
+               destination->data(),
+               value.data(),
+               value.size()
+            );
          
       }
 
@@ -228,13 +248,15 @@ namespace BeeFishDatabase {
                   branch._dataIndex
                );
          }
-
+/*
          if (byteSize == 0)
          {
             deleteData();
             return nullptr;
          }
-         else if ( ( destination == nullptr ) || 
+
+         else */
+         if ( ( destination == nullptr ) || 
               ( destination->size() < byteSize ) )
          {
          

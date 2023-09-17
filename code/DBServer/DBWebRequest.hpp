@@ -173,13 +173,14 @@ namespace BeeFishWebDB {
 
          if (_result != true) {
 
-            stringstream logStream;
+            stringstream stream;
 
             logMessage(LOG_WARNING, "Invalid content from %s", _ipAddress.c_str());
             
             if (_method == "POST") {
+               
                path.clear();
-               outputFail("Invalid content");
+               outputFail(getErrorMessage());
             }
             else
                outputError();
@@ -393,7 +394,15 @@ namespace BeeFishWebDB {
 
       }
 
-      
+      virtual std::string getErrorMessage() const
+      override
+      {
+         if (_body) {
+            return _body->getErrorMessage();
+         }
+         else
+            return Parser::getErrorMessage();
+      }
 
    };
 

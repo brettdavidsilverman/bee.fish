@@ -23,7 +23,7 @@ namespace BeeFishDatabase
       const Size max = 100;
       
       cout << "Test Database" << endl;
-
+      
       const string filename = "/var/tmp/DBServer.data";
       remove(filename.c_str());
 
@@ -48,6 +48,17 @@ namespace BeeFishDatabase
       for (size_t i = min; i <= max; ++i)
       {
          data[i] = i;
+      }
+
+      if (success)
+      {
+         data.setData("");
+         cout << "\tTesting Data string" << flush;
+         success = data.hasData();
+         string value;
+         data.getData(value);
+         success = success && (value == "");
+         outputSuccess(success);
       }
 
       if (success) {
@@ -135,7 +146,7 @@ namespace BeeFishDatabase
       }
 
       if (success) {
-         cout << "\tTesting int next" << endl;
+         cout << "\tTesting int next" << flush;
 
          Path data = start["skip3"];
          data[0];
@@ -172,7 +183,7 @@ namespace BeeFishDatabase
       }
 
       if (success) {
-         cout << "\tTesting string first to next " << endl;
+         cout << "\tTesting string first to next " << flush;
 
          Path data = start["skip4"];
          data["first"];
@@ -208,7 +219,7 @@ namespace BeeFishDatabase
 
       if (success)
       {
-         cout << "\tTesting count" << endl;
+         cout << "\tTesting count" << flush;
 
          Path data = start["skip5"];
          for (int i = 1; i <= 10; ++i)
@@ -232,7 +243,7 @@ namespace BeeFishDatabase
 
       if (success)
       {
-         cout << "\tTesting string next" << endl;
+         cout << "\tTesting string next" << flush;
 
          Path data = start["skip6"];
          data["one"];
@@ -254,7 +265,7 @@ namespace BeeFishDatabase
 
       if (success)
       {
-         cout << "\tTesting string value" << endl;
+         cout << "\tTesting string value" << flush;
 
          Path data = start["skip7"];
          data["one"];
@@ -267,7 +278,7 @@ namespace BeeFishDatabase
 
       if (success)
       {
-         cout << "\tTesting size_t contains" << endl;
+         cout << "\tTesting size_t contains" << flush;
 
          Path data = start["skip8"];
          Size size = 1;
@@ -281,7 +292,7 @@ namespace BeeFishDatabase
 
       if (success)
       {
-         cout << "\tTesting size_t does not contain" << endl;
+         cout << "\tTesting size_t does not contain" << flush;
 
          Path data = start["skip9"];
          Size size = 1;

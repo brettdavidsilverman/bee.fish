@@ -99,11 +99,11 @@ namespace BeeFishWebDB {
 
       path << type;
 
+      string value;
+
       assert(path.hasData());
 
-      string value;
       path.getData(value);
-
 
       switch (type)
       {
@@ -184,12 +184,13 @@ namespace BeeFishWebDB {
                  ++index)
             {
 
-               assert(path.contains(index));
-
-               size += streamJSONFromDB (
-                  output,
-                  path[index]
-               );
+              // if (path.contains(index))
+               {
+                  size += streamJSONFromDB (
+                     output,
+                     path[index]
+                  );
+               }
 
                if ((index + 1) < count)
                   size += output.write(",");

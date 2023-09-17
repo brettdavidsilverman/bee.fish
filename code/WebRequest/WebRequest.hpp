@@ -191,6 +191,20 @@ namespace BeeFishWeb {
          );
       }
 
+      virtual string getErrorMessage() const 
+      override
+      {
+         stringstream stream;
+
+         if (_body) {
+            stream << "Invalid content at position "
+                   << _body->_byteCount;
+         }
+         else
+            stream << "Invalid content";
+
+         return stream.str();
+      }
 
       virtual Parser* copy() const
       override
@@ -203,6 +217,8 @@ namespace BeeFishWeb {
       {
          if (_result != nullopt)
             return false;
+
+         Parser::read(c);
 
          bool matched = _parser.read(c);
 
