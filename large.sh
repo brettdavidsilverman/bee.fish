@@ -1,4 +1,4 @@
-rm /home/bee/*.data
+rm /home/bee/bee.fish.data
 make install
 curl -X POST \
    http://bee.fish/large.json \

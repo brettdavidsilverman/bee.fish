@@ -148,15 +148,15 @@ namespace BeeFishWebDB {
       virtual bool process()
       {
          bool success = true;
-
+         
          WebRequest::read();
 
          stringstream logStream;
          logStream 
-            << _ipAddress << " "
-            << _method << " "
-            << _url << " "
-            << _version << endl;
+               << _ipAddress << " "
+               << _method << " "
+               << _url << " "
+               << _version << endl;
 
          logMessage(LOG_NOTICE, logStream.str());
          

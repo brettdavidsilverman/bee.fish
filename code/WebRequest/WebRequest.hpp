@@ -107,7 +107,7 @@ namespace BeeFishWeb {
 
       virtual bool read()
       {
-         int size;
+         ssize_t size;
          size_t bufferSize = getpagesize();
          char* buffer = new char[bufferSize];
          bool success = true;
@@ -119,6 +119,14 @@ namespace BeeFishWeb {
                 _socket,
                 buffer,
                 bufferSize);
+            
+            if (size < 0)
+            {
+               stringstream stream;
+               stream << "Error reading from " << _ipAddress;
+               logMessage(LOG_NOTICE, stream.str());
+               throw runtime_error("Error reading from web request");
+            }
             
             if (size == 0) {
                usleep(1000);
@@ -161,14 +169,22 @@ namespace BeeFishWeb {
          size_t size
       )
       {
-         Size written = 
+         ssize_t written = 
             ::write(
                _socket,
                data,
                size
             );
 
-         return written;
+         if (written < 0)
+         {
+            stringstream stream;
+            stream << "Error writing to " << _ipAddress;
+            logMessage(LOG_NOTICE, stream.str());
+            throw runtime_error("Error writing to web request");
+         }
+         
+         return (Size)written;
       }
 
       virtual Size write(

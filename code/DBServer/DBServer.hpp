@@ -1,6 +1,8 @@
 #ifndef BEE_FISH__WEBDB__DBSERVER_HPP
 #define BEE_FISH__WEBDB__DBSERVER_HPP
 #include "../Miscellaneous/Miscellaneous.hpp"
+#include "../Miscellaneous/SigHandler.hpp"
+
 #include "../WebServer/WebServer.hpp"
 #include "../Database/Database.hpp"
 #include "../WebRequest/WebRequest.hpp"
@@ -42,15 +44,25 @@ namespace BeeFishWebDB {
       ) override
       {
 
-         DBWebRequest webRequest(
-            this,
-            clientSocket,
-            ipAddress
-         );
+         signal(SIGPIPE, SIG_IGN);
+         try {
+            DBWebRequest webRequest(
+               this,
+               clientSocket,
+               ipAddress
+            );
 
-         // Read from the client socket
-         if (!webRequest.process()) {
-            return false;
+            // Read from the client socket
+            if (!webRequest.process()) {
+               return false;
+            }
+         }
+         catch (...)
+         {
+             stringstream stream;
+             stream << "Error processing client " << ipAddress;
+             logMessage(LOG_NOTICE, stream.str());
+             return false;
          }
 
          return true;

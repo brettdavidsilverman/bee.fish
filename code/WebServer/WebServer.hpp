@@ -176,7 +176,7 @@ namespace BeeFishWeb {
          using namespace std;
 
          logMessage(LOG_NOTICE, "WebServer loop started  🟢");
-         
+
          lock_guard<mutex> guard(webServer->_running);
 
          while (!webServer->_stop) {
@@ -201,7 +201,7 @@ namespace BeeFishWeb {
             {
                const char *ipAddress = inet_ntoa(cli_addr.sin_addr);
 
-               logMessage(LOG_NOTICE, ipAddress);
+               //logMessage(LOG_NOTICE, ipAddress);
          
                // Set client socket to non blocking
                //fcntl(clientSocket, F_SETFL, O_NONBLOCK);
