@@ -248,14 +248,7 @@ namespace BeeFishDatabase {
                   branch._dataIndex
                );
          }
-/*
-         if (byteSize == 0)
-         {
-            deleteData();
-            return nullptr;
-         }
 
-         else */
          if ( ( destination == nullptr ) || 
               ( destination->size() < byteSize ) )
          {

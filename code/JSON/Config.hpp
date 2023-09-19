@@ -3,5 +3,6 @@
 
 #include "../Config.hpp"
 
+#define TAB_SPACES 3
 
 #endif

@@ -10,7 +10,9 @@ using namespace BeeFishJSON;
 
 namespace BeeFishScript {
 
-   class JSONPath : protected BeeFishWeb::Path
+   class JSONPath :
+      protected BeeFishDatabase::
+         Path<BeeFishPowerEncoding::PowerEncoding>
    {
    public:
       inline static const int OBJECT_TABLE = 0;

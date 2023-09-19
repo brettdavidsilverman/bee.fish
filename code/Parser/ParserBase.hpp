@@ -14,6 +14,7 @@
 namespace BeeFishParser {
 
    using namespace std;
+   using namespace BeeFishMisc;
 
    class UTF8Character;
 
@@ -26,6 +27,8 @@ namespace BeeFishParser {
    public:
       std::optional<bool> _result = std::nullopt;
       size_t _byteCount = 0;
+      char _lastCharacter = 0;
+
    public:
    
       Parser()
@@ -77,7 +80,7 @@ namespace BeeFishParser {
 
       virtual string getErrorMessage() const {
          stringstream stream;
-         stream << "Invalid content at position "
+         stream << "Invalid Content {" << (int)_lastCharacter << "} at position "
                 << _byteCount;
          return stream.str();
       }
@@ -146,6 +149,7 @@ namespace BeeFishParser {
          char character
       )
       {
+         _lastCharacter = character;
          ++_byteCount;
          return true;
       }

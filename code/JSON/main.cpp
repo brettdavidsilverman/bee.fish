@@ -6,15 +6,20 @@
 #include "../Parser/Parser.hpp"
 #include "../Parser/Test.hpp"
 #include "JSON.hpp"
+#include "JSONParser.hpp"
 #include "Test.hpp"
+#include "Config.hpp"
 
 using namespace std;
 using namespace BeeFishMisc;
 using namespace BeeFishParser;
 using namespace BeeFishJSON;
+using namespace BeeFishDatabase;
 
-std::optional<bool> homeGrownParser();
-std::optional<bool> boostParser();
+Parser* homeGrownParser();
+Parser* boostParser();
+std::optional<bool> testParser(Parser* parser);
+Database db(TEMP_FILENAME);
 
 int main(int argc, const char* argv[]) {
    
@@ -29,15 +34,6 @@ int main(int argc, const char* argv[]) {
         << "Parser Version: "
            << PARSER_VERSION
            << endl;
-
-   if (hasArg(argc, argv, "-test") >= 0)
-   {
-      cout << "Testing json..." << endl << endl;
-      if (!BeeFishJSON::test())
-         return 1;
-            
-      return 0;
-   }
 
    bool useHomeGrown = true;
    int useArg = -1;
@@ -54,17 +50,36 @@ int main(int argc, const char* argv[]) {
       }
    }
 
+   if (hasArg(argc, argv, "-test") >= 0)
+   {
+      cout << "Testing json..." << endl << endl;
+      if (!BeeFishJSON::test())
+         return 1;
+            
+      return 0;
+   }
+
+
 
    std::optional<bool> result;
+   Parser* parser;
 
    if (useHomeGrown) {
       cout << "Using home grown parser" << endl;
-      result = homeGrownParser();
+      parser = homeGrownParser();
    }
    else {
       cout << "Using boost parser" << endl;
-      result = boostParser();
+      parser = boostParser();
    }
+
+   //remove(TEMP_FILENAME);
+
+   result = testParser(parser);
+
+   delete parser;
+
+   remove(TEMP_FILENAME);
 
    if (result == false) {
       cout << "Invalid JSON" << endl;
@@ -81,20 +96,35 @@ int main(int argc, const char* argv[]) {
 
 }
 
-std::optional<bool> homeGrownParser() {
-   auto parser = JSON();
+Parser* homeGrownParser() {
+   auto parser = new JSON();
+   return parser;
+}
 
-   cin >> parser;
+Parser* boostParser()
+{
+
+   auto parser = new JSONParser(db);
+
+   return parser;
+}
+
+std::optional<bool> testParser(Parser* parser) {
+
+   cin >> *parser;
  
+   if (parser->result() == nullopt)
+      parser->flush();
+
    cout << endl;
 
-   return parser.result();
+   return parser->result();
 
 }
 
-std::optional<bool> boostParser()
-{
 
+
+/*
    using namespace boost::json;
 
    stream_parser p;
@@ -118,4 +148,6 @@ std::optional<bool> boostParser()
       return true;
    else
       return nullopt;
+
 }
+*/

@@ -8,12 +8,39 @@ install:	all
 test:
 	-  mkdir build
 	cd code && make test
-#	curl http://bee.fish/test -H "Content-Type: application/json" -d {}
-#	curl http://bee.fish/test -H "Content-Type: text/plain" -H "Content-Length: 11" -d "Hello World" | grep "Hello World"
-#	curl http://bee.fish/test -H "Content-Type: application/json" --data-binary "@sample.json"
+
+Parser:
+	-  mkdir build
+	cd code/Parser && make $(DEBUG)
+
+PowerEncoding:
+	-  mkdir build
+	cd code/PowerEncoding && make $(DEBUG)
+
+Database:
+	-  mkdir build
+	cd code/Database && make $(DEBUG)
+
+JSON:
+	-  mkdir build
+	cd code/JSON && make $(DEBUG)
+
+WebRequest:
+	-  mkdir build
+	cd code/WebRequest && make $(DEBUG)
+
+WebServer:
+	-  mkdir build
+	cd code/WebServer && make $(DEBUG)
+
+DBServer:
+	-  mkdir build
+	cd code/DBServer && make $(DEBUG)
 
 clean:
 	rm -f -r build
+	rm -f large2a.json
+	rm -f large2b.json
 
 debug:	clean
 debug:	DEBUG = debug

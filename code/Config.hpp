@@ -11,4 +11,6 @@
 
 #include "../Config.hpp"
 
+#define TEMP_FILENAME "/var/tmp/bee.fish.data"
+
 #endif

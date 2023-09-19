@@ -3,13 +3,14 @@
 #include <vector>
 #include <boost/json/basic_parser.hpp>
 #include "../Parser/Parser.hpp"
+#include "../PowerEncoding/PowerEncoding.hpp"
 #include "../Database/Database.hpp"
-#include "Variable.hpp"
 #include "JSONPath.hpp"
 
 using namespace BeeFishParser;
 using namespace BeeFishDatabase;
 using namespace BeeFishJSON;
+using namespace BeeFishPowerEncoding;
 
 namespace BeeFishScript {
 
@@ -19,15 +20,18 @@ namespace BeeFishScript {
       struct JSONStackValue {
          Type _type;
          Size _index;
-         BeeFishWeb::Path  _path;
+         Path<PowerEncoding> _path;
       };
 
-      BeeFishWeb::Path _rootPath;
+      Path<PowerEncoding> _rootPath;
       vector<JSONStackValue> _stack;
-
+      std::string _string;
+      std::string _key;
+      std::string _number;
+      
    public:
 
-      JSONDBHandler(BeeFishWeb::Path path) :
+      JSONDBHandler(Path<PowerEncoding> path) :
          _rootPath(path)
       {
       }
@@ -46,7 +50,7 @@ namespace BeeFishScript {
          return lastValue()._index;
       }
 
-      BeeFishWeb::Path& lastPath() {
+      Path<PowerEncoding>& lastPath() {
          return lastValue()._path;
       }
 
@@ -93,25 +97,12 @@ namespace BeeFishScript {
 
          assert(size() > 0);
 
-         BeeFishWeb::Path
+         Path
             path = lastPath();
-
-         Type type = lastType();
-
-         JSONStackValue last =
-            lastValue();
 
          _stack.pop_back();
 
-         /*
-         if (lastType() == Type::ARRAY) {
-            
-            Size& index =
-               lastIndex();
-            path << index << type;
-            ++index;
-         }
-         else*/ if (lastType() == Type::KEY)
+         if (lastType() == Type::KEY)
          {
             _stack.pop_back();
 
@@ -235,7 +226,7 @@ namespace BeeFishScript {
       ///
       bool on_key_part( string_view s, std::size_t n, error_code& ec )
       {
-
+         _key += string(s);
          return true;
       }
 
@@ -248,18 +239,20 @@ namespace BeeFishScript {
       ///
       bool on_key( string_view s, std::size_t n, error_code& ec )
       {
-         std::string key(s);
-
+         std::string string(s);
+         _key += string;
+         assert(_key.length() == n);
+         
          Path path = lastPath();
          Size& index = lastIndex();
 
          path[JSONPath::OBJECT_TABLE]
              [index++]
-              .setData(key);
+              .setData(_key);
 
          path =
             path[JSONPath::OBJECT_KEYS]
-                [key];
+                [_key];
 
          push_back(
             {
@@ -269,6 +262,8 @@ namespace BeeFishScript {
             }
          );
 
+         _key.clear();
+         
          return true;
       }
 
@@ -280,6 +275,7 @@ namespace BeeFishScript {
       ///
       bool on_number_part( string_view s, error_code& ec )
       {
+         _number += string(s);
          return true;
       }
 
@@ -292,7 +288,8 @@ namespace BeeFishScript {
       ///
       bool on_string_part( string_view s, std::size_t n, error_code& ec )
       {
-        return true;
+         _string += std::string(s);
+         return true;
       }
 
       /// Called with the last characters corresponding to the current string.
@@ -304,13 +301,17 @@ namespace BeeFishScript {
       ///
       bool on_string( string_view s, std::size_t n, error_code& ec )
       {
-         std::string string(s);
-
+         _string += std::string(s);
+         
+         assert(_string.length() == n);
+         
          push_back(
             Type::STRING
          );
 
-         pop_back(string);
+         pop_back(_string);
+         
+         _string.clear();
 
          return true;
       }
@@ -325,11 +326,15 @@ namespace BeeFishScript {
       ///
       bool on_int64( int64_t i, string_view s, error_code& ec )
       {
+         _number += string(s);
+         
          push_back(
             Type::NUMBER
          );
 
-         pop_back(string(s));
+         pop_back(_number);
+         
+         _number.clear();
 
          return true;
       }
@@ -344,12 +349,16 @@ namespace BeeFishScript {
       bool on_uint64( uint64_t u, string_view s, error_code& ec )
       {
 
+         _number += string(s);
+         
          push_back(
             Type::NUMBER
          );
 
-         pop_back(string(s));
- 
+         pop_back(_number);
+         
+         _number.clear();
+         
          return true;
       }
 
@@ -363,12 +372,16 @@ namespace BeeFishScript {
       bool on_double( double d, string_view s, error_code& ec )
       {
  
+         _number += string(s);
+         
          push_back(
             Type::NUMBER
          );
 
-         pop_back(string(s));
-
+         pop_back(_number);
+         
+         _number.clear();
+         
          return true;
       }
 
@@ -442,10 +455,10 @@ namespace BeeFishScript {
    protected:
       boost::json::basic_parser<JSONDBHandler> _parser;
       Path<Database::Encoding> _rootPath;
-      std::string _buffer;
-      const Size _contentLength;
-      Size _bytesRead = 0;
+      std::string _buffer = std::string(getpagesize(), '\0');
+      const long _contentLength;
       Size _bytesWritten {0};
+      Size _position = 0;
       const Size _pageSize = getpagesize();
 
       JSONParser(const JSONParser& source) :
@@ -460,15 +473,13 @@ namespace BeeFishScript {
 
       JSONParser(
          Path<Database::Encoding> path,
-         Size contentLength
+         long contentLength = -1
       ) :
          Parser(),
          _parser(boost::json::parse_options(), path),
          _rootPath(path),
          _contentLength(contentLength)
       {
-         if (_contentLength <= 0)
-            throw runtime_error("Invalid content length");
       }
 
       virtual ~JSONParser() {
@@ -477,14 +488,14 @@ namespace BeeFishScript {
       virtual bool read(char c)
       override
       {
-         ++_bytesRead;
 
          Parser::read(c);
 
-         _buffer.push_back(c);
+         _buffer[_position++] = c;
 
-         if ( (_buffer.size() == _pageSize) ||
-              (_bytesRead >= _contentLength) )
+         if ( (_position == _pageSize) ||
+              (_byteCount >= _contentLength &&
+               _contentLength > 0) )
          {
             return flush();
          }
@@ -502,30 +513,29 @@ namespace BeeFishScript {
 
          boost::json::error_code ec;
 
-         bool more =
-            (_bytesRead < _contentLength);
+         bool more;
+         if (_contentLength > 0)
+            more = (_byteCount < _contentLength);
+         else
+            more = true;
 
          Size n =
             _parser.write_some(
-                more,
+               more,
                _buffer.data(),
-               _buffer.size(),
+               _position,
                 ec
             );
 
          _bytesWritten += n;
 
-         _buffer.clear();
+         _position = 0;
 
          if (ec && (ec != boost::json::error::incomplete)) {
             setResult(false);
             return false;
          }
          else if (_parser.done()) {
-            if (more) {
-               setResult(false);
-               return false;
-            }
             setResult(true);
          }
          else if (!more)

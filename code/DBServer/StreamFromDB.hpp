@@ -4,7 +4,9 @@
 #include "../Parser/Parser.hpp"
 #include "../Database/Database.hpp"
 #include "../WebRequest/WebRequest.hpp"
-#include "JSONParser.hpp"
+#include "../JSON/JSONParser.hpp"
+#include "Config.hpp"
+
 
 namespace BeeFishWebDB {
 
@@ -15,6 +17,11 @@ namespace BeeFishWebDB {
    using namespace BeeFishWebDB;
    using namespace BeeFishJSON;
 
+   inline string getTabs(Size tabs)
+   {
+       return string(tabs * TAB_SPACES, ' ');
+   }
+   
    inline Size streamDocumentFromDB (
       BeeFishWeb::WebRequest& output,
       BeeFishWeb::Path path
@@ -22,7 +29,8 @@ namespace BeeFishWebDB {
 
    inline Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
-      BeeFishWeb::Path path
+      BeeFishWeb::Path path,
+      int tabs
    );
 
    inline bool writeHeaders(
@@ -57,7 +65,7 @@ namespace BeeFishWebDB {
          }
 
          return streamJSONFromDB(
-            output, path["JSON"]
+            output, path["JSON"], 0
          );
       }
 
@@ -84,7 +92,8 @@ namespace BeeFishWebDB {
 
    inline Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
-      BeeFishWeb::Path path
+      BeeFishWeb::Path path,
+      int tabs
    )
    {
 
@@ -108,14 +117,18 @@ namespace BeeFishWebDB {
       switch (type)
       {
          case Type::OBJECT:
-         {
+         {            
             size += output.write("{");
-
+            
             stringstream stream;
             Size count;
             stream << value;
             stream >> count;
 
+            if (count > 0) {
+                size += output.write("\r\n");
+            }
+            
             Path table = path[JSONPath::OBJECT_TABLE];
             Path keys = path[JSONPath::OBJECT_KEYS];
 
@@ -126,20 +139,29 @@ namespace BeeFishWebDB {
 
                assert(keys.contains(key));
 
-               string label = "\"" + escape(key) + "\":";
+               size += output.write(getTabs(tabs + 1));
+               
+               string label = "\"" + escape(key) + "\": ";
 
                size += output.write(label);
 
                size += streamJSONFromDB(
                   output,
-                  keys[key]
+                  keys[key],
+                  tabs + 1
                );
 
-               if (++i < count)
+               if (++i < count) {
                   size += output.write(",");
+                  size += output.write("\r\n");
+               }
 
             }
-
+            
+            if (count > 0) {
+               size += output.write("\r\n");
+               size += output.write(getTabs(tabs));
+            }
             size += output.write("}");
             break;
          }
@@ -173,8 +195,9 @@ namespace BeeFishWebDB {
          }
          case Type::ARRAY:
          {
+           
             size += output.write("[");
-
+            size += output.write("\r\n");
             stringstream stream;
             Size count;
             stream << value;
@@ -184,19 +207,25 @@ namespace BeeFishWebDB {
                  ++index)
             {
 
-              // if (path.contains(index))
+               if (path.contains(index))
                {
+                  size += output.write(getTabs(tabs + 1));
                   size += streamJSONFromDB (
                      output,
-                     path[index]
+                     path[index],
+                     tabs + 1
                   );
                }
 
-               if ((index + 1) < count)
+               if ((index + 1) < count) {
                   size += output.write(",");
+                  size += output.write("\r\n");
+               }
    
             }
 
+            size += output.write("\r\n");
+            size += output.write(getTabs(tabs));
             size += output.write("]");
 
             break;

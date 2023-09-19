@@ -6,18 +6,18 @@ TEMP = /var/tmp
 
 all:
 	cd Parser && make $(DEBUG)
-	cd JSON && make $(DEBUG)
 	cd PowerEncoding && make $(DEBUG)
 	cd Database && make $(DEBUG)
+	cd JSON && make $(DEBUG)
 	cd WebRequest && make $(DEBUG)
 	cd WebServer && make $(DEBUG)
 	cd DBServer && make $(DEBUG)
 	
 test:	all
 	cd Parser && $(BUILD)/Parser -test
-	cd JSON && $(BUILD)/JSON -test
 	cd PowerEncoding && $(BUILD)/PowerEncoding -test
 	cd Database && $(BUILD)/Database -test
+	cd JSON && $(BUILD)/JSON -test
 	cd WebRequest && $(BUILD)/WebRequest -test
 	cd WebServer && $(BUILD)/WebServer -test
 	cd DBServer && $(BUILD)/DBServer -test

@@ -1,7 +1,7 @@
 #ifndef BEE_FISH__WEB_DB__WEB_REQUEST_HPP
 #define BEE_FISH__WEB_DB__WEB_REQUEST_HPP
 #include "StreamFromDB.hpp"
-#include "JSONParser.hpp"
+#include "../JSON/JSONParser.hpp"
 #include "../WebRequest/WebRequest.hpp"
 
 extern "C" uint8_t _binary_404_html_start[];
