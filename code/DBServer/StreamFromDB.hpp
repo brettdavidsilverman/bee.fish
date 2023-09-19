@@ -195,13 +195,15 @@ namespace BeeFishWebDB {
          }
          case Type::ARRAY:
          {
-           
-            size += output.write("[");
-            size += output.write("\r\n");
             stringstream stream;
             Size count;
             stream << value;
             stream >> count;
+            size += output.write("[");
+            
+            if (count > 0)
+               size += output.write("\r\n");
+            
             for (Size index = 0;
                  index < count;
                  ++index)
@@ -224,8 +226,11 @@ namespace BeeFishWebDB {
    
             }
 
-            size += output.write("\r\n");
-            size += output.write(getTabs(tabs));
+            if (count > 0) {
+               size += output.write("\r\n");
+               size += output.write(getTabs(tabs));
+            }
+            
             size += output.write("]");
 
             break;
