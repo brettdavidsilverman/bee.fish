@@ -71,7 +71,7 @@ namespace BeeFishWebDB {
       DBWebRequest::Path urlPath(const string& url) {
          DBWebRequest::Path path = root();
 
-         auto onpath =
+         auto onpathsegment =
          [&path](string segment)
          {
             path = path[segment];
@@ -79,7 +79,7 @@ namespace BeeFishWebDB {
          };
 
          auto urlParser =
-           BeeFishWeb::URL(onpath);
+           BeeFishWeb::URL(onpathsegment);
 
          urlParser.read(url);
 
@@ -177,15 +177,10 @@ namespace BeeFishWebDB {
 
             logMessage(LOG_WARNING, "Invalid content from %s", _ipAddress.c_str());
             
-            if (_method == "POST") {
-               
-               path.clear();
-               outputFail(getErrorMessage());
-            }
+            if (_method == "POST")
+               return outputFail(getErrorMessage());
             else
-               outputError();
-
-            close();
+               return outputError();
 
             return false;
          }
@@ -193,22 +188,19 @@ namespace BeeFishWebDB {
          if ( _method == "GET" &&
               _url == "/" )
          {
-            outputHomePage();
-            return true;
+            return outputHomePage();
          }
 
          if (_method == "POST")
          {
-            outputSuccess();
-            return true;
+            return outputSuccess();
          }
 
          
          if (!path.hasData() ||
              path.isDeadEnd())
          {
-            output404NotFound();
-            return true;
+            return output404NotFound();
          }
          
 
@@ -219,12 +211,11 @@ namespace BeeFishWebDB {
                return true;
          }
 
-         outputError();
+         return outputError();
 
-         return true;
       }
 
-      virtual void outputJSON(bool success, std::string reason = "")
+      virtual bool outputJSON(bool success, std::string reason = "")
       {
          stringstream stream;
 
@@ -267,29 +258,31 @@ namespace BeeFishWebDB {
          std::string response =
             stream.str();
 
-         ::write(
+         ssize_t written = ::write(
             _socket,
             response.c_str(),
             response.length()
          );
          
+         return written == response.length();
+         
 
       }
 
-      virtual void outputFail(const std::string& reason)
+      virtual bool outputFail(const std::string& reason)
       {
-         outputJSON(
+         return outputJSON(
             false,
             reason
          );
       }
 
-      virtual void outputSuccess()
+      virtual bool outputSuccess()
       {
-         outputJSON(true);
+         return outputJSON(true);
       }
 
-      virtual void output404NotFound()
+      virtual bool output404NotFound()
       {
 
          stringstream writeOutput;
@@ -299,7 +292,7 @@ namespace BeeFishWebDB {
          const size_t size =
             _binary_404_html_end -
             _binary_404_html_start;
-
+            
          writeOutput <<
             "HTTP/2.0 404 Not Found\r\n" <<
             "Content-Type: text/html; charset=utf-8\r\n" <<
@@ -308,23 +301,30 @@ namespace BeeFishWebDB {
                size << "\r\n" <<
             "\r\n";
 
-         writeOutput.write(
+         std::string headers =
+            writeOutput.str();
+
+         ssize_t written;
+         
+         written = ::write(
+            _socket,
+            headers.c_str(),
+            headers.length()
+         );
+         
+         if (written < headers.length())
+            return false;
+         
+         written = ::write(
+            _socket,
             html,
             size
          );
-
-         std::string response =
-            writeOutput.str();
-
-         ::write(
-            _socket,
-            response.c_str(),
-            response.length()
-         );
-
+         
+         return written == size;
       }
 
-      virtual void outputHomePage()
+      virtual bool outputHomePage()
       {
 
          stringstream writeOutput;
@@ -343,23 +343,30 @@ namespace BeeFishWebDB {
                size<< "\r\n" <<
             "\r\n";
 
-         writeOutput.write(
+         std::string headers =
+            writeOutput.str();
+
+         ssize_t written;
+         
+         written = ::write(
+            _socket,
+            headers.c_str(),
+            headers.length()
+         );
+         
+         if (written < headers.length())
+            return false;
+         
+         written = ::write(
+            _socket,
             html,
             size
          );
-
-         std::string response =
-            writeOutput.str();
-
-         ::write(
-            _socket,
-            response.c_str(),
-            response.length()
-         );
-
+         
+         return written == size;
       }
 
-      virtual void outputError()
+      virtual bool outputError()
       {
 
          stringstream writeOutput;
@@ -378,19 +385,27 @@ namespace BeeFishWebDB {
                size << "\r\n" <<
             "\r\n";
 
-         writeOutput.write(
+         std::string header =
+            writeOutput.str();
+
+         ssize_t written;
+         
+         written = ::write(
+            _socket,
+            header.data(),
+            header.size()
+         );
+         
+         if (written < header.size())
+            return false;
+            
+         written = ::write(
+            _socket,
             html,
             size
          );
-
-         std::string response =
-            writeOutput.str();
-
-         ::write(
-            _socket,
-            response.data(),
-            response.size()
-         );
+         
+         return written == size;
 
       }
 

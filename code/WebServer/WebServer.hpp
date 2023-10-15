@@ -321,13 +321,13 @@ namespace BeeFishWeb {
          std::string response =
             writeOutput.str();
 
-         ::write(
+         ssize_t written = ::write(
             clientSocket,
             response.c_str(),
             response.length()
          );
 
-         return false;
+         return written == response.length();
 
       }
       

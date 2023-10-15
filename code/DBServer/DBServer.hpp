@@ -54,6 +54,7 @@ namespace BeeFishWebDB {
 
             // Read from the client socket
             if (!webRequest.process()) {
+               ::close(clientSocket);
                return false;
             }
          }
@@ -62,6 +63,7 @@ namespace BeeFishWebDB {
              stringstream stream;
              stream << "Error processing client " << ipAddress;
              logMessage(LOG_NOTICE, stream.str());
+             ::close(clientSocket);
              return false;
          }
 

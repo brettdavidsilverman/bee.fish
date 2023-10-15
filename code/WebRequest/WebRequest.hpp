@@ -176,7 +176,7 @@ namespace BeeFishWeb {
                size
             );
 
-         if (written < 0)
+         if (written != size)
          {
             stringstream stream;
             stream << "Error writing to " << _ipAddress;
@@ -213,7 +213,7 @@ namespace BeeFishWeb {
          stringstream stream;
 
          if (_body) {
-            stream << "Invalid content at position "
+            stream << "Invalid content from position "
                    << _body->_byteCount;
          }
          else
@@ -353,7 +353,7 @@ namespace BeeFishWeb {
                     .find(prefix) !=
                     std::string::npos )
             {
-              _body = createJSONBody();
+               _body = createJSONBody();
                return _body;
             }
             else if (_contentLength > 0)
@@ -362,6 +362,7 @@ namespace BeeFishWeb {
 
                return _body;
             }
+
 
          }
 
