@@ -201,8 +201,6 @@ namespace BeeFishWeb {
             {
                const char *ipAddress = inet_ntoa(cli_addr.sin_addr);
 
-               //logMessage(LOG_NOTICE, ipAddress);
-         
                // Set client socket to non blocking
                //fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 

@@ -61,8 +61,7 @@ namespace BeeFishWebDB {
          catch (...)
          {
              stringstream stream;
-             stream << "Error processing client " << ipAddress;
-             logMessage(LOG_NOTICE, stream.str());
+             logMessage(LOG_NOTICE, "Error processing client %s", ipAddress.c_str());
              ::close(clientSocket);
              return false;
          }

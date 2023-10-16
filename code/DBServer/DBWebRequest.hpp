@@ -177,12 +177,18 @@ namespace BeeFishWebDB {
 
             logMessage(LOG_WARNING, "Invalid content from %s", _ipAddress.c_str());
             
-            if (_method == "POST")
+            if (_method == "POST") {
+                
+               if (_url.length())
+                  path.deleteData();
+                  
                return outputFail(getErrorMessage());
-            else
-               return outputError();
+            }
+            //else
+            //   return outputError();
 
             return false;
+            
          }
 
          if ( _method == "GET" &&
