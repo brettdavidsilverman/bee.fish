@@ -3,4 +3,6 @@
 
 #include "../Config.hpp"
 
+#include "../Script/Config.hpp"
+
 #endif

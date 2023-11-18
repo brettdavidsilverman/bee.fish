@@ -12,7 +12,7 @@ using namespace BeeFishDatabase;
 using namespace BeeFishJSON;
 using namespace BeeFishPowerEncoding;
 
-namespace BeeFishScript {
+namespace BeeFishDBServer {
 
    class JSONDBHandler
    {
@@ -20,10 +20,10 @@ namespace BeeFishScript {
       struct JSONStackValue {
          Type _type;
          Size _index;
-         Path<PowerEncoding> _path;
+         Path _path;
       };
 
-      Path<PowerEncoding> _rootPath;
+      Path _rootPath;
       vector<JSONStackValue> _stack;
       std::string _string;
       std::string _key;
@@ -31,7 +31,7 @@ namespace BeeFishScript {
       
    public:
 
-      JSONDBHandler(Path<PowerEncoding> path) :
+      JSONDBHandler(Path path) :
          _rootPath(path)
       {
       }
@@ -50,7 +50,7 @@ namespace BeeFishScript {
          return lastValue()._index;
       }
 
-      Path<PowerEncoding>& lastPath() {
+      Path& lastPath() {
          return lastValue()._path;
       }
 
@@ -246,12 +246,12 @@ namespace BeeFishScript {
          Path path = lastPath();
          Size& index = lastIndex();
 
-         path[JSONPath::OBJECT_TABLE]
+         path[OBJECT_TABLE]
              [index++]
               .setData(_key);
 
          path =
-            path[JSONPath::OBJECT_KEYS]
+            path[OBJECT_KEYS]
                 [_key];
 
          push_back(
@@ -454,7 +454,7 @@ namespace BeeFishScript {
    {
    protected:
       boost::json::basic_parser<JSONDBHandler> _parser;
-      Path<Database::Encoding> _rootPath;
+      Path _rootPath;
       std::string _buffer = std::string(getpagesize(), '\0');
       const long _contentLength;
       Size _bytesWritten {0};
@@ -472,7 +472,7 @@ namespace BeeFishScript {
    public:
 
       JSONParser(
-         Path<Database::Encoding> path,
+         Path path,
          long contentLength = -1
       ) :
          Parser(),

@@ -155,7 +155,7 @@ namespace BeeFishWeb
       auto onpath =
       [&fullPath](std::string path)
       {
-        // cout << "{" << path << "}";
+         cout << "{" << path << "}";
          fullPath += "/" + path;
          return true;
       };
@@ -205,7 +205,7 @@ namespace BeeFishWeb
       success &= testPattern(
          URL(onpath),
          "/path3/path4?",
-         true
+         nullopt
       );
 
       success &= testValue(
@@ -222,6 +222,12 @@ namespace BeeFishWeb
       success &= testPattern(
          URL(onpath),
          "/path9/path10/?",
+         true
+      );
+      
+      success &= testPattern(
+         URL(onpath),
+         "/path11/path12/?path13.path14",
          true
       );
 

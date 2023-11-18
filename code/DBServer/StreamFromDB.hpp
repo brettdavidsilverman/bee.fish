@@ -4,11 +4,10 @@
 #include "../Parser/Parser.hpp"
 #include "../Database/Database.hpp"
 #include "../WebRequest/WebRequest.hpp"
-#include "../JSON/JSONParser.hpp"
 #include "Config.hpp"
 
 
-namespace BeeFishWebDB {
+namespace BeeFishDBServer {
 
    using namespace std;
    using namespace BeeFishParser;
@@ -16,32 +15,35 @@ namespace BeeFishWebDB {
    using namespace BeeFishPowerEncoding;
    using namespace BeeFishWebDB;
    using namespace BeeFishJSON;
-
-   inline string getTabs(Size tabs)
+  // using namespace BeeFishScript
+  
+   typedef BeeFishDatabase::Path<Database::Encoding> Path;
+   
+   inline string getTabs(BeeFishDatabase::Size tabs)
    {
        return string(tabs * TAB_SPACES, ' ');
    }
    
-   inline Size streamDocumentFromDB (
+   inline BeeFishDatabase::Size streamDocumentFromDB (
       BeeFishWeb::WebRequest& output,
-      BeeFishWeb::Path path
+      Path path
    );
 
-   inline Size streamJSONFromDB (
+   inline BeeFishDatabase::Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
-      BeeFishWeb::Path path,
+      Path path,
       int tabs
    );
 
    inline bool writeHeaders(
       BeeFishWeb::WebRequest& output,
       std::string contentType,
-      Size contentLength
+      BeeFishDatabase::Size contentLength
    );
 
-   inline Size streamFromDB (
+   inline BeeFishDatabase::Size streamFromDB (
       BeeFishWeb::WebRequest& output,
-      BeeFishWeb::Path path,
+      Path path,
       bool original
    )
    {
@@ -71,7 +73,7 @@ namespace BeeFishWebDB {
 
       if (path.contains("document"))
       {
-         Size contentLength;
+         BeeFishDatabase::Size contentLength;
          path["document"].getData(contentLength);
 
          if (!writeHeaders(
@@ -90,14 +92,14 @@ namespace BeeFishWebDB {
       return 0;
    }
 
-   inline Size streamJSONFromDB (
+   inline BeeFishDatabase::Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
-      BeeFishWeb::Path path,
+      Path path,
       int tabs
    )
    {
 
-      Size size = 0;
+      BeeFishDatabase::Size size = 0;
 
       assert(!path.isDeadEnd());
 
@@ -121,7 +123,7 @@ namespace BeeFishWebDB {
             size += output.write("{");
             
             stringstream stream;
-            Size count;
+            BeeFishDatabase::Size count;
             stream << value;
             stream >> count;
 
@@ -129,8 +131,11 @@ namespace BeeFishWebDB {
                 size += output.write("\r\n");
             }
             
-            Path table = path[JSONPath::OBJECT_TABLE];
-            Path keys = path[JSONPath::OBJECT_KEYS];
+            Path
+               table = path[OBJECT_TABLE];
+               
+            Path
+               keys = path[OBJECT_KEYS];
 
             for (int i = 0; i < count;)
             {
@@ -196,7 +201,7 @@ namespace BeeFishWebDB {
          case Type::ARRAY:
          {
             stringstream stream;
-            Size count;
+            BeeFishDatabase::Size count;
             stream << value;
             stream >> count;
             size += output.write("[");
@@ -204,7 +209,7 @@ namespace BeeFishWebDB {
             if (count > 0)
                size += output.write("\r\n");
             
-            for (Size index = 0;
+            for (BeeFishDatabase::Size index = 0;
                  index < count;
                  ++index)
             {
@@ -246,19 +251,19 @@ namespace BeeFishWebDB {
       
    }
 
-   inline Size streamDocumentFromDB (
+   inline BeeFishDatabase::Size streamDocumentFromDB (
       BeeFishWeb::WebRequest& output,
-      BeeFishWeb::Path path
+      Path path
    )
    {
 
       Path document = path;
 
       // Output the document content
-      Size pageIndex  = 0;
-      Size min = document.min<Size>();
-      Size max = document.max<Size>();
-      Size byteCount = 0;
+      BeeFishDatabase::Size pageIndex  = 0;
+      BeeFishDatabase::Size min = document.min<BeeFishDatabase::Size>();
+      BeeFishDatabase::Size max = document.max<BeeFishDatabase::Size>();
+      BeeFishDatabase::Size byteCount = 0;
 
       for ( pageIndex = min;
             pageIndex <= max;
@@ -267,7 +272,7 @@ namespace BeeFishWebDB {
 
          std::string data;
 
-         BeeFishWeb::Path page =
+         Path page =
             document[pageIndex];
 
          if (page.hasData()) {
@@ -291,7 +296,7 @@ namespace BeeFishWebDB {
    bool writeHeaders(
       BeeFishWeb::WebRequest& output,
       std::string contentType,
-      Size contentLength
+      BeeFishDatabase::Size contentLength
    )
    {
       

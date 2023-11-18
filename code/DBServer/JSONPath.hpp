@@ -1,23 +1,23 @@
-#ifndef BEE_FISH__DBSERVER__JSON_PATH
-#define BEE_FISH__DBSERVER__JSON_PATH
+#ifndef BEE_FISH__SCRIPT__JSON_PATH
+#define BEE_FISH__SCRIPT__JSON_PATH
 
 #include "../Database/Path.hpp"
-#include "Variable.hpp"
+#include "../Script/Variable.hpp"
 
 using namespace BeeFishDatabase;
 using namespace BeeFishScript;
 using namespace BeeFishJSON;
 
-namespace BeeFishScript {
-
+namespace BeeFishDBServer {
+   
+   typedef 
+      BeeFishDatabase::
+      Path<BeeFishPowerEncoding::PowerEncoding>
+      Path;
+      
    class JSONPath :
-      protected BeeFishDatabase::
-         Path<BeeFishPowerEncoding::PowerEncoding>
+      public Path
    {
-   public:
-      inline static const int OBJECT_TABLE = 0;
-      inline static const int OBJECT_KEYS = 1;
-
    public:
       JSONPath(const Path& source) :
          Path(source)
@@ -224,6 +224,24 @@ namespace BeeFishScript {
       JSONPath operator [] (int index)
       {
          return (*this)[(Size)index];
+      }
+      
+      bool contains(std::string& segment)
+      {
+         Path path(*this);
+
+         Type type =
+            path.value<Type>();
+
+         if (type == Type::OBJECT)
+         {
+            path << type;
+            path << OBJECT_KEYS;
+            if (path.contains(segment))
+               return true;
+         }
+         
+         return false;
       }
       
       friend ostream& operator << (ostream& out, const JSONPath& jsonPath)

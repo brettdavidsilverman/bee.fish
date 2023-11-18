@@ -11,7 +11,7 @@
 #include "DBWebRequest.hpp"
 #include "Version.hpp"
 
-namespace BeeFishWebDB {
+namespace BeeFishDBServer {
 
    using namespace BeeFishMisc;
    using namespace BeeFishWeb;
@@ -21,7 +21,6 @@ namespace BeeFishWebDB {
       public Database
    {
    public:
-      typedef DBWebRequest::Path Path;
 
       DBServer(
          string host = WEB_SERVER_HOST,
@@ -43,8 +42,6 @@ namespace BeeFishWebDB {
          string ipAddress
       ) override
       {
-
-         signal(SIGPIPE, SIG_IGN);
          try {
             DBWebRequest webRequest(
                this,
@@ -73,7 +70,7 @@ namespace BeeFishWebDB {
    };
    
    // Defined in DBWebRequest.hpp
-   BeeFishWeb::Path DBWebRequest::root() {
+   Path DBWebRequest::root() {
       Database* database =
          dynamic_cast<Database*>
             (_webServer);

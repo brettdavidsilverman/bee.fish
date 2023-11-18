@@ -1,11 +1,11 @@
 #ifndef BEE_FISH__WEB_DB__WEB_REQUEST_HPP
 #define BEE_FISH__WEB_DB__WEB_REQUEST_HPP
 #include "StreamFromDB.hpp"
-#include "../JSON/JSONParser.hpp"
+#include "../DBServer/JSONParser.hpp"
 #include "../WebRequest/WebRequest.hpp"
 
-extern "C" uint8_t _binary_404_html_start[];
-extern "C" uint8_t _binary_404_html_end[];
+extern "C" uint8_t _binary_NotFound_html_start[];
+extern "C" uint8_t _binary_NotFound_html_end[];
 
 extern "C" uint8_t _binary_HomePage_html_start[];
 extern "C" uint8_t _binary_HomePage_html_end[];
@@ -14,7 +14,7 @@ extern "C" uint8_t _binary_ErrorPage_html_start[];
 extern "C" uint8_t _binary_ErrorPage_html_end[];
 
 
-namespace BeeFishWebDB {
+namespace BeeFishDBServer {
 
    using namespace std;
    using namespace BeeFishMisc;
@@ -66,15 +66,34 @@ namespace BeeFishWebDB {
       }
 
       // Defined in DBServer.hpp
-      BeeFishWeb::Path root();
+      Path root();
       
       DBWebRequest::Path urlPath(const string& url) {
-         DBWebRequest::Path path = root();
+       
+         JSONPath path = root();
 
+         cerr << "Fetching " << url << endl;
+         
          auto onpathsegment =
          [&path](string segment)
          {
-            path = path[segment];
+            cerr << "SEGMENT=" << segment << std::flush;
+            
+            Type type =
+               path.value<Type>();
+            cerr << ",Type=" << type << std::flush;
+            
+            if (type == Type::OBJECT) {
+               JSONPath json(path);
+               if (json.contains(segment))
+                  json = json[segment];
+               path = json;
+            }
+            else
+               path = path[segment];
+               
+            cerr << endl;
+            
             return true;
          };
 
@@ -293,11 +312,11 @@ namespace BeeFishWebDB {
 
          stringstream writeOutput;
 
-         const char * html = (const char *)(&_binary_404_html_start[0]);
+         const char * html = (const char *)(&_binary_NotFound_html_start[0]);
 
          const size_t size =
-            _binary_404_html_end -
-            _binary_404_html_start;
+            _binary_NotFound_html_end -
+            _binary_NotFound_html_start;
             
          writeOutput <<
             "HTTP/2.0 404 Not Found\r\n" <<

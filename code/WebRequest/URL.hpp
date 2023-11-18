@@ -10,20 +10,20 @@ namespace BeeFishWeb {
 
    class URL : public Parser {
    protected:
-      string _path;
+      string _segment;
       
       typedef std::function<bool (std::string)> Function;
-      Function _onpath;
+      Function _onsegment;
 
       Parser* _urlParser = nullptr;
 
       Invoke::Function  _oninvoke =
          [this](Parser*) {
             bool success = true;
-            if (_onpath) {
-               success = _onpath(_path);
+            if (_onsegment) {
+               success = _onsegment(_segment);
             }
-            _path.clear();
+            _segment.clear();
             return success;
          };
  
@@ -32,13 +32,13 @@ namespace BeeFishWeb {
       using Parser::read;
 
       URL(const URL& url) :
-         _onpath(url._onpath)
+         _onsegment(url._onsegment)
       {
         _urlParser = createParser();
       }
 
-      URL(Function onpath) :
-         _onpath(onpath)
+      URL(Function onsegment) :
+         _onsegment(onsegment)
       {
          _urlParser = createParser();
       }
@@ -51,27 +51,27 @@ namespace BeeFishWeb {
 
          const auto seperator =
             Character("/") or
-            Character("?");
+            Character("?") or
+            Character(".");
 
-         const auto parser =
-         Repeat(
+         const And parser =
             Character("/") and
-            Capture(
+            Repeat(
                Invoke(
-                  Repeat(
-                     not (
-                        seperator or
-                        blankSpace
+                  Capture(
+                     Repeat(
+                        not (
+                           seperator
+                        ),
+                        1
                      ),
-                     0
-                  ),
+                     _segment
+                  )
+                  and seperator,
                   _oninvoke
                ),
-               _path
-            ),
-            0
-         )
-         and seperator;
+               0
+            );
 
          return parser.copy();
 

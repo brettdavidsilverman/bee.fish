@@ -6,7 +6,7 @@
 #include "../Parser/Parser.hpp"
 #include "../Parser/Test.hpp"
 #include "JSON.hpp"
-#include "JSONParser.hpp"
+#include "../DBServer/JSONParser.hpp"
 #include "Test.hpp"
 #include "Config.hpp"
 
@@ -15,6 +15,7 @@ using namespace BeeFishMisc;
 using namespace BeeFishParser;
 using namespace BeeFishJSON;
 using namespace BeeFishDatabase;
+using namespace BeeFishDBServer;
 
 Parser* homeGrownParser();
 Parser* boostParser();

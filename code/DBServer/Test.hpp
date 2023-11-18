@@ -4,16 +4,16 @@
 #include <bits/stdc++.h>
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../Test/Test.hpp"
-#include "../JSON/JSONPath.hpp"
+#include "JSONPath.hpp"
 #include "DBServer.hpp"
 #include "Config.hpp"
 
-namespace BeeFish
+namespace BeeFishDBServer
 {
    using namespace BeeFishJSON;
    using namespace BeeFishMisc;
    using namespace BeeFishWeb;
-   using namespace BeeFishWebDB;
+   using namespace BeeFishDatabase;
    using namespace BeeFishScript;
    using namespace BeeFishTest;
 

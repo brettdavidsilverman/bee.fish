@@ -15,7 +15,9 @@ using namespace BeeFishPowerEncoding;
 
 namespace BeeFishDatabase {
 
-
+   const int OBJECT_TABLE = 0;
+   const int OBJECT_KEYS = 1;
+      
    template<class Encoding = PowerEncoding>
    class Path :
       public Encoding
@@ -24,9 +26,11 @@ namespace BeeFishDatabase {
       Database* _database;
       Index     _index;
    public:
-
+      
 #include "Stack.hpp"
 
+   public:
+       
       Path( Database* database = nullptr,
             Index index = Branch::Root ) :
          Encoding(),
@@ -551,11 +555,9 @@ namespace BeeFishDatabase {
       template<typename T>
       T value() const
       {
-     //    if (isDeadEnd())
-     //       return T();
-
-         assert(!isDeadEnd());
-
+         if (isDeadEnd())
+            return T();
+            
          return min<T>();
       }
 

@@ -35,9 +35,13 @@ namespace BeeFishWeb {
    using namespace BeeFishDatabase;
    using namespace BeeFishPowerEncoding;
 
-   typedef Path<Database::Encoding> Path;
-
    class WebServer {
+   protected:
+       
+      typedef
+      BeeFishDatabase::Path<Database::Encoding>
+      Path;
+      
    protected:
       const int _port;
       int _serverSocket = -1;

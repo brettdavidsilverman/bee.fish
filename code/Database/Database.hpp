@@ -18,7 +18,9 @@
 #include "Data.hpp"#include "Path.hpp"
 
 namespace BeeFishDatabase {
-   typedef Path<Database::Encoding>::Stack Stack;
+   typedef
+      Path<Database::Encoding>::Stack
+      Stack;
 }
 
 #endif

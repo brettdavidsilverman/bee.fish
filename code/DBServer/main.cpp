@@ -14,7 +14,8 @@ int main(int argc, const char* argv[]) {
    using namespace BeeFishWeb;
    using namespace BeeFishWebDB;
    using namespace BeeFishParser;
-
+   using namespace BeeFishDBServer;
+   
    cout << endl
         << "bee.fish.db-server"
            << endl
@@ -89,7 +90,7 @@ int main(int argc, const char* argv[]) {
    }
 
    if (hasArg(argc, argv, "-test") >= 0) {
-      if (!BeeFish::test()) {
+      if (!BeeFishDBServer::test()) {
          cout << "BeeFish DBServer tests failed" << endl;
          return 1;
       }
