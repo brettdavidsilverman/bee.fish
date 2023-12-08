@@ -14,7 +14,7 @@
 #include "../Parser/Parser.hpp"
 #include "../JSON/JSON.hpp"
 #include "../Database/Database.hpp"
-#include "URL.hpp"
+#include "../WebRequest/URLHandler.hpp"
 #include "Header.hpp"
 #include "Config.hpp"
 
@@ -25,15 +25,15 @@ namespace BeeFishWeb {
    using namespace BeeFishParser;
    using namespace BeeFishJSON;
    using namespace BeeFishDatabase;
+   using namespace BeeFishDBServer;
 
    class WebServer;
 
    class WebRequest : public Parser {
    protected:
-      WebServer* _webServer;
-
       int _socket;
    public:
+      WebServer* _webServer;
       string _ipAddress;
       string _method;
       string _url;
@@ -44,14 +44,16 @@ namespace BeeFishWeb {
 
       Parser* _body = nullptr;
       And _parser = createParser();
-
+      
       size_t _index {0};
+      string _segment;
 
    public:
+
       using Parser::read;
 
-      WebRequest() :
-         _webServer(nullptr),
+      WebRequest(WebServer* webServer) :
+         _webServer(webServer),
          _socket(-1)
       {
       }
@@ -73,9 +75,20 @@ namespace BeeFishWeb {
       }
 
       virtual ~WebRequest() {
+         
          close();
+
       }
 
+      Parser* copy() const override
+      {
+         return new WebRequest(*this);
+      }
+/*
+      virtual Path root() {
+         return Path(*(Database*)_webServer);
+      };
+*/
       void close() {
          if(_socket > 0)
             ::close(_socket);
@@ -129,7 +142,7 @@ namespace BeeFishWeb {
             }
             
             if (size == 0) {
-               usleep(1000);
+               usleep(100);
                continue;
             }
 
@@ -222,12 +235,6 @@ namespace BeeFishWeb {
          return stream.str();
       }
 
-      virtual Parser* copy() const
-      override
-      {
-         return new WebRequest(*this);
-      }
-
       virtual bool read(char c)
       override
       {
@@ -265,57 +272,8 @@ namespace BeeFishWeb {
          Parser::fail();
       }
 
-      And createParser() {
-
-         And parser = Capture(
-            Word("GET") or
-            Word("POST") or
-            Word("DELETE"),
-            _method
-         ) and blanks and
-         Invoke(
-            Capture(
-               Character("/") and
-               Repeat(not blank, 0),
-               _url
-            ),
-            [this](Parser* match) {
-               if (_url[_url.size() - 1] 
-                   != '/' &&
-                   _url.find("?") == 
-                   std::string::npos)
-               {
-                  _url += "/";
-               }
-               return true;
-            }
-         ) and blanks and
-         Capture(
-            Word("HTTP/") and
-            integer and
-            fraction,
-            _version
-         ) and newLine and
-         Headers(
-            [this](Header* header) {
-               _headers.emplace(
-                  header->_key,
-                  header->_value
-               );
-            }
-         ) and
-         Invoke(
-            newLine,
-            [this](Parser*) {
-               if (_method == "GET")
-                  setResult(true);
-               return true;
-            }
-         ) and
-         LoadOnDemand(loadBody, this);
-
-         return parser;
-      }
+      // Defined in WebServer.hpp
+      And createParser();
 
       static Parser* loadBody(Parser* params) {
          
@@ -359,7 +317,6 @@ namespace BeeFishWeb {
             else if (_contentLength > 0)
             {
                _body = createContentLengthBody();
-
                return _body;
             }
 
@@ -403,7 +360,6 @@ namespace BeeFishWeb {
          virtual bool read(char c)
          override
          {
-
             if (_count >= _contentLength)
                return false;
 

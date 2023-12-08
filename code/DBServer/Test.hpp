@@ -36,26 +36,23 @@ namespace BeeFishDBServer
 
       cout << "Test DB Server" << endl;
 
-      remove(TEMP_FILENAME);
+      DBServer dbServer(
+         TEST_SERVER_HOST, TEST_SERVER_PORT, 1
+      );
 
-      DBServer* dbServer =
-         new DBServer(
-           WEB_SERVER_HOST, 8080, 1, TEMP_FILENAME
-         );
-
-      if (!dbServer->start())
+      if (!dbServer.start())
          return false;
 
       success = success &&
-         testJSONPath(dbServer);
+         testJSONPath(&dbServer);
 
       if (success)
       {
          cout << "Testing 404 " << flush;
 
          stringstream stream;
-         stream << "curl " << dbServer->url() << "bee"
-            " -s | grep \"html\"";
+         stream << "curl " << dbServer.url() << "bee"
+                << " -s | grep \"html\"";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
          outputSuccess(success);
@@ -66,7 +63,7 @@ namespace BeeFishDBServer
          cout << "Testing post application/json " << flush;
 
          stringstream stream;
-         stream << "curl " << dbServer->url() << "bee"
+         stream << "curl " << dbServer.url() << "bee/"
             " --header \"content-type: application/json\" " <<
             " --data 123 -s | grep \"true\"";
          string command = stream.str();
@@ -81,7 +78,7 @@ namespace BeeFishDBServer
          cout << "Testing get " << flush;
 
          stringstream stream;
-         stream << "curl -s " << dbServer->url() << "bee"
+         stream << "curl -s " << dbServer.url() << "bee/"
             " | grep 123";
          string command = stream.str();
          cerr << command << endl;
@@ -92,19 +89,15 @@ namespace BeeFishDBServer
       }
 
       if (success) {
-         success = testAllFiles(dbServer->url(), "tests");
+         success = testAllFiles(dbServer.url(), "tests");
       }
 
-      dbServer->stop();
-
-      delete dbServer;
-
-      std::filesystem::remove(TEMP_FILENAME);
+      dbServer.stop();
 
       outputSuccess(success);
 
       return success;
-   }
+   }  
 
    inline bool testAllFiles(string url, string directory)
    {
@@ -120,7 +113,7 @@ namespace BeeFishDBServer
       }
 
       sort(files.begin(), files.end());
-
+      
       for (auto file : files) {
          if (success)
             success = testFile(url, file);
@@ -133,8 +126,10 @@ namespace BeeFishDBServer
    
    inline bool testFile(string url, string file, bool expect)
    {
-      cout << "Testing " << endl
-           << url << file << endl;
+      cout << "\tTesting "
+           << file
+           << endl;
+
       stringstream stream;
       bool success = true;
 
@@ -147,10 +142,14 @@ namespace BeeFishDBServer
          "-T " << file << " -s | grep \"" << (expect ? "true" : "false") << "\" -q";
 
       string command = stream.str();
+
+cerr << "RIGHT HERE" << endl;
+cerr << command << endl;
+      
       success &= (system(command.c_str()) == 0);
 
       if (success && expect) {
-         command = "curl -s " + url + file;
+         command = "curl -s " + url + file + "/";
          success &= (system(command.c_str()) == 0);
       }
 
@@ -230,7 +229,7 @@ namespace BeeFishDBServer
       cout << "Testing JSON Path" << endl;
 
       bool success = true;
-      BeeFishWeb::Path root(db);
+      Path root(db);
       {
          cout << "\tTesting number " << flush;
          JSONPath path(root["json-number"]);
@@ -353,8 +352,9 @@ namespace BeeFishDBServer
             };
 
          path.setVariable(object);
+
          Variable var =
-            path["a"].getVariable();
+            path.getVariable();
 
          success = success &&
             (Number)(path["e"]["h"][0].getVariable()) == 1;

@@ -25,6 +25,7 @@
 
 #include "Config.hpp"
 #include "../Database/Database.hpp"
+#include "../WebRequest/URLHandler.hpp"
 #include "../WebRequest/WebRequest.hpp"
 #include "Version.hpp"
 
@@ -37,12 +38,6 @@ namespace BeeFishWeb {
 
    class WebServer {
    protected:
-       
-      typedef
-      BeeFishDatabase::Path<Database::Encoding>
-      Path;
-      
-   protected:
       const int _port;
       int _serverSocket = -1;
       boost::asio::thread_pool _threadPool;
@@ -53,12 +48,13 @@ namespace BeeFishWeb {
       std::string _host;
 
    public:
+      OnSegment _onsegment;
+
       WebServer(
          string host = WEB_SERVER_HOST,
          int port = WEB_SERVER_PORT,
          int threads = WEB_SERVER_THREADS
-      )
-      :
+      ) :
          _host(host),
          _port(port),
          _threadPool(threads)
@@ -66,19 +62,16 @@ namespace BeeFishWeb {
       }
 
       virtual ~WebServer() {
-         if (_loopThread)
-            delete _loopThread;
+         stop();
+         //if (_loopThread)
+         //   delete _loopThread;
       }
       
       virtual bool start() {
          using namespace std;
-
-         logMessage(
-            LOG_NOTICE,
-            "Starting WebServer %s",
-            _host.c_str()
-         );
          
+         stringstream  stream;
+
          if (!initializeServerSocket()) {
             return false;
          }
@@ -89,21 +82,28 @@ namespace BeeFishWeb {
          _loopThread = new std::thread(WebServer::loop, this); 
 
          while (!_isRunning) {
-            this_thread::sleep_for(milliseconds(100));
+            usleep(100);
          }
+
+         stream << "Server listening on " << url() << " 🟢";
+
+         logMessage(
+            LOG_NOTICE,
+            stream.str()
+         );
+
+         cout << stream.str() << endl;
 
          return true;
 
       }
 
       virtual void stop() {
+         
          using namespace std;
 
          if (_loopThread == nullptr)
             return;
-
-         logMessage(LOG_NOTICE, 
-            "Stopping WebServer");
 
          // Flush a request through
          // the system using curl
@@ -114,33 +114,28 @@ namespace BeeFishWeb {
          _stop = true;
 
          while (_isRunning) {
-            logMessage(LOG_NOTICE, "WebServer flush");
-            system(command.c_str());
-            this_thread::sleep_for(milliseconds(100));
+            auto result = system(command.c_str());
+            usleep(10000);
          }
-
-         logMessage(LOG_NOTICE, 
-            "Waiting on lock guard");
 
          lock_guard<mutex>
             guard(_running);
 
-         logMessage(LOG_NOTICE,
-            "Waiting on loop thread");
          _loopThread->join();
 
          delete _loopThread;
          _loopThread = nullptr;
 
-         logMessage(LOG_NOTICE,
-            "Waiting on thread pool");
-
          _threadPool.join();
 
          close();
 
+         string message = "WebServer stopped 🔴";
+
          logMessage(LOG_NOTICE,
-            "WebServer stopped 🔴");
+            message);
+
+         cout << message << endl;
       }
 
       virtual void join() {
@@ -158,12 +153,18 @@ namespace BeeFishWeb {
          return _port;
       }
 
-      virtual string url() const {
+      string url() const {
          stringstream stream;
+         
          stream << "http://"
-                <<  host()
+                <<  host();
+
+         if (port() != 80)
+            stream
                 << ":"
-                <<  port()
+                <<  port();
+
+         stream
                 << "/";
 
          return stream.str();
@@ -178,8 +179,6 @@ namespace BeeFishWeb {
       static void loop(WebServer* webServer) {
 
          using namespace std;
-
-         logMessage(LOG_NOTICE, "WebServer loop started  🟢");
 
          lock_guard<mutex> guard(webServer->_running);
 
@@ -212,11 +211,10 @@ namespace BeeFishWeb {
                boost::asio::post(
                   webServer->_threadPool,
                   [webServer, clientSocket, ipAddress]() {
-                     webServer->handleWebRequest(
+                     return webServer->handleWebRequest(
                         clientSocket,
                         ipAddress
                      );
-                     return true;
                   }
                );
 
@@ -226,11 +224,6 @@ namespace BeeFishWeb {
 
          webServer->_isRunning = false;
 
-        // delete webServer->_loopThread;
-        // webServer->_loopThread = nullptr;
-
-         logMessage(LOG_NOTICE, "WebServer loop ended");
-         
       }
 
       bool initializeServerSocket() {
@@ -290,8 +283,6 @@ namespace BeeFishWeb {
             return false;
          }
 
-         cout << "Server listening on port " << _port << " 🟢" << endl;
-
          return true;
 
       }
@@ -303,10 +294,13 @@ namespace BeeFishWeb {
       )
       {
 
+         WebRequest webRequest(this, clientSocket, ipAddress);
+         webRequest.read();
+
          stringstream outStream;
 
          outStream << version() << endl;
-
+         //outStream << webRequest._url << endl;
          string out = outStream.str();
 
          stringstream writeOutput;
@@ -314,7 +308,7 @@ namespace BeeFishWeb {
          writeOutput <<
             "HTTP/2.0 500 Error\r\n" <<
             "Content-Type: text/plain; charset=utf-8\r\n" <<
-            "Connection: keep-alive\r\n" <<
+            "Connection: close\r\n" <<
             "Content-Length: " <<
                out.length() << "\r\n" <<
             "\r\n" <<
@@ -339,9 +333,103 @@ namespace BeeFishWeb {
             ::close(_serverSocket);
          _serverSocket = -1;
       }
-   
+  
    };
 
+
+   // Declared in WebRequest.hpp
+   BeeFishParser::And WebRequest::createParser() {
+      const auto seperator =
+         Character("/") or
+         Character("?") or
+         Character(".");
+
+      const And parser = Capture(
+         Word("GET") or
+         Word("POST") or
+         Word("DELETE"),
+         _method
+      ) and blanks and
+      Invoke(
+         Capture(
+            Character("/") and
+            Repeat(
+               Invoke(
+                  Capture(
+                     Repeat(
+                        not (
+                           seperator or blank
+                        ),
+                        1
+                     ),
+                     _segment
+                  ),
+                  [this](Parser*) {
+
+                     bool success = true;
+
+                     if (_webServer && _webServer->_onsegment) {
+                        cerr << "FOUND OUR ON SEGMENT" << endl;
+                        success = _webServer->_onsegment(
+                           _segment
+                        );
+                     }
+                     else
+                        cerr << "NO ONSEGMENT" << endl;
+
+                     _segment.clear();
+                     return success;
+                  }
+               )
+               and Optional(seperator),
+               0
+            )
+         ),
+         [this](Parser* match) {
+            cerr << "HERE MOTHERFUCKER" << endl;
+
+            if (_url.size() == 0)
+               _url = "/";
+            else if (
+                  _url[_url.length() - 1] 
+                  != '/' &&
+                  _url.find("?") == 
+                  std::string::npos
+            )
+            {
+            //   _url += "/";
+            }
+            return true;
+         }
+      ) and blanks and
+      Capture(
+         Word("HTTP/") and
+         integer and
+         fraction,
+         _version
+      ) and newLine and
+      Headers(
+         [this](Header* header) {
+            _headers.emplace(
+               header->_key,
+               header->_value
+            );
+         }
+      ) and
+      Invoke(
+         newLine,
+         [this](Parser*) {
+            if (_method == "GET")
+               setResult(true);
+            return true;
+         }
+      ) and
+      LoadOnDemand(loadBody, this);
+
+      return parser;
+   }
+
+     
 }
 
 

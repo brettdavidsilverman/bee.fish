@@ -7,6 +7,11 @@
 
 // Should log to /var/log/messages
 
+
+//#define LOG_NOTICE  1
+//#define LOG_WARNING 2
+
+
 namespace BeeFishMisc {
 
    void openLog() {
@@ -20,18 +25,19 @@ namespace BeeFishMisc {
    }
 
    template<typename ... Args>
-   void logMessage(int priority, const std::string& message, Args ... args)
+//   void logMessage(int priority, const std::string& message, Args ... args)
+   void logMessage(int priority, const std::string& message)
    {
 
       //fprintf(stderr, message.c_str(), args ...);
       //fprintf(stderr, "\n");
-
-      syslog(priority, message.c_str(), args ...);
+      
+      syslog(priority, "%s", message.c_str());
       
    }
 
    void closeLog() {
-      closelog();
+       closelog();
    }
 
 }

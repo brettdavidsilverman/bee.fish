@@ -151,7 +151,7 @@ namespace BeeFishScript {
          Value(BeeFishJSON::Type type, const Value& source) {
             switch (type) {
             case BeeFishJSON::Type::UNDEFINED:
-            case BeeFishJSON::Type::_NULL:
+            case BeeFishJSON::Type::NULL_:
                break;
             case BeeFishJSON::Type::BOOLEAN:
                _boolean = source._boolean;
@@ -197,7 +197,7 @@ namespace BeeFishScript {
       }
 
       Variable(const Null& _nullptr) {
-         _type = BeeFishJSON::Type::_NULL;
+         _type = BeeFishJSON::Type::NULL_;
       }
 
       Variable(const Boolean& boolean) {
@@ -271,7 +271,7 @@ namespace BeeFishScript {
       virtual ~Variable() {
          switch (_type) {
          case BeeFishJSON::Type::UNDEFINED:
-         case BeeFishJSON::Type::_NULL:
+         case BeeFishJSON::Type::NULL_:
          case BeeFishJSON::Type::BOOLEAN:
          case BeeFishJSON::Type::NUMBER:
             break;
@@ -339,7 +339,7 @@ namespace BeeFishScript {
 
       virtual bool operator == (const Null compare) const {
 
-         if (_type == BeeFishJSON::Type::_NULL)
+         if (_type == BeeFishJSON::Type::NULL_)
             return true;
 
          return false;
@@ -348,7 +348,7 @@ namespace BeeFishScript {
 
       virtual bool operator != (const Null compare) const {
 
-         if (_type != BeeFishJSON::Type::_NULL)
+         if (_type != BeeFishJSON::Type::NULL_)
             return true;
 
          return false;
@@ -383,7 +383,7 @@ namespace BeeFishScript {
          case BeeFishJSON::Type::UNDEFINED:
             out << "undefined";
             break;
-         case BeeFishJSON::Type::_NULL:
+         case BeeFishJSON::Type::NULL_:
             out << "null";
             break;
          case BeeFishJSON::Type::BOOLEAN:
@@ -450,7 +450,7 @@ namespace BeeFishScript {
          switch (_type) {
          case BeeFishJSON::Type::UNDEFINED:
             return "undefined";
-         case BeeFishJSON::Type::_NULL:
+         case BeeFishJSON::Type::NULL_:
             return "null";
          case BeeFishJSON::Type::BOOLEAN:
             return "Boolean";

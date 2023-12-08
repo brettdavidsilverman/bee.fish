@@ -6,24 +6,34 @@
 #include "../Test/Test.hpp"
 
 #include "WebRequest.hpp"
+#include "../WebServer/WebServer.hpp"
 
 
-
-namespace BeeFishWeb
+namespace BeeFishTest
 {
+   using namespace BeeFishWeb;
    using namespace BeeFishParser;
    using namespace BeeFishJSON;
    using namespace BeeFishMisc;
    using namespace BeeFishTest;
 
+   Database* database = nullptr;
+   Path* root = nullptr;
+   WebServer* webServer = nullptr;
+
    inline bool testHeaders();
    inline bool testWebRequestClass();
-   inline bool testURL();
 
    inline bool testWebRequest()
    {
    
       bool success = true;
+
+      database = new Database();
+      root = new Path(database);
+      webServer = new WebServer(
+         "localhost", 8000, 2
+      );
 
       if (success)
          success = testHeaders();
@@ -31,10 +41,14 @@ namespace BeeFishWeb
       if (success)
          success = testWebRequestClass();
 
-      if (success)
-         success = testURL();
-
       BeeFishMisc::outputSuccess(success);
+
+      std::string tempfile = database->filename();
+      remove(tempfile.c_str());
+      
+      delete root;
+      delete database;
+      delete webServer;
 
       return success;
    }
@@ -104,7 +118,7 @@ namespace BeeFishWeb
       
       string host = WEB_SERVER_HOST;
 
-      WebRequest webRequest;
+      WebRequest webRequest(webServer);
 
       success &=
          testPattern(
@@ -127,7 +141,8 @@ namespace BeeFishWeb
       success &=
          testValue(host, webRequest._headers["host"]);
 
-      WebRequest webRequestJSON;
+      WebRequest webRequestJSON(webServer);
+
       success &=
          testPattern(
             webRequestJSON,
@@ -145,98 +160,6 @@ namespace BeeFishWeb
       
    }
 
-   inline bool testURL()
-   {
-      
-      cout << "Test URL" << endl;
-      
-      std::string fullPath;
-
-      auto onpath =
-      [&fullPath](std::string path)
-      {
-         cout << "{" << path << "}";
-         fullPath += "/" + path;
-         return true;
-      };
-
-      bool success = true;
-
-      fullPath = "";
-      success &= testPattern(
-         URL(onpath),
-         "/",
-         nullopt
-      );
-
-      success &= testValue(
-         "",
-         fullPath
-      );
-      
-      fullPath = "";
-
-      success &= testPattern(
-         URL(onpath),
-         "/path/",
-         nullopt
-      );
-
-      success &= testValue(
-         "/path",
-         fullPath
-      );
-      
-      fullPath = "";
-
-      success &= testPattern(
-         URL(onpath),
-         "/path1/path2/",
-         nullopt
-      );
-
-      success &= testValue(
-         "/path1/path2",
-         fullPath
-      );
-
-      fullPath = "";
-
-      success &= testPattern(
-         URL(onpath),
-         "/path3/path4?",
-         nullopt
-      );
-
-      success &= testValue(
-         "/path3/path4",
-         fullPath
-      );
-
-      success &= testPattern(
-         URL(onpath),
-         "/path5/path6/",
-         nullopt
-      );
-
-      success &= testPattern(
-         URL(onpath),
-         "/path9/path10/?",
-         true
-      );
-      
-      success &= testPattern(
-         URL(onpath),
-         "/path11/path12/?path13.path14",
-         true
-      );
-
-      BeeFishMisc::outputSuccess(success);
-
-      return success;
-   }
-
-    
 
 }
 

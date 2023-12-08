@@ -15,17 +15,16 @@ using namespace BeeFishMisc;
 
 int main(int argc, const char* argv[]) {
 /*
-      const string filename = "/var/tmp/DBServer.data";
-      remove(filename.c_str());
+      Database* db = new Database();
 
-      Database db(filename);
-
-      Path start(db);
+      Path start(*db);
       Path next = start["Hello"];
-      std::string str = "My Content Type";
-      next.setData(str);
-      std::string str2;
-      next.getData(str2);
+
+      if (start.contains("Hello"))
+         cerr << *db << endl;
+
+      delete db;
+
 return 0;
 */
    cout << "bee.fish.database"
@@ -79,7 +78,7 @@ return 0;
    
    Database database(fileName);
    cout << database;
-   Path<Database::Encoding> root(database);
+   Path root(database);
    Path path(root);
    
    if (output)

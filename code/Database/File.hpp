@@ -10,8 +10,6 @@
 #include <sys/file.h>
 #include <unistd.h>
 
-
-
 namespace BeeFishDatabase {
 
    using namespace std;
@@ -20,28 +18,45 @@ namespace BeeFishDatabase {
    protected:
       FILE* _file = NULL;
       bool _isNew;
+      bool _isTemp;
       string _filename;
-      
+            
    public:
       typedef size_t Size;
 
    public:
       File(
-         const string& path,
+         const string& filename = "",
          const Size initialSize = 0
       ) : _file(NULL),
-          _filename(path)
+          _filename(filename)
       {
-         // Create the file if it
-         // doesnt exist
-         if (exists() == false) {
-            create(initialSize);
+         if (_filename == "") {
+            std::string temp = TEMP_DIRECTORY;
+            temp += "bee.fish.XXXXXX";
+            int fileNo = mkstemp(temp.data());
+            _filename = temp;
             _isNew = true;
+            _isTemp = true;
+            ::close(fileNo);
+            open();
+            resize(initialSize);
          }
-         else
-            _isNew = false;
-      
-         open();
+         else {
+
+            // Create the file if it
+            // doesnt exist
+            if (exists() == false) {
+               create(initialSize);
+               _isNew = true;
+            }
+            else
+               _isNew = false;
+
+            open();
+
+         }
+
 
       }
 
@@ -51,12 +66,15 @@ namespace BeeFishDatabase {
          
       {
          _isNew = false;
+         _isTemp = false;
          open();
       }
       
          
       ~File() {
-          close();
+         close();
+         if (_isTemp && exists())
+            ::remove(_filename.c_str());
       }
       
       Size fileSize() const
@@ -210,7 +228,7 @@ namespace BeeFishDatabase {
          _fileNumber = fileno(_file);
       }
 
-      virtual File::Size resize(const File::Size newSize)
+      File::Size resize(const File::Size newSize)
       {
 
          resize(

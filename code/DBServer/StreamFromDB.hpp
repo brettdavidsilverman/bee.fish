@@ -15,10 +15,7 @@ namespace BeeFishDBServer {
    using namespace BeeFishPowerEncoding;
    using namespace BeeFishWebDB;
    using namespace BeeFishJSON;
-  // using namespace BeeFishScript
   
-   typedef BeeFishDatabase::Path<Database::Encoding> Path;
-   
    inline string getTabs(BeeFishDatabase::Size tabs)
    {
        return string(tabs * TAB_SPACES, ' ');
@@ -32,7 +29,7 @@ namespace BeeFishDBServer {
    inline BeeFishDatabase::Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
       Path path,
-      int tabs
+      int tabs = 0
    );
 
    inline bool writeHeaders(
@@ -56,21 +53,6 @@ namespace BeeFishDBServer {
       string contentType;
       path.getData(contentType);
 
-      if (path.contains("JSON"))
-      {
-         if (!writeHeaders(
-               output,
-               contentType,
-               0))
-         {
-            return 0;
-         }
-
-         return streamJSONFromDB(
-            output, path["JSON"], 0
-         );
-      }
-
       if (path.contains("document"))
       {
          BeeFishDatabase::Size contentLength;
@@ -88,6 +70,23 @@ namespace BeeFishDBServer {
             output, path["document"]
          );
       }
+
+//      if (path.contains("JSON"))
+      {
+         if (!writeHeaders(
+               output,
+               contentType,
+               0))
+         {
+            return 0;
+         }
+
+         return streamJSONFromDB(
+//            output, path["JSON"]
+            output, path
+         );
+      }
+
 
       return 0;
    }
@@ -132,10 +131,10 @@ namespace BeeFishDBServer {
             }
             
             Path
-               table = path[OBJECT_TABLE];
+               table = path[JSONPath::OBJECT_TABLE];
                
             Path
-               keys = path[OBJECT_KEYS];
+               keys = path[JSONPath::OBJECT_KEYS];
 
             for (int i = 0; i < count;)
             {
@@ -186,7 +185,7 @@ namespace BeeFishDBServer {
             size += output.write(value);
             break;
          }
-         case Type::_NULL:
+         case Type::NULL_:
          {
             string str = "null";
             size += output.write(str);

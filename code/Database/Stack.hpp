@@ -1,11 +1,12 @@
+// Included in Path.hpp
 
    struct StackValue {
-      Path<Encoding> _path;
+      Path* _path = nullptr;
       bool _bit;
    };
 
    class Stack :
-      public Encoding,
+      public PowerEncoding,
       public vector<StackValue>
    {
    protected:
@@ -18,6 +19,13 @@
       {
       }
      
+      virtual ~Stack() {
+         for (auto value : *this) {
+            if (value._path)
+               delete value._path;
+         }
+      }
+
       virtual bool peekBit() const
       override
       {
@@ -30,7 +38,7 @@
 
          bool value = peekBit();
 
-         Encoding::readBit();
+         PowerEncoding::readBit();
 
          if (value)
             ++_count;
@@ -45,7 +53,7 @@
       virtual void writeBit(bool bit)
       override
       {
-         Encoding::writeBit(bit);
+         PowerEncoding::writeBit(bit);
          if (bit)
             ++_count;
          else
@@ -59,7 +67,6 @@
       }
 
       virtual long int count() const
-      override
       {
          return _count;
       }
@@ -71,7 +78,7 @@
         
          for (auto value : stack)
          {
-            out << value._path << ":" 
+            out << *(value._path) << ":" 
                 << value._bit
                 << endl;
          }

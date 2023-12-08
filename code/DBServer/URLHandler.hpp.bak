@@ -1,0 +1,51 @@
+#ifndef BEE_FISH__DBSERVER__URL_HANDLER_HPP
+#define BEE_FISH__DBSERVER__URL_HANDLER_HPP
+#include "../WebRequest/URL.hpp"
+#include "../DBServer/JSONPath.hpp"
+
+namespace BeeFishDBServer {
+
+   using namespace std;
+   using namespace BeeFishParser;
+   using namespace BeeFishJSON;
+   using namespace BeeFishDBServer;
+   
+   class URLHandler : public BeeFishWeb::URLHandler {
+   protected:
+      
+      JSONPath _path;
+   public:
+
+      URLHandler(const URLHandler& source) :
+        BeeFishWeb::URLHandler(source),
+        _path(source._path)
+      {
+
+      }
+      URLHandler(JSONPath path) :
+         BeeFishWeb::URLHandler(*this),
+         _path(_path)
+      {
+         _onsegment = 
+            [this](string segment)
+            {
+               cerr << "SEGMENT=" << segment << endl;
+               cerr << "PATH=" << _path << endl;
+
+               if (_path._database) {
+
+                  if (_path.contains(segment))
+                     _path = _path[segment];
+                  else 
+                     return false;
+               }
+               return true;
+            };
+      }
+
+
+   };
+
+}
+
+#endif

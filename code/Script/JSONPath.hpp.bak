@@ -10,11 +10,6 @@ using namespace BeeFishJSON;
 
 namespace BeeFishScript {
    
-   typedef 
-      BeeFishDatabase::
-      Path<BeeFishPowerEncoding::PowerEncoding>
-      Path;
-  
    class JSONPath :
       public Path
    {
@@ -34,7 +29,7 @@ namespace BeeFishScript {
             case Type::UNDEFINED:
                path.setData("undefined");
                break;
-            case Type::_NULL:
+            case Type::NULL_:
                path.setData("null");
                break;
             case Type::BOOLEAN:
@@ -112,7 +107,7 @@ namespace BeeFishScript {
          {
             case Type::UNDEFINED:
                break;
-            case Type::_NULL:
+            case Type::NULL_:
                break;
             case Type::BOOLEAN:
                if (value == "true")

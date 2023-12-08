@@ -10,15 +10,16 @@ using namespace BeeFishJSON;
 
 namespace BeeFishDBServer {
    
-   typedef 
-      BeeFishDatabase::
-      Path<BeeFishPowerEncoding::PowerEncoding>
-      Path;
-      
+
    class JSONPath :
       public Path
    {
    public:
+
+      static inline const int OBJECT_TABLE = 0;
+      static inline const int OBJECT_KEYS  = 1;
+
+
       JSONPath(const Path& source) :
          Path(source)
       {
@@ -34,7 +35,7 @@ namespace BeeFishDBServer {
             case Type::UNDEFINED:
                path.setData("undefined");
                break;
-            case Type::_NULL:
+            case Type::NULL_:
                path.setData("null");
                break;
             case Type::BOOLEAN:
@@ -96,8 +97,16 @@ namespace BeeFishDBServer {
          
       }
 
-      Variable getVariable() {
+      Variable getVariable(Size depth = -1) {
          Path path(*this);
+
+
+         if (depth == 0) {
+            std::stringstream pointer;
+            pointer << path;
+            Variable var(pointer.str());
+            return var;
+         }
 
          if (path.isDeadEnd())
             return undefined;
@@ -112,7 +121,7 @@ namespace BeeFishDBServer {
          {
             case Type::UNDEFINED:
                break;
-            case Type::_NULL:
+            case Type::NULL_:
                break;
             case Type::BOOLEAN:
                if (value == "true")
@@ -140,7 +149,7 @@ namespace BeeFishDBServer {
                {
                   JSONPath value = path[i];
                   array->push_back(
-                     value.getVariable()
+                     value.getVariable(depth - 1)
                   );
                }
 
@@ -165,7 +174,7 @@ namespace BeeFishDBServer {
                {
                   table[i].getData(key);
                   JSONPath json = map[key];
-                  Variable value = json.getVariable();
+                  Variable value = json.getVariable(depth - 1);
                   (*object)[key] = value;
                }
                break;
@@ -180,13 +189,11 @@ namespace BeeFishDBServer {
       {
          Path path(*this);
 
-         Type type =
-            path.value<Type>();
+         path = path
+            [Type::OBJECT]
+            [OBJECT_KEYS]
+            [key];
 
-         path << type;
-
-         path << OBJECT_KEYS << key;
-         
          return JSONPath(path);
       }
 
@@ -197,35 +204,17 @@ namespace BeeFishDBServer {
          return (*this)[key];
       }
 
-      JSONPath operator [] (const Size& index)
+      JSONPath operator [] (const BeeFishDatabase::Size& index)
       {
          Path path(*this);
-
-         Type type =
-            path.value<Type>();
-
-         path << type;
-
-         if (type == Type::OBJECT)
-         {
-            Path table = path[OBJECT_TABLE];
-            String key;
-            table.getData(key);
-            path << OBJECT_KEYS
-                 << key;
-         }
-         else //if (type == Type::ARRAY)
-            path << index;
-         
-         
-         return JSONPath(path);
+         return path[Type::ARRAY][index];
       }
 
       JSONPath operator [] (int index)
       {
-         return (*this)[(Size)index];
+         return (*this)[Size(index)];
       }
-      
+
       bool contains(std::string& segment)
       {
          Path path(*this);

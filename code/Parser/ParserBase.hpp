@@ -257,7 +257,9 @@ namespace BeeFishParser {
 
       virtual Parser* copy() const = 0;
 
-      virtual bool isOptional() const;
+      virtual bool isOptional() const {
+         return false;
+      };
       
       virtual size_t index() {
 

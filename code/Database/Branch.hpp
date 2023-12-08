@@ -2,12 +2,15 @@
 #define BEE_FISH__DATABASE__BRANCH_HPP
 
 #include <iomanip>
+#include "../Script/Variable.hpp"
 #include "Index.hpp"
 
 using namespace std;
 
 namespace BeeFishDatabase
 {
+
+   using namespace BeeFishScript;
 
    struct Branch
    {
@@ -20,19 +23,22 @@ namespace BeeFishDatabase
          return ( _left  == 0 ) &&
                 ( _right == 0 );
       }
+
+      Variable getVariable() const {
+         Variable var = BeeFishScript::Object{
+            {"left", (Number)_left},
+            {"right", (Number)_right}
+         };
+         return var;
+      }
       
       friend ostream& operator << 
       (ostream& out, const Branch& branch)
       {
          
-         out << "["
-             << setw(4) << branch._left
-             << ", "
-             << setw(4) << branch._right
-             << "]";
+         Variable var = branch.getVariable();
 
-         //if (branch._dataIndex)
-         //   out << setw(4) << branch._dataIndex;
+         out << var;
 
          return out;
       }

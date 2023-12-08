@@ -27,20 +27,19 @@ int main(int argc, const char* argv[]) {
            << PARSER_VERSION
            << endl;
 
-   if (hasArg(argc, argv, "-test") >= 0)
+   if (true || hasArg(argc, argv, "-test") >= 0)
    {
       cout << "Testing WebRequest..." << endl << endl;
-      if (!BeeFishWeb::testWebRequest())
+      if (!BeeFishTest::testWebRequest())
          return 1;
       return 0;
    }
-
+/*
    string line;
 
-   auto onpath = [](string path) {
-      cout << path << endl;
-      return true;
-   };
+   Database db;
+   
+   WebServer webServer("localhost", 8080);
 
    while (true) {
 
@@ -48,8 +47,6 @@ int main(int argc, const char* argv[]) {
 
       if (line == "")
          break;
-
-      auto _url = URL(onpath);
 
       bool read = _url.read(line + "\r\n");
 
@@ -65,6 +62,10 @@ int main(int argc, const char* argv[]) {
       else
          cout << "Result Null" << endl;
    }
+
+   webServer.stop();
+
+*/
 
    return 0;
 }

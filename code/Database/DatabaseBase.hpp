@@ -4,7 +4,7 @@
 #include "Config.hpp"
 
 #include <sys/mman.h>
-
+#include <stdio.h>
 #include <string.h>
 #include <map>
 #include <mutex>
@@ -57,7 +57,7 @@ namespace BeeFishDatabase {
       std::mutex _mutex;
    
       Database(
-         string filePath,
+         string filePath = "",
          const Size initialSize = 1000 * 1000,
          const Size incrementSize = 1000 * 1000,
          const Size pageSize = getPageSize()
@@ -175,7 +175,8 @@ namespace BeeFishDatabase {
       }
          
       
-   public:
+   public:
+
       Size pageSize() const {
          return _pageSize;
       }

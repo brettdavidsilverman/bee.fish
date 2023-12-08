@@ -1,8 +1,11 @@
 #ifndef BEE_FISH__WEB_DB__WEB_REQUEST_HPP
 #define BEE_FISH__WEB_DB__WEB_REQUEST_HPP
+
+#include <iostream>
 #include "StreamFromDB.hpp"
-#include "../DBServer/JSONParser.hpp"
+#include "../WebServer/WebServer.hpp"
 #include "../WebRequest/WebRequest.hpp"
+#include "../DBServer/JSONParser.hpp"
 
 extern "C" uint8_t _binary_NotFound_html_start[];
 extern "C" uint8_t _binary_NotFound_html_end[];
@@ -29,9 +32,13 @@ namespace BeeFishDBServer {
    protected:
       DBServer* _webServer {nullptr};
       std::mutex _mutex;
+      JSONPath _path;
    public:
-      typedef BeeFishDatabase::Path<Database::Encoding> Path;
-      DBWebRequest() : WebRequest()
+
+      DBWebRequest(DBServer* dbServer) :
+         WebRequest((WebServer*)dbServer),
+         _webServer(dbServer),
+         _path(Path(*(Database*)dbServer))
       {
       }
 
@@ -45,73 +52,33 @@ namespace BeeFishDBServer {
              socket,
              ipAddress
           ),
-          _webServer(webServer)
+          _webServer(webServer),
+          _path(Path(*(Database*)webServer))
       {
       }
 
       DBWebRequest(const DBWebRequest& source)
       :
          WebRequest(source),
-         _webServer(source._webServer)
+         _webServer(source._webServer),
+         _path(source._path)
       {
       }
 
       virtual ~DBWebRequest() {
       }
 
+
       virtual Parser* copy() const
       override
       {
          return new DBWebRequest(*this);
       }
-
+      
       // Defined in DBServer.hpp
       Path root();
-      
-      DBWebRequest::Path urlPath(const string& url) {
-       
-         JSONPath path = root();
 
-         cerr << "Fetching " << url << endl;
-         
-         auto onpathsegment =
-         [&path](string segment)
-         {
-            cerr << "SEGMENT=" << segment << std::flush;
-            
-            Type type =
-               path.value<Type>();
-            cerr << ",Type=" << type << std::flush;
-            
-            if (type == Type::OBJECT) {
-               JSONPath json(path);
-               if (json.contains(segment))
-                  json = json[segment];
-               path = json;
-            }
-            else
-               path = path[segment];
-               
-            cerr << endl;
-            
-            return true;
-         };
-
-         auto urlParser =
-           BeeFishWeb::URL(onpathsegment);
-
-         urlParser.read(url);
-
-         return path;
- 
-      }
-
-      DBWebRequest::Path path()
-      {
-         return urlPath(_url);
-      }
-
-      virtual bool setContentType(DBWebRequest::Path path)
+      virtual bool setContentType(Path path)
       {
 
          std::scoped_lock lock(_mutex);
@@ -134,31 +101,30 @@ namespace BeeFishDBServer {
       virtual Parser* createJSONBody()
       override
       {
-         Path path = DBWebRequest::path();
+         //Path path = root();
 
-         if (!setContentType(path))
+         if (!setContentType(_path))
             return nullptr;
 
          return new
             StreamToDB(
-               JSONParser(path["JSON"], _contentLength),
-               path["document"],
+//               JSONParser(path["JSON"], _contentLength),
+               JSONParser(_path, _contentLength),
+               _path["document"],
                _contentLength
             );
-      };
+      }
 
       virtual Parser* createContentLengthBody()
       override
       {
-         Path path = DBWebRequest::path();
-
-         if (!setContentType(path))
+         if (!setContentType(_path))
             return nullptr;
 
          return new
             StreamToDB(
                ContentLength(_contentLength),
-               path["document"],
+               _path["document"],
                _contentLength
             );
       };
@@ -167,7 +133,9 @@ namespace BeeFishDBServer {
       virtual bool process()
       {
          bool success = true;
-         
+
+         _path = root();
+
          WebRequest::read();
 
          stringstream logStream;
@@ -179,9 +147,6 @@ namespace BeeFishDBServer {
 
          logMessage(LOG_NOTICE, logStream.str());
          
-         Path path =
-            DBWebRequest::path();
-
          if (_method == "POST" &&
              _body == nullptr)
              
@@ -193,13 +158,13 @@ namespace BeeFishDBServer {
          if (_result != true) {
 
             stringstream stream;
-
-            logMessage(LOG_WARNING, "Invalid content from %s", _ipAddress.c_str());
+            stream << "Invalid content from " << _ipAddress;
+            logMessage(LOG_WARNING, stream.str());
             
             if (_method == "POST") {
                 
                if (_url.length())
-                  path.deleteData();
+                  _path.deleteData();
                   
                return outputFail(getErrorMessage());
             }
@@ -222,8 +187,8 @@ namespace BeeFishDBServer {
          }
 
          
-         if (!path.hasData() ||
-             path.isDeadEnd())
+         if (!_path.hasData() ||
+             _path.isDeadEnd())
          {
             return output404NotFound();
          }
@@ -232,7 +197,7 @@ namespace BeeFishDBServer {
          // Send the body
          if (_result == true)
          {
-            if (streamFromDB(*this, path, true))
+            if (streamFromDB(*this, _path, true))
                return true;
          }
 

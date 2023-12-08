@@ -44,10 +44,7 @@ function (message, source, lineno, colno, error)
          <label for="contentType">Content Type</label><br />
          <input type="text" id="contentType" value="application/json; charset=utf-8"></input><br />
          <label for="bodyText">Body Text</label><br />
-         <textarea id="bodyText">[1,2,3,4]</textarea><br />
-<!--
-{"🐝":"🌎"}
--->
+         <textarea id="bodyText">{"🐝":"🌎"}</textarea><br />
          <button onclick="postBody()">Submit</button>
       </form><br />
 

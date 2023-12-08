@@ -6,6 +6,7 @@
 #include "../WebServer/WebServer.hpp"
 #include "../Database/Database.hpp"
 #include "../WebRequest/WebRequest.hpp"
+#include "../WebRequest/URLHandler.hpp"
 #include "StreamToDB.hpp"
 
 #include "DBWebRequest.hpp"
@@ -15,10 +16,11 @@ namespace BeeFishDBServer {
 
    using namespace BeeFishMisc;
    using namespace BeeFishWeb;
+   using namespace BeeFishDatabase;
 
    class DBServer :
-      public WebServer,
-      public Database
+      public Database,
+      public WebServer
    {
    public:
 
@@ -26,16 +28,27 @@ namespace BeeFishDBServer {
          string host = WEB_SERVER_HOST,
          int port = WEB_SERVER_PORT,
          int threads = WEB_SERVER_THREADS,
-         string databaseFilename = DATABASE_FILENAME)
-      :
-         WebServer(host, port, threads),
-         Database(databaseFilename)
+         string databaseFilename = ""
+      ) :
+         Database(databaseFilename),
+         WebServer(host, port, threads)
       {
+         
+         _onsegment =
+            [this](string segment) {
+               cerr << "DBServer.hpp: " << segment <<  endl;
+               return true;
+            };
+
       }
 
       virtual ~DBServer() {
       }
 
+      Path root() {
+         Path root = Path(*this);
+         return root[url()];
+      }
       
       virtual bool handleWebRequest(
          int clientSocket,
@@ -52,31 +65,26 @@ namespace BeeFishDBServer {
             // Read from the client socket
             if (!webRequest.process()) {
                ::close(clientSocket);
-               return false;
             }
          }
          catch (...)
          {
              stringstream stream;
-             logMessage(LOG_NOTICE, "Error processing client %s", ipAddress.c_str());
+             stream << "Error processing client " << ipAddress;
+             logMessage(LOG_NOTICE, stream.str());
              ::close(clientSocket);
-             return false;
          }
 
          return true;
 
       }
 
-   };
-   
-   // Defined in DBWebRequest.hpp
-   Path DBWebRequest::root() {
-      Database* database =
-         dynamic_cast<Database*>
-            (_webServer);
 
-      return BeeFishWeb::Path(*database)
-         [_webServer->host()];
+   };
+
+   // Declared in DBWebRequest.hpp
+   Path DBWebRequest::root() {
+      return _webServer->root();
    }
 
 }

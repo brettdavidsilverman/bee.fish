@@ -2,7 +2,9 @@ all:
 	- mkdir build
 	cd code && make $(DEBUG)
 
-install:	all
+install:
+	- mkdir build
+	cd code && make $(DEBUG)
 	./start.sh $(PORT)
 
 test:

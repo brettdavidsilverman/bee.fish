@@ -15,12 +15,12 @@
 #include "Index.hpp"
 #include "Branch.hpp"
 #include "DatabaseBase.hpp"
-#include "Data.hpp"#include "Path.hpp"
+#include "Data.hpp"
+#include "Path.hpp"
 
 namespace BeeFishDatabase {
    typedef
-      Path<Database::Encoding>::Stack
-      Stack;
+      Path::Stack Stack;
 }
 
 #endif

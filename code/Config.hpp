@@ -6,11 +6,15 @@
    #define WEB_SERVER_HOST "bee.fish"
 #else
    #define WEB_SERVER_PORT 8080
-   #define WEB_SERVER_HOST "dev.bee.fish"
+   #define WEB_SERVER_HOST "localhost"
 #endif
+
+#define TEST_SERVER_HOST "localhost"
+#define TEST_SERVER_PORT 8080
 
 #include "../Config.hpp"
 
-#define TEMP_FILENAME "/var/tmp/bee.fish.data"
+#define TEMP_DIRECTORY "/var/tmp/"
+#define TEMP_FILENAME TEMP_DIRECTORY "bee.fish.data"
 
 #endif

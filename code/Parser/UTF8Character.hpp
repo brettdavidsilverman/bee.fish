@@ -238,7 +238,8 @@ namespace BeeFishParser {
       virtual Parser* copy()
       const override
       {
-         return new UTF8Character(*this);
+         Parser* parser = new UTF8Character(*this);
+         return parser;
       }
 
    };

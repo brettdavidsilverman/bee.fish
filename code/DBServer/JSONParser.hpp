@@ -79,10 +79,10 @@ namespace BeeFishDBServer {
       {
          Path path = lastPath();
 
+         path << type;
+
          if (lastType() == Type::ARRAY)
             path << lastIndex()++;
-
-         path << type;
 
          _stack.push_back(
             {
@@ -241,18 +241,15 @@ namespace BeeFishDBServer {
       {
          std::string string(s);
          _key += string;
+
+         if (_key.length() < n)
+            return true;
+
          assert(_key.length() == n);
          
-         Path path = lastPath();
-         Size& index = lastIndex();
+         JSONPath path = lastPath();
 
-         path[OBJECT_TABLE]
-             [index++]
-              .setData(_key);
-
-         path =
-            path[OBJECT_KEYS]
-                [_key];
+         path = path[_key];
 
          push_back(
             {
@@ -418,7 +415,7 @@ namespace BeeFishDBServer {
       bool on_null( error_code& ec )
       {
          push_back(
-            Type::_NULL
+            Type::NULL_
          );
 
          pop_back(string("null"));

@@ -16,7 +16,7 @@ namespace BeeFishWebDB {
       public Capture
    {
    protected:
-      Path<Database::Encoding> _path;
+      Path _path;
       char*   _page = nullptr;
       size_t  _position {0};
       size_t  _pageIndex {0};
@@ -26,7 +26,7 @@ namespace BeeFishWebDB {
 
       StreamToDB(
          const Parser& parser,
-         const Path<Database::Encoding> path,
+         const Path path,
          const size_t contentLength
       ) :
          Capture(parser),

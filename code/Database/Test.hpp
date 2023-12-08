@@ -24,12 +24,9 @@ namespace BeeFishDatabase
       
       cout << "Test Database" << endl;
       
-      const string filename = "/var/tmp/DBServer.data";
-      remove(filename.c_str());
+      Database db;
 
-      Database db(filename);
-
-      Path<Database::Encoding> start(db);
+      Path start(db);
 
       Path next = start["Hello"];
 
@@ -112,7 +109,7 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tTesting get/set data: ";
 
-         Path<Database::Encoding> data = start;
+         Path data = start;
          Size count = -1;
          data = 22;
          data.getData(count);
@@ -304,7 +301,8 @@ namespace BeeFishDatabase
          outputSuccess(success);
       }
 
-      remove(filename.c_str());
+      db.close();
+      remove(db.filename().c_str());
 
       outputSuccess(success);
 

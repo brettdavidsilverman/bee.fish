@@ -108,7 +108,9 @@ int main(int argc, const char* argv[]) {
       return 1;
    }
 
-   logMessage(LOG_INFO, "DBServer %s on port %i", host.c_str(), port);
+   std::stringstream stream;
+   stream << "DBServer " << host << " on port " << port;
+   logMessage(LOG_INFO, stream.str());
 
    dbServer.join();
 

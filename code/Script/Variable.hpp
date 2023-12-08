@@ -6,11 +6,13 @@
 #include <memory>
 #include <cmath>
 
+#include "../Database/File.hpp"
 #include "../JSON/JSON.hpp"
 #include "Config.hpp"
 
 namespace BeeFishScript {
-   
+
+   using namespace BeeFishDatabase;   
    using namespace BeeFishJSON;
    using namespace std;
 
@@ -75,7 +77,7 @@ namespace BeeFishScript {
          
       }
 
-      Variable& operator[] (size_t index) {
+      Variable& operator[] (const BeeFishDatabase::Size& index) {
 
          const String& key = _table[index];
 
@@ -151,7 +153,7 @@ namespace BeeFishScript {
          Value(BeeFishJSON::Type type, const Value& source) {
             switch (type) {
             case BeeFishJSON::Type::UNDEFINED:
-            case BeeFishJSON::Type::_NULL:
+            case BeeFishJSON::Type::NULL_:
                break;
             case BeeFishJSON::Type::BOOLEAN:
                _boolean = source._boolean;
@@ -197,7 +199,7 @@ namespace BeeFishScript {
       }
 
       Variable(const Null& _nullptr) {
-         _type = BeeFishJSON::Type::_NULL;
+         _type = BeeFishJSON::Type::NULL_;
       }
 
       Variable(const Boolean& boolean) {
@@ -271,7 +273,7 @@ namespace BeeFishScript {
       virtual ~Variable() {
          switch (_type) {
          case BeeFishJSON::Type::UNDEFINED:
-         case BeeFishJSON::Type::_NULL:
+         case BeeFishJSON::Type::NULL_:
          case BeeFishJSON::Type::BOOLEAN:
          case BeeFishJSON::Type::NUMBER:
             break;
@@ -298,9 +300,21 @@ namespace BeeFishScript {
          return (*object)[String(key)];
       }
 
-      virtual Variable& operator[] (size_t index) {
-         ObjectPointer object = (ObjectPointer)*this;
-         return (*object)[index];
+      virtual Variable& operator[] (int index) {
+         return (*this)[Size(index)];
+      }
+
+      virtual Variable& operator[] (const Size& index) {
+         if (_type == Type::OBJECT) {
+            ObjectPointer object = (ObjectPointer)*this;
+            return (*object)[index];
+         }
+         else if (_type == Type::ARRAY) {
+            ArrayPointer array = (ArrayPointer)*this;
+            return (*array)[index];
+         }
+         throw std::runtime_error("Error using operator [] when type is not oject or array");
+         return undefined;
       }
 
       virtual Variable& operator = (const Variable& source) {
@@ -339,7 +353,7 @@ namespace BeeFishScript {
 
       virtual bool operator == (const Null compare) const {
 
-         if (_type == BeeFishJSON::Type::_NULL)
+         if (_type == BeeFishJSON::Type::NULL_)
             return true;
 
          return false;
@@ -348,7 +362,7 @@ namespace BeeFishScript {
 
       virtual bool operator != (const Null compare) const {
 
-         if (_type != BeeFishJSON::Type::_NULL)
+         if (_type != BeeFishJSON::Type::NULL_)
             return true;
 
          return false;
@@ -383,7 +397,7 @@ namespace BeeFishScript {
          case BeeFishJSON::Type::UNDEFINED:
             out << "undefined";
             break;
-         case BeeFishJSON::Type::_NULL:
+         case BeeFishJSON::Type::NULL_:
             out << "null";
             break;
          case BeeFishJSON::Type::BOOLEAN:
@@ -450,7 +464,7 @@ namespace BeeFishScript {
          switch (_type) {
          case BeeFishJSON::Type::UNDEFINED:
             return "undefined";
-         case BeeFishJSON::Type::_NULL:
+         case BeeFishJSON::Type::NULL_:
             return "null";
          case BeeFishJSON::Type::BOOLEAN:
             return "Boolean";
@@ -474,7 +488,9 @@ namespace BeeFishScript {
          return stream.str().size();
       }
 
-      
+      virtual Type getType() const {
+         return _type;
+      }
 
 #define CHECK_TYPE(type) {if (_type != type) throw std::runtime_error("Cannot cast variable to type");}
 

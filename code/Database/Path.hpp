@@ -5,6 +5,7 @@
 #include <atomic>
 #include "../PowerEncoding/PowerEncoding.hpp"
 #include "../Miscellaneous/optional.h"
+#include "../Script/Variable.hpp"
 #include "Data.hpp"
 #include "File.hpp"
 #include "Branch.hpp"
@@ -15,25 +16,18 @@ using namespace BeeFishPowerEncoding;
 
 namespace BeeFishDatabase {
 
-   const int OBJECT_TABLE = 0;
-   const int OBJECT_KEYS = 1;
-      
-   template<class Encoding = PowerEncoding>
    class Path :
-      public Encoding
+      public PowerEncoding
    {
    public:
       Database* _database;
       Index     _index;
-   public:
       
-#include "Stack.hpp"
-
    public:
-       
+
       Path( Database* database = nullptr,
             Index index = Branch::Root ) :
-         Encoding(),
+         PowerEncoding(),
          _database(database),
          _index(index)
       {
@@ -41,7 +35,7 @@ namespace BeeFishDatabase {
 
       Path( Database& database,
             Index index = Branch::Root ) :
-         Encoding(),
+         PowerEncoding(),
          _database(&database),
          _index(index)
       {
@@ -49,14 +43,14 @@ namespace BeeFishDatabase {
 
       Path( const Path& source,
             Index index) :
-         Encoding(),
+         PowerEncoding(),
          _database(source._database),
          _index(index)
       {
       }
    
       Path(const Path& source) :
-         Encoding(),
+         PowerEncoding(),
          _database(source._database),
          _index(source._index)
          
@@ -98,7 +92,7 @@ namespace BeeFishDatabase {
             
          }
 
-         Encoding::writeBit(bit);
+         PowerEncoding::writeBit(bit);
          
       }
 
@@ -182,6 +176,8 @@ namespace BeeFishDatabase {
          Data& data = getData();
          destination = *(T*)data.data();
       }
+
+
 /*
       template<typename T>
       operator T()
@@ -205,17 +201,15 @@ namespace BeeFishDatabase {
          }
       }
 
-      operator string() const
+      operator string()
       {
-         Data& data = getData(data);
+         std::string data;
+         getData(data);
 
          if (data.size() == 0)
             return "";
 
-         return std::string(
-            data.data(),
-            data.size()
-         );
+         return data;
 
       }
 
@@ -299,12 +293,15 @@ namespace BeeFishDatabase {
       
       Branch& getBranch()
       {
-         return getBranch(_index);
+        
+         return
+            _database->getBranch(_index);
       }
 
       Branch getBranch() const
       {
-         return getBranch(_index);
+         return
+            _database->getBranch(_index);
       }
       
       Branch& getBranch(Size index)
@@ -353,7 +350,7 @@ namespace BeeFishDatabase {
       
       virtual bool readBit()
       {
-         Encoding::readBit();
+         PowerEncoding::readBit();
 
          const Branch& branch =
             getBranch(_index);
@@ -388,7 +385,11 @@ namespace BeeFishDatabase {
          assert(false);
 
       }
-      
+
+   public:
+         
+#include "Stack.hpp"
+
    protected:
 
       void min(
@@ -414,7 +415,7 @@ namespace BeeFishDatabase {
                bit = 1;
             }
 
-            stack.push_back({path, bit});
+            stack.push_back({new Path(path), bit});
 
             branch = getBranch(index);
          }
@@ -445,7 +446,7 @@ namespace BeeFishDatabase {
                bit = 0;
             }
 
-            stack.push_back({path, bit});
+            stack.push_back({new Path(path), bit});
 
             branch = getBranch(index);
          }
@@ -515,14 +516,14 @@ namespace BeeFishDatabase {
          }
          
          Branch branch;
-         Path path;
+         Path* path;
          StackValue entry;
          // Up the tree until first right
          do 
          {
             entry = stack.last();
             path = entry._path;
-            branch = path.getBranch();
+            branch = path->getBranch();
             stack.pop_back();
          }
          while (stack.size() && 
@@ -540,7 +541,7 @@ namespace BeeFishDatabase {
 
          // Follow the next min from
          // this right
-         stack.push_back({path, 1});
+         stack.push_back({new Path(*path), 1});
          min(branch._right, stack);
 
          // Get this value
@@ -630,15 +631,22 @@ namespace BeeFishDatabase {
       friend ostream& operator <<
       (ostream& out, const Path& path)
       {
-         out << "{\"path\":" << path._index
-             << ", \"hasData\": " <<
-                ( path.hasData() ?
-                  "true" :
-                  "false"
-                )
-             << ", \"branch\": "
-             << path.getBranch()
-             << "}";
+         BeeFishScript::Variable variable = 
+            BeeFishScript::Object{};
+
+         variable["index"] =
+            (BeeFishScript::Number)path._index;
+
+
+         if (path._database) {
+            variable["hasData"] = path.hasData();
+            variable["branch"] = path.getBranch().getVariable();
+         }
+         else
+            variable["database"] = BeeFishScript::Null();
+
+
+         out << variable;
      
          return out;
       }
@@ -730,7 +738,7 @@ namespace BeeFishDatabase {
    protected:
       
       class Contains :
-         public Encoding
+         public PowerEncoding
       {
       protected:
          bool _isDeadEnd;
@@ -770,7 +778,7 @@ namespace BeeFishDatabase {
                _contains = false;
             }
 
-            Encoding::writeBit(bit);
+            PowerEncoding::writeBit(bit);
          }
          
          virtual bool readBit()

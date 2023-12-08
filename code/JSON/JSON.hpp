@@ -16,7 +16,7 @@ namespace BeeFishJSON {
 
    enum class Type {
       UNDEFINED,
-      _NULL,
+      NULL_,
       BOOLEAN,
       NUMBER,
       STRING,
@@ -33,7 +33,7 @@ namespace BeeFishJSON {
          case Type::UNDEFINED:
             out << "undefined";
             break;
-         case Type::_NULL:
+         case Type::NULL_:
             out << "null";
             break;
          case Type::BOOLEAN:

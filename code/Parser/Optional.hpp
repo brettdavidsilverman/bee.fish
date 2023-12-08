@@ -74,17 +74,6 @@ namespace BeeFishParser {
      
    };
 
-   inline bool Parser::isOptional() const {
-
-      const Optional* optional =
-         dynamic_cast<const Optional*>(this);
-     
-      if (optional == nullptr)
-         return false;
-
-      return true;
-   }
-
 
 }
 
