@@ -79,10 +79,10 @@ namespace BeeFishDBServer {
       {
          Path path = lastPath();
 
-         path << type;
+         path = path[type];
 
          if (lastType() == Type::ARRAY)
-            path << lastIndex()++;
+            path = path[lastIndex()++];
 
          _stack.push_back(
             {
@@ -96,17 +96,18 @@ namespace BeeFishDBServer {
       void pop_back(const string& value) {
 
          assert(size() > 0);
-
+         
+         
          Path
             path = lastPath();
-
+         
          _stack.pop_back();
 
          if (lastType() == Type::KEY)
          {
             _stack.pop_back();
 
-            assert(lastType() == Type::OBJECT);
+            assert(lastType() == Type::MAP);
 
          }
 
@@ -197,7 +198,7 @@ namespace BeeFishDBServer {
       {
 
          push_back(
-            Type::OBJECT
+            Type::MAP
          );
 
          return true;

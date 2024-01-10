@@ -1,8 +1,40 @@
-// Included in Path.hpp
+#ifndef BEE_FISH__DATABASE__STACK_HPP
+#define BEE_FISH__DATABASE__STACK_HPP
 
+#include "Path.hpp"
+
+using namespace std;
+using namespace BeeFishPowerEncoding;
+
+namespace BeeFishDatabase {
+    
    struct StackValue {
-      Path* _path = nullptr;
-      bool _bit;
+   public:
+      Path _path;
+      bool _bit = false;
+      
+      StackValue() {
+         _bit = false;
+      }
+      
+      StackValue(const Path& path, bool bit) :
+          _path(path),
+          _bit(bit)
+      {
+      }
+      
+      StackValue(const StackValue& source) :
+          _path(source._path),
+          _bit(source._bit)
+      {
+      }
+      /*
+      virtual ~StackValue() {
+         if (_path) {
+            delete _path;
+            _path = nullptr;
+         }
+      */
    };
 
    class Stack :
@@ -20,10 +52,6 @@
       }
      
       virtual ~Stack() {
-         for (auto value : *this) {
-            if (value._path)
-               delete value._path;
-         }
       }
 
       virtual bool peekBit() const
@@ -78,7 +106,7 @@
         
          for (auto value : stack)
          {
-            out << *(value._path) << ":" 
+            out << value._path << ":" 
                 << value._bit
                 << endl;
          }
@@ -94,4 +122,8 @@
       }
 
    };
+   
+}
+
+#endif
 

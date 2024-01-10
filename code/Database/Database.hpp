@@ -17,11 +17,8 @@
 #include "DatabaseBase.hpp"
 #include "Data.hpp"
 #include "Path.hpp"
+#include "MinMaxPath.hpp"
 
-namespace BeeFishDatabase {
-   typedef
-      Path::Stack Stack;
-}
 
 #endif
 

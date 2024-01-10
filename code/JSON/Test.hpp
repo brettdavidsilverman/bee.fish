@@ -307,25 +307,25 @@ namespace BeeFishJSON {
 
       bool success = true;
 
-      cout << "Testing Objects:" << endl;
+      cout << "Testing Maps:" << endl;
 
       success &=
-         testPattern(Object(), "{}", true);
+         testPattern(Map(), "{}", true);
  
       success &=
-         testPattern(Object(), "{\"a\":1}", true);
+         testPattern(Map(), "{\"a\":1}", true);
  
       success &=
-         testPattern(Object(), "{\"a\":1,\"b\":2}", true);
+         testPattern(Map(), "{\"a\":1,\"b\":2}", true);
 
       success &=
-         testPattern(Object(), "{\"c\":{}}", true);
+         testPattern(Map(), "{\"c\":{}}", true);
 
       success &=
-         testPattern(Object(), " { \"c\" : { } }", true);
+         testPattern(Map(), " { \"c\" : { } }", true);
 
       success &=
-         testPattern(Object(), "{", nullopt);
+         testPattern(Map(), "{", nullopt);
 
       BeeFishMisc::outputSuccess(success);
 

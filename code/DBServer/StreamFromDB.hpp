@@ -28,7 +28,7 @@ namespace BeeFishDBServer {
 
    inline BeeFishDatabase::Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
-      Path path,
+      MinMaxPath path,
       int tabs = 0
    );
 
@@ -40,19 +40,17 @@ namespace BeeFishDBServer {
 
    inline BeeFishDatabase::Size streamFromDB (
       BeeFishWeb::WebRequest& output,
-      Path path,
-      bool original
+      Path path
    )
    {
-      if (path.isDeadEnd() ||
-            !path.hasData())
+      const std::string contentType =
+         "application/json; charset=utf-8";
+         
+      if (path.isDeadEnd())
       {
          throw std::runtime_error("Path is dead end");
       }
-
-      string contentType;
-      path.getData(contentType);
-
+/*
       if (path.contains("document"))
       {
          BeeFishDatabase::Size contentLength;
@@ -70,8 +68,8 @@ namespace BeeFishDBServer {
             output, path["document"]
          );
       }
-
-//      if (path.contains("JSON"))
+*/
+      //if (contentType == "application/json; charset=utf-8")
       {
          if (!writeHeaders(
                output,
@@ -93,56 +91,43 @@ namespace BeeFishDBServer {
 
    inline BeeFishDatabase::Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
-      Path path,
+      MinMaxPath path,
       int tabs
    )
    {
 
       BeeFishDatabase::Size size = 0;
-
-      assert(!path.isDeadEnd());
-
-      Type type =
-         path.value<Type>();
-  
-      assert(path.contains(type));
-
-      path << type;
+      Type type;
+      
+      if (path.isDeadEnd())
+          type = Type::UNDEFINED;
+      else {
+         type =
+            path.value<Type>();
+      }
+      
+      path = path[type];
 
       string value;
 
-      assert(path.hasData());
-
-      path.getData(value);
-
+      if (path.hasData())
+         path.getData(value);
+    
       switch (type)
       {
-         case Type::OBJECT:
+         case Type::MAP:
          {            
-            size += output.write("{");
-            
-            stringstream stream;
-            BeeFishDatabase::Size count;
-            stream << value;
-            stream >> count;
+            size += output.write("{\r\n");
+            string key;
+            Stack stack;
+            Size i = 0;
 
-            if (count > 0) {
-                size += output.write("\r\n");
-            }
-            
-            Path
-               table = path[JSONPath::OBJECT_TABLE];
-               
-            Path
-               keys = path[JSONPath::OBJECT_KEYS];
+            Size count = atol(value.c_str());
 
-            for (int i = 0; i < count;)
+            path = path[Type::MAP];
+            
+            while(path.next(stack, key))
             {
-               string key;
-               table[i].getData(key);
-
-               assert(keys.contains(key));
-
                size += output.write(getTabs(tabs + 1));
                
                string label = "\"" + escape(key) + "\": ";
@@ -151,7 +136,7 @@ namespace BeeFishDBServer {
 
                size += streamJSONFromDB(
                   output,
-                  keys[key],
+                  path[key],
                   tabs + 1
                );
 
@@ -213,7 +198,7 @@ namespace BeeFishDBServer {
                  ++index)
             {
 
-               if (path.contains(index))
+               if (path[index].hasData())
                {
                   size += output.write(getTabs(tabs + 1));
                   size += streamJSONFromDB (
@@ -256,7 +241,7 @@ namespace BeeFishDBServer {
    )
    {
 
-      Path document = path;
+      MinMaxPath document = path;
 
       // Output the document content
       BeeFishDatabase::Size pageIndex  = 0;

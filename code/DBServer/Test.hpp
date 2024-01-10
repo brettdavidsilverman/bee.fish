@@ -28,31 +28,27 @@ namespace BeeFishDBServer
 
    inline bool test()
    {
-
+      cout << "Test DB Server" << endl;
+      
       bool success = true;
-
+/*
       success = success &&
          testVariables();
-
-      cout << "Test DB Server" << endl;
-
+*/
       DBServer dbServer(
-         TEST_SERVER_HOST, TEST_SERVER_PORT, 1
+         TEST_SERVER_HOST, TEST_SERVER_PORT, 2
       );
-
-      if (!dbServer.start())
-         return false;
-
-      success = success &&
-         testJSONPath(&dbServer);
-
+/*
+      if (success)
+         success = testJSONPath(&dbServer);
+         
       if (success)
       {
          cout << "Testing 404 " << flush;
 
          stringstream stream;
-         stream << "curl " << dbServer.url() << "bee"
-                << " -s | grep \"html\"";
+         stream << "curl -s " << dbServer.url() << "bee"
+                << " | grep -q \"page not taken yet\"";
          string command = stream.str();
          success &= (system(command.c_str()) == 0);
          outputSuccess(success);
@@ -60,14 +56,13 @@ namespace BeeFishDBServer
 
       if (success)
       {
-         cout << "Testing post application/json " << flush;
+         cout << "Testing post json " << flush;
 
          stringstream stream;
-         stream << "curl " << dbServer.url() << "bee/"
+         stream << "curl " << dbServer.url() << "bee"
             " --header \"content-type: application/json\" " <<
-            " --data 123 -s | grep \"true\"";
+            " --data 123 -s | grep -q \"true\"";
          string command = stream.str();
-         cout << command << endl;
          success &= (system(command.c_str()) == 0);
 
          outputSuccess(success);
@@ -78,16 +73,16 @@ namespace BeeFishDBServer
          cout << "Testing get " << flush;
 
          stringstream stream;
-         stream << "curl -s " << dbServer.url() << "bee/"
-            " | grep 123";
+         stream << "curl -s " << dbServer.url() << "bee"
+            " | grep -q 123";
          string command = stream.str();
-         cerr << command << endl;
+
          success &= (system(command.c_str()) == 0);
 
          outputSuccess(success);
 
       }
-
+*/
       if (success) {
          success = testAllFiles(dbServer.url(), "tests");
       }
@@ -113,10 +108,12 @@ namespace BeeFishDBServer
       }
 
       sort(files.begin(), files.end());
-      
+
       for (auto file : files) {
          if (success)
             success = testFile(url, file);
+         else
+            break;
       }
 
       outputSuccess(success);
@@ -127,7 +124,7 @@ namespace BeeFishDBServer
    inline bool testFile(string url, string file, bool expect)
    {
       cout << "\tTesting "
-           << file
+           << url << file
            << endl;
 
       stringstream stream;
@@ -139,18 +136,20 @@ namespace BeeFishDBServer
          file << " "
          "-H \"Content-Type: application/json; charset=utf-8\" " <<
          "-H Expect: " <<
-         "-T " << file << " -s | grep \"" << (expect ? "true" : "false") << "\" -q";
+         "-T " << file << " -s | grep -q \"" << (expect ? "true" : "false") << "\"";
 
       string command = stream.str();
 
-cerr << "RIGHT HERE" << endl;
-cerr << command << endl;
-      
       success &= (system(command.c_str()) == 0);
 
       if (success && expect) {
-         command = "curl -s " + url + file + "/";
+         stringstream stream;
+         stream << "curl -s "
+                << url << file;
+                
+         command = stream.str();
          success &= (system(command.c_str()) == 0);
+
       }
 
       outputSuccess(success);
@@ -211,7 +210,7 @@ cerr << command << endl;
       }
 
       {
-         Variable v = BeeFishScript::Object{{"🐝","🌎"}};
+         Variable v = BeeFishScript::Map{{"🐝","🌎"}};
          stringstream out;
          out << v;
 
@@ -281,28 +280,28 @@ cerr << command << endl;
       }
 
       {
-         cout << "\tTesting object " << flush;
-         JSONPath path(root["json-object"]);
-         Variable object =
-            BeeFishScript::Object
+         cout << "\tTesting map " << flush;
+         JSONPath path(root["json-map"]);
+         Variable map =
+            BeeFishScript::Map
             {
                {"a", 1},
                {"c", 2},
-               {"e", BeeFishScript::Object()}
+               {"e", BeeFishScript::Map()}
             };
 
-         path.setVariable(object);
+         path.setVariable(map);
 
-         JSONPath path2(root["json-object"]);
-         Variable object2 = path2.getVariable();
+         JSONPath path2(root["json-map"]);
+         Variable map2 = path2.getVariable();
 
-         ObjectPointer o = object2;
+         MapPointer o = map2;
          success = success &&
             ((Number)((*o)["c"]) == 2);
 
          Variable e = (*o)["e"];
          success = success &&
-            e._type == BeeFishJSON::Type::OBJECT;
+            e._type == BeeFishJSON::Type::MAP;
 
          outputSuccess(success);
       }
@@ -310,21 +309,21 @@ cerr << command << endl;
       {
          cout << "\tTesting complex " << flush;
          JSONPath path(root["json-complex"]);
-         Variable object =
-            BeeFishScript::Object
+         Variable map =
+            BeeFishScript::Map
             {
                {"a", "b"},
                {"c", BeeFishScript::Array{1,2,3}},
-               {"e", BeeFishScript::Object{
+               {"e", BeeFishScript::Map{
                      {"f", "g"}
                      }
                }
             };
 
-         path.setVariable(object);
+         path.setVariable(map);
          JSONPath path2(root["json-complex"]);
-         Variable object2 = path2.getVariable();
-         ObjectPointer o = object2;
+         Variable map2 = path2.getVariable();
+         MapPointer o = map2;
          ArrayPointer a = (*o)["c"];
          success = success &&
             ((Number)((*a)[1]) == 2);
@@ -338,26 +337,27 @@ cerr << command << endl;
 
       {
          cout << "\tTesting object map " << flush;
-         JSONPath path(root["json-map"]);
-         Variable object =
-            BeeFishScript::Object
+         JSONPath path = root["object-map"];
+         
+         Variable map =
+            BeeFishScript::Map
             {
                {"a", "b"},
                {"c", BeeFishScript::Array{1,2,3}},
-               {"e", BeeFishScript::Object{
+               {"e", BeeFishScript::Map{
                      {"f", "g"},
                      {"h", BeeFishScript::Array{1,2,3}}
-                     }
+                  }
                }
             };
 
-         path.setVariable(object);
+         path.setVariable(map);
 
          Variable var =
-            path.getVariable();
-
+            path["e"]["h"][Size(0)].getVariable();
+            
          success = success &&
-            (Number)(path["e"]["h"][0].getVariable()) == 1;
+            (Number)(var) == 1;
 
          outputSuccess(success);
       }

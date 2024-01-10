@@ -300,7 +300,6 @@ namespace BeeFishDatabase {
       (ostream& out, const Database& db)
       {
 
-         
          out << "Database: " 
              << db._tree->_header._version
              << endl

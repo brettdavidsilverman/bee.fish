@@ -39,7 +39,7 @@ int main(int argc, const char* argv[]) {
 
    Database db;
    
-   WebServer webServer("localhost", 8080);
+   WebServer webServer("localhost", TEST_SERVER_PORT);
 
    while (true) {
 

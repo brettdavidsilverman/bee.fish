@@ -4,7 +4,7 @@
 #include "../Parser/Parser.hpp"
 #include "../PowerEncoding/PowerEncoding.hpp"
 #include "Version.hpp"
-#include "Object.hpp"
+#include "Map.hpp"
 #include "Array.hpp"
 #include "Number.hpp"
 #include "String.hpp"
@@ -22,7 +22,7 @@ namespace BeeFishJSON {
       STRING,
       KEY,
       ARRAY,
-      OBJECT,
+      MAP,
       ROOT
    };
 
@@ -48,8 +48,8 @@ namespace BeeFishJSON {
          case Type::ARRAY:
             out << "array";
             break;
-         case Type::OBJECT:
-            out << "object";
+         case Type::MAP:
+            out << "map";
             break;
          default:
             out << "UNKNOWN";
@@ -140,7 +140,7 @@ namespace BeeFishJSON {
                number or
                _string or
                array or
-               Object(params)
+               Map(params)
             );
       }
 

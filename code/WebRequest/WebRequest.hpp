@@ -14,7 +14,6 @@
 #include "../Parser/Parser.hpp"
 #include "../JSON/JSON.hpp"
 #include "../Database/Database.hpp"
-#include "../WebRequest/URLHandler.hpp"
 #include "Header.hpp"
 #include "Config.hpp"
 
@@ -25,9 +24,10 @@ namespace BeeFishWeb {
    using namespace BeeFishParser;
    using namespace BeeFishJSON;
    using namespace BeeFishDatabase;
-   using namespace BeeFishDBServer;
 
    class WebServer;
+   
+   typedef std::function<bool (std::string)> OnSegment;
 
    class WebRequest : public Parser {
    protected:
@@ -47,30 +47,33 @@ namespace BeeFishWeb {
       
       size_t _index {0};
       string _segment;
-
+      string _path;
+      OnSegment _onsegment;
    public:
-
+       
+      WebRequest ()
+         :
+         _socket(-1),
+         _webServer(nullptr)
+      {
+          _onsegment =
+             [this](string segment) {
+                _path += "/" + segment;
+                return true;
+             };
+      }
+      
       using Parser::read;
 
-      WebRequest(WebServer* webServer) :
-         _webServer(webServer),
-         _socket(-1)
-      {
-      }
-
-      WebRequest(WebServer* webServer, int socket, const std::string& ipAddress)
-      :
-         _webServer(webServer),
-         _socket(socket),
-         _ipAddress(ipAddress)
-      {
-      }
+      // Defined in WebServer.hpp
+      WebRequest(WebServer* webServer, int socket, const std::string& ipAddress);
 
       WebRequest(const WebRequest& source)
       :
          _webServer(source._webServer),
          _socket(-1),
-         _ipAddress(source._ipAddress)
+         _ipAddress(source._ipAddress),
+         _onsegment(source._onsegment)
       {
       }
 
@@ -89,6 +92,97 @@ namespace BeeFishWeb {
          return Path(*(Database*)_webServer);
       };
 */
+
+      BeeFishParser::And createParser() {
+          
+         const auto method =
+            Capture(
+               Word("GET") or
+               Word("POST") or
+               Word("DELETE"),
+               _method
+            );
+            
+         const auto version =
+            Capture(
+               Word("HTTP/") and
+               integer and
+               fraction,
+               _version
+            );
+            
+         const auto segment =
+            Invoke(
+               Capture(
+                  Character("/") and
+                  Repeat(
+                     not (
+                        Character("/") or
+                        Character("?") or
+                        blank
+                     ),
+                     0
+                  ),
+                  _segment
+               ),
+               [this](Parser*) {
+                   
+                  bool success = true;
+
+                  if ( _onsegment &&
+                       _segment != "/" )
+                  {
+                     string segment =
+                        _segment.substr(1);
+
+                     success = _onsegment(segment);
+                  }
+
+                  _segment = "";
+                  return success;
+               }
+            );
+            
+         const auto query =
+            Character("?") and
+            Repeat(
+                not blank,
+                0
+            );
+            
+         const auto url =
+            Capture(
+               Repeat(segment) and
+               Optional(query),
+               _url
+            );
+            
+         const auto parser = 
+            method and blanks and
+               url and blanks and
+               version and newLine and
+            Headers(
+               [this](Header* header) {
+                  _headers.emplace(
+                     header->_key,
+                     header->_value
+                  );
+               }
+            ) and
+            Invoke(
+               newLine,
+               [this](Parser*) {
+                  if (_method == "GET")
+                     setResult(true);
+                  return true;
+               }
+            ) and
+            LoadOnDemand(loadBody, this);
+
+         return parser;
+      }
+   
+   
       void close() {
          if(_socket > 0)
             ::close(_socket);
@@ -272,9 +366,7 @@ namespace BeeFishWeb {
          Parser::fail();
       }
 
-      // Defined in WebServer.hpp
-      And createParser();
-
+      
       static Parser* loadBody(Parser* params) {
          
          if (!params)

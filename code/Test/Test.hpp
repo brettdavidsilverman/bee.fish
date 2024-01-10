@@ -22,8 +22,9 @@ namespace BeeFishTest {
 
       return success;
    }
-
+   
    inline bool testPattern(
+      const std::string& label,
       BeeFishParser::Parser&
          parser,
       const std::string& pattern,
@@ -37,7 +38,7 @@ namespace BeeFishTest {
 
       bool success = true;
     
-      cout << "\t" << escape(pattern) << ":" << flush;
+      cout << "\t" << label << ":" << flush;
       
       success =
          parser.read(pattern);
@@ -52,6 +53,24 @@ namespace BeeFishTest {
       BeeFishMisc::outputSuccess(success);
 
       return success;
+   }
+   
+
+   inline bool testPattern(
+      BeeFishParser::Parser&
+         parser,
+      const std::string& pattern,
+      const std::optional<bool>&
+          expected
+   )
+   {
+      
+       return testPattern(
+          escape(pattern),
+          parser,
+          pattern,
+          expected
+       );
 
    }
 
@@ -78,7 +97,8 @@ namespace BeeFishTest {
 
       return success;
    }
-
+   
+   
 }
 
 #endif

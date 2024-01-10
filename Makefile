@@ -4,8 +4,7 @@ all:
 
 install:
 	- mkdir build
-	cd code && make $(DEBUG)
-	./start.sh $(PORT)
+	cd code/DBServer && make install
 
 test:
 	-  mkdir build
@@ -47,5 +46,5 @@ clean:
 debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
-debug:	PORT = 8080
+debug:	PORT = 8000
 debug:	install

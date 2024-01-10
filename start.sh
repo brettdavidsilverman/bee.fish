@@ -6,8 +6,8 @@ then
       PORT=80
 fi
 
-sudo ./stop.sh $PORT
+./stop.sh $PORT
 echo "Starting..."
-sudo ./build/DBServer -port $PORT -host bee.fish &
+./build/DBServer -port $PORT -host bee.fish &
 #>> ~/bee.fish.log &
 

@@ -25,7 +25,6 @@
 
 #include "Config.hpp"
 #include "../Database/Database.hpp"
-#include "../WebRequest/URLHandler.hpp"
 #include "../WebRequest/WebRequest.hpp"
 #include "Version.hpp"
 
@@ -37,19 +36,21 @@ namespace BeeFishWeb {
    using namespace BeeFishPowerEncoding;
 
    class WebServer {
+   public:
+      bool _stop = false;
+      bool _isRunning = false;
+      std::mutex _running;
+      
    protected:
       const int _port;
       int _serverSocket = -1;
       boost::asio::thread_pool _threadPool;
       std::thread* _loopThread = nullptr;
-      bool _stop = false;
-      bool _isRunning = false;
-      std::mutex _running;
       std::string _host;
 
    public:
       OnSegment _onsegment;
-
+      
       WebServer(
          string host = WEB_SERVER_HOST,
          int port = WEB_SERVER_PORT,
@@ -59,25 +60,26 @@ namespace BeeFishWeb {
          _port(port),
          _threadPool(threads)
       {
+          bool started = start();
+          assert(started);
+         
       }
 
       virtual ~WebServer() {
          stop();
-         //if (_loopThread)
-         //   delete _loopThread;
       }
       
-      virtual bool start() {
+      bool start() {
          using namespace std;
          
          stringstream  stream;
 
+         _stop = false;
+         _isRunning = false;
+         
          if (!initializeServerSocket()) {
             return false;
          }
-
-         _stop = false;
-         _isRunning = false;
 
          _loopThread = new std::thread(WebServer::loop, this); 
 
@@ -85,8 +87,13 @@ namespace BeeFishWeb {
             usleep(100);
          }
 
-         stream << "Server listening on " << url() << " 🟢";
-
+        // usleep(1000L * 1000L);
+         
+         if (_isRunning)
+            stream << "Server listening on " << url() << " 🟢";
+         else
+            stream << "Error starting WebServer on " << _port << " 🚫";
+                
          logMessage(
             LOG_NOTICE,
             stream.str()
@@ -94,28 +101,30 @@ namespace BeeFishWeb {
 
          cout << stream.str() << endl;
 
+         
          return true;
 
       }
-
+       
       virtual void stop() {
-         
+
          using namespace std;
 
          if (_loopThread == nullptr)
             return;
-
+            
+         _stop = true;
+         
          // Flush a request through
          // the system using curl
          std::stringstream stream;
          stream << "curl " << url() << " -s > /dev/null &";
          std::string command = stream.str();
          
-         _stop = true;
 
          while (_isRunning) {
             auto result = system(command.c_str());
-            usleep(10000);
+            usleep(1000L);
          }
 
          lock_guard<mutex>
@@ -179,9 +188,8 @@ namespace BeeFishWeb {
       static void loop(WebServer* webServer) {
 
          using namespace std;
-
          lock_guard<mutex> guard(webServer->_running);
-
+   
          while (!webServer->_stop) {
 
             webServer->_isRunning = true;
@@ -192,15 +200,14 @@ namespace BeeFishWeb {
 
             // Process will wait here till connection is accepted
             clilen = sizeof(cli_addr);
-
             clientSocket = accept(
                webServer->_serverSocket,
                (struct sockaddr *)&cli_addr,
                &clilen
             );
-            
-            if (clientSocket >= 0 &&
-                !webServer->_stop)
+
+            if ( ( clientSocket > -1 ) ) //&&
+              //   ( !webServer->_stop ) )
             {
                const char *ipAddress = inet_ntoa(cli_addr.sin_addr);
 
@@ -234,7 +241,7 @@ namespace BeeFishWeb {
          struct sockaddr_in serv_addr;
          int opt = 1;
 
-         if (_serverSocket >= 0) {
+         if (_serverSocket > -1) {
             ::close(_serverSocket);    
          }
 
@@ -251,9 +258,10 @@ namespace BeeFishWeb {
          if ( setsockopt(
                  _serverSocket,
                  SOL_SOCKET,
-                 SO_REUSEADDR |
+                    SO_REUSEADDR |
                     SO_REUSEPORT |
-                    SO_KEEPALIVE, &opt,
+                    SO_KEEPALIVE,
+                 &opt,
                  sizeof(opt))
          )
          {
@@ -271,7 +279,9 @@ namespace BeeFishWeb {
          // Now bind the host address using bind() call.
          if (bind(_serverSocket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
          {
-            perror("Bind server socket");
+            stringstream stream;
+            stream << "Error binding socket on port " << _port;
+            perror(stream.str().c_str());
             return false;
          }
 
@@ -329,105 +339,25 @@ namespace BeeFishWeb {
       
       virtual void close() {
          logMessage(LOG_NOTICE, "Closing web server");
-         if (_serverSocket > -1)
-            ::close(_serverSocket);
+         if (_serverSocket > -1) {
+            //::close(_serverSocket);
+            ::shutdown(_serverSocket, SHUT_RDWR);
+         }
          _serverSocket = -1;
       }
   
    };
 
-
    // Declared in WebRequest.hpp
-   BeeFishParser::And WebRequest::createParser() {
-      const auto seperator =
-         Character("/") or
-         Character("?") or
-         Character(".");
-
-      const And parser = Capture(
-         Word("GET") or
-         Word("POST") or
-         Word("DELETE"),
-         _method
-      ) and blanks and
-      Invoke(
-         Capture(
-            Character("/") and
-            Repeat(
-               Invoke(
-                  Capture(
-                     Repeat(
-                        not (
-                           seperator or blank
-                        ),
-                        1
-                     ),
-                     _segment
-                  ),
-                  [this](Parser*) {
-
-                     bool success = true;
-
-                     if (_webServer && _webServer->_onsegment) {
-                        cerr << "FOUND OUR ON SEGMENT" << endl;
-                        success = _webServer->_onsegment(
-                           _segment
-                        );
-                     }
-                     else
-                        cerr << "NO ONSEGMENT" << endl;
-
-                     _segment.clear();
-                     return success;
-                  }
-               )
-               and Optional(seperator),
-               0
-            )
-         ),
-         [this](Parser* match) {
-            cerr << "HERE MOTHERFUCKER" << endl;
-
-            if (_url.size() == 0)
-               _url = "/";
-            else if (
-                  _url[_url.length() - 1] 
-                  != '/' &&
-                  _url.find("?") == 
-                  std::string::npos
-            )
-            {
-            //   _url += "/";
-            }
-            return true;
-         }
-      ) and blanks and
-      Capture(
-         Word("HTTP/") and
-         integer and
-         fraction,
-         _version
-      ) and newLine and
-      Headers(
-         [this](Header* header) {
-            _headers.emplace(
-               header->_key,
-               header->_value
-            );
-         }
-      ) and
-      Invoke(
-         newLine,
-         [this](Parser*) {
-            if (_method == "GET")
-               setResult(true);
-            return true;
-         }
-      ) and
-      LoadOnDemand(loadBody, this);
-
-      return parser;
+   WebRequest::WebRequest(WebServer* webServer, int socket, const std::string& ipAddress)
+      :
+      _webServer(webServer),
+      _socket(socket),
+      _ipAddress(ipAddress),
+      _onsegment(webServer->_onsegment)
+   {
    }
+
 
      
 }

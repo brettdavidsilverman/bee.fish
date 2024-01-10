@@ -14,19 +14,7 @@ using namespace BeeFishDatabase;
 using namespace BeeFishMisc;
 
 int main(int argc, const char* argv[]) {
-/*
-      Database* db = new Database();
 
-      Path start(*db);
-      Path next = start["Hello"];
-
-      if (start.contains("Hello"))
-         cerr << *db << endl;
-
-      delete db;
-
-return 0;
-*/
    cout << "bee.fish.database"
            << endl
         << "C++ run time: "

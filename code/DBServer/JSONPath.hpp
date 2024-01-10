@@ -1,7 +1,7 @@
 #ifndef BEE_FISH__SCRIPT__JSON_PATH
 #define BEE_FISH__SCRIPT__JSON_PATH
 
-#include "../Database/Path.hpp"
+#include "../Database/MinMaxPath.hpp"
 #include "../Script/Variable.hpp"
 
 using namespace BeeFishDatabase;
@@ -12,23 +12,58 @@ namespace BeeFishDBServer {
    
 
    class JSONPath :
-      public Path
+      public MinMaxPath
    {
    public:
 
-      static inline const int OBJECT_TABLE = 0;
-      static inline const int OBJECT_KEYS  = 1;
-
-
       JSONPath(const Path& source) :
-         Path(source)
+         MinMaxPath(source)
       {
       }
+      /*
+      const Variable& operator=(const Variable& var)
+      {
+          setVariable(var);
+          return var;
+      }
+      
+      operator Variable() {
+         Variable var = getVariable();
+         return var;
+      }
+      
+*/
 
+      JSONPath operator [] (Size index) {
+         Path path = *this;
+         path = path[Type::ARRAY][index];
+         return path;
+      }
+      
+      JSONPath operator [] (String key) {
+         Path path = *this;
+         path = path[Type::MAP][key];
+         return path;
+      }
+      
+      JSONPath operator [] (const char* key) {
+         Path path = *this;
+         path = path[Type::MAP][key];
+         return path;
+      }
+      
+      bool contains(const String& key) const {
+          Path path = *this;
+          return path.contains(Type::MAP) &&
+                 path[Type::MAP].contains(key);
+      }
+          
+    
+      
       void setVariable(const Variable& source)
       {
          Path path(*this);
-         path << source._type;
+         path = path[source._type];
          string value;
          switch (source._type)
          {
@@ -56,34 +91,37 @@ namespace BeeFishDBServer {
                break;
             case Type::ARRAY:
             {
+cerr << "JSONPATH.HPP:" << "write array" << endl;
                ArrayPointer array (source._value._array);
                Size i;
                for (i = 0; i < array->size(); ++i)
                {
-                  Variable element = (*array)[i];
-                  JSONPath(path[i]).setVariable(element);
+ 
+                  Variable& element = (*array)[i];
+                  JSONPath indexed = (*this)[i];
+                  indexed.setVariable(element);
                }
                stringstream stream;
                stream << i;
                path.setData(stream.str());
                break;
             }
-            case Type::OBJECT:
+            case Type::MAP:
             {
-               ObjectPointer object =
-                  (source._value._object);
-               
-               Path table = path[OBJECT_TABLE];
-               Path map = path[OBJECT_KEYS];
+                
+               MapPointer map =
+                  (source._value._map);
+                  
                Size i = 0;
-               for (auto it = object->cbegin(); it != object->cend(); ++it)
+               for (auto pair : *map)
                {
                   
-                  String key = *it;
-                  table[i++].setData(key);
-                  Variable item = (*object)[key];
-                  JSONPath(map[key])
-                     .setVariable(item);
+                  const String& key = pair.first;
+                  const Variable& item = pair.second;
+  
+                  JSONPath indexed = path[key];
+                  indexed.setVariable(item);
+                  ++i;
                }
                stringstream stream;
                stream << i;
@@ -97,23 +135,15 @@ namespace BeeFishDBServer {
          
       }
 
-      Variable getVariable(Size depth = -1) {
-         Path path(*this);
-
-
-         if (depth == 0) {
-            std::stringstream pointer;
-            pointer << path;
-            Variable var(pointer.str());
-            return var;
-         }
+      Variable getVariable() {
+         MinMaxPath path(*this);
 
          if (path.isDeadEnd())
             return undefined;
 
          Type type =
             path.value<Type>();
-         path << type;
+         path = path[type];
          Variable var(type);
          string value;
          path.getData(value);
@@ -145,92 +175,41 @@ namespace BeeFishDBServer {
                var._value._array = array;
                Size max = path.max<Size>();
                array->reserve(max);
+               JSONPath json = path;
                for (Size i = 0; i <= max; ++i)
                {
-                  JSONPath value = path[i];
+                  JSONPath value = json[i];
                   array->push_back(
-                     value.getVariable(depth - 1)
+                     value.getVariable()
                   );
                }
 
                break;
             }
-            case Type::OBJECT:
+            case Type::MAP:
             {
-               BeeFishScript::ObjectPointer
-               object = BeeFishScript::ObjectPointer(
-                  new BeeFishScript::Object()
-               );
-               var._value._object = object;
+               BeeFishScript::MapPointer
+                  map = BeeFishScript::MapPointer(
+                     new BeeFishScript::Map()
+                  );
+                  
+               var._value._map = map;
 
-               Path table = path[OBJECT_TABLE];
-               Path map = path[OBJECT_KEYS];
-
-
-               Path::Stack stack;
+               Stack stack;
                String key;
-               Size i;
-               while (table.next(stack, i))
+               while (path.next(stack, key))
                {
-                  table[i].getData(key);
-                  JSONPath json = map[key];
-                  Variable value = json.getVariable(depth - 1);
-                  (*object)[key] = value;
+                  JSONPath json = path[key];
+                  Variable value = json.getVariable();
+                  (*map)[key] = value;
                }
+               
                break;
             }
             default:
                throw std::logic_error("JSON::Variable::Value::copy constructor");
          }
          return var;
-      }
-
-      JSONPath operator [] (const string& key)
-      {
-         Path path(*this);
-
-         path = path
-            [Type::OBJECT]
-            [OBJECT_KEYS]
-            [key];
-
-         return JSONPath(path);
-      }
-
-      JSONPath operator [] (const char * str)
-      {
-         string key(str);
-
-         return (*this)[key];
-      }
-
-      JSONPath operator [] (const BeeFishDatabase::Size& index)
-      {
-         Path path(*this);
-         return path[Type::ARRAY][index];
-      }
-
-      JSONPath operator [] (int index)
-      {
-         return (*this)[Size(index)];
-      }
-
-      bool contains(std::string& segment)
-      {
-         Path path(*this);
-
-         Type type =
-            path.value<Type>();
-
-         if (type == Type::OBJECT)
-         {
-            path << type;
-            path << OBJECT_KEYS;
-            if (path.contains(segment))
-               return true;
-         }
-         
-         return false;
       }
       
       friend ostream& operator << (ostream& out, const JSONPath& jsonPath)

@@ -5,7 +5,7 @@ DEPS = main.cpp WebServer.hpp Version.hpp Test.hpp Config.hpp
 
 $(OUTPUT):	$(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -latomic
-
+	
 all:	$(OUTPUT)
 
 test:	$(OUTPUT)

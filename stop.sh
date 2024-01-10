@@ -11,6 +11,10 @@ if [ -z "$PID" ]
 then
    echo "Nothing to do"
 else
-   sudo kill $PID
-   echo "Stopped process"
+   for item in $PID
+   do
+      echo $item
+      sudo kill $item
+   done
+   echo "Stopped processes"
 fi

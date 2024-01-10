@@ -80,7 +80,7 @@ namespace BeeFishParser {
 
       virtual string getErrorMessage() const {
          stringstream stream;
-         stream << "Invalid Content {" << (int)_lastCharacter << "} at position "
+         stream << "Invalid Content '" << escape(_lastCharacter) << "' at position "
                 << _byteCount;
          return stream.str();
       }
@@ -211,10 +211,6 @@ namespace BeeFishParser {
             << endl;
          
 #endif
-
-         if (parser._result == false) {
-            cerr << "Failed on {" << escape(c) << "}" << " at " << charCount << endl;
-         }
 
          return in;
       }

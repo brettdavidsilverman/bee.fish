@@ -17,23 +17,14 @@ namespace BeeFishTest
    using namespace BeeFishMisc;
    using namespace BeeFishTest;
 
-   Database* database = nullptr;
-   Path* root = nullptr;
-   WebServer* webServer = nullptr;
-
    inline bool testHeaders();
    inline bool testWebRequestClass();
-
+   inline bool testURLs();
+   
    inline bool testWebRequest()
    {
    
       bool success = true;
-
-      database = new Database();
-      root = new Path(database);
-      webServer = new WebServer(
-         "localhost", 8000, 2
-      );
 
       if (success)
          success = testHeaders();
@@ -41,15 +32,12 @@ namespace BeeFishTest
       if (success)
          success = testWebRequestClass();
 
+      if (success)
+         success = testURLs();
+          
       BeeFishMisc::outputSuccess(success);
 
-      std::string tempfile = database->filename();
-      remove(tempfile.c_str());
-      
-      delete root;
-      delete database;
-      delete webServer;
-
+  
       return success;
    }
    
@@ -116,9 +104,9 @@ namespace BeeFishTest
       
       bool success = true;
       
-      string host = WEB_SERVER_HOST;
+      string host = "localhost";
 
-      WebRequest webRequest(webServer);
+      WebRequest webRequest;
 
       success &=
          testPattern(
@@ -141,7 +129,7 @@ namespace BeeFishTest
       success &=
          testValue(host, webRequest._headers["host"]);
 
-      WebRequest webRequestJSON(webServer);
+      WebRequest webRequestJSON;
 
       success &=
          testPattern(
@@ -160,7 +148,64 @@ namespace BeeFishTest
       
    }
 
+   inline bool testURL(string url) {
 
+      bool success = true;
+      
+      string fullPath;
+
+      string host = "localhost";
+
+      WebRequest webRequest;
+      
+      webRequest._onsegment =
+         [&fullPath](std::string segment)
+         {
+            fullPath = fullPath + "/" + segment;
+            return true;
+         };
+         
+      success &=
+         testPattern(
+            url,
+            webRequest,
+            "GET " + url + " HTTP/1.1\r\n" \
+            "Host: " + host + "\r\n" \
+            "\r\n",
+            true
+         );
+         
+         
+      if (success && fullPath.length())
+         success &= testValue(url, fullPath);
+      
+      BeeFishMisc::outputSuccess(success);
+   
+      return success;
+   }
+
+   inline bool testURLs()
+   {
+      
+      cout << "Test URLs" << endl;
+
+      bool success = true;
+
+      success &= testURL("/");
+
+      success &= testURL("/path");
+
+      success &= testURL("/path1");
+
+      success &= testURL("/path5/path6");
+
+      success &= testURL("/path9/path10");
+      
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+   }
+   
 }
 
 #endif

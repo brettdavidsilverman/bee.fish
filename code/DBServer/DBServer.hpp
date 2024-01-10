@@ -6,7 +6,7 @@
 #include "../WebServer/WebServer.hpp"
 #include "../Database/Database.hpp"
 #include "../WebRequest/WebRequest.hpp"
-#include "../WebRequest/URLHandler.hpp"
+
 #include "StreamToDB.hpp"
 
 #include "DBWebRequest.hpp"
@@ -33,13 +33,6 @@ namespace BeeFishDBServer {
          Database(databaseFilename),
          WebServer(host, port, threads)
       {
-         
-         _onsegment =
-            [this](string segment) {
-               cerr << "DBServer.hpp: " << segment <<  endl;
-               return true;
-            };
-
       }
 
       virtual ~DBServer() {
@@ -55,6 +48,7 @@ namespace BeeFishDBServer {
          string ipAddress
       ) override
       {
+
          try {
             DBWebRequest webRequest(
                this,
@@ -66,6 +60,7 @@ namespace BeeFishDBServer {
             if (!webRequest.process()) {
                ::close(clientSocket);
             }
+
          }
          catch (...)
          {

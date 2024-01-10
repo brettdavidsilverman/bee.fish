@@ -58,10 +58,6 @@ namespace BeeFishDatabase {
          
       }
 
-      virtual ~Path()
-      {
-      }
-      
       virtual void writeBit(bool bit)
       {
 
@@ -388,180 +384,6 @@ namespace BeeFishDatabase {
 
    public:
          
-#include "Stack.hpp"
-
-   protected:
-
-      void min(
-         Index index,
-         Stack& stack
-      ) const
-      {
-         Branch branch =
-            getBranch(index);
-
-         while (!branch.isDeadEnd())
-         {
-            Path path(*this, index);
-            
-            bool bit;
-
-            if (branch._left) {
-               index = branch._left;
-               bit = 0;
-            }
-            else if (branch._right) {
-               index = branch._right;
-               bit = 1;
-            }
-
-            stack.push_back({new Path(path), bit});
-
-            branch = getBranch(index);
-         }
-      }
-
-      void max(
-         Index index,
-         Stack& stack
-      ) const
-      {
-
-         
-         Branch branch =
-            getBranch(index);
-
-         while (!branch.isDeadEnd())
-         {
-            Path path(*this, index);
-
-            bool bit;
-         
-            if (branch._right) {
-               index = branch._right;
-               bit = 1;
-            }
-            else if (branch._left) {
-               index = branch._left;
-               bit = 0;
-            }
-
-            stack.push_back({new Path(path), bit});
-
-            branch = getBranch(index);
-         }
-      
-      }
-
-   public:
-      template<typename T>
-      T min(
-         Stack& stack
-      ) const
-      {
-         min(_index, stack);
-         T minimum;
-         stack >> minimum;
-         assert(stack.count() == 0);
-         return minimum;
-      }
-
-      template<typename T>
-      T max(
-         Stack& stack
-      ) 
-      {
-         max(_index, stack);
-         T maximum;
-         stack >> maximum;
-         return maximum;
-      }
-
-      template<typename T>
-      T min() const {
-         Stack stack;
-         min(_index, stack);
-         T minimum;
-         stack >> minimum;
-         return minimum;
-      }
-
-      template<typename T>
-      T max() const {
-
-         Stack stack;
-         max(_index, stack);
-         T maximum;
-         stack >> maximum;
-         return maximum;
-      }
-
-      template<typename T>
-      bool next(Stack& stack, T& value) {
-         // Algorithm:
-         // Up the tree until first
-         // right with a left
-
-         // Take that right, then
-         // follow using min algo
-
-         if (isDeadEnd())
-            return false;
-
-         if (stack.size() == 0)
-         {
-            min(_index, stack);
-            stack >> value;
-            return true;
-         }
-         
-         Branch branch;
-         Path* path;
-         StackValue entry;
-         // Up the tree until first right
-         do 
-         {
-            entry = stack.last();
-            path = entry._path;
-            branch = path->getBranch();
-            stack.pop_back();
-         }
-         while (stack.size() && 
-                ( !(branch._left &&
-                     branch._right) ||
-                entry._bit == 1) );
-
-         if ( ! (branch._left and
-                  branch._right) ||
-              (entry._bit == 1) )
-            return false;
-
-
-         assert(branch._left && branch._right && entry._bit == 0);
-
-         // Follow the next min from
-         // this right
-         stack.push_back({new Path(*path), 1});
-         min(branch._right, stack);
-
-         // Get this value
-         stack.reset();
-         value = T();
-         stack >> value;
-
-         return true;
-
-      }
-
-      template<typename T>
-      T value() const
-      {
-         if (isDeadEnd())
-            return T();
-            
-         return min<T>();
-      }
-
       Path& operator=(const Path& rhs)
       { 
          _database = rhs._database;
@@ -631,8 +453,17 @@ namespace BeeFishDatabase {
       friend ostream& operator <<
       (ostream& out, const Path& path)
       {
+          Variable value = path.getVariable();
+          out << value;
+          return out;
+      }
+      
+      virtual Variable getVariable() const
+      {
+         Path path(*this);
+         
          BeeFishScript::Variable variable = 
-            BeeFishScript::Object{};
+            BeeFishScript::Map{};
 
          variable["index"] =
             (BeeFishScript::Number)path._index;
@@ -646,9 +477,8 @@ namespace BeeFishDatabase {
             variable["database"] = BeeFishScript::Null();
 
 
-         out << variable;
+         return variable;
      
-         return out;
       }
       
    protected:

@@ -26,7 +26,6 @@ trace:	clean
 trace:	CFLAGS += -DTIME -g -O3
 trace:	run_trace
 
-test:	clean
 test:	CFLAGS += -g
 test:	run_test
 

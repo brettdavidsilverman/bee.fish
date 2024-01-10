@@ -16,7 +16,7 @@ namespace BeeFishScript {
    using namespace BeeFishJSON;
    using namespace std;
 
-   class Object;
+   class Map;
    class Variable;
 
    typedef nullptr_t Null;
@@ -25,88 +25,56 @@ namespace BeeFishScript {
    typedef std::string String;
    typedef vector<Variable> Array;
 
-   typedef std::map<String, Variable>                Map;
+   typedef std::map<String, Variable>                MapBase;
    typedef std::vector<String>                       Table;
-   typedef std::initializer_list<Map::value_type>     List;
+   typedef std::initializer_list<MapBase::value_type>     List;
    typedef std::initializer_list<Array::value_type>   ArrayList;
 
-   typedef std::shared_ptr<BeeFishScript::Object> ObjectPointer;
+   typedef std::shared_ptr<BeeFishScript::Map> MapPointer;
    typedef std::shared_ptr<BeeFishScript::Array> ArrayPointer;
 
    inline std::string escapeString(const String& string);
 
    #define undefined BeeFishScript::Variable::Undefined()
 
-   class Object : public Map {
-   public:
-      Table _table;
-      typedef Table::const_iterator const_iterator;
+   class Map : public MapBase {
    public:
 
-      Object() {
+      Map() {
 
       }
 
-      Object(List list)
+      Map(List list)
       {
          loadMap(list);
       }
 
-      Object(const Object& source) : Map(source), _table(source._table) {
+      Map(const Map& source) :
+         MapBase(source)
+      {
       }
 
-      virtual ~Object() {
+      virtual ~Map() {
 
       }
 
-      virtual void clear() {
-         Map::clear();
-         _table.clear();
-      }
-
-      virtual void apply(const ObjectPointer value);
-
-      virtual pair<Object::iterator,bool> insert(const Object::value_type& pair);
-
-      Variable& operator[] (const String& key) {
-
-         if (count(key) == 0)
-            _table.push_back(key);
-
-         return Map::operator[](key);
-         
-      }
-
-      Variable& operator[] (const BeeFishDatabase::Size& index) {
-
-         const String& key = _table[index];
-
-         return Map::operator[](key);
-         
-      }
+      virtual void apply(const MapPointer value);
 
       bool contains (const String& key) const {
-
          return (count(key) > 0);
-         
       }
 
       bool contains (const char* key) const {
-
          String strKey(key);
          return contains(strKey);
-         
       }
 
-      //virtual Variable operator[] (const BString& key) const;
-      //virtual Variable& operator[] (const BString& key);
-      
       void loadMap(List list);
 
       virtual void write(ostream& out, size_t tabs = 0) const;
 
-      friend ostream& operator << (ostream& out, const Object& object) {
-         object.write(out);
+      friend ostream& operator << (ostream& out, const Map& map) {
+         map.write(out);
          return out;
       }
 
@@ -125,13 +93,6 @@ namespace BeeFishScript {
          return stream.str().size();
       }
 
-      const_iterator cbegin() const {
-         return _table.cbegin();
-      }
-
-      const_iterator cend() const {
-         return _table.cend();
-      }
 
    };
    
@@ -145,7 +106,7 @@ namespace BeeFishScript {
          Number _number;
          String _string;
          ArrayPointer _array;
-         ObjectPointer _object;
+         MapPointer _map;
 
          Value() {
          }
@@ -167,8 +128,8 @@ namespace BeeFishScript {
             case BeeFishJSON::Type::ARRAY:
                new (&_array) ArrayPointer(source._array);
                break;
-            case BeeFishJSON::Type::OBJECT:
-               new (&_object) ObjectPointer(source._object);
+            case BeeFishJSON::Type::MAP:
+               new (&_map) MapPointer(source._map);
                break;
             default:
                throw std::logic_error("JSON::Variable::Value::copy constructor");
@@ -244,25 +205,25 @@ namespace BeeFishScript {
          new (&_value._array) ArrayPointer(value);
       }
 
-      Variable(const Object& value) {
-         _type = BeeFishJSON::Type::OBJECT;
-         new (&_value._object) ObjectPointer(new Object(value));
+      Variable(const Map& value) {
+         _type = BeeFishJSON::Type::MAP;
+         new (&_value._map) MapPointer(new Map(value));
       }
 
-      Variable(ObjectPointer value) {
-         _type = BeeFishJSON::Type::OBJECT;
-         new (&_value._object) ObjectPointer(value);
+      Variable(MapPointer value) {
+         _type = BeeFishJSON::Type::MAP;
+         new (&_value._map) MapPointer(value);
       }
 
       Variable(List list) :
-         Variable(ObjectPointer(new Object(list)))
+         Variable(MapPointer(new Map(list)))
       {
       }
 
       istream& operator >> (istream& in) {
          Variable variable;
-         auto object = BeeFishJSON::Object();
-         return in >> object;
+         auto map = BeeFishJSON::Map();
+         return in >> map;
       }
 
       static Variable& Undefined() {
@@ -283,21 +244,21 @@ namespace BeeFishScript {
          case BeeFishJSON::Type::ARRAY:
             _value._array.~ArrayPointer();
             break;
-         case BeeFishJSON::Type::OBJECT:
-            _value._object.~ObjectPointer();
+         case BeeFishJSON::Type::MAP:
+            _value._map.~MapPointer();
             break;
          }
 
       }
 
       virtual Variable& operator[] (const String& key) {
-         ObjectPointer object = (ObjectPointer)*this;
-         return (*object)[key];
+         MapPointer map = (MapPointer)*this;
+         return (*map)[key];
       }
 
       virtual Variable& operator[] (const char* key) {
-         ObjectPointer object = (ObjectPointer)*this;
-         return (*object)[String(key)];
+         MapPointer map = (MapPointer)*this;
+         return (*map)[String(key)];
       }
 
       virtual Variable& operator[] (int index) {
@@ -305,16 +266,8 @@ namespace BeeFishScript {
       }
 
       virtual Variable& operator[] (const Size& index) {
-         if (_type == Type::OBJECT) {
-            ObjectPointer object = (ObjectPointer)*this;
-            return (*object)[index];
-         }
-         else if (_type == Type::ARRAY) {
-            ArrayPointer array = (ArrayPointer)*this;
-            return (*array)[index];
-         }
-         throw std::runtime_error("Error using operator [] when type is not oject or array");
-         return undefined;
+         ArrayPointer array = (ArrayPointer)*this;
+         return (*array)[index];
       }
 
       virtual Variable& operator = (const Variable& source) {
@@ -443,8 +396,8 @@ namespace BeeFishScript {
             out << "]";
             break;
          }
-         case BeeFishJSON::Type::OBJECT: {
-            _value._object->write(out, tabIndex + 1);
+         case BeeFishJSON::Type::MAP: {
+            _value._map->write(out, tabIndex + 1);
             break;
          }
          default:
@@ -474,8 +427,8 @@ namespace BeeFishScript {
             return "String";
          case BeeFishJSON::Type::ARRAY:
             return "Array";
-         case BeeFishJSON::Type::OBJECT:
-            return "Object";
+         case BeeFishJSON::Type::MAP:
+            return "Map";
          default:
             throw std::logic_error("Invalid variable type");
          }
@@ -519,23 +472,23 @@ namespace BeeFishScript {
          return _value._array;
       }
 
-      operator ObjectPointer() {
-         CHECK_TYPE(BeeFishJSON::Type::OBJECT);
-         return _value._object;
+      operator MapPointer() {
+         CHECK_TYPE(BeeFishJSON::Type::MAP);
+         return _value._map;
       }
 
-      operator const ObjectPointer() const {
-         CHECK_TYPE(BeeFishJSON::Type::OBJECT);
-         return _value._object;
+      operator const MapPointer() const {
+         CHECK_TYPE(BeeFishJSON::Type::MAP);
+         return _value._map;
       }
 
    };
 
-   inline void Object::write(ostream& out, size_t tabs) const {
+   inline void Map::write(ostream& out, size_t tabs) const {
 
       ostream& output = out;
       
-      bool emptySet = (_table.size() == 0);
+      bool emptySet = (size() == 0);
 
       if (emptySet) {
          output << "{}";
@@ -547,9 +500,9 @@ namespace BeeFishScript {
 
       output << "{" << endl;
 
-      for (Object::const_iterator it = cbegin(); it != cend();) {
-         const String& key = *it;
-         const Variable& value = at(key);
+      for (Map::const_iterator it = cbegin(); it != cend();) {
+         const String& key = it->first;
+         const Variable& value = it->second;
          if (value._type != BeeFishJSON::Type::UNDEFINED) {
             if (tabs > 0)
                output << std::string(tabs * TAB_SPACES, ' ');
@@ -576,22 +529,17 @@ namespace BeeFishScript {
 
    }
    
-   inline void Object::loadMap(List list) {
+   inline void Map::loadMap(List list) {
       for (List::iterator it = list.begin(); it != list.end(); ++it) {
          insert(*it);
       }
    }
 
-   inline pair<Object::iterator,bool> Object::insert(const Object::value_type& pair) {
-      _table.push_back(pair.first);
-      return Map::insert(pair);
-   }
-
-   inline void Object::apply(const ObjectPointer value) {
-      const Object& object = *value;
-      for (auto it = object.cbegin(); it != object.cend(); ++it) {
-         const String& key = *it;
-         (*this)[key] = object.at(key);
+   inline void Map::apply(const MapPointer value) {
+      const Map& map = *value;
+      for (auto it = map.cbegin(); it != map.cend(); ++it) {
+         const String& key = it->first;
+         (*this)[key] = it->second;
       }
    }
 
@@ -666,26 +614,6 @@ namespace BeeFishScript {
       return out.str();
 
    }
-
-/*
-   inline Variable Object::operator[] (const BString& key) const {
-
-      if (count(key) == 0)
-         return Variable::Undefined();
-
-      return Map::at(key);
-      
-   }
-
-   inline Variable& Object::operator[] (const BString& key) {
-
-      if (count(key) == 0)
-         return Variable::Undefined();
-
-      return Map::at(key);
-      
-   }
-*/
 
 }
 

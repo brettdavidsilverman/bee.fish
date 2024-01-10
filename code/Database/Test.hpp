@@ -40,7 +40,7 @@ namespace BeeFishDatabase
       outputSuccess(success);
 
       // Min / Max
-      Path data = start["data"];
+      MinMaxPath data = start["data"];
 
       for (size_t i = min; i <= max; ++i)
       {
@@ -121,7 +121,7 @@ namespace BeeFishDatabase
 
       if (success) {
          cout << "\tTesting first ";
-         Path data = start["skip"];
+         MinMaxPath data = start["skip"];
          data["first"];
          success =
             (data.min<string>() == "first");
@@ -132,7 +132,7 @@ namespace BeeFishDatabase
       
       if (success) {
          cout << "\tTesting last ";
-         Path data = start["skip2"];
+         MinMaxPath data = start["skip2"];
          data["first"];
          data["zlast"];
          success =
@@ -145,11 +145,10 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tTesting int next" << flush;
 
-         Path data = start["skip3"];
+         MinMaxPath data = start["skip3"];
          data[0];
          data[1];
-         //data[2];
-
+         
          Stack stack;
          int first = - 1;
          bool next =
@@ -182,7 +181,7 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tTesting string first to next " << flush;
 
-         Path data = start["skip4"];
+         MinMaxPath data = start["skip4"];
          data["first"];
          data["second"];
          data["third"];
@@ -218,7 +217,7 @@ namespace BeeFishDatabase
       {
          cout << "\tTesting count" << flush;
 
-         Path data = start["skip5"];
+         MinMaxPath data = start["skip5"];
          for (int i = 1; i <= 10; ++i)
             data[i];
 
@@ -242,7 +241,7 @@ namespace BeeFishDatabase
       {
          cout << "\tTesting string next" << flush;
 
-         Path data = start["skip6"];
+         MinMaxPath data = start["skip6"];
          data["one"];
          data["two"];
          data["three"];
@@ -264,7 +263,7 @@ namespace BeeFishDatabase
       {
          cout << "\tTesting string value" << flush;
 
-         Path data = start["skip7"];
+         MinMaxPath data = start["skip7"];
          data["one"];
          data["two"];
          data["three"];
@@ -277,7 +276,7 @@ namespace BeeFishDatabase
       {
          cout << "\tTesting size_t contains" << flush;
 
-         Path data = start["skip8"];
+         MinMaxPath data = start["skip8"];
          Size size = 1;
          data[size];
 
@@ -291,7 +290,7 @@ namespace BeeFishDatabase
       {
          cout << "\tTesting size_t does not contain" << flush;
 
-         Path data = start["skip9"];
+         MinMaxPath data = start["skip9"];
          Size size = 1;
          data[size];
 

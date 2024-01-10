@@ -14,6 +14,7 @@ all:
 	cd DBServer && make $(DEBUG)
 	
 test:	all
+	../stop.sh 8000
 	cd Parser && $(BUILD)/Parser -test
 	cd PowerEncoding && $(BUILD)/PowerEncoding -test
 	cd Database && $(BUILD)/Database -test

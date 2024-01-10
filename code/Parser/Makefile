@@ -5,7 +5,7 @@ CFLAGS = -std=c++17 -Wfatal-errors
 $(OUTPUT):	$(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread
 
-test:	clean $(OUTPUT)
+test:	$(OUTPUT)
 	$(OUTPUT) -test
 
 clean:

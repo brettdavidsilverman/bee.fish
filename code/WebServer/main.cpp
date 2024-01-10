@@ -3,7 +3,7 @@
 #include "../Parser/Test.hpp"
 #include "Test.hpp"
 #include "WebServer.hpp"
-#include <boost/json/src.hpp>
+//#include <boost/json/src.hpp>
 
 int main(int argc, const char* argv[]) {
    using namespace std;
@@ -70,7 +70,6 @@ int main(int argc, const char* argv[]) {
 
    WebServer webServer(host, port, threads);
 
-   webServer.start();
    webServer.join();
 
    return 0;

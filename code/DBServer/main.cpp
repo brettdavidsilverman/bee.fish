@@ -103,11 +103,6 @@ int main(int argc, const char* argv[]) {
 
    DBServer dbServer(host, port, threads, filename);
 
-   if (!dbServer.start()) {
-      logMessage(LOG_ERR, "Could not start DBServer");
-      return 1;
-   }
-
    std::stringstream stream;
    stream << "DBServer " << host << " on port " << port;
    logMessage(LOG_INFO, stream.str());

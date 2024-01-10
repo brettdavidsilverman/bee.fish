@@ -33,13 +33,19 @@ namespace BeeFishDBServer {
       DBServer* _webServer {nullptr};
       std::mutex _mutex;
       JSONPath _path;
+      bool _found = false;
    public:
 
       DBWebRequest(DBServer* dbServer) :
-         WebRequest((WebServer*)dbServer),
+         WebRequest(
+            (WebServer*)dbServer,
+            -1,
+            ""
+         ),
          _webServer(dbServer),
          _path(Path(*(Database*)dbServer))
       {
+          createSegmentHandler();
       }
 
       DBWebRequest(
@@ -55,6 +61,7 @@ namespace BeeFishDBServer {
           _webServer(webServer),
           _path(Path(*(Database*)webServer))
       {
+          createSegmentHandler();
       }
 
       DBWebRequest(const DBWebRequest& source)
@@ -63,7 +70,38 @@ namespace BeeFishDBServer {
          _webServer(source._webServer),
          _path(source._path)
       {
+          createSegmentHandler();
       }
+      
+      void createSegmentHandler()
+      {
+          _path = root();
+          
+          _onsegment =
+             [this](string segment) {
+                 
+                 if (_method == "GET")
+                 {
+                     _path = _path[segment];
+                     if (_path.hasData()) {
+                        _found = true;
+                        return true;
+                     }
+                     else {
+                        _found = false;
+                        return true;
+                     }
+                 }
+                 else if (_method == "POST") {
+                    _path = _path[segment];
+                    _found = _path.hasData();
+                    return true;
+                 }
+                 
+                 return false;
+             };
+      }
+      
 
       virtual ~DBWebRequest() {
       }
@@ -86,12 +124,7 @@ namespace BeeFishDBServer {
          if (path.hasData())
             return false;
 
-         string contentType;
-         if (_headers.count("content-type") > 0)
-            contentType = _headers["content-type"];
-         
-         if (contentType == "")
-            contentType = "text/plain; charset=utf-8";
+         std::string contentType = "application/json; charset=utf-8";
 
          path.setData(contentType);
 
@@ -103,8 +136,9 @@ namespace BeeFishDBServer {
       {
          //Path path = root();
 
-         if (!setContentType(_path))
+         if (!setContentType(_path)) {
             return nullptr;
+         }
 
          return new
             StreamToDB(
@@ -147,8 +181,20 @@ namespace BeeFishDBServer {
 
          logMessage(LOG_NOTICE, logStream.str());
          
+         if ( _method == "GET" &&
+              _url == "/" )
+         {
+            return outputHomePage();
+         }
+         
+         if (_method == "GET" &&
+             !_found)
+         {
+            return output404NotFound();
+         }
+         
          if (_method == "POST" &&
-             _body == nullptr)
+             _found)
              
          {
             outputFail("Already taken");
@@ -175,29 +221,15 @@ namespace BeeFishDBServer {
             
          }
 
-         if ( _method == "GET" &&
-              _url == "/" )
-         {
-            return outputHomePage();
-         }
-
-         if (_method == "POST")
+         if (_method == "POST" && _result == true)
          {
             return outputSuccess();
          }
-
          
-         if (!_path.hasData() ||
-             _path.isDeadEnd())
-         {
-            return output404NotFound();
-         }
-         
-
          // Send the body
          if (_result == true)
          {
-            if (streamFromDB(*this, _path, true))
+            if (streamFromDB(*this, _path))
                return true;
          }
 

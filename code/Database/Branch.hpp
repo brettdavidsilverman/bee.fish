@@ -25,7 +25,7 @@ namespace BeeFishDatabase
       }
 
       Variable getVariable() const {
-         Variable var = BeeFishScript::Object{
+         Variable var = BeeFishScript::Map{
             {"left", (Number)_left},
             {"right", (Number)_right}
          };
