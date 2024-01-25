@@ -77,13 +77,14 @@ namespace BeeFishDBServer {
 
       void push_back(Type type)
       {
+cerr << "JSONPATSER.HPP: " << type << endl;
          Path path = lastPath();
-
-         path = path[type];
 
          if (lastType() == Type::ARRAY)
             path = path[lastIndex()++];
 
+         path = path[type];
+         
          _stack.push_back(
             {
                type,

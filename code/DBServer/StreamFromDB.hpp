@@ -105,6 +105,7 @@ namespace BeeFishDBServer {
          type =
             path.value<Type>();
       }
+      cerr << "STREAMFROMDB.HPP" << ":" << type << endl;
       
       path = path[type];
 
@@ -117,13 +118,16 @@ namespace BeeFishDBServer {
       {
          case Type::MAP:
          {            
-            size += output.write("{\r\n");
+            Size count = atol(value.c_str());
+            if (count == 0)
+               size += output.write("{");
+            else
+               size += output.write("{\r\n");
+cerr << "STREAMFROMDB.HPP: size: " << size << endl;
             string key;
             Stack stack;
             Size i = 0;
-
-            Size count = atol(value.c_str());
-
+            
             path = path[Type::MAP];
             
             while(path.next(stack, key))
@@ -143,6 +147,7 @@ namespace BeeFishDBServer {
                if (++i < count) {
                   size += output.write(",");
                   size += output.write("\r\n");
+                  
                }
 
             }
@@ -151,7 +156,9 @@ namespace BeeFishDBServer {
                size += output.write("\r\n");
                size += output.write(getTabs(tabs));
             }
+            
             size += output.write("}");
+            
             break;
          }
          case Type::NUMBER:
@@ -192,6 +199,8 @@ namespace BeeFishDBServer {
             
             if (count > 0)
                size += output.write("\r\n");
+            
+            path = path[Type::ARRAY];
             
             for (BeeFishDatabase::Size index = 0;
                  index < count;

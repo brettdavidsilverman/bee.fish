@@ -6,15 +6,11 @@ then
 fi
 
 echo "Stopping $PORT..."
-PID=$(sudo lsof -t -i:$PORT)
-if [ -z "$PID" ]
+PROCESS=$(sudo lsof -t -i:$PORT)
+if [ -z "$PROCESS" ]
 then
    echo "Nothing to do"
 else
-   for item in $PID
-   do
-      echo $item
-      sudo kill $item
-   done
-   echo "Stopped processes"
+   sudo kill -9 $PROCESS
+   echo "Done"
 fi

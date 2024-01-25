@@ -143,13 +143,28 @@ namespace BeeFishDBServer
       success &= (system(command.c_str()) == 0);
 
       if (success && expect) {
-         stringstream stream;
-         stream << "curl -s "
-                << url << file;
+          
+         // Redirect curl to temp file
+         stringstream stream1;
+         stream1 << "curl -s "
+                 << url << file
+                 << " > "
+                 << TEMP_DIRECTORY
+                 << "test.curl.txt";
                 
-         command = stream.str();
+         command = stream1.str();
          success &= (system(command.c_str()) == 0);
 
+         // Compare the files
+         stringstream stream2;
+         stream2 << "diff -y "
+                 << TEMP_DIRECTORY
+                 << "test.curl.txt"
+                 << " "
+                 << file;
+                
+         command = stream2.str();
+         success &= (system(command.c_str()) == 0);
       }
 
       outputSuccess(success);

@@ -92,6 +92,7 @@ namespace BeeFishDBServer {
             case Type::ARRAY:
             {
 cerr << "JSONPATH.HPP:" << "write array" << endl;
+
                ArrayPointer array (source._value._array);
                Size i;
                for (i = 0; i < array->size(); ++i)

@@ -45,6 +45,9 @@ namespace BeeFishJSON {
          case Type::STRING:
             out << "string";
             break;
+         case Type::KEY:
+            out << "key";
+            break;
          case Type::ARRAY:
             out << "array";
             break;

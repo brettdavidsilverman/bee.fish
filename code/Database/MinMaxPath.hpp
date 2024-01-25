@@ -120,7 +120,7 @@ namespace BeeFishDatabase {
       ) const
       {
          min(_index, stack);
-         T minimum;
+         T minimum = T();
          stack >> minimum;
          assert(stack.count() == 0);
          return minimum;
