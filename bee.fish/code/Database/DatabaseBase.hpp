@@ -99,6 +99,8 @@ namespace BeeFishDatabase {
             munmap(_tree, _size);
 
          logMessage(LOG_NOTICE, "~Database()");
+         cout << "~Database"
+              << endl;
       }
       
       
