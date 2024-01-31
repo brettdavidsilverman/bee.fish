@@ -59,6 +59,14 @@ var jsonText =
 
 function postJSON() {
 
+   try {
+      eval( "(" + jsonText.value + ")");
+   }
+   catch (error) {
+       alert(error);
+       return;
+   }
+   
    var response =
       fetch(
          window.location.href,
@@ -68,11 +76,16 @@ function postJSON() {
          }
       ).then(
          function (response) {
-            return response.json();
+            return response.text();
          }
       ).then(
-         function (json) {
-            window.location.reload();
+         function (text) {
+            if (text == jsonText.value) {
+               document.write(text);
+               document.close();
+            }
+            else
+               window.location.reload();
          }
       ).catch(
          function(error) {

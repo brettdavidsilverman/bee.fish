@@ -17,6 +17,8 @@ namespace BeeFishWebServer {
        
       Path path = database;
       string _uri = uri;
+      
+      // Add trailing /
       if (_uri[_uri.length() -1] != '/')
          _uri += '/';
          
