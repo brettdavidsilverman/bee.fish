@@ -3,8 +3,9 @@
 
 #include "../Parser/Parser.hpp"
 #include "../PowerEncoding/PowerEncoding.hpp"
+#include "../Script/Variable.hpp"
 #include "Version.hpp"
-#include "Map.hpp"
+#include "Object.hpp"
 #include "Array.hpp"
 #include "Number.hpp"
 #include "String.hpp"
@@ -13,78 +14,26 @@
 namespace BeeFishJSON {
 
    using namespace BeeFishParser;
-
-   enum class Type {
-      UNDEFINED,
-      NULL_,
-      BOOLEAN,
-      NUMBER,
-      STRING,
-      KEY,
-      ARRAY,
-      MAP,
-      ROOT
-   };
-
-   ostream& operator << (ostream& out, const Type& type)
-   {
-      switch (type)
-      {
-         case Type::UNDEFINED:
-            out << "undefined";
-            break;
-         case Type::NULL_:
-            out << "null";
-            break;
-         case Type::BOOLEAN:
-            out << "bool";
-            break;
-         case Type::NUMBER:
-            out << "number";
-            break;
-         case Type::STRING:
-            out << "string";
-            break;
-         case Type::KEY:
-            out << "key";
-            break;
-         case Type::ARRAY:
-            out << "array";
-            break;
-         case Type::MAP:
-            out << "map";
-            break;
-         default:
-            out << "UNKNOWN";
-      }
-
-      return out;
-   }
-
-   PowerEncoding& operator << (PowerEncoding& out, const Type& type)
-   {
-      out << (int)type;
-      return out;
-   }
-
-   PowerEncoding& operator >> (PowerEncoding& in, Type& value)
-   {
-      int type;
-      in >> type;
-      value = (Type)type;
-      return in;
-   }
+   using namespace BeeFishScript;
 
    class JSON : public Parser
    {
    protected:
       Parser* _params {nullptr};
       And _parser;
-
+      String _value;
+      
+      vector<Variable*> _stack;
+      vector<String> _keyStack;
+      
    public:
+      using Parser::read;
+      
+      Variable* _variable {nullptr};
+      
       JSON(Parser* params = nullptr) :
          _params(params),
-         _parser(createParser(params))
+         _parser(createParser(_params))
       {
 
       }
@@ -93,6 +42,14 @@ namespace BeeFishJSON {
           _params(source._params),
           _parser(createParser(_params))
       {
+      }
+      
+      virtual ~JSON()
+      {
+          if (_variable) {
+             delete _variable;
+             _variable = nullptr;
+          }
       }
 
       Parser* copy() const override {
@@ -115,39 +72,212 @@ namespace BeeFishJSON {
 
          return matched;
       }
-
-      And createParser(Parser* params) {
       
+      virtual bool flush() override
+      {
+         bool isOk =  Parser::flush();
+         if (isOk) {
+            
+            if (_result == nullopt &&
+                _variable == nullptr)
+            {
+                stringstream stream;
+                stream << this->_value;
+                Number number;
+                stream >> number;
+                _variable = new Variable(number);
+            }
+         }
+         return isOk;
+      }
 
-         static const auto undefined =
-            Word("undefined");
+      
+      And createParser(Parser* params) {
+        
+         auto _undefined =
+            Invoke(
+               Word("undefined"),
+               [this](Parser* parser) {
+                  this->_variable =
+                     new Variable();
+                  return true;
+               }
+            );
 
-         static const auto _null =
-            Word("null");
+         auto _null =
+            Invoke(
+               Word("null"),
+               [this](Parser* parser)
+               {
+                  this->_variable =
+                     new Variable(nullptr);
+                     
+                  return true;
+               }
+            );
 
-         static const auto _true =
-            Word("true");
+         auto _true =
+            Invoke(
+               Word("true"),
+               [this](Parser* parser)
+               {
+                  this->_variable =
+                     new Variable(true);
+                     
+                  return true;
+               }
+            );
+            
+         auto _false =
+            Invoke(
+               Word("false"),
+               [this](Parser* parser)
+               {
+                  this->_variable =
+                     new Variable(false);
+                     
+                  return true;
+               }
+            );
 
-         static const auto _false =
-            Word("false");
-
-         static const auto boolean =
+         auto boolean =
             _true or _false;
-
+            
+         auto _number =
+            Invoke(
+                Capture(
+                   number,
+                   this->_value
+                ),
+                [this](Parser* parser) {
+                   stringstream stream;
+                   stream << _value;
+                   Number number;
+                   stream >> number;
+                   this->_variable =
+                      new Variable(number);
+                   _value = "";
+                   return true;
+                }
+            );
+            
+         auto __string =
+            Invoke(
+                Capture(
+                   _string,
+                   this->_value
+                ),
+                [this](Parser* parser) {
+                   this->_variable =
+                      new Variable(_value);
+                   _value = "";
+                   return true;
+                }
+            );
+            
+         auto _openBrace =
+         Invoke(
+            openBrace,
+            [this](Parser*) {
+               Variable* var =
+                  new Variable(BeeFishScript::Object());
+               _stack.push_back(var);
+               return true;
+            }
+         );
+         
+         auto key =
+         Invoke(
+            Capture(
+               _string,
+               this->_value
+            ),
+            [this](Parser*) {
+               _keyStack.push_back(_value);
+               return true;
+            }
+         );
+            
+         auto objectValue =
+         Invoke(
+            LoadOnDemand(_JSON),
+            [this](Parser* parser) {
+                LoadOnDemand* loader = dynamic_cast<LoadOnDemand*>(parser);
+                
+                if (loader)
+                   parser = loader->_loadOnDemand;
+                   
+                JSON* json = dynamic_cast<JSON*>(parser);
+                
+                if (json == nullptr ||
+                    _keyStack.size() == 0)
+                   return false;
+                String key = _keyStack[_keyStack.size() - 1];
+                _keyStack.pop_back();
+                
+                Variable* var =
+                   _stack[_stack.size() - 1];
+                   
+                (*var)[key] = *(json->_variable);
+                
+                return true;
+            }
+         );
+            
+         auto keyValue =
+            key and blankSpaces and
+            Character(":") and
+            blankSpaces and
+            objectValue;
+         
+         auto _closeBrace =
+         Invoke(
+            closeBrace,
+            [this](Parser*) {
+                
+               if (_stack.size() == 0)
+                  return false;
+                  
+               Variable* var =
+                  _stack[_stack.size() - 1];
+               _stack.pop_back();
+               if (_stack.size() == 0)
+                  _variable = var;
+               else
+                  delete var;
+               return true;
+            }
+         );
+            
+         auto object =
+            blankSpaces and
+            _openBrace and
+            blankSpaces and
+            Optional(
+               keyValue and
+               Repeat(
+                  seperator and keyValue,
+                  0
+               )
+            ) and
+            blankSpaces and
+            _closeBrace;
+            
          return
             blankSpaces and
             (
-               undefined or
+               _undefined or
                _null or
                boolean or
-               number or
-               _string or
+               _number or
+               __string or
                array or
-               Map(params)
+               object
             );
       }
 
    };
+   
 
    Parser* _JSON(Parser* params) {
       return JSON(params).copy();

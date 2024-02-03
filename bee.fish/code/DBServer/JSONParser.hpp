@@ -108,7 +108,7 @@ cerr << "JSONPATSER.HPP: " << type << endl;
          {
             _stack.pop_back();
 
-            assert(lastType() == Type::MAP);
+            assert(lastType() == Type::OBJECT);
 
          }
 
@@ -199,7 +199,7 @@ cerr << "JSONPATSER.HPP: " << type << endl;
       {
 
          push_back(
-            Type::MAP
+            Type::OBJECT
          );
 
          return true;

@@ -16,17 +16,17 @@ namespace BeeFishDBServer {
    using namespace BeeFishWebDB;
    using namespace BeeFishJSON;
   
-   inline string getTabs(BeeFishDatabase::Size tabs)
+   inline string getTabs(Size tabs)
    {
        return string(tabs * TAB_SPACES, ' ');
    }
    
-   inline BeeFishDatabase::Size streamDocumentFromDB (
+   inline Size streamDocumentFromDB (
       BeeFishWeb::WebRequest& output,
       Path path
    );
 
-   inline BeeFishDatabase::Size streamJSONFromDB (
+   inline Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
       MinMaxPath path,
       int tabs = 0
@@ -35,10 +35,10 @@ namespace BeeFishDBServer {
    inline bool writeHeaders(
       BeeFishWeb::WebRequest& output,
       std::string contentType,
-      BeeFishDatabase::Size contentLength
+      Size contentLength
    );
 
-   inline BeeFishDatabase::Size streamFromDB (
+   inline Size streamFromDB (
       BeeFishWeb::WebRequest& output,
       Path path
    )
@@ -53,7 +53,7 @@ namespace BeeFishDBServer {
 /*
       if (path.contains("document"))
       {
-         BeeFishDatabase::Size contentLength;
+         Size contentLength;
          path["document"].getData(contentLength);
 
          if (!writeHeaders(
@@ -89,14 +89,14 @@ namespace BeeFishDBServer {
       return 0;
    }
 
-   inline BeeFishDatabase::Size streamJSONFromDB (
+   inline Size streamJSONFromDB (
       BeeFishWeb::WebRequest& output,
       MinMaxPath path,
       int tabs
    )
    {
 
-      BeeFishDatabase::Size size = 0;
+      Size size = 0;
       Type type;
       
       if (path.isDeadEnd())
@@ -116,7 +116,7 @@ namespace BeeFishDBServer {
     
       switch (type)
       {
-         case Type::MAP:
+         case Type::OBJECT:
          {            
             Size count = atol(value.c_str());
             if (count == 0)
@@ -128,7 +128,7 @@ cerr << "STREAMFROMDB.HPP: size: " << size << endl;
             Stack stack;
             Size i = 0;
             
-            path = path[Type::MAP];
+            path = path[Type::OBJECT];
             
             while(path.next(stack, key))
             {
@@ -192,7 +192,7 @@ cerr << "STREAMFROMDB.HPP: size: " << size << endl;
          case Type::ARRAY:
          {
             stringstream stream;
-            BeeFishDatabase::Size count;
+            Size count;
             stream << value;
             stream >> count;
             size += output.write("[");
@@ -202,7 +202,7 @@ cerr << "STREAMFROMDB.HPP: size: " << size << endl;
             
             path = path[Type::ARRAY];
             
-            for (BeeFishDatabase::Size index = 0;
+            for (Size index = 0;
                  index < count;
                  ++index)
             {
@@ -244,7 +244,7 @@ cerr << "STREAMFROMDB.HPP: size: " << size << endl;
       
    }
 
-   inline BeeFishDatabase::Size streamDocumentFromDB (
+   inline Size streamDocumentFromDB (
       BeeFishWeb::WebRequest& output,
       Path path
    )
@@ -253,10 +253,10 @@ cerr << "STREAMFROMDB.HPP: size: " << size << endl;
       MinMaxPath document = path;
 
       // Output the document content
-      BeeFishDatabase::Size pageIndex  = 0;
-      BeeFishDatabase::Size min = document.min<BeeFishDatabase::Size>();
-      BeeFishDatabase::Size max = document.max<BeeFishDatabase::Size>();
-      BeeFishDatabase::Size byteCount = 0;
+      Size pageIndex  = 0;
+      Size min = document.min<Size>();
+      Size max = document.max<Size>();
+      Size byteCount = 0;
 
       for ( pageIndex = min;
             pageIndex <= max;
@@ -289,7 +289,7 @@ cerr << "STREAMFROMDB.HPP: size: " << size << endl;
    bool writeHeaders(
       BeeFishWeb::WebRequest& output,
       std::string contentType,
-      BeeFishDatabase::Size contentLength
+      Size contentLength
    )
    {
       

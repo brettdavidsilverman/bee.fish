@@ -47,9 +47,12 @@
 #include "Parser/Parser.hpp"
 
 #include "parseURI.hpp"
+#include "JSON/JSON.hpp"
 
 using namespace BeeFishDatabase;
 using namespace BeeFishWebServer;
+using namespace BeeFishJSON;
+
 using namespace std;
 
 static int counter = 0;
@@ -63,8 +66,8 @@ static int database_handler(request_rec *r)
     string postedJSON;
            
     if (!strcmp(r->method, "GET")) {
-        if (!strcmp(r->uri, "/index.html") ||
-            !strcmp(r->uri, "/NotFound.html") ) {
+        if (!strcmp(r->uri, "/index.xhtml") ||
+            !strcmp(r->uri, "/NotFound.xhtml") ) {
             return DECLINED;
         }
         if (path.hasData()) {
@@ -80,22 +83,40 @@ static int database_handler(request_rec *r)
         
         int pageSize = getpagesize();
         char buffer[pageSize];
+        bool isOk = true;
+        JSON json;
         int ret_code = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR);
         if (ret_code == OK) {
            long dataBytesRead;
            if (ap_should_client_block(r))
            {
+              
               while (
                   (dataBytesRead = ap_get_client_block(r, buffer, pageSize))
                      > 0)
               {
+                 isOk =
+                    json.read(buffer, dataBytesRead);
+                    
+                 if (!isOk)
+                    break;
+                    
                  string str(buffer, dataBytesRead);
                  postedJSON += str;
               }
            }
         }
-
-        path.setData(postedJSON);
+        
+        if (isOk)
+           isOk = json.flush();
+        
+        if (isOk &&
+           json._result == true)
+        {
+           path.setData(postedJSON);
+        }
+        else
+           return 500;
     }
     
     else {

@@ -15,32 +15,6 @@ using namespace BeeFishParser;
 
 int main(int argc, const char* argv[]) {
 
-   if (true)
-   {
-
-      std::string capture;
-/*
-      const auto word =
-         Capture(
-            not Word("hello") and
-            Invoke(
-               Word("boo"),
-               
-            capture
-         );
-
-      bool success = testPattern(
-         word,
-         "worldboo",
-         nullopt
-      );
-
-      cout << endl << "*" << capture << endl;
-
-      return 0;
-*/
-   }
-
    cout << "bee.fish.parser"
            << endl
         << "C++ run time: "

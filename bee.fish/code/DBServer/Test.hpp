@@ -225,7 +225,7 @@ namespace BeeFishDBServer
       }
 
       {
-         Variable v = BeeFishScript::Map{{"🐝","🌎"}};
+         Variable v = BeeFishScript::Object{{"🐝","🌎"}};
          stringstream out;
          out << v;
 
@@ -296,27 +296,27 @@ namespace BeeFishDBServer
 
       {
          cout << "\tTesting map " << flush;
-         JSONPath path(root["json-map"]);
-         Variable map =
-            BeeFishScript::Map
+         JSONPath path(root["json-objrct"]);
+         Variable object =
+            BeeFishScript::Object
             {
                {"a", 1},
                {"c", 2},
-               {"e", BeeFishScript::Map()}
+               {"e", BeeFishScript::Object()}
             };
 
-         path.setVariable(map);
+         path.setVariable(object);
 
-         JSONPath path2(root["json-map"]);
-         Variable map2 = path2.getVariable();
+         JSONPath path2(root["json-objrct"]);
+         Variable object2 = path2.getVariable();
 
-         MapPointer o = map2;
+         ObjectPointer o = object2;
          success = success &&
             ((Number)((*o)["c"]) == 2);
 
          Variable e = (*o)["e"];
          success = success &&
-            e._type == BeeFishJSON::Type::MAP;
+            e._type == BeeFishJSON::Type::OBJECT;
 
          outputSuccess(success);
       }
@@ -324,21 +324,21 @@ namespace BeeFishDBServer
       {
          cout << "\tTesting complex " << flush;
          JSONPath path(root["json-complex"]);
-         Variable map =
-            BeeFishScript::Map
+         Variable object =
+            BeeFishScript::Object
             {
                {"a", "b"},
                {"c", BeeFishScript::Array{1,2,3}},
-               {"e", BeeFishScript::Map{
+               {"e", BeeFishScript::Object{
                      {"f", "g"}
                      }
                }
             };
 
-         path.setVariable(map);
+         path.setVariable(object);
          JSONPath path2(root["json-complex"]);
-         Variable map2 = path2.getVariable();
-         MapPointer o = map2;
+         Variable object2 = path2.getVariable();
+         ObjectPointer o = object2;
          ArrayPointer a = (*o)["c"];
          success = success &&
             ((Number)((*a)[1]) == 2);
@@ -354,19 +354,19 @@ namespace BeeFishDBServer
          cout << "\tTesting object map " << flush;
          JSONPath path = root["object-map"];
          
-         Variable map =
-            BeeFishScript::Map
+         Variable object =
+            BeeFishScript::Object
             {
                {"a", "b"},
                {"c", BeeFishScript::Array{1,2,3}},
-               {"e", BeeFishScript::Map{
+               {"e", BeeFishScript::Object{
                      {"f", "g"},
                      {"h", BeeFishScript::Array{1,2,3}}
                   }
                }
             };
 
-         path.setVariable(map);
+         path.setVariable(object);
 
          Variable var =
             path["e"]["h"][Size(0)].getVariable();

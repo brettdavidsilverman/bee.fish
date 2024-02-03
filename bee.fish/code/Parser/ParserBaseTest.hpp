@@ -10,7 +10,6 @@
 #include <cstring>
 
 #include "../Miscellaneous/Miscellaneous.hpp"
-#include "../Size.hpp"
 
 namespace BeeFishParser {
 
@@ -29,7 +28,8 @@ namespace BeeFishParser {
       std::optional<bool> _result = std::nullopt;
       size_t _byteCount = 0;
       char _lastCharacter = 0;
-
+      Parser* _parser;
+      
    public:
    
       Parser()
@@ -40,6 +40,12 @@ namespace BeeFishParser {
       Parser(const Parser& parser)
       {
          ++parserInstanceCount();
+      }
+      
+      Parser(Parser& parser) :
+          _parser(&parser)
+      {
+          ++parserInstanceCount();
       }
       
       virtual ~Parser()
@@ -150,6 +156,16 @@ namespace BeeFishParser {
          char character
       )
       {
+         if (_parser) {
+             bool result = 
+                _parser->read(character);
+             if (_parser->_result != nullopt)
+             {
+                 setResult(_parser->_result);
+             }
+             return result;
+         }
+         
          _lastCharacter = character;
          ++_byteCount;
          return true;
@@ -258,14 +274,16 @@ namespace BeeFishParser {
          return false;
       };
       
-      virtual Size index() {
+      virtual size_t index() {
 
-         throw std::logic_error("Pure virtual function");
-         
+         if (parsed())
+            return 1;
+
+         return 0;
       }
 
       virtual Parser*
-      getByIndex(Size index)
+      getByIndex(size_t index)
       {
          if (index == 0)
             return this;

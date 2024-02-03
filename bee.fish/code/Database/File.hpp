@@ -10,6 +10,8 @@
 #include <sys/file.h>
 #include <unistd.h>
 
+#include "../Size.hpp"
+
 namespace BeeFishDatabase {
 
    using namespace std;
@@ -20,9 +22,6 @@ namespace BeeFishDatabase {
       bool _isNew;
       bool _isTemp;
       string _filename;
-            
-   public:
-      typedef size_t Size;
 
    public:
       File(
@@ -228,7 +227,7 @@ namespace BeeFishDatabase {
          _fileNumber = fileno(_file);
       }
 
-      File::Size resize(const File::Size newSize)
+      Size resize(const Size newSize)
       {
 
          resize(
@@ -281,8 +280,6 @@ namespace BeeFishDatabase {
      
    };
 
-   typedef File::Size Size;
-   
 }
 
 #endif

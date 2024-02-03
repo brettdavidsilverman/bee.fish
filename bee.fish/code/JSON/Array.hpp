@@ -27,7 +27,7 @@ namespace BeeFishJSON {
        Character(",") and
        blankSpaces;
 
-   const auto value =
+   const auto arrayValue =
        Optional(
           LoadOnDemand(_JSON)
        );
@@ -35,7 +35,7 @@ namespace BeeFishJSON {
    const auto items =
       value and
       Repeat(
-         arraySeperator and value,
+         arraySeperator and arrayValue,
          0
       );
 

@@ -6,7 +6,6 @@
 
 using namespace BeeFishDatabase;
 using namespace BeeFishScript;
-using namespace BeeFishJSON;
 
 namespace BeeFishDBServer {
    
@@ -42,20 +41,20 @@ namespace BeeFishDBServer {
       
       JSONPath operator [] (String key) {
          Path path = *this;
-         path = path[Type::MAP][key];
+         path = path[Type::OBJECT][key];
          return path;
       }
       
       JSONPath operator [] (const char* key) {
          Path path = *this;
-         path = path[Type::MAP][key];
+         path = path[Type::OBJECT][key];
          return path;
       }
       
       bool contains(const String& key) const {
           Path path = *this;
-          return path.contains(Type::MAP) &&
-                 path[Type::MAP].contains(key);
+          return path.contains(Type::OBJECT) &&
+                 path[Type::OBJECT].contains(key);
       }
           
     
@@ -107,14 +106,14 @@ cerr << "JSONPATH.HPP:" << "write array" << endl;
                path.setData(stream.str());
                break;
             }
-            case Type::MAP:
+            case Type::OBJECT:
             {
                 
-               MapPointer map =
-                  (source._value._map);
+               ObjectPointer object =
+                  (source._value._object);
                   
                Size i = 0;
-               for (auto pair : *map)
+               for (auto pair : *object)
                {
                   
                   const String& key = pair.first;
@@ -187,14 +186,14 @@ cerr << "JSONPATH.HPP:" << "write array" << endl;
 
                break;
             }
-            case Type::MAP:
+            case Type::OBJECT:
             {
-               BeeFishScript::MapPointer
-                  map = BeeFishScript::MapPointer(
-                     new BeeFishScript::Map()
+               BeeFishScript::ObjectPointer
+                  object = BeeFishScript::ObjectPointer(
+                     new BeeFishScript::Object()
                   );
                   
-               var._value._map = map;
+               var._value._object = object;
 
                Stack stack;
                String key;
@@ -202,7 +201,7 @@ cerr << "JSONPATH.HPP:" << "write array" << endl;
                {
                   JSONPath json = path[key];
                   Variable value = json.getVariable();
-                  (*map)[key] = value;
+                  (*object)[key] = value;
                }
                
                break;

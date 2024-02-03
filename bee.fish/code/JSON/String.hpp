@@ -39,7 +39,6 @@ namespace BeeFishJSON {
             0) and
          quote;
 
-
 }
 
 #endif

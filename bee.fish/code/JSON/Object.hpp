@@ -31,7 +31,15 @@ namespace BeeFishJSON {
    const auto seperator =
       Character(",");
 
+   const auto value =
+            LoadOnDemand(_JSON);
 
+   const auto keyValue =
+      blankSpaces and
+      key and blankSpaces and
+      colon and blankSpaces and 
+      value and blankSpaces;
+            
    class Object : public Parser {
    protected:
       Parser* _params = nullptr;
@@ -53,26 +61,18 @@ namespace BeeFishJSON {
       And createParser(Parser* params) {
 
          
-         const auto value =
-            LoadOnDemand(_JSON, params);
-
-         
-         const auto line =
-            blankSpaces and
-            key and blankSpaces and
-            colon and blankSpaces and 
-            value and blankSpaces;
-
+        
          const auto object =
             blankSpaces and
             openBrace and blankSpaces and
             Optional(
-               line and
+               keyValue and
                Repeat(
-                  seperator and line,
+                  seperator and keyValue,
                   0
                )
             ) and
+            blankSpaces and
             closeBrace;
 
          return object;

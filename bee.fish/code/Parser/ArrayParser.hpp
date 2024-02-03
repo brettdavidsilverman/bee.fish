@@ -93,7 +93,7 @@ namespace BeeFishParser {
          }
       }
 
-      virtual size_t index() override {
+      virtual Size index() override {
          return _index;
       }
 

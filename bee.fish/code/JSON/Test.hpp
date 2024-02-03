@@ -15,6 +15,7 @@ namespace BeeFishJSON {
    bool testStrings();
    bool testArrays();
    bool testObjects();
+   bool testJSON();
    bool testUnicode();
 
    inline bool test() {
@@ -39,6 +40,9 @@ namespace BeeFishJSON {
 
       success = success &&
          testObjects();
+         
+      success = success &&
+         testJSON();
 
       success = success &&
          testUnicode();
@@ -307,32 +311,51 @@ namespace BeeFishJSON {
 
       bool success = true;
 
-      cout << "Testing Maps:" << endl;
+      cout << "Testing Objects:" << endl;
 
       success &=
-         testPattern(Map(), "{}", true);
+         testPattern(Object(), "{}", true);
  
       success &=
-         testPattern(Map(), "{\"a\":1}", true);
+         testPattern(Object(), "{\"a\":1}", true);
  
       success &=
-         testPattern(Map(), "{\"a\":1,\"b\":2}", true);
+         testPattern(Object(), "{\"a\":1,\"b\":2}", true);
 
       success &=
-         testPattern(Map(), "{\"c\":{}}", true);
+         testPattern(Object(), "{\"c\":{}}", true);
 
       success &=
-         testPattern(Map(), " { \"c\" : { } }", true);
+         testPattern(Object(), "{\"a\":{\"b\":{}}}", true);
+         
+         
+      success &=
+         testPattern(Object(), "{ \"a\" :{ \"b\" : { } } }", true);
+         
+      success &=
+         testPattern(Object(), "{", nullopt);
 
       success &=
-         testPattern(Map(), "{", nullopt);
-
+         testPattern(Object(), "}", false);
+         
+         
       BeeFishMisc::outputSuccess(success);
 
       return success;
       
    }
-
+   
+   inline bool testJSON() {
+       
+      bool success = true;
+      cout << "Testing JSON" << endl;
+      
+      success &=
+         testPattern(JSON(), "{ \"a\" :{ \"b\" : { } } }", true);
+         
+      return success;
+   }
+   
    inline bool testUnicode()
    {
       using namespace std;

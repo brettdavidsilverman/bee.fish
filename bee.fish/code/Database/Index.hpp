@@ -9,7 +9,7 @@ using namespace std;
 
 namespace BeeFishDatabase {
 
-   typedef File::Size Index;
+   typedef Size Index;
    
 
 }

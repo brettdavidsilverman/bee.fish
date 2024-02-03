@@ -13,7 +13,7 @@ namespace BeeFishParser {
 
    class LoadOnDemand : public Parser {
 
-   protected:
+   public:
       Parser* _loadOnDemand = nullptr;
    public:
       typedef std::function<Parser*(Parser*)> Function;

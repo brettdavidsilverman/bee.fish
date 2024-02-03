@@ -463,7 +463,7 @@ namespace BeeFishDatabase {
          Path path(*this);
          
          BeeFishScript::Variable variable = 
-            BeeFishScript::Map{};
+            BeeFishScript::Object{};
 
          variable["index"] =
             (BeeFishScript::Number)path._index;

@@ -1,6 +1,0 @@
-#ifndef BEE_FISH_B_SCRIPT__VERSION_H
-#define BEE_FISH_B_SCRIPT__VERSION_H
-
-#define BEE_FISH_B_SCRIPT_VERSION "0.0.1"
-
-#endif

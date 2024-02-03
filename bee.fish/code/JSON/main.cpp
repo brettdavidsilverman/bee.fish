@@ -1,12 +1,10 @@
 #include <iostream>
 #include <filesystem>
-#include <boost/json/src.hpp>
 #include "Config.hpp"
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../Parser/Parser.hpp"
 #include "../Parser/Test.hpp"
 #include "JSON.hpp"
-#include "../DBServer/JSONParser.hpp"
 #include "Test.hpp"
 #include "Config.hpp"
 
@@ -14,16 +12,12 @@ using namespace std;
 using namespace BeeFishMisc;
 using namespace BeeFishParser;
 using namespace BeeFishJSON;
-using namespace BeeFishDatabase;
-using namespace BeeFishDBServer;
 
-Parser* homeGrownParser();
-Parser* boostParser();
+
 std::optional<bool> testParser(Parser* parser);
-Database db(TEMP_FILENAME);
 
 int main(int argc, const char* argv[]) {
-   
+
    cout << "bee.fish.json"
            << endl
         << "C++ run time: "
@@ -38,18 +32,6 @@ int main(int argc, const char* argv[]) {
 
    bool useHomeGrown = true;
    int useArg = -1;
-   if ((useArg = hasArg(argc, argv, "-use")) >= 0 && argc > (useArg + 1))
-   {
-      if (argv[useArg + 1] == string("home"))
-         useHomeGrown = true;
-      else if (argv[useArg + 1] == string("boost"))
-         useHomeGrown = false;
-      else {
-         cout << "Invalid use arg; [home|boost]" << endl;
-         useHomeGrown = false;
-         return 1;
-      }
-   }
 
    if (hasArg(argc, argv, "-test") >= 0)
    {
@@ -63,24 +45,19 @@ int main(int argc, const char* argv[]) {
 
 
    std::optional<bool> result;
-   Parser* parser;
-
-   if (useHomeGrown) {
-      cout << "Using home grown parser" << endl;
-      parser = homeGrownParser();
-   }
-   else {
-      cout << "Using boost parser" << endl;
-      parser = boostParser();
-   }
-
-   //remove(TEMP_FILENAME);
+   
+   JSON* parser = new JSON();
 
    result = testParser(parser);
 
+   Variable var;
+   if (parser->_variable) {
+      cerr << "one" << endl;
+      cerr << *(parser->_variable) << endl;
+      var = *(parser->_variable);
+   }
+   
    delete parser;
-
-   remove(TEMP_FILENAME);
 
    if (result == false) {
       cout << "Invalid JSON" << endl;
@@ -92,22 +69,13 @@ int main(int argc, const char* argv[]) {
    }
    
 
-   cout << "Valid JSON" << endl;
+   cerr << "two" << endl;
+   cout << var
+        << " Valid JSON"
+        << endl;
+        
    return 0;
 
-}
-
-Parser* homeGrownParser() {
-   auto parser = new JSON();
-   return parser;
-}
-
-Parser* boostParser()
-{
-
-   auto parser = new JSONParser(db);
-
-   return parser;
 }
 
 std::optional<bool> testParser(Parser* parser) {
@@ -122,33 +90,3 @@ std::optional<bool> testParser(Parser* parser) {
    return parser->result();
 
 }
-
-
-
-/*
-   using namespace boost::json;
-
-   stream_parser p;
-   boost::json::error_code ec;
-
-   char buffer[1026];
-   while (!cin.eof()) {
-      cin.read(buffer, sizeof(buffer));
-      size_t read = cin.gcount();
-      p.write(
-         std::string(buffer, read),
-         ec
-      );
-      if (ec)
-         return false;
-      if (read < sizeof(buffer))
-         break;
-   }
-   
-   if (p.done())
-      return true;
-   else
-      return nullopt;
-
-}
-*/
