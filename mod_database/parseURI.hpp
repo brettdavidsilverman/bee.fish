@@ -19,7 +19,8 @@ namespace BeeFishWebServer {
       string _uri = uri;
       
       // Add trailing /
-      if (_uri[_uri.length() -1] != '/')
+      if (_uri.length() == 0 ||
+          _uri[_uri.length() -1] != '/')
          _uri += '/';
          
       string segment;

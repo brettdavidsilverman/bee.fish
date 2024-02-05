@@ -109,9 +109,13 @@ static int database_handler(request_rec *r)
         
         if (isOk)
         {
-            if (json._result == nullopt &&
-                json._variable == nullptr)
+            // Need to check for
+            // unterminated numbers
+            if (json._result == nullopt)
             {
+                // Send eof to
+                // handle unterminated
+                // numbers
                 json.eof();
             }
         }
