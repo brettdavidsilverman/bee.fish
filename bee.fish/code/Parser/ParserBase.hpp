@@ -79,6 +79,11 @@ namespace BeeFishParser {
       {
       }
 
+      virtual bool eof()
+      {
+         return read((char)-1);
+      }
+
       virtual string getErrorMessage() const {
          stringstream stream;
          stream << "Invalid Content '" << escape(_lastCharacter) << "' at position "

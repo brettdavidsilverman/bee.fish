@@ -19,7 +19,7 @@ namespace BeeFishJSON {
 
       const auto integer = digits;
 
-      const auto fraction =
+      const auto decimal =
          Character(".") and
          integer;
 
@@ -31,12 +31,15 @@ namespace BeeFishJSON {
          -sign and
          integer;
        
+      const auto eof =
+         Character((char)-1);
       
       const auto number =
          -sign and
          integer and
-         -fraction and
-         -exponent;
+         -decimal and
+         -exponent and
+         -eof;
 
 }
 

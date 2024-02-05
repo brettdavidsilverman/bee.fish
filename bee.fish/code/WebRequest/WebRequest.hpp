@@ -107,7 +107,7 @@ namespace BeeFishWeb {
             Capture(
                Word("HTTP/") and
                integer and
-               fraction,
+               decimal,
                _version
             );
             

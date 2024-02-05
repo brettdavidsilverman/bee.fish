@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<?xml version="1.0" ?>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
    <head>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -76,16 +76,11 @@ function postJSON() {
          }
       ).then(
          function (response) {
-            return response.text();
+            return response.json();
          }
       ).then(
-         function (text) {
-            if (text == jsonText.value) {
-               document.write(text);
-               document.close();
-            }
-            else
-               window.location.reload();
+         function (json) {
+            window.location.reload();
          }
       ).catch(
          function(error) {

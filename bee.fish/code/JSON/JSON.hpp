@@ -73,24 +73,6 @@ namespace BeeFishJSON {
          return matched;
       }
       
-      virtual bool flush() override
-      {
-         bool isOk =  Parser::flush();
-         if (isOk) {
-            
-            if (_result == nullopt &&
-                _variable == nullptr)
-            {
-                stringstream stream;
-                stream << this->_value;
-                Number number;
-                stream >> number;
-                _variable = new Variable(number);
-            }
-         }
-         return isOk;
-      }
-
       
       And createParser(Parser* params) {
         

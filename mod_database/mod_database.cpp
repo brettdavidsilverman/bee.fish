@@ -108,7 +108,14 @@ static int database_handler(request_rec *r)
         }
         
         if (isOk)
-           isOk = json.flush();
+        {
+            if (json._result == nullopt &&
+                json._variable == nullptr)
+            {
+                json.eof();
+            }
+        }
+           
         
         if (isOk &&
            json._result == true)
