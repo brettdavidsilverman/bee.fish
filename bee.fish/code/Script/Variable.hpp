@@ -373,14 +373,14 @@ namespace BeeFishScript {
             }
             break;
          case Type::STRING:
-            out << _value._string;
-            break;
-/*
+           // out << "\""_value._string;
+          //  break;
+
             out << "\"";
             out << escapeString(_value._string);
             out << "\"";
             break;
-*/
+
          case Type::ARRAY:
          {
 

@@ -197,6 +197,8 @@ namespace BeeFishJSON {
                 String key = _keyStack[_keyStack.size() - 1];
                 _keyStack.pop_back();
                 
+                key = unescape(key);
+                
                 Variable* var =
                    _stack[_stack.size() - 1];
                    
@@ -208,7 +210,7 @@ namespace BeeFishJSON {
             
          auto keyValue =
             key and blankSpaces and
-            Character(":") and
+            colon and
             blankSpaces and
             objectValue;
          

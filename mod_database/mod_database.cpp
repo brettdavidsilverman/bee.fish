@@ -57,94 +57,130 @@ using namespace std;
 
 static int counter = 0;
 
+static Variable readJSON(Path path, request_rec *r);
+
 /* The sample content handler */
 static int database_handler(request_rec *r)
 {
        
     Path path = parseURI(r->uri);
     
-    string postedJSON;
-           
+    Variable result;
+    
     if (!strcmp(r->method, "GET")) {
         if (!strcmp(r->uri, "/index.xhtml") ||
-            !strcmp(r->uri, "/NotFound.xhtml") ) {
+            !strcmp(r->uri, "/NotFound.xhtml") ||
+            !strcmp(r->uri, "/error.js") ) {
             return DECLINED;
         }
-        if (path.hasData()) {
+        else if (path.hasData()) {
 
-           path.getData(postedJSON);
-              
+           string posted;
+           path.getData(posted);
+           ap_set_content_type(
+              r, "application/json; charset=utf-8"
+           );
+           ap_rputs(posted.c_str(), r);
+           
+           return OK;
         }
         else
-           return 404; // NotFound.html
+           return 404; // NotFound.xhtml
         
     }
     else if ( !strcmp(r->method, "POST")) {
         
-        int pageSize = getpagesize();
-        char buffer[pageSize];
-        bool isOk = true;
-        JSON json;
-        int ret_code = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR);
-        if (ret_code == OK) {
-           long dataBytesRead;
-           if (ap_should_client_block(r))
-           {
-              
-              while (
-                  (dataBytesRead = ap_get_client_block(r, buffer, pageSize))
-                     > 0)
-              {
-                 isOk =
-                    json.read(buffer, dataBytesRead);
-                    
-                 if (!isOk)
-                    break;
-                    
-                 string str(buffer, dataBytesRead);
-                 postedJSON += str;
-              }
-           }
-        }
         
-        if (isOk)
-        {
-            // Need to check for
-            // unterminated numbers
-            if (json._result == nullopt)
-            {
-                // Send eof to
-                // handle unterminated
-                // numbers
-                json.eof();
-            }
-        }
-           
+        result = readJSON(path, r);
         
-        if (isOk &&
-           json._result == true)
-        {
-           path.setData(postedJSON);
-        }
-        else
-           return 500;
+        ap_set_content_type(
+           r, "application/json; charset=utf-8"
+        );
+
+        stringstream output;
+    
+        output << result;
+    
+        ap_rputs(output.str().c_str(), r);
+
+        return OK;
+
     }
     
     else {
         return 500;
     }
     
-    ap_set_content_type(r, "application/json; charset=utf-8");
-
-    ap_rputs(postedJSON.c_str(), r);
-
     /* Lastly, if there was a query string, let's print that too!
     if (r->args) {
         ap_rprintf(r, "Your query string was: %s", r->args);
     }
     */
     
-    return OK;
+    return 500;
+}
+
+static Variable readJSON(Path path, request_rec *r) {
+   JSON json;
+   bool isOk = true;
+   stringstream posted;
+   int pageSize = getpagesize();
+   char buffer[pageSize];
+   
+   int ret_code = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR);
+   if (ret_code == OK) {
+      long dataBytesRead;
+      if (ap_should_client_block(r))
+      {
+              
+         while (
+                 (dataBytesRead = ap_get_client_block(r, buffer, pageSize))
+                  > 0)
+         {
+            isOk =
+               json.read(buffer, dataBytesRead);
+                    
+            if (!isOk)
+               break;
+                    
+            posted <<
+               string(buffer, dataBytesRead);
+         }
+      }
+   }
+   
+   if (isOk)
+   {
+      // Need to check for
+      // unterminated numbers
+      if (json._result == nullopt)
+      {
+         // Send eof to
+         // handle unterminated
+         // numbers
+         json.eof();
+      }
+   }
+           
+        
+   if (isOk &&
+       json._result == true)
+   {
+      path.setData(posted.str());
+      
+      if (json._variable)
+         return *(json._variable);
+   
+   }
+   
+   Variable error =
+      json.getErrorMessage();
+      
+   return
+      BeeFishScript::Object{
+         {"error", error}
+      };
+   
 }
 
 static void database_register_hooks(apr_pool_t *p)
