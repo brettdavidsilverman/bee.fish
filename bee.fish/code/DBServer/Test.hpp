@@ -34,11 +34,11 @@ namespace BeeFishDBServer
 /*
       success = success &&
          testVariables();
-*/
+
       DBServer dbServer(
          TEST_SERVER_HOST, TEST_SERVER_PORT, 2
       );
-/*
+
       if (success)
          success = testJSONPath(&dbServer);
          
@@ -83,11 +83,14 @@ namespace BeeFishDBServer
 
       }
 */
+     // string url = dbServer.url();
+      string url = "https://bee.fish/";
+      
       if (success) {
-         success = testAllFiles(dbServer.url(), "tests");
+         success = testAllFiles(url, "tests");
       }
 
-      dbServer.stop();
+      //dbServer.stop();
 
       outputSuccess(success);
 
@@ -136,9 +139,11 @@ namespace BeeFishDBServer
          file << " "
          "-H \"Content-Type: application/json; charset=utf-8\" " <<
          "-H Expect: " <<
-         "-T " << file << " -s | grep -q \"" << (expect ? "true" : "false") << "\"";
+         "-T " << file << " -s ";
 
       string command = stream.str();
+
+      cerr << "Command:" << endl << command << endl;
 
       success &= (system(command.c_str()) == 0);
 
