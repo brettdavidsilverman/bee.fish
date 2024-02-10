@@ -20,12 +20,11 @@ namespace BeeFishParser {
    class UTF8Character;
 
    class Parser {
-#ifdef DEBUG
    protected:
-      std::string _value;
       
-#endif
+      
    public:
+      std::string _value = "";
       std::optional<bool> _result = std::nullopt;
       size_t _byteCount = 0;
       char _lastCharacter = 0;
@@ -37,7 +36,8 @@ namespace BeeFishParser {
          ++parserInstanceCount();
       }
 
-      Parser(const Parser& parser)
+      Parser(const Parser& source) :
+          _value(source._value)
       {
          ++parserInstanceCount();
       }
@@ -81,7 +81,11 @@ namespace BeeFishParser {
 
       virtual bool eof()
       {
-         return read((char)-1);
+          
+         if (_result == nullopt)
+            return read((char)-1);
+            
+         return false;
       }
 
       virtual string getErrorMessage() const {
@@ -160,6 +164,29 @@ namespace BeeFishParser {
          return true;
       }
 
+      virtual bool readIndirect(
+          Parser& parser,
+          char c
+      ) {
+          
+         if (parser._result != nullopt)
+            return false;
+
+         bool matched = true;
+         
+         matched = matched &&
+            Parser::read(c);
+         
+
+         matched = matched &&
+            parser.read(c);
+
+         if (parser._result != nullopt)
+            setResult(parser._result);
+
+         return matched;
+      }
+      
       friend std::istream& operator >>
       (std::istream& in, Parser& parser)
       {
@@ -246,11 +273,12 @@ namespace BeeFishParser {
 
       virtual const std::string& value() const
       {
-#ifdef DEBUG
          return _value;
-#else
-         return EmptyString();
-#endif
+      }
+      
+      virtual std::string& value()
+      {
+         return _value;
       }
 
       virtual bool flush() {

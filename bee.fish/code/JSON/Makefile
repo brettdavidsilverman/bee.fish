@@ -1,7 +1,7 @@
 OUTPUT = ../../build/JSON
 DEPS = Makefile main.cpp Number.hpp String.hpp Test.hpp
 CFLAGS = -std=c++17 -Wfatal-errors
-TEST = ../../large.json
+TEST = ~/bee.fish/large.json
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
@@ -15,15 +15,15 @@ debug:	$(OUTPUT)
 	cd ../Parser && make $(DEBUG)
 
 time:	clean
-time:	CFLAGS += -DTIME -O3
+time:	CFLAGS += -DTIME -Ofast
 time:	run_time
 
 perf:	clean
-perf:	CFLAGS += -DTIME -O3
+perf:	CFLAGS += -DTIME -Ofast
 perf:	run_performance
 
 trace:	clean
-trace:	CFLAGS += -DTIME -g -O3
+trace:	CFLAGS += -DTIME -g -Ofast
 trace:	run_trace
 
 test:	CFLAGS += -g

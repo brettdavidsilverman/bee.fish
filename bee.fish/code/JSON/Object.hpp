@@ -60,8 +60,6 @@ namespace BeeFishJSON {
 
       And createParser(Parser* params) {
 
-         
-        
          const auto object =
             blankSpaces and
             openBrace and blankSpaces and
@@ -89,15 +87,11 @@ namespace BeeFishJSON {
       override
       {
 
-         if (_parser._result != nullopt)
-            return false;
-
-         bool matched = _parser.read(c);
-
-         if (_parser._result != nullopt)
-            setResult(_parser._result);
-
-         return matched;
+         return readIndirect(
+            _parser,
+            c
+         );
+         
       }
 
 

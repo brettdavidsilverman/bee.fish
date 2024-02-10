@@ -21,7 +21,7 @@ test:	all
 	cd JSON && $(BUILD)/JSON -test
 	cd WebRequest && $(BUILD)/WebRequest -test
 	cd WebServer && $(BUILD)/WebServer -test
-	#cd DBServer && $(BUILD)/DBServer -test
+#	cd DBServer && $(BUILD)/DBServer -test
 
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG

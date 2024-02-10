@@ -10,7 +10,7 @@ namespace BeeFishParser {
    using namespace std;
 
    class Optional : public Parser {
-   protected:
+   public:
       Parser* _optional;
       bool _matched {false};
    public:
@@ -35,29 +35,11 @@ namespace BeeFishParser {
          char c
       ) override
       {
+         return readIndirect(
+            *_optional,
+            c
+         );
          
-         if (_optional == nullptr) {
-            setResult(true);
-            return false;
-         }
-
-         bool matched =
-            _optional->read(c);
-
-        
-         if (_optional->_result == true)
-         {
-         
-            setResult(true);
-            
-         }
-         else if(_optional->_result == false)
-         {
-            return false;
-            
-         } 
-
-         return matched;
       }
    
       virtual Parser* copy() const override {

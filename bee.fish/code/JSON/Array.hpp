@@ -23,26 +23,26 @@ namespace BeeFishJSON {
       Character("]");
 
    const auto arraySeperator =
-       blankSpaces and
-       Character(",") and
-       blankSpaces;
+      blankSpaces and
+      Character(",") and
+      blankSpaces;
 
-   const auto arrayValue =
-       Optional(
-          LoadOnDemand(_JSON)
-       );
+   const auto arrayItem =
+      Optional(
+         LoadOnDemand(_JSON)
+      );
 
-   const auto items =
+   const auto arrayItems =
       value and
       Repeat(
-         arraySeperator and arrayValue,
+         arraySeperator and arrayItem,
          0
       );
 
    const auto array =
       openBracket and
          Optional(
-            items
+            arrayItems
          ) and
       closeBracket;
 

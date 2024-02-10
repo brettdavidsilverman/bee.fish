@@ -23,8 +23,8 @@ namespace BeeFishDBServer
    inline bool testFile(string url, string file, bool expect = true);
    inline bool testData(string url, string label, string data, bool expect = true);
 
-   inline bool testVariables();
-   inline bool testJSONPath(Database* db);
+   
+   //inline bool testJSONPath(Database* db);
 
    inline bool test()
    {
@@ -158,7 +158,8 @@ namespace BeeFishDBServer
                  << "test.curl.txt";
                 
          command = stream1.str();
-         success &= (system(command.c_str()) == 0);
+         success = success &&
+            (system(command.c_str()) == 0);
 
          // Compare the files
          stringstream stream2;
@@ -169,7 +170,8 @@ namespace BeeFishDBServer
                  << file;
                 
          command = stream2.str();
-         success &= (system(command.c_str()) == 0);
+         success = success && 
+            (system(command.c_str()) == 0);
       }
 
       outputSuccess(success);
@@ -202,46 +204,6 @@ namespace BeeFishDBServer
       return success;
    }
 */
-   inline bool testVariables()
-   {
-      using namespace std;
-
-      cout << "Testing variables" << endl;
-
-      bool success = true;
-
-      {
-         Variable v = "Hello World";
-         stringstream out;
-         out << v;
-
-         success = success &&
-            testValue("\"Hello World\"", out.str());
-
-      }
-
-      {
-         Variable v = "Hello\\World";
-         stringstream out;
-         out << v;
-
-         success = success &&
-            testValue("\"Hello\\\\World\"", out.str());
-      }
-
-      {
-         Variable v = BeeFishScript::Object{{"🐝","🌎"}};
-         stringstream out;
-         out << v;
-
-         success = success &&
-            testValue("{\n   \"🐝\": \"🌎\"\n}", out.str());
-      }
-   
-      BeeFishMisc::outputSuccess(success);
-
-      return success;
-   }
    
    inline bool testJSONPath(Database* db)
    {
@@ -271,7 +233,7 @@ namespace BeeFishDBServer
 
          Variable var = jsonPath.getVariable();
 
-         success = ((String)var == "My String");
+         success = ((BeeFishScript::String)var == "My String");
 
          outputSuccess(success);
       }
@@ -281,7 +243,7 @@ namespace BeeFishDBServer
          JSONPath path(root["json-string"]);
          Variable var = path.getVariable();
 
-         success = ((String)var == "My String");
+         success = ((BeeFishScript::String)var == "My String");
 
          outputSuccess(success);
       }
@@ -351,7 +313,7 @@ namespace BeeFishDBServer
          Variable f = (*o)["e"]["f"];
          success = success &&
             f._type == BeeFishJSON::Type::STRING &&
-            (String)f == "g";
+            (BeeFishScript::String)f == "g";
          outputSuccess(success);
       }
 

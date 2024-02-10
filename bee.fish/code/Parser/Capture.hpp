@@ -69,6 +69,12 @@ namespace BeeFishParser {
       {
          return _valueRef;
       }
+      
+      virtual std::string& value()
+      override
+      {
+         return _valueRef;
+      }
 
       virtual Parser* copy() const
       override
@@ -81,17 +87,14 @@ namespace BeeFishParser {
       {
          Parser::read(c);
 
-         bool matched = _capture->read(c);
-
+         bool matched = readIndirect(
+            *_capture,
+            c
+         );
+         
          if (matched)
             capture(c);
-
-         if (_capture->_result == true)
-            setResult(true);
-         else if (_capture->_result == false)
-            setResult(false);
-
-         
+            
          return matched;
       }
 

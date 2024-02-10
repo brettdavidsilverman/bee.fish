@@ -198,7 +198,7 @@ namespace BeeFishParser {
       success &= testPattern(
          parser(),
          "a",
-         nullopt
+         false
       );
 
       success &= testPattern(
@@ -476,7 +476,7 @@ namespace BeeFishParser {
          testPattern(
             Repeat(aToZ, 1),
             "brett",
-            std::nullopt
+            true
          );
 
       success &=
@@ -525,7 +525,7 @@ namespace BeeFishParser {
             Repeat(Range("0", "9"))
          ),
          ",1,2,3",
-         std::nullopt
+         true
       );
 
       auto SpaceParser = []() {
@@ -619,8 +619,6 @@ namespace BeeFishParser {
 
       std::cout << "testInvoke: " << std::flush;
 
-      std::string myName;
-
       auto parser = Capture(
          Word("Brett") and
          Character(" ") and
@@ -628,8 +626,7 @@ namespace BeeFishParser {
             Word("David") and
             Character(" ")
          ) and
-         Word("Silverman"),
-         myName
+         Word("Silverman")
       );
 
       string value;
@@ -637,9 +634,7 @@ namespace BeeFishParser {
       Invoke invoke(
          parser,
          [&value](Parser* parser) {
-            Capture* capture =
-               dynamic_cast<Capture*>(parser);
-            value = capture->value();
+            value = parser->value();
             return true;
          }
       );
@@ -671,7 +666,7 @@ namespace BeeFishParser {
       success &= testPattern(
          NumberExample(),
          "1e+1",
-         nullopt
+         true
       );
 
       BeeFishMisc::outputSuccess(success);

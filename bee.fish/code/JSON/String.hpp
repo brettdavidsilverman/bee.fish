@@ -28,26 +28,51 @@ namespace BeeFishJSON {
             Character("n") or
             Character("b") or
             Character("t") or
-            Character("f")
+            Character("f") or
+            (
+               Character("u") and
+               Repeat(
+                  (
+                     Range("0", "9") or
+                     Range("A", "F") or
+                     Range("a", "f")
+                  ),
+                  4
+               )
+            )
          );
 
-      const auto _string =
-         quote and
-         Repeat(
-            plainCharacter or
-            escapedCharacter,
-            0) and
-         quote;
-         
-   inline std::string unescape(
-       const std::string& input
-   )
+      
+   class String :
+       public Parser
    {
+   protected:
       string _plainCharacter;
       string _escapedCharacter;
-      stringstream output;
+      Invoke _parser;
       
-      auto _string =
+      stringstream _output;
+      
+   public:
+      using Parser::read;
+      
+      String() : _parser(createParser())
+      {
+      }
+      
+      String(const String& copy) :
+          Parser(copy),
+          _parser(createParser())
+      {
+      }
+      
+      
+      
+      Invoke createParser() {
+         return
+        
+        
+         Invoke(
          quote and
          Repeat(
             Invoke(
@@ -55,9 +80,9 @@ namespace BeeFishJSON {
                   plainCharacter,
                   _plainCharacter
                ),
-               [&output, &_plainCharacter](Parser* parser)
+               [this](Parser* parser)
                {
-                  output << _plainCharacter;
+                  _output << _plainCharacter;
                   _plainCharacter.clear();
                   return true;
                }
@@ -67,42 +92,77 @@ namespace BeeFishJSON {
                   escapedCharacter,
                   _escapedCharacter
                ),
-               [&output, &_escapedCharacter](Parser* parser)
+               [this](Parser* parser)
                {
-                  string c = _escapedCharacter;
+                  string& input = _escapedCharacter;
+
                   bool result = true;
-                  if (c == "\\\\")
-                     output << "\\";
-                  else if (c == "\\\"")
-                     output << "\"";
-                  else if (c == "\\r")
-                     output << "\r";
-                  else if (c == "\\n")
-                     output << "\n";
-                  else if (c == "\\b")
-                     output << "\b";
-                  else if (c == "\\t")
-                     output << "\t";
-                  else if (c == "\\f")
-                     output << "\f";
-                  else
-                     result = false;
+                  if (input == "\\\\")
+                     _output << "\\";
+                  else if (input == "\\\"")
+                     _output << "\"";
+                  else if (input == "\\r")
+                     _output << "\r";
+                  else if (input == "\\n")
+                     _output << "\n";
+                  else if (input == "\\b")
+                     _output << "\b";
+                  else if (input == "\\t")
+                     _output << "\t";
+                  else if (input == "\\f")
+                     _output << "\f";
+                  else if (input.size() == 6 &&
+                     input[1] == 'u')
+                  {
+                     std::stringstream hex;
+                     hex << std::hex << input.substr(2);
+                     unsigned int word;
+                     hex >> word;
+                     char c1 = (0xFF00 & word) >> 8;
+                     char c2 = (0x00FF & word);
                      
+                     if (c1)
+                        _output << c1;
+                        
+                     _output << c2;
+                  }
+                  else
+                     _output << input;
+                 
                   _escapedCharacter.clear();
-                  
-                  return result;
+                  return true;
                }
             ),
             0
          ) and
-         quote;
+         quote,
+         [this](Parser* parser)
+         {
+             _value = _output.str();
+             _output.clear();
+             return true;
+         }
+         );
+      }
          
-      _string.read(input);
-      
-      return output.str();
-   }
-   
+      Parser* copy() const override {
+         return new String(*this);
+      }
 
+      virtual bool read(char c)
+      override
+      {
+         return readIndirect(
+            _parser,
+            c
+         );
+      }
+      
+      
+   };
+
+   const String _string;
+   
 }
 
 #endif

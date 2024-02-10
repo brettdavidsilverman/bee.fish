@@ -17,7 +17,8 @@ namespace BeeFishJSON {
    bool testObjects();
    bool testJSON();
    bool testUnicode();
-
+   bool testVariables();
+   
    inline bool test() {
       using namespace std;
 
@@ -46,6 +47,9 @@ namespace BeeFishJSON {
 
       success = success &&
          testUnicode();
+         
+      success = success &&
+         testVariables();
 
       if (success)
          cout << "JSON tests pass" << endl;
@@ -170,7 +174,7 @@ namespace BeeFishJSON {
       success &= testPattern(
          JSON(),
          "nul",
-         nullopt
+         false
       );
 
       success &= testPattern(
@@ -208,12 +212,9 @@ namespace BeeFishJSON {
       const std::optional<bool>&
           expected)
    {
-      auto complex = number and
-         BeeFishParser::Word("\r\n");
-
       return testPattern(
-         complex,
-         pattern + "\r\n",
+         number,
+         pattern ,
          expected
       );
    }
@@ -238,9 +239,11 @@ namespace BeeFishJSON {
          testNumber("-1.2e-10", true);
 
       success &=
-         testNumber("10b", false);
+         testNumber("10b", true);
 
-
+      success &=
+         testNumber("10", true);
+         
       BeeFishMisc::outputSuccess(success);
 
       return success;
@@ -269,6 +272,24 @@ namespace BeeFishJSON {
       success = success &&
          testPattern(_string, "unquoted", false);
 
+      auto pattern = _string;
+      success = success &&
+         testPattern(pattern, "\"\\u007A\"",true);
+
+      success = success &&
+         testValue(pattern.value(), "z");
+
+      if (success) {
+         auto pattern = _string;
+         
+         pattern.read("\"text\"");
+      
+         cerr << pattern._value << endl;
+         
+         success = success &&
+            pattern._value == "text";
+      }
+         
       BeeFishMisc::outputSuccess(success);
 
       return success;
@@ -333,7 +354,7 @@ namespace BeeFishJSON {
          testPattern(Object(), "{ \"a\" :{ \"b\" : { } } }", true);
          
       success &=
-         testPattern(Object(), "{", nullopt);
+         testPattern(Object(), "{", false);
 
       success &=
          testPattern(Object(), "}", false);
@@ -378,6 +399,186 @@ namespace BeeFishJSON {
       
    }
 
+   inline bool testVariables()
+   {
+      using namespace std;
+
+      cout << "Testing variables" << endl;
+
+      bool success = true;
+
+      if (success)
+      
+      {
+         Variable v = "Hello World";
+         stringstream out;
+         out << v;
+
+         success = success &&
+            testValue("\"Hello World\"", out.str());
+
+      }
+
+      if (success)
+      {
+         Variable v = "Hello\\World";
+         stringstream out;
+         out << v;
+
+         success = success &&
+            testValue("\"Hello\\\\World\"", out.str());
+      }
+      
+      if (success)
+      {
+          
+         Variable v =
+            BeeFishScript::Number{260975};
+            
+         stringstream out;
+         out << v;
+
+         success = success &&
+            testValue("260975", out.str());
+      }
+      
+      if (success)
+      {
+         Variable v = BeeFishScript::Object{{"🐝","🌎"}};
+         stringstream out;
+         out << v;
+
+         success = success &&
+            testValue("{\n   \"🐝\": \"🌎\"\n}", out.str());
+      }
+      
+      if (success)
+      {
+          cout << "\tParsing undefined: " << flush;
+          JSON json;
+          json.read("undefined");
+          json.eof();
+          Variable var = *(json._variable);
+          
+          success = success &&
+             var == undefined;
+             
+          BeeFishMisc::outputSuccess(success);
+          
+      }
+      
+      if (success)
+      {
+          cout << "\tParsing null: " << flush;
+          JSON json;
+          json.read("null");
+          json.eof();
+          Variable var = *(json._variable);
+          
+          success = success &&
+             var == nullptr;
+             
+          BeeFishMisc::outputSuccess(success);
+          
+      }
+      
+      if (success)
+      {
+          cout << "\tParsing Number: " << flush;
+          JSON json;
+          json.read("1234567");
+          json.eof();
+          Variable var = *(json._variable);
+          Number num = var;
+          success = success &&
+             num == 1234567;
+             
+          BeeFishMisc::outputSuccess(success);
+          
+      }
+      
+      if (success)
+      {
+          cout << "\tParsing String: " << flush;
+          JSON json;
+          json.read("\"Bee Silverman\"");
+          json.eof();
+          Variable var = *(json._variable);
+          std::string str = var;
+          success = success &&
+             str == "Bee Silverman";
+             
+          BeeFishMisc::outputSuccess(success);
+          
+      }
+      
+      if (success)
+      {
+          cout << "\tParsing Object: " << flush;
+          JSON json;
+          json.read("{\"name\": \"Bee\"}");
+          json.eof();
+          Variable var = *(json._variable);
+          
+          success = success &&
+             var["name"] == "Bee";
+          
+             
+          BeeFishMisc::outputSuccess(success);
+          
+      }
+      
+      if (success)
+      {
+          cout << "\tParsing Array: " << flush;
+          JSON json;
+          json.read("[\"name\", \"Bee\"]");
+          json.eof();
+          
+          if (json._result != true) {
+             cout << json.getErrorMessage() << endl;
+             success = false;
+          }
+          else {
+             Variable var = *(json._variable);
+             ArrayPointer array = var;
+             success = success &&
+                array->size() == 2 &&
+                var[Size(0)] == "name" &&
+                var[Size(1)] == "Bee";
+          }
+             
+          BeeFishMisc::outputSuccess(success);
+          
+      }
+   
+      if (success)
+      {
+          cout << "\tParsing Complex Object: " << flush;
+          JSON json;
+          json.read("{\"id\": \"007\", \"name\": {\"first\": \"Bee\", \"last\": \"Silverman\"}}");
+          json.eof();
+          if (json._result != true) {
+             cout << json.getErrorMessage() << endl;
+             success = false;
+          }
+          else {
+             Variable var = *(json._variable);
+             success = success &&
+                (var["id"] == "007") &&
+                (var["name"]["last"]
+                   == "Silverman");
+          }
+             
+          BeeFishMisc::outputSuccess(success);
+          
+      }
+   
+    
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+   }
    
    
 }

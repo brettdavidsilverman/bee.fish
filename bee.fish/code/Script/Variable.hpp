@@ -150,6 +150,24 @@ namespace BeeFishScript {
       Variable(Type type)
       {
          _type = type;
+         switch (_type) {
+         case Type::UNDEFINED:
+         case Type::NULL_:
+         case Type::BOOLEAN:
+            break;
+         case Type::NUMBER:
+             _value._number = 0;
+            break;
+         case Type::STRING:
+            new (&_value._string) String();
+            break;
+         case Type::ARRAY:
+            new (&_value._array) ArrayPointer(new Array());
+            break;
+         case Type::OBJECT:
+            new (&_value._object) ObjectPointer(new Object());
+            break;
+         }
       } 
 
       Variable(const Variable& source) : 
@@ -260,11 +278,7 @@ namespace BeeFishScript {
          return (*object)[String(key)];
       }
 
-      virtual Variable& operator[] (int index) {
-         return (*this)[Size(index)];
-      }
-
-      virtual Variable& operator[] (const Size& index) {
+      virtual Variable& operator[] (Size index) {
          ArrayPointer array = (ArrayPointer)*this;
          return (*array)[index];
       }
@@ -385,8 +399,8 @@ namespace BeeFishScript {
          {
 
             out << "[";            
-            Array* array = _value._array.get();
-
+            const Array* array = _value._array.get();
+            
             for  (Array::const_iterator it = array->cbegin();
                    it != array->cend();)
             {
@@ -582,6 +596,7 @@ namespace BeeFishScript {
                }
                else {
                   out << c;
+#warning "put \\u back in escape"
 /*
                if (value > 0x10FFFF)
                {

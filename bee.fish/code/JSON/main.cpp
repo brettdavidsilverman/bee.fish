@@ -17,7 +17,7 @@ using namespace BeeFishJSON;
 std::optional<bool> testParser(Parser* parser);
 
 int main(int argc, const char* argv[]) {
-
+   
    cout << "bee.fish.json"
            << endl
         << "C++ run time: "
@@ -30,7 +30,6 @@ int main(int argc, const char* argv[]) {
            << PARSER_VERSION
            << endl;
 
-   bool useHomeGrown = true;
    int useArg = -1;
 
    if (hasArg(argc, argv, "-test") >= 0)
@@ -52,29 +51,25 @@ int main(int argc, const char* argv[]) {
 
    Variable var;
    if (parser->_variable) {
-      cerr << "one" << endl;
-      cerr << *(parser->_variable) << endl;
       var = *(parser->_variable);
    }
-   
-   delete parser;
+  
+   int returnCode = 0;
 
    if (result == false) {
-      cout << "Invalid JSON" << endl;
-      return 2;
+      string error =
+         parser->getErrorMessage();
+      cout << error << endl;
+      returnCode = 2;
    }
    else if (result == nullopt) {
       cout << "Insufficient data";
-      return 3;
+      returnCode = 3;
    }
    
-
-   cerr << "two" << endl;
-   cout << var
-        << " Valid JSON"
-        << endl;
-        
-   return 0;
+   delete parser;
+   
+   return returnCode;
 
 }
 

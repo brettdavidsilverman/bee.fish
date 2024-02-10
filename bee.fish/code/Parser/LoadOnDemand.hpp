@@ -23,6 +23,8 @@ namespace BeeFishParser {
       Parser* _params = nullptr;
    public:
 
+      using Parser::read;
+      
       LoadOnDemand(Function function, Parser* params = nullptr) :
          _function(function),
          _params(params)
@@ -65,14 +67,10 @@ namespace BeeFishParser {
             }
          }
 
-         bool matched = _loadOnDemand->read(
+         return readIndirect(
+            *_loadOnDemand,
             character
          );
-
-         if (_loadOnDemand->_result != nullopt)
-            setResult(_loadOnDemand->_result);
-
-         return matched;
       }
 
       virtual Parser* copy()
