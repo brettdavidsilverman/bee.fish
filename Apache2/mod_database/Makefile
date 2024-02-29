@@ -17,8 +17,11 @@ INCLUDES=-I/usr/include/apache2 -I/usr/include/apr-1.0 -I../../bee.fish/code
 #LIBS=-Lmy/lib/dir -lmylib
 
 mod_database.so:	mod_database.cpp parseURI.hpp
-		g++ -std=c++17 -fPIC -shared -o mod_database.so $(INCLUDES) mod_database.cpp
+	g++ -std=c++17 -fPIC -shared -o mod_database.so $(INCLUDES) mod_database.cpp
 		
+a.out:	mod_database.so
+	g++ -std=c++17 -o a.out $(INCLUDES) main.cpp
+	
 #   the default target
 all: mod_database.so
 
@@ -28,12 +31,13 @@ install: mod_database.so
 
 #   cleanup
 clean:
-	-rm -f mod_database.o mod_database.lo mod_database.slo mod_database.la mod_database.so
+	-rm -f mod_database.o mod_database.lo mod_database.slo mod_database.la mod_database.so a.out
 
 #   simple test
-test: reload
+test: a.out reload
 	sleep 1
 	curl https://bee.fish/ -s > /dev/null
+	./a.out -test
 
 #   install and activate shared object by reloading Apache to
 #   force a reload of the shared object file

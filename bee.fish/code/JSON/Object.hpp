@@ -32,7 +32,7 @@ namespace BeeFishJSON {
       Character(",");
 
    const auto value =
-            LoadOnDemand(_JSON);
+      LoadOnDemand(_JSON);
 
    const auto keyValue =
       blankSpaces and

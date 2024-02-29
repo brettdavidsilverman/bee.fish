@@ -18,6 +18,7 @@ namespace BeeFishJSON {
    bool testJSON();
    bool testUnicode();
    bool testVariables();
+   bool testIntegers();
    
    inline bool test() {
       using namespace std;
@@ -31,10 +32,13 @@ namespace BeeFishJSON {
          testConstants();
 
       success = success &&
-         testNumbers();
-
-      success = success &&
          testStrings();
+         
+      success = success &&
+         testIntegers();
+         
+      success = success &&
+         testNumbers();
 
       success = success &&
          testArrays();
@@ -174,7 +178,7 @@ namespace BeeFishJSON {
       success &= testPattern(
          JSON(),
          "nul",
-         false
+         nullopt
       );
 
       success &= testPattern(
@@ -207,16 +211,58 @@ namespace BeeFishJSON {
       
    }
 
-   static bool testNumber(
+   static bool testInteger(
       const std::string& pattern,
       const std::optional<bool>&
           expected)
    {
       return testPattern(
-         number,
+         integer,
          pattern ,
          expected
       );
+   }
+   
+   inline bool testIntegers()  {
+      using namespace std;
+
+      bool success = true;
+
+      cout << "Testing Integers:" << endl;
+
+      success &=
+         testInteger("1", nullopt);
+ 
+      success &=
+         testInteger("-1", nullopt);
+ 
+      success &=
+         testInteger("1234567890", nullopt);
+         
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+      
+   }
+   
+   static bool testNumber(
+      const std::string& pattern,
+      const std::optional<bool>&
+          expected)
+   {
+      JSON json;
+      
+      Capture parser(json);
+      
+      bool success =
+         testPattern(
+            parser,
+            pattern,
+            expected
+         );
+      
+      return success;
+      
    }
 
    inline bool testNumbers()  {
@@ -227,22 +273,26 @@ namespace BeeFishJSON {
       cout << "Testing Numbers:" << endl;
 
       success &=
-         testNumber("1", true);
+         testNumber("1", nullopt);
  
       success &=
-         testNumber("-1", true);
+         testNumber("-1", nullopt);
  
       success &=
-         testNumber("-1e+1", true);
+         testNumber("-1e+1", nullopt);
 
       success &=
-         testNumber("-1.2e-10", true);
+         testNumber("-1.2e-10", nullopt);
 
       success &=
          testNumber("10b", true);
 
       success &=
-         testNumber("10", true);
+         testNumber("10", nullopt);
+         
+         
+      success &=
+         testNumber("1.23", nullopt);
          
       BeeFishMisc::outputSuccess(success);
 
@@ -277,17 +327,17 @@ namespace BeeFishJSON {
          testPattern(pattern, "\"\\u007A\"",true);
 
       success = success &&
-         testValue(pattern.value(), "z");
+         testValue("z", pattern.value());
 
       if (success) {
          auto pattern = _string;
          
          pattern.read("\"text\"");
       
-         cerr << pattern._value << endl;
+         cerr << pattern.value() << endl;
          
          success = success &&
-            pattern._value == "text";
+            pattern.value() == "text";
       }
          
       BeeFishMisc::outputSuccess(success);
@@ -304,22 +354,28 @@ namespace BeeFishJSON {
       cout << "Testing Arrays:" << endl;
 
       success &=
-         testPattern(array, "[]", true);
+         testPattern(JSON(), "[]", true);
  
       success &=
-         testPattern(array, "[\"a\"]", true);
+         testPattern(JSON(), "[\"a\"]", true);
  
       success &=
-         testPattern(array, "[1,2]", true);
+         testPattern(JSON(), "[\"a\",\"b\"]", true);
+      
+      success &=
+         testPattern(JSON(), "[1 , 2]", true);
 
       success &=
-         testPattern(array, "[1,null]", true);
+         testPattern(JSON(), "[1,null]", true);
 
       success &=
-         testPattern(array, "[1,2,3]", true);
-
+         testPattern(JSON(), "[1,2,3]", true);
+      
       success &=
-         testPattern(array, "[[]]", true);
+         testPattern(JSON(), "[1.23,2,3]", true);
+         
+      success &=
+         testPattern(JSON(), "[[]]", true);
 
       BeeFishMisc::outputSuccess(success);
 
@@ -354,7 +410,7 @@ namespace BeeFishJSON {
          testPattern(Object(), "{ \"a\" :{ \"b\" : { } } }", true);
          
       success &=
-         testPattern(Object(), "{", false);
+         testPattern(Object(), "{", nullopt);
 
       success &=
          testPattern(Object(), "}", false);
@@ -385,13 +441,8 @@ namespace BeeFishJSON {
 
       cout << "Testing unicode" << endl;
 
-      string captured;
-
       success &=
-         testPattern(Capture(JSON(), captured), "{\"🐝\":\"🌎\"}", true);
-
-      success &=
-         testValue("{\"🐝\":\"🌎\"}", captured);
+         testPattern(JSON(), "{\"🐝\":\"🌎\"}", true);
 
       BeeFishMisc::outputSuccess(success);
 
@@ -433,7 +484,7 @@ namespace BeeFishJSON {
       {
           
          Variable v =
-            BeeFishScript::Number{260975};
+            BeeFishScript::Integer{260975};
             
          stringstream out;
          out << v;
@@ -485,17 +536,37 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing Number: " << flush;
+
           JSON json;
-          json.read("1234567");
+          json.read("1.23");
           json.eof();
-          Variable var = *(json._variable);
-          Number num = var;
+          
+          Variable& var = *(json._variable);
+          Number& num = var;
+       
           success = success &&
-             num == 1234567;
+             num == 1.23;
              
           BeeFishMisc::outputSuccess(success);
           
       }
+      
+      if (success)
+      {
+          cout << "\tParsing Integer: " << flush;
+          JSON json;
+          json.read("1234567890");
+          json.eof();
+          Variable& var = *(json._variable);
+          Integer& _int = var;
+          success = success &&
+             _int == 1234567890;
+             
+          BeeFishMisc::outputSuccess(success);
+          
+      }
+      
+
       
       if (success)
       {

@@ -1,4 +1,3 @@
-
 <FilesMatch "\.(xhtml|html|htm|js|css)$">
    FileETag None
    Header unset ETag

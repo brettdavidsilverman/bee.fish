@@ -2,6 +2,7 @@
 #define BEE_FISH__JSON__NUMBER_HPP
 
 #include "../Parser/Parser.hpp"
+#include "BlankSpace.hpp"
 
 namespace BeeFishJSON {
 
@@ -17,11 +18,12 @@ namespace BeeFishJSON {
       const auto digits =
          Repeat(digit);
 
-      const auto integer = digits;
+      const auto integer =
+         -sign and digits;
 
       const auto decimal =
          Character(".") and
-         integer;
+         digits;
 
       const auto exponent =
          (
@@ -29,17 +31,14 @@ namespace BeeFishJSON {
             Character("E")
          ) and
          -sign and
-         integer;
+         digits;
        
-      const auto eof =
-         Character((char)-1);
       
       const auto number =
          -sign and
-         integer and
+         digits and
          -decimal and
-         -exponent and
-         -eof;
+         -exponent;
 
 }
 

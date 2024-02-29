@@ -214,11 +214,11 @@ namespace BeeFishDBServer
       {
          cout << "\tTesting number " << flush;
          JSONPath path(root["json-number"]);
-         Variable i = 22;
+         Variable i = 22L;
          path.setVariable(i);
          JSONPath path2(root["json-number"]);
          Variable i2 = path2.getVariable();
-         success = ((int)i2 == 22);
+         success = ((Integer)i2 == 22);
 
          outputSuccess(success);
       }
@@ -251,12 +251,12 @@ namespace BeeFishDBServer
       {
          cout << "\tTesting array " << flush;
          JSONPath path(root["json-array"]);
-         Variable array = Array{1,2,3};
+         Variable array = Array{1L,2L,3L};
          path.setVariable(array);
          JSONPath path2(root["json-array"]);
          Variable array2 = path2.getVariable();
          ArrayPointer a = array2;
-         success = ((int)((*a)[2]) == 3);
+         success = ((Integer)((*a)[2]) == 3);
 
          outputSuccess(success);
       }
@@ -267,8 +267,8 @@ namespace BeeFishDBServer
          Variable object =
             BeeFishScript::Object
             {
-               {"a", 1},
-               {"c", 2},
+               {"a", 1L},
+               {"c", 2L},
                {"e", BeeFishScript::Object()}
             };
 
@@ -295,7 +295,7 @@ namespace BeeFishDBServer
             BeeFishScript::Object
             {
                {"a", "b"},
-               {"c", BeeFishScript::Array{1,2,3}},
+               {"c", BeeFishScript::Array{1L,2L,3L}},
                {"e", BeeFishScript::Object{
                      {"f", "g"}
                      }
@@ -308,7 +308,7 @@ namespace BeeFishDBServer
          ObjectPointer o = object2;
          ArrayPointer a = (*o)["c"];
          success = success &&
-            ((Number)((*a)[1]) == 2);
+            ((Integer)((*a)[1]) == 2);
 
          Variable f = (*o)["e"]["f"];
          success = success &&
@@ -325,10 +325,10 @@ namespace BeeFishDBServer
             BeeFishScript::Object
             {
                {"a", "b"},
-               {"c", BeeFishScript::Array{1,2,3}},
+               {"c", BeeFishScript::Array{1L,2L,3L}},
                {"e", BeeFishScript::Object{
                      {"f", "g"},
-                     {"h", BeeFishScript::Array{1,2,3}}
+                     {"h", BeeFishScript::Array{1L,2L,3L}}
                   }
                }
             };

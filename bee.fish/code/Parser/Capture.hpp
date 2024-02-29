@@ -17,11 +17,13 @@ namespace BeeFishParser {
    class Capture : public Parser
    {
    protected:
-      Parser* _capture;
-      std::string _value;
+      Parser* _parser;
+      
    public:
+      std::string _value;
       std::string& _valueRef;
       
+
 
    public:
       using Parser::read;
@@ -30,16 +32,17 @@ namespace BeeFishParser {
          const Capture& source
       ) :
          Parser(),
-         _capture(source._capture->copy()),
+         _parser(source._parser->copy()),
          _value(""),
          _valueRef(source._valueRef)
+
       {
       }
-      
+
       Capture(
          const Parser& parser
       ) :
-         _capture(parser.copy()),
+         _parser(parser.copy()),
          _value(""),
          _valueRef(_value)
       {
@@ -49,33 +52,28 @@ namespace BeeFishParser {
          const Parser& parser,
          std::string& value
       ) :
-         _capture(parser.copy()),
+         _parser(parser.copy()),
+         _value(""),
          _valueRef(value)
       {
       }
       
       virtual ~Capture() {
-         delete _capture;
+         delete _parser;
       }
 
-      virtual void capture(char c)
-      {
-         _valueRef += c;
-        // _valueRef.push_back(c);
-      }
-      
       virtual const std::string& value() const
       override
       {
          return _valueRef;
       }
-      
+/*
       virtual std::string& value()
       override
       {
          return _valueRef;
       }
-
+*/
       virtual Parser* copy() const
       override
       {
@@ -88,14 +86,20 @@ namespace BeeFishParser {
          Parser::read(c);
 
          bool matched = readIndirect(
-            *_capture,
+            *_parser,
             c
          );
          
-         if (matched)
-            capture(c);
-            
+         if (matched) {
+             capture(c);
+            _valueRef += c;
+         }
+         
          return matched;
+      }
+      
+      virtual void capture(char c)
+      {
       }
 
       virtual bool flush()
@@ -104,7 +108,7 @@ namespace BeeFishParser {
          if (!Parser::flush())
             return false;
 
-         return _capture->flush();
+         return _parser->flush();
       }
 
 

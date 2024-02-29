@@ -21,6 +21,7 @@ namespace BeeFishScript {
 
    typedef nullptr_t Null;
    typedef bool Boolean; 
+   typedef int64_t Integer;
    typedef double Number;
    typedef std::string String;
    typedef vector<Variable> Array;
@@ -103,6 +104,7 @@ namespace BeeFishScript {
 
       union Value {
          Boolean _boolean;
+         Integer  _integer;
          Number _number;
          String _string;
          ArrayPointer _array;
@@ -118,6 +120,9 @@ namespace BeeFishScript {
                break;
             case Type::BOOLEAN:
                _boolean = source._boolean;
+               break;
+            case Type::INTEGER:
+               _integer = source._integer;
                break;
             case Type::NUMBER:
                _number = source._number;
@@ -155,8 +160,11 @@ namespace BeeFishScript {
          case Type::NULL_:
          case Type::BOOLEAN:
             break;
+         case Type::INTEGER:
+            _value._integer = 0;
+            break;
          case Type::NUMBER:
-             _value._number = 0;
+            _value._number = 0;
             break;
          case Type::STRING:
             new (&_value._string) String();
@@ -190,13 +198,12 @@ namespace BeeFishScript {
          _value._number = number;
       }
 
-      Variable(const int& number) : Variable(Number(number)) {
+      Variable(const Integer& integer) {
+         _type = Type::INTEGER;
+         _value._integer = integer;
       }
 
-      Variable(const unsigned int& number) : Variable(Number(number)) {
-      }
-
-      Variable(const void *& pointer) : Variable(Number((unsigned long)pointer)) {
+      Variable(const void *& pointer) : Variable(Integer((unsigned long)pointer)) {
       }
 
       Variable(const String& value) {
@@ -253,6 +260,7 @@ namespace BeeFishScript {
          case Type::UNDEFINED:
          case Type::NULL_:
          case Type::BOOLEAN:
+         case Type::INTEGER:
          case Type::NUMBER:
             break;
          case Type::STRING:
@@ -341,6 +349,12 @@ namespace BeeFishScript {
 
       }
 
+      virtual bool operator == (long compare) const {
+
+         return (_type == Type::INTEGER) && (_value._integer == compare);
+
+      }
+      
       virtual bool operator == (double compare) const {
 
          return (_type == Type::NUMBER) && (_value._number == compare);
@@ -372,6 +386,9 @@ namespace BeeFishScript {
             else
                out << "false";
             break;
+         case Type::INTEGER:
+            out << _value._integer;
+            break;
          case Type::NUMBER:
             if ( _value._number == 0.0 ) {
                out << "0";
@@ -400,16 +417,32 @@ namespace BeeFishScript {
 
             out << "[";            
             const Array* array = _value._array.get();
+            if (array->size() > 1) {
+               out << "\r\n";
+               tabIndex++;
+            }
+            
+            
             
             for  (Array::const_iterator it = array->cbegin();
                    it != array->cend();)
             {
+               if (array->size() > 1)
+                  out << std::string(tabIndex * TAB_SPACES, ' ');
                const Variable& element = *it;
-               element.write(out, tabIndex + 1);
-               if (++it != array->cend())
-                  out << ", ";
+               element.write(out, tabIndex);
+               if (++it != array->cend()) {
+                  out << ",\r\n";
+               }
             }
 
+            
+            
+            if (array->size() > 1) {
+                --tabIndex;
+               out << "\r\n";
+               out << std::string(tabIndex * TAB_SPACES, ' ');
+            }
             out << "]";
             break;
          }
@@ -438,6 +471,8 @@ namespace BeeFishScript {
             return "null";
          case Type::BOOLEAN:
             return "Boolean";
+         case Type::INTEGER:
+            return "Integer";
          case Type::NUMBER:
             return "Number";
          case Type::STRING:
@@ -469,14 +504,14 @@ namespace BeeFishScript {
          return _value._boolean;
       }
 
+      operator Integer& () {
+         CHECK_TYPE(Type::INTEGER);
+         return _value._integer;
+      }
+      
       operator Number& () {
          CHECK_TYPE(Type::NUMBER);
          return _value._number;
-      }
-
-      operator int () {
-         CHECK_TYPE(Type::NUMBER);
-         return (int)(_value._number);
       }
 
       operator String& () {

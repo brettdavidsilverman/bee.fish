@@ -81,11 +81,10 @@ static int database_handler(request_rec *r)
               r, "application/json; charset=utf-8"
            );
            ap_rputs(posted.c_str(), r);
-           
            return OK;
         }
         else
-           return 404; // NotFound.xhtml
+           return HTTP_NOT_FOUND; // NotFound.xhtml
         
     }
     else if ( !strcmp(r->method, "POST")) {
@@ -99,16 +98,12 @@ static int database_handler(request_rec *r)
 
         stringstream output;
     
-        output << result;
+        output << result << "\r\n";
     
         ap_rputs(output.str().c_str(), r);
 
         return OK;
 
-    }
-    
-    else {
-        return 500;
     }
     
     /* Lastly, if there was a query string, let's print that too!
@@ -117,7 +112,7 @@ static int database_handler(request_rec *r)
     }
     */
     
-    return 500;
+    return HTTP_INTERNAL_SERVER_ERROR;
 }
 
 static Variable readJSON(Path path, request_rec *r) {

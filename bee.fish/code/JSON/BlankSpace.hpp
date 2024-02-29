@@ -36,6 +36,10 @@ namespace BeeFishJSON {
 
       const auto newLine =
          Word("\r\n") or Word("\n");
+         
+      const auto eof =
+         Character((char)-1);
+      
 
 
 }

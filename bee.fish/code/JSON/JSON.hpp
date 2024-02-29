@@ -20,7 +20,9 @@ namespace BeeFishJSON {
    {
    protected:
       Parser* _params {nullptr};
-      And _parser;
+      std::string _numberString;
+      std::string _integerString;
+      Parser* _parser;
       
       vector<Variable*> _stack;
       vector<std::string> _keyStack;
@@ -45,6 +47,8 @@ namespace BeeFishJSON {
       
       virtual ~JSON()
       {
+          delete _parser;
+          
           if (_variable) {
              delete _variable;
              _variable = nullptr;
@@ -59,10 +63,10 @@ namespace BeeFishJSON {
       override
       {
 
-         return readIndirect(_parser, c);
+         return readIndirect(*_parser, c);
       }
       
-      And createVariableParser(Parser* params) {
+      Parser* createVariableParser(Parser* params) {
         
          const auto _undefined =
             Invoke(
@@ -112,20 +116,46 @@ namespace BeeFishJSON {
 
          const auto _boolean =
             _true or _false;
-            
+                        
          const auto _number =
             Invoke(
                 Capture(
                    number,
-                   this->_value),
+                   _numberString
+                ),
                 [this](Parser* parser) {
                    stringstream stream;
-                   stream << _value;
-                   Number number;
-                   stream >> number;
-                   this->_variable =
-                      new Variable(number);
-                   _value = "";
+                   stream << _numberString;
+                   if ( ( _numberString.find('.') !=
+                           std::string::npos ) ||
+                        ( _numberString.find('e') !=
+                           std::string::npos ) ||
+                        ( _numberString.find('E') !=
+                          std::string::npos ) )
+                   {
+                      // Number contains decimal
+                      // place or exponent.
+                      // Treat it as float
+                      Number number;
+                      stream >> number;
+                      _variable =
+                         new Variable(
+                            BeeFishScript::Number{number}
+                         );
+                   }
+                   else
+                   {
+                      // Treat number as integral
+                      Integer integer;
+                      stream >> integer;
+                      _variable =
+                         new Variable(
+                            BeeFishScript::Integer{integer}
+                         );
+                   }
+                   
+                   _numberString = "";
+                   
                    return true;
                 }
             );
@@ -137,7 +167,7 @@ namespace BeeFishJSON {
                [this](Parser* parser) {
                   this->_variable =
                      new Variable(
-                        parser->_value
+                        parser->value()
                      );
                    return true;
                 }
@@ -150,8 +180,8 @@ namespace BeeFishJSON {
          const auto object =
             createObjectParser();
             
-         return
-            blankSpaces and
+         return (
+            -blankSpaces and
             (
                _undefined or
                _null or
@@ -160,7 +190,8 @@ namespace BeeFishJSON {
                __string or
                array or
                object
-            );
+            )
+         ).copy();
       }
       
       And createObjectParser() {
@@ -264,6 +295,7 @@ namespace BeeFishJSON {
          return object;
       }
       
+      
       And createArrayParser() {
          const auto _openBracket =
             Invoke(
@@ -300,9 +332,10 @@ namespace BeeFishJSON {
 
          const auto _arrayItem =
             Invoke(
-               arrayItem,
+               LoadOnDemand(_JSON),
                [this](Parser* parser)
                {
+
                   if (_stack.size() == 0)
                      return false;
                   
@@ -311,18 +344,29 @@ namespace BeeFishJSON {
                      
                   ArrayPointer array = (*var);
                   
-                  JSON* value = nullptr;
-                  Optional* optional = dynamic_cast<Optional*>(parser);
-                  LoadOnDemand* load = dynamic_cast<LoadOnDemand*>(optional->_optional);
+                  LoadOnDemand* load =
+                     dynamic_cast
+                     <LoadOnDemand*>(parser);
+                  
+                  JSON* json = nullptr;
                   
                   if (load && load->_loadOnDemand)
-                     value = dynamic_cast<JSON*>(load->_loadOnDemand);
-                     
-                  if (value && value->_variable)
-                     array->push_back(*(value->_variable));
+                  {
+                     json =
+                        dynamic_cast
+                        <JSON*>(load->_loadOnDemand);
+                  }
+                  
+                  if (json && json->_variable)
+                  {
+                     array->push_back(*(json->_variable));
+                     delete json->_variable;
+                     json->_variable = nullptr;
+                  }
                   else
+                  {
                      array->push_back(undefined);
-                     
+                  }
                   return true;
                }
             );
@@ -331,15 +375,19 @@ namespace BeeFishJSON {
          const auto _arrayItems =
             _arrayItem and
             Repeat(
-               arraySeperator and _arrayItem,
+               -blankSpaces and
+               arraySeperator and
+               -blankSpaces and
+               _arrayItem,
                0
             );
-
+            
          const auto _array =
+            -blankSpaces and
             _openBracket and
-            Optional(
-               _arrayItems
-            ) and
+               -blankSpaces and
+               -_arrayItems and
+               -blankSpaces and
             _closeBracket;
             
          return _array;
@@ -350,7 +398,7 @@ namespace BeeFishJSON {
    
 
    Parser* _JSON(Parser* params) {
-      return JSON(params).copy();
+      return new JSON(params);
    }
    
    

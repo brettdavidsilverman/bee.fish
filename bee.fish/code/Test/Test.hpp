@@ -43,9 +43,9 @@ namespace BeeFishTest {
       success =
          parser.read(pattern);
 
-      if (success &&
-          parser._result == nullopt)
-         parser.eof();
+     // if (success &&
+     //     parser._result == nullopt)
+     //    parser.eof();
       
       cout << "{"
            << parser.result()
