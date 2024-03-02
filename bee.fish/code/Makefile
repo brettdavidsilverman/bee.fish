@@ -11,7 +11,7 @@ all:
 	cd JSON && make $(DEBUG)
 	cd WebRequest && make $(DEBUG)
 	cd WebServer && make $(DEBUG)
-	cd DBServer && make $(DEBUG)
+#	cd DBServer && make $(DEBUG)
 	
 test:	all
 	../stop.sh 8000

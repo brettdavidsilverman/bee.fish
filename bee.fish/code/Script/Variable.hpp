@@ -619,7 +619,7 @@ namespace BeeFishScript {
                out << "\\t";
                break;
             default:
-
+            {
                if ((uint16_t)c <= 0x001F) {
                   // Control chars
                   out << "\\u" 
@@ -629,11 +629,8 @@ namespace BeeFishScript {
                      << (uint16_t)c;
 
                }
-               else {
-                  out << c;
-#warning "put \\u back in escape"
-/*
-               if (value > 0x10FFFF)
+               /*
+               else if (value > 0x10FFFF)
                {
                   // Uhicode chars
                   out << "\\u" 
@@ -649,11 +646,10 @@ namespace BeeFishScript {
                      << std::setfill('0')
                      <<
                      (value & 0x0000FFFF);
-                  }
+               }*/
                else {
-                  writeCharacter(out, value);
+                  out << c;
                }
-*/
             }
          }
       

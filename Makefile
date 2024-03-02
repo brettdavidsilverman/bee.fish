@@ -1,4 +1,5 @@
 all:
+	cd bee.fish && make clean
 	cd bee.fish && make $(DEBUG)
 	cd bee.fish && make test
 	cd Apache2/mod_database && make $(DEBUG) install restart test
