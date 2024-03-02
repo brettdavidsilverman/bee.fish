@@ -87,9 +87,8 @@ namespace BeeFishApache2 {
          "-H \"Content-Type: application/json; charset=utf-8\" " <<
          "-H Expect: " <<
          "-T " << file
-         << " -s > "
-         << TEMP_DIRECTORY
-          << "test.curl.txt";
+         << " -s | grep Success > /dev/null ";
+
 
       string command = stream.str();
 
@@ -97,6 +96,18 @@ namespace BeeFishApache2 {
 
       if (success && expect) {
           
+         stringstream stream1;
+         stream1
+            << "curl "
+            << url  << file << " "
+            << " -s > "
+            << TEMP_DIRECTORY
+            << "test.curl.txt";
+            
+         string command = stream1.str();
+         success &= (system(command.c_str()) == 0);
+
+
          // Compare the files
          stringstream stream;
          stream  << "diff -s -Z "

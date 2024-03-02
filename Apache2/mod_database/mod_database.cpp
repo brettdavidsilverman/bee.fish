@@ -84,22 +84,24 @@ static int database_handler(request_rec *r)
         return HTTP_NOT_FOUND; // NotFound.xhtml
         
     }
-    else if ( !strcmp(r->method, "POST")) {
+    else if (!strcmp(r->method, "POST")) {
         
         
-        result = readJSON(path, r);
+       Variable variable =
+          readJSON(path, r);
        
-        ap_set_content_type(
-           r, "application/json; charset=utf-8"
-        );
-
-        stringstream output;
-    
-        output << result << "\r\n";
-    
-        ap_rputs(output.str().c_str(), r);
-
-        return OK;
+       stringstream stream;
+       stream << variable;
+       
+       ap_set_content_type(
+          r, "application/json; charset=utf-8"
+       );
+       
+       string formatted = stream.str();
+       
+       ap_rputs(formatted.c_str(), r);
+       
+       return OK;
 
     }
     
@@ -178,8 +180,10 @@ static Variable readJSON(Path path, request_rec *r) {
    if (isOk &&
        json._result == true)
    {
-      if (json._variable)
-         return *(json._variable);
+      return
+         BeeFishScript::String{
+            "Success"
+         };
    }
    
    Variable error =

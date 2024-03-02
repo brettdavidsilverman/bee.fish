@@ -40,12 +40,12 @@ function postJSON() {
          }
       ).then(
          function (json) {
-             
             if (json.error)
                alert("Error " + json.error);
             else {
-               alert("Ok");
-               window.location.reload();
+               alert(json);
+               if (json == "Success")
+                  window.location.reload();
             }
                
          }

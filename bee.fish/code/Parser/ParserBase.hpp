@@ -26,6 +26,7 @@ namespace BeeFishParser {
    public:
       
       std::optional<bool> _result = std::nullopt;
+      
       size_t _byteCount = 0;
       char _lastCharacter = 0;
 
@@ -36,8 +37,8 @@ namespace BeeFishParser {
          ++parserInstanceCount();
       }
 
-      Parser(const Parser& source)// :
-         // _value(source._value)
+      Parser(const Parser& source)
+        // _value(source._value)
       {
          ++parserInstanceCount();
       }
@@ -277,6 +278,7 @@ namespace BeeFishParser {
       {
          return EmptyString();
       }
+      
  /*
       virtual std::string& value()
       {
