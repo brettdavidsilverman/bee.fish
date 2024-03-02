@@ -1,3 +1,24 @@
 {
-   "label": "value"
+   "approvals": [{
+      "reviewedAt": 1557088625,
+      "reviewedAutomatically": true,
+      "state": "approved",
+      "submissionDetails": {
+         "permissionType": "READ"
+      },
+      "submissionId": 819766,
+      "submissionObject": "public_audience_request",
+      "submissionOutcome": "change_audience",
+      "submissionOutcomeApplication": {
+         "failureCount": 0,
+         "status": "success"
+      },
+      "submittedAt": 1557088625,
+      "submitter": {
+         "displayName": "Tyler Kleykamp",
+         "id": "cvy9-n6sb"
+      },
+      "workflowId": 2184
+   }],
+   "name": "Brett"
 }

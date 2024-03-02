@@ -58,6 +58,7 @@ using namespace std;
 static int counter = 0;
 
 static Variable readJSON(Path path, request_rec *r);
+static bool sendDocument(Path path, request_rec *r);
 
 /* The sample content handler */
 static int database_handler(request_rec *r)
@@ -67,31 +68,27 @@ static int database_handler(request_rec *r)
     
     Variable result;
     
-    if (!strcmp(r->method, "GET")) {
+    if (!strcmp(r->method, "GET"))
+    {
         if (!strcmp(r->uri, "/index.xhtml") ||
             !strcmp(r->uri, "/NotFound.xhtml") ||
             !strcmp(r->uri, "/error.js") ) {
             return DECLINED;
         }
-        else if (path.hasData()) {
+        else if (path.contains("document")) {
 
-           string posted;
-           path.getData(posted);
-           ap_set_content_type(
-              r, "application/json; charset=utf-8"
-           );
-           ap_rputs(posted.c_str(), r);
-           return OK;
+           if (sendDocument(path["document"], r));
+              return OK;
         }
-        else
-           return HTTP_NOT_FOUND; // NotFound.xhtml
+        
+        return HTTP_NOT_FOUND; // NotFound.xhtml
         
     }
     else if ( !strcmp(r->method, "POST")) {
         
         
         result = readJSON(path, r);
-        
+       
         ap_set_content_type(
            r, "application/json; charset=utf-8"
         );
@@ -115,12 +112,37 @@ static int database_handler(request_rec *r)
     return HTTP_INTERNAL_SERVER_ERROR;
 }
 
+static bool sendDocument(Path path, request_rec *r)
+{
+   ap_set_content_type(
+      r, "application/json; charset=utf-8"
+   );
+           
+   string posted;
+   Size pageIndex;
+   Stack stack;
+   MinMaxPath document = path;
+   while (document.next(stack, pageIndex))
+   {
+      document[pageIndex]
+         .getData(posted);
+           
+      ap_rputs(posted.c_str(), r);
+   }
+   
+   return true;
+}
+
+
 static Variable readJSON(Path path, request_rec *r) {
    JSON json;
    bool isOk = true;
-   stringstream posted;
+   string posted;
    int pageSize = getpagesize();
    char buffer[pageSize];
+   Size pageIndex = 0;
+   Path document = path["document"];
+   Path index = path["index"];
    
    int ret_code = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR);
    if (ret_code == OK) {
@@ -137,9 +159,12 @@ static Variable readJSON(Path path, request_rec *r) {
                     
             if (!isOk)
                break;
-                    
-            posted <<
+
+            posted =
                string(buffer, dataBytesRead);
+               
+            document[pageIndex++].setData(posted);
+            
          }
       }
    }
@@ -153,11 +178,8 @@ static Variable readJSON(Path path, request_rec *r) {
    if (isOk &&
        json._result == true)
    {
-      path.setData(posted.str());
-      
       if (json._variable)
          return *(json._variable);
-   
    }
    
    Variable error =
