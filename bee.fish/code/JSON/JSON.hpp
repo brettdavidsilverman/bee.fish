@@ -66,15 +66,21 @@ namespace BeeFishJSON {
          return readIndirect(*_parser, c);
       }
       
+      virtual bool onundefined(Parser* parser)
+      {
+         this->_variable =
+            new Variable();
+         return true;
+      }
+      
       Parser* createVariableParser(Parser* params) {
         
          const auto _undefined =
             Invoke(
                Word("undefined"),
-               [this](Parser* parser) {
-                  this->_variable =
-                     new Variable();
-                  return true;
+               [this](Parser* parser)
+               {
+                  return onundefined(parser);
                }
             );
 
