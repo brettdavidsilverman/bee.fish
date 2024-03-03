@@ -78,14 +78,15 @@ static int database_handler(request_rec *r)
         if (!strcmp(r->uri, "/index.xhtml") ||
             !strcmp(r->uri, "/NotFound.xhtml") ||
             !strcmp(r->uri, "/error.js") ) {
-            return DECLINED;
+           
+           return DECLINED;
         }
         else if (path.contains("document")) {
 
            if (sendDocument(path["document"], r))
               return OK;
-           else
-              return HTTP_INTERNAL_SERVER_ERROR;
+           
+           return HTTP_INTERNAL_SERVER_ERROR;
         }
         
         return HTTP_NOT_FOUND; // NotFound.xhtml
@@ -94,11 +95,11 @@ static int database_handler(request_rec *r)
     else if (!strcmp(r->method, "POST")) {
         
         
-       Variable variable =
+       Variable result =
           readJSON(path, r);
        
        stringstream stream;
-       stream << variable;
+       stream << result;
        
        ap_set_content_type(
           r, "application/json; charset=utf-8"

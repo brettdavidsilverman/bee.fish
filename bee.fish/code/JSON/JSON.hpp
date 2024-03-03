@@ -186,6 +186,57 @@ namespace BeeFishJSON {
          _stack.push_back(var);
          return true;
       }
+      
+      virtual bool onendarray(Parser* parser)
+      {
+         if (_stack.size() == 0)
+            return false;
+                  
+         Variable* var =
+            _stack[_stack.size() - 1];
+         _stack.pop_back();
+         if (_stack.size() == 0)
+            _variable = var;
+         else
+            delete var;
+         return true;
+      }
+      
+      virtual bool onarrayitem(Parser* parser)
+      {
+         if (_stack.size() == 0)
+            return false;
+                  
+         Variable* var =
+            _stack[_stack.size() - 1];
+                     
+         ArrayPointer array = (*var);
+                  
+         LoadOnDemand* load =
+            dynamic_cast
+            <LoadOnDemand*>(parser);
+                  
+         JSON* json = nullptr;
+                  
+         if (load && load->_loadOnDemand)
+         {
+            json =
+               dynamic_cast
+               <JSON*>(load->_loadOnDemand);
+         }
+                  
+         if (json && json->_variable)
+         {
+            array->push_back(*(json->_variable));
+            delete json->_variable;
+            json->_variable = nullptr;
+         }
+         else
+         {
+            array->push_back(undefined);
+         }
+         return true;
+      }
                
       Parser* createVariableParser(Parser* params) {
         
@@ -369,19 +420,8 @@ namespace BeeFishJSON {
          const auto _closeBracket =
             Invoke(
                closeBracket,
-               [this](Parser*) {
-                
-                  if (_stack.size() == 0)
-                     return false;
-                  
-                  Variable* var =
-                     _stack[_stack.size() - 1];
-                  _stack.pop_back();
-                  if (_stack.size() == 0)
-                     _variable = var;
-                  else
-                     delete var;
-                  return true;
+               [this](Parser* parser) {
+                  return onendarray(parser);
                }
             );
 
@@ -390,39 +430,7 @@ namespace BeeFishJSON {
                LoadOnDemand(_JSON),
                [this](Parser* parser)
                {
-
-                  if (_stack.size() == 0)
-                     return false;
-                  
-                  Variable* var =
-                     _stack[_stack.size() - 1];
-                     
-                  ArrayPointer array = (*var);
-                  
-                  LoadOnDemand* load =
-                     dynamic_cast
-                     <LoadOnDemand*>(parser);
-                  
-                  JSON* json = nullptr;
-                  
-                  if (load && load->_loadOnDemand)
-                  {
-                     json =
-                        dynamic_cast
-                        <JSON*>(load->_loadOnDemand);
-                  }
-                  
-                  if (json && json->_variable)
-                  {
-                     array->push_back(*(json->_variable));
-                     delete json->_variable;
-                     json->_variable = nullptr;
-                  }
-                  else
-                  {
-                     array->push_back(undefined);
-                  }
-                  return true;
+                  return onarrayitem(parser);
                }
             );
             
