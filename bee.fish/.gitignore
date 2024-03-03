@@ -5,4 +5,3 @@ build/**
 **/perf.data
 **/perf.data.old
 **/*.data
-#mod_database.so
