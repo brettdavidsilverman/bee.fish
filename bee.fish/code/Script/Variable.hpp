@@ -387,11 +387,12 @@ namespace BeeFishScript {
                out << "false";
             break;
          case Type::INTEGER:
+
             out << _value._integer;
             break;
          case Type::NUMBER:
             if ( _value._number == 0.0 ) {
-               out << "0";
+               out << "0.0";
             } 
             else if (isnormal(_value._number)) {
 //               out.precision(17);

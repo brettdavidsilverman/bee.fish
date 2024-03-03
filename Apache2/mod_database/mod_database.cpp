@@ -38,6 +38,7 @@
 */ 
 #include <unistd.h>
 #include <syslog.h>
+#include <fstream>
 #include "httpd.h"
 #include "http_config.h"
 #include "http_protocol.h"
@@ -56,16 +57,20 @@ using namespace BeeFishJSON;
 using namespace std;
 
 static int counter = 0;
-
+static std::ofstream debug;
 static Variable readJSON(Path path, request_rec *r);
 static bool sendDocument(Path path, request_rec *r);
 
 /* The sample content handler */
 static int database_handler(request_rec *r)
 {
-       
+    debug.open("/home/bee/debug.txt", std::ios_base::app);
+   
     Path path = parseURI(r->uri);
     
+    debug.close();
+    
+ 
     Variable result;
     
     if (!strcmp(r->method, "GET"))
@@ -77,8 +82,10 @@ static int database_handler(request_rec *r)
         }
         else if (path.contains("document")) {
 
-           if (sendDocument(path["document"], r));
+           if (sendDocument(path["document"], r))
               return OK;
+           else
+              return HTTP_INTERNAL_SERVER_ERROR;
         }
         
         return HTTP_NOT_FOUND; // NotFound.xhtml
@@ -97,9 +104,9 @@ static int database_handler(request_rec *r)
           r, "application/json; charset=utf-8"
        );
        
-       string formatted = stream.str();
+       string output = stream.str();
        
-       ap_rputs(formatted.c_str(), r);
+       ap_rputs(output.c_str(), r);
        
        return OK;
 
@@ -110,7 +117,7 @@ static int database_handler(request_rec *r)
         ap_rprintf(r, "Your query string was: %s", r->args);
     }
     */
-    
+   
     return HTTP_INTERNAL_SERVER_ERROR;
 }
 
@@ -119,7 +126,10 @@ static bool sendDocument(Path path, request_rec *r)
    ap_set_content_type(
       r, "application/json; charset=utf-8"
    );
-           
+   
+   
+   JSON json;
+   
    string posted;
    Size pageIndex;
    Stack stack;
@@ -129,10 +139,28 @@ static bool sendDocument(Path path, request_rec *r)
       document[pageIndex]
          .getData(posted);
            
-      ap_rputs(posted.c_str(), r);
+     // ap_rputs(posted.c_str(), r);
+      if (!json.read(posted))
+         return false;
    }
    
-   return true;
+   json.eof();
+   
+   // Write variable to output
+   stringstream stream;
+   stream << *(json._variable);
+   string output = stream.str();
+   
+   if ( ap_rwrite(
+           output.data(),
+           output.length(),
+           r )
+       == output.length() )
+   {
+       return true;
+   }
+   
+   return false;
 }
 
 
@@ -180,6 +208,7 @@ static Variable readJSON(Path path, request_rec *r) {
    if (isOk &&
        json._result == true)
    {
+      
       return
          BeeFishScript::String{
             "Success"

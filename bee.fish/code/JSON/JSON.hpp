@@ -160,6 +160,32 @@ namespace BeeFishJSON {
                 
       }
                
+      virtual bool onendobject(Parser* parser)
+      {
+         if (_stack.size() == 0)
+            return false;
+                  
+         Variable* var =
+            _stack[_stack.size() - 1];
+         _stack.pop_back();
+         
+         if (_stack.size() == 0)
+            _variable = var;
+         else
+            delete var;
+         
+         return true;
+      }
+      
+      virtual bool onbeginarray(Parser* parser)
+      {
+         Variable* var =
+            new Variable(
+               BeeFishScript::Type::ARRAY
+            );
+         _stack.push_back(var);
+         return true;
+      }
                
       Parser* createVariableParser(Parser* params) {
         
@@ -304,19 +330,8 @@ namespace BeeFishJSON {
          auto _closeBrace =
          Invoke(
             closeBrace,
-            [this](Parser*) {
-                
-               if (_stack.size() == 0)
-                  return false;
-                  
-               Variable* var =
-                  _stack[_stack.size() - 1];
-               _stack.pop_back();
-               if (_stack.size() == 0)
-                  _variable = var;
-               else
-                  delete var;
-               return true;
+            [this](Parser* parser) {
+               return onendobject(parser);
             }
          );
             
@@ -345,13 +360,8 @@ namespace BeeFishJSON {
          const auto _openBracket =
             Invoke(
                openBracket,
-               [this](Parser*) {
-                  Variable* var =
-                     new Variable(
-                        BeeFishScript::Type::ARRAY
-                     );
-                  _stack.push_back(var);
-                  return true;
+               [this](Parser* parser) {
+                  return onbeginarray(parser);
                }
             );
             

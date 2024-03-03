@@ -1,5 +1,6 @@
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 #include "Config.hpp"
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../Parser/Parser.hpp"
