@@ -14,7 +14,7 @@ namespace BeeFishJSON {
 
    using namespace BeeFishParser;
 
-   Parser* _JSON(Parser*);
+   Parser* _JSON(void*);
 
    const auto openBracket =
       Character("[");

@@ -48,7 +48,7 @@
 #include "Parser/Parser.hpp"
 
 #include "parseURI.hpp"
-#include "JSON/JSON.hpp"
+#include "JSON/JSONVariable.hpp"
 
 using namespace BeeFishDatabase;
 using namespace BeeFishWebServer;
@@ -129,7 +129,7 @@ static bool sendDocument(Path path, request_rec *r)
    );
    
    
-   JSON json;
+   JSONVariable json;
    
    string posted;
    Size pageIndex;

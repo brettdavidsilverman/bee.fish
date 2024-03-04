@@ -1,7 +1,7 @@
 OUTPUT = ../../build/JSON
 DEPS = Makefile main.cpp Number.hpp String.hpp Test.hpp
 CFLAGS = -std=c++17 -Wfatal-errors
-TEST = ~/bee.fish/large.json
+TEST = /home/bee/bee.fish/large.json
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)

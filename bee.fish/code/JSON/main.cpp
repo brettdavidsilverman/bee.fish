@@ -5,7 +5,7 @@
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../Parser/Parser.hpp"
 #include "../Parser/Test.hpp"
-#include "JSON.hpp"
+#include "JSONVariable.hpp"
 #include "Test.hpp"
 #include "Config.hpp"
 
@@ -49,11 +49,6 @@ int main(int argc, const char* argv[]) {
    JSON* parser = new JSON();
 
    result = testParser(parser);
-
-   Variable var;
-   if (parser->_variable) {
-      var = *(parser->_variable);
-   }
   
    int returnCode = 0;
 
@@ -67,7 +62,9 @@ int main(int argc, const char* argv[]) {
       cout << "Insufficient data";
       returnCode = 3;
    }
-   
+   else
+      cout << "Valid JSON" << endl;
+      
    delete parser;
    
    return returnCode;
@@ -79,7 +76,7 @@ std::optional<bool> testParser(Parser* parser) {
    cin >> *parser;
  
    if (parser->result() == nullopt)
-      parser->flush();
+      parser->eof();
 
    cout << endl;
 

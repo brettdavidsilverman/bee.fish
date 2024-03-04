@@ -19,40 +19,34 @@ namespace BeeFishJSON {
    class JSON : public Parser
    {
    protected:
-      Parser* _params {nullptr};
+      void* _params {nullptr};
       std::string _numberString;
       std::string _integerString;
       Parser* _parser;
       
-      vector<Variable*> _stack;
-      vector<BeeFishScript::String> _keyStack;
       
    public:
       using Parser::read;
-      
-      Variable* _variable {nullptr};
-      
-      JSON(Parser* params = nullptr) :
+       
+      JSON(void* params = nullptr) :
          _params(params),
-         _parser(createVariableParser(_params))
+         _parser(nullptr)
       {
 
       }
 
       JSON(const JSON& source) :
           _params(source._params),
-          _parser(createVariableParser(_params))
+          _parser(nullptr)
       {
       }
       
       virtual ~JSON()
       {
-          delete _parser;
-          
-          if (_variable) {
-             delete _variable;
-             _variable = nullptr;
-          }
+         if (_parser) {
+            delete _parser;
+            _parser = nullptr;
+         }
       }
 
       Parser* copy() const override {
@@ -62,183 +56,82 @@ namespace BeeFishJSON {
       virtual bool read(char c)
       override
       {
-
+         if (_parser == nullptr)
+            _parser = createParser(_params);
+            
          return readIndirect(*_parser, c);
+      }
+      
+      virtual LoadOnDemand createJSON(void* params) {
+         return LoadOnDemand(_JSON, params);
       }
       
       virtual bool onundefined(Parser* parser)
       {
-         this->_variable =
-            new Variable();
          return true;
       }
       
       virtual bool onnull(Parser* parser)
       {
-         this->_variable =
-            new Variable(nullptr);
-                     
          return true;       
       }
       
       virtual bool onboolean(bool value, Parser* parser)
       {
-         this->_variable =
-            new Variable(value);
-                     
          return true;
       }
                   
       virtual bool onnumber(BeeFishScript::Number& value, Parser* parser)
-      {      
-         this->_variable =
-            new Variable(value);
-            
+      {
          return true;
       }
       
       virtual bool oninteger(BeeFishScript::Integer& value, Parser* parser)
       {      
-         this->_variable =
-            new Variable(value);
-            
          return true;
       }
       
       virtual bool onstring(const BeeFishScript::String& value, Parser* parser)
       {      
-         this->_variable =
-            new Variable(value);
-            
          return true;
       }
       
       virtual bool onbeginobject(Parser* parser)
       {      
-      
-         Variable* var =
-            new Variable(BeeFishScript::Object());
-         _stack.push_back(var);
-         
          return true;
       }
       
       virtual bool onobjectkey(Parser* parser)
       {
-         BeeFishScript::String key = parser->value();
-         _keyStack.push_back(key);
          return true;
       }
                
       virtual bool onobjectvalue(Parser* parser)
       {
-         LoadOnDemand* loader =
-            dynamic_cast<LoadOnDemand*>(parser);
-                
-         if (loader)
-            parser = loader->_loadOnDemand;
-                   
-         JSON* json = dynamic_cast<JSON*>(parser);
-                
-         if (json == nullptr ||
-             _keyStack.size() == 0)
-            return false;
-                   
-         BeeFishScript::String key =
-            _keyStack[
-               _keyStack.size() - 1
-            ];
-                   
-         _keyStack.pop_back();
-
-         Variable* var =
-            _stack[_stack.size() - 1];
-                   
-         (*var)[key] = *(json->_variable);
-                
          return true;
-                
       }
                
       virtual bool onendobject(Parser* parser)
       {
-         if (_stack.size() == 0)
-            return false;
-                  
-         Variable* var =
-            _stack[_stack.size() - 1];
-         _stack.pop_back();
-         
-         if (_stack.size() == 0)
-            _variable = var;
-         else
-            delete var;
-         
          return true;
       }
       
       virtual bool onbeginarray(Parser* parser)
       {
-         Variable* var =
-            new Variable(
-               BeeFishScript::Type::ARRAY
-            );
-         _stack.push_back(var);
          return true;
       }
       
       virtual bool onendarray(Parser* parser)
       {
-         if (_stack.size() == 0)
-            return false;
-                  
-         Variable* var =
-            _stack[_stack.size() - 1];
-         _stack.pop_back();
-         if (_stack.size() == 0)
-            _variable = var;
-         else
-            delete var;
          return true;
       }
       
       virtual bool onarrayitem(Parser* parser)
       {
-         if (_stack.size() == 0)
-            return false;
-                  
-         Variable* var =
-            _stack[_stack.size() - 1];
-                     
-         ArrayPointer array = (*var);
-                  
-         LoadOnDemand* load =
-            dynamic_cast
-            <LoadOnDemand*>(parser);
-                  
-         JSON* json = nullptr;
-                  
-         if (load && load->_loadOnDemand)
-         {
-            json =
-               dynamic_cast
-               <JSON*>(load->_loadOnDemand);
-         }
-                  
-         if (json && json->_variable)
-         {
-            array->push_back(*(json->_variable));
-            delete json->_variable;
-            json->_variable = nullptr;
-         }
-         else
-         {
-            array->push_back(undefined);
-         }
          return true;
       }
                
-      Parser* createVariableParser(Parser* params) {
+      virtual Parser* createParser(void* params) {
         
          const auto _undefined =
             Invoke(
@@ -328,10 +221,10 @@ namespace BeeFishJSON {
             );
             
          const auto array =
-            createArrayParser();
+            createArrayParser(params);
             
          const auto object =
-            createObjectParser();
+            createObjectParser(params);
             
          return (
             -blankSpaces and
@@ -347,7 +240,7 @@ namespace BeeFishJSON {
          ).copy();
       }
       
-      And createObjectParser() {
+      And createObjectParser(void* params) {
          auto _openBrace =
          Invoke(
             openBrace,
@@ -366,7 +259,7 @@ namespace BeeFishJSON {
             
          auto objectValue =
          Invoke(
-            LoadOnDemand(_JSON),
+            createJSON(params),
             [this](Parser* parser) {
                return onobjectvalue(parser);
             }
@@ -407,7 +300,7 @@ namespace BeeFishJSON {
       }
       
       
-      And createArrayParser() {
+      And createArrayParser(void* params) {
          const auto _openBracket =
             Invoke(
                openBracket,
@@ -427,7 +320,7 @@ namespace BeeFishJSON {
 
          const auto _arrayItem =
             Invoke(
-               LoadOnDemand(_JSON),
+               createJSON(params),
                [this](Parser* parser)
                {
                   return onarrayitem(parser);
@@ -459,11 +352,9 @@ namespace BeeFishJSON {
 
    };
    
-
-   Parser* _JSON(Parser* params) {
+   Parser* _JSON(void* params) {
       return new JSON(params);
    }
-   
    
 
 }

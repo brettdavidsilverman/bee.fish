@@ -4,7 +4,7 @@
 #include <thread>
 #include <stdlib.h>
 #include "JSON.hpp"
-
+#include "JSONVariable.hpp"
 namespace BeeFishJSON {
  
    using namespace BeeFishMisc;
@@ -506,7 +506,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing undefined: " << flush;
-          JSON json;
+          JSONVariable json;
           json.read("undefined");
           json.eof();
           Variable var = *(json._variable);
@@ -521,7 +521,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing null: " << flush;
-          JSON json;
+          JSONVariable json;
           json.read("null");
           json.eof();
           Variable var = *(json._variable);
@@ -537,7 +537,7 @@ namespace BeeFishJSON {
       {
           cout << "\tParsing Number: " << flush;
 
-          JSON json;
+          JSONVariable json;
           json.read("1.23");
           json.eof();
           
@@ -554,7 +554,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing Integer: " << flush;
-          JSON json;
+          JSONVariable json;
           json.read("1234567890");
           json.eof();
           Variable& var = *(json._variable);
@@ -571,7 +571,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing String: " << flush;
-          JSON json;
+          JSONVariable json;
           json.read("\"Bee Silverman\"");
           json.eof();
           Variable var = *(json._variable);
@@ -586,7 +586,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing Object: " << flush;
-          JSON json;
+          JSONVariable json;
           json.read("{\"name\": \"Bee\"}");
           json.eof();
           Variable var = *(json._variable);
@@ -602,7 +602,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing Array: " << flush;
-          JSON json;
+          JSONVariable json;
           json.read("[\"name\", \"Bee\"]");
           json.eof();
           
@@ -626,7 +626,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing Complex Object: " << flush;
-          JSON json;
+          JSONVariable json;
           json.read("{\"id\": \"007\", \"name\": {\"first\": \"Bee\", \"last\": \"Silverman\"}}");
           json.eof();
           if (json._result != true) {

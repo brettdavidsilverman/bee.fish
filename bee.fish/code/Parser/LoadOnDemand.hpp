@@ -16,16 +16,15 @@ namespace BeeFishParser {
    public:
       Parser* _loadOnDemand = nullptr;
    public:
-      typedef std::function<Parser*(Parser*)> Function;
-      //typedef Parser*(*Function)(Parser*);
+      typedef std::function<Parser*(void*)> Function;
    protected:
       const Function _function;
-      Parser* _params = nullptr;
+      void* _params = nullptr;
    public:
 
       using Parser::read;
       
-      LoadOnDemand(Function function, Parser* params = nullptr) :
+      LoadOnDemand(Function function, void* params = nullptr) :
          _function(function),
          _params(params)
       {

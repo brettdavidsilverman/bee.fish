@@ -4,7 +4,7 @@
 #include "Miscellaneous/Miscellaneous.hpp"
 #include "Parser/Parser.hpp"
 #include "Parser/Test.hpp"
-#include "JSON/JSON.hpp"
+#include "JSON/JSONVariable.hpp"
 #include "Test.hpp"
 
 
@@ -48,7 +48,7 @@ int main(int argc, const char* argv[]) {
 
    std::optional<bool> result;
    
-   JSON* parser = new JSON();
+   JSONVariable* parser = new JSONVariable();
 
    result =
       BeeFishApache2::testParser(parser);
