@@ -367,13 +367,13 @@ namespace BeeFishWeb {
       }
 
       
-      static Parser* loadBody(Parser* params) {
+      static Parser* loadBody(void* params) {
          
          if (!params)
             throw logic_error("WebRequest::loadBody invalid params");
 
          WebRequest* request =
-            dynamic_cast<WebRequest*>(params);
+            (WebRequest*)(params);
 
          Parser* body = request->createBody();
 
