@@ -4,7 +4,9 @@
 #include <thread>
 #include <stdlib.h>
 #include "JSON.hpp"
-#include "JSONVariable.hpp"
+#include "JSON2Variable.hpp"
+#include "JSON2Path.hpp"
+
 namespace BeeFishJSON {
  
    using namespace BeeFishMisc;
@@ -19,6 +21,7 @@ namespace BeeFishJSON {
    bool testUnicode();
    bool testVariables();
    bool testIntegers();
+   bool testPath();
    
    inline bool test() {
       using namespace std;
@@ -55,6 +58,9 @@ namespace BeeFishJSON {
       success = success &&
          testVariables();
 
+      success = success &&
+         testPath();
+         
       if (success)
          cout << "JSON tests pass" << endl;
       else
@@ -506,7 +512,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing undefined: " << flush;
-          JSONVariable json;
+          JSON2Variable json;
           json.read("undefined");
           json.eof();
           Variable var = *(json._variable);
@@ -521,7 +527,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing null: " << flush;
-          JSONVariable json;
+          JSON2Variable json;
           json.read("null");
           json.eof();
           Variable var = *(json._variable);
@@ -537,7 +543,7 @@ namespace BeeFishJSON {
       {
           cout << "\tParsing Number: " << flush;
 
-          JSONVariable json;
+          JSON2Variable json;
           json.read("1.23");
           json.eof();
           
@@ -554,7 +560,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing Integer: " << flush;
-          JSONVariable json;
+          JSON2Variable json;
           json.read("1234567890");
           json.eof();
           Variable& var = *(json._variable);
@@ -571,7 +577,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing String: " << flush;
-          JSONVariable json;
+          JSON2Variable json;
           json.read("\"Bee Silverman\"");
           json.eof();
           Variable var = *(json._variable);
@@ -586,7 +592,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing Object: " << flush;
-          JSONVariable json;
+          JSON2Variable json;
           json.read("{\"name\": \"Bee\"}");
           json.eof();
           Variable var = *(json._variable);
@@ -602,7 +608,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing Array: " << flush;
-          JSONVariable json;
+          JSON2Variable json;
           json.read("[\"name\", \"Bee\"]");
           json.eof();
           
@@ -626,7 +632,7 @@ namespace BeeFishJSON {
       if (success)
       {
           cout << "\tParsing Complex Object: " << flush;
-          JSONVariable json;
+          JSON2Variable json;
           json.read("{\"id\": \"007\", \"name\": {\"first\": \"Bee\", \"last\": \"Silverman\"}}");
           json.eof();
           if (json._result != true) {
@@ -651,6 +657,50 @@ namespace BeeFishJSON {
       return success;
    }
    
+   inline bool testPath()
+   {
+      using namespace std;
+
+      cout << "Testing path" << endl;
+
+      bool success = true;
+      Database database;
+      Path path(database);
+      JSON2Path parser(database);
+      
+      if (success)
+      {
+         
+         parser.read("\"Hello World\"");
+         
+         cout << "\tParse string ";
+         success = success &&
+            parser._result == true;
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         
+         cout << "\tIndexed strings ";
+         
+         success = success &&
+            path.contains(Type::STRING);
+            
+         BeeFishMisc::outputSuccess(success);
+
+      }
+      
+      if (success) {
+         path = path[Type::STRING];
+         Variable var = path.getData();
+         success = testValue("Hello World", var._value._string);
+      }
+      
+      
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+   }
    
 }
 

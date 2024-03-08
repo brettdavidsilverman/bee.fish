@@ -4,7 +4,8 @@
 #include "Miscellaneous/Miscellaneous.hpp"
 #include "Parser/Parser.hpp"
 #include "Parser/Test.hpp"
-#include "JSON/JSONVariable.hpp"
+#include "JSON/JSON2Variable.hpp"
+#include "JSON/JSON2Path.hpp"
 #include "Test.hpp"
 
 
@@ -43,20 +44,17 @@ int main(int argc, const char* argv[]) {
             
       return 0;
    }
+   
 
 
-
+   Database database;
+   
    std::optional<bool> result;
    
-   JSONVariable* parser = new JSONVariable();
+   JSON2Path* parser = new JSON2Path(database);
 
    result =
       BeeFishApache2::testParser(parser);
-
-   Variable var;
-   if (parser->_variable) {
-      var = *(parser->_variable);
-   }
   
    int returnCode = 0;
 
@@ -70,9 +68,13 @@ int main(int argc, const char* argv[]) {
       cout << "Insufficient data";
       returnCode = 3;
    }
-   else
-      cout << var << endl;
+   else {
+      cout << "Stored in database" << endl;
       
+      //Path2JSON start(database);
+      cout << "undefined" << endl;
+   }
+   
    delete parser;
    
    return returnCode;

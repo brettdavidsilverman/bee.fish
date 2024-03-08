@@ -1,14 +1,13 @@
-#ifndef BEE_FISH__JSON_VARIABLE_HPP
-#define BEE_FISH__JSON_VARIABLE_HPP
+#ifndef BEE_FISH__JSON_2_VARIABLE_HPP
+#define BEE_FISH__JSON_2_VARIABLE_HPP
 
 #include "JSON.hpp"
-#include "JSONVariable.hpp"
 
 namespace BeeFishJSON {
    using namespace BeeFishParser;
    using namespace BeeFishScript;
 
-   class JSONVariable : public JSON
+   class JSON2Variable : public JSON
    {
    protected:
       vector<Variable*> _stack;
@@ -16,12 +15,12 @@ namespace BeeFishJSON {
    public:
       Variable* _variable {nullptr};
     
-      JSONVariable(void* params = nullptr)
+      JSON2Variable(void* params = nullptr)
          : JSON(params)
       {
       }
 
-      virtual ~JSONVariable()
+      virtual ~JSON2Variable()
       {
          if (_variable) {
             delete _variable;
@@ -29,17 +28,17 @@ namespace BeeFishJSON {
          }
       }
 
-      JSONVariable(const JSONVariable& source) :
+      JSON2Variable(const JSON2Variable& source) :
          JSON(source)
       {
       }
 
       static Parser* _JSONVariable(void* params) {
-         return new JSONVariable(params);
+         return new JSON2Variable(params);
       }
    
       Parser* copy() const override {
-         return new JSONVariable(*this);
+         return new JSON2Variable(*this);
       }
 
       virtual LoadOnDemand createJSON(void* params) {
@@ -118,8 +117,8 @@ namespace BeeFishJSON {
          if (loader)
             parser = loader->_loadOnDemand;
                    
-         JSONVariable* json =
-            dynamic_cast<JSONVariable*>(parser);
+         JSON2Variable* json =
+            dynamic_cast<JSON2Variable*>(parser);
                 
          if (json == nullptr ||
              _keyStack.size() == 0)
@@ -197,13 +196,13 @@ namespace BeeFishJSON {
             dynamic_cast
             <LoadOnDemand*>(parser);
                   
-         JSONVariable* json = nullptr;
+         JSON2Variable* json = nullptr;
                   
          if (load && load->_loadOnDemand)
          {
             json =
                dynamic_cast
-               <JSONVariable*>(load->_loadOnDemand);
+               <JSON2Variable*>(load->_loadOnDemand);
          }
                   
          if (json && json->_variable)

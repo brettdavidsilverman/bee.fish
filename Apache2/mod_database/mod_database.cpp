@@ -48,7 +48,8 @@
 #include "Parser/Parser.hpp"
 
 #include "parseURI.hpp"
-#include "JSON/JSONVariable.hpp"
+#include "JSON/JSON2Variable.hpp"
+#include "JSON/JSON2Path.hpp"
 
 using namespace BeeFishDatabase;
 using namespace BeeFishWebServer;
@@ -129,7 +130,7 @@ static bool sendDocument(Path path, request_rec *r)
    );
    
    
-   JSONVariable json;
+   JSON2Variable json;
    
    string posted;
    Size pageIndex;
@@ -166,7 +167,7 @@ static bool sendDocument(Path path, request_rec *r)
 
 
 static Variable readJSON(Path path, request_rec *r) {
-   JSON json;
+   JSON2Path json(database);
    bool isOk = true;
    string posted;
    int pageSize = getpagesize();
@@ -182,8 +183,9 @@ static Variable readJSON(Path path, request_rec *r) {
       {
               
          while (
-                 (dataBytesRead = ap_get_client_block(r, buffer, pageSize))
-                  > 0)
+            (dataBytesRead =
+             ap_get_client_block(r, buffer, pageSize))
+             > 0)
          {
             isOk =
                json.read(buffer, dataBytesRead);

@@ -5,7 +5,7 @@
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../Parser/Parser.hpp"
 #include "../Parser/Test.hpp"
-#include "JSONVariable.hpp"
+#include "JSON2Variable.hpp"
 #include "Test.hpp"
 #include "Config.hpp"
 
