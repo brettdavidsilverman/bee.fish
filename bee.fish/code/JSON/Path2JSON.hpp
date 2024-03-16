@@ -27,15 +27,22 @@ namespace BeeFishJSON
       
       friend ostream& operator << (ostream& out, Path2JSON& json)
       {
-         if (json.isDeadEnd())
-            return out;
-             
+         json.write(out, 0);
+         
+         return out;
+      }
+      
+      virtual void write(ostream& out, Size tabs)
+      {
+         if (isDeadEnd())
+            return;
+     
          Stack stack;
          Type type = 
-            MinMaxPath(json)
+            MinMaxPath(*this)
             .value<Type>();
             
-         MinMaxPath path = json[type];
+         MinMaxPath path = (*this)[type];
             
          switch (type) {
          case Type::UNDEFINED:
@@ -75,7 +82,7 @@ namespace BeeFishJSON
                   if (path.contains(index)) {
                       Path2JSON item =
                          path[index];
-                     out << item;
+                     item.write(out, tabs + 1);
                   }
                      
                   if (index < max)
@@ -92,7 +99,6 @@ namespace BeeFishJSON
             throw std::logic_error("JSON::Variable::Value::copy constructor");
          }
           
-         return out;
       }
        
     };
