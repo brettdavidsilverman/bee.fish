@@ -97,7 +97,11 @@ namespace BeeFishDatabase {
       {
          Path path(*this);
          
+         cerr << "PATH: " << _index << "[" << key << "] -> ";
+         
          path << key;
+         
+         cerr << path._index << endl;
          
          return path;
       }
@@ -466,7 +470,7 @@ namespace BeeFishDatabase {
             BeeFishScript::Object{};
 
          variable["index"] =
-            (BeeFishScript::Number)path._index;
+            (BeeFishScript::Integer)path._index;
 
 
          if (path._database) {

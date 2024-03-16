@@ -6,8 +6,9 @@
 #include "Parser/Test.hpp"
 #include "JSON/JSON2Variable.hpp"
 #include "JSON/JSON2Path.hpp"
+#include "JSON/Path2JSON.hpp"
 #include "Test.hpp"
-
+#include "JSON/Test.hpp"
 
 using namespace std;
 using namespace BeeFishMisc;
@@ -19,6 +20,7 @@ std::optional<bool> testParser(Parser* parser);
 
 int main(int argc, const char* argv[]) {
    
+     
    cout << "apache2.mod_database"
            << endl
         << "C++ run time: "
@@ -38,6 +40,10 @@ int main(int argc, const char* argv[]) {
 
    if (hasArg(argc, argv, "-test") >= 0)
    {
+      cout << "Testing json..." << endl << endl;
+      if (!BeeFishJSON::test())
+         return 1;
+         
       cout << "Testing apache2..." << endl << endl;
       if (!BeeFishApache2::test())
          return 1;
@@ -71,8 +77,8 @@ int main(int argc, const char* argv[]) {
    else {
       cout << "Stored in database" << endl;
       
-      //Path2JSON start(database);
-      cout << "undefined" << endl;
+      Path2JSON start(database);
+      cout << start << endl;
    }
    
    delete parser;

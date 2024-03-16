@@ -10,72 +10,137 @@ namespace BeeFishJSON {
    class JSON2Path : public JSON
    {
    protected:
+      
+      
       Path _start;
+      vector<Path>* _pathStack;
+      vector<bool>* _containerStack;
+      bool _deleteStack = false;
       
-      
-      class StackPath : public Path
+      virtual void setVariable(const Variable& var)
       {
-      public:
-          StackPath(const Path& path)
-          : Path(path)
-          {
-          }
-          
-          virtual void setVariable(const Variable& var)
-          {
-              (*this)[var._type].setData(var);
-          }
-      };
-      
-      class StackArrayPath : public StackPath
-      {
-      public:
-          StackArrayPath(const Path& path)
-          : StackPath(path)
-          {
-          }
-          
-          virtual void setVariable(const Variable& var)
-          {
-             Path path = *this;
-             MinMaxPath maxPath = path;
-             Size next;
-             if (maxPath.isDeadEnd())
-                next = 0;
-             else
-                next = maxPath.max<Size>() + 1;
+         bool isArrayContainer = topContainer();
          
-             StackPath stackPath =
-                Path((*this)[next]);
-             stackPath.setVariable(var);
-          }
-      };
+         if (isArrayContainer)
+            setArrayVariable(var);
+         else
+            setObjectVariable(var);
+            
+        // pop_back();
+         
+      }
       
-      vector<StackPath*> _stack;
-     
+      virtual void setObjectVariable(const Variable& var)
+      {
+         cerr << "setObjectVariable: " << var << endl;
+         Path path =
+            topPath()[var._type];
+
+         switch (var._type)
+         {
+            case Type::UNDEFINED:
+               path["undefined"];
+               break;
+            case Type::NULL_:
+               path["null"];
+               break;
+            case Type::BOOLEAN:
+               path
+                  [var._value._boolean
+                     ? "true" : "false"];
+               break;
+            case Type::INTEGER:
+               path
+                  [var._value._integer];
+               break;
+            case Type::NUMBER:
+            {
+               path.setData(
+                  var._value._number
+               );
+                    
+               break;
+            }
+            case Type::STRING:
+               path[var._value._string];
+               break;
+            case Type::ARRAY:
+               push_back_path(path);
+               push_back_container(true);
+               break;
+            //case Type::OBJECT:
+            default:
+               throw std::logic_error("JSON2Path");
+         }
+         
+         
+             
+      }
+      
+      virtual void setArrayVariable(const Variable& var)
+      {
+         cerr << "setArrayVariable: " << var << endl;
+
+         MinMaxPath path =
+            topPath();
+            
+         Size next;
+             
+         if (path.isDeadEnd())
+            next = 0;
+         else
+            next = path.max<Size>()
+               + 1;
+         cerr << "Next Array Index: " << next << endl;
+         path = path[next];
+         
+         push_back_path(path);
+         push_back_container(false);
+         
+         setVariable(var);
+         
+         
+      }
+          
    public:
     
-      JSON2Path(Path start, void* params = nullptr)
-         : JSON(params),
+      JSON2Path(Path start)
+         : JSON(),
          _start(start)
       {
-         _stack.push_back(new StackPath(_start));
+         cerr << "****New Stack" << endl;
+         _pathStack = new vector<Path>();
+         _containerStack = new vector<bool>();
+         _deleteStack = true;
+         push_back_path(_start);
+         push_back_container(false);
+      }
+      
+      JSON2Path(Database& database) :
+          JSON2Path(Path(database))
+      {
+      }
+
+      JSON2Path(const JSON2Path& source) :
+         JSON(source),
+         _start(source._start),
+         _pathStack(source._pathStack),
+         _containerStack(source._containerStack)
+      {
       }
 
       virtual ~JSON2Path()
       {
-          for (auto path : _stack)
-             delete path;
+         if (_deleteStack) {
+            pop_back_path();
+            cerr << "****Delete stack: " << _pathStack->size() << endl;
+            delete _pathStack;
+            delete _containerStack;
+         }
       }
-
-      JSON2Path(const JSON2Path& source) :
-         JSON(source)
-      {
-          _stack.push_back(new StackPath(_start));
-      }
-
-      static Parser* _JSONPath(void* params) {
-         return new JSON2Path(*(Path*)params, params);
+      
+      static Parser* _JSON2Path(void* params) {
+         return new JSON2Path(*(JSON2Path*)params);
       }
    
       Parser* copy() const override {
@@ -83,32 +148,61 @@ namespace BeeFishJSON {
       }
 
       virtual LoadOnDemand createJSON(void* params) {
-         return LoadOnDemand(_JSONPath, &_start);
+         return LoadOnDemand(_JSON2Path, this);
       }
       
-      StackPath* top() {
-         assert(_stack.size() > 0);
+      Path topPath() {
+         return 
+            (*_pathStack)[_pathStack->size() - 1];
+      }
+      
+      bool topContainer() {
          return
-            _stack[_stack.size() - 1];
+            (*_containerStack)
+            [_containerStack->size() - 1];
+      }
+      
+      virtual void push_back_path(Path path)
+      {
+         _pathStack->push_back(path);
+         cerr << "push_back path: " << _pathStack->size() << endl;
+      }
+      
+      virtual void push_back_container(bool isArrayContainer)
+      {
+         _containerStack->push_back(isArrayContainer);
+         cerr << "push_back container: " << 
+            (isArrayContainer ? "array" : "object")
+             << ": " << _containerStack->size() << endl;
+      }
+      
+      virtual void pop_back_path()
+      {
+         _pathStack->pop_back();
+         cerr << "pop_back_path: " << _pathStack->size() << endl;
+      }
+      
+      virtual void pop_back_container()
+      {
+         _containerStack->pop_back();
+         cerr << "pop_back_container: " << _containerStack->size() << endl;
       }
       
       virtual bool onundefined(Parser* parser)
       {
-         top()->setVariable(undefined);
+         setVariable(undefined);
          return true;
       }
       
       virtual bool onnull(Parser* parser)
       {
-         top()->setVariable(
-            Variable(nullptr)
-         ); 
+         setVariable(null);
          return true;       
       }
       
       virtual bool onboolean(bool value, Parser* parser)
       {
-         top()->setVariable(
+         setVariable(
             Variable(value)
          );
          return true;
@@ -116,7 +210,7 @@ namespace BeeFishJSON {
                   
       virtual bool onnumber(BeeFishScript::Number& value, Parser* parser)
       {      
-         top()->setVariable(
+         setVariable(
             Variable(value)
          );
          
@@ -125,7 +219,7 @@ namespace BeeFishJSON {
       
       virtual bool oninteger(BeeFishScript::Integer& value, Parser* parser)
       {      
-         top()->setVariable(
+         setVariable(
             Variable(value)
          );
          return true;
@@ -133,84 +227,73 @@ namespace BeeFishJSON {
       
       virtual bool onstring(const BeeFishScript::String& value, Parser* parser)
       {      
-         top()->setVariable(
+         setVariable(
             Variable(value)
          );
-         return true;
-      }
-      
-      virtual bool onbeginobject(Parser* parser)
-      {      
-      
-         StackPath* object = new StackPath(
-            (*top())[Type::OBJECT]
-         );
-         _stack.push_back(object);
-         
-         return true;
-      }
-      
-      virtual bool onobjectkey(Parser* parser)
-      {
-         BeeFishScript::String key = parser->value();
-         StackPath* path = new StackPath(
-            (*top())[key]
-         );
-         _stack.push_back(path);
-         return true;
-      }
-               
-      virtual bool onobjectvalue(Parser* parser)
-      {
-         Path* path = top();
-         _stack.pop_back();
-         delete path;
-         return true;
-         
-      }
-               
-      virtual bool onendobject(Parser* parser)
-      {
-         if (_stack.size() == 0)
-            return false;
-                  
-         Path* path = top();
-         
-         _stack.pop_back();
-         
-         delete path;
          
          return true;
       }
       
       virtual bool onbeginarray(Parser* parser)
       {
-         StackPath* array = new StackArrayPath(
-            (*top())[Type::ARRAY]
-         );
-         _stack.push_back(array);
+         cerr << "onbeginarray" << endl;
+         
+     
+         setVariable(Variable(Type::ARRAY));
+
+         
+         
          return true;
       }
       
       virtual bool onendarray(Parser* parser)
       {
-         if (_stack.size() == 0)
-            return false;
-         Path* path = top();
-         _stack.pop_back();
-         delete path;
+         cerr << "onendarray" << endl;
+         pop_back_path();
+         pop_back_container();
          return true;
       }
       
       virtual bool onarrayitem(Parser* parser)
       {
           
-         if (_stack.size() == 0)
-            return false;
-         
+         pop_back_path();
+         pop_back_container();
          return true;
         
       }
+      
+      virtual bool onbeginobject(Parser* parser)
+      {
+         Path path =
+            topPath()[Type::OBJECT];
+         push_back_path(path);
+         return true;
+      }
+      
+      virtual bool onobjectkey(Parser* parser)
+      {
+         BeeFishScript::String key = parser->value();
+         Path path =
+            topPath()[key];
+         push_back_path(path);
+         return true;
+      }
+               
+      virtual bool onobjectvalue(Parser* parser)
+      {
+       //  pop_back();
+         return true;
+         
+      }
+               
+      virtual bool onendobject(Parser* parser)
+      {
+         pop_back_path();
+         pop_back_container();
+         return true;
+      }
+      
       
    };
 

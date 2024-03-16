@@ -20,7 +20,6 @@ namespace BeeFishScript {
    class Variable;
 
    typedef nullptr_t Null;
-   typedef Null null;
    typedef bool Boolean; 
    typedef int64_t Integer;
    typedef double Number;
@@ -660,6 +659,7 @@ namespace BeeFishScript {
 
    }
 
+   const Variable null(Type::NULL_);
 }
 
 #endif

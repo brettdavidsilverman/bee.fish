@@ -50,7 +50,7 @@
 #include "parseURI.hpp"
 #include "JSON/JSON2Variable.hpp"
 #include "JSON/JSON2Path.hpp"
-
+#include "JSON/Path2JSON.hpp"
 using namespace BeeFishDatabase;
 using namespace BeeFishWebServer;
 using namespace BeeFishJSON;
@@ -59,8 +59,8 @@ using namespace std;
 
 static int counter = 0;
 static std::ofstream debug;
-static Variable readJSON(Path path, request_rec *r);
-static bool sendDocument(Path path, request_rec *r);
+static bool inputJSON(Path path, request_rec *r);
+static bool outputJSON(Path path, request_rec *r);
 
 /* The sample content handler */
 static int database_handler(request_rec *r)
@@ -82,12 +82,12 @@ static int database_handler(request_rec *r)
            
            return DECLINED;
         }
-        else if (path.contains("document")) {
-
-           if (sendDocument(path["document"], r))
+        else if (path.contains("document") &&
+                 path.contains("index"))
+        {
+           if (outputJSON(path, r))
               return OK;
            
-           return HTTP_INTERNAL_SERVER_ERROR;
         }
         
         return HTTP_NOT_FOUND; // NotFound.xhtml
@@ -96,21 +96,8 @@ static int database_handler(request_rec *r)
     else if (!strcmp(r->method, "POST")) {
         
         
-       Variable result =
-          readJSON(path, r);
-       
-       stringstream stream;
-       stream << result;
-       
-       ap_set_content_type(
-          r, "application/json; charset=utf-8"
-       );
-       
-       string output = stream.str();
-       
-       ap_rputs(output.c_str(), r);
-       
-       return OK;
+       if (inputJSON(path, r))
+          return OK;
 
     }
     
@@ -123,14 +110,19 @@ static int database_handler(request_rec *r)
     return HTTP_INTERNAL_SERVER_ERROR;
 }
 
-static bool sendDocument(Path path, request_rec *r)
+static bool outputJSON(Path path, request_rec *r)
 {
    ap_set_content_type(
       r, "application/json; charset=utf-8"
    );
-   
-   
-   JSON2Variable json;
+
+#warning "Need to replace stringstream with buffered ap_rwrite"
+
+   Path2JSON json = path["index"];
+   stringstream stream;
+   stream << json;
+
+   /*
    
    string posted;
    Size pageIndex;
@@ -151,6 +143,8 @@ static bool sendDocument(Path path, request_rec *r)
    // Write variable to output
    stringstream stream;
    stream << *(json._variable);
+   */
+   
    string output = stream.str();
    
    if ( ap_rwrite(
@@ -166,15 +160,16 @@ static bool sendDocument(Path path, request_rec *r)
 }
 
 
-static Variable readJSON(Path path, request_rec *r) {
-   JSON2Path json(database);
+static bool inputJSON(Path path, request_rec *r) {
+   
    bool isOk = true;
    string posted;
    int pageSize = getpagesize();
    char buffer[pageSize];
    Size pageIndex = 0;
+   
+   JSON2Path index = path["index"];
    Path document = path["document"];
-   Path index = path["index"];
    
    int ret_code = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR);
    if (ret_code == OK) {
@@ -188,7 +183,7 @@ static Variable readJSON(Path path, request_rec *r) {
              > 0)
          {
             isOk =
-               json.read(buffer, dataBytesRead);
+               index.read(buffer, dataBytesRead);
                     
             if (!isOk)
                break;
@@ -204,28 +199,44 @@ static Variable readJSON(Path path, request_rec *r) {
    
    if (isOk)
    {
-      json.eof();
+      index.eof();
    }
            
-        
+   Variable result;
+   
    if (isOk &&
-       json._result == true)
+       index._result == true)
    {
       
-      return
+      result =
          BeeFishScript::String{
             "Success"
          };
    }
-   
-   Variable error =
-      json.getErrorMessage();
+   else {
+      Variable error =
+         index.getErrorMessage();
       
-   return
-      BeeFishScript::Object{
-         {"error", error}
-      };
+      result =
+         BeeFishScript::Object{
+            {"error", error}
+         };
+         
+      isOk = false;
+   }
    
+   stringstream stream;
+   stream << result;
+       
+   ap_set_content_type(
+      r, "application/json; charset=utf-8"
+   );
+       
+   string output = stream.str();
+       
+   ap_rputs(output.c_str(), r);
+       
+   return isOk;
 }
 
 static void database_register_hooks(apr_pool_t *p)
