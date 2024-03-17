@@ -27,7 +27,7 @@ namespace BeeFishWebServer {
    public:
       ApacheStream(request_rec * r) : std::ostream(this)
       {
-         _pageSize = getpagesize();
+         _pageSize = getPageSize();
          _buffer = new char[_pageSize];
          _count = 0;
          _r = r;

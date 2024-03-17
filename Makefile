@@ -1,7 +1,6 @@
 all:
-	cd bee.fish && make clean
-	cd bee.fish && make $(DEBUG)
-	cd bee.fish && make test
+	cd bee.fish && make clean $(DEBUG) test
+	#tail /home/bee/debug.txt -f &
 	cd Apache2/mod_database && sudo make $(DEBUG) clean install restart test
 	
 debug:	clean

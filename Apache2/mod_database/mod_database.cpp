@@ -52,24 +52,34 @@
 #include "JSON/Path2JSON.hpp"
 #include "ParseURI.hpp"
 #include "ApacheStream.hpp"
+#include "Miscellaneous/Debug.hpp"
 
 using namespace BeeFishDatabase;
 using namespace BeeFishWebServer;
 using namespace BeeFishJSON;
+using namespace BeeFishMisc;
 
 using namespace std;
 
 static int counter = 0;
-static std::ofstream debug;
+
 static bool inputJSON(Path path, request_rec *r);
 static bool outputJSON(Path path, request_rec *r);
 static bool outputDocument(Path path, request_rec *r);
-
+static Debug debug;
+    
 /* The sample content handler */
 static int database_handler(request_rec *r)
 {
-    debug.open("/home/bee/debug.txt", std::ios_base::app);
-    debug.close();
+    
+    debug << now() << " " 
+          << r->method << " "
+          << r->uri;
+    
+    if (r->args)
+       debug << "?" << r->args;
+       
+    debug << endl;
     
     Path path = parseURI(r->uri);
     
@@ -89,8 +99,6 @@ static int database_handler(request_rec *r)
         else if (path.contains("document") &&
                  path.contains("index"))
         {
-        
-           
            if (r->args) {
               std::string arguments(r->args);
               if (arguments == "document")
@@ -167,38 +175,68 @@ static bool inputJSON(Path path, request_rec *r) {
    
    bool isOk = true;
    string posted;
-   int pageSize = getpagesize();
+   int pageSize = getPageSize();
    char buffer[pageSize];
    Size pageIndex = 0;
    path.clear();
    JSON2Path index = path["index"];
-   Path document = path["document"];
+   MinMaxPath document = path["document"];
+   
+   debug << now()
+         << " Uploading document "
+         << endl;
    
    int ret_code = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR);
    if (ret_code == OK) {
       long dataBytesRead;
       if (ap_should_client_block(r))
       {
-              
          while (
             (dataBytesRead =
              ap_get_client_block(r, buffer, pageSize))
              > 0)
          {
-            isOk =
-               index.read(buffer, dataBytesRead);
+            //isOk =
+            //   index.read(buffer, dataBytesRead);
                     
-            if (!isOk)
-               break;
+            //if (!isOk)
+            //   break;
 
             posted =
                string(buffer, dataBytesRead);
                
             document[pageIndex++].setData(posted);
-            
+          
          }
       }
    }
+   
+   debug << now()
+         << " Parsing document "
+         << endl;
+   
+   Size maxPageIndex = pageIndex;
+   
+   Stack stack;
+   while (document.next(stack, pageIndex))
+   {
+      document[pageIndex]
+         .getData(posted);
+           
+      float percentage =
+         ((float)pageIndex / (float)maxPageIndex) * 100.0;
+         
+      debug << now() << " "
+            << percentage << "%" 
+            << endl;
+      
+      isOk =
+         index.read(posted);
+                    
+      if (!isOk)
+         break;
+   }
+   
    
    if (isOk)
    {
@@ -210,6 +248,9 @@ static bool inputJSON(Path path, request_rec *r) {
    if (isOk &&
        index._result == true)
    {
+      debug << now()
+            << " Document Ok"
+            << endl;
       
       result =
          BeeFishScript::String{
@@ -217,8 +258,14 @@ static bool inputJSON(Path path, request_rec *r) {
          };
    }
    else {
+       
       Variable error =
          index.getErrorMessage();
+         
+      debug << now()
+            << " Document failed "
+            << error
+            << endl;
       
       result =
          BeeFishScript::Object{
@@ -228,17 +275,16 @@ static bool inputJSON(Path path, request_rec *r) {
       isOk = false;
    }
    
-   stringstream stream;
-   stream << result;
-       
    ap_set_content_type(
       r, "application/json; charset=utf-8"
    );
-       
-   string output = stream.str();
-       
-   ap_rputs(output.c_str(), r);
-       
+   
+   ApacheStream stream(r);
+   
+   stream << result;
+   stream.flush();
+   
+   
    return isOk;
 }
 

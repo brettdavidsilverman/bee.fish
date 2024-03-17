@@ -215,7 +215,7 @@ namespace BeeFishWeb {
       virtual bool read()
       {
          ssize_t size;
-         size_t bufferSize = getpagesize();
+         size_t bufferSize = getPageSize();
          char* buffer = new char[bufferSize];
          bool success = true;
          _result = nullopt;

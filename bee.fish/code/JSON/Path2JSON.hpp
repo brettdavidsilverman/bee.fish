@@ -68,9 +68,13 @@ namespace BeeFishJSON
          }
          case Type::STRING:
          {
-            out << "\"" << escape(
-               path.value<BeeFishScript::String>()
-            ) << "\"";
+            BeeFishScript::String
+              string = (BeeFishScript::String)path;
+              
+            out << "\""
+                   << escape(string)
+                << "\"";
+            
             break;
          }
          case Type::ARRAY:
@@ -136,8 +140,6 @@ namespace BeeFishJSON
                MinMaxPath keys = path;
                while(keys.next<BeeFishScript::String>(stack, key))
                {
-                 // cerr << "PATH2JSON: " << key << endl;
-                  
                   out << tabs(tabCount + 1)
                       << "\""
                          << escapeString(key)

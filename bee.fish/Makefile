@@ -42,6 +42,7 @@ clean:
 	rm -f -r build
 	rm -f large2a.json
 	rm -f large2b.json
+	rm -f large2.json
 
 debug:	clean
 debug:	DEBUG = debug

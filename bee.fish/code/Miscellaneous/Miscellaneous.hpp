@@ -87,6 +87,14 @@ namespace BeeFishMisc {
    inline size_t getPageSize() {
       return PAGE_SIZE;
    }
+   
+   std::string now() {
+      time_t t = time(0);
+      char buffer[9] = {0};
+
+      strftime(buffer, 9, "%H:%M:%S", localtime(&t));
+      return std::string(buffer);
+   }
 
    
    

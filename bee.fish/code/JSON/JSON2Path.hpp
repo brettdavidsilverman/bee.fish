@@ -30,7 +30,6 @@ namespace BeeFishJSON {
       
       virtual void setObjectVariable(const Variable& var, const std::string& value = "")
       {
-         cerr << "setObjectVariable: " << var._type << ": " << value << endl;
          Path path =
             topPath()[var._type];
 
@@ -60,7 +59,7 @@ namespace BeeFishJSON {
                break;
             }
             case Type::STRING:
-               path[var._value._string];
+               path.setData(var._value._string);
                break;
             case Type::ARRAY:
                push_back_path(path);
@@ -80,8 +79,6 @@ namespace BeeFishJSON {
       
       virtual void setArrayVariable(const Variable& var, const std::string& value = "")
       {
-         cerr << "setArrayVariable: " << var << endl;
-
          MinMaxPath path =
             topPath();
             
@@ -92,7 +89,7 @@ namespace BeeFishJSON {
          else
             next = path.max<Size>()
                + 1;
-         cerr << "Next Array Index: " << next << endl;
+
          path = path[next];
          
          push_back_path(path);
@@ -109,7 +106,6 @@ namespace BeeFishJSON {
          : JSON(),
          _start(start)
       {
-         cerr << "****New Stack" << endl;
          _pathStack = new vector<Path>();
          _containerStack = new vector<bool>();
          _deleteStack = true;
@@ -134,7 +130,6 @@ namespace BeeFishJSON {
       {
          if (_deleteStack) {
             pop_back_path();
-            cerr << "****Delete stack: " << _pathStack->size() << endl;
             delete _pathStack;
             delete _containerStack;
          }
@@ -166,27 +161,21 @@ namespace BeeFishJSON {
       virtual void push_back_path(Path path)
       {
          _pathStack->push_back(path);
-         //cerr << "push_back path: " << _pathStack->size() << endl;
       }
       
       virtual void push_back_container(bool isArrayContainer)
       {
          _containerStack->push_back(isArrayContainer);
-        // cerr << "push_back container: " << 
-        //    (isArrayContainer ? "array" : "object")
-        //     << ": " << _containerStack->size() << endl;
       }
       
       virtual void pop_back_path()
       {
          _pathStack->pop_back();
-        // cerr << "pop_back_path: " << _pathStack->size() << endl;
       }
       
       virtual void pop_back_container()
       {
          _containerStack->pop_back();
-         //cerr << "pop_back_container: " << _containerStack->size() << endl;
       }
       
       virtual bool onundefined(Parser* parser)
@@ -211,7 +200,6 @@ namespace BeeFishJSON {
                   
       virtual bool onnumber(BeeFishScript::Number& value, Parser* parser)
       {
-         cerr << "onnumber: " << parser->value() << endl;
          setVariable(
             Variable(Type::NUMBER),
             parser->value()
@@ -239,14 +227,12 @@ namespace BeeFishJSON {
       
       virtual bool onbeginarray(Parser* parser)
       {
-         cerr << "onbeginarray" << endl;
          setVariable(Variable(Type::ARRAY));
          return true;
       }
       
       virtual bool onendarray(Parser* parser)
       {
-         cerr << "onendarray" << endl;
          pop_back_path();
          pop_back_container();
          return true;
@@ -263,8 +249,6 @@ namespace BeeFishJSON {
       
       virtual bool onbeginobject(Parser* parser)
       {
-         cerr << "onbeginobject" << endl;
-         
          setVariable(Variable(Type::OBJECT));
          
          return true;
@@ -273,7 +257,6 @@ namespace BeeFishJSON {
       virtual bool onobjectkey(Parser* parser)
       {
          const BeeFishScript::String& key = parser->value();
-         cerr << "onobjectkey " << key << endl;
          
          Path path =
             topPath()[key];
@@ -286,7 +269,6 @@ namespace BeeFishJSON {
                
       virtual bool onobjectvalue(Parser* parser)
       {
-         cerr << "onobjectvalue" << endl;
          pop_back_path();
          pop_back_container();
          Path path = topPath();
@@ -302,7 +284,6 @@ namespace BeeFishJSON {
                
       virtual bool onendobject(Parser* parser)
       {
-         cerr << "onendobject" << endl;
          pop_back_path();
          pop_back_container();
          return true;

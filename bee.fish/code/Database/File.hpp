@@ -9,13 +9,14 @@
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <unistd.h>
-
+#include "../Miscellaneous/Debug.hpp"
 #include "../Size.hpp"
 
 namespace BeeFishDatabase {
 
    using namespace std;
-
+   using namespace BeeFishMisc;
+   
    class File {
    protected:
       FILE* _file = NULL;
@@ -261,9 +262,13 @@ namespace BeeFishDatabase {
             string str = "Couldn't resize file. ";
             str += to_string(newSize) +
                    strerror(errno);
-                   
+            
+            Debug debug;
+            debug << "********" << str << endl;
+         
             throw runtime_error(str);
          }
+         
       }
       
    private:

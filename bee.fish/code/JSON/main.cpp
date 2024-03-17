@@ -6,6 +6,7 @@
 #include "../Parser/Parser.hpp"
 #include "../Parser/Test.hpp"
 #include "JSON2Variable.hpp"
+#include "JSON2Path.hpp"
 #include "Test.hpp"
 #include "Config.hpp"
 
@@ -13,7 +14,7 @@ using namespace std;
 using namespace BeeFishMisc;
 using namespace BeeFishParser;
 using namespace BeeFishJSON;
-
+using namespace BeeFishDatabase;
 
 std::optional<bool> testParser(Parser* parser);
 
@@ -46,7 +47,9 @@ int main(int argc, const char* argv[]) {
 
    std::optional<bool> result;
    
-   JSON* parser = new JSON();
+   Database database;
+   
+   JSON* parser = new JSON2Path(database);
 
    result = testParser(parser);
   
@@ -62,9 +65,10 @@ int main(int argc, const char* argv[]) {
       cout << "Insufficient data";
       returnCode = 3;
    }
-   else
+   else {
       cout << "Valid JSON" << endl;
-      
+   }
+   
    delete parser;
    
    return returnCode;
@@ -73,7 +77,10 @@ int main(int argc, const char* argv[]) {
 
 std::optional<bool> testParser(Parser* parser) {
 
-   cin >> *parser;
+   ifstream in("/home/bee/bee.fish/large.json");
+   in >> *parser;
+   
+   //cin >> *parser;
  
    if (parser->result() == nullopt)
       parser->eof();

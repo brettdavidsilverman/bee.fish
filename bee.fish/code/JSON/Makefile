@@ -36,7 +36,8 @@ run:	$(OUTPUT)
 	$(OUTPUT)
 
 run_time:	$(OUTPUT)
-	time cat $(TEST) | $(OUTPUT)
+	#time cat $(TEST) | $(OUTPUT)
+	time $(OUTPUT)
 
 run_trace:	$(OUTPUT)
 	rm -f trace.txt

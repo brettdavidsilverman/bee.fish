@@ -704,7 +704,8 @@ namespace BeeFishJSON {
          MinMaxPath path(database);
          path = path[Type::STRING];
          BeeFishScript::String value;
-         value = path.value<BeeFishScript::String>();
+         path.getData(value);
+         
          success = testValue("Hello World", value);
       }
       
