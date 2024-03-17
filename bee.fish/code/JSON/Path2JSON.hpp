@@ -98,7 +98,10 @@ namespace BeeFishJSON
                      Path2JSON item =
                         path[index];
                   
-                     item.write(out, tabCount + 1);
+                     item.write(
+                        out,
+                        tabCount
+                     );
                   }
                   
                   if (index < max)
