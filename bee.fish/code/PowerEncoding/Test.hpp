@@ -11,10 +11,13 @@ using namespace BeeFishPowerEncoding;
 
 namespace BeeFishPowerEncoding
 {
-
+   
+   inline bool testCount();
+   
    inline bool testEncodeDecodeCharacter();
    inline bool testEncodeDecodeString();
    inline bool testEncodeDecodeNumber();
+   
    inline bool test() {
    
       bool success = true;
@@ -22,9 +25,12 @@ namespace BeeFishPowerEncoding
       cout << "Test PowerEncoding" << endl;
 
       success = success &&
+         testCount();
+         
+      success = success &&
          testEncodeDecodeCharacter();
 
-     success = success &&
+      success = success &&
          testEncodeDecodeString();
 
       success = success &&
@@ -35,6 +41,28 @@ namespace BeeFishPowerEncoding
       return success;
    }
 
+   inline bool testCount()
+   {
+      cout << "Test Count" << endl;
+      
+      bool success = true;
+      
+      stringstream stream;
+      EncodeToStream encoder(stream, cout);
+      
+      for (int i = 0; i <= 10; ++i)
+      {
+          encoder << i;
+          cout << endl;
+      }
+      
+      success &= (encoder.count() == 0);
+
+      outputSuccess(success);
+
+      return success;
+   }
+   
    inline bool testEncodeDecodeCharacter()
    {
       cout << "Encode/Decode Character " << endl;
@@ -62,7 +90,7 @@ namespace BeeFishPowerEncoding
 
    inline bool testEncodeDecodeString()
    {
-      cout << "\tString " << flush;
+      cout << "Encode/Decode String " << endl;
       bool success = true;
       stringstream stream;
       EncodeToStream encoder(stream, stream);
@@ -73,23 +101,11 @@ namespace BeeFishPowerEncoding
       string _str;
       encoder >> _str;
 
-      long int readCount = encoder.count();
-
-      cout << "\tStrings equal "
-           << (str == _str)
-           << endl
-           << "\t" << _str
-           << endl
-           << "\tWrite Count: "
-           << readCount
-           << endl
-           << "\tFinal Count: "
-           << encoder.count()
-           << endl;
-
-      success &= (str == _str);
+      success &= testValue(str, _str);
+      
+      cout << "\tCount: " << encoder.count() << endl;
       success &= (encoder.count() == 0);
-
+      
       outputSuccess(success);
 
       return success;
@@ -97,20 +113,21 @@ namespace BeeFishPowerEncoding
 
    inline bool testEncodeDecodeNumber()
    {
+      cout << "Encode/Decode Number " << endl;
       bool success = true;
       stringstream stream;
       EncodeToStream encoder(stream, stream);
 
       const unsigned long number = 19750926L;
       encoder << number;
-      cout << endl;
 
       unsigned long value;
       encoder >> value;
-      cout << "Value: " << value << endl;
+      cout << "\tValue: " << value;
       success &= (value == number);
-
-      cout << "Count: " << encoder.count() << endl;
+      outputSuccess(success);
+      
+      cout << "\tCount: " << encoder.count();
       success &= (encoder.count() == 0);
 
       outputSuccess(success);
