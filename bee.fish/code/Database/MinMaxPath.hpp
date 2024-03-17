@@ -50,6 +50,8 @@ namespace BeeFishDatabase {
          Branch branch =
             getBranch(index);
 
+         Size count = stack.count();
+         
          while (!branch.isDeadEnd())
          {
             MinMaxPath path(*this, index);
@@ -59,10 +61,12 @@ namespace BeeFishDatabase {
             if (branch._left) {
                index = branch._left;
                bit = 0;
+               --count;
             }
             else if (branch._right) {
                index = branch._right;
                bit = 1;
+               ++count;
             }
 
             stack.push_back(
@@ -72,7 +76,11 @@ namespace BeeFishDatabase {
                 )
             );
 
+            if (count == 0)
+               break;
+               
             branch = getBranch(index);
+            
          }
       }
 
@@ -86,6 +94,8 @@ namespace BeeFishDatabase {
          Branch branch =
             getBranch(index);
 
+         Size count = stack.count();
+         
          while (!branch.isDeadEnd())
          {
             MinMaxPath path(*this, index);
@@ -95,10 +105,12 @@ namespace BeeFishDatabase {
             if (branch._right) {
                index = branch._right;
                bit = 1;
+               ++count;
             }
             else if (branch._left) {
                index = branch._left;
                bit = 0;
+               --count;
             }
 
             stack.push_back(
@@ -108,6 +120,9 @@ namespace BeeFishDatabase {
                )
             );
 
+            if (count == 0)
+               break;
+               
             branch = getBranch(index);
          }
       
@@ -189,7 +204,9 @@ namespace BeeFishDatabase {
          while (stack.size() && 
                 ( !(branch._left &&
                      branch._right) ||
-                entry._bit == 1) );
+                   entry._bit == 1
+                ) 
+                );
 
          if ( ! (branch._left and
                   branch._right) ||

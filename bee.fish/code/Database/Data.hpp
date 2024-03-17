@@ -54,6 +54,11 @@ namespace BeeFishDatabase {
          return _size;
       }
 
+      operator std::string() const
+      {
+         return std::string(data(), _size);
+      }
+      
       template<typename T>
       operator const T&() const
       {
@@ -71,13 +76,14 @@ namespace BeeFishDatabase {
          
          return *destination;
       }
-
+      
       template<typename T>
       operator T() const
       {
          return T(_data);
       }
-
+      
+      
       bool operator == (const Data& rhs) const {
          if (_size != rhs._size)
             return false;

@@ -103,14 +103,16 @@ namespace BeeFishDatabase {
       friend ostream& operator << (ostream& out, const Stack& stack)
       {
          int index = 0;
-        
+         
+         
          for (auto value : stack)
          {
-            out << value._path << ":" 
-                << value._bit
-                << endl;
+            if (index++ == 0)
+               out << value._path;
+               
+            out << value._bit;
          }
-
+         
          return out;
 
       }
@@ -120,6 +122,31 @@ namespace BeeFishDatabase {
          assert(size);
          return (*this)[size - 1];
       }
+      
+      virtual void push_back(const StackValue& value)
+      {
+         if (value._bit)
+            ++_count;
+         else
+            --_count;
+            
+         vector<StackValue>::push_back(
+            value
+         );
+      }
+      
+      virtual void pop_back()
+      {
+         StackValue value = (*this)[size() - 1];
+         
+         if (value._bit)
+            --_count;
+         else
+            ++_count;
+            
+         vector<StackValue>::pop_back();
+      }
+ 
 
    };
    

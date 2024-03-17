@@ -95,6 +95,17 @@ namespace BeeFishDatabase
 
          outputSuccess(success);
       }
+      
+      if (success) {
+         cout << "\tTesting Data Path Min through: ";
+
+         data[min][0];
+         data[min][1];
+         Stack stack;
+         success &= (data.min<Size>(stack) == min);
+         success &= (stack.size() == 4);
+         outputSuccess(success);
+      }
 
       if (success) {
          cout << "\tTesting Data Path Max through: ";
@@ -143,7 +154,7 @@ namespace BeeFishDatabase
       }
 
       if (success) {
-         cout << "\tTesting int next" << flush;
+         cout << "\tTesting int next" << endl;
 
          MinMaxPath data = start["skip3"];
          data[0];
@@ -179,7 +190,7 @@ namespace BeeFishDatabase
       }
 
       if (success) {
-         cout << "\tTesting string first to next " << flush;
+         cout << "\tTesting three strings ";
 
          MinMaxPath data = start["skip4"];
          data["first"];
@@ -187,29 +198,27 @@ namespace BeeFishDatabase
          data["third"];
 
          Stack stack;
-         success =
-            (data.min<string>(stack) == "first");
-         string second;
-         bool next =
-            data.next(stack, second);
- 
+         vector<string> values;
+         string value;
+         while (data.next<string>(stack, value))
+         {
+            values.push_back(value);
+         }
+         success = (values.size() == 3);
+         outputSuccess(success);
+         
          if (success) {
-            cout << "\t\tRead second: \"" << second << "\", " << next << endl;
-            success = (second == "second") && next;
+            success = testValue("first", values[0]);
          }
 
          if (success) {
-            string third;
-            next = data.next(stack, third);
-            cout << "\t\tRead third: \"" << third << "\", " << next << endl;
-            success = (third == "third") && next;
+            success = testValue("second", values[1]);
          }
+         
          if (success) {
-            string empty;
-            next = data.next(stack, empty);
-            cout << "\tString last next: " << next << endl;
-            success = (next == false);
+            success = testValue("third", values[2]);
          }
+         
          outputSuccess(success);
       }
 
@@ -299,6 +308,42 @@ namespace BeeFishDatabase
          success &= (contains == false);
          outputSuccess(success);
       }
+      
+      if (success)
+      {
+         cout << "\tTesting nested keys" << flush;
+          
+         Path data = start["skip10"];
+         data[1][1];
+         Stack stack1;
+         MinMaxPath test1 = data;
+         int min1 = test1.min<int>(stack1);
+         
+         success &= (min1 == 1);
+         
+         data[1][2];
+         Stack stack2;
+         MinMaxPath test2 = data;
+         int min2 = test2.min<int>(stack2);
+         success &= (min2 == 1);
+         
+         MinMaxPath keys = data;
+   
+         int key;
+         
+         int count = 0;
+         Stack stack;
+         while (keys.next<int>(stack, key))
+         {
+            ++count;
+         }
+         
+         success &= (count == 1);
+         
+         outputSuccess(success);
+   
+      }
+     
 
       db.close();
       remove(db.filename().c_str());

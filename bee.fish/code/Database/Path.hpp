@@ -97,11 +97,11 @@ namespace BeeFishDatabase {
       {
          Path path(*this);
          
-         cerr << "PATH: " << _index << "[" << key << "] -> ";
-         
+         //cerr << "PATH: " << _index << "[" << key << "] -> ";
+ 
          path << key;
          
-         cerr << path._index << endl;
+         //cerr << path._index << endl;
          
          return path;
       }
@@ -169,6 +169,26 @@ namespace BeeFishDatabase {
          assert(false);
 
       }
+      
+      const Data& getData() const {
+
+         const Branch& branch =
+            getBranch();
+            
+         if (branch._dataIndex)
+         {
+            const Data* source =
+               _database->getData(
+                  branch._dataIndex
+               );
+
+            return *source;
+
+         }
+
+         assert(false);
+
+      }
 
       template<typename T>
       void getData(T& destination)
@@ -177,7 +197,18 @@ namespace BeeFishDatabase {
          destination = *(T*)data.data();
       }
 
+      void getData(std::string& destination)
+      {
+         const Data& data = getData();
 
+         if (data.size() == 0)
+            destination = "";
+         else
+            destination = std::string(
+               data.data(),
+               data.size()
+            );
+      }
 /*
       template<typename T>
       operator T()
@@ -186,30 +217,32 @@ namespace BeeFishDatabase {
          return (T&)(*data.data());
       }
 */
-      void getData(std::string& destination)
+/*
+ 
+      operator string() const
       {
-         Data& data = getData();
-         if (data.size() == 0)
-            destination = "";
-         else {
-            std::string string(
-               data.data(),
-               data.size()
-            );
-
-            destination = string;
-         }
-      }
-
-      operator string()
-      {
-         std::string data;
-         getData(data);
+         std::string data = getData();
 
          if (data.size() == 0)
             return "";
 
          return data;
+
+      }
+*/
+
+
+      operator string() const
+      {
+         const Data& data = getData();
+
+         if (data.size() == 0)
+            return "";
+
+         return std::string(
+            data.data(),
+            data.size()
+         );
 
       }
 
