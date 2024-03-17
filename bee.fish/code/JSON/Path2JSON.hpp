@@ -32,12 +32,16 @@ namespace BeeFishJSON
          return out;
       }
       
-      virtual void write(ostream& out, Size tabs)
+      std::string tabs(Size tabCount)
+      {
+         return string(tabCount * TAB_SPACES, ' ');
+      }
+      
+      virtual void write(ostream& out, Size tabCount)
       {
          if (isDeadEnd())
             return;
-     
-         Stack stack;
+       
          Type type = 
             MinMaxPath(*this)
             .value<Type>();
@@ -55,8 +59,11 @@ namespace BeeFishJSON
             break;
          case Type::NUMBER:
          {
-            Number number = path.getData();
+            BeeFishScript::String number =
+               (BeeFishScript::String)path;
+               
             out << number;
+            
             break;
          }
          case Type::STRING:
@@ -69,32 +76,88 @@ namespace BeeFishJSON
          case Type::ARRAY:
          {
             out << "[";
+            Size max = 0;
+            
             if (!path.isDeadEnd()) {
                Stack stack;
                Size index;
                
-               Size max = path.max<Size>();
-               cerr << "MAX: " << max << endl;
+               max = path.max<Size>();
+               
+               if (max > 0) {
+                  out << "\r\n";
+                  out << tabs(tabCount + 1);
+               }
+               
                for (index = path.min<Size>(stack);
                     index <= max;
                     ++index)
                {
-                  if (path.contains(index)) {
-                      Path2JSON item =
-                         path[index];
-                     item.write(out, tabs + 1);
+                  if (path.contains(index))
+                  {
+                     Path2JSON item =
+                        path[index];
+                  
+                     item.write(out, tabCount + 1);
                   }
-                     
+                  
                   if (index < max)
-                     out << ",";
+                  {
+                     out << ",\r\n" << tabs(tabCount + 1);
+                  }
                }
             }
+            
+            if (max > 0) {
+               out << "\r\n";
+            }
+            
             out << "]";
+               
             break;
          }
          case Type::OBJECT:
-            out << "{Not implemented}" << endl;
+         {
+            out << "{";
+            Size count = 0;
+            if (!path.isDeadEnd()) {
+                
+               out << "\r\n";
+               
+               if (path.hasData())
+                  count = path.getData();
+                  
+               Size i = 0;
+               Stack stack;
+               BeeFishScript::String key;
+               MinMaxPath keys = path;
+               while(keys.next<BeeFishScript::String>(stack, key))
+               {
+                 // cerr << "PATH2JSON: " << key << endl;
+                  
+                  out << tabs(tabCount + 1)
+                      << "\""
+                         << escapeString(key)
+                      << "\": ";
+                      
+                  Path2JSON value = path[key];
+                  
+                  value.write(out, tabCount + 1);
+                  
+                  if (++i < count)
+                     out << ",\r\n";
+                  
+               }
+            }
+            
+            if (count > 0) {
+               out << "\r\n";
+               out << tabs(tabCount);
+            }
+            
+            out  << "}";
             break;
+         }
          default:
             throw std::logic_error("JSON::Variable::Value::copy constructor");
          }

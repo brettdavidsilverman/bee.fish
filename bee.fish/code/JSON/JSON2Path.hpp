@@ -11,28 +11,26 @@ namespace BeeFishJSON {
    {
    protected:
       
-      
       Path _start;
       vector<Path>* _pathStack;
       vector<bool>* _containerStack;
       bool _deleteStack = false;
       
-      virtual void setVariable(const Variable& var)
+      virtual void setVariable(const Variable& var, const std::string& value = "")
       {
          bool isArrayContainer = topContainer();
          
          if (isArrayContainer)
-            setArrayVariable(var);
+            setArrayVariable(var, value);
          else
-            setObjectVariable(var);
+            setObjectVariable(var, value);
             
-        // pop_back();
          
       }
       
-      virtual void setObjectVariable(const Variable& var)
+      virtual void setObjectVariable(const Variable& var, const std::string& value = "")
       {
-         cerr << "setObjectVariable: " << var << endl;
+         cerr << "setObjectVariable: " << var._type << ": " << value << endl;
          Path path =
             topPath()[var._type];
 
@@ -56,9 +54,9 @@ namespace BeeFishJSON {
             case Type::NUMBER:
             {
                path.setData(
-                  var._value._number
+                  value
                );
-                    
+               
                break;
             }
             case Type::STRING:
@@ -68,7 +66,10 @@ namespace BeeFishJSON {
                push_back_path(path);
                push_back_container(true);
                break;
-            //case Type::OBJECT:
+            case Type::OBJECT:
+               push_back_path(path);
+               push_back_container(false);
+               break;
             default:
                throw std::logic_error("JSON2Path");
          }
@@ -77,7 +78,7 @@ namespace BeeFishJSON {
              
       }
       
-      virtual void setArrayVariable(const Variable& var)
+      virtual void setArrayVariable(const Variable& var, const std::string& value = "")
       {
          cerr << "setArrayVariable: " << var << endl;
 
@@ -97,7 +98,7 @@ namespace BeeFishJSON {
          push_back_path(path);
          push_back_container(false);
          
-         setVariable(var);
+         setVariable(var, value);
          
          
       }
@@ -165,27 +166,27 @@ namespace BeeFishJSON {
       virtual void push_back_path(Path path)
       {
          _pathStack->push_back(path);
-         cerr << "push_back path: " << _pathStack->size() << endl;
+         //cerr << "push_back path: " << _pathStack->size() << endl;
       }
       
       virtual void push_back_container(bool isArrayContainer)
       {
          _containerStack->push_back(isArrayContainer);
-         cerr << "push_back container: " << 
-            (isArrayContainer ? "array" : "object")
-             << ": " << _containerStack->size() << endl;
+        // cerr << "push_back container: " << 
+        //    (isArrayContainer ? "array" : "object")
+        //     << ": " << _containerStack->size() << endl;
       }
       
       virtual void pop_back_path()
       {
          _pathStack->pop_back();
-         cerr << "pop_back_path: " << _pathStack->size() << endl;
+        // cerr << "pop_back_path: " << _pathStack->size() << endl;
       }
       
       virtual void pop_back_container()
       {
          _containerStack->pop_back();
-         cerr << "pop_back_container: " << _containerStack->size() << endl;
+         //cerr << "pop_back_container: " << _containerStack->size() << endl;
       }
       
       virtual bool onundefined(Parser* parser)
@@ -209,9 +210,11 @@ namespace BeeFishJSON {
       }
                   
       virtual bool onnumber(BeeFishScript::Number& value, Parser* parser)
-      {      
+      {
+         cerr << "onnumber: " << parser->value() << endl;
          setVariable(
-            Variable(value)
+            Variable(Type::NUMBER),
+            parser->value()
          );
          
          return true;
@@ -237,12 +240,7 @@ namespace BeeFishJSON {
       virtual bool onbeginarray(Parser* parser)
       {
          cerr << "onbeginarray" << endl;
-         
-     
          setVariable(Variable(Type::ARRAY));
-
-         
-         
          return true;
       }
       
@@ -265,30 +263,46 @@ namespace BeeFishJSON {
       
       virtual bool onbeginobject(Parser* parser)
       {
-         Path path =
-            topPath()[Type::OBJECT];
-         push_back_path(path);
+         cerr << "onbeginobject" << endl;
+         
+         setVariable(Variable(Type::OBJECT));
+         
          return true;
       }
       
       virtual bool onobjectkey(Parser* parser)
       {
-         BeeFishScript::String key = parser->value();
+         const BeeFishScript::String& key = parser->value();
+         cerr << "onobjectkey " << key << endl;
+         
          Path path =
             topPath()[key];
+            
          push_back_path(path);
+         push_back_container(false);
+         
          return true;
       }
                
       virtual bool onobjectvalue(Parser* parser)
       {
-       //  pop_back();
+         cerr << "onobjectvalue" << endl;
+         pop_back_path();
+         pop_back_container();
+         Path path = topPath();
+         Size count = 0;
+         if (path.hasData())
+            count = path.getData();
+         ++count;
+         path.setData(count);
+        
          return true;
          
       }
                
       virtual bool onendobject(Parser* parser)
       {
+         cerr << "onendobject" << endl;
          pop_back_path();
          pop_back_container();
          return true;
