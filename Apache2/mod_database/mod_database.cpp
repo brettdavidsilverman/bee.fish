@@ -47,10 +47,12 @@
 #include "Database/Database.hpp"
 #include "Parser/Parser.hpp"
 
-#include "parseURI.hpp"
 #include "JSON/JSON2Variable.hpp"
 #include "JSON/JSON2Path.hpp"
 #include "JSON/Path2JSON.hpp"
+#include "ParseURI.hpp"
+#include "ApacheStream.hpp"
+
 using namespace BeeFishDatabase;
 using namespace BeeFishWebServer;
 using namespace BeeFishJSON;
@@ -61,15 +63,17 @@ static int counter = 0;
 static std::ofstream debug;
 static bool inputJSON(Path path, request_rec *r);
 static bool outputJSON(Path path, request_rec *r);
+static bool outputDocument(Path path, request_rec *r);
 
 /* The sample content handler */
 static int database_handler(request_rec *r)
 {
     debug.open("/home/bee/debug.txt", std::ios_base::app);
-   
+    debug.close();
+    
     Path path = parseURI(r->uri);
     
-    debug.close();
+    
     
  
     Variable result;
@@ -85,7 +89,22 @@ static int database_handler(request_rec *r)
         else if (path.contains("document") &&
                  path.contains("index"))
         {
-           if (outputJSON(path, r))
+        
+           
+           if (r->args) {
+              std::string arguments(r->args);
+              if (arguments == "document")
+              {
+                 if (!outputDocument(path, r))
+                    return HTTP_INTERNAL_SERVER_ERROR;
+                 else
+                    return OK;
+              }
+           }
+           
+           if (!outputJSON(path, r))
+              return HTTP_INTERNAL_SERVER_ERROR;
+           else
               return OK;
            
         }
@@ -101,11 +120,6 @@ static int database_handler(request_rec *r)
 
     }
     
-    /* Lastly, if there was a query string, let's print that too!
-    if (r->args) {
-        ap_rprintf(r, "Your query string was: %s", r->args);
-    }
-    */
    
     return HTTP_INTERNAL_SERVER_ERROR;
 }
@@ -115,50 +129,39 @@ static bool outputJSON(Path path, request_rec *r)
    ap_set_content_type(
       r, "application/json; charset=utf-8"
    );
-
-#warning "Need to replace stringstream with buffered ap_rwrite"
-
-   Path2JSON json = path["index"];
-   stringstream stream;
-   stream << json;
-
-   /*
    
+   Path2JSON index = path["index"];
+   ApacheStream stream(r);
+   stream << index;
+   stream.flush();
+   
+   return true;
+   
+}
+
+static bool outputDocument(Path path, request_rec *r)
+{
+   ap_set_content_type(
+      r, "application/json; charset=utf-8"
+   );
+   
+   ApacheStream stream(r);
    string posted;
    Size pageIndex;
    Stack stack;
-   MinMaxPath document = path;
+   MinMaxPath document = path["document"];
    while (document.next(stack, pageIndex))
    {
       document[pageIndex]
          .getData(posted);
            
-     // ap_rputs(posted.c_str(), r);
-      if (!json.read(posted))
-         return false;
+      stream << posted;
    }
    
-   json.eof();
+   stream.flush();
    
-   // Write variable to output
-   stringstream stream;
-   stream << *(json._variable);
-   */
-   
-   string output = stream.str();
-   
-   if ( ap_rwrite(
-           output.data(),
-           output.length(),
-           r )
-       == output.length() )
-   {
-       return true;
-   }
-   
-   return false;
+   return true;
 }
-
 
 static bool inputJSON(Path path, request_rec *r) {
    
