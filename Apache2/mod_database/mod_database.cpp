@@ -167,7 +167,7 @@ static bool inputJSON(Path path, request_rec *r) {
    int pageSize = getpagesize();
    char buffer[pageSize];
    Size pageIndex = 0;
-   
+   path.clear();
    JSON2Path index = path["index"];
    Path document = path["document"];
    

@@ -77,6 +77,11 @@ namespace BeeFishApache2 {
            << url << file
            << endl;
 
+      string tempFile =
+         TEMP_DIRECTORY;
+         
+      tempFile += "test.curl.txt";
+      
       stringstream stream;
       bool success = true;
 
@@ -101,8 +106,7 @@ namespace BeeFishApache2 {
             << "curl "
             << url  << file << " "
             << " -s > "
-            << TEMP_DIRECTORY
-            << "test.curl.txt";
+            << tempFile;
             
          string command = stream1.str();
          success &= (system(command.c_str()) == 0);
@@ -111,8 +115,7 @@ namespace BeeFishApache2 {
          // Compare the files
          stringstream stream;
          stream  << "diff -s -Z "
-                 << TEMP_DIRECTORY
-                 << "test.curl.txt"
+                 << tempFile
                  << " "
                  << file;
                 
@@ -120,6 +123,8 @@ namespace BeeFishApache2 {
          
          success = success && 
             (system(command.c_str()) == 0);
+            
+         remove(tempFile);
       }
 
       outputSuccess(success);
