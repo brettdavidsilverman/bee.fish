@@ -2,13 +2,15 @@
 #define BEE_FISH_MISC__DEBUG
 
 #include <fstream>
-#include "Miscellaneous.hpp"
+#include "MiscellaneousBase.hpp"
 #include "../Config.hpp"
 
-using namespace std;
+
 
 namespace BeeFishMisc {
 
+   using namespace std;
+   
    class Debug : public ofstream
    {
    public:

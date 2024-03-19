@@ -25,7 +25,7 @@ namespace BeeFishParser {
       
    public:
       
-      std::optional<bool> _result = std::nullopt;
+      BeeFishMisc::optional<bool> _result = BeeFishMisc::nullopt;
       
       size_t _byteCount = 0;
       char _lastCharacter = 0;
@@ -83,7 +83,7 @@ namespace BeeFishParser {
       virtual bool eof()
       {
           
-         if (_result == nullopt) {
+         if (_result == BeeFishMisc::nullopt) {
             return read((char)-1);
   //          return true;
          }
@@ -172,7 +172,7 @@ namespace BeeFishParser {
           char c
       ) {
           
-         if (parser._result != nullopt)
+         if (parser._result != BeeFishMisc::nullopt)
             return false;
 
          bool matched = true;
@@ -184,7 +184,7 @@ namespace BeeFishParser {
          matched = matched &&
             parser.read(c);
 
-         if (parser._result != nullopt)
+         if (parser._result != BeeFishMisc::nullopt)
             setResult(parser._result);
 
          return matched;
@@ -214,7 +214,7 @@ namespace BeeFishParser {
             if (!parser.read((char)c))
                break;
 
-            if (parser._result != nullopt)
+            if (parser._result != BeeFishMisc::nullopt)
                break;
 
 #ifdef TIME

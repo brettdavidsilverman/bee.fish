@@ -263,9 +263,6 @@ namespace BeeFishDatabase {
             str += to_string(newSize) +
                    strerror(errno);
             
-            Debug debug;
-            debug << "********" << str << endl;
-         
             throw runtime_error(str);
          }
          

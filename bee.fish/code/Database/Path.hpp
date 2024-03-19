@@ -4,7 +4,7 @@
 #include <iostream>
 #include <atomic>
 #include "../PowerEncoding/PowerEncoding.hpp"
-#include "../Miscellaneous/optional.h"
+#include "../Miscellaneous/Optional.hpp"
 #include "../Script/Variable.hpp"
 #include "Data.hpp"
 #include "File.hpp"
@@ -61,28 +61,24 @@ namespace BeeFishDatabase {
       virtual void writeBit(bool bit)
       {
 
+         scoped_lock lock(_database->_mutex);
+         
          Branch& branch = getBranch();
 
          if (bit == false)
          {
-            if (!branch._left) {
-               scoped_lock lock(_database->_mutex);
-               if (!branch._left) {
-                  branch._left =
-                     _database->getNextIndex();
-               }
+            if (branch._left == 0) {
+               branch._left =
+                  _database->getNextIndex();
             }
             _index = branch._left;
             
          }
          else
          {
-            if (!branch._right) {
-               scoped_lock lock(_database->_mutex);
-               if (!branch._right) {
-                  branch._right =
-                     _database->getNextIndex();
-               }
+            if (branch._right == 0) {
+               branch._right =
+                  _database->getNextIndex();
             }
             _index = branch._right;
             
@@ -209,27 +205,6 @@ namespace BeeFishDatabase {
                data.size()
             );
       }
-/*
-      template<typename T>
-      operator T()
-      {
-         Data& data = getData();
-         return (T&)(*data.data());
-      }
-*/
-/*
- 
-      operator string() const
-      {
-         std::string data = getData();
-
-         if (data.size() == 0)
-            return "";
-
-         return data;
-
-      }
-*/
 
 
       operator string() const

@@ -1,0 +1,2 @@
+rm -f trace.txt
+valgrind  --log-file="trace.txt"  --leak-check=yes ./test

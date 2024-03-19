@@ -2,7 +2,7 @@ rm /home/bee/bee.fish.data
 set -e
 sudo make
 echo "Uploading large.json"
-time curl -X POST \
+curl -X POST \
    https://bee.fish/large.json \
    -H "Content-Type: application/json; charset=utf-8" \
    -H "Expect: " \

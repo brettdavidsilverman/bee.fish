@@ -72,8 +72,9 @@ static Debug debug;
 static int database_handler(request_rec *r)
 {
     
-    debug << now() << " " 
+    debug << now() << " "
           << r->method << " "
+          << "https://bee.fish"
           << r->uri;
     
     if (r->args)
@@ -82,10 +83,7 @@ static int database_handler(request_rec *r)
     debug << endl;
     
     Path path = parseURI(r->uri);
-    
-    
-    
- 
+
     Variable result;
     
     if (!strcmp(r->method, "GET"))
@@ -249,7 +247,7 @@ static bool inputJSON(Path path, request_rec *r) {
        index._result == true)
    {
       debug << now()
-            << " Document Ok"
+            << " 100% Document Ok"
             << endl;
       
       result =

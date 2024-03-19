@@ -1,27 +1,10 @@
-#ifndef BEE_FISH_MISC__OPTIONAL_H
-#define BEE_FISH_MISC__OPTIONAL_H
+#ifndef BEE_FISH_MISC__OPTIONAL_HPP
+#define BEE_FISH_MISC__OPTIONAL_HPP
 
 #include <iostream>
 
 #if (__cplusplus >= 201703L)
 #include <optional>
-namespace std {
-   ostream& operator << (
-      ostream& out,
-      const std::optional<bool>& value
-   )
-   {
-      if (value == nullopt)
-         out << "null";
-      else if (value == true)
-         out << "true";
-      else if (value == false)
-         out << "false";
-      else
-         throw logic_error("Optional value");
-      return out;
-   }
-}
 
 #else
 namespace std {
@@ -126,5 +109,21 @@ namespace std {
 
 }
 #endif
+
+   std::ostream& operator << (
+      std::ostream& out,
+      const std::optional<bool>& value
+   )
+   {
+      if (value == std::nullopt)
+         out << "null";
+      else if (value == true)
+         out << "true";
+      else if (value == false)
+         out << "false";
+      else
+         throw std::logic_error("Optional value");
+      return out;
+   }
 
 #endif

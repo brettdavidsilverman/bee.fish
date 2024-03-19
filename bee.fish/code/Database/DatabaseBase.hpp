@@ -9,7 +9,7 @@
 #include <map>
 #include <mutex>
 
-#include "../Miscellaneous/Debug.hpp"
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "Version.hpp"
 #include "File.hpp"
 #include "Index.hpp"
@@ -271,20 +271,22 @@ namespace BeeFishDatabase {
       virtual Size growFile()
       {
 
+         //scoped_lock lock(_mutex);
+
+         Size oldSize = _size;
+         Size newSize = oldSize + _incrementSize;
+
          Debug debug;
-         debug << "#############GROWFILE##############" << endl;
+         debug << now() << " Grow File " << (newSize / 1000 / 1000) << "Mb" << endl;
          
-         scoped_lock lock(_mutex);
-
-         Size size = _size + _incrementSize;
-
-         File::resize(size);
+        
+         File::resize(newSize);
          
          _tree = (Tree*)
             mremap(
                _tree,
-               _size,
-               size,
+               oldSize,
+               newSize,
                MREMAP_MAYMOVE
             );
             

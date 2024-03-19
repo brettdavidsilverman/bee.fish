@@ -10,9 +10,17 @@ test:
 	-  mkdir build
 	cd code && make test
 
-Parser:
+power-encoding:
+	- mkdir build
+	cd code/power-encoding && make $(DEBUG)
+	
+b-string:
+	- mkdir build
+	cd code/b-string && make $(DEBUG)
+	
+parser:
 	-  mkdir build
-	cd code/Parser && make $(DEBUG)
+	cd code/parser && make $(DEBUG)
 
 PowerEncoding:
 	-  mkdir build
@@ -22,10 +30,14 @@ Database:
 	-  mkdir build
 	cd code/Database && make $(DEBUG)
 
+json:
+	-  mkdir build
+	cd code/json && make $(DEBUG)
+
 JSON:
 	-  mkdir build
 	cd code/JSON && make $(DEBUG)
-
+	
 WebRequest:
 	-  mkdir build
 	cd code/WebRequest && make $(DEBUG)

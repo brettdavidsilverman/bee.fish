@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="/bee.fish/head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <script src="console/console.js"></script>
+      <script src="id/id.js"></script>
+      <script src="shorthand/shorthand.js"></script>
+      <script src="pointer/pointer.js"></script>
+      <script src="object/object.js"></script>
+     
+      <link rel="stylesheet" type="text/css" href="../../style.css" />
+      <title>Fetch</title>
+   </head>
+   <body>
+      <script src="body.js"></script>
+      <h1>Fetch</h1>
+      <button onclick="go()">Go</button>
+      <pre id="response"></pre>
+      <pre>
+         <script>
+var url = "http://localhost/bee.fish/large.json";
+
+async function go() {
+   
+   fetch(
+      url,
+      {
+         method: "GET",
+         credentials: "include",
+         headers: []
+      }
+   )
+   .then(function(response) {
+      return response.text();
+   })
+   .then(function(text) {
+       postMessage(text);
+   })
+   .catch(function(error) {
+      alert("Request failed " + error)
+   });
+}
+
+
+
+var response =
+   document.getElementById("response");
+
+window.onmessage = function(event) {
+
+   alert("Recieved, parsing");
+   
+   eval("(" + event.data + ")");
+ 
+   alert("Done");
+}
+
+
+
+         </script>
+      </pre>
+   </body>
+</html>

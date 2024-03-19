@@ -47,7 +47,9 @@ int main(int argc, const char* argv[]) {
 
    std::optional<bool> result;
    
-   Database database;
+   remove("test.data");
+   
+   Database database("test.data");
    
    JSON* parser = new JSON2Path(database);
 
@@ -77,10 +79,10 @@ int main(int argc, const char* argv[]) {
 
 std::optional<bool> testParser(Parser* parser) {
 
-   ifstream in("/home/bee/bee.fish/large.json");
-   in >> *parser;
+   //ifstream in("/home/bee/bee.fish/large.json");
+   //in >> *parser;
    
-   //cin >> *parser;
+   cin >> *parser;
  
    if (parser->result() == nullopt)
       parser->eof();

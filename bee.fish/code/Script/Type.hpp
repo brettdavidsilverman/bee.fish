@@ -10,10 +10,8 @@ namespace BeeFishScript {
       INTEGER,
       NUMBER,
       STRING,
-      KEY,
       ARRAY,
-      OBJECT,
-      ROOT
+      OBJECT
    };
 
    
@@ -38,9 +36,6 @@ namespace BeeFishScript {
             break;
          case Type::STRING:
             out << "string";
-            break;
-         case Type::KEY:
-            out << "key";
             break;
          case Type::ARRAY:
             out << "array";

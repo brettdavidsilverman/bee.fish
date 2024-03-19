@@ -693,6 +693,7 @@ namespace BeeFishJSON {
          
          cout << "\tIndexed string ";
          MinMaxPath path(database);
+
          success = success &&
             path.contains(Type::STRING);
             
@@ -735,8 +736,7 @@ namespace BeeFishJSON {
       if (success) {
          MinMaxPath path = database;
          path = path[Type::ARRAY][0][Type::INTEGER];
-         Integer value;
-         value = path.value<Integer>();
+         Integer value = path.getData();
          cout << "\tValue 1: " << value;
          success = (value == 1);
          BeeFishMisc::outputSuccess(success);
@@ -882,9 +882,9 @@ namespace BeeFishJSON {
       }
       
       if (success) {
-         MinMaxPath valuePath =
+         Path valuePath =
             path[Type::INTEGER];
-         Integer value = valuePath.value<Integer>();
+         Integer value = valuePath.getData();
          success = (value == 1);
          BeeFishMisc::outputSuccess(success);
       }

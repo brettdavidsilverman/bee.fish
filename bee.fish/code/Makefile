@@ -5,8 +5,11 @@ BUILD = ../../build
 TEMP = /var/tmp
 
 all:
-	cd Parser && make $(DEBUG)
-	cd PowerEncoding && make $(DEBUG)
+	cd power-encoding && make $(DEBUG) test
+	cd b-string && make $(DEBUG) test
+	cd parser && make $(DEBUG) test
+	cd json && make $(DEBUG) test
+	#cd PowerEncoding && make $(DEBUG)
 	cd Database && make $(DEBUG)
 	cd JSON && make $(DEBUG)
 	cd WebRequest && make $(DEBUG)
@@ -15,8 +18,9 @@ all:
 	
 test:	all
 	../stop.sh 8000
-	cd Parser && $(BUILD)/Parser -test
-	cd PowerEncoding && $(BUILD)/PowerEncoding -test
+	cd power-encoding && $(BUILD)/power-encoding -test
+	cd b-string && $(BUILD)/b-string -test
+	cd parser && $(BUILD)/parser -test
 	cd Database && $(BUILD)/Database -test
 	cd JSON && $(BUILD)/JSON -test
 	cd WebRequest && $(BUILD)/WebRequest -test
