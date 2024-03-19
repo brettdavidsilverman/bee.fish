@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <bits/stdc++.h>
 #include "Miscellaneous/Miscellaneous.hpp"
-#include "Test/Test.hpp"
 
 namespace BeeFishApache2 {
 
@@ -34,7 +33,7 @@ namespace BeeFishApache2 {
 
    std::optional<bool> testParser(Parser* parser) {
 
-      cin >> *parser;
+      parser->read(cin);
  
       parser->eof();
 

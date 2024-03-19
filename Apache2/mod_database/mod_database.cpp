@@ -192,12 +192,6 @@ static bool inputJSON(Path path, request_rec *r) {
              ap_get_client_block(r, buffer, pageSize))
              > 0)
          {
-            //isOk =
-            //   index.read(buffer, dataBytesRead);
-                    
-            //if (!isOk)
-            //   break;
-
             posted =
                string(buffer, dataBytesRead);
                
@@ -226,11 +220,11 @@ static bool inputJSON(Path path, request_rec *r) {
             << percentage << "%" 
             << endl;
       
-      isOk =
-         index.read(posted);
-                    
-      if (!isOk)
+      if (index.read(posted) == false)
+      {
+         isOk == false;
          break;
+      }
    }
    
    
@@ -241,8 +235,8 @@ static bool inputJSON(Path path, request_rec *r) {
            
    Variable result;
    
-   if (isOk &&
-       index._result == true)
+   if (isOk == true &&
+       index.result() == true)
    {
       debug << now()
             << " 100% Document Ok"

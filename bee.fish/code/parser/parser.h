@@ -46,7 +46,7 @@ namespace BeeFishParser
       Match& _match;
       size_t _charCount = 0;
       ssize_t _dataBytes = -1;
-
+      char _lastCharacter = -1;
       BeeFishBString::UTF8Character _utf8 = -1;
 
    public:
@@ -90,6 +90,7 @@ namespace BeeFishParser
 #endif
          ++_charCount;
 
+         _lastCharacter = (char)byte;
 
          if (_dataBytes >= 0)
          {
@@ -239,6 +240,12 @@ namespace BeeFishParser
       virtual void eof() {
       }
 
+      virtual string getErrorMessage() const {
+         stringstream stream;
+         stream << "Invalid Content '" << escape(_lastCharacter) << "' at position "
+                << _charCount;
+         return stream.str();
+      }
    };
 }
 

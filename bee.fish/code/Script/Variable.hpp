@@ -35,7 +35,7 @@ namespace BeeFishScript {
 
    inline std::string escapeString(const String& string);
 
-   #define undefined BeeFishScript::Variable::Undefined()
+  // #define undefined BeeFishScript::Variable::Undefined()
 
    class Object : public ObjectBase {
    public:

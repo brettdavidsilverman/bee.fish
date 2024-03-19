@@ -2,11 +2,11 @@
 #include <filesystem>
 #include "Config.hpp"
 #include "Miscellaneous/Miscellaneous.hpp"
-#include "Parser/Parser.hpp"
-#include "Parser/Test.hpp"
+#include "parser/parser.h"
+#include "parser/test.h"
 #include "Database/Database.hpp"
 #include "Test.hpp"
-#include "JSON/Test.hpp"
+#include "json/test.h"
 
 using namespace std;
 using namespace BeeFishMisc;
@@ -25,13 +25,10 @@ int main(int argc, const char* argv[]) {
            << __cplusplus
            << endl
         << "mod_database Version: "
-           << "1.0"
+           << "1.2"
            << endl
-        << "JSON Version: "
-           << JSON_VERSION
-           << endl
-        << "Parser Version: "
-           << PARSER_VERSION
+        << "Database Version: "
+           << DATABASE_VERSION
            << endl;
 
    int useArg = -1;
@@ -55,7 +52,7 @@ int main(int argc, const char* argv[]) {
    
    std::optional<bool> result;
    
-   JSON match!
+   JSON match;
    JSON2Path* parser = new JSON2Path(database, match);
 
    result =
