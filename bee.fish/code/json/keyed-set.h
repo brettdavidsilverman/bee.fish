@@ -22,6 +22,9 @@ namespace BeeFishJSON
       virtual void matchedKey(Key& key, Value& value) {
 
       }
+      virtual void matchedKey(Key& key) {
+
+      }
    };
 
    template<class Key, class KeyValueSeperator, class Value>
@@ -75,7 +78,13 @@ namespace BeeFishJSON
          _seperator = new InvokeKeyValueSeperator(_keyMatched, _key, _value);
 
          And::_inputs = {
-            _key,
+            new Invoke(
+               _key,
+               [this](Match* match) {
+                  Key& key = *_key;
+                  _keyMatched->matchedKey(key);
+               }
+            ),
             new Optional(new BlankSpace()),
             _seperator,
             new Optional(new BlankSpace()),
@@ -125,6 +134,10 @@ namespace BeeFishJSON
       }
 
       virtual void matchedKey(Key& key, Value& value) {
+      }
+      
+      virtual void matchedKey(Key& key) {
+          
       }
 
    };

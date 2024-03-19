@@ -45,11 +45,7 @@
 #include "ap_config.h"
 
 #include "Database/Database.hpp"
-#include "Parser/Parser.hpp"
-
-#include "JSON/JSON2Variable.hpp"
-#include "JSON/JSON2Path.hpp"
-#include "JSON/Path2JSON.hpp"
+#include "parser/parser.h"
 #include "ParseURI.hpp"
 #include "ApacheStream.hpp"
 #include "Miscellaneous/Debug.hpp"
@@ -177,7 +173,9 @@ static bool inputJSON(Path path, request_rec *r) {
    char buffer[pageSize];
    Size pageIndex = 0;
    path.clear();
-   JSON2Path index = path["index"];
+   JSON match;
+   JSON2Path index(path["index"], match);
+   
    MinMaxPath document = path["document"];
    
    debug << now()

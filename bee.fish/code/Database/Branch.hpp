@@ -26,8 +26,8 @@ namespace BeeFishDatabase
 
       Variable getVariable() const {
          Variable var = BeeFishScript::Object{
-            {"left", (Integer)_left},
-            {"right", (Integer)_right}
+            {"left", (Number)_left},
+            {"right", (Number)_right}
          };
          return var;
       }

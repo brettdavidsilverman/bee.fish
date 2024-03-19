@@ -2,7 +2,7 @@
 #define BEE_FISH_MISC__DEBUG
 
 #include <stdexcept>
-#include "../b-string/string.h"
+#include <string>
 
 #ifndef ESP32
 #define ESP_OK (0)
@@ -26,7 +26,7 @@ extern "C" inline const char* esp_err_to_name(esp_err_t err) {
 #if defined(DEBUG) && !defined(USE_FILTER)
     #define filterTag(result, tag) (true)
 #else
-    inline bool filterTag(int result, BString tag) {
+    inline bool filterTag(int result, std::string tag) {
         if (tag == "WebRequest" && result == 0)
             return false;
         else if (tag == "NeoPixels" && result == 0)

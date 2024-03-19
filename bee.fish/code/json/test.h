@@ -5,6 +5,7 @@
 #include "../parser/test.h"
 #include "json.h"
 #include "json-parser.h"
+#include "../Script/Type.hpp"
 
 using namespace BeeFishParser;
 
@@ -27,7 +28,8 @@ namespace BeeFishJSON
 #endif
 
    inline bool testEmojis();
-
+   inline bool testTypes();
+   
    inline bool test()
    {
       
@@ -44,7 +46,8 @@ namespace BeeFishJSON
       ok &= testStreams();
 #endif
       ok &= testEmojis();
-
+      ok &= testTypes();
+      
       if (ok)
          cout << "SUCCESS" << endl;
       else
@@ -100,6 +103,7 @@ namespace BeeFishJSON
       ok &= testMatchDelete("Full exponent", new CaptureNumber(), "800E-10*", true, "800E-10*");
       ok &= testMatchDelete("False positive", new CaptureNumber(), "+800*");
       //ok &= testMatchDelete("NaN", new CaptureNumber(), "NaN", true, "NaN");
+      assert(ok);
       
       cout << endl;
       
@@ -138,8 +142,7 @@ namespace BeeFishJSON
       
       StringCharacters stringCharacters;
       ok &= testMatch("String characters", &stringCharacters, "hello world\\\\", nullopt);
-      ok &= testResult("String characters value", (stringCharacters.value() == "hello world\\"));
-
+      ok &= testResult("String characters value", (stringCharacters == "hello world\\"));
       ok &= testMatchDelete("String", new String(), "\"hello world\"", true, "hello world");
 
 
@@ -522,6 +525,44 @@ namespace BeeFishJSON
       ok &= testMatch("Double unicode", &parser1, "\"\\uD83D\\uDE00\"", true, "😀");
       ok &= testMatch("Emoji 😀", &parser2, "\"😀\"", true, "😀");
 
+      cout << endl;
+      
+      return ok;
+   }
+   
+   inline bool testTypes()
+   {
+      cout << "Types" << endl;
+      
+      bool ok = true;
+      
+      JSON undefined;
+      JSON _null;
+      JSON boolean;
+      JSON number;
+      JSON string;
+      JSON array;
+      
+      ok &= testMatch("undefined", &undefined, "undefined", true, "");
+      ok &= testResult("undefined type", undefined.type() == Type::UNDEFINED);
+
+      ok &= testMatch("null", &_null, "null", true, "");
+      ok &= testResult("null type", _null.type() == Type::NULL_);
+      
+      ok &= testMatch("boolean", &boolean, "true", true, "true");
+      ok &= testResult("boolean type", boolean.type() == Type::BOOLEAN);
+      
+      ok &= testMatch("number", &number, "1", true, "1");
+      ok &= testResult("number type", number.type() == Type::NUMBER);
+
+      ok &= testMatch("string", &string, "\"❤️\"", true, "❤️");
+      ok &= testResult("string type", string.type() == Type::STRING);
+      
+      ok &= testMatch("array", &array, "[]", true);
+      ok &= testResult("array type", array.type() == Type::ARRAY);
+      
+      assert(ok);
+      
       cout << endl;
       
       return ok;

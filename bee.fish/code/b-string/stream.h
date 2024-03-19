@@ -9,11 +9,12 @@
 #include <functional>
 
 #include "../power-encoding/power-encoding.h"
-#include "../misc/pagesize.h"
+#include "../misc/misc.h"
 
 #include "b-string.h"
 
 using namespace BeeFishPowerEncoding;
+using namespace BeeFishMisc;
 
 namespace BeeFishBString {
 

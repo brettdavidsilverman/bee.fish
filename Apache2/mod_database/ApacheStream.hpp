@@ -5,12 +5,8 @@
 #include "http_config.h"
 #include "http_protocol.h"
 #include "ap_config.h"
-#include "Database/Database.hpp"
-#include "Parser/Parser.hpp"
 
 using namespace std;
-using namespace BeeFishDatabase;
-using namespace BeeFishParser;
 
 namespace BeeFishWebServer {
 

@@ -141,6 +141,8 @@ namespace BeeFishJSON
       
       virtual void onendset(Match* match) {
       }
+      
+      
    };
          
 

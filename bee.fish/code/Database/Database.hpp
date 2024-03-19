@@ -8,7 +8,7 @@
 #include <string.h>
 #include <map>
 #include <mutex>
-#include "../PowerEncoding/PowerEncoding.hpp"
+#include "../power-encoding/power-encoding.h"
 
 #include "Version.hpp"
 #include "File.hpp"
@@ -18,8 +18,8 @@
 #include "Data.hpp"
 #include "Path.hpp"
 #include "MinMaxPath.hpp"
-
-
+#include "JSON2Path.hpp"
+#include "Path2JSON.hpp"
 #endif
 
 

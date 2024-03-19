@@ -237,7 +237,7 @@ namespace BeeFishBString
       );
 
       BitStream stream2;
-      stream2 << "Hello World";
+      stream2 << bstring;
       Data data = stream2.toData();
       stream2.reset();
       BitStream stream2Compare = BitStream::fromData(data);

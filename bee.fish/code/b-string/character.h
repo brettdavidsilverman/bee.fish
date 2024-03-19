@@ -9,6 +9,7 @@
 #include <type_traits>
 
 #include "../power-encoding/power-encoding.h"
+#include "../power-encoding/encoding.h"
 
 using namespace std;
 using namespace BeeFishPowerEncoding;
@@ -19,7 +20,7 @@ namespace BeeFishBString {
    inline PowerEncoding& operator << (PowerEncoding& encoding, const Character& value) {
       encoding.writeBit(1);
 
-      encoding << (unsigned long)value;
+      encoding.write((unsigned long)value);
 
       return encoding;
    }
@@ -27,7 +28,7 @@ namespace BeeFishBString {
    inline PowerEncoding& operator >> (PowerEncoding& encoding, Character& character) {
       assert(encoding.readBit() == 1);
       unsigned long value;
-      encoding >> value;
+      encoding.read(value);
 
       character = value;
 

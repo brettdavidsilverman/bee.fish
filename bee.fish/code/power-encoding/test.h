@@ -1,12 +1,14 @@
 #include <iostream>
 #include "../test/test.h"
+#include "power-encoding-base.h"
 #include "../b-string/string.h"
-#include "power-encoding.h"
+#include "../b-string/misc.h"
 #include "encoding.h"
 
 
 using namespace std;
 using namespace BeeFishTest;
+using namespace BeeFishBString;
 
 namespace BeeFishPowerEncoding
 {
@@ -20,7 +22,6 @@ namespace BeeFishPowerEncoding
 
       for (int i = 0; i < 256; i++)
       {
-         encodingOut.writeBit(true);
          encodingOut << (unsigned char)i;
       }
 
@@ -57,7 +58,7 @@ namespace BeeFishPowerEncoding
     
       test.clear();
       
-      encoding << "🍄";
+      encoding << BString("🍄");
       encoding >> test;
       ok &= testResult(
          "String 🍄",
@@ -65,12 +66,9 @@ namespace BeeFishPowerEncoding
          ( encoding.count() == 0 )
       );
 
- 
-      encoding.writeBit(true);
       encoding << 8;
       int i = 0;
-      if (encoding.readBit())
-         encoding >> i;
+      encoding >> i;
          
       ok &= testResult(
          "Number 8",

@@ -15,7 +15,6 @@
 namespace BeeFishDatabase {
 
    using namespace std;
-   using namespace BeeFishMisc;
    
    class File {
    protected:

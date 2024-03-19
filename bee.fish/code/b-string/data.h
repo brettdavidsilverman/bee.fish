@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 #include <cstring>
-#include "b-string.h"
+
 
 #ifdef SERVER
 #include <openssl/evp.h>
@@ -13,11 +13,13 @@
 #include <openssl/rand.h>
 #include <openssl/err.h>
 #endif
-#include "../misc/pagesize.h"
 
+#include "../misc/misc.h"
 #include "../power-encoding/power-encoding.h"
+#include "b-string.h"
 
 using namespace BeeFishPowerEncoding;
+using namespace BeeFishMisc;
 
 namespace BeeFishBString {
 

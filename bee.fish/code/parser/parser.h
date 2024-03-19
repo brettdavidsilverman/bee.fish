@@ -39,11 +39,13 @@ namespace BeeFishParser
 
    class Parser
    {
-   protected:
+   public:
       optional<bool> _result = nullopt;
+   protected:
+      
       Match& _match;
       size_t _charCount = 0;
-      signed long long _dataBytes = -1;
+      ssize_t _dataBytes = -1;
 
       BeeFishBString::UTF8Character _utf8 = -1;
 
@@ -216,7 +218,7 @@ namespace BeeFishParser
          return _result;
       
       }
-
+      
       optional<bool> result() const
       {
          return _result;
@@ -230,8 +232,11 @@ namespace BeeFishParser
          return false;
       }
 
-      void setDataBytes(signed long long dataBytes) {
+      void setDataBytes(ssize_t dataBytes) {
          _dataBytes = dataBytes;
+      }
+      
+      virtual void eof() {
       }
 
    };

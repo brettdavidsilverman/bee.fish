@@ -90,6 +90,23 @@ namespace BeeFishJSON {
          _match = _allValues;
       }
       
+      virtual void eof(Parser* parser) 
+      override {
+          if (!_setup)
+             setup(parser);
+             
+          if (result() == nullopt)
+          {
+              
+             _parser->read((char)-1);
+             
+             if (result() == true) {
+                success();
+             }
+          }
+          
+      }
+      
    };
    
 }

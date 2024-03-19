@@ -154,14 +154,15 @@ namespace BeeFishBString {
          
       }
       
-      virtual bool peekBit()
+      virtual bool peekBit() const
+      override
       {
          if (_it == cend())
             return 0;
             
          bool bit = *_it;
          
-         PowerEncoding::peekBit();
+         //PowerEncoding::();
 
          return bit;
       }

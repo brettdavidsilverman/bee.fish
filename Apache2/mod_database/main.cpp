@@ -4,9 +4,7 @@
 #include "Miscellaneous/Miscellaneous.hpp"
 #include "Parser/Parser.hpp"
 #include "Parser/Test.hpp"
-#include "JSON/JSON2Variable.hpp"
-#include "JSON/JSON2Path.hpp"
-#include "JSON/Path2JSON.hpp"
+#include "Database/Database.hpp"
 #include "Test.hpp"
 #include "JSON/Test.hpp"
 
@@ -57,7 +55,8 @@ int main(int argc, const char* argv[]) {
    
    std::optional<bool> result;
    
-   JSON2Path* parser = new JSON2Path(database);
+   JSON match!
+   JSON2Path* parser = new JSON2Path(database, match);
 
    result =
       BeeFishApache2::testParser(parser);

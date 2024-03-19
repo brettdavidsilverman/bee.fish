@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <atomic>
-#include "../PowerEncoding/PowerEncoding.hpp"
+#include "../power-encoding/power-encoding.h"
 #include "../Miscellaneous/Optional.hpp"
 #include "../Script/Variable.hpp"
 #include "Data.hpp"
@@ -13,6 +13,7 @@
 
 using namespace std;
 using namespace BeeFishPowerEncoding;
+using namespace BeeFishBString;
 
 namespace BeeFishDatabase {
 
@@ -105,7 +106,7 @@ namespace BeeFishDatabase {
       Path operator [] (const char* key)
       {
          return Path::operator[] 
-            (string(key));
+            (BeeFishBString::BString(key));
       }
 
       Size getDataSize() const
@@ -452,6 +453,11 @@ namespace BeeFishDatabase {
          return contains;
       }
       
+      bool contains(const char* value)
+      {
+          return contains(BString(value));
+      }
+      
       Database& database()
       {
          return *_database;
@@ -478,7 +484,7 @@ namespace BeeFishDatabase {
             BeeFishScript::Object{};
 
          variable["index"] =
-            (BeeFishScript::Integer)path._index;
+            (BeeFishScript::Number)path._index;
 
 
          if (path._database) {

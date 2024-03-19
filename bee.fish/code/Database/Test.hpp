@@ -2,17 +2,20 @@
 #define BEE_FISH__DATABASE__TEST_HPP
 #include "../Miscellaneous/Miscellaneous.hpp"
 
-#include "../JSON/JSON.hpp"
-#include "../Parser/Test.hpp"
 #include "Database.hpp"
-
+#include "../test/test.h"
 
 namespace BeeFishDatabase
 {
    using namespace BeeFishJSON;
    using namespace BeeFishMisc;
+   using namespace BeeFishTest;
    using namespace BeeFishPowerEncoding;
 
+   bool testPath();
+   bool testArray2Path();
+   bool testSubArray2Path();
+   
 
    inline bool test()
    {
@@ -344,7 +347,15 @@ namespace BeeFishDatabase
    
       }
      
-
+      success = success &&
+         testPath();
+         
+      success= success &&
+         testArray2Path();
+         
+      success = success &&
+         testSubArray2Path();
+         
       db.close();
       remove(db.filename().c_str());
 
@@ -353,7 +364,242 @@ namespace BeeFishDatabase
       return success;
    }
    
+   inline bool testPath()
+   {
+      using namespace std;
 
+      cout << "Testing path" << endl;
+
+      bool success = true;
+      Database database;
+      
+      
+      // Test string
+      if (success)
+      {
+         JSON match;
+         JSON2Path parser(database, match);
+         parser.read("\"Hello World\"");
+         
+         cout << "\tParse string ";
+         success = success &&
+            parser.result() == true;
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         
+         cout << "\tIndexed string ";
+         MinMaxPath path(database);
+
+         success = success &&
+            path.contains(Type::STRING);
+            
+         BeeFishMisc::outputSuccess(success);
+
+      }
+      
+      if (success) {
+         MinMaxPath path(database);
+         path = path[Type::STRING];
+         BeeFishScript::String value;
+         path.getData(value);
+         
+         success = testValue("Hello World", value);
+      }
+      
+      // Test array
+      if (success)
+      {
+         JSON match;
+         JSON2Path parser(database, match);
+         parser.read("[1,[]]");
+         
+         cout << "\tParse array ";
+         success &&
+            parser.result() == true;
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         
+         cout << "\tIndexed array ";
+         MinMaxPath path = database;
+         success =
+            path.contains(Type::ARRAY);
+            
+         BeeFishMisc::outputSuccess(success);
+
+      }
+      
+      if (success) {
+         MinMaxPath path = database;
+         path = path[Type::ARRAY][0][Type::NUMBER];
+         string value;
+         path.getData(value);
+         cout << "\tValue 1: " << value;
+         success = (value == "1");
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         cout << "\tSub Array: ";
+         MinMaxPath path = database;
+         success = path[Type::ARRAY].contains(1);
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      BeeFishMisc::outputSuccess(success);
+      
+      return success;
+   }
+   
+   inline bool testArray2Path()
+   {
+
+      cout << "Test Array 2 Path: ";
+ 
+      Database database;
+      Path path = database;
+      JSON match;
+      JSON2Path parser(database, match);
+      parser.read("[[]]");
+      bool success = true;
+      
+      success = (parser.result() == true);
+      
+      if (success)
+      {
+          //success = path[ARRAY][0].contains(ARRAY);
+      }
+      
+      if (success) {
+         success = path.contains(Type::ARRAY);
+      }
+      
+      if (success) {
+         path = path[Type::ARRAY];
+         success = path.contains(0);
+      }
+      
+      if (success) {
+         MinMaxPath maxPath = path;
+         Size max = maxPath.max<Size>();
+         success &= testResult("\tmax == 0", max == 0);
+         for (Size i = 0; i <= max; ++i)
+         {
+            if (!path.contains(i))
+            {
+                success = false;
+                break;
+            }
+         }
+      }
+      
+      if (success) {
+         path = path[0];
+         success = path.contains(Type::ARRAY);
+      }
+      
+      if (success) {
+         path = path[Type::ARRAY];
+         success = path.isDeadEnd();
+      }
+      
+      BeeFishMisc::outputSuccess(success);
+      
+      return success;
+   }
+   
+   inline bool testSubArray2Path()
+   {
+
+      cout << "Test Sub Array 2 Path: ";
+      
+      Database database;
+      Path path = database;
+      JSON match;
+      JSON2Path parser(database, match);
+      parser.read("[[1]]");
+      bool success = true;
+      
+      success = testResult(
+         "\tparser result",
+         parser.result() == true
+      );
+      
+      if (success)
+      {
+          //success = path[ARRAY][0].contains(ARRAY);
+      }
+      
+      if (success) {
+         cerr << "\tOuter Array: ";
+         
+         success = path.contains(Type::ARRAY);
+         BeeFishMisc::outputSuccess(success);
+      
+      }
+      
+      if (success) {
+         cerr << "\tOuter Array first index: ";
+         path = path[Type::ARRAY];
+         success = path.contains(0);
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         cerr << "\tOuter Array max index: ";
+         MinMaxPath maxPath = path;
+         Size max = maxPath.max<Size>();
+         success = (max == 0);
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         cerr << "\tInner Array: ";
+         path = path[0];
+         success = path.contains(Type::ARRAY);
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         path = path[Type::ARRAY];
+      }
+   
+      if (success) {
+         cerr << "\tInner Array Max index: ";
+         MinMaxPath maxPath = path;
+         if (path.isDeadEnd())
+            success = false;
+         else {
+            Size max = maxPath.max<Size>();
+            success = (max == 0);
+         }
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         
+         path = path[0];
+         success = path.contains(Type::NUMBER);
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         Path valuePath =
+            path[Type::NUMBER];
+         std::string value;
+         valuePath.getData(value);
+         success = (value == "1");
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      BeeFishMisc::outputSuccess(success);
+      
+      return success;
+   }
+   
 }
 
 #endif

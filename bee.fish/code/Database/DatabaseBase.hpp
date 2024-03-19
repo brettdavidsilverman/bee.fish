@@ -80,9 +80,6 @@ namespace BeeFishDatabase {
     
          checkHeader();
          
-         cout << "Database "
-              << filePath
-              << endl;
       }
       
       Database(const Database& source) :
@@ -100,8 +97,7 @@ namespace BeeFishDatabase {
             munmap(_tree, _size);
 
          logMessage(LOG_NOTICE, "~Database()");
-         cout << "~Database"
-              << endl;
+
       }
       
       

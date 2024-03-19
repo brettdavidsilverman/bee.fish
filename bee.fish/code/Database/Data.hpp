@@ -16,7 +16,7 @@
 #endif
 #include "Config.hpp"
 #include "../Miscellaneous/Miscellaneous.hpp"
-#include "../PowerEncoding/PowerEncoding.hpp"
+#include "../power-encoding/power-encoding.h"
 
 using namespace BeeFishPowerEncoding;
 

@@ -62,22 +62,24 @@ int main(int argc, const char* argv[]) {
       cout << "Input" << endl;
    }
    
-   string fileName = "data";
+   string fileName = "test.data";
    
    Database database(fileName);
    cout << database;
    Path root(database);
-   Path path(root);
    
    if (output)
    {
+      Path2JSON path = root;
       cout << path;
       return 0;
    }
    
    if (input)
    {
-      cin >> path;
+      JSON match;
+      JSON2Path json(root, match);
+      json.read(cin);
       return 0;
    }
  

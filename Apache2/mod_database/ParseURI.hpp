@@ -2,7 +2,6 @@
 #define BEE_FISH_WEB_SERVER__PARSE_URI
 
 #include "Database/Database.hpp"
-#include "Parser/Parser.hpp"
 
 using namespace std;
 using namespace BeeFishDatabase;
@@ -24,7 +23,13 @@ namespace BeeFishWebServer {
          _uri += '/';
          
       string segment;
- 
+      std::stringstream test(_uri);
+      while(std::getline(test, segment, '/'))
+      {
+         path = path[BString(segment)];
+      }
+
+/*
       const auto segmentParser =
          Invoke(
             Capture(
@@ -57,10 +62,11 @@ namespace BeeFishWebServer {
          Repeat(segmentParser, 1);
          
       uriParser.read(_uri);
-      
+      */
       return path;
       
    }
+   
 
 }
 

@@ -1,7 +1,8 @@
-OUTPUT=../../build/json
+BUILD=../../build
+OUTPUT=$(BUILD)/json
 CC=g++
 CFLAGS=-std=gnu++17 -Wall -fmax-errors=1 -Ofast
-DEPS=main.cpp json.h string.h number.h array.h object.h boolean.h null.h blank-space.h set.h keyed-set.h test.h version.h ../../build/parser json-parser.h Makefile
+DEPS=main.cpp json.h string.h number.h array.h object.h boolean.h null.h blank-space.h set.h keyed-set.h test.h version.h $(BUILD)/parser json-parser.h Makefile
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
@@ -9,7 +10,7 @@ $(OUTPUT): $(DEPS)
 test:	$(OUTPUT)
 	$(OUTPUT) -test
 	
-../../build/parser:
+$(BUILD)/parser:
 	cd ../parser && make $(DEBUG)
 
 debug:	clean
@@ -27,6 +28,7 @@ trace:	$(OUTPUT)
 	cat trace.txt
 
 clean:
+	rm -f $(OUTPUT)
 	rm -f *.o
 	rm -f a.out
 	rm -f json

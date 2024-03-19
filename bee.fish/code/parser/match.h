@@ -140,6 +140,7 @@ namespace BeeFishParser {
       
       virtual void success()
       {
+         _result = true;
          if (_onsuccess)
             _onsuccess(this);
       }
@@ -164,6 +165,9 @@ namespace BeeFishParser {
 
       virtual void capture()
       {
+      }
+      
+      virtual void eof(Parser* parser) {
       }
       
    

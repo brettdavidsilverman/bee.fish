@@ -13,6 +13,7 @@
 #include "array.h"
 #include "string.h"
 #include "object.h"
+#include "../Script/Type.hpp"
 
 //#include "../b-script/object.h"
 
@@ -21,12 +22,13 @@
 
 using namespace BeeFishParser;
 using namespace BeeFishPowerEncoding;
+using namespace BeeFishScript;
 
 namespace BeeFishJSON
 {
 
    class JSONParser;
-   
+   /*
    enum Type {
       UNDEFINED,
       __NULL,
@@ -36,7 +38,7 @@ namespace BeeFishJSON
       ARRAY,
       OBJECT
    };
-
+*/
    class JSON : public And
    {
    public:
@@ -47,6 +49,7 @@ namespace BeeFishJSON
       String*   _string;
       Array*     _array;
       Object*   _object;
+      
       Or*        _items;
 
    public:
@@ -133,6 +136,23 @@ namespace BeeFishJSON
 
       JSONParser* jsonParser() {
          return (JSONParser*)_parser;
+      }
+      
+      virtual void eof(Parser* parser)
+      override {
+ 
+          if (!_setup)
+             setup(parser);
+             
+          assert(_parser);
+          assert(_items);
+          
+          if (result() == nullopt &&
+              type() == Type::UNKNOWN)
+          {
+             _number->eof(parser);
+          }
+             
       }
    };
 

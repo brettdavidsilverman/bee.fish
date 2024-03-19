@@ -19,15 +19,22 @@
 
 namespace BeeFishBString
 {
-   
-   inline PowerEncoding& operator <<
-   ( 
-      PowerEncoding& stream,
-      const char* string
+   PowerEncoding& operator <<
+   (
+      PowerEncoding &output,
+      const BString& string
    )
    {
-      return operator <<
-      (stream, BString(string));
+      output.writeBit(1);
+
+      for (auto character : string)
+      {
+         output << character;
+      }
+
+      output.writeBit(0);
+
+      return output;
    }
 
    

@@ -21,14 +21,24 @@ namespace BeeFishJSON
       OnKeys _onkeys = {};
       OnValues _onvalues {};
 
-      public:
+      JSON* _json;
+      
+   public:
       JSONParser(Match& match) :
-         Parser(match)
+         Parser(match),
+         _json((JSON*)&match)
       {
       }
       
       virtual ~JSONParser()
       {
+      }
+      
+      virtual void eof() {
+         
+         if (result() == nullopt) {
+            _json->eof(this);
+         }
       }
       
       void captureValue(const BString& key, optional<BString>& value) {
@@ -65,6 +75,13 @@ namespace BeeFishJSON
 
       virtual void onbeginobject(Match* match) {
       }
+      
+      virtual void onobjectkey(const BString& key) {
+      }
+      
+      virtual void onobjectkey(const BString& key, JSON* json) {
+      }
+      
 
       virtual void onendobject(Match* match) {
       }
@@ -109,25 +126,30 @@ namespace BeeFishJSON
    }
 
    // Declared in object.h
-   inline void Object::matchedKey(String& key, LoadOnDemand<JSON>& value) {
+   inline void Object::matchedKey(const BString& key, LoadOnDemand<JSON>& value) {
 
       if (_parser->isJSONParser()) {
-         JSONParser* parser = (JSONParser*)_parser;
-         if (parser->_onkeys.count(key.value()) > 0) {
-            JSONParser::OnKey onkey = parser->_onkeys[key.value()];
-            JSON* json = static_cast<JSON*>(value._match);
-            if (!json->_setup)
-               json->setup(parser);
-            onkey(key.value(), *json);
-         }
+         //JSONParser* parser = (JSONParser*)_parser;
+         JSON* json = (JSON*)(value._match);
+         assert(json);
+         jsonParser()->onobjectkey(key, json);
       }
 
-   } 
+   }
+   
+   // Declared in object.h
+   inline void Object::matchedKey(const BString& key) {
+
+      if (_parser->isJSONParser()) {
+         jsonParser()->onobjectkey(key);
+      }
+
+   }
 
    // Declared in object.h
    inline void Object::matchedSetItem(Object::_KeyValue* item) {
-      
-      JSON* json = static_cast<JSON*>(item->_value->_match);
+
+      JSON* json = (JSON*)(item->_value->_match);
       const BString& key = item->_key->value();
 
       if (_parser->isJSONParser()) {

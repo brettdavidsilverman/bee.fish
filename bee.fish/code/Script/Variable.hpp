@@ -21,8 +21,7 @@ namespace BeeFishScript {
 
    typedef nullptr_t Null;
    typedef bool Boolean; 
-   typedef int64_t Integer;
-   typedef double Number;
+   typedef long double Number;
    typedef std::string String;
    typedef vector<Variable> Array;
 
@@ -104,7 +103,6 @@ namespace BeeFishScript {
 
       union Value {
          Boolean _boolean;
-         Integer  _integer;
          Number _number;
          String _string;
          ArrayPointer _array;
@@ -120,9 +118,6 @@ namespace BeeFishScript {
                break;
             case Type::BOOLEAN:
                _boolean = source._boolean;
-               break;
-            case Type::INTEGER:
-               _integer = source._integer;
                break;
             case Type::NUMBER:
                _number = source._number;
@@ -160,9 +155,6 @@ namespace BeeFishScript {
          case Type::NULL_:
          case Type::BOOLEAN:
             break;
-         case Type::INTEGER:
-            _value._integer = 0;
-            break;
          case Type::NUMBER:
             _value._number = 0;
             break;
@@ -174,6 +166,8 @@ namespace BeeFishScript {
             break;
          case Type::OBJECT:
             new (&_value._object) ObjectPointer(new Object());
+            break;
+         case Type::UNKNOWN:
             break;
          }
       } 
@@ -198,12 +192,7 @@ namespace BeeFishScript {
          _value._number = number;
       }
 
-      Variable(const Integer& integer) {
-         _type = Type::INTEGER;
-         _value._integer = integer;
-      }
-
-      Variable(const void *& pointer) : Variable(Integer((unsigned long)pointer)) {
+      Variable(const void *& pointer) : Variable(Number((unsigned long)pointer)) {
       }
 
       Variable(const String& value) {
@@ -260,7 +249,6 @@ namespace BeeFishScript {
          case Type::UNDEFINED:
          case Type::NULL_:
          case Type::BOOLEAN:
-         case Type::INTEGER:
          case Type::NUMBER:
             break;
          case Type::STRING:
@@ -271,6 +259,8 @@ namespace BeeFishScript {
             break;
          case Type::OBJECT:
             _value._object.~ObjectPointer();
+            break;
+         case Type::UNKNOWN:
             break;
          }
 
@@ -349,12 +339,6 @@ namespace BeeFishScript {
 
       }
 
-      virtual bool operator == (long compare) const {
-
-         return (_type == Type::INTEGER) && (_value._integer == compare);
-
-      }
-      
       virtual bool operator == (double compare) const {
 
          return (_type == Type::NUMBER) && (_value._number == compare);
@@ -386,13 +370,9 @@ namespace BeeFishScript {
             else
                out << "false";
             break;
-         case Type::INTEGER:
-
-            out << _value._integer;
-            break;
          case Type::NUMBER:
             if ( _value._number == 0.0 ) {
-               out << "0.0";
+               out << "0";
             } 
             else if (isnormal(_value._number)) {
 //               out.precision(17);
@@ -465,26 +445,9 @@ namespace BeeFishScript {
 
       String type() const {
 
-         switch (_type) {
-         case Type::UNDEFINED:
-            return "undefined";
-         case Type::NULL_:
-            return "null";
-         case Type::BOOLEAN:
-            return "Boolean";
-         case Type::INTEGER:
-            return "Integer";
-         case Type::NUMBER:
-            return "Number";
-         case Type::STRING:
-            return "String";
-         case Type::ARRAY:
-            return "Array";
-         case Type::OBJECT:
-            return "Object";
-         default:
-            throw std::logic_error("Invalid variable type");
-         }
+         stringstream stream;
+         stream << _type;
+         return stream.str();
 
       }
 
@@ -503,11 +466,6 @@ namespace BeeFishScript {
       operator Boolean& (){
          CHECK_TYPE(Type::BOOLEAN);
          return _value._boolean;
-      }
-
-      operator Integer& () {
-         CHECK_TYPE(Type::INTEGER);
-         return _value._integer;
       }
       
       operator Number& () {

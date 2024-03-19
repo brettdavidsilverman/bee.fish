@@ -12,6 +12,8 @@
 
 #include "test-result.h"
 
+#include "../Miscellaneous/Miscellaneous.hpp"
+
 namespace BeeFishTest
 {
 
@@ -20,7 +22,7 @@ namespace BeeFishTest
 #endif
 
    using namespace BeeFishParser;
-
+   using namespace BeeFishMisc;
 
 #ifdef SERVER
    inline bool testFile(
@@ -85,6 +87,7 @@ namespace BeeFishTest
       bool ok = true;
 
       parser.read(text);
+      parser.eof();
       
       BString value;
 
@@ -142,7 +145,18 @@ namespace BeeFishTest
       return ok;
    }
    
+   inline bool testValue(
+      string expected,
+      string value
+   )
+   {
+      bool success = (expected == value);
+      cout << "\t" << escape(expected) << ":{" << escape(value) << "}" << flush;
+     
+      BeeFishMisc::outputSuccess(success);
 
+      return success;
+   }
 }
 
 #endif

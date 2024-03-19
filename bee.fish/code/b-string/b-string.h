@@ -319,22 +319,7 @@ namespace BeeFishBString
             writeEscapedCharacter(out, character);
       }
 
-      friend PowerEncoding &operator<<(
-          PowerEncoding &stream,
-          const BString &bString)
-      {
-
-         stream.writeBit(1);
-
-         for (auto character : bString)
-         {
-            stream << character;
-         }
-
-         stream.writeBit(0);
-
-         return stream;
-      }
+      
 
       friend PowerEncoding &operator>>(
           PowerEncoding &stream,
@@ -500,6 +485,9 @@ namespace BeeFishBString
       BString _bstr = bstr1;
       return _bstr + bstr2;
    }
+   
+   
+   
 }
 
 #endif

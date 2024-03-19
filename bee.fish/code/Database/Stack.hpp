@@ -55,7 +55,6 @@ namespace BeeFishDatabase {
       }
 
       virtual bool peekBit() const
-      override
       {
          return (*this)[_index]._bit;
       }

@@ -1,17 +1,21 @@
 #ifndef BEE_FISH__SCRIPT__TYPE_HPP
 #define BEE_FISH__SCRIPT__TYPE_HPP
 
+#include "../power-encoding/encoding.h"
+
 namespace BeeFishScript {
 
+   using namespace BeeFishPowerEncoding;
+   
    enum class Type {
       UNDEFINED,
       NULL_,
       BOOLEAN,
-      INTEGER,
       NUMBER,
       STRING,
       ARRAY,
-      OBJECT
+      OBJECT,
+      UNKNOWN
    };
 
    
@@ -28,9 +32,6 @@ namespace BeeFishScript {
          case Type::BOOLEAN:
             out << "bool";
             break;
-         case Type::INTEGER:
-            out << "integer";
-            break;
          case Type::NUMBER:
             out << "number";
             break;
@@ -43,7 +44,7 @@ namespace BeeFishScript {
          case Type::OBJECT:
             out << "object";
             break;
-         default:
+         case Type::UNKNOWN:
             out << "UNKNOWN";
       }
 
@@ -52,13 +53,13 @@ namespace BeeFishScript {
 
    PowerEncoding& operator << (PowerEncoding& out, const Type& type)
    {
-      out << (int)type;
+      out << (unsigned int)type;
       return out;
    }
 
    PowerEncoding& operator >> (PowerEncoding& in, Type& value)
    {
-      int type;
+      unsigned int type;
       in >> type;
       value = (Type)type;
       return in;
