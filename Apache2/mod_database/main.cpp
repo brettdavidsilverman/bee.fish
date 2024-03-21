@@ -48,7 +48,8 @@ int main(int argc, const char* argv[]) {
    
 
 
-   Database database;
+   Database database("test.data");
+   
    
    std::optional<bool> result;
    
@@ -73,7 +74,9 @@ int main(int argc, const char* argv[]) {
    else {
       cout << "Stored in database" << endl;
       
-      Path2JSON start(database);
+      Database database2("test.data");
+      
+      Path2JSON start(database2);
       cout << start << endl;
    }
    

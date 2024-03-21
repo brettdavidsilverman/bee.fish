@@ -16,10 +16,16 @@ APACHECTL=apachectl
 INCLUDES=-I/usr/include/apache2 -I/usr/include/apr-1.0 -I../../bee.fish/code
 #LIBS=-Lmy/lib/dir -lmylib
 
-mod_database.so:	mod_database.cpp ParseURI.hpp ApacheStream.hpp
+DATABASE=../../bee.fish/build/Database
+
+
+mod_database.so:	mod_database.cpp ParseURI.hpp ApacheStream.hpp $(DATABASE) a.out
 	g++ -std=c++17 -fPIC -shared -o mod_database.so $(INCLUDES) mod_database.cpp
-		
-a.out:	mod_database.so
+	
+$(DATABASE):
+	cd ../../bee.fish && make $(DEBUG)
+
+a.out:
 	g++ -std=c++17 -o a.out $(INCLUDES) main.cpp
 	
 #   the default target

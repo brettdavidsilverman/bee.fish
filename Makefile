@@ -1,7 +1,7 @@
 DATABASE=bee.fish/build/Database
 
 all:	$(DATABASE)
-	cd Apache2/mod_database && sudo make clean $(DEBUG) install reload test
+	cd Apache2/mod_database && sudo make $(DEBUG) install reload test
 
 $(DATABASE):
 	cd bee.fish && make $(DEBUG) test
