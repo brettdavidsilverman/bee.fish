@@ -9,7 +9,7 @@
 #include <map>
 #include <mutex>
 
-#include "../Miscellaneous/Miscellaneous.hpp"
+#include "../Miscellaneous/Debug.hpp"
 #include "Version.hpp"
 #include "File.hpp"
 #include "Index.hpp"

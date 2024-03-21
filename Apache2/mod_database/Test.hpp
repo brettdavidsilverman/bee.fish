@@ -58,6 +58,7 @@ namespace BeeFishApache2 {
 
       sort(files.begin(), files.end());
 
+      // Test via apache web server
       for (auto file : files) {
          if (success)
             success = testFile(url, file);
@@ -110,25 +111,17 @@ namespace BeeFishApache2 {
          string command = stream1.str();
          success &= (system(command.c_str()) == 0);
 
-
          // Compare the files
-         stringstream stream;
-         stream  << "diff -s -Z "
-                 << tempFile
-                 << " "
-                 << file;
-                
-         command = stream.str();
-         
-         success = success && 
-            (system(command.c_str()) == 0);
-            
+         success = success &&
+            compareFiles(tempFile, file);
+
          remove(tempFile);
       }
 
       outputSuccess(success);
       return success;
    }
+   
    
 }
 

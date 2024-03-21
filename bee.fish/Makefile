@@ -45,10 +45,10 @@ WebRequest:
 WebServer:
 	-  mkdir build
 	cd code/WebServer && make $(DEBUG)
-
-DBServer:
-	-  mkdir build
-	cd code/DBServer && make $(DEBUG)
+	
+#DBServer:
+	#-  mkdir build
+	#cd code/DBServer && make $(DEBUG)
 
 clean:
 	rm -f -r build
@@ -60,4 +60,4 @@ debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	PORT = 8000
-debug:	install
+debug:	all

@@ -12,9 +12,11 @@ namespace BeeFishDatabase
    using namespace BeeFishTest;
    using namespace BeeFishPowerEncoding;
 
-   bool testPath();
-   bool testArray2Path();
-   bool testSubArray2Path();
+   inline bool testPath();
+   inline bool testArray2Path();
+   inline bool testSubArray2Path();
+   inline bool testAllFiles(string url, string directory);
+   inline bool testFile(Path root, string file, bool expect);
    
 
    inline bool test()
@@ -356,6 +358,9 @@ namespace BeeFishDatabase
       success = success &&
          testSubArray2Path();
          
+      success = success &&
+         testAllFiles(HOST, TEST_DIRECTORY);
+     
       db.close();
       remove(db.filename().c_str());
 
@@ -599,6 +604,76 @@ namespace BeeFishDatabase
       
       return success;
    }
+   
+   inline bool testAllFiles(string url, string directory)
+   {
+      cout << "Testing all files in " << directory << endl;
+
+      bool success = true;
+      
+      vector<string> files;
+
+      for (const auto & entry : directory_iterator(directory))
+      {
+         files.push_back(entry.path());
+      }
+
+      sort(files.begin(), files.end());
+
+      // Test direct to database
+      Database tempDB;
+         
+      for (auto file : files) {
+         if (success)
+            success = testFile(tempDB, file, true);
+         else
+            break;
+      }
+
+      outputSuccess(success);
+
+      return success;
+   }
+   
+   inline bool testFile(Path root, string file, bool expect)
+   {
+      cout << "\t" << file << flush;
+      
+      string tempFile =
+         TEMP_DIRECTORY;
+
+      tempFile += "test.json";
+ 
+      ifstream inputFile(file);
+      JSON json;
+      JSON2Path parser(root[file], json);
+      parser.read(file);
+      inputFile.close();
+      
+      bool success = true;
+      
+      if (parser.result() == true && expect)
+      {
+         ofstream outputFile(tempFile);
+         Path2JSON path = root[file];
+         outputFile << path;
+         outputFile.close();
+         
+         // Compare the files
+         success = success &&
+            compareFiles(tempFile, file);
+
+         remove(tempFile);
+ 
+      }
+      
+      outputSuccess(success);
+      
+      return success;
+      
+   }
+   
+   
    
 }
 

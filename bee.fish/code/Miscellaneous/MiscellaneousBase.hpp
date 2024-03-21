@@ -4,7 +4,7 @@
 #include <string>
 #include <unistd.h>
 #include <memory>
-
+#include <filesystem>
 #include "Log.hpp"
 #include "Optional.hpp"
 #include "../Config.hpp"
@@ -12,8 +12,11 @@
 #define ON_SUCCESS "😃"
 #define ON_FAIL "🚫"
 
+
 namespace BeeFishMisc {
 
+   using namespace std::filesystem;
+   
    inline int hasArg(
       int argc,
       const char* argv[],
@@ -89,7 +92,7 @@ namespace BeeFishMisc {
       return PAGE_SIZE;
    }
    
-   std::string now() {
+   inline std::string now() {
       time_t t = time(0);
       char buffer[9] = {0};
 
@@ -97,6 +100,21 @@ namespace BeeFishMisc {
       return std::string(buffer);
    }
 
+   inline bool compareFiles(std::string file1, std::string file2)
+   {
+      // Compare the files
+      std::stringstream stream;
+      stream  << "diff -s -Z "
+              << file1
+              << " "
+              << file2;
+                
+      std::string command = stream.str();
+         
+      return
+         (system(command.c_str()) == 0);
+      
+   }
    
    
 }

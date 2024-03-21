@@ -1,6 +1,6 @@
 BUILD = ../../build
 CFLAGS = -std=c++17 -fmax-errors=1
-DEPS= $(BUILD)/b-string main.cpp Database.hpp DatabaseBase.hpp Data.hpp Version.hpp Test.hpp File.hpp Version.hpp Path.hpp Stack.hpp Iterator.hpp Makefile JSON2Path.hpp Path2JSON.hpp
+DEPS= $(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp Data.hpp Version.hpp Test.hpp File.hpp Version.hpp Path.hpp Stack.hpp Iterator.hpp Makefile JSON2Path.hpp Path2JSON.hpp
 OUTPUT = $(BUILD)/Database
 
 $(OUTPUT):	$(DEPS)
@@ -8,8 +8,8 @@ $(OUTPUT):	$(DEPS)
 
 all:	$(OUTPUT)
 
-$(BUILD)/b-string:
-	cd ../b-string && make $(DEBUG)
+$(BUILD)/json:
+	cd ../json && make $(DEBUG)
 
 debug:	clean
 debug:	DEBUG = debug
@@ -21,4 +21,4 @@ clean:
 	rm -f trace.txt
 
 test:	$(OUTPUT)
-	$(OUTPUT) -test 2>&1 | c++filt
+	$(OUTPUT) -test

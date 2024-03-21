@@ -228,11 +228,7 @@ namespace BeeFishDatabase {
       }
          
       void setData(const std::string& value) {
-         Branch& branch = getBranch();
-         
          Data* destination = createData(value.size());
-
-         assert(destination);
 
          if (value.size())
             memcpy(

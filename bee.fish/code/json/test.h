@@ -542,6 +542,7 @@ namespace BeeFishJSON
       JSON number;
       JSON string;
       JSON array;
+      JSON object;
       
       ok &= testMatch("undefined", &undefined, "undefined", true, "");
       ok &= testResult("undefined type", undefined.type() == Type::UNDEFINED);
@@ -560,7 +561,10 @@ namespace BeeFishJSON
       
       ok &= testMatch("array", &array, "[]", true);
       ok &= testResult("array type", array.type() == Type::ARRAY);
-      
+     
+      ok &= testMatch("object", &object, "{}", true);
+      ok &= testResult("object type", object.type() == Type::OBJECT);
+     
       assert(ok);
       
       cout << endl;

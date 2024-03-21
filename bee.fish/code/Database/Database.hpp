@@ -8,7 +8,7 @@
 #include <string.h>
 #include <map>
 #include <mutex>
-#include "../power-encoding/power-encoding.h"
+#include "../power-encoding/power-encoding.h"#include "../Miscellaneous/Miscellaneous.hpp"
 
 #include "Version.hpp"
 #include "File.hpp"

@@ -1,10 +1,8 @@
-#ifndef BEE_FISH_MISC__DEBUG
-#define BEE_FISH_MISC__DEBUG
+#ifndef BEE_FISH_MISCELLANEOUS__DEBUG
+#define BEE_FISH_MISCELLANEOUS__DEBUG
 
 #include <fstream>
-#include "MiscellaneousBase.hpp"
 #include "../Config.hpp"
-
 
 
 namespace BeeFishMisc {
