@@ -63,12 +63,19 @@ static bool inputJSON(Path path, request_rec *r);
 static bool outputJSON(Path path, request_rec *r);
 static bool outputDocument(Path path, request_rec *r);
 static Debug debug;
-    
+static mutex _mutex;
+
+namespace BeeFishWebServer {
+   Database database("/home/bee/bee.fish.data");
+
+}
+
 /* The sample content handler */
 static int database_handler(request_rec *r)
 {
     
     debug << now() << " "
+          << r->connection->client_ip << " "
           << r->method << " "
           << "https://bee.fish"
           << r->uri;
@@ -77,8 +84,11 @@ static int database_handler(request_rec *r)
        debug << "?" << r->args;
        
     debug << endl;
-    
-    Path path = parseURI(r->uri);
+ 
+    Path path = parseURI(
+       r->connection->client_ip,
+       r->uri
+    );
 
     Variable result;
     
@@ -116,7 +126,8 @@ static int database_handler(request_rec *r)
     }
     else if (!strcmp(r->method, "POST")) {
         
-        
+       path.clear();
+       
        if (inputJSON(path, r))
           return OK;
 
@@ -172,7 +183,6 @@ static bool inputJSON(Path path, request_rec *r) {
    int pageSize = getPageSize();
    char buffer[pageSize];
    Size pageIndex = 0;
-   path.clear();
    JSON match;
    JSON2Path index(path["index"], match);
    

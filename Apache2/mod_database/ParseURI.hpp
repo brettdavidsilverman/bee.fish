@@ -9,12 +9,13 @@ using namespace BeeFishParser;
 
 namespace BeeFishWebServer {
 
-   static Database
-      database("/home/bee/bee.fish.data");
-   
-   Path parseURI(const char* uri) {
+   extern Database database;
+      
+   Path parseURI(const char* clientIP, const char* uri) {
        
       Path path = database;
+      path = path[clientIP];
+      
       string _uri = uri;
       
       // Add trailing /

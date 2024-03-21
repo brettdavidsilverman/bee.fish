@@ -23,7 +23,7 @@ a.out:	mod_database.so
 	g++ -std=c++17 -o a.out $(INCLUDES) main.cpp
 	
 #   the default target
-all: mod_database.so
+all: mod_database.so a.out
 
 #   install the shared object file into Apache 
 install: mod_database.so
@@ -38,6 +38,13 @@ test: a.out reload
 	sleep 1
 	curl https://bee.fish/ -s > /dev/null
 	./a.out -test
+
+debug:	clean
+debug:	DEBUG = debug
+debug:	CFLAGS += -g -DDEBUG
+debug:	PORT = 8000
+debug:	all
+
 
 #   install and activate shared object by reloading Apache to
 #   force a reload of the shared object file

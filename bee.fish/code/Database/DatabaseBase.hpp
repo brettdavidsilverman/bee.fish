@@ -70,7 +70,13 @@ namespace BeeFishDatabase {
          _incrementSize(incrementSize),
          _pageSize(pageSize)
       {
-         
+         Debug debug;
+         debug << now() << " "
+               << "Database(\""
+               << escape(_filename)
+               << "\")"
+               << endl;
+               
          mapFile();
          
          if (isNew())
@@ -96,7 +102,11 @@ namespace BeeFishDatabase {
          if (_tree)
             munmap(_tree, _size);
 
-         logMessage(LOG_NOTICE, "~Database()");
+         Debug debug;
+         debug << now() << " "
+               << "~Database(\""
+               << escape(_filename)
+               << "\")";
 
       }
       
@@ -270,10 +280,16 @@ namespace BeeFishDatabase {
          //scoped_lock lock(_mutex);
 
          Size oldSize = _size;
-         Size newSize = oldSize + _incrementSize;
+         Size newSize = oldSize * 2 ;
+            //+ _incrementSize;
 
          Debug debug;
-         debug << now() << " Grow File " << (newSize / 1000 / 1000) << "Mb" << endl;
+         debug << now()
+            << " Grow File \""
+               << escape(_filename)
+            << "\" "
+            << (newSize / 1000 / 1000)
+               << "Mb" << endl;
          
         
          File::resize(newSize);

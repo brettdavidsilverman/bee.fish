@@ -10,7 +10,7 @@ curl -X POST \
    
 echo "Downloading large.json?document"
 
-curl https://bee.fish/large.json?document > large2.json -s
+curl https://bee.fish/large.json?document -s > large2.json
 
 echo "Comparing large.json and large2.json"
 
@@ -18,7 +18,7 @@ diff /home/bee/bee.fish/large.json large2.json
 
 echo "Downloading large2a.json"
 
-curl https://bee.fish/large.json > large2a.json -s
+curl https://bee.fish/large.json -s > large2a.json
 
 echo "Uploading large2a.json"
 
@@ -30,7 +30,7 @@ curl -X POST \
    
 echo "Downloading large2b.json"
 
-curl https://bee.fish/large2a.json > large2b.json -s
+curl https://bee.fish/large2a.json -s > large2b.json
 
 echo "Comparing large2a.json and large2b.json"
 
@@ -41,3 +41,5 @@ diff large2a.json large2b.json
 #rm -f large2a.json
 #rm -f large2b.json
 #rm -f large2.json
+
+echo "Success 😃"

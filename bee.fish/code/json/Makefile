@@ -16,11 +16,15 @@ $(BUILD)/parser:
 debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -Og -g -D DEBUG
-debug:	json
+debug:	$(OUTPUT)
 
 time:	clean
 time:	CFLAGS += -D TIME -Ofast
-time:	json
+time:	$(OUTPUT)
+time:	run_time
+
+run_time:
+	time cat /home/bee/bee.fish/large.json | $(OUTPUT)
 
 trace:	$(OUTPUT)
 	rm -f trace.txt
