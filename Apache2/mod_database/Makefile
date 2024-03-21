@@ -35,7 +35,6 @@ clean:
 
 #   simple test
 test: a.out reload
-	sleep 1
 	curl https://bee.fish/ -s > /dev/null
 	./a.out -test
 
@@ -54,8 +53,11 @@ reload: install restart
 #   procedures
 start:
 	$(APACHECTL) start
+	sleep 1
+
 restart:
 	$(APACHECTL) restart
+	sleep 1
 stop:
 	$(APACHECTL) stop
 

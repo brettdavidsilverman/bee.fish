@@ -98,8 +98,7 @@ namespace BeeFishJSON
                   out << "\r\n";
                   out << tabs(tabCount + 1);
                }
-               else
-                  tabCount--;
+               
                   
                for (index = path.min<Size>(stack);
                     index <= max;
@@ -110,9 +109,16 @@ namespace BeeFishJSON
                      Path2JSON item =
                         path[index];
                   
+                     ssize_t _tabCount = tabCount;
+                     
+                     if (max == 0)
+                        _tabCount--;
+                     //else
+                     //   _tabCount++;
+                        
                      item.write(
                         out,
-                        tabCount + 1
+                        _tabCount + 1
                      );
                   }
                   
