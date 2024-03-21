@@ -21,10 +21,10 @@ namespace BeeFishApache2 {
       cout << "Testing Apache2" << endl;
       bool success = true;
       
-      string url = "https://bee.fish/";
+      string url = HOST;
      
       success = success &&
-         testAllFiles(url, "tests");
+         testAllFiles(url, TEST_DIRECTORY);
          
       outputSuccess(success);
       

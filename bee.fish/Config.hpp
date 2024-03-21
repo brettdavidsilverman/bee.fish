@@ -9,4 +9,8 @@
    #define DATABASE_FILENAME "/home/bee/dev.bee.fish.data"
 #endif
 
+#define HOST "https://bee.fish"
+
+#define TEST_DIRECTORY "/home/bee/bee.fish/tests"
+
 #endif
