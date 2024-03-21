@@ -157,7 +157,7 @@ namespace BeeFishParser
                   << _charCount << " (char count)\t"
                   << Match::matchInstanceCount() << " (instances)\t" 
                   << time << " (milliseconds)\t"
-                  << 10000.0 / time * 1000.0 << " (chars per second)" 
+                  << _charCount / time * 100 << " (chars per second)" 
                   << endl;
 
                start = now();

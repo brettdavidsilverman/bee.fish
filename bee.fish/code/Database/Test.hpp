@@ -643,16 +643,18 @@ namespace BeeFishDatabase
          TEMP_DIRECTORY;
 
       tempFile += "test.json";
- 
+      remove(tempFile);
+      
       ifstream inputFile(file);
       JSON json;
       JSON2Path parser(root[file], json);
-      parser.read(file);
+      parser.read(inputFile);
+      parser.eof();
       inputFile.close();
       
-      bool success = true;
+      bool success = (parser.result() == true);
       
-      if (parser.result() == true && expect)
+      if (success && expect)
       {
          ofstream outputFile(tempFile);
          Path2JSON path = root[file];
@@ -662,8 +664,19 @@ namespace BeeFishDatabase
          // Compare the files
          success = success &&
             compareFiles(tempFile, file);
-
-         remove(tempFile);
+            
+         if (!success) {
+            ifstream inputFile(tempFile);
+         
+            string line;
+            while (getline(inputFile, line))
+               cout << line << endl;
+            
+            inputFile.close();
+         }
+         
+         if (success)
+            remove(tempFile);
  
       }
       

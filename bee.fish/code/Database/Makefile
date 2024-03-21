@@ -11,6 +11,14 @@ all:	$(OUTPUT)
 $(BUILD)/json:
 	cd ../json && make $(DEBUG)
 
+time:	clean
+time:	CFLAGS += -D TIME -Ofast -DDEBUG
+time:	$(OUTPUT)
+time:	run_time
+
+run_time:
+	time cat ../../../large.json | $(OUTPUT) -input
+	
 debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -rdynamic -DDEBUG
@@ -19,6 +27,7 @@ debug:	$(OUTPUT)
 clean:
 	rm -f $(OUTPUT)
 	rm -f trace.txt
+	rm -f test.data
 
 test:	$(OUTPUT)
 	$(OUTPUT) -test
