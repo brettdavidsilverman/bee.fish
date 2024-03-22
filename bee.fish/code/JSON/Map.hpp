@@ -1,0 +1,109 @@
+#ifndef BEE_FISH__JSON__MAP_HPP
+#define BEE_FISH__JSON__MAP_HPP
+
+#include <map>
+#include <memory>
+
+#include "../Parser/Parser.hpp"
+
+#include "Number.hpp"
+#include "String.hpp"
+#include "BlankSpace.hpp"
+
+namespace BeeFishJSON {
+
+   using namespace BeeFishParser;
+
+   Parser* _JSON(Parser* params);
+
+   const auto openBrace =
+      Character("{");
+
+   const auto closeBrace =
+      Character("}");
+
+   const auto key =
+      _string;
+
+   const auto colon =
+      Character(":");
+
+   const auto seperator =
+      Character(",");
+
+
+   class Map : public Parser {
+   protected:
+      Parser* _params = nullptr;
+      And _parser;
+   public:
+
+      Map(Parser* params = nullptr) :
+         _params(params),
+         _parser(createParser(params))
+      {
+      }
+
+      Map(const Map& source) :
+         _params(source._params),
+         _parser(createParser(_params))
+      {
+      }
+
+      And createParser(Parser* params) {
+
+         
+         const auto value =
+            LoadOnDemand(_JSON, params);
+
+         
+         const auto line =
+            blankSpaces and
+            key and blankSpaces and
+            colon and blankSpaces and 
+            value and blankSpaces;
+
+         const auto map =
+            blankSpaces and
+            openBrace and blankSpaces and
+            Optional(
+               line and
+               Repeat(
+                  seperator and line,
+                  0
+               )
+            ) and
+            closeBrace;
+
+         return map;
+
+      }
+
+      virtual Parser* copy() const
+      override
+      {
+         return new Map(*this);
+      }
+
+      virtual bool read(char c)
+      override
+      {
+
+         if (_parser._result != nullopt)
+            return false;
+
+         bool matched = _parser.read(c);
+
+         if (_parser._result != nullopt)
+            setResult(_parser._result);
+
+         return matched;
+      }
+
+
+   };
+
+
+}
+
+#endif

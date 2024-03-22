@@ -99,7 +99,7 @@ namespace BeeFishJSON {
       virtual void matchedKey(const BString& key, LoadOnDemand<JSON>& value);
       // Defined in json-parser.h
       virtual void matchedSetItem(_KeyValue* item);
-      
+
       virtual void matchedKey(ObjectKey& key)
       override
       {
