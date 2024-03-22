@@ -12,18 +12,15 @@ namespace BeeFishParser {
    class CIWord : public Word {
    public:
       CIWord(const BString& word) :
-         Word(word)
+         Word(word.toLower())
       {
       
       }
 
    protected:
       virtual bool matchChar(const Char& character) {
-   
-         return (
-            tolower(*_index) == 
-            tolower((char)character)
-         );
+         BString temp = character;
+         return Word::matchChar(temp.toLower());
       }
    };
 

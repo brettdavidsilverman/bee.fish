@@ -3,6 +3,7 @@
 
 #include "match.h"
 #include "../b-string/string.h"
+#include "../Size.hpp"
 
 namespace BeeFishParser {
 
@@ -16,10 +17,19 @@ namespace BeeFishParser {
    
       virtual bool matchChar(const Char& character)
       {
-         return
-            (
-               (*_index) == character
-            );
+         Size countMatches = 0;
+         for (auto c : character)
+         {
+            if (c != (*_index))
+               return false;
+               
+            countMatches++;
+            
+            if (++_index == _word.cend())
+               break;
+         }
+         
+         return countMatches == character.size();
       }
    
    public:
@@ -38,7 +48,6 @@ namespace BeeFishParser {
          
          if (matched)
          {
-            ++_index;
             if (_index == _word.end())
             {
                _result = true;

@@ -13,7 +13,7 @@ namespace BeeFishParser {
    public:
       Character() :
          Match(),
-         _characterToMatch(-1),
+         _characterToMatch(""),
          _any(true)
       {
          _setup = true;

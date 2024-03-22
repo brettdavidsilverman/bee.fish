@@ -32,7 +32,7 @@ namespace BeeFishParser {
 
       bool _setup = false;
       optional<bool> _result = nullopt;
-      Char _character = 0;
+      Char _character = "";
       Match* _match = nullptr;
       Parser* _parser = nullptr;
       
@@ -55,7 +55,7 @@ namespace BeeFishParser {
       Match(const Match& match) :
          _setup(false),
          _result(nullopt),
-         _character(0),
+         _character(""),
          _match(nullptr),
          _parser(match._parser),
          _onsuccess(match._onsuccess)

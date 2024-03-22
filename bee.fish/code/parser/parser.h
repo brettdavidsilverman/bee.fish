@@ -47,7 +47,7 @@ namespace BeeFishParser
       size_t _charCount = 0;
       ssize_t _dataBytes = -1;
       char _lastCharacter = -1;
-      BeeFishBString::UTF8Character _utf8 = -1;
+      BeeFishBString::UTF8Character _utf8 = "";
 
    public:
       Parser(Match& match) :
@@ -211,10 +211,20 @@ namespace BeeFishParser
          size_t _size = string.size();
 
          for (size_t i = 0; i < _size; ++i) {
-            BeeFishBString::Character character = string[i];
+            char character = string[i];
             if (!match(character))
                return false;
          }
+
+         return _result;
+      
+      }
+      
+      virtual optional<bool> read(const char c)
+      {
+
+         if (!match(c))
+            return false;
 
          return _result;
       
