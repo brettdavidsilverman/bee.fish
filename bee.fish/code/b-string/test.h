@@ -143,13 +143,11 @@ namespace BeeFishBString
       Character readCharacter;
       characterStream >> readCharacter;
 
-cerr << "readCharacter: " << readCharacter << endl;
-
       ok &= testResult(
          "Character Read One stream",
          readCharacter == "1"
       );
-assert(ok);
+
       BitStream characterManyStream;
       for (char c = 'a'; c <= 'z'; c++) {
          Character character(c);

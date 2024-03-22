@@ -1,5 +1,5 @@
-#ifndef BEE_FISH_TEST__TEST_RESULT
-#define BEE_FISH_TEST__TEST_RESULT
+#ifndef BEE_FISH_TEST__TEST_RESULT_H
+#define BEE_FISH_TEST__TEST_RESULT_H
 
 namespace BeeFishTest
 {

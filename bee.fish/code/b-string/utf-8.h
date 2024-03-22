@@ -31,6 +31,11 @@ namespace BeeFishBString {
          _value("")
       {
       }
+      
+      UTF8Character(const char * value) :
+          UTF8Character(Value(value))
+      {
+      }
 
       UTF8Character(const Value& value) :
          _expectedByteCount(0),

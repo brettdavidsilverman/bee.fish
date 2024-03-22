@@ -9,7 +9,7 @@
 #include <type_traits>
 
 #include "../power-encoding/power-encoding.h"
-#include "../power-encoding/encoding.h"
+#include "../power-encoding/encoding.h"#include "../Miscellaneous/Miscellaneous.hpp"
 
 using namespace std;
 using namespace BeeFishPowerEncoding;

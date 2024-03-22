@@ -9,7 +9,7 @@
 #include <map>
 #include <mutex>
 #include "../power-encoding/power-encoding.h"#include "../Miscellaneous/Miscellaneous.hpp"
-
+#include "../b-string/string.h"
 #include "Version.hpp"
 #include "File.hpp"
 #include "Index.hpp"

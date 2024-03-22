@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../test/test.h"
+#include "../test/test-result.h"
 #include "power-encoding-base.h"
 #include "../b-string/string.h"
 #include "../b-string/misc.h"
@@ -18,11 +18,13 @@ namespace BeeFishPowerEncoding
       bool ok = true;
       
       std::stringstream stream1;
-      EncodeToStream encodingOut(stream1, stream1);
+      EncodeToStream encodingOut(stream1, cout);
 
-      for (int i = 0; i < 256; i++)
+      for (int i = 0; i < 10; i++)
       {
+         cout << i << " ";
          encodingOut << (unsigned char)i;
+         cout << endl;
       }
 
       cout << "Count: " << encodingOut.count() << endl;

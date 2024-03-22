@@ -1,5 +1,5 @@
-#ifndef BEE_FISH_TEST__TEST
-#define BEE_FISH_TEST__TEST
+#ifndef BEE_FISH_TEST__TEST_H
+#define BEE_FISH_TEST__TEST_H
 
 #include <fstream>
 #ifdef SERVER
@@ -129,6 +129,7 @@ namespace BeeFishTest
    ) 
    {
       BeeFishJSON::JSONParser parser(*match);
+     // Parser parser(*match);
       return testMatch(parser, label, match, text, result, expected);
    }
 

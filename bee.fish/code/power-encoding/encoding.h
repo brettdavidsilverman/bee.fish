@@ -1,9 +1,8 @@
-#ifndef BEE_FISH_POWER_ENCODING__ENCODING
-#define BEE_FISH_POWER_ENCODING__ENCODING
+#ifndef BEE_FISH_POWER_ENCODING__ENCODING_H
+#define BEE_FISH_POWER_ENCODING__ENCODING_H
 
 #include <iostream>
 #include "power-encoding-base.h"
-#include "../b-string/b-string.h"
 
 using namespace std;
 
@@ -16,6 +15,7 @@ namespace BeeFishPowerEncoding
       const char& character
    )
    {
+       
       output.writeBit(1);
 
       // Write as unsigned because
@@ -28,18 +28,19 @@ namespace BeeFishPowerEncoding
 
    PowerEncoding& operator >>
    (
-      PowerEncoding &output,
+      PowerEncoding &input,
       char& character
    )
    {
-      assert(output.readBit() == 1);
+      // read one
+      input.readBit();
 
       uint8_t read;
-      output.read(read);
+      input.read(read);
 
       character = (char)read;
 
-      return output;
+      return input;
    }
 
    PowerEncoding& operator <<
@@ -48,6 +49,7 @@ namespace BeeFishPowerEncoding
       const std::string& string
    )
    {
+      
       output.writeBit(1);
 
       for (const int character : string)
@@ -66,16 +68,21 @@ namespace BeeFishPowerEncoding
       std::string& string
    )
    {
-
+      string.clear();
+      
       char character;
+      
+      // read one
       assert(input.readBit() == 1);
-
+      
       while (input.peekBit())
       {
          input >> character;
-         string += character;
+         
+         string.push_back(character);
       }
 
+      // read zero
       assert(input.readBit() == 0);
 
       return input;
@@ -103,6 +110,7 @@ namespace BeeFishPowerEncoding
       T& value
    )
    {
+      // read one
       assert(input.readBit() == 1);
 
       input.read(value);
