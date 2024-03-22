@@ -231,8 +231,9 @@ namespace BeeFishId
          
          write(stream);
 
-         assert(stream._count == 0);
-         
+         if (stream._count != 0)
+            throw logic_error("Id::createKey");
+
          // get the data
          Data key = stream.toData();
 

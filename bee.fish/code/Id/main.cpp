@@ -12,7 +12,7 @@ using namespace BeeFishId;
 
 int main(int argc, const char* argv[]) {
    
-   while (1) {
+   while (0) {
       auto nanoseconds =
             std::chrono::duration_cast
                <std::chrono::nanoseconds>
@@ -24,7 +24,6 @@ int main(int argc, const char* argv[]) {
    
       cout << nanoseconds << endl;
    }
-   return 0;
    
    if (hasArg(argc, argv, "-test") >= 0)
    {

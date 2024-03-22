@@ -49,7 +49,7 @@ namespace BeeFishId
    
    inline bool testIds()
    {
-      ofstream ofile("temp.txt");
+      ofstream ofile("test.txt");
       vector<Id> array(1000);
       for (Id& id : array)
       {
@@ -62,7 +62,7 @@ namespace BeeFishId
       ofile.close();
 
 
-      ifstream ifile("temp.txt");
+      ifstream ifile("test.txt");
       string key;
       for (;;) {
          getline(ifile, key);
