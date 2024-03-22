@@ -187,7 +187,7 @@ namespace BeeFishBString {
       BString bstr() {
          BString string;
          for (auto bit : (*this)) {
-            string.push_back(bit ? Character('1') : Character('0'));
+            string.push_back(bit ? '1' : '0');
          }
          return string;
       }

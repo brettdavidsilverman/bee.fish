@@ -102,7 +102,7 @@ namespace BeeFishBString {
          }
          return out;
       }
-
+/*
       inline friend BStream& operator << (BStream& out, BeeFishBString::Character character) {
          const std::string chars = getChars(character);
          
@@ -111,10 +111,10 @@ namespace BeeFishBString {
 
          return out;
       }
+*/
 
-      inline friend BStream& operator << (BStream& out, BeeFishBString::BString bstring) {
-         for (const Character& character : bstring)
-            out << character;
+      inline friend BStream& operator << (BStream& out, const BeeFishBString::BString& bstring) {
+         (ostream&)out << bstring;
          return out;
       }
 

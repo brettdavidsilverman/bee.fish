@@ -15,26 +15,46 @@ using namespace std;
 using namespace BeeFishPowerEncoding;
 
 namespace BeeFishBString {
-   typedef char32_t Character;
-
-   inline PowerEncoding& operator << (PowerEncoding& encoding, const Character& value) {
-      encoding.writeBit(1);
-
-      encoding.write((unsigned long)value);
-
-      return encoding;
-   }
-
-   inline PowerEncoding& operator >> (PowerEncoding& encoding, Character& character) {
-      assert(encoding.readBit() == 1);
-      unsigned long value;
-      encoding.read(value);
-
-      character = value;
-
-      return encoding;
-   }
-
+    class Character : public std::string
+   {
+   public:
+      Character() {
+      }
+      
+      Character(char c) {
+         push_back(c);
+      }
+      
+      Character(const char* character) :
+         std::string(character)
+      {
+      }
+      
+      Character(const std::string& character) :
+         std::string(character)
+      {
+      }
+      
+      friend PowerEncoding& operator <<      (
+         PowerEncoding& out,
+         const Character& value
+      )
+      {
+          out << (std::string&)value;
+          return out;
+      }
+      
+      friend PowerEncoding& operator >>      (
+         PowerEncoding& in,
+         Character& value
+      )
+      {
+          in >> (std::string&)value;
+          return in;
+      }
+   };
+   
+/*
    inline std::string getChars(const Character& value) {
 
       std::string buffer;
@@ -144,14 +164,13 @@ namespace BeeFishBString {
 
 
    }
-
+*/
    inline void writeCharacter(
       ostream& out,
       const Character& value
    )
    {
-      const std::string chars = getChars(value);
-      for (const char c : chars) {
+      for (const char c : value) {
          out << c;
       }
    }
@@ -166,6 +185,14 @@ namespace BeeFishBString {
       const Character& value
    )
    {
+      for (auto c : value)
+      {
+         out << BeeFishMisc::escape(c);
+      }
+      
+      return;
+      
+      /*
       // std::ios_base::fmtflags f( out.flags() );
       switch (value)
       {
@@ -227,9 +254,11 @@ namespace BeeFishBString {
       }
       
       // out.flags( f );
+      */
    }
       
    // https://unicodebook.readthedocs.io/unicode_encodings.html#surrogates
+   /*
    inline bool isSurrogatePair(
       const Character& first,
       const Character& second
@@ -256,7 +285,7 @@ namespace BeeFishBString {
       return first;
    }
    
-   
+   */
 }
 
 #endif

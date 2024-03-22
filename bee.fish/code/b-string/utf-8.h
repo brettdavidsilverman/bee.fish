@@ -7,6 +7,8 @@
 #include "../misc/optional.h"
 #include <iomanip>
 
+#include "character.h"
+
 using namespace std;
 
 namespace BeeFishBString {
@@ -19,14 +21,14 @@ namespace BeeFishBString {
       optional<bool> _result = nullopt;   
       
    public:
-      typedef uint32_t Value;
-      Value _value = 0;
+      typedef Character Value;
+      Value _value;
       
       UTF8Character() :
          _expectedByteCount(0),
          _byteCount(0),
          _result(nullopt),
-         _value(0)
+         _value("")
       {
       }
 
@@ -62,7 +64,7 @@ namespace BeeFishBString {
       {
          _expectedByteCount = 0;
          _byteCount = 0;
-         _value = 0;
+         _value.clear();
          _result = nullopt;
       }
       
@@ -73,16 +75,15 @@ namespace BeeFishBString {
 
       bool match(uint8_t byte)
       {
-         bitset<8> bits(byte);
          bool matched = false;
          
          if (_byteCount == 0)
          {
-            matched = matchFirstByte(bits);
+            matched = matchFirstByte(byte);
          }
          else
          {
-            matched = matchSubsequentBytes(bits);
+            matched = matchSubsequentBytes(byte);
          }
          
          if (matched)
@@ -105,29 +106,29 @@ namespace BeeFishBString {
          
       }
       
-      bool matchFirstByte(const bitset<8>& bits)
+      bool matchFirstByte(const uint8_t byte)
       {
+         bitset<8> bits(byte);
+         
          // Match first byte
          for (auto it = FirstByte.cbegin();
                    it != FirstByte.cend();
                  ++it )
          {
             // Get the byte.
-            UTF8Byte byte = *it;
+            UTF8Byte _byte = *it;
             
             // See if its a match.
-            if (byte.match(bits))
+            if (_byte.match(bits))
             {
                // Store how many subsequent bytes
                // (including this one).
-               _expectedByteCount = byte._byteCount;
+               _expectedByteCount = _byte._byteCount;
                
                // Start the character value
                // using the bytes extract mask.
              
-               _value = (
-                  bits & byte._extractMask
-               ).to_ulong();
+               _value = byte;
                
                
                return true;
@@ -138,23 +139,20 @@ namespace BeeFishBString {
          return false;
       }
       
-      bool matchSubsequentBytes(const bitset<8>& bits)
+      bool matchSubsequentBytes(const uint8_t byte)
       {
+         bitset<8> bits(byte);
+         
          // Match subsequent bytes.
          
          // Check the byte is a subsequent
          // byte.
-         UTF8Byte byte = UTF8Subsequent;
-         if (byte.match(bits))
+         UTF8Byte _byte = UTF8Subsequent;
+         if (_byte.match(bits))
          {
             // Left shift the 6 usable bits
             // onto the character value.
-            _value =
-               (_value << 6) |
-               (
-                  bits &
-                     UTF8Subsequent._extractMask
-               ).to_ulong();
+            _value.push_back(byte);
                
             // We matched.
             return true;
@@ -166,8 +164,7 @@ namespace BeeFishBString {
       }
 
       BeeFishBString::Character character() {
-         BeeFishBString::Character character(_value);
-         return character;
+         return _value;
       }      
 
       const optional<bool> result() const {
