@@ -54,20 +54,22 @@ int main(int argc, const char* argv[]) {
    std::optional<bool> result;
    
    JSON match;
-   JSON2Path* parser = new JSON2Path(database, match);
-
-   result =
-      BeeFishApache2::testParser(parser);
+   JSON2Path parser =
+      JSON2Path(database, match);
   
+   parser.read(cin);
+   parser.eof();
+   
+      
    int returnCode = 0;
 
-   if (result == false) {
+   if (parser.result() == false) {
       string error =
-         parser->getErrorMessage();
+         parser.getErrorMessage();
       cout << error << endl;
       returnCode = 2;
    }
-   else if (result == nullopt) {
+   else if (parser.result() == nullopt) {
       cout << "Insufficient data";
       returnCode = 3;
    }
@@ -80,7 +82,7 @@ int main(int argc, const char* argv[]) {
       //cout << start << endl;
    }
    
-   delete parser;
+
    
    return returnCode;
 
