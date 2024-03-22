@@ -225,7 +225,7 @@ namespace BeeFishJSON {
       virtual void matchedItem(StringCharacter* item) {
          BeeFishBString::Character character = item->character();
          BString::push_back(character);
-         *this << character;
+         BStream::write(character);
          Repeat::matchedItem(item);
       }
 
