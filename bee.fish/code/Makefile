@@ -4,6 +4,7 @@ DEPS=$(BUILD)/Database Makefile
 TEMP = /var/tmp
 
 all:	$(DEPS)
+	cd Id && make $(DEBUG) test
 	cd power-encoding && make $(DEBUG) test
 	cd b-string && make $(DEBUG) test
 	cd parser && make $(DEBUG) test
@@ -23,6 +24,7 @@ $(BUILD)/Database:
 	
 test:	all
 	../stop.sh 8000
+	cd Id && ../$(BUILD)/Id -test
 	cd power-encoding && ../$(BUILD)/power-encoding -test
 	cd b-string && ../$(BUILD)/b-string -test
 	cd parser && ../$(BUILD)/parser -test

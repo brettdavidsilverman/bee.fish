@@ -13,7 +13,7 @@ namespace BeeFishPowerEncoding
 {
    class PowerEncoding
    {
-   protected:
+   public:
       long int _count {0};
 
    public:

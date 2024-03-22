@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <unistd.h>
-#include "../Miscellaneous/Debug.hpp"
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "../Size.hpp"
 
 namespace BeeFishDatabase {

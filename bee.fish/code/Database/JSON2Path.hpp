@@ -15,10 +15,9 @@ namespace BeeFishDatabase {
    protected:
       
       Path _start;
-      vector<Path>* _pathStack;
-      vector<bool>* _containerStack;
-      bool _deleteStack = false;
-      
+      vector<Path> _pathStack;
+      vector<bool> _containerStack;
+
       virtual void setVariable(const Type type, const std::string& value = "")
       {
          bool isArrayContainer = topContainer();
@@ -105,56 +104,49 @@ namespace BeeFishDatabase {
          : JSONParser(match),
          _start(start)
       {
-         _pathStack = new vector<Path>();
-         _containerStack = new vector<bool>();
-         _deleteStack = true;
          push_back_path(_start);
          push_back_container(false);
       }
       
       JSON2Path(Database& database, Match& match) :
-          JSON2Path(Path(database), match)
+         JSON2Path(Path(database), match)
       {
       }
 
       virtual ~JSON2Path()
       {
-         if (_deleteStack) {
-            pop_back_path();
-            delete _pathStack;
-            delete _containerStack;
-         }
+         assert(_pathStack.size() ==1);
       }
       
       Path topPath() {
          return 
-            (*_pathStack)[_pathStack->size() - 1];
+            _pathStack[_pathStack.size() - 1];
       }
       
       bool topContainer() {
          return
-            (*_containerStack)
-            [_containerStack->size() - 1];
+            _containerStack
+            [_containerStack.size() - 1];
       }
       
       virtual void push_back_path(Path path)
       {
-         _pathStack->push_back(path);
+         _pathStack.push_back(path);
       }
       
       virtual void push_back_container(bool isArrayContainer)
       {
-         _containerStack->push_back(isArrayContainer);
+         _containerStack.push_back(isArrayContainer);
       }
       
       virtual void pop_back_path()
       {
-         _pathStack->pop_back();
+         _pathStack.pop_back();
       }
       
       virtual void pop_back_container()
       {
-         _containerStack->pop_back();
+         _containerStack.pop_back();
       }
       
       virtual void onbeginobject(Match* match) {

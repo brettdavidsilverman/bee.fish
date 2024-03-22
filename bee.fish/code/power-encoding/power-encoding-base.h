@@ -13,7 +13,7 @@ namespace BeeFishPowerEncoding
 {
    class PowerEncoding
    {
-   protected:
+   public:
       long int _count {0};
 
    public:
@@ -90,6 +90,10 @@ namespace BeeFishPowerEncoding
       }
 
       virtual void reset() {
+         resetCount();
+      }
+      
+      virtual void resetCount() {
          _count = 0;
       }
 

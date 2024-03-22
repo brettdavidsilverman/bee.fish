@@ -10,6 +10,10 @@ test:
 	-  mkdir build
 	cd code && make test
 
+id:
+	- mkdir build
+	cd code/Id && make $(DEBUG)
+	
 power-encoding:
 	- mkdir build
 	cd code/power-encoding && make $(DEBUG)
