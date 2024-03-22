@@ -106,7 +106,8 @@ namespace BeeFishDatabase {
          debug << now() << " "
                << "~Database(\""
                << escape(_filename)
-               << "\")";
+               << "\")"
+               << endl;
 
       }
       
@@ -280,8 +281,8 @@ namespace BeeFishDatabase {
          //scoped_lock lock(_mutex);
 
          Size oldSize = _size;
-         Size newSize = oldSize * 2 ;
-            //+ _incrementSize;
+         Size newSize = oldSize
+            + _incrementSize;
 
          Debug debug;
          debug << now()

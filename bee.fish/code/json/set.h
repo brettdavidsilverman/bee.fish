@@ -61,8 +61,6 @@ namespace BeeFishJSON
 
             virtual void success() {
                _set->matchedSetItem((Item*)_match);
-               delete _match;
-               _match = nullptr;
             }
          };
 

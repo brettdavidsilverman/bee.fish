@@ -74,10 +74,10 @@ int main(int argc, const char* argv[]) {
    else {
       cout << "Stored in database" << endl;
       
-      Database database2("test.data");
+    //  Database database2("test.data");
       
-      Path2JSON start(database2);
-      cout << start << endl;
+     // Path2JSON start(database2);
+      //cout << start << endl;
    }
    
    delete parser;
