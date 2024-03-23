@@ -6,9 +6,12 @@
 #include <sys/mman.h>
 #include <stdio.h>
 #include <string.h>
-#include <map>
-#include <mutex>
-
+#include <atomic>
+#include <chrono>
+#include <future>
+#include <iostream>
+#include <thread>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include "../Miscellaneous/Debug.hpp"
 #include "Version.hpp"
 #include "File.hpp"
@@ -17,11 +20,14 @@
 #include "Data.hpp"
 
 using namespace std;
+using namespace std::literals;
 
 namespace BeeFishDatabase {
    
    using namespace BeeFishMisc;
 
+   typedef boost::interprocess::interprocess_mutex Mutex;
+   
    // Store [left, right] branch elements.
    // A zero is stored if the branch
    // hasnt been visited yet.
@@ -37,7 +43,9 @@ namespace BeeFishDatabase {
       {
          char   _version[256];
          size_t _pageSize;
-         Index  _nextIndex;
+         AtomicIndex _nextIndex;
+         Mutex _growLock;
+         std::atomic_flag _writtingFlag;
       };
     
       struct Tree
@@ -50,13 +58,13 @@ namespace BeeFishDatabase {
       Size    _size;
       Tree*   _tree {nullptr};
       Branch* _root;
-      Index*  _nextIndex;
+      AtomicIndex*  _nextIndex;
       Size    _branchCount;
       Size    _pageSize;
-
+      Mutex*  _mutex;
    public:
-      std::mutex _mutex;
-   
+      std::atomic_flag* _writtingFlag;
+   public:
       Database(
          string filePath = "",
          const Size initialSize = 1000 * 1000,
@@ -120,7 +128,9 @@ namespace BeeFishDatabase {
          //memset(&header, '\0', sizeof(Header));
          strcpy(header._version, DATABASE_VERSION);
          header._pageSize = _pageSize;
-         header._nextIndex = Branch::Root;
+         memcpy(&(header._nextIndex), new AtomicIndex{Branch::Root}, sizeof(AtomicIndex));
+         memcpy(&(header._growLock), new Mutex(), sizeof(Mutex));
+         memcpy(&(header._writtingFlag), new std::atomic_flag{false}, sizeof(std::atomic_flag));
       }
       
       virtual void checkHeader()
@@ -181,7 +191,11 @@ namespace BeeFishDatabase {
             
          _nextIndex = 
            &(_tree->_header._nextIndex);
-
+           
+         _mutex = &(_tree->_header._growLock);
+         
+         _writtingFlag = &(_tree->_header._writtingFlag);
+         
       }
          
       
@@ -193,8 +207,8 @@ namespace BeeFishDatabase {
 
       inline Index getNextIndex()
       {
-         Index& index = *_nextIndex;
-         return ++index;
+         return ++(*_nextIndex);
+         //return _nextIndex->load();
 
       }
  
@@ -208,14 +222,10 @@ namespace BeeFishDatabase {
             ceil((float)size /
                  (float)sizeof(Branch));
 
-         Index dataIndex;
-
-         {
-            scoped_lock lock(_mutex);
-            dataIndex = getNextIndex();
+         Index dataIndex;
+         dataIndex = getNextIndex();
          
-            (*_nextIndex) += (branchCount);
-         }
+         (*_nextIndex) += (branchCount);
 
          // Check for resize
          while ( _branchCount < *_nextIndex  )
@@ -278,8 +288,8 @@ namespace BeeFishDatabase {
       virtual Size growFile()
       {
 
-         //scoped_lock lock(_mutex);
-
+         _mutex->lock();
+         
          Size oldSize = _size;
          Size newSize = oldSize
             + _incrementSize;
@@ -293,7 +303,8 @@ namespace BeeFishDatabase {
                << "Mb" << endl;
          
         
-         File::resize(newSize);
+         if (newSize > size())
+            newSize = File::resize(newSize);
          
          _tree = (Tree*)
             mremap(
@@ -307,7 +318,9 @@ namespace BeeFishDatabase {
             
          setMembers();
 
-         return _size;
+         _mutex->unlock();
+         
+         return size();
 
       }
       

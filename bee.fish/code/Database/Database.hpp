@@ -1,6 +1,6 @@
 #ifndef BEE_FISH_DATABASE__DATABASE_HPP
 #define BEE_FISH_DATABASE__DATABASE_HPP
-
+
 #include "Config.hpp"
 
 #include <sys/mman.h>

@@ -62,13 +62,14 @@ namespace BeeFishDatabase {
       virtual void writeBit(bool bit)
       {
 
-         scoped_lock lock(_database->_mutex);
+         //scoped_lock lock(_database->_mutex);
          
          Branch& branch = getBranch();
 
          if (bit == false)
          {
             if (branch._left == 0) {
+               getWriteLock();
                branch._left =
                   _database->getNextIndex();
             }
@@ -78,6 +79,7 @@ namespace BeeFishDatabase {
          else
          {
             if (branch._right == 0) {
+               getWriteLock();
                branch._right =
                   _database->getNextIndex();
             }
@@ -87,6 +89,27 @@ namespace BeeFishDatabase {
 
          PowerEncoding::writeBit(bit);
          
+         clearWriteLock();
+         
+      }
+      
+      virtual void getWriteLock()
+      {
+          while ( _database->
+                  _writtingFlag->
+                    test_and_set(std::memory_order_acquire) == 0)
+          {
+             std::this_thread::yield();
+          }
+          
+      }
+      
+      virtual void clearWriteLock()
+      {
+         _database->
+            _writtingFlag->
+            clear(std::memory_order_release);
+             
       }
 
       template<typename T>

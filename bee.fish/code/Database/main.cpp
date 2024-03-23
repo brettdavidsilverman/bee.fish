@@ -46,14 +46,6 @@ int main(int argc, const char* argv[]) {
       cout << "Read" << endl;
    }
    
-   bool output =
-      (hasArg(argc, argv, "-output") != -1);
-      
-   if (output)
-   {
-      cout << "Output" << endl;
-   }
-
    bool input =
       (hasArg(argc, argv, "-input") != -1);
       
@@ -62,24 +54,33 @@ int main(int argc, const char* argv[]) {
       cout << "Input" << endl;
    }
    
+   bool output =
+      (hasArg(argc, argv, "-output") != -1);
+      
+   if (output)
+   {
+      cout << "Output" << endl;
+   }
+
+   
    string fileName = "test.data";
    
    Database database(fileName);
    cout << database;
    Path root(database);
    
-   if (output)
-   {
-      Path2JSON path = root;
-      cout << path;
-      return 0;
-   }
-   
    if (input)
    {
       JSON match;
       JSON2Path json(root, match);
       json.read(cin);
+      return 0;
+   }
+   
+   if (output)
+   {
+      Path2JSON path = root;
+      cout << path;
       return 0;
    }
  

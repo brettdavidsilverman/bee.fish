@@ -43,13 +43,13 @@ namespace BeeFishDatabase {
             case Type::NULL_:
                break;
             case Type::BOOLEAN:
-               path.setData(
+               path.setData<bool>(
                   (value == "true") ? true : false
                );
                break;
             case Type::NUMBER:
             {
-               path.setData(
+               path.setData<std::string>(
                   value
                );
                
@@ -61,10 +61,12 @@ namespace BeeFishDatabase {
             case Type::ARRAY:
                push_back_path(path);
                push_back_container(true);
+               path.setData<Size>(0);
                break;
             case Type::OBJECT:
                push_back_path(path);
                push_back_container(false);
+               path.setData<Size>(0);
                break;
             default:
                throw std::logic_error("JSON2Path");
@@ -80,15 +82,9 @@ namespace BeeFishDatabase {
          MinMaxPath path =
             topPath();
             
-         Size next;
-             
-         if (path.isDeadEnd())
-            next = 0;
-         else
-            next = path.max<Size>()
-               + 1;
+         Size& next = path.getData();
 
-         path = path[next];
+         path = path[next++];
          
          push_back_path(path);
          push_back_container(false);
@@ -115,7 +111,6 @@ namespace BeeFishDatabase {
 
       virtual ~JSON2Path()
       {
-         assert(_pathStack.size() ==1);
       }
       
       Path topPath() {
@@ -196,11 +191,8 @@ namespace BeeFishDatabase {
          pop_back_path();
          pop_back_container();
          Path path = topPath();
-         Size count = 0;
-         if (path.hasData())
-            count = path.getData();
+         Size& count = path.getData();
          ++count;
-         path.setData(count);
         
       }
 
