@@ -12,6 +12,7 @@
 #include <locale>
 #include <codecvt>
 #include <locale>
+#include <codecvt>
 
 #ifdef SERVER
 #include <filesystem>
@@ -465,6 +466,50 @@ namespace BeeFishBString
          line = str;
          return in;
       }
+      
+      // convert UTF-8 string to wstring
+      std::wstring utf8_to_wstring ()
+      {
+         std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+         return myconv.from_bytes(*this);
+      }
+
+      // convert wstring to UTF-8 string
+      static BString wstring_to_utf8 (const std::wstring& str)
+      {
+         std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+         return myconv.to_bytes(str);
+      }
+      
+      BString toLower() {
+         // the locale will be the UTF-8 enabled English
+         std::setlocale(LC_CTYPE, "en_US.UTF-8");
+         
+         std::wstring str = utf8_to_wstring();
+
+         for (std::wstring::iterator it = str.begin(); it != str.end(); ++it)
+         {
+            *it = towlower(*it);
+         }
+         
+         return wstring_to_utf8(str);
+      }
+      
+      BString toUpper() {
+         // the locale will be the UTF-8 enabled English
+         std::setlocale(LC_CTYPE, "en_US.UTF-8");
+         
+         std::wstring str = utf8_to_wstring();
+
+         for (std::wstring::iterator it = str.begin(); it != str.end(); ++it)
+         {
+            *it = towupper(*it);
+         }
+         
+         return wstring_to_utf8(str);
+      }
+      
+
    };
 
    inline bool operator==(const char* _1, const BStringBase& _2)
@@ -488,7 +533,7 @@ namespace BeeFishBString
       return _bstr + bstr2;
    }
    
-   
+
    
 }
 

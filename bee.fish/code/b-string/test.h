@@ -84,7 +84,7 @@ namespace BeeFishBString
 
       ok &= testResult(
          "B-String character @",
-         (value == Character("@"))
+         (value == Character('@'))
       );
 
       BString bstr2 = "from Bee";
@@ -120,6 +120,19 @@ namespace BeeFishBString
          BString("String") != "unequal"
       );
 
+
+      BString mixedCase = "I 💜 Rock and roll";
+      BString lowerCase = mixedCase.toLower();
+      ok &= testResult(
+         lowerCase,
+         lowerCase == "i 💜 rock and roll"
+      );
+      
+      BString upperCase = mixedCase.toUpper();
+      ok &= testResult(
+         upperCase,
+         upperCase == "I 💜 ROCK AND ROLL"
+      );
       cout << endl;
 
       return ok;
