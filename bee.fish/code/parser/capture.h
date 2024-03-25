@@ -14,8 +14,9 @@ namespace BeeFishParser {
    class Capture : public Match
    {
    public:
-      BString& _valueRef;
       BString _value;
+      BString& _valueRef;
+      
 
    public:
       Capture() :
@@ -55,9 +56,6 @@ namespace BeeFishParser {
              _match->capture(parser, c);
           }
           
-          
-         // cerr << "{" << c << "}" << flush;
-        
           _valueRef.push_back(c);
       }
       

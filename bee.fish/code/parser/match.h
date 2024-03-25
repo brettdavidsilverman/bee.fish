@@ -75,7 +75,7 @@ namespace BeeFishParser {
   
       bool matched() const
       {
-         return (result() == true);
+         return (result(true));
       }
       
 
@@ -151,7 +151,7 @@ namespace BeeFishParser {
          return _result;
       }
 
-      virtual bool result(optional<bool> compare)
+      virtual bool result(optional<bool> compare) const
       {
          return result() == compare;
       }

@@ -99,14 +99,10 @@ namespace BeeFishParser {
          if (size() == 0)
             return;
 
-         size_t last = _iterator;
-         if (last == size())
-            --last;
-         
          if (_result != false)
          {
     
-            Match* item = _inputs[last];
+            Match* item = _inputs[_iterator];
             //if (item->_result != false)
             item->capture(parser, c);
             

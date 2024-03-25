@@ -255,6 +255,9 @@ namespace BeeFishParser
       }
       
       virtual void eof() {
+         if (result() == nullopt && _match) {
+            _match->eof(this);
+         }
       }
 
       virtual string getErrorMessage() const {
