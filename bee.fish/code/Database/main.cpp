@@ -67,22 +67,21 @@ int main(int argc, const char* argv[]) {
    
    Database database(fileName);
    cout << database;
-   Path root(database);
+   Path root = database;
    
    if (input)
    {
-      JSON match;
-      JSON2Path json(root, match);
+      JSON2Path json(root);
       json.read(cin);
-      return 0;
    }
    
    if (output)
    {
       Path2JSON path = root;
-      cout << path;
+      cout << path << endl;
       return 0;
    }
- 
    
+   return 0;
+
 }

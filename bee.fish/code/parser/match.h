@@ -109,9 +109,6 @@ namespace BeeFishParser {
 
          bool matched = matchCharacter(character);
 
-         if (matched) 
-            capture();
-
          if (_result == true)
             success();
          else if (_result == false)
@@ -149,22 +146,38 @@ namespace BeeFishParser {
       {
       }
             
-      virtual optional<bool> result() const
+      virtual const optional<bool>& result() const
       {
          return _result;
       }
 
-      virtual BString value()
+      virtual bool result(optional<bool> compare)
       {
-         return EmptyString();
+         return result() == compare;
+      }
+      
+      virtual BString& value()
+      {
+         if (_match)
+            return _match->value();
+            
+         static BString emptyString = "";
+         return emptyString;
       }
       
       virtual const Char& character() const {
          return _character;
       }
-
-      virtual void capture()
+      
+      virtual void capture(Parser* parser, char c)
       {
+         if (!_setup)
+            setup(parser);
+            
+         if (_match)
+         {
+            _match->capture(parser, c);
+         }
       }
       
       virtual void eof(Parser* parser) {

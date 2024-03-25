@@ -44,9 +44,10 @@ namespace BeeFishParser {
 
       virtual void success()
       {
-         Match::success();
          if (_function)
             _function(_match);
+         Match::success();
+         
          
       }
       

@@ -11,6 +11,7 @@ namespace BeeFishScript {
       UNDEFINED,
       NULL_,
       BOOLEAN,
+      INTEGER,
       NUMBER,
       STRING,
       ARRAY,
@@ -31,6 +32,9 @@ namespace BeeFishScript {
             break;
          case Type::BOOLEAN:
             out << "bool";
+            break;
+         case Type::INTEGER:
+            out << "integer";
             break;
          case Type::NUMBER:
             out << "number";

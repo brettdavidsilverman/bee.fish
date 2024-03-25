@@ -131,7 +131,7 @@ namespace BeeFishJSON
       {
       }
       
-      virtual BString value()
+      virtual BString& value()
       {
          return _match->value();
       }

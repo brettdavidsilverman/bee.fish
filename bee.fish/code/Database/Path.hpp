@@ -251,6 +251,7 @@ namespace BeeFishDatabase {
       }
          
       void setData(const std::string& value) {
+         //cerr << "Path::setData: " << value << endl;
          Data* destination = createData(value.size());
 
          if (value.size())
@@ -401,7 +402,7 @@ namespace BeeFishDatabase {
       
       virtual bool peekBit()
       {
-         const Branch& branch =
+         const Branch branch =
             getBranch();
                
          if (branch._left)
@@ -508,6 +509,8 @@ namespace BeeFishDatabase {
 
          if (path._database) {
             variable["hasData"] = path.hasData();
+            if (path.hasData())
+               variable["dataSize"] = (Integer)path.getDataSize();
             variable["branch"] = path.getBranch().getVariable();
          }
          else

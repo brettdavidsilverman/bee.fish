@@ -24,6 +24,10 @@ debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -rdynamic -DDEBUG
 debug:	$(OUTPUT)
+debug:	run_debug
+
+run_debug:
+	gdb --args $(OUTPUT) -test
 
 run:	$(OUTPUT)
 	$(OUTPUT) -input -output

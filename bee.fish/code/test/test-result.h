@@ -9,16 +9,10 @@ namespace BeeFishTest
    )
    {
       cout << label << ":\t";
-      
-      if (ok)
-         cout << "ok";
-      else
-         cout << "FAIL";
-
-      cout << endl;
-      
+      BeeFishMisc::outputSuccess(ok);
       return ok;
    }
+   
    /*
    inline int hasArg(
       int argc,

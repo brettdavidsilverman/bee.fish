@@ -1,5 +1,5 @@
 OUTPUT=../../build/parser
-CFLAGS=-std=gnu++17 -Wall -fmax-errors=1 -Ofast
+CFLAGS=-std=c++17 -Wall -fmax-errors=1 -Ofast
 DEPS=main.cpp match.h and.h or.h not.h character.h blanks.h word.h ciword.h repeat.h optional.h load-on-demand.h test.h capture.h invoke.h parser.h version.h Makefile
 
 $(OUTPUT): $(DEPS)
@@ -11,7 +11,7 @@ test:	$(OUTPUT)
 debug:	clean
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
-debug:	parser
+debug:	$(OUTPUT)
 
 clean:
 	rm -f $(OUTPUT)

@@ -5,11 +5,10 @@
 #include <vector>
 #include <iostream>
 #include "../misc/debug.h"
-#include "../misc/optional.h"
 #include <sstream>
 #include <ostream>
 #include <chrono>
-
+#include <optional>
 
 #include "version.h"
 #include "misc.h"
@@ -43,7 +42,7 @@ namespace BeeFishParser
       optional<bool> _result = nullopt;
    protected:
       
-      Match& _match;
+      Match* _match;
       size_t _charCount = 0;
       ssize_t _dataBytes = -1;
       char _lastCharacter = -1;
@@ -51,12 +50,17 @@ namespace BeeFishParser
 
    public:
       Parser(Match& match) :
+         _match(&match)
+      {
+      }
+      
+      Parser(Match* match) :
          _match(match)
       {
       }
 
       void setMatch(Match& match) {
-         _match = match;
+         _match = &match;
          _utf8.reset();
          _charCount = 0;
       }      
@@ -67,7 +71,7 @@ namespace BeeFishParser
       }
       
       Match* getMatch() {
-         return &_match;
+         return _match;
       }
 
       unsigned long now()
@@ -85,44 +89,47 @@ namespace BeeFishParser
       virtual bool match(uint8_t byte) {
 
          
-#ifdef DEBUG_PARSER
+#ifdef DEBUG
          cerr << (char)byte;
 #endif
          ++_charCount;
 
          _lastCharacter = (char)byte;
-
+         
          if (_dataBytes >= 0)
          {
             --_dataBytes;
-            _match.match(this, byte);
+            _match->match(this, byte);
          }
-         else {
+         else  {
 
-            _utf8.match(byte);
-
+            if (_utf8.match(byte))
+            {
+               _match->capture(this, byte);
+            }
+            
             if (_utf8.result() == true) {
                // Valid utf8 character, perform match
-               _match.match(this, _utf8.character());
+               _match->match(this, _utf8.character());
                // Reset the utf8 character
                _utf8.reset();
             }
             else if (_utf8.result() == false) {
                // in valid utf8 character, try to perform match
-               _match.match(this, _utf8.character());
+               _match->match(this, _utf8.character());
                // Reset the utf8 character
                _utf8.reset();
             }
 
          }         
 
-         _result = _match._result;
          
-         if (_result == nullopt || _result == true)
-            return true;
-
-         return false;
-
+         _result = _match->result();
+         
+         bool matched = _result != false;
+            
+         return matched;
+ 
       }
       
       virtual optional<bool> read(
@@ -136,7 +143,7 @@ namespace BeeFishParser
 #endif
 
          _result = nullopt;
-         _match._parser = this;
+         _match->_parser = this;
 
          int i = 0;
          while ((i = input.get()) != -1)

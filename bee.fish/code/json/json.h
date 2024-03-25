@@ -7,6 +7,7 @@
 #include "undefined.h"
 #include "null.h"
 #include "boolean.h"
+#include "integer.h"
 #include "number.h"
 #include "set.h"
 #include "keyed-set.h"
@@ -45,13 +46,51 @@ namespace BeeFishJSON
       Undefined* _undefined;
       Null*      _null;
       Boolean*  _boolean;
+      //Integer*  _integer;
       Number*   _number;
       String*   _string;
       Array*     _array;
       Object*   _object;
       
       Or*        _items;
-
+      Type       _type = Type::UNKNOWN;
+      
+   protected:
+      Invoke* invoke(Match* match, Type type)
+      {
+         return new Invoke(
+            match,
+            [this, type](Match* match) {
+               _type = type;
+               onvalue(type, match->value());
+            }
+         );
+      }
+      
+      Invoke* invokeNumber(Match* match)
+      {
+         return new Invoke(
+            match,
+            [this](Match* match) {
+               BString& value = match->value();
+               if (value.contains('-') ||
+                   value.contains('+') ||
+                   value.contains('e') ||
+                   value.contains('E') ||
+                   value.contains('.'))
+                  _type = Type::NUMBER;
+               else
+                  _type = Type::INTEGER;
+               onvalue(_type, value);
+            }
+         );
+      }
+      
+   public:
+      virtual void onvalue(Type type, BString& value)
+      {
+      }
+      
    public:
       JSON() : And()
       {
@@ -73,22 +112,24 @@ namespace BeeFishJSON
       
          _boolean = new Boolean();
          
+        // _integer = new Integer();
+         
          _number  = new Number();
-      
-         _string  = new String();
-
+  
+         _string = new String();
+         
          _array   = new Array();
 
          _object  = new Object();
 
          _items = new Or{
-            _undefined,
-            _null,
-            _boolean,
-            _number,
-            _string,
-            _array,
-            _object
+            invoke(_undefined, Type::UNDEFINED),
+            invoke(_null, Type::NULL_),
+            invoke(_boolean, Type::BOOLEAN),
+            invokeNumber(_number),
+            invoke(_string, Type::STRING),
+            invoke(_array, Type::ARRAY),
+            invoke(_object, Type::OBJECT)
          };
          
          _inputs = {
@@ -116,12 +157,12 @@ namespace BeeFishJSON
          return _null->matched();
       }
       
-      virtual BString value()
+      virtual BString& value()
       {
          return item().value();
       }
 
-      virtual BString value() const
+      virtual const BString& value() const
       {
          return item().value();
       }
@@ -131,7 +172,7 @@ namespace BeeFishJSON
       }
 
       Type type() const {
-         return (Type)(_items->_index);
+         return _type;
       }
 
       JSONParser* jsonParser() {
@@ -151,8 +192,10 @@ namespace BeeFishJSON
               type() == Type::UNKNOWN)
           {
              _number->eof(parser);
+             //_integer->eof(parser);
           }
-             
+          
+
       }
    };
 

@@ -229,7 +229,7 @@ namespace BeeFishJSON {
          Repeat::matchedItem(item);
       }
 
-      virtual BString value() {
+      virtual BString& value() {
          return *this;
       }
 
@@ -281,9 +281,9 @@ namespace BeeFishJSON {
          Match::setup(parser);
       }
       
-      virtual BString value()
+      virtual BString& value()
       {
-         return _value;;
+         return _value;
       }
 
       virtual void success() {

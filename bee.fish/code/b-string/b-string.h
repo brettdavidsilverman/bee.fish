@@ -75,9 +75,7 @@ namespace BeeFishBString
       // defined in misc.h
       static BString fromData(const Data &source);
 
-      // from  Data, defined in misc.h
-      //BString(const Data &source);
-
+      
      
 #ifdef SERVER
       // from path
@@ -92,20 +90,6 @@ namespace BeeFishBString
           BStringBase::const_iterator last) : BStringBase(first, last)
       {
       }
-/*
-      static BString fromUTF8String(const std::string &str)
-      {
-         BString result;
-         UTF8Character utf8;
-
-         for (const char character : str)
-         {
-            result.push_back((uint8_t)character, utf8);
-         }
-
-         return result;
-      }
-*/
 
       // c string
       BString(const char *cstring) : BString(std::string(cstring))
@@ -116,42 +100,8 @@ namespace BeeFishBString
       BString(const char *cstring, size_t len) : BString(std::string(cstring, len))
       {
       }
-/*
-      BString(wstring wstr)
-      {
 
-         for (auto character : wstr)
-         {
-            Character c = character;
-            push_back(c);
-         }
-      }
 
-      // Wide c string
-      BString(const wchar_t *wstr) : BString(wstring(wstr))
-      {
-      }
-
-      // from character
-      BString(const Character &character)
-      {
-         (*this) += character;
-      }
-*/
-   /*
-      // Stream indexable bits from data
-      static BString fromData(const Data &source)
-      {
-
-         BitStream stream = BitStream::fromData(source);
-
-         BString bString;
-
-         stream >> bString;
-
-         return bString;
-      }
-*/
       std::string str() const {
          stringstream stream;
          stream << *this;
@@ -161,49 +111,8 @@ namespace BeeFishBString
       void push_back(const Character &character)
       {
          *this += character;
-         /*
-         if (size())
-         {
-            Character &last = (*this)[size() - 1];
-            if (isSurrogatePair(last, character))
-            {
-               joinSurrogatePair(last, character);
-               return;
-            }
-         }
-         BStringBase::push_back(character);
-         */
       }
-/*
-      void push_back(uint32_t character, UTF8Character& utf8) {
 
-         uint32_t largeByte = character;
-
-         uint8_t firstByte  =  largeByte >> 24;
-         uint8_t secondByte = (largeByte & 0x00FF0000) >> 16;
-         uint8_t thirdByte  = (largeByte & 0x0000FF00) >> 8;
-         uint8_t fourthByte = (largeByte & 0x000000FF);
-
-
-         if (firstByte > 0) {
-            BString::push_back(firstByte,  utf8);
-            BString::push_back(secondByte, utf8);
-            BString::push_back(thirdByte,  utf8);
-            BString::push_back(fourthByte, utf8);
-         }
-         else if (secondByte > 0) {
-            BString::push_back(secondByte, utf8);
-            BString::push_back(thirdByte,  utf8);
-            BString::push_back(fourthByte, utf8);
-         }
-         else if (thirdByte > 0) {
-            BString::push_back(thirdByte,  utf8);
-            BString::push_back(fourthByte, utf8);
-         }
-         else
-            BString::push_back(fourthByte, utf8);
-      }
-*/
       void push_back(char c)
       {
          BStringBase::push_back(c);
@@ -298,19 +207,7 @@ namespace BeeFishBString
 
          return segments;
       }
-/*
-      friend ostream &operator<<(ostream &out, const BString &str)
-      {
-         str.write(out);
-         return out;
-      }
 
-      virtual void write(ostream &out) const
-      {
-         BStringBase::operator << (out, *this);
-         
-      }
-*/
       virtual void writeEscaped(
           ostream &out
       ) const
@@ -321,7 +218,6 @@ namespace BeeFishBString
          }
       }
 
-      
 
       friend PowerEncoding &operator>>(
           PowerEncoding &stream,
@@ -389,6 +285,22 @@ namespace BeeFishBString
       BString trim()
       {
          return ltrim().rtrim();
+      }
+      
+      bool contains(Character character) const
+      {
+         if (find(character) != std::string::npos)
+            return true;
+            
+         return false;
+      }
+      
+      bool contains(char character) const
+      {
+         if (find(character) != std::string::npos)
+            return true;
+            
+         return false;
       }
 
       BString substr(size_t pos, size_t len = 0) const

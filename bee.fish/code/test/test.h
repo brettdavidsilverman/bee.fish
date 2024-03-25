@@ -94,17 +94,15 @@ namespace BeeFishTest
       if (match->matched())
          value = match->value();
 
-      ok = (result == match->result());
+      ok = (match->result(result));
 
       if (match->matched() && expected.size())
       {
          if (value != expected)
             ok = false;
       }
-      
-      if (ok)
-         cout << "ok" << endl;
-      else
+      BeeFishMisc::outputSuccess(ok);
+      if (!ok)
       {
          cout << "FAIL. Expected "
               << result
@@ -122,7 +120,7 @@ namespace BeeFishTest
    
    inline bool testMatch(
       BString label,
-      Match* match,
+      BeeFishJSON::JSON* match,
       string text,
       optional<bool> result = false,
       BString expected = {}
@@ -132,17 +130,42 @@ namespace BeeFishTest
      // Parser parser(*match);
       return testMatch(parser, label, match, text, result, expected);
    }
+   
+   inline bool testMatch(
+      BString label,
+      Match* match,
+      string text,
+      optional<bool> result = false,
+      BString expected = {}
+   ) 
+   {
+      Parser parser(*match);
+      return testMatch(parser, label, match, text, result, expected);
+   }
 
    inline bool testMatchDelete(
       BString label,
-      Match* parser,
+      Match* match,
       string text,
       optional<bool> result = false,
       BString expected = {}
    )
    {
-      bool ok = testMatch(label, parser, text, result, expected);
-      delete parser;
+      bool ok = testMatch(label, match, text, result, expected);
+      delete match;
+      return ok;
+   }
+   
+   inline bool testMatchDelete(
+      BString label,
+      BeeFishJSON::JSON* json,
+      string text,
+      optional<bool> result = false,
+      BString expected = {}
+   )
+   {
+      bool ok = testMatch(label, json, text, result, expected);
+      delete json;
       return ok;
    }
    

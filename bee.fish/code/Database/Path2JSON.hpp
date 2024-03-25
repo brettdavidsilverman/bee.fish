@@ -10,7 +10,8 @@ namespace BeeFishJSON
     
    using namespace BeeFishDatabase;
    using namespace BeeFishScript;
-
+   using namespace BeeFishMisc;
+   
    class Path2JSON : public MinMaxPath
    {
    public:
@@ -39,6 +40,9 @@ namespace BeeFishJSON
       
       virtual void write(ostream& out, Size tabCount)
       {
+         cerr << "<" << _index << "> ";
+         
+         
          if (isDeadEnd())
             return;
        
@@ -86,50 +90,37 @@ namespace BeeFishJSON
          case Type::ARRAY:
          {
             out << "[";
-            Size max = 0;
+            Size count = path.getData();
             
-            if (!path.isDeadEnd()) {
-               Stack stack;
-               Size index;
-               
-               max = path.max<Size>();
-               
-               if (max > 0) {
-                  out << "\r\n";
-                  out << tabs(tabCount + 1);
-               }
-               
+            if (count > 1) {
+               out << "\r\n";
+               out << tabs(tabCount + 1);
+            }
+
+            for (Size index = 0;
+                 index < count;
+                 ++index)
+            {
+               Path2JSON item =
+                  path[index];
                   
-               for (index = path.min<Size>(stack);
-                    index <= max;
-                    ++index)
-               {
-                  if (path.contains(index))
-                  {
-                     Path2JSON item =
-                        path[index];
-                  
-                     ssize_t _tabCount = tabCount;
+               Size _tabCount = tabCount + 1;
                      
-                     if (max == 0)
-                        _tabCount--;
-                     //else
-                     //   _tabCount++;
-                        
-                     item.write(
-                        out,
-                        _tabCount + 1
-                     );
-                  }
+               if (count == 1)
+                  _tabCount--;
+
+               item.write(
+                  out,
+                  _tabCount
+               );
                   
-                  if (index < max)
-                  {
-                     out << ",\r\n" << tabs(tabCount + 1);
-                  }
+               if (index < count - 1)
+               {
+                  out << ",\r\n" << tabs(tabCount + 1);
                }
             }
-            
-            if (max > 0) {
+
+            if (count > 1) {
                out << "\r\n";
                out << tabs(tabCount);
             }
@@ -157,7 +148,7 @@ namespace BeeFishJSON
                {
                   out << tabs(tabCount + 1)
                       << "\""
-                         << escapeString(key)
+                         << escape(key)
                       << "\": ";
                       
                   Path2JSON value = path[key];

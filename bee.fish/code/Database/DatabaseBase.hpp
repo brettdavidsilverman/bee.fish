@@ -128,9 +128,9 @@ namespace BeeFishDatabase {
          //memset(&header, '\0', sizeof(Header));
          strcpy(header._version, DATABASE_VERSION);
          header._pageSize = _pageSize;
-         memcpy(&(header._nextIndex), new AtomicIndex{Branch::Root}, sizeof(AtomicIndex));
-         memcpy(&(header._growLock), new Mutex(), sizeof(Mutex));
-         memcpy(&(header._writtingFlag), new std::atomic_flag{false}, sizeof(std::atomic_flag));
+         memcpy((void*)&(header._nextIndex), new AtomicIndex{Branch::Root}, sizeof(AtomicIndex));
+         memcpy((void*)&(header._growLock), new Mutex(), sizeof(Mutex));
+         memcpy((void*)&(header._writtingFlag), new std::atomic_flag{false}, sizeof(std::atomic_flag));
       }
       
       virtual void checkHeader()

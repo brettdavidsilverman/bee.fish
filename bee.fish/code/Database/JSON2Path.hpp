@@ -5,34 +5,25 @@
 #include "../json/json-parser.h"
 
 namespace BeeFishDatabase {
-    
+ 
    using namespace BeeFishParser;
    using namespace BeeFishScript;
    using namespace BeeFishJSON;
    
-   class JSON2Path : public JSONParser
+   class JSON2Path :
+      public JSONParser
    {
    protected:
       
       Path _start;
       vector<Path> _pathStack;
       vector<bool> _containerStack;
-
+      
       virtual void setVariable(const Type type, const std::string& value = "")
       {
-         bool isArrayContainer = topContainer();
-         
-         if (isArrayContainer)
-            setArrayVariable(type, value);
-         else
-            setObjectVariable(type, value);
-            
-         
-      }
-      
-      virtual void setObjectVariable(Type type, const std::string& value = "")
-      {
 
+         cerr << "setVariable " << type << " " << value << endl;
+         
          Path path =
             topPath()[type];
 
@@ -48,34 +39,33 @@ namespace BeeFishDatabase {
                );
                break;
             case Type::NUMBER:
-            {
-               path.setData<std::string>(
+               path.setData(
                   value
                );
-               
                break;
-            }
             case Type::STRING:
                path.setData(value);
                break;
             case Type::ARRAY:
                push_back_path(path);
                push_back_container(true);
-               path.setData<Size>(0);
+               path.setData(Size(0));
                break;
             case Type::OBJECT:
                push_back_path(path);
                push_back_container(false);
-               path.setData<Size>(0);
+               path.setData(Size(0));
+
                break;
             default:
                throw std::logic_error("JSON2Path");
          }
          
+         pop_back_path();
          
              
       }
-      
+
       virtual void setArrayVariable(Type type, const std::string& value = "")
       {
 
@@ -93,19 +83,18 @@ namespace BeeFishDatabase {
          
          
       }
-          
+      
    public:
     
-      JSON2Path(Path start, Match& match)
-         : JSONParser(match),
+      JSON2Path(Path start) :
+         JSONParser(),
          _start(start)
       {
          push_back_path(_start);
-         push_back_container(false);
       }
       
-      JSON2Path(Database& database, Match& match) :
-         JSON2Path(Path(database), match)
+      JSON2Path(Database& database) :
+         JSON2Path(Path(database))
       {
       }
 
@@ -144,67 +133,122 @@ namespace BeeFishDatabase {
          _containerStack.pop_back();
       }
       
-      virtual void onbeginobject(Match* match) {
+      
+      virtual void onbeginobject(JSON* match) 
+      override {
          setVariable(Type::OBJECT);
+         Path path =
+            topPath()[Type::OBJECT];
+            
+         path.setData(Size(0));
          
+         push_back_path(
+            path
+         );
       }
       
       virtual void onobjectkey(const BString& key)
       override
       {
+      
+      }
+      
+      virtual void onendobject(JSON* match)
+      override
+      {
+         pop_back_path();
+      }
 
+      virtual void onbeginarray(JSON* match)
+      override
+      {
+         cerr << "onbeginarray" << endl;
+         
          Path path =
-            topPath()[key];
+            topPath()[Type::ARRAY];
             
-         push_back_path(path);
-         push_back_container(false);
-      
+         path.setData(Size(0));
+         
+         push_back_path(
+            path
+         );
       }
-      
-      virtual void onendobject(Match* match) {
-         pop_back_path();
-         pop_back_container();
+
+      virtual void onarrayvalue(JSON* json) {
+
+         cerr << "onarrayvalue " ;
+
+         Type type = json->type();
+         
          Path path = topPath();
-         Size count = 0;
-         if (path.hasData())
-            count = path.getData();
-         ++count;
-         path.setData(count);
-      }
-
-      virtual void onbeginarray(Match* match) {
-         setVariable(Type::ARRAY);
-      }
-
-      virtual void onarrayvalue(Match* match) {
-
-         pop_back_path();
-         pop_back_container();
-      }
-
-      virtual void onendarray(Match* match) {
-         pop_back_path();
-         pop_back_container();
-      }
-
-      virtual void onobjectvalue(const BString& key, const JSON* value) {
-         pop_back_path();
-         pop_back_container();
-         Path path = topPath();
+         
+         cerr << path._index << " ";
+         
          Size& count = path.getData();
-         ++count;
-        
-      }
-
-      virtual void onvalue(JSON* json) {
-         if (json->type() == Type::ARRAY ||
-             json->type() == Type::OBJECT)
-            return;
-
+         
+         cerr << "[" << count << "] = " << json->type() << " " << json->value() << endl;
+         
+         path = path[count++][type];
+         
+         if (type == Type::ARRAY || type == Type::OBJECT)
+         {
+            path.setData(Size(0));
+         }
+         else
+            path.setData(json->value());
+         
+         /*
+         push_back_path(path);
+         
          setVariable(
             json->type(),
             json->value()
          );
+         */
+            
+         
+      }
+
+      virtual void onendarray(JSON* match) {
+         cerr << "onendarray "  << endl;
+         
+         pop_back_path();
+         pop_back_container();
+        
+      }
+
+      virtual void onobjectvalue(const BString& key, const JSON* json) {
+
+         cerr << "onobjectvalue " << key << " " << json->type() << " " << json->value() << endl;
+         
+         Path path = topPath();
+         Size& count = path.getData();
+         count++;
+         path = path[key];
+         
+         push_back_path(path);
+         
+         setVariable(
+               json->type(),
+               json->value()
+            );
+         
+      }
+
+      virtual void onvalue(JSON* json)
+      override
+      {
+         cerr << "onvalue " << json->type() << " " << json->value() << endl;
+         
+         Type type = json->type();
+         const BString& value = json->value();
+         
+         
+         //if (_pathStack.size() == 1 && type != Type::ARRAY)
+            setVariable(
+               type,
+               value.str()
+            );
          
       }
                

@@ -15,13 +15,14 @@
 #endif
 
 #include "../misc/misc.h"
-#include "../power-encoding/power-encoding.h"
-#include "b-string.h"
-
-using namespace BeeFishPowerEncoding;
-using namespace BeeFishMisc;
+//#include "../power-encoding/power-encoding-base.h"
+//#include "b-string.h"
 
 namespace BeeFishBString {
+    
+   using namespace BeeFishPowerEncoding;
+   using namespace BeeFishMisc;
+
 
    class BString;
    
@@ -71,15 +72,7 @@ namespace BeeFishBString {
          _size = sizeof(T);
          _delete = false;
       }
-      /*
-      Data(unsigned long& source)
-      {
-         _readWrite = (Byte*)&source;
-         _data = _readWrite;
-         _size = sizeof(unsigned long);
-         _delete = false;
-      }
-      */
+
       template<typename T>
       Data(const vector<T>& source)
       {
@@ -88,14 +81,7 @@ namespace BeeFishBString {
          _data = source.data();
          _size = source.size() * sizeof(T);
       }
-/*      
-      Data(const vector<Byte>& source) {
-         _delete = false;
-         _readWrite = nullptr;
-         _data = source.data();
-         _size = source.size();
-      }
-*/
+
       Data(const void* source, size_t len, bool copy = false) : Data((const Byte*)source, len, copy)
       {
       }

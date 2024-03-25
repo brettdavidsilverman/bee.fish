@@ -12,6 +12,24 @@ namespace BeeFishJSON
    class JSONParser : public Parser
    {
    public:
+       
+      class _JSON : public JSON
+      {
+      public:
+          _JSON() {
+          }
+          
+      public:
+         virtual void onvalue(Type type, BString& value)
+         {
+             cerr << endl
+                  << "JSONPARSER:onvalue "
+                  << type
+                  << ":"
+                  << value
+                  << endl;
+         }
+      };
 
       typedef std::function<void(const BString& key, JSON& json)> OnKey;
       typedef std::map<const BString, OnKey> OnKeys;
@@ -24,10 +42,25 @@ namespace BeeFishJSON
       JSON* _json;
       
    public:
+       
       JSONParser(Match& match) :
          Parser(match),
          _json((JSON*)&match)
       {
+      }
+      /*
+      JSONParser(JSON* json) :
+         Parser(*json),
+         _json(json),
+         _delete(true)
+      {
+      }
+      */
+      
+      JSONParser() :
+         Parser(new _JSON())
+      {
+          _json = (_JSON*)&_match;
       }
       
       virtual ~JSONParser()
@@ -73,7 +106,7 @@ namespace BeeFishJSON
          return true;
       }
 
-      virtual void onbeginobject(Match* match) {
+      virtual void onbeginobject(JSON* match) {
       }
       
       virtual void onobjectkey(const BString& key) {
@@ -83,16 +116,16 @@ namespace BeeFishJSON
       }
       
 
-      virtual void onendobject(Match* match) {
+      virtual void onendobject(JSON* match) {
       }
 
-      virtual void onbeginarray(Match* match) {
+      virtual void onbeginarray(JSON* match) {
       }
 
-      virtual void onarrayvalue(Match* match) {
+      virtual void onarrayvalue(JSON* match) {
       }
 
-      virtual void onendarray(Match* match) {
+      virtual void onendarray(JSON* match) {
       }
 
       virtual void onobjectvalue(const BString& key, const JSON* value) {
@@ -100,13 +133,15 @@ namespace BeeFishJSON
 
       virtual void onvalue(JSON* json) {
       }
+      
 
    };
 
    // Declared in json.h
-   inline void JSON::success() {
+   void JSON::success()
+   {
       if (_parser->isJSONParser()) {
-         jsonParser()->onvalue(this);
+        // jsonParser()->onvalue(this);
       }
       And::success();
    }
@@ -114,14 +149,18 @@ namespace BeeFishJSON
    // Declared in object.h
    inline void Object::onbeginset(Match* match) {
       if (_parser->isJSONParser()) {
-         jsonParser()->onbeginobject(match);
+         JSON* json =
+             (JSON*)(match);
+         jsonParser()->onbeginobject(json);
       }
    }
 
    // Declared in object.h
    inline void Object::onendset(Match* match) {
       if (_parser->isJSONParser()) {
-         jsonParser()->onendobject(match);
+         JSON* json =
+             (JSON*)(match);
+         jsonParser()->onendobject(json);
       }
    }
 
@@ -149,19 +188,12 @@ namespace BeeFishJSON
    // Declared in object.h
    inline void Object::matchedSetItem(Object::_KeyValue* item) {
 
-      JSON* json = (JSON*)(item->_value->_match);
+      //JSON* json = (JSON*)(item->_value->_match);
       const BString& key = item->_key->value();
 
       if (_parser->isJSONParser()) {
 
          JSONParser* parser = (JSONParser*)(_parser);
-
-         if (parser->_onvalues.count(key) > 0) {
-            JSONParser::OnValue onvalue = parser->_onvalues[key];
-            if (!item->_value->_setup)
-               item->_value->setup(parser);
-            onvalue(key, *json);
-         }
 
          LoadOnDemand<BeeFishJSON::JSON>* value = item->_value;
          const BeeFishJSON::JSON* json = (const BeeFishJSON::JSON*)(value->_match);
@@ -169,10 +201,6 @@ namespace BeeFishJSON
          parser->onobjectvalue(key, json);
       }
       
-      if (_onkeyvalue) {
-         _onkeyvalue(key, *json);
-      }
-
       Set::matchedSetItem(item);
 
    }
@@ -183,7 +211,9 @@ namespace BeeFishJSON
       ++_size;
 
       if (_parser->isJSONParser()) {
-          jsonParser()->onarrayvalue(item->_match);
+          JSON* json =
+             (JSON*)(item->_match);
+          jsonParser()->onarrayvalue(json);
       }
       
       Set::matchedSetItem(item);
@@ -192,7 +222,7 @@ namespace BeeFishJSON
    // Declared in array.h
    inline void Array::onbeginset(Match* match) {
       if (_parser->isJSONParser()) {
-          jsonParser()->onbeginarray(match);
+          jsonParser()->onbeginarray((JSON*)match);
       }
       Set::onbeginset(match);
    }
@@ -200,7 +230,7 @@ namespace BeeFishJSON
    // Declared in array.h
    inline void Array::onendset(Match* match) {
       if (_parser->isJSONParser()) {
-          jsonParser()->onendarray(match);
+          jsonParser()->onendarray((JSON*)match);
       }
       Set::onendset(match);
    }

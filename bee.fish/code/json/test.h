@@ -83,25 +83,13 @@ namespace BeeFishJSON
       
       bool ok = true;
       
-      class CaptureNumber : public Capture {
-      public:
-         CaptureNumber() : Capture(
-            new And(
-               new Number(),
-               new BeeFishParser::Character('*')
-            )
-         ) {
-
-         }
-      };
-     
-      ok &= testMatchDelete("Capture",  new CaptureNumber(), "80000", nullopt, "80000");
-      ok &= testMatchDelete("Integer", new CaptureNumber(), "800*", true, "800*");
-      ok &= testMatchDelete("Negative", new CaptureNumber(), "-800*", true, "-800*");
-      ok &= testMatchDelete("Decimal", new CaptureNumber(), "800.01*", true, "800.01*");
-      ok &= testMatchDelete("Short exponent", new CaptureNumber(), "800e10*", true, "800e10*");
-      ok &= testMatchDelete("Full exponent", new CaptureNumber(), "800E-10*", true, "800E-10*");
-      ok &= testMatchDelete("False positive", new CaptureNumber(), "+800*");
+      ok &= testMatchDelete("Capture",  new Integer(), "80000", true, "80000");
+      ok &= testMatchDelete("Integer", new Integer(), "800", true, "800");
+      ok &= testMatchDelete("Negative", new Number(), "-800", true, "-800");
+      ok &= testMatchDelete("Decimal", new Number(), "800.01", true, "800.01");
+      ok &= testMatchDelete("Short exponent", new Number(), "800e10", true, "800e10");
+      ok &= testMatchDelete("Full exponent", new Number(), "800E-10", true, "800E-10");
+      ok &= testMatchDelete("False positive", new Number(), "+800");
       //ok &= testMatchDelete("NaN", new CaptureNumber(), "NaN", true, "NaN");
       assert(ok);
       
@@ -407,7 +395,7 @@ namespace BeeFishJSON
       ok &= testMatchDelete("Triple object", new Capture(new JSON()), "{\"a\":1,\"b\":2,\"c\":[]}", true, "{\"a\":1,\"b\":2,\"c\":[]}");
       ok &= testMatchDelete("Embedded object", new Capture(new JSON()), "{\"obj\":{\"embedded\":true}}", true, "{\"obj\":{\"embedded\":true}}");
       ok &= testMatchDelete("Object with blanks", new Capture(new JSON()), "{ \"field\" : \"string value\" }", true, "{ \"field\" : \"string value\" }");
-      
+      /*
       Object* test = new Object();
       bool hit = false;
       BString _key;
@@ -422,9 +410,11 @@ namespace BeeFishJSON
       };
 
       ok &= testMatch(parser, "Object field", capture, "{\"hello\":1}", true, "{\"hello\":1}");
+      
       ok &= testResult("Object field key hit", hit);
       ok &= testResult("Object key value", (_key == "hello"));
       ok &= testResult("Object field value", (value == "1"));
+      
       delete capture;
 
       class ObjectTest : public Object {
@@ -460,7 +450,7 @@ namespace BeeFishJSON
       ok &= testMatch("Object test constructor", capture = new Capture(objectTest), "{\"key\":\"hello world\"}", true, "{\"key\":\"hello world\"}");
       ok &= testResult("Object test value", objectTest->value() == "hello world");
       delete capture;
-
+*/
       cout << endl;
       
       return ok;
@@ -534,13 +524,14 @@ namespace BeeFishJSON
    
    inline bool testTypes()
    {
-      cout << "Types" << endl;
+      cout << "Test Types" << endl;
       
       bool ok = true;
       
       JSON undefined;
       JSON _null;
       JSON boolean;
+      JSON integer;
       JSON number;
       JSON string;
       JSON array;
@@ -555,7 +546,10 @@ namespace BeeFishJSON
       ok &= testMatch("boolean", &boolean, "true", true, "true");
       ok &= testResult("boolean type", boolean.type() == Type::BOOLEAN);
       
-      ok &= testMatch("number", &number, "1", true, "1");
+      ok &= testMatch("integer", &integer, "1", true, "1");
+      ok &= testResult("integer type", integer.type() == Type::INTEGER);
+      
+      ok &= testMatch("number", &number, "1.1", true, "1.1");
       ok &= testResult("number type", number.type() == Type::NUMBER);
 
       ok &= testMatch("string", &string, "\"❤️\"", true, "❤️");

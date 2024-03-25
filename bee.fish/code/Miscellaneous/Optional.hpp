@@ -2,10 +2,8 @@
 #define BEE_FISH_MISC__OPTIONAL_HPP
 
 #include <iostream>
-
 #if (__cplusplus >= 201703L)
 #include <optional>
-
 #else
 namespace std {
 

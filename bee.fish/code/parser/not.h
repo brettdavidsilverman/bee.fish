@@ -27,9 +27,9 @@ namespace BeeFishParser {
          bool matched =
             _match->match(_parser, character);
          
-         if (_match->_result == false)
+         if (_match->result() == false)
             _result = true;
-         else if (_match->_result == true)
+         else if (_match->result() == true)
             _result = false;
          
          return !matched;

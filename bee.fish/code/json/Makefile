@@ -1,7 +1,7 @@
 BUILD=../../build
 OUTPUT=$(BUILD)/json
 CC=g++
-CFLAGS=-std=gnu++17 -Wall -fmax-errors=1 -Ofast
+CFLAGS=-std=c++17 -Wall -fmax-errors=1 -Ofast
 DEPS=main.cpp json.h string.h number.h array.h object.h boolean.h null.h blank-space.h set.h keyed-set.h test.h version.h $(BUILD)/parser json-parser.h Makefile
 
 $(OUTPUT): $(DEPS)
@@ -17,6 +17,9 @@ debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -Og -g -D DEBUG
 debug:	$(OUTPUT)
+
+run_debug:
+	gdb --args $(OUTPUT) -test
 
 time:	clean
 time:	CFLAGS += -D TIME -Ofast

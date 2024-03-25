@@ -51,6 +51,8 @@ namespace BeeFishDatabase {
             }
             else
                _isNew = false;
+               
+            _isTemp = false;
 
             open();
 

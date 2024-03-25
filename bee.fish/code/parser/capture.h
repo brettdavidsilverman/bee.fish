@@ -22,12 +22,14 @@ namespace BeeFishParser {
          Match(),
          _valueRef(_value) 
       {
+         _valueRef.clear();
       }
       
       Capture(Match* match) :
          Match(match),
          _valueRef(_value)
       {
+          _valueRef.clear();
       }
             
       Capture(
@@ -37,17 +39,29 @@ namespace BeeFishParser {
          Match(match),
          _valueRef(value)
       {
+         _valueRef.clear();
       }
       
       virtual ~Capture() {
       }      
 
-      virtual void capture()
+      virtual void capture(Parser* parser, char c)
+      override
       {
-         _valueRef.push_back(_match->character());
+          if (!_setup)
+            setup(parser);
+          
+          if (_match) {
+             _match->capture(parser, c);
+          }
+          
+          
+         // cerr << "{" << c << "}" << flush;
+        
+          _valueRef.push_back(c);
       }
       
-      virtual BString value()
+      virtual BString& value()
       {
          return _valueRef;
       }

@@ -21,6 +21,7 @@ namespace BeeFishScript {
 
    typedef nullptr_t Null;
    typedef bool Boolean; 
+   typedef Size Integer;
    typedef long double Number;
    typedef std::string String;
    typedef vector<Variable> Array;
@@ -32,10 +33,6 @@ namespace BeeFishScript {
 
    typedef std::shared_ptr<BeeFishScript::Object> ObjectPointer;
    typedef std::shared_ptr<BeeFishScript::Array> ArrayPointer;
-
-   inline std::string escapeString(const String& string);
-
-  // #define undefined BeeFishScript::Variable::Undefined()
 
    class Object : public ObjectBase {
    public:
@@ -103,6 +100,7 @@ namespace BeeFishScript {
 
       union Value {
          Boolean _boolean;
+         Integer _integer;
          Number _number;
          String _string;
          ArrayPointer _array;
@@ -118,6 +116,9 @@ namespace BeeFishScript {
                break;
             case Type::BOOLEAN:
                _boolean = source._boolean;
+               break;
+            case Type::INTEGER:
+               _integer = source._integer;
                break;
             case Type::NUMBER:
                _number = source._number;
@@ -155,6 +156,9 @@ namespace BeeFishScript {
          case Type::NULL_:
          case Type::BOOLEAN:
             break;
+         case Type::INTEGER:
+            _value._integer = 0;
+            break;
          case Type::NUMBER:
             _value._number = 0;
             break;
@@ -185,6 +189,11 @@ namespace BeeFishScript {
       Variable(const Boolean& boolean) {
          _type = Type::BOOLEAN;
          _value._boolean = boolean;
+      }
+      
+      Variable(const Integer& integer) {
+         _type = Type::INTEGER;
+         _value._integer = integer;
       }
 
       Variable(const Number& number) {
@@ -249,6 +258,7 @@ namespace BeeFishScript {
          case Type::UNDEFINED:
          case Type::NULL_:
          case Type::BOOLEAN:
+         case Type::INTEGER:
          case Type::NUMBER:
             break;
          case Type::STRING:
@@ -339,6 +349,12 @@ namespace BeeFishScript {
 
       }
 
+      virtual bool operator == (Integer compare) const {
+
+         return (_type == Type::INTEGER) && (_value._integer == compare);
+
+      }
+      
       virtual bool operator == (double compare) const {
 
          return (_type == Type::NUMBER) && (_value._number == compare);
@@ -370,6 +386,9 @@ namespace BeeFishScript {
             else
                out << "false";
             break;
+         case Type::INTEGER:
+            out << _value._integer;
+            break;
          case Type::NUMBER:
             if ( _value._number == 0.0 ) {
                out << "0";
@@ -389,7 +408,7 @@ namespace BeeFishScript {
           //  break;
 
             out << "\"";
-            out << escapeString(_value._string);
+            out << BeeFishMisc::escape(_value._string);
             out << "\"";
             break;
 
@@ -468,6 +487,11 @@ namespace BeeFishScript {
          return _value._boolean;
       }
       
+      operator Integer& () {
+         CHECK_TYPE(Type::INTEGER);
+         return _value._integer;
+      }
+      
       operator Number& () {
          CHECK_TYPE(Type::NUMBER);
          return _value._number;
@@ -512,7 +536,7 @@ namespace BeeFishScript {
             if (tabs > 0)
                output << std::string(tabs * TAB_SPACES, ' ');
             output << "\"";
-            output << escapeString(key);
+            output << BeeFishMisc::escape(key);
             output << "\": ";
             value.write(output, tabs);
          }
@@ -548,76 +572,8 @@ namespace BeeFishScript {
       }
    }
 
-   inline std::string escapeString(const String& string)
-   {
-   
-      stringstream out;
-
-      for (const char& c: string) {
-         switch (c)
-            {
-            case '\"':
-               out << "\\\"";
-               break;
-            case '\\':
-               out << "\\\\";
-               break;
-            case '\b':
-               out << "\\b";
-               break;
-            case '\f':
-               out << "\\f";
-               break;
-            case '\r':
-               out << "\\r";
-               break;
-            case '\n':
-               out << "\\n";
-               break;
-            case '\t':
-               out << "\\t";
-               break;
-            default:
-            {
-               if ((uint16_t)c <= 0x001F) {
-                  // Control chars
-                  out << "\\u" 
-                     << std::hex
-                     << std::setw(4)
-                     << std::setfill('0')
-                     << (uint16_t)c;
-
-               }
-               /*
-               else if (value > 0x10FFFF)
-               {
-                  // Uhicode chars
-                  out << "\\u" 
-                     << std::hex
-                     << std::setw(4)
-                     << std::setfill('0')
-                     << 
-                     ((value & 0xFFFF0000) >>
-                        16);
-                  out << "\\u" 
-                     << std::hex
-                     << std::setw(4)
-                     << std::setfill('0')
-                     <<
-                     (value & 0x0000FFFF);
-               }*/
-               else {
-                  out << c;
-               }
-            }
-         }
-      
-      }
-      return out.str();
-
-   }
-
    const Variable null(Type::NULL_);
+   const Variable undefined(Type::UNDEFINED);
 }
 
 #endif

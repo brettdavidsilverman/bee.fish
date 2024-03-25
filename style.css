@@ -1,0 +1,63 @@
+pre {
+   display: block;
+   font-family: monospace;
+   white-space: pre-wrap;
+   word-wrap: break-word;
+   color: black;
+}
+
+body {
+   font-family: arial;
+   font-size: 15px;
+}
+
+h1 {
+   color: blue;
+}
+
+form {
+   background-color: lightblue;
+   border: outset 2px;
+   border-radius: 10px;
+}
+
+@media (orientation: landscape) {
+  body {
+     width: 50%;
+     padding-left: 25%
+  }
+}
+
+@media (orientation: portrait) {
+   form {
+      width: 100%;
+   }
+}
+
+input, textarea {
+   margin: 10px;
+   width: calc(100% - 30px);
+   border: inset 2px;
+   background-color: lightgrey;
+}
+
+textarea {
+   height: 200px;
+}
+
+button {
+   margin: 10px;
+   bottom: 10px;
+   right: 10px;
+}
+
+div {
+   text-align: right;
+}
+
+label {
+   position: relative;
+   font-weight: bold;
+   top: 5px;
+   left: 10px;
+}

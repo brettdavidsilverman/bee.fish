@@ -89,6 +89,32 @@ namespace BeeFishParser {
          _inputs.push_back(match);
 
       }
+      
+      virtual void capture(Parser* parser, char c)
+      override
+      {
+         if (!_setup)
+            setup(parser);
+            
+         if (size() == 0)
+            return;
+
+         size_t last = _iterator;
+         if (last == size())
+            --last;
+         
+         if (_result != false)
+         {
+    
+            Match* item = _inputs[last];
+            //if (item->_result != false)
+            item->capture(parser, c);
+            
+         }
+         
+         
+      }
+      
 
       
    };

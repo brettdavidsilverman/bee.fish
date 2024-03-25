@@ -69,6 +69,8 @@ namespace BeeFishParser {
          return matched;
          
       }
+      
+      
 
       virtual void setup(Parser* parser) {
          Match::setup(parser);
@@ -76,9 +78,12 @@ namespace BeeFishParser {
             item->setup(parser);
       }   
       
-      virtual BString value()
+      virtual BString& value()
       {
-         return _item->value();
+         if (_item)
+            return _item->value();
+            
+         return Match::value();
       }
       
       virtual Match& item()
@@ -89,6 +94,16 @@ namespace BeeFishParser {
       virtual const Match& item() const
       {
          return *_item;
+      }
+      
+      virtual void capture(Parser* parser, char c)
+      override
+      {
+         if (!_setup)
+            setup(parser);
+          
+         for (auto item : _inputs)
+             item->capture(parser, c);
       }
    };
 

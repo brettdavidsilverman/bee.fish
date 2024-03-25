@@ -2,25 +2,14 @@
 #define BEE_FISH_JSON__NUMBER_H
 
 #include "../parser/parser.h"
+#include "integer.h"
 
 namespace BeeFishJSON {
       
    class Number: public Capture
    {
    public:
-      class IntegerCharacter : public Range {
-      public:
-         IntegerCharacter() : Range('0', '9') {
-
-         }
-      };
       
-      class Integer : public Repeat<IntegerCharacter> {
-      public:
-         Integer() : Repeat<IntegerCharacter>(1) {
-
-         }
-      };
 
       Match* _fractionInteger;
       
@@ -78,11 +67,12 @@ namespace BeeFishJSON {
             new Optional(_exponent)
          );
 
-      Match* _allValues = 
+      Match* _allValues = new Capture(
          new Or(
             _number,
             new Word("\"NaN\"")
-         );
+         )
+      );
 
    public:
       Number() : Capture()
@@ -95,16 +85,18 @@ namespace BeeFishJSON {
           if (!_setup)
              setup(parser);
              
-          if (result() == nullopt)
+          if (result(nullopt))
           {
-              
              _parser->read((char)-1);
-             
-             if (result() == true) {
-                success();
-             }
           }
           
+      }
+      
+      virtual BString& value() {
+         if (result() == true)
+            return _allValues->value();
+            
+         return Match::value();
       }
       
    };
