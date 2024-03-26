@@ -6,7 +6,7 @@
 namespace BeeFishJSON {
       
    class IntegerCharacter :
-      public Range
+         public Range
    {
    public:
       IntegerCharacter() : Range('0', '9') {
@@ -21,24 +21,20 @@ namespace BeeFishJSON {
       }
    };
       
-   class Integer: public Capture
+   class Integer : public IntegerCharacters
    {
    public:
-      
-
-   public:
-      Integer() : Capture(
-         new IntegerCharacters()
-      )
+      Integer() : IntegerCharacters()
       {
       }
       
       virtual void eof(Parser* parser) 
       override {
+
           if (!_setup)
              setup(parser);
              
-          if (result(nullopt))
+          if (result() == nullopt)
           {
              _parser->read((char)-1);
           }

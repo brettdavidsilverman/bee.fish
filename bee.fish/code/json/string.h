@@ -68,20 +68,21 @@ namespace BeeFishJSON {
       }
    };
 
-   class Hex : public Capture
+   class Hex : public Match
    {
    private:
       BString _hex;
       Char _hexValue;
 
    public:
-      Hex() : Capture(
-         new Repeat<HexCharacter>(
-            4, 4
-         ),
-         _hex
-      )
+      Hex() : Match()
       {
+          _match = new Capture(
+             new Repeat<HexCharacter>(
+                4, 4
+             ),
+             _hex
+          );
       }
             
       virtual void success()

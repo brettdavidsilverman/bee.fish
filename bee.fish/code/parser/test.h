@@ -62,6 +62,8 @@ namespace BeeFishParser {
       else
          cout << "FAIL";
          
+      BeeFishMisc::outputSuccess(ok);
+         
       cout << endl;
       
       return ok;
@@ -70,7 +72,7 @@ namespace BeeFishParser {
    
    inline bool testBasics()
    {
-      cout << "Test basics:\t";
+      cout << "Test basics";
       
       class CharA : public Character {
       public:
@@ -89,11 +91,7 @@ namespace BeeFishParser {
 
       delete _a;
 
-      if (ok)
-         cout << "ok" << endl;
-      else
-         cout << "FAIL" << endl;
-      
+      BeeFishMisc::outputSuccess(ok);
       
       return ok;
    }
@@ -101,6 +99,8 @@ namespace BeeFishParser {
    inline bool testCharacter()
    {
       bool ok = true;
+      
+      cout << "Test Characters" << endl;
       
       class CharA : public Character
       {
@@ -123,11 +123,15 @@ namespace BeeFishParser {
       ok &= testMatch("Character any", any, "a", true, "a");
       delete any;
       
+      BeeFishMisc::outputSuccess(ok);
+      
       return ok;
    }
    
    inline bool testRange()
    {
+      cout << "Test Range" << endl;
+      
       bool ok = true;
       
       class atoz : public Range {
@@ -148,12 +152,16 @@ namespace BeeFishParser {
       ok &= testMatch("Range no match", rangeNoMatch, "B");
       delete rangeNoMatch;
       
+      BeeFishMisc::outputSuccess(ok);
+      
       return ok;
    }
 
 
    inline bool testWord()
    {
+      cout << "Test Words" << endl;
+      
       bool ok = true;
 
       class WordWord : public Word {
@@ -574,21 +582,52 @@ namespace BeeFishParser {
             _setup = true;
          }
          
-         
       };
       
       _Capture* _capture = new _Capture();
       Capture* capture = new Capture(_capture);
       
-      ok &= testMatch("Derived Capture class", _capture, "name value", true);
+      ok &= testMatch("Derived Capture class", capture, "name value", true, "name value");
     
       ok &= testResult("Derived Capture class result", (_capture->_name == "name") && (_capture->_value == "value"));
       
-      cerr << "Name: \"" << _capture->_name << "\"" << endl;
-      
-      assert(ok);
       
       delete capture;
+      
+      class Item : public Word
+      {
+      public:
+         Item() : Word("item")
+         {
+         }
+      };
+      
+      ok &= testMatchDelete("Capture item", new Capture(new Item()), "item", true, "item");
+    
+         
+      class LoadItemOnDemand :
+          public LoadOnDemand<Item>
+      {
+      public:
+         LoadItemOnDemand()
+         {
+         }
+      };
+      
+      ok &= testMatchDelete("Capture load item on demand", new Capture(new LoadItemOnDemand()), "item", true, "item");
+    
+      class CaptureLoadOnDemand :
+         public Capture
+      {
+      public:
+          CaptureLoadOnDemand() :
+             Capture(new LoadItemOnDemand())
+          {
+          }
+      };
+      
+      ok &= testMatchDelete("Capture load item on demand 2 ", new CaptureLoadOnDemand(), "item", true, "item");
+    
       
       BeeFishMisc::outputSuccess(ok);
       
@@ -618,8 +657,8 @@ namespace BeeFishParser {
          } 
       );
       
-      ok &= testMatch("\tInvoke", invoke, "invoke", true);
-      ok &= testResult("\tInvoke value", invokeValue == "invoke");
+      ok &= testMatch("Invoke", invoke, "invoke", true);
+      ok &= testResult("Invoke value", invokeValue == "invoke");
 
       delete invoke;
       
@@ -660,8 +699,8 @@ namespace BeeFishParser {
 
       Test* testParser = new Test();
 
-      ok &= testMatch("\tInvoke class virtual", testParser, "test", true);
-      ok &= testResult("\tInvoke class virtual value", testParser->_test == "test");
+      ok &= testMatch("Invoke class virtual", testParser, "test", true);
+      ok &= testResult("Invoke class virtual value", testParser->_test == "test");
 
       delete testParser;
       
@@ -692,7 +731,7 @@ namespace BeeFishParser {
          }
       };
 
-      ok &= testMatch("\tLoad on demand", loadOnDemand, "BrettDavid", true, "BrettDavid"); 
+      ok &= testMatch("Load on demand", loadOnDemand, "BrettDavid", true, "BrettDavid"); 
  
       delete loadOnDemand;
       
@@ -719,12 +758,12 @@ namespace BeeFishParser {
          )
       );
       
-      ok &= testMatch("\tAnd",
+      ok &= testMatch("And",
          _and,
          "abc", true, "abc"
       );
       
-      ok &= testResult("\tAnd c", c->value() == "c");
+      ok &= testResult("And c", c->value() == "c");
       delete _and;
       
       // Multipart
@@ -738,7 +777,7 @@ namespace BeeFishParser {
          multipart.matched() &&
          parser.result() == true;
          
-      ok &= testResult("\tMultipart", multipartResult);
+      ok &= testResult("Multipart", multipartResult);
       
       BeeFishMisc::outputSuccess(ok);
       

@@ -33,10 +33,14 @@ namespace BeeFishParser {
       }
 
       virtual void setup(Parser* parser) {
-         Match::setup(parser);
+         if (_setup)
+            return;
+            
          for (auto item : _inputs)
             item->setup(parser);
          _iterator = 0;
+         
+         Match::setup(parser);
       }     
 
       virtual bool matchCharacter(const Char& character) {

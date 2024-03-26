@@ -53,30 +53,57 @@ namespace BeeFishJSON
             Set* _set;
          public:
             InvokeItem(Set* set) : Match(
-               set->createItem()
+               
             )
             {
                _set = set;
+               _match = _set->createItem();
             }
 
             virtual void success() {
-               _set->matchedSetItem((Item*)_match);
+               Item* item = (Item*)_match;
+
+               _set->matchedSetItem(item);
             }
          };
 
-         class SubsequentItem : public And {
+         class SubsequentItem : public Match {
+         protected:
+             Set* _set;
+             Item* _item;
          public:
             
-            SubsequentItem() : And() {
+            SubsequentItem() : Match() {
                throw std::runtime_error("SubsequentItem construted without a set");
             }
 
-            SubsequentItem(Set* set) : And(
-               new _Seperator(), 
-               new InvokeItem(set)
-            )
+            SubsequentItem(Set* set) : Match(
+            ),
+               _set(set)
             {
+            }
+            
+            virtual void setup(Parser* parser)
+            override
+            {
+               _parser = parser;
 
+			   if (!_match) {
+                  _match = new And(
+                     new _Seperator(), 
+                     _item = _set->createItem()
+                  );
+                  _match->setup(parser);
+               }
+			
+			   _setup = true;
+
+			   Match::setup(parser);
+            }
+         
+            virtual void success() {
+cerr << "Set::subsequentItem " << _item->value() << endl;
+               _set->matchedSetItem(_item);
             }
          };
 

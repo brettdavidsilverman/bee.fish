@@ -20,16 +20,16 @@ namespace BeeFishParser
 
 		virtual void setup(Parser* parser)
 		{
-            if (_setup)
-               return;
-               
-			_parser = parser;
-            
-            _match = new T();
-			
-			_setup = true;
 
-			Match::setup(parser);
+			_parser = parser;
+
+            if (!_match)
+	           _match = new T();
+                
+			_match->setup(parser);
+            
+            _setup = true;
+         
 		}
         
         

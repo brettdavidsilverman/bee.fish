@@ -8,6 +8,7 @@ $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
 	
 test:	$(OUTPUT)
+	$(BUILD)/parser -test
 	$(OUTPUT) -test
 	
 $(BUILD)/parser:
@@ -18,7 +19,7 @@ debug:	DEBUG = debug
 debug:	CFLAGS += -Og -g -D DEBUG
 debug:	$(OUTPUT)
 
-run_debug:
+run_debug:	debug
 	gdb --args $(OUTPUT) -test
 
 time:	clean

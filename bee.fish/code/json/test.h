@@ -59,11 +59,13 @@ namespace BeeFishJSON
    inline bool testIntrinsics()
    {
       cout << "Intrinsics" << endl;
-      
+ 
       bool ok = true;
       
-      ok &= testMatchDelete("Undefined", new Capture(new JSON()), "undefined", true, "undefined");
+      ok &= testMatchDelete("Undefined", new Capture(new Undefined()), "undefined", true, "undefined");
 
+      ok &= testMatchDelete("Undefined JSON", new Capture(new JSON()), "undefined", true, "undefined");
+      
       ok &= testMatchDelete("True", new Capture(new JSON()), "true", true, "true");
 
       ok &= testMatchDelete("False", new Capture(new JSON()), "false", true, "false");
@@ -84,6 +86,7 @@ namespace BeeFishJSON
       bool ok = true;
       
       ok &= testMatchDelete("Capture",  new Integer(), "80000", true, "80000");
+      assert(ok);
       ok &= testMatchDelete("Integer", new Integer(), "800", true, "800");
       ok &= testMatchDelete("Negative", new Number(), "-800", true, "-800");
       ok &= testMatchDelete("Decimal", new Number(), "800.01", true, "800.01");
@@ -196,9 +199,9 @@ namespace BeeFishJSON
          }
       };
 
-      class _Set : public Capture {
+      class _Set : public Match {
       public:
-         _Set() : Capture(
+         _Set() : Match(
             new Set<OpenBrace, Item, Seperator, CloseBrace>()
          )
          {
@@ -206,9 +209,9 @@ namespace BeeFishJSON
          }
       };
  
-      ok &= testMatchDelete("Set", new _Set(), "{item,item,item}", true, "{item,item,item}");
-      ok &= testMatchDelete("Set empty", new _Set(), "{}", true, "{}");
-      ok &= testMatchDelete("Set blanks", new _Set(), "{item, item ,item }", true);
+      ok &= testMatchDelete("Set", new Capture(new _Set()), "{item,item,item}", true, "{item,item,item}");
+      ok &= testMatchDelete("Set empty", new Capture(new _Set()), "{}", true, "{}");
+      ok &= testMatchDelete("Set blanks", new Capture(new _Set()), "{item, item ,item }", true);
 
 
       Capture object(
@@ -220,12 +223,32 @@ namespace BeeFishJSON
 
       class MySetItem : public Capture {
       public:
-         MySetItem() : Capture(
-            new Word("myset")
-         )
+         MySetItem() : Capture()
          {
-
          }
+         
+         virtual void setup(Parser* parser)
+         override
+         {
+            if (_setup)
+               return;
+                
+            _parser = parser;
+
+			_match = new Word("myset");
+			
+			_setup = true;
+
+			Capture::setup(parser);
+         }
+         
+         virtual void capture(Parser* parser, char c)
+         {
+             Capture::capture(parser, c);
+             cerr << "{" << c << "}" << flush;
+             _match->capture(parser, c);
+         }
+         
       };
 
       class MySet : public Set<OpenBrace, MySetItem, Seperator, CloseBrace>
@@ -238,7 +261,11 @@ namespace BeeFishJSON
          }
          
          virtual void matchedSetItem(MySetItem* item)
+         override
          {
+            cerr << "matchedSetItem: " << item->value() << endl;
+             
+  
             if (item->value() == "myset")
                ++_count;
                
@@ -252,6 +279,8 @@ namespace BeeFishJSON
       ok &= testResult("Set with overload result", (mySet->_count == 2));
       delete mySet;
       
+      BeeFishMisc::outputSuccess(ok);
+      assert(false);
       cout << endl;
       
       return ok;

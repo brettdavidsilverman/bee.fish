@@ -29,17 +29,7 @@ namespace BeeFishJSON
 {
 
    class JSONParser;
-   /*
-   enum Type {
-      UNDEFINED,
-      __NULL,
-      BOOLEAN,
-      NUMBER,
-      STRING,
-      ARRAY,
-      OBJECT
-   };
-*/
+
    class JSON : public And
    {
    public:

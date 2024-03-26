@@ -82,7 +82,7 @@ namespace BeeFishTest
       BString expected = {}
    )
    {
-      cout << label << ":\t";
+      cout << '\t' << label << ":\t";
       
       bool ok = true;
 
@@ -101,7 +101,9 @@ namespace BeeFishTest
          if (value != expected)
             ok = false;
       }
+      
       BeeFishMisc::outputSuccess(ok);
+      
       if (!ok)
       {
          cout << "FAIL. Expected "
@@ -117,7 +119,7 @@ namespace BeeFishTest
       
       return ok;
    }
-   
+   /*
    inline bool testMatch(
       BString label,
       BeeFishJSON::JSON* match,
@@ -130,7 +132,7 @@ namespace BeeFishTest
      // Parser parser(*match);
       return testMatch(parser, label, match, text, result, expected);
    }
-   
+   */
    inline bool testMatch(
       BString label,
       Match* match,
@@ -139,7 +141,7 @@ namespace BeeFishTest
       BString expected = {}
    ) 
    {
-      Parser parser(*match);
+      BeeFishJSON::JSONParser parser(*match);
       return testMatch(parser, label, match, text, result, expected);
    }
 
@@ -155,7 +157,7 @@ namespace BeeFishTest
       delete match;
       return ok;
    }
-   
+   /*
    inline bool testMatchDelete(
       BString label,
       BeeFishJSON::JSON* json,
@@ -168,7 +170,7 @@ namespace BeeFishTest
       delete json;
       return ok;
    }
-   
+   */
    inline bool testValue(
       string expected,
       string value

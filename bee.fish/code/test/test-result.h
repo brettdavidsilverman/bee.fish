@@ -8,7 +8,7 @@ namespace BeeFishTest
       bool ok
    )
    {
-      cout << label << ":\t";
+      cout << '\t' << label << ":\t";
       BeeFishMisc::outputSuccess(ok);
       return ok;
    }

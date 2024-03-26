@@ -21,16 +21,16 @@ namespace BeeFishParser {
    public:
       Capture() :
          Match(),
-         _valueRef(_value) 
+         _value(""),
+         _valueRef(_value)
       {
-         _valueRef.clear();
       }
       
       Capture(Match* match) :
          Match(match),
+         _value(""),
          _valueRef(_value)
       {
-          _valueRef.clear();
       }
             
       Capture(

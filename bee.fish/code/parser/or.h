@@ -22,8 +22,7 @@ namespace BeeFishParser {
       
       virtual ~Or()
       {
-         for (auto it : _inputs) {
-            Match* match = it;
+         for (auto match : _inputs) {
             delete match;
          }
       }
@@ -73,9 +72,13 @@ namespace BeeFishParser {
       
 
       virtual void setup(Parser* parser) {
-         Match::setup(parser);
+         if (_setup)
+            return;
+            
          for (auto item : _inputs)
             item->setup(parser);
+            
+         Match::setup(parser);
       }   
       
       virtual BString& value()
