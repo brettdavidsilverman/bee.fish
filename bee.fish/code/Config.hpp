@@ -17,5 +17,5 @@
 #define TEMP_DIRECTORY "/var/tmp/"
 #define TEMP_FILENAME TEMP_DIRECTORY "bee.fish.data"
 
-#define DEBUG_FILE "/home/bee/debug.txt"
+#define DEBUG_FILE HOME_DIR "/debug.txt"
 #endif

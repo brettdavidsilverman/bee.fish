@@ -41,7 +41,7 @@ clean:
 
 #   simple test
 test: a.out reload
-	curl https://bee.fish/ -s > /dev/null
+	curl http://localhost/ -s > /dev/null
 	./a.out -test
 
 debug:	clean

@@ -1,7 +1,8 @@
 #ifndef APACHE2_CONFIG_HPP
 #define APACHE2_CONFIG_HPP
 
-#define PAGE_SIZE 4096
+#include "../Config.hpp"
+
 
 #ifdef DEBUG
    #define DATABASE_FILENAME "/home/bee/dev.bee.fish.data"

@@ -77,7 +77,7 @@ static int database_handler(request_rec *r)
     debug << now() << " "
           << r->connection->client_ip << " "
           << r->method << " "
-          << "https://bee.fish"
+          << HOST 
           << r->uri;
     
     if (r->args)
@@ -183,8 +183,7 @@ static bool inputJSON(Path path, request_rec *r) {
    int pageSize = getPageSize();
    char buffer[pageSize];
    Size pageIndex = 0;
-   JSON match;
-   JSON2Path index(path["index"], match);
+   JSON2Path index(path["index"]);
    
    MinMaxPath document = path["document"];
    
