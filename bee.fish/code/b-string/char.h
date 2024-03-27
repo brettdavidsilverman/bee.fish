@@ -1,5 +1,5 @@
-#ifndef BEE_FISH_B_STRING__CHARACTER_H
-#define BEE_FISH_B_STRING__CHARACTER_H
+#ifndef BEE_FISH_B_STRING__CHAR_H
+#define BEE_FISH_B_STRING__CHAR_H
 
 #include <iostream>
 #include <string>
@@ -15,29 +15,29 @@ using namespace std;
 using namespace BeeFishPowerEncoding;
 
 namespace BeeFishBString {
-    class Character : public std::string
+    class Char : public std::string
    {
    public:
-      Character() {
+      Char() {
       }
       
-      Character(char c) {
+      Char(char c) {
          push_back(c);
       }
       
-      Character(const char* character) :
+      Char(const char* character) :
          std::string(character)
       {
       }
       
-      Character(const std::string& character) :
+      Char(const std::string& character) :
          std::string(character)
       {
       }
       
       friend PowerEncoding& operator <<      (
          PowerEncoding& out,
-         const Character& value
+         const Char& value
       )
       {
           out << (std::string&)value;
@@ -46,7 +46,7 @@ namespace BeeFishBString {
       
       friend PowerEncoding& operator >>      (
          PowerEncoding& in,
-         Character& value
+         Char& value
       )
       {
           in >> (std::string&)value;
@@ -57,9 +57,9 @@ namespace BeeFishBString {
    };
    
 
-   inline void writeCharacter(
+   inline void writeChar(
       ostream& out,
-      const Character& value
+      const Char& value
    )
    {
       for (const char c : value) {
@@ -67,14 +67,14 @@ namespace BeeFishBString {
       }
    }
       
-   inline ostream& operator << (ostream& out, const Character& character) {
-      writeCharacter(out, character);
+   inline ostream& operator << (ostream& out, const Char& character) {
+      writeChar(out, character);
       return out;
    }
 
-   inline void writeEscapedCharacter(
+   inline void writeEscapedChar(
       ostream& out,
-      const Character& value
+      const Char& value
    )
    {
       for (auto c : value)

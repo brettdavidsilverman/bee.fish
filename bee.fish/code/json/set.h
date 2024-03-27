@@ -11,167 +11,148 @@ using namespace std;
 namespace BeeFishJSON
 {
 
-   template<class OpenBrace, class Item, class Seperator, class CloseBrace>
-   class Set : public Match
-   {
-   
-   protected:
+template<class OpenBrace, class Item, class Seperator, class CloseBrace>
+class Set : public Match
+{
 
+protected:
+
+   class _Seperator : public And {
    public:
-      Set() : Match()
-      {
-      }
-            
-      virtual ~Set()
-      {
-      }
-
-      virtual Item* createItem() {
-         return new Item();
-      }  
-
-      virtual void setup(Parser* parser)
-      {
-         class _Seperator : public And {
-         public:
-            _Seperator() : And(
-               new Optional(
-                  new BlankSpace()
-               ),
-               new Seperator(),
-               new Optional(
-                  new BlankSpace()
-               )
-            )
-            {
-
-            }
-         };
-
-         class InvokeItem : public Match {
-         protected:
-            Set* _set;
-         public:
-            InvokeItem(Set* set) : Match(
-               
-            )
-            {
-               _set = set;
-               _match = _set->createItem();
-            }
-
-            virtual void success() {
-               Item* item = (Item*)_match;
-
-               _set->matchedSetItem(item);
-            }
-         };
-
-         class SubsequentItem : public Match {
-         protected:
-             Set* _set;
-             Item* _item;
-         public:
-            
-            SubsequentItem() : Match() {
-               throw std::runtime_error("SubsequentItem construted without a set");
-            }
-
-            SubsequentItem(Set* set) : Match(
+      _Seperator() : And(
+            new Optional(
+               new BlankSpace()
             ),
-               _set(set)
-            {
-            }
-            
-            virtual void setup(Parser* parser)
-            override
-            {
-               _parser = parser;
+            new Seperator(),
+            new Optional(
+               new BlankSpace()
+            )
+         )
+      {
 
-			   if (!_match) {
-                  _match = new And(
-                     new _Seperator(), 
-                     _item = _set->createItem()
-                  );
-                  _match->setup(parser);
+      }
+   };
+
+   class SubsequentItem : public Match {
+   protected:
+      Set* _set;
+      Match* _item;
+   public:
+
+      SubsequentItem() : Match() {
+         throw std::runtime_error("SubsequentItem construted without a set");
+      }
+
+      SubsequentItem(Match* set) : Match(),
+         _set((Set*)set)
+      {
+         _match = new And(
+            new _Seperator(),
+            new Invoke(
+               _item = _set->createItem(),
+               [this](Match* match)
+               {
+                  _set->onsetvalue(match);
                }
-			
-			   _setup = true;
+            )
+         );
+      }
 
-			   Match::setup(parser);
-            }
+   };
+
+   class SubsequentItems : public Repeat<SubsequentItem> {
+   protected:
+      Set* _set;
+   public:
+      SubsequentItems() : Repeat<SubsequentItem>(0) {
+         throw std::runtime_error("SubsequentItems constructed without set");
+      }
+
+      SubsequentItems(Set* set) : Repeat<SubsequentItem>(0)
+      {
+         _set = set;
+      }
+
+      virtual ~SubsequentItems() {
+      }
+
+      virtual SubsequentItem* createItem() {
+         SubsequentItem* item =
+            new SubsequentItem(_set);
          
-            virtual void success() {
-cerr << "Set::subsequentItem " << _item->value() << endl;
-               _set->matchedSetItem(_item);
-            }
-         };
+         return item;
+      }
+   };
 
-         class SubsequentItems : public Repeat<SubsequentItem> {
-         protected:
-            Set* _set;
-         public:
-            SubsequentItems() : Repeat<SubsequentItem>(0) {
-               throw std::runtime_error("SubsequentItems constructed without set");
-            }
 
-            SubsequentItems(Set* set) : Repeat<SubsequentItem>(0) 
-            {
-               _set = set;
-            }
+public:
+   Set() : Match()
+   {
+   }
 
-            virtual ~SubsequentItems() {
-            }
+   virtual ~Set()
+   {
+   }
 
-            virtual SubsequentItem* createItem() {
-               return new SubsequentItem(_set);
-            }
-         };
+   virtual void setup(Parser* parser)
+   {
+      if (_parser)
+         return;
 
-         _match =
+      _parser = parser;
+      
+      _match =
+         new And(
+         new Invoke(
+            new OpenBrace(),
+            [this](Match* match) {
+               this->onbeginset(match);
+            }
+         ),
+         new Optional(
             new And(
                new Invoke(
-                  new OpenBrace(),
+                  createItem(),
                   [this](Match* match) {
-                     this->onbeginset(match);
+                     this->onsetvalue(match);
                   }
                ),
                new Optional(
-                  new And(
-                     new InvokeItem(this),
-                     new SubsequentItems(this)
-                  )
-               ),
-               new Invoke(
-                  new CloseBrace(),
-                  [this](Match* match) {
-                     this->onendset(match);
-                  }
+                  new SubsequentItems(this)
                )
-            );
+            )
+         ),
+         new Invoke(
+            new CloseBrace(),
+            [this](Match* match) {
+               this->onendset(match);
+            }
+         )
+      );
+      
+      _match->setup(parser);
 
-         Match::setup(parser);
-      }
-      
-             
-      virtual void matchedSetItem(Item* item)
-      {
-      }
-      
-      virtual BString& value()
-      {
-         return _match->value();
-      }
-
-      virtual void onbeginset(Match* match) {
-      }
-      
-      virtual void onendset(Match* match) {
-      }
-      
-      
-   };
+   }
+   
+   virtual Match* createItem()
+   {
+      return new Item(this);
+   }
          
+   virtual void onbeginset(Match* match) {
+   }
+   
+   virtual void onsetvalue(Match* item)
+   {
+   }
+   
+
+   virtual void onendset(Match* match) {
+   }
+
+
+};
+
 
 }
 

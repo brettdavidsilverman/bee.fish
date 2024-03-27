@@ -12,20 +12,19 @@ using namespace BeeFishParser;
 namespace BeeFishJSON
 {
 
-   class Boolean : public Capture
+   class Boolean : public Match
    {
    public:
 
       Word* _true;
       Word* _false;
       
-      Boolean() : Capture(
-         new Or (
-            _true = new Word("true"),
-            _false = new Word("false")
-         )
-      )
+      Boolean()
       {
+          _match = new Or(
+             _true = new Word("true"),
+             _false = new Word("false")
+          );
       }
             
    };

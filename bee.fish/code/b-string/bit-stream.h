@@ -12,7 +12,7 @@
 #include "../power-encoding/power-encoding.h"
 #include "b-string.h"
 #include "data.h"
-#include "character.h"
+#include "char.h"
 
 namespace BeeFishBString {
 

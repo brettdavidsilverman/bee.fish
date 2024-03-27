@@ -108,6 +108,8 @@ namespace std {
 }
 #endif
 
+namespace std {
+    #warning optional extensions
    std::ostream& operator << (
       std::ostream& out,
       const std::optional<bool>& value
@@ -123,5 +125,41 @@ namespace std {
          throw std::logic_error("Optional value");
       return out;
    }
+   
+   bool operator == (optional<bool> left, optional<bool> right)
+   {
+      // both have values
+      if (left.has_value() &&
+          right.has_value())
+         return left.value() == right.value();
+            
+      // neither have values
+      if (!left.has_value() &&
+          !right.has_value())
+         return true;
+            
+      // either or
+      return false;
+   }
+   
+   bool operator != (optional<bool> left, optional<bool> right)
+   {
+      // both have values
+      if (left.has_value() &&
+          right.has_value())
+         return left.value() != right.value();
+            
+      // neither have values
+      if (!left.has_value() &&
+          !right.has_value())
+         return false;
+            
+      // either or
+      return true;
+   }
+   
+   
+}
+      
 
 #endif

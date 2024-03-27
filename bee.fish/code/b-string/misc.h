@@ -12,7 +12,7 @@
 
 #include "../power-encoding/power-encoding.h"
 #include "b-string.h"
-#include "character.h"
+#include "char.h"
 #include "data.h"
 #include "base64.h"
 #include "bit-stream.h"
@@ -94,9 +94,9 @@ namespace BeeFishBString
    // BString from data
    inline BString::BString(const Data &source)
    {
-      size_t characterCount = source.size() / sizeof(Character);
+      size_t characterCount = source.size() / sizeof(Char);
       reserve(characterCount);
-      Character* chars = (Character*)(source.data());
+      Char* chars = (Char*)(source.data());
       for (size_t i = 0; i < characterCount; ++i) {
          BStringBase::push_back(chars[i]);
       }
@@ -104,7 +104,7 @@ namespace BeeFishBString
 */
 /*
    // Declared in character.h
-   inline BString Character::bstr() const {
+   inline BString Char::bstr() const {
       BString string;
       for (auto bit : (*this)) {
          if (bit)

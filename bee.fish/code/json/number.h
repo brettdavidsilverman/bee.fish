@@ -6,6 +6,12 @@
 
 namespace BeeFishJSON {
       
+      
+      
+      
+   class Number: public Match
+   {
+   public:
       class Plus : public BeeFishParser::Character {
       public:
          Plus() : Character('+') {
@@ -32,17 +38,8 @@ namespace BeeFishJSON {
 
          }
       };
-
-      
-      
-   class Number: public Match
-   {
-   public:
-      BString _sign;
-   public:
-      Number() : Match()
-      {
-      Match* numberSign      = new Capture(new Minus(), _sign);
+       
+      Match* _numberSign      = new Minus();
       Match* _integer         = new Integer();
       Match* _fractionInteger = new Integer();
       Match* _fraction        =
@@ -66,18 +63,22 @@ namespace BeeFishJSON {
          
       Match* _number          =
          new And(
-            new Optional(numberSign),
+            new Optional(_numberSign),
             _integer,
             new Optional(_fraction),
             new Optional(_exponent)
          );
+         
+   public:
+      Number() : Match()
+      {
          _match = _number;
       }
       
       virtual void eof(Parser* parser) 
       override {
           
-          if (!_setup)
+          if (!parser)
              setup(parser);
              
           if (_result == nullopt)

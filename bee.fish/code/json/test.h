@@ -85,13 +85,13 @@ namespace BeeFishJSON
       
       bool ok = true;
       
-      ok &= testMatchDelete("Capture",  new Integer(), "80000", true, "80000");
+      ok &= testMatchDelete("Capture",  new Capture(new Integer()), "80000", true, "80000");
       assert(ok);
-      ok &= testMatchDelete("Integer", new Integer(), "800", true, "800");
-      ok &= testMatchDelete("Negative", new Number(), "-800", true, "-800");
-      ok &= testMatchDelete("Decimal", new Number(), "800.01", true, "800.01");
-      ok &= testMatchDelete("Short exponent", new Number(), "800e10", true, "800e10");
-      ok &= testMatchDelete("Full exponent", new Number(), "800E-10", true, "800E-10");
+      ok &= testMatchDelete("Integer", new Capture(new Integer()), "800", true, "800");
+      ok &= testMatchDelete("Negative", new Capture(new Number()), "-800", true, "-800");
+      ok &= testMatchDelete("Decimal", new Capture(new Number()), "800.01", true, "800.01");
+      ok &= testMatchDelete("Short exponent", new Capture(new Number()), "800e10", true, "800e10");
+      ok &= testMatchDelete("Full exponent", new Capture(new Number()), "800E-10", true, "800E-10");
       ok &= testMatchDelete("False positive", new Number(), "+800");
       //ok &= testMatchDelete("NaN", new CaptureNumber(), "NaN", true, "NaN");
       assert(ok);
@@ -117,8 +117,8 @@ namespace BeeFishJSON
       
       EscapedCharacter backSlash;
       ok &= testMatch("Escaped character back slash", &backSlash, "\\\\", true);
-      ok &= testResult("Escaped character back slash value", (backSlash.character() == Char('\\')));
-        
+      ok &= testResult("Escaped character back slash value", (backSlash.character() == "\\"));
+      
       EscapedCharacter hexCharacter;
       ok &= testMatch("Escaped character hex", &hexCharacter, "\\u0040", true);
       ok &= testResult("Escaped character hex value", (hexCharacter.character() == Char('@')));
@@ -135,7 +135,7 @@ namespace BeeFishJSON
       ok &= testMatch("String characters", &stringCharacters, "hello world\\\\", nullopt);
       ok &= testResult("String characters value", (stringCharacters == "hello world\\"));
       ok &= testMatchDelete("String", new String(), "\"hello world\"", true, "hello world");
-
+      assert(ok);
 
       ok &= testMatchDelete("Empty string", new JSON(), "\"\"", true, "");
       ok &= testMatchDelete("Simple string", new JSON(), "\"hello\"", true, "hello");
@@ -176,7 +176,7 @@ namespace BeeFishJSON
 
       };
 
-
+ 
       class CloseBrace : public BeeFishParser::Character {
       public:
          CloseBrace() : Character('}') {
@@ -185,12 +185,33 @@ namespace BeeFishJSON
 
       };
 
-      class Item : public Word {
+      class Item : public Capture {
       public:
-         Item() : Word("item") {
+         Item(void* params = nullptr) :
+            Capture(new Word("item"))
+         {
 
          }
+         
+         virtual void capture(Parser* parser, char c)
+         override
+         {
+            cerr << "[" << c << "]";
+            Capture::capture(parser, c);
+         }
+         
+         virtual void success()
+         {
+            cerr << endl << "Item: " << value() << endl;
+         }
       };
+      
+      typedef Repeat<Item> Items;
+      Items* items = new Items();
+      ok &= testMatchDelete("Items", new Capture(items), "itemitemitem", true, "itemitemitem");
+      
+      assert(false);
+      
 
       class Seperator : public BeeFishParser::Character {
       public:
@@ -199,17 +220,16 @@ namespace BeeFishJSON
          }
       };
 
-      class _Set : public Match {
-      public:
-         _Set() : Match(
-            new Set<OpenBrace, Item, Seperator, CloseBrace>()
-         )
-         {
-
-         }
-      };
+      typedef
+         Set<OpenBrace, Item, Seperator, CloseBrace> 
+         _Set;
+      
+      
  
       ok &= testMatchDelete("Set", new Capture(new _Set()), "{item,item,item}", true, "{item,item,item}");
+      
+      assert(false);
+      
       ok &= testMatchDelete("Set empty", new Capture(new _Set()), "{}", true, "{}");
       ok &= testMatchDelete("Set blanks", new Capture(new _Set()), "{item, item ,item }", true);
 
@@ -220,33 +240,25 @@ namespace BeeFishJSON
       
 
       ok &= testMatch("Set LoadOnDemand", &object, "{item,item}", true, "{item,item}");
+assert(ok);
 
+      class MySet;
+      
       class MySetItem : public Capture {
       public:
-         MySetItem() : Capture()
+         MySetItem(Match* set) : Capture()
          {
-         }
-         
-         virtual void setup(Parser* parser)
-         override
-         {
-            if (_setup)
-               return;
-                
-            _parser = parser;
-
-			_match = new Word("myset");
-			
-			_setup = true;
-
-			Capture::setup(parser);
+            _match = new Word("myset");
          }
          
          virtual void capture(Parser* parser, char c)
          {
              Capture::capture(parser, c);
+             
+             //_match->capture(parser, c);
+             
              cerr << "{" << c << "}" << flush;
-             _match->capture(parser, c);
+         
          }
          
       };
@@ -260,27 +272,34 @@ namespace BeeFishJSON
          {
          }
          
-         virtual void matchedSetItem(MySetItem* item)
+         virtual void onsetvalue(Match* item)
          override
          {
-            cerr << "matchedSetItem: " << item->value() << endl;
+            cerr << endl << "matchedSetItem: " << item->value() << endl;
              
   
             if (item->value() == "myset")
                ++_count;
                
-            Set::matchedSetItem(item);
          }
+         
+         virtual Match* createItem()
+         override
+         {
+            return new MySetItem(this);
+         }
+         
          
       };
      
       MySet* mySet = new MySet();
-      ok &= testMatch("Set with overload", mySet, "{myset,myset}", true);
+      Capture cap = Capture(mySet);
+      ok &= testMatch("Set with overload", &cap, "{myset,myset}", true, "{myset,myset}");
       ok &= testResult("Set with overload result", (mySet->_count == 2));
-      delete mySet;
-      
-      BeeFishMisc::outputSuccess(ok);
+
       assert(false);
+      BeeFishMisc::outputSuccess(ok);
+ 
       cout << endl;
       
       return ok;

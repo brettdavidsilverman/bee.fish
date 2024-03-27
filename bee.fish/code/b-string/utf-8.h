@@ -7,7 +7,7 @@
 #include "../misc/optional.h"
 #include <iomanip>
 
-#include "character.h"
+#include "char.h"
 
 using namespace std;
 
@@ -21,7 +21,7 @@ namespace BeeFishBString {
       optional<bool> _result = nullopt;   
       
    public:
-      typedef Character Value;
+      typedef Char Value;
       Value _value;
       
       UTF8Character() :
@@ -168,7 +168,7 @@ namespace BeeFishBString {
 
       }
 
-      BeeFishBString::Character character() {
+      BeeFishBString::Char character() {
          return _value;
       }      
 

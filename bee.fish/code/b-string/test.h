@@ -53,7 +53,7 @@ namespace BeeFishBString
       for (char c = 0; c <= 10; c++) {
          BitStream stream;
          stream << c;
-         cout << "Character: " << (int)c << '\t' << stream.bstr() << endl;
+         cout << "Char: " << (int)c << '\t' << stream.bstr() << endl;
       }
 
       bool ok = true;
@@ -79,12 +79,12 @@ namespace BeeFishBString
          (next == compare)
       );
       
-      Character at = "\u0040";
+      Char at = "\u0040";
       BString value = at;
 
       ok &= testResult(
          "B-String character @",
-         (value == Character('@'))
+         (value == Char('@'))
       );
 
       BString bstr2 = "from Bee";
@@ -145,30 +145,30 @@ namespace BeeFishBString
       bool ok = true;
 
       BitStream characterStream;
-      characterStream << Character('1');
+      characterStream << Char('1');
 
       ok &= testResult(
-         "Character One stream",
+         "Char One stream",
          characterStream.count() == 0
       );
 
       characterStream.reset();
-      Character readCharacter;
+      Char readCharacter;
       characterStream >> readCharacter;
 
       ok &= testResult(
-         "Character Read One stream",
+         "Char Read One stream",
          readCharacter == "1"
       );
 
       BitStream characterManyStream;
       for (char c = 'a'; c <= 'z'; c++) {
-         Character character(c);
+         Char character(c);
          characterManyStream << character;
       }
 
       ok &= testResult(
-         "Character many stream",
+         "Char many stream",
          characterManyStream.count() == 0
       );
 
@@ -179,7 +179,7 @@ namespace BeeFishBString
       bool compares = true;
 
       while (characterManyStream.peekBit()) {
-         Character readCharacter;
+         Char readCharacter;
          characterManyStream >> readCharacter;
          if (readCharacter[0] != compare) {
             compares = false;

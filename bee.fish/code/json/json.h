@@ -30,7 +30,7 @@ namespace BeeFishJSON
 
    class JSONParser;
 
-   class JSON : public And
+   class JSON : public Match
    {
    public:
       Undefined* _undefined;
@@ -82,19 +82,7 @@ namespace BeeFishJSON
       }
       
    public:
-      JSON() : And()
-      {
-      }
-      
-      virtual ~JSON()
-      {
-
-      }
-
-      // Defined in json-parser.h
-      virtual void success();
-      
-      virtual void setup(Parser* parser)
+      JSON() : Match()
       {
          _undefined = new Undefined();
 
@@ -122,17 +110,22 @@ namespace BeeFishJSON
             invoke(_object, Type::OBJECT)
          };
          
-         _inputs = {
+         _match = new And(
             new Optional(new BlankSpace()),
-            _items,
-         };
+            _items
+         );
         
-         And::setup(parser);
-
-         
+        // And::setup(parser);
          
       }
       
+      virtual ~JSON()
+      {
+
+      }
+
+      // Defined in json-parser.h
+      virtual void success();
       
       virtual Match& item() const
       {
@@ -172,7 +165,7 @@ namespace BeeFishJSON
       virtual void eof(Parser* parser)
       override {
  
-          if (!_setup)
+          if (!parser)
              setup(parser);
              
           assert(_parser);

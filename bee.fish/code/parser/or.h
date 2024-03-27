@@ -82,7 +82,7 @@ namespace BeeFishParser {
             
       }   
       
-      virtual BString& value()
+      virtual const BString& value() const
       {
          if (_item)
             return _item->value();

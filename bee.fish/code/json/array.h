@@ -52,16 +52,26 @@ namespace BeeFishJSON {
       }
       
       // Defined in json-parser.h
-      virtual void matchedSetItem(LoadOnDemand<JSON>* item);
-
-      // Defined in json-parser.h
       virtual void onbeginset(Match* match);
 
+      // Defined in json-parser.h
+      virtual void onarrayvalue(Match* match);
+      
       // Defined in json-parser.h
       virtual void onendset(Match* match);
 
       BeeFishJSON::JSONParser* jsonParser() {
          return (BeeFishJSON::JSONParser*)_parser;
+      }
+      
+      virtual void onsetvalue(Match* match)
+      override
+      {
+         onarrayvalue(match);
+      }
+      
+      virtual Match* createItem() {
+         return new LoadOnDemand<JSON>(this);
       }
 
    };

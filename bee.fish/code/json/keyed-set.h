@@ -12,90 +12,40 @@ using namespace std;
 namespace BeeFishJSON
 {
 
-   template<class Key, class Value>
-   class KeyMatched {
-   public:
-      KeyMatched() {
-
-      }
-
-      virtual void matchedKey(Key& key, Value& value) {
-
-      }
-      virtual void matchedKey(Key& key) {
-
-      }
-   };
-
-   template<class Key, class KeyValueSeperator, class Value>
-   class KeyValue : public And {
-   public:
-      KeyValue() : And() {
-         throw std::logic_error("Invalid constructor");
-      }
-   public:
-      KeyMatched<Key, Value>* _keyMatched;
-      Key* _key;
-      KeyValueSeperator* _seperator;
-      Value* _value;
-
-      class InvokeKeyValueSeperator : public KeyValueSeperator {
+   template<
+      class OpenBrace,
+      class Key,
+      class KeyValueSeperator,
+      class Value,
+      class Seperator,
+      class CloseBrace
+   > class KeyedSet;
+   
+   //template<class Key, class KeyValueSeperator, class Value>
+      template<class OpenBrace, class Key, class KeyValueSeperator, class Value, class Seperator, class CloseBrace>
+      class KeyValue : public Match {
       protected:
-         KeyMatched<Key, Value>* _keyMatched;
-         Key* _key;
-         Value* _value;
+        typedef KeyedSet<OpenBrace, Key, KeyValueSeperator, Value, Seperator, CloseBrace> _KeyedSet;
+        
+
+        _KeyedSet* _set;
+      
       public:
-         InvokeKeyValueSeperator(KeyMatched<Key, Value>* keyMatched, Key* key, Value* value) 
-            : KeyValueSeperator() 
-         {
-            _keyMatched = keyMatched;
-            _key = key;
-            _value = value;
+         Match* _key;
+         Match* _seperator;
+         Match* _value;
+      
+      public:
+         KeyValue(Match* set) : Match() {
+            _set = (_KeyedSet*)set;
          }
-
-         virtual void success() {
-            Key& key = *_key;
-            Value& value = *_value;
-
-            if (!value._setup)
-                value.setup(this->_parser);
-
-            _keyMatched->matchedKey(key, value);
-
-            KeyValueSeperator::success();
-         }
+      
+         // Defined below
+         virtual void setup(Parser* parser);
+      
 
       };
-
-   public:
-      KeyValue(KeyMatched<Key, Value>* keyMatched) : And() {
-         _keyMatched = keyMatched;
-      }
       
-      virtual void setup(Parser* parser) {
-         _key = new Key();
-         _value = new Value();
-         _seperator = new InvokeKeyValueSeperator(_keyMatched, _key, _value);
-
-         And::_inputs = {
-            new Invoke(
-               _key,
-               [this](Match* match) {
-                  Key& key = *_key;
-                  _keyMatched->matchedKey(key);
-               }
-            ),
-            new Optional(new BlankSpace()),
-            _seperator,
-            new Optional(new BlankSpace()),
-            _value
-         };
-
-         And::setup(parser);
-      }
-   };
-   
-
    template<
       class OpenBrace,
       class Key,
@@ -104,20 +54,21 @@ namespace BeeFishJSON
       class Seperator,
       class CloseBrace
    >
-   class KeyedSet : 
+   class KeyedSet :
+      
       public
          Set<
             OpenBrace, 
-            KeyValue<Key, KeyValueSeperator, Value>,
+            KeyValue<OpenBrace, Key, KeyValueSeperator, Value, Seperator, CloseBrace>,
             Seperator,
             CloseBrace
-         >,
-         KeyMatched<Key, Value>
+         >
 
    {
    public:
-      typedef KeyValue<Key, KeyValueSeperator, Value> _KeyValue;
-
+      typedef KeyValue<OpenBrace, Key, KeyValueSeperator, Value, Seperator, CloseBrace> _KeyValue;
+       
+       
    public:
       KeyedSet() : 
          Set<
@@ -129,19 +80,73 @@ namespace BeeFishJSON
       {
       }
 
-      virtual _KeyValue* createItem() {
+      virtual Match* createItem() 
+      override
+      {
          return new _KeyValue(this);
       }
 
-      virtual void matchedKey(Key& key, Value& value) {
+      virtual void onkey(Match* key) {
       }
       
-      virtual void matchedKey(Key& key) {
+      virtual void onvalue(Value* value) {
           
       }
 
    };
 
+
+   // Declared above in KeyValue
+   
+   template<
+      class OpenBrace,
+      class Key,
+      class KeyValueSeperator,
+      class Value,
+      class Seperator,
+      class CloseBrace
+   >
+   void KeyValue<
+         OpenBrace,
+         Key,
+         KeyValueSeperator,
+         Value,
+         Seperator,
+         CloseBrace
+    >::setup(Parser* parser)
+    {
+      if (_parser)
+         return;
+            
+      _parser = parser;
+         
+      _key = new Invoke(
+         new Key(),
+         [this](Match* key) {
+            _set->onkey(key);
+         }
+      );
+         
+      _seperator =
+         new KeyValueSeperator();
+         
+      _value = new Invoke(
+         new Value(),
+         [this](Match* value) {
+            _set->onsetvalue(value);
+         }
+      );
+         
+      _match = new And(
+          _key,
+          _seperator,
+          _value
+      );
+         
+      _match->setup(parser);
+         
+   }
+ 
 }
 
 #endif

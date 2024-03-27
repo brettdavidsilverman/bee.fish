@@ -18,7 +18,7 @@
 #include <filesystem>
 #endif
 
-#include "character.h"
+#include "char.h"
 
 #include "utf-8.h"
 
@@ -30,7 +30,7 @@ namespace BeeFishBString
 {
 
 
-   //typedef vector<Character> BStringBase;
+   //typedef vector<Char> BStringBase;
    typedef uint8_t Byte;
    
    typedef std::string BStringBase;
@@ -47,7 +47,7 @@ namespace BeeFishBString
    {
       
    public:
-      typedef Character ValueType;
+      typedef Char ValueType;
    
       // empty string
       BString()
@@ -108,7 +108,7 @@ namespace BeeFishBString
          return stream.str();
       }
 
-      void push_back(const Character &character)
+      void push_back(const Char &character)
       {
          *this += character;
       }
@@ -287,7 +287,7 @@ namespace BeeFishBString
          return ltrim().rtrim();
       }
       
-      bool contains(Character character) const
+      bool contains(const Char& character) const
       {
          if (find(character) != std::string::npos)
             return true;

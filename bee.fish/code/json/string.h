@@ -71,7 +71,6 @@ namespace BeeFishJSON {
    class Hex : public Match
    {
    private:
-      BString _hex;
       Char _hexValue;
 
    public:
@@ -80,15 +79,14 @@ namespace BeeFishJSON {
           _match = new Capture(
              new Repeat<HexCharacter>(
                 4, 4
-             ),
-             _hex
+             )
           );
       }
             
       virtual void success()
       {
          std::stringstream stream;
-         stream << std::hex << _hex;
+         stream << std::hex << value();
          uint32_t u32;
          stream >> u32;
          _hexValue = Char(u32);
@@ -124,6 +122,7 @@ namespace BeeFishJSON {
                [this, output](Match*)
                {
                   _character = output;
+                  success();
                }
             );
       }
@@ -133,25 +132,18 @@ namespace BeeFishJSON {
       EscapedCharacter() :
          Match()
       {
-      }
-      
-      virtual ~EscapedCharacter() {
-      }
-
-      virtual void setup(Parser* parser)
-      {
-         
-         Match* invokeHex = new
+          Match* invokeHex = new
             Invoke(
                _hex = new Hex(),
                [this](Match*)
                {
                   _character = 
                      _hex->character();
+                  success();
                }
             );
             
-         Match* match = new And(
+         _match = new And(
             new BeeFishParser::
                Character('\\'),
             new Or(
@@ -173,17 +165,16 @@ namespace BeeFishJSON {
                )
             )
          );
-         
-         _match = match;
-
-         Match::setup(parser);
-         
       }
       
-      virtual const Char& character() const
+      virtual ~EscapedCharacter() {
+      }
+
+      const Char& character() const
       {
          return _character;
       }
+     
 
       
    };
@@ -214,7 +205,7 @@ namespace BeeFishJSON {
          
    class StringCharacters :
       public Repeat<StringCharacter>,
-      public BeeFishBString::BStream,
+      //public BeeFishBString::BStream,
       public BString
    {
 
@@ -223,72 +214,50 @@ namespace BeeFishJSON {
       {
       }
 
-      virtual void matchedItem(StringCharacter* item) {
-         BeeFishBString::Character character = item->character();
+      virtual void matchedItem(StringCharacter* item)
+      override
+      {
+         const Char& character = item->character();
          BString::push_back(character);
-         BStream::write(character);
+        // BStream::write(character);
          Repeat::matchedItem(item);
       }
 
       virtual BString& value() {
          return *this;
       }
-
+/*
       virtual void clear() {
          BString::clear();
          BeeFishBString::BStream::clear();
       }
-
+*/
    };
 
    class String :
       public Match
    {
-   public:
-      BStream::OnBuffer _onbuffer;
    protected:
       StringCharacters*
          _stringCharacters = nullptr;
-      BString _value;
 
    public:
       String() : Match()
       {
-      }
-      
-      virtual void setup(Parser* parser)
-      {
-            
          _stringCharacters =
             new StringCharacters();
          
-         _stringCharacters->_onbuffer =
-            [this](const Data& buffer) {
-               if (this->_onbuffer) {
-                  this->_onbuffer(buffer);
-               }
-               this->_value += this->_stringCharacters->value();
-               _stringCharacters->clear();
-            };
-
-
          _match = new And(
             new Quote(),
             _stringCharacters,
             new Quote()
          );
-
-
-         Match::setup(parser);
       }
+      
       
       virtual BString& value()
       {
-         return _value;
-      }
-
-      virtual void success() {
-         _stringCharacters->flush();
+         return *_stringCharacters;
       }
       
    protected:

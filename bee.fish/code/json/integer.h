@@ -31,7 +31,7 @@ namespace BeeFishJSON {
       virtual void eof(Parser* parser) 
       override {
 
-          if (!_setup)
+          if (!_parser)
              setup(parser);
              
           if (result() == nullopt)

@@ -16,7 +16,19 @@ using namespace BeeFishJSON;
 using namespace BeeFishMisc;
 
 int main(int argc, const char* argv[]) {
-
+/*
+   Match* match = new BeeFishJSON::JSON();
+   Parser parser1(match);
+   cout << "setup: " << endl;
+   match->setup(&parser1);
+   cout << "ok" << endl;
+   parser1.read("undefined");
+   parser1.eof();
+   cerr << match->value() << endl;
+   outputSuccess(match->matched());
+   
+   return 0;
+   */
    cerr << "bee.fish.json"
            << endl
         << "C++ run time: "

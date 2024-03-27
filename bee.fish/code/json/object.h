@@ -94,21 +94,23 @@ namespace BeeFishJSON {
       virtual void onendset(Match* match);
 
       // Defined in json-parser.h
-      virtual void matchedKey(const BString& key);
+      virtual void onobjectkey(Match* key);
+      
       // Defined in json-parser.h
-      virtual void matchedKey(const BString& key, LoadOnDemand<JSON>& value);
-      // Defined in json-parser.h
-      virtual void matchedSetItem(_KeyValue* item);
-
-      virtual void matchedKey(ObjectKey& key)
+      virtual void onobjectvalue(Match* value);
+      
+      virtual void onkey(Match* match)
       override
       {
-          matchedKey(key.value());
+          onobjectkey(match);
       }
       
-      virtual void setOnKeyValue(OnKeyValue onkeyvalue) {
-         _onkeyvalue = onkeyvalue;
+      virtual void onsetvalue(Match* match)
+      override
+      {
+          onobjectvalue(match);
       }
+
    };
 
 }
