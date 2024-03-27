@@ -39,7 +39,7 @@ namespace BeeFishParser
    class Parser
    {
    public:
-      optional<bool> _result = nullopt;
+      optional<bool> _result = true;
    protected:
       
       Match* _match;
@@ -90,7 +90,7 @@ namespace BeeFishParser
 
          
 #ifdef DEBUG
-         cerr << (char)byte;
+         cerr << escape((char)byte);
 #endif
          ++_charCount;
 
@@ -241,7 +241,8 @@ namespace BeeFishParser
       {
          return _result;
       }
-
+      
+      
       virtual bool isJSONParser() {
          return false;
       }
@@ -267,6 +268,20 @@ namespace BeeFishParser
          return stream.str();
       }
    };
+   
+   ostream& operator << (ostream& out, const Match& match)
+   {
+      match.write(out);
+      return out;
+   }
+     
+   istream& operator >> (istream& in, Match& number)
+   {
+      Parser parser(number);
+      parser.read(in);
+      return in;
+   }
+   
 }
 
 #endif

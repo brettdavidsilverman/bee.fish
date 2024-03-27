@@ -15,24 +15,25 @@ namespace BeeFishParser {
    {
    public:
       BString _value;
-      BString& _valueRef;
+      //BString& _valueRef;
       
 
    public:
       Capture() :
          Match(),
-         _value(""),
-         _valueRef(_value)
+         _value("")//,
+         //_valueRef(_value)
       {
       }
       
       Capture(Match* match) :
          Match(match),
-         _value(""),
-         _valueRef(_value)
+         _value("")
+        // _valueRef(_value)
       {
       }
-            
+      
+      /*
       Capture(
          Match* match,
          BString& value
@@ -41,7 +42,7 @@ namespace BeeFishParser {
          _valueRef(value)
       {
          _valueRef.clear();
-      }
+      }*/
       
       virtual ~Capture() {
       }      
@@ -49,19 +50,23 @@ namespace BeeFishParser {
       virtual void capture(Parser* parser, char c)
       override
       {
-          if (!_setup)
+          if (!_parser)
             setup(parser);
+            
+          _parser = parser;
           
           if (_match) {
              _match->capture(parser, c);
           }
           
-          _valueRef.push_back(c);
+          _value.push_back(c);
+          
       }
       
-      virtual BString& value()
+      virtual const BString& value() const
+      override
       {
-         return _valueRef;
+         return _value;
       }
 
    };

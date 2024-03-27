@@ -86,7 +86,12 @@ namespace BeeFishParser
 		}
 
 		virtual T* createItem() {
-			return new T();
+			T* item = new T();
+            
+            if (_parser)
+                item->setup(_parser);
+               
+            return item;
 		}
 
 	};

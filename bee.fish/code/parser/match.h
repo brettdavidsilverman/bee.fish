@@ -14,7 +14,6 @@ using namespace std;
 namespace BeeFishParser {
 
    class Parser;
-   typedef BeeFishBString::Character Char;
 
    class Match {
    public:
@@ -30,18 +29,18 @@ namespace BeeFishParser {
       }
       
 
-      bool _setup = false;
+      //bool _setup = false;
       optional<bool> _result = nullopt;
       Char _character = "";
       Match* _match = nullptr;
       Parser* _parser = nullptr;
       
-      typedef std::function<void(Match*)> OnSuccess;
-      OnSuccess _onsuccess;
+      //typedef std::function<void(Match*)> OnSuccess;
+      //OnSuccess _onsuccess;
 
    public:
    
-      Match()
+      Match(void* params = nullptr)
       {
          _match = nullptr;
          ++matchInstanceCount();
@@ -53,12 +52,11 @@ namespace BeeFishParser {
       }
 
       Match(const Match& match) :
-         _setup(false),
          _result(nullopt),
          _character(""),
          _match(nullptr),
-         _parser(match._parser),
-         _onsuccess(match._onsuccess)
+         _parser(match._parser)
+        // _onsuccess(match._onsuccess)
       {
          ++matchInstanceCount();
       }
@@ -83,7 +81,7 @@ namespace BeeFishParser {
 
       virtual void setup(Parser* parser) {
 
-         if (_setup)
+         if (_parser)
             return;
             
          _parser = parser;
@@ -94,7 +92,6 @@ namespace BeeFishParser {
          if (_match)
             _match->setup(parser);
             
-         _setup = true;
 
       }
 
@@ -104,7 +101,7 @@ namespace BeeFishParser {
          const Char& character
       )
       {
-         if (!_setup)
+         if (!_parser)
             setup(parser);
 
          _character = character;
@@ -122,7 +119,7 @@ namespace BeeFishParser {
       
       virtual bool matchCharacter(const Char& character)  {
          
-         if (!_setup)
+         if (!_parser)
             throw std::logic_error("Match::matchCharacter not setup");
 
          bool matched = false;
@@ -141,16 +138,20 @@ namespace BeeFishParser {
       virtual void success()
       {
          _result = true;
-         if (_onsuccess)
-            _onsuccess(this);
+         //if (_onsuccess)
+         //   _onsuccess(this);
       }
    
       virtual void fail()
       {
+         _result = false;
       }
             
       virtual const optional<bool>& result() const
       {
+         if (_match)
+            return _match->result();
+            
          return _result;
       }
 
@@ -159,7 +160,7 @@ namespace BeeFishParser {
          return result() == compare;
       }
       
-      virtual BString& value()
+      virtual const BString& value() const
       {
          if (_match)
             return _match->value();
@@ -174,7 +175,7 @@ namespace BeeFishParser {
       
       virtual void capture(Parser* parser, char c)
       {
-         if (!_setup)
+         if (!_parser)
             setup(parser);
             
          if (_match)
@@ -184,8 +185,18 @@ namespace BeeFishParser {
       }
       
       virtual void eof(Parser* parser) {
+         if (_match)
+            _match->eof(parser);
       }
       
+      virtual void write(ostream& out) const {
+         out << this->value();
+      }
+      
+      friend ostream& operator << (ostream& out, const Match& number);
+     
+      friend istream& operator >> (istream& in, Match& number);
+     
    
    };
 

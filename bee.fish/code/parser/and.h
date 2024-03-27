@@ -33,14 +33,15 @@ namespace BeeFishParser {
       }
 
       virtual void setup(Parser* parser) {
-         if (_setup)
+         if (_parser)
             return;
             
+         _parser = parser;
+         
          for (auto item : _inputs)
             item->setup(parser);
          _iterator = 0;
          
-         Match::setup(parser);
       }     
 
       virtual bool matchCharacter(const Char& character) {
@@ -87,7 +88,7 @@ namespace BeeFishParser {
 
       void push_back(Match* match) {
          
-         if (_setup)
+         if (_parser)
             match->setup(_parser);
 
          _inputs.push_back(match);
@@ -97,7 +98,7 @@ namespace BeeFishParser {
       virtual void capture(Parser* parser, char c)
       override
       {
-         if (!_setup)
+         if (!_parser)
             setup(parser);
             
          if (size() == 0)
@@ -113,6 +114,11 @@ namespace BeeFishParser {
          }
          
          
+      }
+      
+      virtual Match* operator[] (size_t index)
+      {
+         return _inputs[index];
       }
       
 

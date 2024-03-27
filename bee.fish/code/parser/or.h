@@ -72,13 +72,14 @@ namespace BeeFishParser {
       
 
       virtual void setup(Parser* parser) {
-         if (_setup)
+         if (_parser)
             return;
             
+         _parser = parser;
+         
          for (auto item : _inputs)
             item->setup(parser);
             
-         Match::setup(parser);
       }   
       
       virtual BString& value()
@@ -102,7 +103,7 @@ namespace BeeFishParser {
       virtual void capture(Parser* parser, char c)
       override
       {
-         if (!_setup)
+         if (!_parser)
             setup(parser);
           
          for (auto item : _inputs)

@@ -16,7 +16,6 @@ namespace BeeFishParser {
          _characterToMatch(""),
          _any(true)
       {
-         _setup = true;
       }
       
       Character(const Char& character) :
@@ -24,7 +23,6 @@ namespace BeeFishParser {
          _characterToMatch(character),
          _any(false)
       {
-         _setup = true;
       }
       
       virtual bool matchCharacter(const Char& character)

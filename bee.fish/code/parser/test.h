@@ -532,12 +532,11 @@ namespace BeeFishParser {
 
       delete test1;
       
-      BString bstr;
-      Match* test2 = new Capture(new WordCapture(), bstr);
+      Match* test2 = new Capture(new WordCapture());
       
       ok &= testMatch("Capture reference", test2, "capture", true, "capture");
       
-      ok &= testResult("Capture reference result", bstr == "capture");
+      ok &= testResult("Capture reference result", test2->value() == "capture");
 
       delete test2;
  
@@ -560,6 +559,7 @@ namespace BeeFishParser {
       public:
          BString _name;
          BString _value;
+         And* _and;
          
          _Capture() :
              _name(""),
@@ -569,18 +569,30 @@ namespace BeeFishParser {
          
          virtual void setup(Parser* parser)
          {
+             
+            if (_parser)
+               return;
+               
             _parser = parser;
             
-            _match = new And(
-               new Capture(new Name(), _name),
+            _match = _and = new And(
+               new Capture(new Name()),
                new Character(' '),
-               new Capture(new Value(), _value)
+               new Capture(new Value())
             );
             
             _match->setup(parser);
             
-            _setup = true;
          }
+         
+         virtual void success()
+         {
+            _name =  ((*_and)[0])->value();
+            _value = ((*_and)[2])->value();
+            
+            Match::success();
+         }
+         
          
       };
       
@@ -660,6 +672,7 @@ namespace BeeFishParser {
       ok &= testMatch("Invoke", invoke, "invoke", true);
       ok &= testResult("Invoke value", invokeValue == "invoke");
 
+
       delete invoke;
       
       class Test : public Invoke
@@ -681,13 +694,20 @@ namespace BeeFishParser {
          
          virtual void setup(Parser* parser)
          {
+            if (_parser)
+               return;
+               
+            _parser = parser;
+            
             _match = new Capture(new WordTest());
             _function =
                [this](Match* match)
                {
                   this->virtualFunction();
                };
-            Invoke::setup(parser);
+               
+               
+            _match->setup(parser);
             
          }
          
@@ -697,12 +717,16 @@ namespace BeeFishParser {
          }
       };
 
-      Test* testParser = new Test();
+      Test* test = new Test();
 
-      ok &= testMatch("Invoke class virtual", testParser, "test", true);
-      ok &= testResult("Invoke class virtual value", testParser->_test == "test");
+      ok &= testMatch("Invoke class virtual", test, "test", true);
+      ok &= testResult("Invoke class virtual value", test->_test == "test");
 
-      delete testParser;
+      delete test;
+      
+      assert(ok);
+      
+      
       
       BeeFishMisc::outputSuccess(ok);
       

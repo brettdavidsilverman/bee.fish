@@ -11,7 +11,7 @@ namespace BeeFishParser
 	{
 
 	public:
-		LoadOnDemand() : Match()
+		LoadOnDemand(void* params = nullptr) : Match(params)
 		{
 		}
 
@@ -20,16 +20,11 @@ namespace BeeFishParser
 
 		virtual void setup(Parser* parser)
 		{
-
 			_parser = parser;
 
-            if (!_match)
+            if (!_match) {
 	           _match = new T();
-                
-			_match->setup(parser);
-            
-            _setup = true;
-         
+            }
 		}
         
         

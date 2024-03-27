@@ -7,30 +7,9 @@
 using namespace std;
 using namespace BeeFishMisc;
 using namespace BeeFishParser;
-
-int main(int argc, const char* argv[]) {
-         
-   cerr << "bee.fish.parser"
-           << endl
-        << "C++ run time: "
-           << __cplusplus
-           << endl
-        << "Version: "
-           << BEE_FISH_PARSER_VERSION
-           << endl;
-
-   if (hasArg(argc, argv, "-test") >= 0)
-   {
-      cout << "Testing parser..." << endl << endl;
-      if (!BeeFishParser::test())
-         return 1;
-            
-      return 0;
-   }
    
    class Number : public Match
    {
-   
    public:
       Number() : Match()
       {
@@ -43,27 +22,31 @@ int main(int argc, const char* argv[]) {
       
    public:
      
-      BeeFishParser::Character* _plus =
-         new BeeFishParser::Character('+');
+      Match* _plus =
+         new Character('+');
          
-      BeeFishParser::Character* _minus = 
-         new BeeFishParser::Character('-');
+      Match* _minus = 
+         new Character('-');
          
-      Or* _sign = new Or(
-         _plus,
-         _minus
+      Match* _sign = new Capture(
+         new Or(
+            _plus,
+            _minus
+         )
       );
       
-      class IntegerChar : public Range {
+      class IntegerCharacter :
+         public Range
+      {
       public:
-         IntegerChar() : Range('0', '9') {
+         IntegerCharacter() : Range('0', '9') {
 
          }
       };
 
       Capture* _integer =
          new Capture(
-            new Repeat<IntegerChar>(1)
+            new Repeat<IntegerCharacter>(1)
          );
       
       And* _number = new And(
@@ -82,44 +65,58 @@ int main(int argc, const char* argv[]) {
             return;
          }
 
-        // out << *_sign << endl;
-         
-         if (_plus->matched())
-            out << "+";
-         else if (_minus->matched())
-            out << "-";
-         else
-            out << " ";
+         if (_sign->matched())
+            out << _sign->value();
             
          out << _integer->value();
          
      }
+     
 
    };
    
+   
+int main(int argc, const char* argv[]) {
+         
+   optional<bool> result;
+   
+   cerr << "bee.fish.parser"
+           << endl
+        << "C++ run time: "
+           << __cplusplus
+           << endl
+        << "Version: "
+           << BEE_FISH_PARSER_VERSION
+           << endl;
+
+   if (hasArg(argc, argv, "-test") >= 0)
+   {
+      cout << "Testing parser..." << endl << endl;
+      if (!BeeFishParser::test())
+         return 1;
+            
+      return 0;
+   }
+   
+   
    string line;
-   while (!cin.eof())
+   do 
    {
       cout << "Number: ";
       
-      getline(cin, line);
+      Number number;
       
-      if (!line.length())
+      cin >> number;
+      
+      if (number.matched())
+         cout << number << endl;
+      else
          break;
          
-      Number number;
-     
-      Parser parser(number);
-      
-      parser.read(line);
-   
-      if (parser.result() == false)
-         cout << "Invalid number" << endl;
-         
-      number.write(cout);
-      cout << endl;
-      
    }
+   while (!cin.eof());
+   
+   
   
    cout << "Bye" << endl;
      
