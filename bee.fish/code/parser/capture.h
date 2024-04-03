@@ -15,34 +15,19 @@ namespace BeeFishParser {
    {
    public:
       BString _value;
-      //BString& _valueRef;
-      
 
    public:
       Capture() :
          Match(),
-         _value("")//,
-         //_valueRef(_value)
+         _value("")
       {
       }
       
       Capture(Match* match) :
          Match(match),
          _value("")
-        // _valueRef(_value)
       {
       }
-      
-      /*
-      Capture(
-         Match* match,
-         BString& value
-      ) :
-         Match(match),
-         _valueRef(value)
-      {
-         _valueRef.clear();
-      }*/
       
       virtual ~Capture() {
       }      

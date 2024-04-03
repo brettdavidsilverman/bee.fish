@@ -143,7 +143,7 @@ namespace BeeFishParser
 #endif
 
          _result = nullopt;
-         _match->_parser = this;
+         _match->setup(this);
 
          int i = 0;
          while ((i = input.get()) != -1)

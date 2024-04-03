@@ -101,15 +101,13 @@ int main(int argc, const char* argv[]) {
    /*
    bool ok = true;
    
-   Match* testNot =
+   Match* word =
       new Capture(
-         new Not(
-            new Word("ABC")
-         )
+         new Word("test")
       );
       
-   ok &= testMatch("Simple 'not' match", testNot, "ABC", false);
-   delete testNot;
+   ok &= testMatch("Simple 'test' match", word, "test", nullopt, "test");
+   delete word;
 
    cerr << (ok ? "ok" : "error") << endl;
    

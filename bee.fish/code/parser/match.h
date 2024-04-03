@@ -129,7 +129,7 @@ namespace BeeFishParser {
          }
          else  {
             matched = _match->match(_parser, character);
-            _result = _match->_result;
+            _result = _match->result();
          }
 
          return matched;
@@ -185,6 +185,9 @@ namespace BeeFishParser {
       }
       
       virtual void eof(Parser* parser) {
+         if (!_parser)
+            setup(parser);
+            
          if (_match)
             _match->eof(parser);
       }

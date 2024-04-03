@@ -678,37 +678,33 @@ namespace BeeFishParser {
 
       delete invoke;
       
-      class Test : public Invoke
+      class Test : public Match
       {
-      protected:
-         class WordTest : public Word {
-         public:
-            WordTest() : Word("test") {
-
-            }
-         };
 
       public:
          BString _test;
       public:
-         Test() : Invoke()
+         Test() : Match()
          {
          }
          
          virtual void setup(Parser* parser)
+         override
          {
             if (_parser)
                return;
                
             _parser = parser;
-            
-            _match = new Capture(new WordTest());
-            _function =
+
+            _match = new Invoke(
+               new Capture(
+                  new Word("test")
+               ),
                [this](Match* match)
                {
-                  this->virtualFunction();
-               };
-               
+                  virtualFunction();
+               }
+            );
                
             _match->setup(parser);
             
@@ -721,15 +717,13 @@ namespace BeeFishParser {
       };
 
       Test* test = new Test();
-
+      
       ok &= testMatch("Invoke class virtual", test, "test", true);
       ok &= testResult("Invoke class virtual value", test->_test == "test");
 
       delete test;
       
       assert(ok);
-      
-      
       
       BeeFishMisc::outputSuccess(ok);
       
