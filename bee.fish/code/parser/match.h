@@ -28,37 +28,32 @@ namespace BeeFishParser {
          return _matchInstanceCount;
       }
       
-
-      //bool _setup = false;
       optional<bool> _result = nullopt;
       Match* _match = nullptr;
       Parser* _parser = nullptr;
       
-      //typedef std::function<void(Match*)> OnSuccess;
-      //OnSuccess _onsuccess;
-
    public:
    
       Match(void* params = nullptr)
       {
-         _match = nullptr;
          ++matchInstanceCount();
       }
 
-      Match(Match* match) : _match(match) {
+      Match(Match* match) :
+         _match(match)
+      {
          ++matchInstanceCount();
          _parser = _match->_parser;
       }
-
+/*
       Match(const Match& match) :
          _result(nullopt),
          _match(nullptr),
          _parser(match._parser)
-        // _onsuccess(match._onsuccess)
       {
          ++matchInstanceCount();
       }
-      
+      */
       virtual ~Match()
       {
          if (_match)

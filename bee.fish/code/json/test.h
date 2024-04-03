@@ -193,24 +193,18 @@ namespace BeeFishJSON
 
          }
          
-         virtual void capture(Parser* parser, char c)
-         override
-         {
-            cerr << "[" << c << "]";
-            Capture::capture(parser, c);
-         }
          
          virtual void success()
          {
-            cerr << endl << "Item: " << value() << endl;
+            cerr << endl << "Item: " << _match->value() << endl;
          }
       };
       
       typedef Repeat<Item> Items;
       Items* items = new Items();
-      ok &= testMatchDelete("Items", new Capture(items), "itemitemitem", true, "itemitemitem");
+      ok &= testMatchDelete("Items", new Capture(items), "itemitemitem", nullopt, "itemitemitem");
       
-      assert(false);
+      assert(ok);
       
 
       class Seperator : public BeeFishParser::Character {
@@ -228,7 +222,7 @@ namespace BeeFishJSON
  
       ok &= testMatchDelete("Set", new Capture(new _Set()), "{item,item,item}", true, "{item,item,item}");
       
-      assert(false);
+      assert(ok);
       
       ok &= testMatchDelete("Set empty", new Capture(new _Set()), "{}", true, "{}");
       ok &= testMatchDelete("Set blanks", new Capture(new _Set()), "{item, item ,item }", true);
@@ -250,17 +244,14 @@ assert(ok);
          {
             _match = new Word("myset");
          }
-         
+         /*
          virtual void capture(Parser* parser, char c)
          {
              Capture::capture(parser, c);
              
              //_match->capture(parser, c);
-             
-             cerr << "{" << c << "}" << flush;
-         
          }
-         
+         */
       };
 
       class MySet : public Set<OpenBrace, MySetItem, Seperator, CloseBrace>
@@ -286,9 +277,23 @@ assert(ok);
          virtual Match* createItem()
          override
          {
-            return new MySetItem(this);
+            Match* item = new MySetItem(this);
+            if (_parser)
+               item->setup(_parser);
+            return item;
          }
-         
+         /*
+         virtual void capture(Parser* parser, char c)
+         override
+         {
+             if (!_parser)
+                setup(parser);
+                
+             //cerr << "{" << c << "}" << flush;
+             
+             _match->capture(parser, c);
+         }
+         */
          
       };
      
@@ -297,9 +302,10 @@ assert(ok);
       ok &= testMatch("Set with overload", &cap, "{myset,myset}", true, "{myset,myset}");
       ok &= testResult("Set with overload result", (mySet->_count == 2));
 
-      assert(false);
+      
       BeeFishMisc::outputSuccess(ok);
  
+      
       cout << endl;
       
       return ok;

@@ -90,7 +90,9 @@ namespace BeeFishParser
 
       virtual bool match(uint8_t byte) {
 
-         
+         if (!_match->_parser)
+            _match->setup(this);
+            
 #ifdef DEBUG
          cerr << escape((char)byte);
 #endif
@@ -112,7 +114,6 @@ namespace BeeFishParser
             if (_utf8.result() != nullopt)
             {
                _lastCharacter = _utf8.character();
-               cerr << "{" << _lastCharacter << "}" << flush;
                // Valid utf8 character, perform match
                _match->match(this, _lastCharacter);
                // Reset the utf8 character
