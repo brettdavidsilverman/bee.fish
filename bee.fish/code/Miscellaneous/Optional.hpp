@@ -2,7 +2,7 @@
 #define BEE_FISH_MISC__OPTIONAL_HPP
 
 #include <iostream>
-#if (__cplusplus >= 201703L)
+#if (__cplusplus >= 201703L || 1)
 #include <optional>
 #else
 namespace std {
@@ -109,7 +109,7 @@ namespace std {
 #endif
 
 namespace std {
-    #warning optional extensions
+
    std::ostream& operator << (
       std::ostream& out,
       const std::optional<bool>& value
@@ -125,7 +125,7 @@ namespace std {
          throw std::logic_error("Optional value");
       return out;
    }
-   
+  /*
    bool operator == (optional<bool> left, optional<bool> right)
    {
       // both have values
@@ -158,7 +158,7 @@ namespace std {
       return true;
    }
    
-   
+   */
 }
       
 
