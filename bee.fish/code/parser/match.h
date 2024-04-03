@@ -31,7 +31,6 @@ namespace BeeFishParser {
 
       //bool _setup = false;
       optional<bool> _result = nullopt;
-      Char _character = "";
       Match* _match = nullptr;
       Parser* _parser = nullptr;
       
@@ -53,7 +52,6 @@ namespace BeeFishParser {
 
       Match(const Match& match) :
          _result(nullopt),
-         _character(""),
          _match(nullptr),
          _parser(match._parser)
         // _onsuccess(match._onsuccess)
@@ -103,9 +101,6 @@ namespace BeeFishParser {
       {
          if (!_parser)
             setup(parser);
-
-         _character = character;
-
 
          bool matched = matchCharacter(character);
 
@@ -169,10 +164,19 @@ namespace BeeFishParser {
          return emptyString;
       }
       
-      virtual const Char& character() const {
-         return _character;
+      virtual BString& value()
+      {
+         if (_match)
+            return _match->value();
+            
+         static BString emptyString;
+         emptyString = "";
+         return emptyString;
       }
       
+      // Defined in parser.h
+      virtual const Char& character() const;
+
       virtual void capture(Parser* parser, char c)
       {
          if (!_parser)

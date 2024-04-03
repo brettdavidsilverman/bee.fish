@@ -53,6 +53,12 @@ namespace BeeFishParser {
       {
          return _value;
       }
+      
+      virtual BString& value()
+      override
+      {
+         return _value;
+      }
 
    };
 

@@ -19,17 +19,16 @@ namespace BeeFishParser {
       BeeFishMisc::optional<bool> _result = BeeFishMisc::nullopt;   
       
    public:
-      typedef uint32_t Value;
-      Value _value = 0;
+      Char _character = "";
       
       UTF8Character()
       {
-         _value = 0;
+         _character = "";
          _result = BeeFishMisc::nullopt;
       }
 
-      UTF8Character(const Value& value) {
-         _value = value;
+      UTF8Character(const Char& value) {
+         _character = value;
          _result = BeeFishMisc::nullopt;
       }
       
@@ -38,7 +37,7 @@ namespace BeeFishParser {
       ) :
          _expectedByteCount(source._expectedByteCount),
          _byteCount(source._byteCount),
-         _value(source._value)
+         _character(source._character)
       {
          _result = BeeFishMisc::nullopt;
       }
@@ -47,13 +46,8 @@ namespace BeeFishParser {
       {
          _expectedByteCount = 0;
          _byteCount = 0;
-         _value = 0;
+         _character = "";
          _result = BeeFishMisc::nullopt;
-      }
-      
-      Value& value()
-      {
-         return _value;
       }
 
       bool match(uint8_t byte)
@@ -72,6 +66,8 @@ namespace BeeFishParser {
          
          if (matched)
          {
+            _character.push_back(byte);
+            
             // Check if we've read enough bytes.
             if ( ++_byteCount ==
                    _expectedByteCount )
@@ -110,9 +106,7 @@ namespace BeeFishParser {
                // Start the character value
                // using the bytes extract mask.
              
-               _value = (
-                  bits & byte._extractMask
-               ).to_ulong();
+               _character = ""
                
                
                return true;
@@ -132,15 +126,6 @@ namespace BeeFishParser {
          UTF8Byte byte = UTF8Subsequent;
          if (byte.match(bits))
          {
-            // Left shift the 6 usable bits
-            // onto the character value.
-            _value =
-               (_value << 6) |
-               (
-                  bits &
-                     UTF8Subsequent._extractMask
-               ).to_ulong();
-               
             // We matched.
             return true;
          }
@@ -150,9 +135,8 @@ namespace BeeFishParser {
 
       }
 
-      BeeFishBString::Character character() {
-         BeeFishBString::Character character(_value);
-         return character;
+      const Char& character() const {
+         return _character;
       }      
 
       const BeeFishMisc::optional<bool> result() const {

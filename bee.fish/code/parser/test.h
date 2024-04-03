@@ -72,7 +72,7 @@ namespace BeeFishParser {
    
    inline bool testBasics()
    {
-      cout << "Test basics";
+      cout << "Test Basics" << endl;
       
       class CharA : public Character {
       public:
@@ -81,18 +81,18 @@ namespace BeeFishParser {
          }
       };
 
-      Match* _a = new CharA();
+      Match* a = new CharA();
       
-      Parser parser(*_a);
+      Parser parser(a);
       
       bool ok =
          parser.read("a") &&
          (parser.result() == true);
 
-      delete _a;
+      delete a;
 
       BeeFishMisc::outputSuccess(ok);
-      
+      assert(ok);
       return ok;
    }
    
@@ -124,7 +124,7 @@ namespace BeeFishParser {
       delete any;
       
       BeeFishMisc::outputSuccess(ok);
-      
+
       return ok;
    }
    
@@ -180,6 +180,10 @@ namespace BeeFishParser {
       Match* wordNoMatch = new Capture(new WordWord());
       ok &= testMatch("Word no match", wordNoMatch, "Wor*");
       delete wordNoMatch;
+      
+      BeeFishMisc::outputSuccess(ok);
+      
+      assert(ok);
       
       return ok;
    }

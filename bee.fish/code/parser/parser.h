@@ -45,8 +45,10 @@ namespace BeeFishParser
       Match* _match;
       size_t _charCount = 0;
       ssize_t _dataBytes = -1;
-      char _lastCharacter = -1;
       BeeFishBString::UTF8Character _utf8 = "";
+   public:
+      Char _lastCharacter = "";
+      
 
    public:
       Parser(Match& match) :
@@ -94,7 +96,6 @@ namespace BeeFishParser
 #endif
          ++_charCount;
 
-         _lastCharacter = (char)byte;
          
          if (_dataBytes >= 0)
          {
@@ -108,15 +109,12 @@ namespace BeeFishParser
                _match->capture(this, byte);
             }
             
-            if (_utf8.result() == true) {
+            if (_utf8.result() != nullopt)
+            {
+               _lastCharacter = _utf8.character();
+               cerr << "{" << _lastCharacter << "}" << flush;
                // Valid utf8 character, perform match
-               _match->match(this, _utf8.character());
-               // Reset the utf8 character
-               _utf8.reset();
-            }
-            else if (_utf8.result() == false) {
-               // in valid utf8 character, try to perform match
-               _match->match(this, _utf8.character());
+               _match->match(this, _lastCharacter);
                // Reset the utf8 character
                _utf8.reset();
             }
@@ -285,6 +283,11 @@ namespace BeeFishParser
       Parser parser(match);
       parser.read(in);
       return in;
+   }
+   
+   // Declared in match.h
+   const Char& Match::character() const {
+      return _parser->_lastCharacter;
    }
    
 }
