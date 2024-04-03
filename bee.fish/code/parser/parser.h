@@ -8,7 +8,6 @@
 #include <sstream>
 #include <ostream>
 #include <chrono>
-#include <optional>
 
 #include "version.h"
 #include "misc.h"
@@ -27,6 +26,7 @@
 #include "invoke.h"
 #include "blanks.h"
 #include "load-on-demand.h"
+#include "../Miscellaneous/Optional.hpp"
 
 
 
@@ -126,7 +126,7 @@ namespace BeeFishParser
          
          _result = _match->result();
          
-         bool matched = _result != false;
+         bool matched = (_result != false);
             
          return matched;
  
@@ -256,9 +256,14 @@ namespace BeeFishParser
       }
       
       virtual void eof() {
+          /*
+        if (_match)
+           _match->eof(this);
+        */
          if (result() == nullopt && _match) {
             _match->eof(this);
          }
+         
       }
 
       virtual string getErrorMessage() const {
@@ -275,9 +280,9 @@ namespace BeeFishParser
       return out;
    }
      
-   istream& operator >> (istream& in, Match& number)
+   istream& operator >> (istream& in, Match& match)
    {
-      Parser parser(number);
+      Parser parser(match);
       parser.read(in);
       return in;
    }

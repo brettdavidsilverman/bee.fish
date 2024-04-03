@@ -8,6 +8,8 @@ using namespace std;
 using namespace BeeFishMisc;
 using namespace BeeFishParser;
    
+namespace Test {
+   
    class Number : public Match
    {
    public:
@@ -61,7 +63,7 @@ using namespace BeeFishParser;
       {
          if (result() == false)
          {
-            out << "<error {" << this->character() << "} >" << endl;
+            out << "{\"error\": \"Failed on; character " << this->character() << "\"}" << endl;
             return;
          }
 
@@ -74,11 +76,45 @@ using namespace BeeFishParser;
      
 
    };
+}
    
    
 int main(int argc, const char* argv[]) {
-         
-   optional<bool> result;
+   using namespace Test;
+   /*
+   optional<bool> result = true;
+   
+   cerr << result << endl;
+   
+   if (result != true)
+      cerr << "!True";
+   if (result != false)
+      cerr << "!False";
+   if (result != nullopt)
+      cerr << "!Null";
+ 
+      
+   cerr << endl;
+   
+   return 1;
+   */
+   /*
+   bool ok = true;
+   
+   Match* testNot =
+      new Capture(
+         new Not(
+            new Word("ABC")
+         )
+      );
+      
+   ok &= testMatch("Simple 'not' match", testNot, "ABC", false);
+   delete testNot;
+
+   cerr << (ok ? "ok" : "error") << endl;
+   
+   return 0;
+   */
    
    cerr << "bee.fish.parser"
            << endl

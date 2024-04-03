@@ -256,7 +256,7 @@ namespace BeeFishParser {
       delete testAnd;
       
       Match* testAndNoMatch = new Capture(new ABC1());
-      ok &= testMatch("Simple 'and' no match", testAndNoMatch, "ABc");
+      ok &= testMatch("Simple 'and' no match", testAndNoMatch, "ABc", false);
       delete testAndNoMatch;
       
       class ABC2 : public And {
@@ -412,6 +412,9 @@ namespace BeeFishParser {
    
    inline bool testNot()
    {
+       
+      cout << "Test Not" << endl;
+      
       bool ok = true;
       
       class ABC : public Word {
