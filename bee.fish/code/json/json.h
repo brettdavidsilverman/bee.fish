@@ -62,7 +62,7 @@ namespace BeeFishJSON
          return new Invoke(
             match,
             [this](Match* match) {
-               BString& value = match->value();
+               const BString& value = match->value();
                if (value.contains('-') ||
                    value.contains('+') ||
                    value.contains('e') ||
@@ -77,7 +77,7 @@ namespace BeeFishJSON
       }
       
    public:
-      virtual void onvalue(Type type, BString& value)
+      virtual void onvalue(Type type, const BString& value)
       {
       }
       

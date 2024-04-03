@@ -239,7 +239,7 @@ assert(false);
       Set::onendset(match);
    }
    
-   friend istream& operator >> (istream& in, JSON& json)
+   istream& operator >> (istream& in, JSON& json)
    {
       JSONParser parser(json);
       

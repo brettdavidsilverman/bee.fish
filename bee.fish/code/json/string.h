@@ -16,12 +16,29 @@ namespace BeeFishJSON {
 
       }
    };
+   
+   class CharacterBase : public Match
+   {
+   protected:
+      Char _character;
+      
+   public:
+      CharacterBase() : Match()
+      {
+      }
+       
+      virtual const Char& character() const
+      override
+      {
+         return _character;
+      }
+   };
 
-   class PlainCharacter : public Match
+   class PlainCharacter : public CharacterBase
    {
 
    public:
-      PlainCharacter() : Match() 
+      PlainCharacter() : CharacterBase() 
       {
          _match = new Not(
             new Or(
@@ -49,7 +66,7 @@ namespace BeeFishJSON {
          if (matched)
             _character = character;
             
-         _result = _match->_result;
+         _result = _match->result();
 
          return matched;
       }
@@ -68,13 +85,13 @@ namespace BeeFishJSON {
       }
    };
 
-   class Hex : public Match
+   class Hex : public CharacterBase
    {
    private:
       Char _hexValue;
 
    public:
-      Hex() : Match()
+      Hex() : CharacterBase()
       {
           _match = new Capture(
              new Repeat<HexCharacter>(
@@ -102,7 +119,7 @@ namespace BeeFishJSON {
    };
       
    class EscapedCharacter :
-      public Match
+      public CharacterBase
       
    {
    private:
@@ -130,7 +147,7 @@ namespace BeeFishJSON {
       
    public:
       EscapedCharacter() :
-         Match()
+         CharacterBase()
       {
           Match* invokeHex = new
             Invoke(
@@ -169,13 +186,6 @@ namespace BeeFishJSON {
       
       virtual ~EscapedCharacter() {
       }
-
-      const Char& character() const
-      {
-         return _character;
-      }
-     
-
       
    };
     
@@ -197,6 +207,7 @@ namespace BeeFishJSON {
       }
       
       virtual const Char& character() const
+      override
       {
          return _items->_item->character();
       }
@@ -256,6 +267,11 @@ namespace BeeFishJSON {
       
       
       virtual BString& value()
+      {
+         return *_stringCharacters;
+      }
+      
+      virtual const BString& value() const
       {
          return *_stringCharacters;
       }
