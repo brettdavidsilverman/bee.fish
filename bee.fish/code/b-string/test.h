@@ -8,6 +8,7 @@ using namespace BeeFishTest;
 
 namespace BeeFishBString
 {
+   inline bool testOptional();
    inline bool testCharacters();
    inline bool testBStrings();
    inline bool testBitStreams();
@@ -25,17 +26,18 @@ namespace BeeFishBString
    
       bool ok = true;
      
-      ok &= testCharacters();
-      ok &= testBStrings();
-      ok &= testBitStreams();
-      ok &= testBStringStreams();
+      ok = ok && testOptional();
+      ok = ok && testCharacters();
+      ok = ok && testBStrings();
+      ok = ok && testBitStreams();
+      ok = ok && testBStringStreams();
       
-      ok &= testSplit();
-      ok &= testTrim();
-      ok &= testHex();
-      ok &= testData();
-      ok &= testEncodeURI();
-      ok &= testEmojis();
+      ok = ok && testSplit();
+      ok = ok && testTrim();
+      ok = ok && testHex();
+      ok = ok && testData();
+      ok = ok && testEncodeURI();
+      ok = ok && testEmojis();
       
       if (ok)
          cout << "SUCCESS" << endl;
@@ -45,6 +47,51 @@ namespace BeeFishBString
       return ok;
    }
    
+   inline bool testOptional()
+   {
+      cout << "Optional" << endl;
+     
+      bool ok = true;
+     
+      optional<bool> result;
+      
+      result = true;
+      ok &= testResult("true==true", (result == true) == true);
+      ok &= testResult("true==false", (result == false) == false);
+      ok &= testResult("true==nullopt", (result == nullopt) == false);
+      
+      result = false;
+      ok &= testResult("false==true", (result == true) == false);
+      ok &= testResult("false==false", (result == false) == true);
+      ok &= testResult("false==nullopt", (result == nullopt) == false);
+      
+      result = nullopt;
+      ok &= testResult("nullopt==true", (result == true) == false);
+      ok &= testResult("nullopt==false", (result == false) == false);
+      ok &= testResult("nullopt==nullopt", (result == nullopt) == true);
+     
+      
+        
+      result = true;
+      ok &= testResult("true!=true", (result != true) == false);
+      ok &= testResult("true!=false", (result != false) == true);
+      ok &= testResult("true!=nullopt", (result != nullopt) == true);
+      
+      result = false;
+      ok &= testResult("false!=true", (result != true) == true);
+      ok &= testResult("false!=false", (result != false) == false);
+      ok &= testResult("false!=nullopt", (result != nullopt) == true);
+      
+      result = nullopt;
+      ok &= testResult("nullopt!=true", (result != true) == true);
+      ok &= testResult("nullopt!=false", (result != false) == true);
+      ok &= testResult("nullopt!=nullopt", (result != nullopt) == false);
+    
+    
+      BeeFishMisc::outputSuccess(ok);
+      
+      return ok;
+   }
    
    inline bool testCharacters()
    {
