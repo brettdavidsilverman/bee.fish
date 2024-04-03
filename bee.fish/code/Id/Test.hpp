@@ -74,6 +74,8 @@ namespace BeeFishId
 
       ifile.close();
       
+      remove("test.txt");
+      
       return true;
    
    }
