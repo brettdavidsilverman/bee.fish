@@ -86,14 +86,15 @@ namespace BeeFishJSON
       bool ok = true;
       
       ok &= testMatchDelete("Capture",  new Capture(new Integer()), "80000", true, "80000");
-      assert(ok);
-      ok &= testMatchDelete("Integer", new Capture(new Integer()), "800", true, "800");
+      
+      ok &= testMatchDelete("Integer", new Capture(new Number()), "800", true, "800");
       ok &= testMatchDelete("Negative", new Capture(new Number()), "-800", true, "-800");
       ok &= testMatchDelete("Decimal", new Capture(new Number()), "800.01", true, "800.01");
       ok &= testMatchDelete("Short exponent", new Capture(new Number()), "800e10", true, "800e10");
       ok &= testMatchDelete("Full exponent", new Capture(new Number()), "800E-10", true, "800E-10");
-      ok &= testMatchDelete("False positive", new Number(), "+800");
+      ok &= testMatchDelete("False positive", new Number(), "+800", false);
       //ok &= testMatchDelete("NaN", new CaptureNumber(), "NaN", true, "NaN");
+      
       assert(ok);
       
       cout << endl;
@@ -198,7 +199,7 @@ namespace BeeFishJSON
          override
          {
              Capture::capture(parser, c);
-             cerr << "{" << c << "}" << flush;
+             //cerr << "{" << c << "}" << flush;
              
          }
          

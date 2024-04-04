@@ -58,6 +58,30 @@ namespace BeeFishParser {
       {
          return _value;
       }
+      
+      virtual void eof(Parser* parser)
+      override
+      {
+          if (!_parser)
+             setup(parser);
+             
+          _parser = parser;
+             
+          if (_match && _match->result() == nullopt)
+          {
+             _match->eof(_parser);
+             
+             if (_match->result() == true) {
+                success();
+                cerr << "Capture::eof::success::" << result() << endl;
+             }
+             else if (_match->result() == false)
+             {
+                fail();
+                cerr << "Capture::eof::fail::" << result() << endl;
+             }
+          }
+      }
 
    };
 

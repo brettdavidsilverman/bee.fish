@@ -106,16 +106,21 @@ namespace BeeFishParser
          }
          else  {
 
-            _utf8.match(byte);
+            
             
             // valid or invalid, continue on
-            if (_utf8.result() != nullopt)
+            if (_utf8.match(byte) &&
+                _utf8.result() != nullopt)
             {
                _lastCharacter = _utf8.character();
+               //cerr << "❤️" << typeid(*_match).name() << endl;
                
                for (auto c : _lastCharacter)
+               {
+                   cerr << "{" << c << "}" << endl;
                   _match->capture(this, c);
-                  
+               }
+               
                // utf8 character, perform match
                _match->match(this, _lastCharacter);
                // Reset the utf8 character
@@ -260,10 +265,7 @@ namespace BeeFishParser
       }
       
       virtual void eof() {
-          /*
-        if (_match)
-           _match->eof(this);
-        */
+
          if (result() == nullopt && _match) {
             _match->eof(this);
          }

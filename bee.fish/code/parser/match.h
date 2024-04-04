@@ -121,8 +121,6 @@ namespace BeeFishParser {
       virtual void success()
       {
          _result = true;
-         //if (_onsuccess)
-         //   _onsuccess(this);
       }
    
       virtual void fail()
@@ -158,13 +156,18 @@ namespace BeeFishParser {
          return emptyString;
       }
       
+      virtual bool isOptional() const {
+         if (_match)
+            return _match->isOptional();
+         return false;
+      }
+      
       // Defined in parser.h
       virtual const Char& character() const;
 
       virtual void capture(Parser* parser, char c)
       {
-         if (!_parser)
-            setup(parser);
+         setup(parser);
             
          if (_match)
          {
@@ -172,13 +175,31 @@ namespace BeeFishParser {
          }
       }
       
-      virtual void eof(Parser* parser) {
-         if (!_parser)
-            setup(parser);
-            
-         if (_match)
-            _match->eof(parser);
+      
+      virtual void eof(Parser* parser) 
+      {
+
+          setup(parser);
+             
+          if (_match && result() == nullopt)
+          {
+              cerr << "Match test eof()" << typeid(*_match).name() << endl;
+              
+              _match->eof(_parser);
+              if (_match->result() == true)
+              {
+                 success();
+                 cerr << "Match::eof::success::️" << result() << endl;
+              }
+              else if (_match->result() == false)
+              {
+                 fail();
+                 cerr << "Match::eof::fail::️" << result() << endl;
+              }
+          }
+          
       }
+      
       
       virtual void write(ostream& out) const {
          out << this->value();

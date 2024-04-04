@@ -75,19 +75,6 @@ namespace BeeFishJSON {
          _match = _number;
       }
       
-      virtual void eof(Parser* parser) 
-      override {
-          
-          if (!parser)
-             setup(parser);
-             
-          if (_result == nullopt)
-          {
-             _parser->read((char)-1);
-          }
-          
-      }
-      
       
    };
    

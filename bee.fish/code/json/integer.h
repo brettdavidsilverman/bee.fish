@@ -33,10 +33,21 @@ namespace BeeFishJSON {
 
           if (!_parser)
              setup(parser);
+            
+          _parser = parser;
+
+          if (result() != nullopt)
+             return;
              
-          if (result() == nullopt)
+          if (_matchedCount > 0)
           {
-             _parser->read((char)-1);
+              success();
+              cerr << "Integer::eof::success::" << result() << endl;
+          }
+          else
+          {
+              fail();
+              cerr << "Integer::eof::fail::" << result() << endl;
           }
           
       }

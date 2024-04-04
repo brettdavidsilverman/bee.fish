@@ -116,6 +116,41 @@ namespace BeeFishParser {
          
       }
       
+      virtual void eof(Parser* parser) {
+          
+         if (!_parser)
+            setup(parser);
+            
+         if (result() != nullopt)
+            return;
+            
+         bool matched = true;
+         
+         for (size_t index = _iterator; index < _inputs.size(); ++index)
+         {
+            Match* match = (*this)[index];
+            
+            if (match->result() == nullopt)
+               match->eof(parser);
+            
+            if (match->result() != true && 
+                !match->isOptional())
+            {
+               matched = false;
+               break;
+            }
+         }
+         
+         if (matched) {
+            success();
+            cerr << "And::eof::success::" << result() << endl;
+         }
+         else {
+            fail();
+            cerr << "And::eof::fail::" << result() << endl;
+         }
+      }
+      
       virtual Match* operator[] (size_t index)
       {
          return _inputs[index];

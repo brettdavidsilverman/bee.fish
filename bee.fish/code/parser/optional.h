@@ -22,6 +22,12 @@ namespace BeeFishParser {
 
       virtual ~Optional() {
       }
+      
+      virtual bool isOptional() const
+      override
+      {
+         return true;
+      }
    
       virtual bool matchCharacter(const Char& character)
       {
