@@ -202,8 +202,8 @@ namespace BeeFishJSON
       };
       
       typedef Repeat<Item> Items;
-      Items* items = new Items();
-      ok &= testMatchDelete("Items", new Capture(items), "itemitemitem", nullopt, "itemitemitem");
+      Items* items = new Items(0, 3);
+      ok &= testMatchDelete("Items", new Capture(items), "itemitemitem", true, "itemitemitem");
       
       assert(ok);
       
