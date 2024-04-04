@@ -73,12 +73,12 @@ namespace BeeFishParser {
              
              if (_match->result() == true) {
                 success();
-                cerr << "Capture::eof::success::" << result() << endl;
+                //cerr << "Capture::eof::success::" << result() << endl;
              }
              else if (_match->result() == false)
              {
                 fail();
-                cerr << "Capture::eof::fail::" << result() << endl;
+                //cerr << "Capture::eof::fail::" << result() << endl;
              }
           }
       }

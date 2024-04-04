@@ -143,11 +143,11 @@ namespace BeeFishParser {
          
          if (matched) {
             success();
-            cerr << "And::eof::success::" << result() << endl;
+            //cerr << "And::eof::success::" << result() << endl;
          }
          else {
             fail();
-            cerr << "And::eof::fail::" << result() << endl;
+            //cerr << "And::eof::fail::" << result() << endl;
          }
       }
       

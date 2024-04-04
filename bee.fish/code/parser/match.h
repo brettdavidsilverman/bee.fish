@@ -183,18 +183,18 @@ namespace BeeFishParser {
              
           if (_match && result() == nullopt)
           {
-              cerr << "Match test eof()" << typeid(*_match).name() << endl;
+              //cerr << "Match test eof()" << typeid(*_match).name() << endl;
               
               _match->eof(_parser);
               if (_match->result() == true)
               {
                  success();
-                 cerr << "Match::eof::success::️" << result() << endl;
+                 //cerr << "Match::eof::success::️" << result() << endl;
               }
               else if (_match->result() == false)
               {
                  fail();
-                 cerr << "Match::eof::fail::️" << result() << endl;
+                 //cerr << "Match::eof::fail::️" << result() << endl;
               }
           }
           

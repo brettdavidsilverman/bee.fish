@@ -117,7 +117,6 @@ namespace BeeFishParser
                
                for (auto c : _lastCharacter)
                {
-                   cerr << "{" << c << "}" << endl;
                   _match->capture(this, c);
                }
                
@@ -268,7 +267,13 @@ namespace BeeFishParser
 
          if (result() == nullopt && _match) {
             _match->eof(this);
+            
+            if (_match->result() != nullopt)
+               _result = _match->result();
          }
+         
+         if (_result == nullopt)
+            _result = false;
          
       }
 
