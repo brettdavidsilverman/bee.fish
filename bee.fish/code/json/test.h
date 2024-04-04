@@ -194,20 +194,29 @@ namespace BeeFishJSON
 
          }
          
+         virtual void capture(Parser* parser, char c)
+         override
+         {
+             Capture::capture(parser, c);
+             cerr << "{" << c << "}" << flush;
+             
+         }
          
          virtual void success()
+         override
          {
-            cerr << endl << "Item: " << value() << endl;
+             cerr << "Item(" << value() << ")" << endl;
          }
       };
       
+      ok &= testMatchDelete("Item", new Item(), "item", true);
+     
       typedef Repeat<Item> Items;
-      Items* items = new Items(0, 3);
-      ok &= testMatchDelete("Items", new Capture(items), "itemitemitem", true, "itemitemitem");
+      ok &= testMatchDelete("Items", new Items(0,3), "itemitemitem", true);
+      ok &= testMatchDelete("Capture Items", new Capture(new Items(0,3)), "itemitemitem", true, "itemitemitem");
       
       assert(ok);
       
-
       class Seperator : public BeeFishParser::Character {
       public:
          Seperator() : Character(',') {
@@ -223,7 +232,7 @@ namespace BeeFishJSON
  
       ok &= testMatchDelete("Set", new Capture(new _Set()), "{item,item,item}", true, "{item,item,item}");
       
-      assert(ok);
+      assert(false);
       
       ok &= testMatchDelete("Set empty", new Capture(new _Set()), "{}", true, "{}");
       ok &= testMatchDelete("Set blanks", new Capture(new _Set()), "{item, item ,item }", true);

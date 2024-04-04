@@ -106,15 +106,16 @@ namespace BeeFishParser
          }
          else  {
 
-            if (_utf8.match(byte))
-            {
-               _match->capture(this, byte);
-            }
+            _utf8.match(byte);
             
             // valid or invalid, continue on
             if (_utf8.result() != nullopt)
             {
                _lastCharacter = _utf8.character();
+               
+               for (auto c : _lastCharacter)
+                  _match->capture(this, c);
+                  
                // utf8 character, perform match
                _match->match(this, _lastCharacter);
                // Reset the utf8 character

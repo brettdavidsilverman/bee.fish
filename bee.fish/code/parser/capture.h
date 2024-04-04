@@ -42,6 +42,7 @@ namespace BeeFishParser {
              _match->capture(parser, c);
           }
           
+          
           _value.push_back(c);
           
       }

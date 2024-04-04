@@ -9,8 +9,8 @@ namespace BeeFishParser
 	template<class T>
 	class Repeat : public Match
 	{
-	private:
-		T* _item;
+	protected:
+		T* _item = nullptr;
 
 	public:
 		size_t _minimum = 1;
@@ -42,7 +42,7 @@ namespace BeeFishParser
 			bool matched =
 				_item->match(_parser, character);
 
-			if (_item->_result == true)
+			if (_item->result() == true)
 			{
 
 				matchedItem(_item);
@@ -93,6 +93,16 @@ namespace BeeFishParser
                
             return item;
 		}
+        
+        virtual void capture(Parser* parser, char c)
+        override
+        {
+           if (_item == nullptr)
+              _item = createItem();
+                
+           if (_item && _item->result() == nullopt)
+              _item->capture(parser, c);
+        }
 
 	};
 

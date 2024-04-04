@@ -45,15 +45,7 @@ namespace BeeFishParser {
          ++matchInstanceCount();
          _parser = _match->_parser;
       }
-/*
-      Match(const Match& match) :
-         _result(nullopt),
-         _match(nullptr),
-         _parser(match._parser)
-      {
-         ++matchInstanceCount();
-      }
-      */
+
       virtual ~Match()
       {
          if (_match)
@@ -97,6 +89,7 @@ namespace BeeFishParser {
          if (!_parser)
             setup(parser);
 
+         
          bool matched = matchCharacter(character);
 
          if (_result == true)

@@ -110,7 +110,7 @@ namespace std {
 
 namespace std {
     
-#warning Buggy optional<bool>
+//#warning Buggy optional<bool>
 
    std::ostream& operator << (
       std::ostream& out,
