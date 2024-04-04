@@ -94,9 +94,9 @@ namespace BeeFishTest
       if (match->matched())
          value = match->value();
 
-      ok = (match->result(result));
+      ok = (match->result() == result);
 
-      if (match->matched() && expected.size())
+      if (expected.size())
       {
          if (value != expected)
             ok = false;
@@ -109,7 +109,7 @@ namespace BeeFishTest
          cout << "FAIL. Expected "
               << result
               << " Got  "
-              << parser.result()
+              << match->result()
               << endl;
 
          cout << "\tTested   " << text << endl;

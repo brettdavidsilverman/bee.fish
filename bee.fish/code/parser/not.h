@@ -82,7 +82,7 @@ namespace BeeFishParser {
         
       }
       
-      virtual const optional<bool>& result() const
+      virtual optional<bool> result() const
       override
       {
          return _result;

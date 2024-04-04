@@ -88,6 +88,14 @@ namespace BeeFishBString
       ok &= testResult("nullopt!=nullopt", (result != nullopt) == false);
     
     
+      if (ok)
+      {
+          optional<bool> result;
+          if (!(result != false))
+             ok = false;
+            
+      }
+      
       BeeFishMisc::outputSuccess(ok);
       
       return ok;

@@ -18,14 +18,12 @@ namespace BeeFishParser {
 
    public:
       Capture() :
-         Match(),
-         _value("")
+         Match()
       {
       }
       
       Capture(Match* match) :
-         Match(match),
-         _value("")
+         Match(match)
       {
       }
       

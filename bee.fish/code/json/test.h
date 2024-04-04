@@ -135,7 +135,7 @@ namespace BeeFishJSON
       ok &= testMatch("String characters", &stringCharacters, "hello world\\\\", nullopt);
       ok &= testResult("String characters value", (stringCharacters == "hello world\\"));
       ok &= testMatchDelete("String", new String(), "\"hello world\"", true, "hello world");
-      assert(ok);
+      
 
       ok &= testMatchDelete("Empty string", new JSON(), "\"\"", true, "");
       ok &= testMatchDelete("Simple string", new JSON(), "\"hello\"", true, "hello");
@@ -157,6 +157,7 @@ namespace BeeFishJSON
       ok &= testResult("Large json string length", (largeString.value().size() == 5013));
 #endif
 
+      assert(ok);
       cout << endl;
       
       return ok;

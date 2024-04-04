@@ -39,7 +39,7 @@ namespace BeeFishParser
    class Parser
    {
    public:
-      optional<bool> _result = true;
+      optional<bool> _result;
    protected:
       
       Match* _match;
@@ -111,10 +111,11 @@ namespace BeeFishParser
                _match->capture(this, byte);
             }
             
+            // valid or invalid, continue on
             if (_utf8.result() != nullopt)
             {
                _lastCharacter = _utf8.character();
-               // Valid utf8 character, perform match
+               // utf8 character, perform match
                _match->match(this, _lastCharacter);
                // Reset the utf8 character
                _utf8.reset();
@@ -142,13 +143,16 @@ namespace BeeFishParser
 #endif
 
          _result = nullopt;
-         _match->setup(this);
+         
+         if (!_match->_parser)
+            _match->setup(this);
 
          int i = 0;
+         uint8_t c;
          while ((i = input.get()) != -1)
          {
             
-            uint8_t c = i;
+            c = i;
 
             if (!match(c))
                return false;

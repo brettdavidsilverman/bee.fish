@@ -1,2 +1,3 @@
 rm -f trace.txt
-valgrind --log-file="trace.txt" ../../build/b-string -test
+valgrind -s --log-file="trace.txt" --track-origins=yes --leak-check=yes ../../build/b-string -test
+cat trace.txt

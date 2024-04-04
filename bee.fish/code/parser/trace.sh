@@ -1,2 +1,3 @@
 rm -f trace.txt
-valgrind -s --log-file="trace.txt" --track-origins=yes --leak-check=yes ../../build/parser -test
+valgrind --tool=memcheck --leak-check=full --track-origins=yes --log-file="trace.txt"  ../../build/parser -test
+cat trace.txt

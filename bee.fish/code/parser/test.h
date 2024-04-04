@@ -706,7 +706,7 @@ namespace BeeFishParser {
                ),
                [this](Match* match)
                {
-                  virtualFunction();
+                  virtualFunction(match);
                }
             );
                
@@ -714,9 +714,9 @@ namespace BeeFishParser {
             
          }
          
-         virtual void virtualFunction()
+         virtual void virtualFunction(Match* match)
          {
-            _test = _match->value();
+            _test = match->value();
          }
       };
 

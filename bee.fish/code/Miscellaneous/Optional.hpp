@@ -109,6 +109,8 @@ namespace std {
 #endif
 
 namespace std {
+    
+#warning Buggy optional<bool>
 
    std::ostream& operator << (
       std::ostream& out,
@@ -125,8 +127,8 @@ namespace std {
          throw std::logic_error("Optional value");
       return out;
    }
-  /*
-   bool operator == (optional<bool> left, optional<bool> right)
+  
+   bool operator == (const optional<bool>& left, const optional<bool>& right)
    {
       // both have values
       if (left.has_value() &&
@@ -142,7 +144,25 @@ namespace std {
       return false;
    }
    
-   bool operator != (optional<bool> left, optional<bool> right)
+   bool operator == (const optional<bool>& left, bool right)
+   {
+      // both have values
+      if (left.has_value())
+         return left.value() == right;
+       
+      return false;
+            
+   }
+   
+   bool operator == (const optional<bool>& left, nullopt_t right)
+   {
+      if (left.has_value())
+         return false;
+ 
+      return true;
+   }
+   
+   bool operator != (const optional<bool>& left, const optional<bool>& right)
    {
       // both have values
       if (left.has_value() &&
@@ -158,7 +178,26 @@ namespace std {
       return true;
    }
    
-   */
+   bool operator != (const optional<bool>& left, bool right)
+   {
+      // both have values
+      if (left.has_value())
+         return left.value() != right;
+           
+      // either or
+      return true;
+   }
+   
+   bool operator != (const optional<bool> left, nullopt_t right)
+   {
+      // both have values
+      if (left.has_value())
+         return true;
+           
+      return false;
+   }
+   
+   
 }
       
 
