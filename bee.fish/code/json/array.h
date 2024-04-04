@@ -35,8 +35,10 @@ namespace BeeFishJSON {
 
       }
    };
-
-   class Array : public Set<ArrayOpenBrace, LoadOnDemand<JSON>, ArraySeperator, ArrayCloseBrace>
+   
+   typedef LoadOnDemand<JSON> ArrayValue;
+   
+   class Array : public Set<ArrayOpenBrace, ArrayValue, ArraySeperator, ArrayCloseBrace>
    {
    public:
       size_t _size = 0;
@@ -55,7 +57,7 @@ namespace BeeFishJSON {
       virtual void onbeginset(Match* match);
 
       // Defined in json-parser.h
-      virtual void onarrayvalue(Match* match);
+      virtual void onarrayvalue(JSON* match);
       
       // Defined in json-parser.h
       virtual void onendset(Match* match);
@@ -64,14 +66,16 @@ namespace BeeFishJSON {
          return (BeeFishJSON::JSONParser*)_parser;
       }
       
-      virtual void onsetvalue(Match* match)
+      virtual void onsetvalue(ArrayValue* match)
       override
       {
-         onarrayvalue(match);
+         JSON* json = (JSON*)(match->_match);
+         assert(json);
+         onarrayvalue(json);
       }
       
-      virtual Match* createItem() {
-         return new LoadOnDemand<JSON>(this);
+      virtual ArrayValue* createItem() {
+         return new ArrayValue(this);
       }
 
    };

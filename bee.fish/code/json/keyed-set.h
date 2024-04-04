@@ -31,10 +31,13 @@ namespace BeeFishJSON
         _KeyedSet* _set;
       
       public:
-         Match* _key;
-         Match* _seperator;
-         Match* _value;
+         Key* _key;
+         KeyValueSeperator* _seperator;
+         Value* _value;
       
+         Invoke* _invokeKey;
+         Invoke* _invokeValue;
+         
       public:
          KeyValue(Match* set) : Match() {
             _set = (_KeyedSet*)set;
@@ -68,6 +71,7 @@ namespace BeeFishJSON
    public:
       typedef KeyValue<OpenBrace, Key, KeyValueSeperator, Value, Seperator, CloseBrace> _KeyValue;
        
+
        
    public:
       KeyedSet() : 
@@ -80,18 +84,32 @@ namespace BeeFishJSON
       {
       }
 
-      virtual Match* createItem() 
+      virtual _KeyValue* createItem() 
       override
       {
-         return new _KeyValue(this);
+         _KeyValue* keyValue =
+            new _KeyValue(this);
+            
+         if (Match::_parser)
+            keyValue->setup(Match::_parser);
+            
+         return keyValue;
       }
 
-      virtual void onkey(Match* key) {
+      virtual void onkey(Key* key) {
       }
       
-      virtual void onvalue(Value* value) {
-          
+      virtual void onvalue(Value* value)
+      {
       }
+      
+   protected:
+      
+      virtual void onkeyvalue(_KeyValue* value) {
+         onvalue(value->_value);
+      }
+      
+      
 
    };
 
@@ -120,27 +138,27 @@ namespace BeeFishJSON
             
       _parser = parser;
          
-      _key = new Invoke(
-         new Key(),
-         [this](Match* key) {
-            _set->onkey(key);
+      _invokeKey = new Invoke(
+         _key = new Key(),
+         [this](Match* match) {
+            _set->onkey(_key);
          }
       );
          
       _seperator =
          new KeyValueSeperator();
          
-      _value = new Invoke(
-         new Value(),
-         [this](Match* value) {
-            _set->onsetvalue(value);
+      _invokeValue = new Invoke(
+         _value = new Value(),
+         [this](Match* match) {
+            _set->onvalue(_value);
          }
       );
          
       _match = new And(
-          _key,
+          _invokeKey,
           _seperator,
-          _value
+          _invokeValue
       );
          
       _match->setup(parser);

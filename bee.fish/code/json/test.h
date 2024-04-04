@@ -196,7 +196,7 @@ namespace BeeFishJSON
          
          virtual void success()
          {
-            cerr << endl << "Item: " << _match->value() << endl;
+            cerr << endl << "Item: " << value() << endl;
          }
       };
       
@@ -263,10 +263,10 @@ assert(ok);
          {
          }
          
-         virtual void onsetvalue(Match* item)
+         virtual void onsetvalue(MySetItem* item)
          override
          {
-            cerr << endl << "matchedSetItem: " << item->value() << endl;
+            cerr << endl << "matchedSetItem: " << item->value() << ":" << typeid(*item).name() << endl;
              
   
             if (item->value() == "myset")
@@ -274,10 +274,10 @@ assert(ok);
                
          }
          
-         virtual Match* createItem()
+         virtual MySetItem* createItem()
          override
          {
-            Match* item = new MySetItem(this);
+            MySetItem* item = new MySetItem(this);
             if (_parser)
                item->setup(_parser);
             return item;
@@ -298,13 +298,15 @@ assert(ok);
       };
      
       MySet* mySet = new MySet();
-      Capture cap = Capture(mySet);
-      ok &= testMatch("Set with overload", &cap, "{myset,myset}", true, "{myset,myset}");
+      //Capture cap = Capture(mySet);
+      ok &= testMatch("Set with overload", mySet, "{myset,myset}", true);
       ok &= testResult("Set with overload result", (mySet->_count == 2));
 
+      delete mySet;
       
       BeeFishMisc::outputSuccess(ok);
  
+      assert(ok);
       
       cout << endl;
       

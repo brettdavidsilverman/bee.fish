@@ -16,7 +16,8 @@ class Set : public Match
 {
 
 protected:
-
+   Item* _item;
+   
    class _Seperator : public And {
    public:
       _Seperator() : And(
@@ -36,26 +37,40 @@ protected:
    class SubsequentItem : public Match {
    protected:
       Set* _set;
-      Match* _item;
+      Item* _item;
    public:
 
       SubsequentItem() : Match() {
          throw std::runtime_error("SubsequentItem construted without a set");
       }
 
-      SubsequentItem(Match* set) : Match(),
-         _set((Set*)set)
+      SubsequentItem(Match* set) : Match()
+         
       {
+         _set = dynamic_cast<Set*>(set);
+         assert(_set);
+         cerr << "SubsequentItem::SubsequentItem()" << endl;
+      }
+      
+      virtual void setup(Parser* parser)
+      {
+         if (_parser)
+            return;
+            
+         _parser = parser;
+         
          _match = new And(
             new _Seperator(),
             new Invoke(
                _item = _set->createItem(),
                [this](Match* match)
                {
-                  _set->onsetvalue(match);
+                  _set->onsetvalue(_item);
                }
             )
          );
+         
+         _match->setup(_parser);
       }
 
    };
@@ -80,6 +95,9 @@ protected:
          SubsequentItem* item =
             new SubsequentItem(_set);
          
+         if (Match::_parser)
+            item->setup(Match::_parser);
+            
          return item;
       }
    };
@@ -112,9 +130,9 @@ public:
          new Optional(
             new And(
                new Invoke(
-                  createItem(),
+                  _item = createItem(),
                   [this](Match* match) {
-                     this->onsetvalue(match);
+                     this->onsetvalue(_item);
                   }
                ),
                new Optional(
@@ -134,20 +152,26 @@ public:
 
    }
    
-   virtual Match* createItem()
+   virtual Item* createItem()
    {
-      return new Item(this);
+      Item* item = new Item(this);
+      
+      if (_parser)
+         item->setup(_parser);
+         
+      return item;
    }
          
-   virtual void onbeginset(Match* match) {
-   }
-   
-   virtual void onsetvalue(Match* item)
+   virtual void onbeginset(Match* match)
    {
    }
    
+   virtual void onsetvalue(Item* item)
+   {
+   }
 
-   virtual void onendset(Match* match) {
+   virtual void onendset(Match* match)
+   {
    }
 
 

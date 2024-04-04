@@ -10,7 +10,7 @@ namespace BeeFishParser
 	class Repeat : public Match
 	{
 	private:
-		T *_item;
+		T* _item;
 
 	public:
 		size_t _minimum = 1;
@@ -24,13 +24,13 @@ namespace BeeFishParser
 				_minimum(minimum),
 				_maximum(maximum)
 		{
-			_item = nullptr;
+		   _item = nullptr;
 		}
 
-		virtual ~Repeat()
+        virtual ~Repeat()
 		{
-			if (_item)
-				delete _item;
+		   if (_item)
+              delete _item;
 		}
 
 		virtual bool matchCharacter(const Char &character)
