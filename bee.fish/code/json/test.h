@@ -219,8 +219,7 @@ namespace BeeFishJSON
       typedef Repeat<Item> Items;
       ok &= testMatchDelete("Items", new Items(0,3), "itemitemitem", true);
       ok &= testMatchDelete("Capture Items", new Capture(new Items(0,3)), "itemitemitem", true, "itemitemitem");
-      
-      assert(ok);
+     
       
       class Seperator : public BeeFishParser::Character {
       public:
@@ -236,13 +235,11 @@ namespace BeeFishJSON
       
  
       ok &= testMatchDelete("Set", new Capture(new _Set()), "{item,item,item}", true, "{item,item,item}");
-      
-      assert(false);
-      
       ok &= testMatchDelete("Set empty", new Capture(new _Set()), "{}", true, "{}");
       ok &= testMatchDelete("Set blanks", new Capture(new _Set()), "{item, item ,item }", true);
 
-
+      assert(ok);
+      
       Capture object(
          new Set<OpenBrace, LoadOnDemand<Item>, Seperator, CloseBrace>()
       );

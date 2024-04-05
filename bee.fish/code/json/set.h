@@ -122,14 +122,14 @@ protected:
          
          return item;
       }
-
+/*
       virtual void matchedItem(SubsequentItem* match)
       override
       {
          _set->onsetvalue(match->_item);
          _Repeat::matchedItem(match);
       }
- 
+ */
    };
 
 
