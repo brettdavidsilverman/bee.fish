@@ -82,7 +82,7 @@ namespace BeeFishTest
       BString expected = {}
    )
    {
-      cout << '\t' << label << ":\t";
+      cout << '\t' << label << ":\t" << flush;
       
       bool ok = true;
 
@@ -141,7 +141,7 @@ namespace BeeFishTest
       BString expected = {}
    ) 
    {
-      BeeFishJSON::JSONParser parser(*match);
+      BeeFishJSON::JSONParser parser(match);
       return testMatch(parser, label, match, text, result, expected);
    }
 
