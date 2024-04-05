@@ -33,17 +33,15 @@ namespace BeeFishParser {
       virtual void capture(Parser* parser, char c)
       override
       {
-          if (!_parser)
-            setup(parser);
+          //cerr << "'" << c << "'" << flush;
+          
+          setup(parser);
             
-          _parser = parser;
-          
-          if (_match) {
-             _match->capture(parser, c);
-          }
-          
-          
           _value.push_back(c);
+          
+          Match::capture(parser, c);
+         
+          
           
       }
       
@@ -73,12 +71,10 @@ namespace BeeFishParser {
              
              if (_match->result() == true) {
                 success();
-                //cerr << "Capture::eof::success::" << result() << endl;
              }
              else if (_match->result() == false)
              {
                 fail();
-                //cerr << "Capture::eof::fail::" << result() << endl;
              }
           }
       }

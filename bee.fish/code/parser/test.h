@@ -347,7 +347,7 @@ namespace BeeFishParser {
       cout << "Test Repeat" << endl;
 
       Match* repeat = new Capture(new Repeat<Character>());
-      ok &= testMatch("Repeat any character match", repeat, "helloworld", nullopt, "helloworld");
+      ok &= testMatch("Repeat any character match", repeat, "helloworld", true, "helloworld");
       delete repeat;
       
       
@@ -386,7 +386,7 @@ namespace BeeFishParser {
       
       ok &= testMatch("Repeat", tests[0], "*BBB*", true, "*BBB*");
       ok &= testMatch("Repeat fail 1", tests[1],  "*BB*");
-      ok &= testMatch("Repeat fail 2", tests[2], "*BBB", nullopt);
+      ok &= testMatch("Repeat fail 2", tests[2], "*BBB", false);
       ok &= testMatch("Repeat fail 3", tests[3], "*BBBBB*");
       ok &= testMatch("Repeat success 4", tests[4], "*BBBB*", true);
 
@@ -482,7 +482,7 @@ namespace BeeFishParser {
       delete testOptional12;
       
       Match* testOptional1 = new Capture(new OneOptTwo());
-      ok &= testMatch("Optional one match", testOptional1, "one", nullopt, "one");
+      ok &= testMatch("Optional one match", testOptional1, "one", true, "one");
       delete testOptional1;
             
       return ok;

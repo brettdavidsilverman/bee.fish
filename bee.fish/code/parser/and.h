@@ -98,13 +98,12 @@ namespace BeeFishParser {
       virtual void capture(Parser* parser, char c)
       override
       {
-         if (!_parser)
-            setup(parser);
+         setup(parser);
             
          if (size() == 0)
             return;
 
-         if (_result != false)
+         //if (_result != false)
          {
     
             Match* item = _inputs[_iterator];
@@ -113,13 +112,13 @@ namespace BeeFishParser {
             
          }
          
+         Match::capture(parser, c);
          
       }
       
       virtual void eof(Parser* parser) {
           
-         if (!_parser)
-            setup(parser);
+         setup(parser);
             
          if (result() != nullopt)
             return;
@@ -143,11 +142,9 @@ namespace BeeFishParser {
          
          if (matched) {
             success();
-            //cerr << "And::eof::success::" << result() << endl;
          }
          else {
             fail();
-            //cerr << "And::eof::fail::" << result() << endl;
          }
       }
       
