@@ -1,4 +1,4 @@
-#rm /home/bee/bee.fish.data
+rm /home/bee/bee.fish.data
 set -e
 make
 echo "Uploading large.json"

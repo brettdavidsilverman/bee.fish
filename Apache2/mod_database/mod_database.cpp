@@ -80,7 +80,7 @@ static int database_handler(request_rec *r)
           << HOST 
           << r->uri;
     
-    if (r->args)
+    if (r->args && strlen(r->args) > 0)
        debug << "?" << r->args;
        
     debug << endl;
@@ -94,9 +94,9 @@ static int database_handler(request_rec *r)
     
     if (!strcmp(r->method, "GET"))
     {
-        if (!strcmp(r->uri, "/index.xhtml") ||
-            !strcmp(r->uri, "/NotFound.xhtml") ||
-            !strcmp(r->uri, "/error.js") ) {
+        if (strcmp(r->uri, "/index.xhtml") == 0 ||
+            strcmp(r->uri, "/NotFound.xhtml") == 0 ||
+            strcmp(r->uri, "/error.js") == 0) {
            
            return DECLINED;
         }
@@ -104,8 +104,7 @@ static int database_handler(request_rec *r)
                  path.contains("index"))
         {
            if (r->args) {
-              std::string arguments(r->args);
-              if (arguments == "document")
+              if (strcmp(r->args, "document") == 0)
               {
                  if (!outputDocument(path, r))
                     return HTTP_INTERNAL_SERVER_ERROR;
@@ -125,7 +124,7 @@ static int database_handler(request_rec *r)
         
     }
     else if (!strcmp(r->method, "POST")) {
-        
+        #warning Post overlays existsing data"
        //path.clear();
        
        if (inputJSON(path, r))
