@@ -29,20 +29,20 @@ namespace BeeFishParser {
       
       virtual ~Capture() {
       }      
-
-      virtual void capture(Parser* parser, char c)
-      override
+      
+      virtual bool match(
+         Parser* parser,
+         const Char& character
+      )
       {
-          //cerr << "'" << c << "'" << flush;
-          
-          setup(parser);
-            
-          _value.push_back(c);
-          
-          Match::capture(parser, c);
+         setup(parser);
+
+         bool matched = matchCharacter(character);
          
-          
-          
+         if (matched)
+            _value += character;
+        
+         return matched;
       }
       
       virtual const BString& value() const
@@ -57,28 +57,7 @@ namespace BeeFishParser {
          return _value;
       }
       
-      virtual void eof(Parser* parser)
-      override
-      {
-          if (!_parser)
-             setup(parser);
-             
-          _parser = parser;
-             
-          if (_match && _match->result() == nullopt)
-          {
-             _match->eof(_parser);
-             
-             if (_match->result() == true) {
-                success();
-             }
-             else if (_match->result() == false)
-             {
-                fail();
-             }
-          }
-      }
-
+      
    };
 
 }

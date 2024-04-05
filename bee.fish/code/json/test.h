@@ -133,8 +133,7 @@ namespace BeeFishJSON
       ok &= testResult("String character escaped value", (stringCharacterEscaped.character() == Char('@')));
       
       StringCharacters stringCharacters;
-      ok &= testMatch("String characters", &stringCharacters, "hello world\\\\", nullopt);
-      ok &= testResult("String characters value", (stringCharacters == "hello world\\"));
+      ok &= testMatch("String characters", &stringCharacters, "hello world\\\\", true, "hello world\\");
       ok &= testMatchDelete("String", new String(), "\"hello world\"", true, "hello world");
       
 
@@ -194,14 +193,19 @@ namespace BeeFishJSON
          {
 
          }
-         
+         /*
          virtual void capture(Parser* parser, char c)
          override
          {
-             Capture::capture(parser, c);
-             //cerr << "{" << c << "}" << flush;
+             setup(parser);
+                
+             cerr << "{" << c << "}" << flush;
              
+             Capture::capture(parser, c);
+             
+             //_match->capture(parser, c);
          }
+         */
          
          virtual void success()
          override
@@ -293,18 +297,7 @@ assert(ok);
                item->setup(_parser);
             return item;
          }
-         /*
-         virtual void capture(Parser* parser, char c)
-         override
-         {
-             if (!_parser)
-                setup(parser);
-                
-             //cerr << "{" << c << "}" << flush;
-             
-             _match->capture(parser, c);
-         }
-         */
+         
          
       };
      

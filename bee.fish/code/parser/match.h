@@ -91,8 +91,8 @@ namespace BeeFishParser {
 
          
          bool matched = matchCharacter(character);
-
-         if (_result == true)
+         
+        if (_result == true)
             success();
          else if (_result == false)
             fail();
@@ -164,7 +164,7 @@ namespace BeeFishParser {
       
       // Defined in parser.h
       virtual const Char& character() const;
-
+/*
       virtual void capture(Parser* parser, char c)
       {
          setup(parser);
@@ -174,7 +174,7 @@ namespace BeeFishParser {
             _match->capture(parser, c);
          }
       }
-      
+      */
       
       virtual void eof(Parser* parser) 
       {

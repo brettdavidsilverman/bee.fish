@@ -12,7 +12,7 @@ test:	$(OUTPUT)
 	$(OUTPUT) -test
 	
 $(BUILD)/parser:
-	cd ../parser && make $(DEBUG)
+	cd ../parser && make clean $(DEBUG)
 
 debug:	clean
 debug:	DEBUG = debug

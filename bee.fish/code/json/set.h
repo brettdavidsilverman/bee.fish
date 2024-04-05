@@ -12,7 +12,7 @@ namespace BeeFishJSON
 {
 
 template<class OpenBrace, class Item, class Seperator, class CloseBrace>
-class Set : public Match
+class Set : public And
 {
 protected:
    Item* _setItem = nullptr;
@@ -35,22 +35,21 @@ protected:
       }
    };
 
-   class SubsequentItem : public Match {
+   class SubsequentItem : public And {
    protected:
       Set* _set;
       
    public:
+      _Seperator* _seperator;
       Item* _item;
-      
-      SubsequentItem() : Match() {
+     
+      SubsequentItem() : And() {
          throw std::runtime_error("SubsequentItem construted without a set");
       }
 
-      SubsequentItem(Set* set) : Match()
-         
+      SubsequentItem(Set* set) : And()
       {
          _set = set;
-         cerr << "SubsequentItem::SubsequentItem()" << endl;
       }
       
       virtual void setup(Parser* parser)
@@ -58,21 +57,39 @@ protected:
          if (_parser)
             return;
             
-         _parser = parser;
+         _seperator = new _Seperator();
+         _item = new Item(_set);
          
-         _match = new And(
-            new _Seperator(),
+         _inputs = {
+            _seperator,
             new Invoke(
-               _item = _set->createItem(),
+               _item,
                [this](Match* match)
                {
                   _set->onsetvalue(_item);
                }
             )
-         );
+         };
          
-         _match->setup(_parser);
+         And::setup(parser);
       }
+      /*
+      virtual void capture(Parser* parser, char c)
+      override
+      {
+          setup(parser);
+                
+          cerr << "<" << c << ">" << flush;
+           
+          if (_seperator->matched()) {
+              cerr << "❤️" << flush;
+             //_item->capture(parser, c);
+          }
+          
+          And::capture(parser, c);
+      }
+      */
+         
 
    };
 
@@ -109,29 +126,15 @@ protected:
       virtual void matchedItem(SubsequentItem* match)
       override
       {
-         cerr << "SubsequentItems::matchedItem(" << match->_item->value() << ")" << endl;
          _set->onsetvalue(match->_item);
          _Repeat::matchedItem(match);
       }
-      /*
-      virtual void capture(Parser* parser, char c)
-      override
-      {
-         if (!_Repeat::_parser)
-            _Repeat::setup(parser);
-            
-         if (_Repeat::_item == nullptr)
-            _Repeat::_item = createItem();
-                
-         if (_Repeat::_item && _Repeat::_item->result() == nullopt)
-            _Repeat::_item->capture(parser, c);
-      }
-      */
+ 
    };
 
 
 public:
-   Set() : Match()
+   Set() : And()
    {
    }
 
@@ -144,10 +147,7 @@ public:
       if (_parser)
          return;
 
-      _parser = parser;
-      
-      _match =
-         new And(
+      _inputs = {
          new Invoke(
             new OpenBrace(),
             [this](Match* match) {
@@ -173,9 +173,10 @@ public:
                this->onendset(match);
             }
          )
-      );
+      };
       
-      _match->setup(parser);
+      And::setup(parser);
+      
 
    }
    

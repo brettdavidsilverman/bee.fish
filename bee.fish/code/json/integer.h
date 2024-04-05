@@ -42,12 +42,10 @@ namespace BeeFishJSON {
           if (_matchedCount > 0)
           {
               success();
-              //cerr << "Integer::eof::success::" << result() << endl;
           }
           else
           {
               fail();
-              //cerr << "Integer::eof::fail::" << result() << endl;
           }
           
       }

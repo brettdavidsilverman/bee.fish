@@ -93,7 +93,7 @@ namespace BeeFishParser
                
             return item;
 		}
-        
+        /*
         virtual void capture(Parser* parser, char c)
         override
         {
@@ -109,7 +109,7 @@ namespace BeeFishParser
            //if (_item->result() == nullopt)
               _item->capture(parser, c);
         }
-
+*/
         virtual void eof(Parser* parser) {
           
            setup(parser);

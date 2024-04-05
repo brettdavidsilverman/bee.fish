@@ -94,7 +94,7 @@ namespace BeeFishParser {
          _inputs.push_back(match);
 
       }
-      
+    /*
       virtual void capture(Parser* parser, char c)
       override
       {
@@ -115,7 +115,7 @@ namespace BeeFishParser {
          Match::capture(parser, c);
          
       }
-      
+      */
       virtual void eof(Parser* parser) {
           
          setup(parser);

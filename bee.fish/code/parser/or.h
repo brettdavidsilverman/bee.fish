@@ -99,7 +99,7 @@ namespace BeeFishParser {
       {
          return *_item;
       }
-      
+      /*
       virtual void capture(Parser* parser, char c)
       override
       {
@@ -109,6 +109,7 @@ namespace BeeFishParser {
          for (auto item : _inputs)
              item->capture(parser, c);
       }
+      */
    };
 
 

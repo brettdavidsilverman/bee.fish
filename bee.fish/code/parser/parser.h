@@ -113,13 +113,12 @@ namespace BeeFishParser
                 _utf8.result() != nullopt)
             {
                _lastCharacter = _utf8.character();
-               //cerr << "❤️" << typeid(*_match).name() << endl;
-               
+               /*
                for (auto c : _lastCharacter)
                {
                   _match->capture(this, c);
                }
-               
+               */
                // utf8 character, perform match
                _match->match(this, _lastCharacter);
                // Reset the utf8 character
