@@ -174,6 +174,7 @@ namespace BeeFishDatabase {
       override
       {
          push_back_key(key);
+         key.clear();
       }
       
       virtual void onendobject(JSON* match)
