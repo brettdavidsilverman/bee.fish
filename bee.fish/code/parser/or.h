@@ -42,7 +42,7 @@ namespace BeeFishParser {
          
             Match* item = *it;
             
-            if ( item->_result != nullopt )
+            if ( item->result() != nullopt )
                continue;
 
             if ( item->match(_parser, character) )
@@ -50,7 +50,7 @@ namespace BeeFishParser {
                matched = true;
             }
             
-            if ( item->_result == true )
+            if ( item->result() == true )
             {
                _item = item;
                break;
@@ -69,7 +69,42 @@ namespace BeeFishParser {
          
       }
       
-      
+      virtual void eof(Parser* parser)
+      {
+         setup(parser);
+         
+         if (result() != nullopt)
+            return;
+            
+         bool matched = false;
+         _index = 0;
+         
+         for ( auto
+                 it  = _inputs.begin();
+                 it != _inputs.end();
+                ++_index, ++it
+             )
+         {
+         
+            Match* item = *it;
+            
+            if (item->result() == nullopt)
+               item->eof(parser);
+               
+            if (item->result() == true)
+            {
+               matched = true;
+               _item = item;
+               break;
+            }
+         }
+         
+         if (matched)
+            success();
+         else
+            fail();
+            
+      }
 
       virtual void setup(Parser* parser) {
          if (_parser)
@@ -90,6 +125,14 @@ namespace BeeFishParser {
          return Match::value();
       }
       
+      virtual BString& value()
+      {
+         if (_item)
+            return _item->value();
+            
+         return Match::value();
+      }
+      
       virtual Match& item()
       {
          return *_item;
@@ -99,17 +142,7 @@ namespace BeeFishParser {
       {
          return *_item;
       }
-      /*
-      virtual void capture(Parser* parser, char c)
-      override
-      {
-         if (!_parser)
-            setup(parser);
-          
-         for (auto item : _inputs)
-             item->capture(parser, c);
-      }
-      */
+      
    };
 
 

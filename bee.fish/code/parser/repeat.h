@@ -98,8 +98,8 @@ namespace BeeFishParser
           
            setup(parser);
            
-           if (_item && _item->result() == nullopt)
-              _item->eof(parser);
+           //if (_item && _item->result() == nullopt)
+           //   _item->eof(parser);
            
            if (result() == nullopt)
            {
