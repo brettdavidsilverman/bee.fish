@@ -525,7 +525,7 @@ namespace BeeFishDatabase
       {
          cout << "\tInteger value" << endl;
          Path path = root["integer"][Type::INTEGER];
-         BString value;
+         string value;
          path.getData(value);
          success = (value == "1234");
          BeeFishMisc::outputSuccess(success);
@@ -615,7 +615,7 @@ namespace BeeFishDatabase
       }
       
       if (success) {
-         cerr << "\tOuter Array: ";
+         cout << "\tOuter Array: ";
          
          success = path.contains(Type::ARRAY);
          BeeFishMisc::outputSuccess(success);
@@ -623,14 +623,14 @@ namespace BeeFishDatabase
       }
       
       if (success) {
-         cerr << "\tOuter Array first index: ";
+         cout << "\tOuter Array first index: ";
          path = path[Type::ARRAY];
          success = path.contains(0);
          BeeFishMisc::outputSuccess(success);
       }
       
       if (success) {
-         cerr << "\tOuter Array max index: ";
+         cout << "\tOuter Array max index: ";
          MinMaxPath maxPath = path;
          Size max = maxPath.max<Size>();
          success = (max == 0);
@@ -638,7 +638,7 @@ namespace BeeFishDatabase
       }
       
       if (success) {
-         cerr << "\tInner Array: ";
+         cout << "\tInner Array: ";
          path = path[0];
          success = path.contains(Type::ARRAY);
          BeeFishMisc::outputSuccess(success);
@@ -649,7 +649,7 @@ namespace BeeFishDatabase
       }
    
       if (success) {
-         cerr << "\tInner Array Max index: ";
+         cout << "\tInner Array Max index: ";
          MinMaxPath maxPath = path;
          if (path.isDeadEnd())
             success = false;

@@ -65,9 +65,16 @@ namespace BeeFishJSON
                out << "false";
             break;
          }
+         case Type::INTEGER:
+         {
+            string number;
+            path.getData(number);
+            out << number;
+            break;
+         }
          case Type::NUMBER:
          {
-            BeeFishScript::String number;
+            string number;
             path.getData(number);
             out << number;
             
@@ -75,7 +82,7 @@ namespace BeeFishJSON
          }
          case Type::STRING:
          {
-            BeeFishScript::String string;
+            std::string string;
             path.getData(string);
               
             out << "\""

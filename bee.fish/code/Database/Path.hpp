@@ -117,11 +117,7 @@ namespace BeeFishDatabase {
       {
          Path path(*this);
          
-         //cerr << "PATH: " << _index << "[" << key << "] -> ";
- 
          path << key;
-         
-         //cerr << path._index << endl;
          
          return path;
       }
