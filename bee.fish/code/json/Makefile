@@ -7,7 +7,7 @@ DEPS=main.cpp json.h string.h number.h array.h object.h boolean.h null.h blank-s
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
 	
-test:	$(OUTPUT) $(BUILD)/parser
+test:	$(OUTPUT)
 	$(BUILD)/parser -test
 	$(OUTPUT) -test
 	
@@ -17,7 +17,7 @@ $(BUILD)/parser:
 debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -Og -g -D DEBUG
-debug:	$(OUTPUT)
+debug:	$(OUTPUT) $(BUILD)/parser
 
 run_debug:	debug
 	gdb --args $(OUTPUT) -test

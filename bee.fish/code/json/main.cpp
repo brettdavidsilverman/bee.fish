@@ -15,20 +15,8 @@ using namespace BeeFishJSON;
 using namespace BeeFishMisc;
 
 int main(int argc, const char* argv[]) {
-/*
-   Match* match = new BeeFishJSON::JSON();
-   Parser parser1(match);
-   cout << "setup: " << endl;
-   match->setup(&parser1);
-   cout << "ok" << endl;
-   parser1.read("undefined");
-   parser1.eof();
-   cerr << match->value() << endl;
-   outputSuccess(match->matched());
-   
-   return 0;
-   */
-   cerr << "bee.fish.json"
+    
+   cout << "bee.fish.json"
            << endl
         << "C++ run time: "
            << __cplusplus
@@ -49,58 +37,19 @@ int main(int argc, const char* argv[]) {
       return 0;
    }
    
-   BeeFishJSON::JSON json;
+   BeeFishJSON::JSONParser parser;
 
-   BeeFishJSON::JSONParser parser(json);
-  /*
-   
-   JSONParser::OnValue onvalue =
-      [](const BString& key, JSON& json) {
-         cerr << json.value() << endl;
-      };
-
-   parser.invokeValue("fieldName", onvalue);
-   
-*/
    parser.read(cin);
 
-   if (json.matched())// || (json->result() == nullopt))
+   if (parser.matched())
    {
-      cout << "Valid JSON: " << json.value() << endl;
+      cout << "Valid JSON: " << endl;
    }
    else
    {
       cout << "Invalid JSON" << endl;
    }
 
-   return 0;
-
-   string line;
-   while (!cin.eof())
-   {
-      cout << "JSON: ";
-      
-      getline(cin, line);
-      
-      if (!line.length())
-         break;
-        
-      BeeFishJSON::JSON json;
-      
-      BeeFishJSON::JSONParser parser(json);
-      
-      parser.read(line);
-
-      if (json.matched() || (json.result() == nullopt))
-      {
-         cout << "Valid JSON" << endl;
-      }
-      else
-      {
-         cout << "Invalid JSON" << endl;
-      }
-      
-   }
 
    cout << "Bye" << endl;
    

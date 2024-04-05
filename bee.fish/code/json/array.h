@@ -15,23 +15,36 @@ namespace BeeFishJSON {
    class JSON;
    class JSONParser;
   
-   class ArrayOpenBrace : public BeeFishParser::Character {
+   class ArrayOpenBrace : public And {
    public:
-      ArrayOpenBrace() : Character('[') {
+      ArrayOpenBrace() : And(
+         new Character('['),
+         new BlankSpace(0)
+      )
+      {
 
       }
    };
 
-   class ArrayCloseBrace : public BeeFishParser::Character {
+   class ArrayCloseBrace : public And {
    public:
-      ArrayCloseBrace() : Character(']') {
+      ArrayCloseBrace() : And(
+         new BlankSpace(0),
+         new Character(']')
+      )
+      {
 
       }
    };
 
-   class ArraySeperator : public BeeFishParser::Character {
+   class ArraySeperator : public And {
    public:
-      ArraySeperator() : Character(',') {
+      ArraySeperator() : And(
+         new BlankSpace(0),
+         new Character(','),
+         new BlankSpace(0)
+      )
+      {
 
       }
    };
@@ -73,10 +86,14 @@ namespace BeeFishJSON {
          assert(json);
          onarrayvalue(json);
       }
-      
+      /*
       virtual ArrayValue* createItem() {
-         return new ArrayValue(this);
+         ArrayValue* arrayValue = new ArrayValue();
+         if (_parser)
+            arrayValue->setup(_parser);
+         return arrayValue;
       }
+      */
 
    };
     

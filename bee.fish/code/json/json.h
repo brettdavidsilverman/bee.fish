@@ -53,7 +53,7 @@ namespace BeeFishJSON
             match,
             [this, type](Match* match) {
                _type = type;
-               onvalue(type, match->value());
+               onvalue((JSON*)match);
             }
          );
       }
@@ -72,13 +72,13 @@ namespace BeeFishJSON
                   _type = Type::NUMBER;
                else
                   _type = Type::INTEGER;
-               onvalue(_type, value);
+               onvalue((JSON*)match);
             }
          );
       }
       
    public:
-      virtual void onvalue(Type type, const BString& value)
+      virtual void onvalue(JSON* json)
       {
       }
       
@@ -112,11 +112,10 @@ namespace BeeFishJSON
          };
          
          _match = new And(
-            new Optional(new BlankSpace()),
+            new BlankSpace(0),
             _items
          );
         
-        // And::setup(parser);
          
       }
       

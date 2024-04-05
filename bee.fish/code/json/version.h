@@ -1,6 +1,6 @@
 #ifndef BEE_FISH_JSON__VERSION_H
 #define BEE_FISH_JSON__VERSION_H
 
-#define BEE_FISH_JSON_VERSION "1.0.0"
+#define BEE_FISH_JSON_VERSION "3.0.0"
 
 #endif

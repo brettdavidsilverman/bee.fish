@@ -13,24 +13,7 @@ namespace BeeFishJSON
    {
    public:
        
-      class _JSON : public JSON
-      {
-      public:
-          _JSON() {
-          }
-          
-      public:
-         virtual void onvalue(Type type, BString& value)
-         {
-             cerr << endl
-                  << "JSONPARSER:onvalue "
-                  << type
-                  << ":"
-                  << value
-                  << endl;
-         }
-      };
-
+     
       typedef std::function<void(const BString& key, JSON& json)> OnKey;
       typedef std::map<const BString, OnKey> OnKeys;
       typedef std::function<void(const BString& key, JSON& json)> OnValue;
@@ -48,6 +31,12 @@ namespace BeeFishJSON
          _json((JSON*)&match)
       {
       }
+      
+      JSONParser(Match* match) :
+         Parser(*match),
+         _json((JSON*)match)
+      {
+      }
       /*
       JSONParser(JSON* json) :
          Parser(*json),
@@ -58,9 +47,9 @@ namespace BeeFishJSON
       */
       
       JSONParser() :
-         Parser(new _JSON())
+         Parser(new JSON())
       {
-          _json = (_JSON*)&_match;
+          _json = (JSON*)&_match;
       }
       
       virtual ~JSONParser()
@@ -128,6 +117,10 @@ namespace BeeFishJSON
       }
 
       virtual void onvalue(JSON* json) {
+      }
+      
+      virtual bool matched() const {
+         return _json->result() == true;
       }
       
 

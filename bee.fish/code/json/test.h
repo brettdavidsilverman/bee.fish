@@ -221,11 +221,6 @@ namespace BeeFishJSON
 
          }
          
-         virtual void success()
-         override
-         {
-             cerr << "Item(" << value() << ")" << endl;
-         }
       };
       
       ok &= testMatchDelete("Item", new Item(), "item", true);
@@ -326,12 +321,21 @@ assert(ok);
       
       bool ok = true;
       
-      ok &= testMatchDelete("Empty array", new Capture(new JSON()), "[]", true, "[]");
-      ok &= testMatchDelete("Single array", new Capture(new JSON()), "[0]", true, "[0]");
-      ok &= testMatchDelete("Double array", new Capture(new JSON()), "[true,false]", true, "[true,false]");
-      ok &= testMatchDelete("Triple array", new Capture(new JSON()), "[1,2,3]", true, "[1,2,3]");
-      ok &= testMatchDelete("Embedded array", new Capture(new JSON()), "[0,[]]", true, "[0,[]]");
-      ok &= testMatchDelete("Array with blanks", new Capture(new JSON()), " [ 1, true , null , false]", true, " [ 1, true , null , false]" );
+      ok &= testMatchDelete("Empty array", new Capture(new Array()), "[]", true, "[]");
+      ok &= testMatchDelete("Single array", new Capture(new Array()), "[0]", true, "[0]");
+      ok &= testMatchDelete("Double array", new Capture(new Array()), "[true,false]", true, "[true,false]");
+      ok &= testMatchDelete("Triple array", new Capture(new Array()), "[1,2,3]", true, "[1,2,3]");
+      ok &= testMatchDelete("Embedded array", new Capture(new Array()), "[0,[]]", true, "[0,[]]");
+      ok &= testMatchDelete("Array with blanks", new Capture(new Array()), "[ 1, true , null , false]", true, "[ 1, true , null , false]" );
+
+      ok &= testMatchDelete("Empty array json", new Capture(new JSON()), "[]", true, "[]");
+      ok &= testMatchDelete("Single array json", new Capture(new JSON()), "[0]", true, "[0]");
+      ok &= testMatchDelete("Double array json", new Capture(new JSON()), "[true,false]", true, "[true,false]");
+      ok &= testMatchDelete("Triple array json", new Capture(new JSON()), "[1,2,3]", true, "[1,2,3]");
+      ok &= testMatchDelete("Embedded array json", new Capture(new JSON()), "[0,[]]", true, "[0,[]]");
+      ok &= testMatchDelete("Array with blanks json", new Capture(new JSON()), " [ 1, true , null , false]", true, " [ 1, true , null , false]" );
+
+      assert(ok);
 
       cout << endl;
       
@@ -536,51 +540,7 @@ assert(ok);
       
    }
 
-#ifdef SERVER
-   inline bool testStreams() 
-   {
-      
-      cout << "Streams" << endl;
-      
-      bool ok = true;
 
-      JSON jsonImage;
-      JSONParser parser(jsonImage);
-
-      BString last;
-      parser.streamValue("image",
-         [&last](const Data& buffer) {
-            cerr << "Size : " << buffer.size() << endl;
-            std::string str((const char*)buffer.data(), buffer.size());
-            last = str;
-         }
-      );
-
-      bool secretOk = false;
-      parser.invokeValue("secret",
-         [&secretOk](const BString& key, JSON& json) {
-            secretOk = (key == "secret") && (json.value() == "mysecret");
-         }
-      );
-
-      ok &= testFile(
-         parser,
-         "JSON with buffered image",
-         "server/json/tests/stream.json",
-         jsonImage,
-         true
-      );
-
-      ok &= testResult(
-         "JSON with invoke secret",
-         secretOk
-      );
-
-      cout << endl;
-      
-      return ok;
-   }
-#endif
 
    inline bool testEmojis()
    {
