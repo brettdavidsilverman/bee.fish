@@ -35,24 +35,26 @@ namespace BeeFishJSON
       
       bool ok = true;
 
-      ok &= testIntrinsics();
-      ok &= testNumbers();
-      ok &= testStrings();
-      ok &= testSets();
-      ok &= testArrays();
-      ok &= testKeyedSets();
-      ok &= testObjects();
+      ok = ok && testIntrinsics();
+      ok = ok && testNumbers();
+      ok = ok && testStrings();
+      ok = ok && testSets();
+      ok = ok && testArrays();
+      ok = ok && testKeyedSets();
+      ok = ok && testObjects();
 #ifdef SERVER
       ok &= testStreams();
 #endif
-      ok &= testEmojis();
-      ok &= testTypes();
+      ok = ok && testEmojis();
+      ok = ok && testTypes();
       
       if (ok)
          cout << "SUCCESS" << endl;
       else
          cout << "FAIL" << endl;
          
+      BeeFishMisc::outputSuccess(ok);
+      
       return ok;
    }
    
@@ -193,19 +195,6 @@ namespace BeeFishJSON
          {
 
          }
-         /*
-         virtual void capture(Parser* parser, char c)
-         override
-         {
-             setup(parser);
-                
-             cerr << "{" << c << "}" << flush;
-             
-             Capture::capture(parser, c);
-             
-             //_match->capture(parser, c);
-         }
-         */
          
          virtual void success()
          override
@@ -256,14 +245,7 @@ assert(ok);
          {
             _match = new Word("myset");
          }
-         /*
-         virtual void capture(Parser* parser, char c)
-         {
-             Capture::capture(parser, c);
-             
-             //_match->capture(parser, c);
-         }
-         */
+         
       };
 
       class MySet : public Set<OpenBrace, MySetItem, Seperator, CloseBrace>
@@ -278,8 +260,6 @@ assert(ok);
          virtual void onsetvalue(MySetItem* item)
          override
          {
-            cerr << endl << "matchedSetItem: " << item->value() << ":" << typeid(*item).name() << endl;
-             
   
             if (item->value() == "myset")
                ++_count;
@@ -388,14 +368,28 @@ assert(ok);
      {
       
       public:
-         StyleCharacters() : Repeat<StyleCharacter>()
+         StyleCharacters() : Repeat<StyleCharacter>(0)
          {
 
          }
 
-         virtual void matchedItem(StyleCharacter* item) {
+         virtual void matchedItem(StyleCharacter* item)
+         override
+         {
             push_back(item->character());
             Repeat::matchedItem(item);
+         }
+         
+         virtual const BString& value() const
+         override
+         {
+            return *this;
+         }
+         
+         virtual BString& value()
+         override
+         {
+            return *this;
          }
       };
 
@@ -419,7 +413,9 @@ assert(ok);
       {
       public:
          int _keyCount = 0;
-         virtual void matchedKey(Key& key, Value& value) {
+         virtual void onkeyvalue(Key* key, Value* value)
+         override
+         {
             _keyCount++;
          }
 
@@ -432,6 +428,7 @@ assert(ok);
       ok &= testMatchDelete("Style with one key", new Capture(new StyleSet()), "\"key=value\"", true, "\"key=value\"");
       ok &= testMatch("Style with two keys", &capture, "\"key1=value1;key2=value2\"", true, "\"key1=value1;key2=value2\"");
       ok &= testResult("Style matched two keys", styleSet->_keyCount == 2);
+      
       cout << endl;
 
       return ok;

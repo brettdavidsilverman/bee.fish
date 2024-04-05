@@ -97,17 +97,13 @@ namespace BeeFishJSON
       }
 
       virtual void onkey(Key* key) {
+          cerr << "KeyedSet::onkey(" << key->value() << ")" << endl;
+      }
+    
+      virtual void onkeyvalue(Key* key, Value* value) {
+         cerr << "KeyedSet::onkeyvalue(" << key->value() << ", " << value->value() << ")" << endl;
       }
       
-      virtual void onvalue(Value* value)
-      {
-      }
-      
-   protected:
-      
-      virtual void onkeyvalue(_KeyValue* value) {
-         onvalue(value->_value);
-      }
       
       
 
@@ -151,7 +147,7 @@ namespace BeeFishJSON
       _invokeValue = new Invoke(
          _value = new Value(),
          [this](Match* match) {
-            _set->onvalue(_value);
+            _set->onkeyvalue(_key, _value);
          }
       );
          

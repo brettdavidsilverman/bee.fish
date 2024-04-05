@@ -97,7 +97,7 @@ namespace BeeFishJSON {
       virtual void onobjectkey(ObjectKey* key);
       
       // Defined in json-parser.h
-      virtual void onobjectvalue(JSON* value);
+      virtual void onobjectvalue(ObjectKey* key, JSON* value);
       
       virtual void onkey(ObjectKey* key)
       override
@@ -105,12 +105,12 @@ namespace BeeFishJSON {
           onobjectkey(key);
       }
       
-      virtual void onvalue(ObjectValue* match)
+      virtual void onkeyvalue(ObjectKey* key, ObjectValue* value)
       override
       {
-          JSON* json = (JSON*)(match->_match);
+          JSON* json = (JSON*)(value->_match);
           
-          onobjectvalue(json);
+          onobjectvalue(key, json);
       }
 
    };

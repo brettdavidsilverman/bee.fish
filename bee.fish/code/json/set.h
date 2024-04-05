@@ -73,23 +73,7 @@ protected:
          
          And::setup(parser);
       }
-      /*
-      virtual void capture(Parser* parser, char c)
-      override
-      {
-          setup(parser);
-                
-          cerr << "<" << c << ">" << flush;
-           
-          if (_seperator->matched()) {
-              cerr << "❤️" << flush;
-             //_item->capture(parser, c);
-          }
-          
-          And::capture(parser, c);
-      }
-      */
-         
+      
 
    };
 
@@ -122,14 +106,8 @@ protected:
          
          return item;
       }
-/*
-      virtual void matchedItem(SubsequentItem* match)
-      override
-      {
-         _set->onsetvalue(match->_item);
-         _Repeat::matchedItem(match);
-      }
- */
+
+
    };
 
 
@@ -197,7 +175,6 @@ public:
    
    virtual void onsetvalue(Item* item)
    {
-       cerr << "Set::onsetvalue(" << item->value() << ")" << endl;
    }
 
    virtual void onendset(Match* match)

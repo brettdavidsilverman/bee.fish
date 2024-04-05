@@ -147,7 +147,7 @@ namespace BeeFishDatabase {
          );
       }
       
-      virtual void onobjectkey(const BString& key)
+      virtual void onobjectkey(BString& key)
       override
       {
       
@@ -217,7 +217,7 @@ namespace BeeFishDatabase {
         
       }
 
-      virtual void onobjectvalue(const BString& key, const JSON* json) {
+      virtual void onobjectvalue(BString& key, const JSON* json) {
 
          cerr << "onobjectvalue " << key << " " << json->type() << " " << json->value() << endl;
          

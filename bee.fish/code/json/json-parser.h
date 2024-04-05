@@ -109,7 +109,7 @@ namespace BeeFishJSON
       virtual void onbeginobject(JSON* match) {
       }
       
-      virtual void onobjectkey(const BString& key) {
+      virtual void onobjectkey(BString& key) {
       }
 
       virtual void onendobject(JSON* match) {
@@ -124,7 +124,7 @@ namespace BeeFishJSON
       virtual void onendarray(JSON* match) {
       }
 
-      virtual void onobjectvalue(const JSON* value) {
+      virtual void onobjectvalue(BString& key, const JSON* value) {
       }
 
       virtual void onvalue(JSON* json) {
@@ -185,7 +185,7 @@ namespace BeeFishJSON
    }
 
    // Declared in object.h
-   inline void Object::onobjectvalue(JSON* item) {
+   inline void Object::onobjectvalue(ObjectKey* key, JSON* item) {
 
       //JSON* json = (JSON*)(item->_value->_match);
       //const BString& key = item->_key->value();
@@ -193,7 +193,7 @@ namespace BeeFishJSON
       if (_parser->isJSONParser()) {
 
          JSONParser* parser = (JSONParser*)(_parser);
-         parser->onobjectvalue(item);
+         parser->onobjectvalue(key->value(), item);
       }
       
       //Set::matchedSetItem(item);
