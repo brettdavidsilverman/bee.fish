@@ -49,7 +49,12 @@ namespace BeeFishParser
    public:
       Char _lastCharacter = "";
       
-
+   protected:
+             
+      Parser() : _match(nullptr)
+      {
+      }
+      
    public:
       Parser(Match& match) :
          _match(&match)
@@ -60,6 +65,7 @@ namespace BeeFishParser
          _match(match)
       {
       }
+
 
       void setMatch(Match& match) {
          _match = &match;

@@ -36,6 +36,7 @@ namespace BeeFishParser {
    
       Match(void* params = nullptr)
       {
+         //cerr << "Match(" << params << ")" << endl;
          ++matchInstanceCount();
       }
 
