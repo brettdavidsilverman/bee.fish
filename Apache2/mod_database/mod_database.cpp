@@ -126,7 +126,7 @@ static int database_handler(request_rec *r)
     }
     else if (!strcmp(r->method, "POST")) {
         
-       path.clear();
+       //path.clear();
        
        if (inputJSON(path, r))
           return OK;

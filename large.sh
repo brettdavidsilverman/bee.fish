@@ -1,6 +1,6 @@
-rm /home/bee/bee.fish.data
+#rm /home/bee/bee.fish.data
 set -e
-sudo make
+make
 echo "Uploading large.json"
 curl -X POST \
    https://bee.fish/large.json \
@@ -36,10 +36,10 @@ echo "Comparing large2a.json and large2b.json"
 
 diff large2a.json large2b.json
 
-#echo "Cleaning up"
+echo "Cleaning up"
 
-#rm -f large2a.json
-#rm -f large2b.json
-#rm -f large2.json
+rm -f large2a.json
+rm -f large2b.json
+rm -f large2.json
 
 echo "Success 😃"
