@@ -21,9 +21,11 @@ namespace BeeFishJSON
       
       Boolean()
       {
-          _match = new Or(
-             _true = new Word("true"),
-             _false = new Word("false")
+          _match = new Capture(
+              new Or(
+                _true = new Word("true"),
+                _false = new Word("false")
+             )
           );
       }
             

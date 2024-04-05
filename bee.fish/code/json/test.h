@@ -105,7 +105,6 @@ namespace BeeFishJSON
       bool ok = true;
       
       ok &= testMatchDelete("Capture",  new Capture(new Integer()), "80000", true, "80000");
-      
       ok &= testMatchDelete("Integer", new Capture(new Number()), "800", true, "800");
       ok &= testMatchDelete("Negative", new Capture(new Number()), "-800", true, "-800");
       ok &= testMatchDelete("Decimal", new Capture(new Number()), "800.01", true, "800.01");
@@ -113,6 +112,15 @@ namespace BeeFishJSON
       ok &= testMatchDelete("Full exponent", new Capture(new Number()), "800E-10", true, "800E-10");
       ok &= testMatchDelete("False positive", new Number(), "+800", false);
       //ok &= testMatchDelete("NaN", new CaptureNumber(), "NaN", true, "NaN");
+      
+      
+      ok &= testMatchDelete("Capture json",  new JSON(), "80000", true, "80000");
+      ok &= testMatchDelete("Integer json", new JSON(), "800", true, "800");
+      ok &= testMatchDelete("Negative json", new JSON(), "-800", true, "-800");
+      ok &= testMatchDelete("Decimal json", new JSON(), "800.01", true, "800.01");
+      ok &= testMatchDelete("Short exponent json", new JSON(), "800e10", true, "800e10");
+      ok &= testMatchDelete("Full exponent json", new JSON(), "800E-10", true, "800E-10");
+      ok &= testMatchDelete("False positive json", new JSON(), "+800", false);
       
       assert(ok);
       
@@ -159,7 +167,7 @@ namespace BeeFishJSON
       ok &= testMatchDelete("Empty string", new JSON(), "\"\"", true, "");
       ok &= testMatchDelete("Simple string", new JSON(), "\"hello\"", true, "hello");
       ok &= testMatchDelete("Unquoted", new JSON(), "hello", false);
-      ok &= testMatchDelete("Single quote", new JSON(), "\"", nullopt);
+      ok &= testMatchDelete("Single quote", new JSON(), "\"", false);
       ok &= testMatchDelete("Escaped quote", new JSON(), "\"\\\"\"", true, "\"");
 
 #ifdef SERVER  
@@ -323,7 +331,7 @@ assert(ok);
       ok &= testMatchDelete("Double array", new Capture(new JSON()), "[true,false]", true, "[true,false]");
       ok &= testMatchDelete("Triple array", new Capture(new JSON()), "[1,2,3]", true, "[1,2,3]");
       ok &= testMatchDelete("Embedded array", new Capture(new JSON()), "[0,[]]", true, "[0,[]]");
-      ok &= testMatchDelete("Array with blanks", new Capture(new JSON()), " [ 1, true ,null, false]", true," [ 1, true ,null, false]" );
+      ok &= testMatchDelete("Array with blanks", new Capture(new JSON()), " [ 1, true , null , false]", true, " [ 1, true , null , false]" );
 
       cout << endl;
       
@@ -617,9 +625,9 @@ assert(ok);
       ok &= testMatch("boolean", &boolean, "true", true, "true");
       ok &= testResult("boolean type", boolean.type() == Type::BOOLEAN);
       
-      ok &= testMatch("integer", &integer, "1", true, "1");
+      ok &= testMatch("integer", &integer, "10", true, "10");
       ok &= testResult("integer type", integer.type() == Type::INTEGER);
-      
+      assert(ok);
       ok &= testMatch("number", &number, "1.1", true, "1.1");
       ok &= testResult("number type", number.type() == Type::NUMBER);
 

@@ -35,12 +35,13 @@ namespace BeeFishJSON
    public:
       Undefined* _undefined;
       Null*      _null;
-      Boolean*  _boolean;
+      Boolean*   _boolean;
       //Integer*  _integer;
-      Number*   _number;
-      String*   _string;
+      Number*    _number;
+      Invoke*    _invokeNumber;
+      String*    _string;
       Array*     _array;
-      Object*   _object;
+      Object*    _object;
       
       Or*        _items;
       Type       _type = Type::UNKNOWN;
@@ -104,7 +105,7 @@ namespace BeeFishJSON
             invoke(_undefined, Type::UNDEFINED),
             invoke(_null, Type::NULL_),
             invoke(_boolean, Type::BOOLEAN),
-            invokeNumber(_number),
+            _invokeNumber = invokeNumber(_number),
             invoke(_string, Type::STRING),
             invoke(_array, Type::ARRAY),
             invoke(_object, Type::OBJECT)
@@ -165,18 +166,21 @@ namespace BeeFishJSON
       virtual void eof(Parser* parser)
       override {
  
-          if (!parser)
-             setup(parser);
+          setup(parser);
              
-          assert(_parser);
-          assert(_items);
           
           if (result() == nullopt &&
               type() == Type::UNKNOWN)
           {
-             _number->eof(parser);
-             //_integer->eof(parser);
+             
+             _invokeNumber->eof(parser);
+             
+             if (_invokeNumber->result() == true)
+                success();
+
           }
+          
+          Match::eof(parser);
           
 
       }

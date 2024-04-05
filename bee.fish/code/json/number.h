@@ -61,7 +61,7 @@ namespace BeeFishJSON {
             _exponentInteger
          );
          
-      Match* _number          =
+      Match* _number =
          new And(
             new Optional(_numberSign),
             _integer,
@@ -72,8 +72,28 @@ namespace BeeFishJSON {
    public:
       Number() : Match()
       {
-         _match = _number;
+         _match = new Capture(_number);
       }
+      
+      virtual void eof(Parser* parser)
+      {
+         setup(parser);
+         
+         if (result() != nullopt)
+            return;
+            
+         if (_integer->result() == nullopt)
+            _integer->eof(parser);
+         
+         if (_integer->result() == true)
+         {
+            success();
+            
+         }
+         Match::eof(parser);
+         
+      }
+      
       
       
    };
