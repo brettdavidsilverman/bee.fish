@@ -113,12 +113,6 @@ namespace BeeFishParser
                 _utf8.result() != nullopt)
             {
                _lastCharacter = _utf8.character();
-               /*
-               for (auto c : _lastCharacter)
-               {
-                  _match->capture(this, c);
-               }
-               */
                // utf8 character, perform match
                _match->match(this, _lastCharacter);
                // Reset the utf8 character
@@ -171,7 +165,7 @@ namespace BeeFishParser
                   << _charCount << " (char count)\t"
                   << Match::matchInstanceCount() << " (instances)\t" 
                   << time << " (milliseconds)\t"
-                  << _charCount / time * 100 << " (chars per second)" 
+                  << 100000.0 / (float)time << " (k chars per second)" 
                   << endl;
 
                start = now();
