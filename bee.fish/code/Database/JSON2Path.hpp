@@ -24,8 +24,25 @@ namespace BeeFishDatabase {
 
          cerr << "setVariable " << type << " " << value << endl;
          
-         Path path =
-            topPath()[type];
+         MinMaxPath path =
+            topPath();
+            
+            
+         bool isArrayContainer = topContainer();
+         if (isArrayContainer)
+         {
+             // Get next array index
+             Size& next = path.getData();
+         
+             if (!path.isDeadEnd())
+             {
+                ++next;
+             }
+         
+             path = path[next];
+         }
+         
+         path = path[type];
 
          switch (type)
          {
@@ -36,6 +53,11 @@ namespace BeeFishDatabase {
             case Type::BOOLEAN:
                path.setData<bool>(
                   (value == "true") ? true : false
+               );
+               break;
+            case Type::INTEGER:
+               path.setData(
+                  value
                );
                break;
             case Type::NUMBER:
@@ -55,34 +77,15 @@ namespace BeeFishDatabase {
                push_back_path(path);
                push_back_container(false);
                path.setData(Size(0));
-
                break;
             default:
                throw std::logic_error("JSON2Path");
          }
          
-         pop_back_path();
          
              
       }
 
-      virtual void setArrayVariable(Type type, const std::string& value = "")
-      {
-
-         MinMaxPath path =
-            topPath();
-            
-         Size& next = path.getData();
-
-         path = path[next++];
-         
-         push_back_path(path);
-         push_back_container(false);
-         
-         setVariable(type, value);
-         
-         
-      }
       
    public:
     
@@ -91,6 +94,7 @@ namespace BeeFishDatabase {
          _start(start)
       {
          push_back_path(_start);
+         push_back_container(false);
       }
       
       JSON2Path(Database& database) :
@@ -100,6 +104,8 @@ namespace BeeFishDatabase {
 
       virtual ~JSON2Path()
       {
+         pop_back_path();
+         cerr << "~JSON2Path: " << _pathStack.size() << endl;
       }
       
       Path topPath() {
@@ -164,49 +170,15 @@ namespace BeeFishDatabase {
       {
          cerr << "onbeginarray" << endl;
          
-         Path path =
-            topPath()[Type::ARRAY];
-            
-         path.setData(Size(0));
-         
-         push_back_path(
-            path
+         setVariable(
+            Type::ARRAY
          );
+         
+         
       }
 
       virtual void onarrayvalue(JSON* json) {
 
-         cerr << "onarrayvalue " ;
-
-         Type type = json->type();
-         
-         Path path = topPath();
-         
-         cerr << path._index << " ";
-         
-         Size& count = path.getData();
-         
-         cerr << "[" << count << "] = " << json->type() << " " << json->value() << endl;
-         
-         path = path[count++][type];
-         
-         if (type == Type::ARRAY || type == Type::OBJECT)
-         {
-            path.setData(Size(0));
-         }
-         else
-            path.setData(json->value());
-         
-         /*
-         push_back_path(path);
-         
-         setVariable(
-            json->type(),
-            json->value()
-         );
-         */
-            
-         
       }
 
       virtual void onendarray(JSON* match) {
@@ -234,21 +206,22 @@ namespace BeeFishDatabase {
             );
          
       }
-
+      
       virtual void onvalue(JSON* json)
       override
       {
-         cerr << "onvalue " << json->type() << " " << json->value() << endl;
-         
-         Type type = json->type();
-         const BString& value = json->value();
-         
-         
-         //if (_pathStack.size() == 1 && type != Type::ARRAY)
+          
+         if (json->type() != Type::ARRAY)
+         {
+            cerr << "onvalue " << json->type() << " " << json->value() << endl;
+           
             setVariable(
-               type,
-               value.str()
+               json->type(),
+               json->value()
             );
+            
+         }
+         
          
       }
                

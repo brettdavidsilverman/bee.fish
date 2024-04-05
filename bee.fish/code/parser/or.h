@@ -10,7 +10,6 @@ namespace BeeFishParser {
    public:
       vector<Match*> _inputs;
       Match* _item = nullptr;
-      size_t _index = 0;
       
    public:
 
@@ -31,12 +30,11 @@ namespace BeeFishParser {
       {
    
          bool matched = false;
-         _index = 0;
          
          for ( auto
                  it  = _inputs.begin();
                  it != _inputs.end();
-                ++_index, ++it
+                ++it
              )
          {
          
@@ -77,17 +75,11 @@ namespace BeeFishParser {
             return;
             
          bool matched = false;
-         _index = 0;
+         _item = nullptr;
          
-         for ( auto
-                 it  = _inputs.begin();
-                 it != _inputs.end();
-                ++_index, ++it
-             )
+         for ( auto item : _inputs)
          {
          
-            Match* item = *it;
-            
             if (item->result() == nullopt)
                item->eof(parser);
                
@@ -103,6 +95,8 @@ namespace BeeFishParser {
             success();
          else
             fail();
+            
+         Match::eof(parser);
             
       }
 
@@ -141,6 +135,12 @@ namespace BeeFishParser {
       virtual const Match& item() const
       {
          return *_item;
+      }
+      
+      virtual bool matched() const {
+         return
+            (_item &&
+            _item->result() == true);
       }
       
    };

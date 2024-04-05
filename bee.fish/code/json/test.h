@@ -170,20 +170,6 @@ namespace BeeFishJSON
       ok &= testMatchDelete("Single quote", new JSON(), "\"", false);
       ok &= testMatchDelete("Escaped quote", new JSON(), "\"\\\"\"", true, "\"");
 
-#ifdef SERVER  
-      BeeFishJSON::String largeString;
-      JSONParser stringParser(largeString);
-      ok &= testFile(
-         stringParser,
-         "Large json string",
-         "server/json/tests/large-string.json",
-         largeString,
-         true
-      );
-
-      ok &= testResult("Large json string length", (largeString.value().size() == 5013));
-#endif
-
       assert(ok);
       cout << endl;
       

@@ -40,9 +40,6 @@ namespace BeeFishJSON
       
       virtual void write(ostream& out, Size tabCount)
       {
-         cerr << "<" << _index << "> ";
-         
-         
          if (isDeadEnd())
             return;
        

@@ -1,10 +1,14 @@
 DATABASE=bee.fish/build/Database
+JSON=bee.fish/build/json
 
-all:	$(DATABASE)
-	cd Apache2/mod_database && sudo make $(DEBUG) install reload test
-
-$(DATABASE):
+all:	$(JSON) $(DATABASE)
+	
+$(JSON):
 	cd bee.fish && make $(DEBUG) test
+	
+$(DATABASE):
+	cd Apache2/mod_database && sudo make $(DEBUG) install reload test
+	
 	
 clean:
 	cd bee.fish && make clean

@@ -249,8 +249,11 @@ namespace BeeFishDatabase
 
          success &= (i == 10);
          outputSuccess(success);
+         
       }
 
+      assert(success);
+      
       if (success)
       {
          cout << "\tTesting string next" << flush;
@@ -390,6 +393,8 @@ namespace BeeFishDatabase
       BeeFishMisc::outputSuccess(success);
       
       // Test string
+      cout << "Test strings" << endl;
+      
       if (success)
       {
          Path path = root["string"];
@@ -426,7 +431,7 @@ namespace BeeFishDatabase
          BeeFishMisc::outputSuccess(success);
       }
       
-      // Test array
+      cout << "Test arrays" << endl;
       if (success)
       {
          Path path = root["array"];
@@ -459,48 +464,75 @@ namespace BeeFishDatabase
       }
       
       if (success) {
-         cout << "\tValue item 0 ";
+         cout << "\tType item 0 ";
          Path path = root["array"][Type::ARRAY][0];
          success = path.contains(Type::INTEGER);
          BeeFishMisc::outputSuccess(success);
       }
       
       if (success) {
-         cout << "\tValue 1: ";
+         cout << "\tValue item 0 ";
          Path path = root["array"][Type::ARRAY][0][Type::INTEGER];
-         cerr << path << endl;
          string value;
          path.getData(value);
-         cout << value;
          success = (value == "1");
          BeeFishMisc::outputSuccess(success);
       }
       
       if (success) {
+         cout << "\tItem 1 ";
          Path path = root["array"];
-         path = path[Type::ARRAY][0][Type::INTEGER];
-         string value;
+         path = path[Type::ARRAY];
+         success = path.contains(1);
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         cout << "\tType item 1 ";
+         Path path = root["array"][Type::ARRAY][1];
+         success = path.contains(Type::ARRAY);
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success) {
+         cout << "\tValue item 1 ";
+         Path path = root["array"];
+         success = path[Type::ARRAY][1][Type::ARRAY].isDeadEnd();
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      cout << "Test numbers" << endl;
+      if (success) {
+         cout << "\tInteger" << flush;
+         Path path = root["integer"];
+         JSON2Path parser(path);
+         parser.read("1234");
+         parser.eof();
+         success = parser.matched();
+         BeeFishMisc::outputSuccess(success);
+         assert(success);
+      }
+      
+      if (success)
+      {
+         cout << "\tInteger type" << endl;
+         Path path = root["integer"];
+         success = path.contains(Type::INTEGER);
+         BeeFishMisc::outputSuccess(success);
+      }
+      
+      if (success)
+      {
+         cout << "\tInteger value" << endl;
+         Path path = root["integer"][Type::INTEGER];
+         BString value;
          path.getData(value);
-         cout << "\tValue 1: " << value;
-         success = (value == "1");
-         BeeFishMisc::outputSuccess(success);
-      }
-      
-      if (success) {
-         cout << "\tSub Array: ";
-         Path path = root["array"];
-         success = path[Type::ARRAY].contains(1);
-         BeeFishMisc::outputSuccess(success);
-      }
-      
-      if (success) {
-         cout << "\tSub Array index: ";
-         Path path = root["array"];
-         success = path[Type::ARRAY][1].contains(Type::ARRAY);
+         success = (value == "1234");
          BeeFishMisc::outputSuccess(success);
       }
       
       BeeFishMisc::outputSuccess(success);
+      assert(success);
       
       return success;
    }
@@ -568,7 +600,6 @@ namespace BeeFishDatabase
       
       Database database;
       Path path = database;
-      JSON match;
       JSON2Path parser(database);
       parser.read("[[1]]");
       bool success = true;
@@ -630,17 +661,17 @@ namespace BeeFishDatabase
       }
       
       if (success) {
-         
+         cout << "\tInner array contains number" << endl;
          path = path[0];
-         success = path.contains(Type::NUMBER);
+         success = path.contains(Type::INTEGER);
          BeeFishMisc::outputSuccess(success);
       }
       
       if (success) {
-         Path valuePath =
-            path[Type::NUMBER];
+         cout << "\tInner array value" << endl;
+         path = path[Type::INTEGER];
          std::string value;
-         valuePath.getData(value);
+         path.getData(value);
          success = (value == "1");
          BeeFishMisc::outputSuccess(success);
       }
@@ -696,7 +727,7 @@ namespace BeeFishDatabase
       parser.eof();
       inputFile.close();
       
-      bool success = (parser.result() == true);
+      bool success = (parser.matched());
       
       if (success && expect)
       {

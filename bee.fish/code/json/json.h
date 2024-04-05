@@ -53,7 +53,7 @@ namespace BeeFishJSON
             match,
             [this, type](Match* match) {
                _type = type;
-               onvalue((JSON*)match);
+               //onvalue(this);
             }
          );
       }
@@ -72,15 +72,16 @@ namespace BeeFishJSON
                   _type = Type::NUMBER;
                else
                   _type = Type::INTEGER;
-               onvalue((JSON*)match);
+               //onvalue(this);
             }
          );
       }
       
    public:
-      virtual void onvalue(JSON* json)
-      {
-      }
+   
+   
+      // Defined in json-parser.h
+     // virtual void onvalue(JSON* json);
       
    public:
       JSON() : Match()
@@ -162,27 +163,6 @@ namespace BeeFishJSON
          return (JSONParser*)_parser;
       }
       
-      virtual void eof(Parser* parser)
-      override {
- 
-          setup(parser);
-             
-          
-          if (result() == nullopt &&
-              type() == Type::UNKNOWN)
-          {
-             
-             _invokeNumber->eof(parser);
-             
-             if (_invokeNumber->result() == true)
-                success();
-
-          }
-          
-          Match::eof(parser);
-          
-
-      }
    };
 
    

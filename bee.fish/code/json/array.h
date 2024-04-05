@@ -86,14 +86,7 @@ namespace BeeFishJSON {
          assert(json);
          onarrayvalue(json);
       }
-      /*
-      virtual ArrayValue* createItem() {
-         ArrayValue* arrayValue = new ArrayValue();
-         if (_parser)
-            arrayValue->setup(_parser);
-         return arrayValue;
-      }
-      */
+      
 
    };
     
