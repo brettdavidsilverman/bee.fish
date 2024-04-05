@@ -8,7 +8,7 @@ install:
 
 test:
 	-  mkdir build
-	cd code && make test
+	cd code && make $(DEBUG) test
 
 id:
 	- mkdir build
