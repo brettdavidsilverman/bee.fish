@@ -34,7 +34,7 @@ namespace BeeFishJSON
       
    class BlankSpace : public Repeat<BlankSpaceCharacter> {
    public:
-      BlankSpace() : Repeat<BlankSpaceCharacter>() {
+      BlankSpace(size_t minimum = 1) : Repeat<BlankSpaceCharacter>(minimum) {
 
       }
    };

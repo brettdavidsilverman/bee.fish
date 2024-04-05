@@ -25,9 +25,9 @@ namespace BeeFishJSON {
    class ObjectOpenBrace : public And {
    public:
       ObjectOpenBrace() : And(
-         new Optional(new BlankSpace()),
+         new BlankSpace(0),
          new BeeFishParser::Character('{'),
-         new Optional(new BlankSpace())
+         new BlankSpace(0)
       )
       {
 
@@ -38,25 +38,36 @@ namespace BeeFishJSON {
    class ObjectCloseBrace : public And {
    public:
       ObjectCloseBrace() : And(
-         new Optional(new BlankSpace()),
-         new BeeFishParser::Character('}') 
+         new BlankSpace(0),
+         new Character('}') 
       )
       {
 
       }
    };
 
-   class ObjectFieldSeperator: public BeeFishParser::Character {
+   class ObjectFieldSeperator: public And
+   {
    public:
-      ObjectFieldSeperator() : Character(',') {
+      ObjectFieldSeperator() : And(
+         new BlankSpace(0),
+         new Character(','),
+         new BlankSpace(0)
+      )
+      {
 
       }
    };
 
-   class ObjectKeyValueSeperator : public BeeFishParser::Character {
+   class ObjectKeyValueSeperator : public And {
 
    public:
-      ObjectKeyValueSeperator() : Character(':') {
+      ObjectKeyValueSeperator() : And(
+         new BlankSpace(0),
+         new Character(':'),
+         new BlankSpace(0)
+      )
+      {
 
       }
    };

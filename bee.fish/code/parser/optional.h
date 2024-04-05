@@ -55,7 +55,14 @@ namespace BeeFishParser {
 
          return matched;
       }
-   
+      
+      virtual void eof(Parser* parser)
+      {
+         
+         if (result() == nullopt) {
+            success();
+         }
+      }
    };
 
 

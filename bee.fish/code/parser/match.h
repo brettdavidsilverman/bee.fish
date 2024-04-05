@@ -164,18 +164,7 @@ namespace BeeFishParser {
       
       // Defined in parser.h
       virtual const Char& character() const;
-/*
-      virtual void capture(Parser* parser, char c)
-      {
-         setup(parser);
-            
-         if (_match)
-         {
-            _match->capture(parser, c);
-         }
-      }
-      */
-      
+
       virtual void eof(Parser* parser) 
       {
 

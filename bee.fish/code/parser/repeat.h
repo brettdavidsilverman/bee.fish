@@ -93,33 +93,22 @@ namespace BeeFishParser
                
             return item;
 		}
-        /*
-        virtual void capture(Parser* parser, char c)
-        override
-        {
-           //cerr << "[" << c << "]" << flush;
-           
-           setup(parser);
-           
-           if (_item == nullptr)
-              _item = createItem();
-                
-           Match::capture(parser, c);
-           
-           //if (_item->result() == nullopt)
-              _item->capture(parser, c);
-        }
-*/
+        
         virtual void eof(Parser* parser) {
           
            setup(parser);
+           
+           if (_item && _item->result() == nullopt)
+              _item->eof(parser);
            
            if (result() == nullopt)
            {
               if (_matchedCount >= _minimum &&
                   (_matchedCount <= _maximum ||
                    _maximum == 0))
+              {
                  success();
+              }
               else
                  fail();
            }

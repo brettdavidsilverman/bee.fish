@@ -7,12 +7,12 @@ DEPS=main.cpp json.h string.h number.h array.h object.h boolean.h null.h blank-s
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
 	
-test:	$(OUTPUT)
+test:	$(OUTPUT) $(BUILD)/parser
 	$(BUILD)/parser -test
 	$(OUTPUT) -test
 	
 $(BUILD)/parser:
-	cd ../parser && make clean $(DEBUG)
+	cd ../parser && make $(DEBUG) test
 
 debug:	clean
 debug:	DEBUG = debug
@@ -37,6 +37,7 @@ trace:	$(OUTPUT)
 
 clean:
 	rm -f $(OUTPUT)
+	rm -f $(BUILD)/parser
 	rm -f *.o
 	rm -f a.out
 	rm -f json

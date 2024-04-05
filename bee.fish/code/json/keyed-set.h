@@ -97,11 +97,9 @@ namespace BeeFishJSON
       }
 
       virtual void onkey(Key* key) {
-          cerr << "KeyedSet::onkey(" << key->value() << ")" << endl;
       }
     
       virtual void onkeyvalue(Key* key, Value* value) {
-         cerr << "KeyedSet::onkeyvalue(" << key->value() << ", " << value->value() << ")" << endl;
       }
       
       

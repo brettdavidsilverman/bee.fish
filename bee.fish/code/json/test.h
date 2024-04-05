@@ -14,7 +14,7 @@ namespace BeeFishJSON
    
    inline bool test();
 
-
+   inline bool testBlankSpace();
    inline bool testIntrinsics();
    inline bool testNumbers(); 
    inline bool testStrings();
@@ -35,6 +35,7 @@ namespace BeeFishJSON
       
       bool ok = true;
 
+      ok = ok && testBlankSpace();
       ok = ok && testIntrinsics();
       ok = ok && testNumbers();
       ok = ok && testStrings();
@@ -53,6 +54,22 @@ namespace BeeFishJSON
       else
          cout << "FAIL" << endl;
          
+      BeeFishMisc::outputSuccess(ok);
+      
+      return ok;
+   }
+   
+   inline bool testBlankSpace()
+   {
+      cout << "Blank space" << endl;
+      bool ok = true;
+     
+      ok &= testMatchDelete("Blank space 1", new Capture(new BlankSpace(1)), " ", true, " ");
+      ok &= testMatchDelete("Blank space 2", new Capture(new BlankSpace(1)), "  ", true, "  ");
+      ok &= testMatchDelete("Blank space optional 1", new Capture(new BlankSpace(0)), " ", true, " ");
+      ok &= testMatchDelete("Blank space optional 2", new Capture(new BlankSpace(0)), "", true, "");
+      
+      
       BeeFishMisc::outputSuccess(ok);
       
       return ok;
