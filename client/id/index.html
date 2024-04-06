@@ -16,7 +16,13 @@
    <body>
       <script src="/body.js"></script>
       <h1>Id</h1>
+      <h2 id="version"></h2>
+      
       <a href="id.js">id.js</a>
+      
+      <script>
+document.getElementById("version").innerText ="Version: " + Id.version;
+      </script>
       
       <h2>Usage</h2>
       <p>Create a new Id and write out its milliseconds
@@ -43,30 +49,25 @@ var id2 = Id.fromKey(id.key);
          <button onclick="createId()" type="button">New</button>
          <br />
          <label for="key">Key</label>
-         <br />
          <textarea id="key" rows="3" cols="40"></textarea>
          <br />
          <button onclick="loadDataFromKey()" type="button">Ok</button>
          <br />
-         Base 64
+         <label for="base64">Base 64</label>
          <textarea id="base64" rows="3" cols="40"></textarea>
          <br />
          <button onclick="loadDataFromBase64()" type="button">Ok</button>
          <br />
-         Name
-         <br />
+         <label for="name">Name</label>
          <input type="text" id="name"></input>
          <br />
-         Seconds
-         <br />
+         <label for="seconds">Seconds</label>
          <input type="text" id="seconds"></input>
          <br />
-         Milliseconds
-         <br />
+         <label for="milliseconds">Milliseconds</label>
          <input type="text" id="milliseconds"></input>
          <br />
-         Increment
-         <br />
+         <label for="increment">Increment</label>
          <input type="text" id="increment"></input>
          <br />
          <button onclick="loadKey()" type="button">Ok</button>
@@ -114,7 +115,7 @@ function loadDataFromBase64()
    var key = document.getElementById("base64").value;
    
    id = new Id({key});
-   alert(id.name);
+
    loadData(id);
    
 }
@@ -142,9 +143,10 @@ function loadData(id) {
    
 }
 
-function createId()
+function createId(name)
 {
-   var name = prompt("name");
+   if (name == undefined)
+      name = prompt("name", document.getElementById("name").value);
    
    if (name == null)
       return;
@@ -154,7 +156,7 @@ function createId()
    loadData(id);
 }
 
-createId();
+createId("Id");
          </script>
       </form>
 

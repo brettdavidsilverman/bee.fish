@@ -1,5 +1,6 @@
 class Id {
  
+   static version = "Id-v0.0.1-client";
    
    // Creates a value that is
    // guaranteed to be unique
@@ -11,7 +12,8 @@ class Id {
    // The increment is reset when
    // the milliseconds ticks over
    constructor(input) {
-   
+      
+      
       this.seconds = undefined;
       this.milliseconds = undefined;
       this.increment  = undefined;
