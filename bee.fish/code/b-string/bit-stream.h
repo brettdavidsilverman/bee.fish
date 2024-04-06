@@ -58,7 +58,7 @@ namespace BeeFishBString {
 
          reserve(_size * 8);
 
-         long int count = 0;
+         ssize_t count = 0;
 
          for (size_t byteIndex = 0; byteIndex < _size; ++byteIndex) {
 
@@ -111,7 +111,6 @@ namespace BeeFishBString {
             {
                Byte byte =
                   bits.to_ulong();
-                  
                bytes.push_back(byte);
                bits = 0;
                bitCount = 0;
@@ -162,8 +161,6 @@ namespace BeeFishBString {
             
          bool bit = *_it;
          
-         //PowerEncoding::();
-
          return bit;
       }
 
