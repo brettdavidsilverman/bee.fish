@@ -61,9 +61,6 @@ var id2 = Id.fromKey(id.key);
          <label for="name">Name</label>
          <input type="text" id="name"></input>
          <br />
-         <label for="seconds">Seconds</label>
-         <input type="text" id="seconds"></input>
-         <br />
          <label for="milliseconds">Milliseconds</label>
          <input type="text" id="milliseconds"></input>
          <br />
@@ -76,8 +73,6 @@ function loadKey()
 {
    var name =
       document.getElementById("name").value;
-   var seconds =
-      document.getElementById("seconds").value;
    var milliseconds =
       document.getElementById("milliseconds").value;
    var increment =
@@ -86,7 +81,6 @@ function loadKey()
    var data =
    {
       name: name,
-      seconds: Number(seconds),
       milliseconds: Number(milliseconds),
       increment: Number(increment)
    }
@@ -94,15 +88,15 @@ function loadKey()
    id = new Id(data);
       
    document.getElementById("key").value =
-      atob(id.key);
+      id.key;
       
    document.getElementById("base64").value =
-      id.key;
+      btoa(id.key);
 }
 
 function loadDataFromKey()
 {
-   var key = btoa(document.getElementById("key").value);
+   var key = document.getElementById("key").value;
    
    id = new Id({key});
    
@@ -112,7 +106,7 @@ function loadDataFromKey()
 
 function loadDataFromBase64()
 {
-   var key = document.getElementById("base64").value;
+   var key = atob(document.getElementById("base64").value);
    
    id = new Id({key});
 
@@ -123,13 +117,10 @@ function loadDataFromBase64()
 function loadData(id) {
     
    document.getElementById("key").value =
-      atob(id.key);
+      id.key;
       
    document.getElementById("name").value =
       id.name;
-      
-   document.getElementById("seconds").value =
-      id.seconds;
 
    document.getElementById("milliseconds").value =
       id.milliseconds;
@@ -138,7 +129,7 @@ function loadData(id) {
       id.increment;
       
    document.getElementById("base64").value =
-      id.key;
+      btoa(id.key);
       
    
 }
@@ -195,7 +186,6 @@ var id4 =
    new Id(
       {
          name: id.name,
-         seconds: id.seconds,
          milliseconds: id.milliseconds,
          increment: id.increment
       }

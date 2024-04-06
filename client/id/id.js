@@ -1,6 +1,6 @@
 class Id {
  
-   static version = "Id-v0.0.1-client";
+   static version = "Id-v0.0.2-client";
    
    // Creates a value that is
    // guaranteed to be unique
@@ -14,7 +14,6 @@ class Id {
    constructor(input) {
       
       
-      this.seconds = undefined;
       this.milliseconds = undefined;
       this.increment  = undefined;
       this.key  = undefined;
@@ -23,13 +22,11 @@ class Id {
       Object.assign(this, input);
 
       if ( this.key &&
-             ( this.seconds == undefined ||
-               this.milliseconds == undefined ||
+             ( this.milliseconds == undefined ||
                this.increment  == undefined ||
                this.name == undefined ) )
          this._decodeKey();
-      else if ( this.seconds == undefined || 
-                this.milliseconds == undefined ||
+      else if ( this.milliseconds == undefined ||
                 this.increment == undefined )
          this._createTimestamp();
       
@@ -77,22 +74,15 @@ class Id {
    _createTimestamp() {
       // create a new timestamp
       var time = Date.now();
-      var seconds = Math.floor(time / 1000);
-      var milliseconds = time % 1000;
+      var milliseconds = time;
       
-      if (seconds <= Id.seconds)
-         ++Id.increment;
-      else if (seconds > Id.seconds)
-         Id.increment = 0;
-      else if (milliseconds <= Id.milliseconds)
+      if (milliseconds <= Id.milliseconds)
          ++Id.increment;
       else
          Id.increment = 0;
             
-      Id.seconds = seconds;
       Id.milliseconds = milliseconds;
 
-      this.seconds = seconds;
       this.milliseconds = milliseconds;
       this.increment = Id.increment;
 
@@ -101,8 +91,7 @@ class Id {
    _encodeKey()
    {
 
-      if ( this.seconds == undefined ||
-           this.milliseconds == undefined ||
+      if ( this.milliseconds == undefined ||
            this.increment == undefined )
          this._createTimestamp();
          
@@ -117,9 +106,6 @@ class Id {
 
       this.name.encode(stream);
       
-      // encode seconds
-      this.seconds.encode(stream);
-
       // encode milliseconds
       this.milliseconds.encode(stream);
       
@@ -131,7 +117,7 @@ class Id {
       
       var data = stream.toString();
       
-      var key = btoa(data);
+      var key = data;
       
       Object.defineProperty(
          this, 
@@ -157,7 +143,7 @@ class Id {
       
       // extract the name and timestamp
       // from the key
-      var data = atob(this.key);
+      var data = this.key;
       
       var stream = new PowerEncoding(
          data
@@ -172,8 +158,6 @@ class Id {
       this.name = String.decode(stream);
 
       // read the time
-      this.seconds = Number.decode(stream);
-
       this.milliseconds = Number.decode(stream);
       
       // read the incrementrement
@@ -223,7 +207,6 @@ class Id {
    toJSON() {
       return {
          name: this.name,
-         seconds: this.seconds,
          milliseconds: this.milliseconds,
          increment: this.increment
       }
@@ -304,7 +287,6 @@ class Id {
       var bool =
          (
             (this.name == id.name) &&
-            (this.seconds = id.seconds) &&
             (this.milliseconds == id.milliseconds) &&
             (this.increment == id.increment)
            
@@ -317,7 +299,6 @@ class Id {
    
 }
 
-Id.seconds = Math.floor(Date.now() / 1000);
-Id.milliseconds = Date.now() % 1000;
+Id.milliseconds = Date.now();
 Id.increment = 0;
 Id.types = new Map();
