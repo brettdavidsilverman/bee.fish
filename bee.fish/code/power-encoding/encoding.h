@@ -52,7 +52,7 @@ namespace BeeFishPowerEncoding
       
       output.writeBit(1);
 
-      for (const int character : string)
+      for (char character : string)
       {
          output << character;
       }
