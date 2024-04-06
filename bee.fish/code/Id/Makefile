@@ -18,6 +18,12 @@ debug:	$(OUTPUT)
 run:	$(OUTPUT)
 	$(OUTPUT)
 
+run_key:	$(OUTPUT)
+	$(OUTPUT) -key
+	
+run_debug:	$(OUTPUT)
+	gdb --args $(OUTPUT) -test
+	
 clean:
 	rm -f $(OUTPUT)
 	rm -f test.txt

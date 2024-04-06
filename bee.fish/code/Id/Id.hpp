@@ -196,7 +196,7 @@ namespace BeeFishId
          BeeFishScript::Object output;
          
          output["name"] = _name;
-         output["epoch ms"] =
+         output["milliseconds"] =
             _timestamp.epochMilliseconds();
          output["increment"] = (BeeFishScript::Number)_timestamp._increment;
 
@@ -213,7 +213,7 @@ namespace BeeFishId
       {
          // encode timestamp
          stream.writeBit(1);
-         
+
          stream
             << _name
             << _timestamp._milliseconds
@@ -263,7 +263,7 @@ namespace BeeFishId
          if (read) {
             
             stream >> name;
-         
+
             // read milliseconds
             stream >> milliseconds;
          
