@@ -77,7 +77,7 @@ namespace BeeFishMisc {
          break;
       default:
          {
-            if ((uint16_t)c <= 0x001F) {
+            if (false && (uint16_t)c <= 0x001F) {
                std::stringstream stream;
                // Control chars
                stream << "\\u" 
