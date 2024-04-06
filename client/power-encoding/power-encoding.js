@@ -8,7 +8,7 @@ class PowerEncoding extends Stream {
    
    //           x
    //          / \
-   // x === 5^n + r
+   // x === 2^n + r
    //
    // repeat for n (exponent)
    // and r (remainder)
@@ -26,18 +26,18 @@ class PowerEncoding extends Stream {
          return this;
       }
 
-      // (presuming base 5)...
+      // (presuming base 2)...
       //
       // Define 1 as...
       //
       //            1
       //           / \
-      // One is 5^0 + 0
+      // One is 2^0 + 0
   
       
-      // So 5 is...
+      // So 2 is...
       //
-      //     5
+      //     1
       //    / \
       //   1   0
       //  /\  
@@ -135,7 +135,12 @@ String.prototype.encode = function(encoding)
    
    for (var i = 0; i < this.length; ++i)
    {
-      this.charCodeAt(i).encode(encoding);
+      var charCode = this.charCodeAt(i);
+      var byte1 = charCode >> 8;
+      var byte2 = charCode & 0x00FF;
+      alert([byte1, byte2]);
+      byte1.encode(encoding);
+      byte2.encode(encoding);
    }
    
    encoding.write("0");
@@ -152,7 +157,9 @@ String.decode = function(encoding)
    
    while (encoding.peek() == "1")
    {
-      var charCode = Number.decode(encoding);
+      var byte1 = Number.decode(encoding);
+      var byte2 = Number.decode(encoding);
+      var charCode = (byte1 << 8) + byte2;
       string += String.fromCharCode(charCode);
    }
    
