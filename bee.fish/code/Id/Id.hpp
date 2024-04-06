@@ -25,29 +25,29 @@ namespace BeeFishId
    class Timestamp
    {
    public:
-      unsigned long _nanoseconds;
+      unsigned long _milliseconds;
       unsigned long _increment;
 
       Timestamp() :
-         _nanoseconds(nanoseconds()),
-         _increment(increment(_nanoseconds))
+         _milliseconds(milliseconds()),
+         _increment(increment(_milliseconds))
       {
       }
          
       Timestamp(
-         unsigned long nanoseconds,
+         unsigned long milliseconds,
          unsigned long increment
       )
       {
-         _nanoseconds = nanoseconds;
+         _milliseconds = milliseconds;
          _increment = increment;
       }
          
-      static unsigned long nanoseconds()
+      static unsigned long milliseconds()
       {
          unsigned long now =
             std::chrono::duration_cast
-               <std::chrono::nanoseconds>
+               <std::chrono::milliseconds>
                (
                   std::chrono::system_clock
                      ::now()
@@ -57,31 +57,31 @@ namespace BeeFishId
       }
       
       static std::string epoch() {
-         unsigned long nanoseconds = Timestamp::nanoseconds();
-         return Timestamp::formatEpochNanoseconds(
-            nanoseconds
+         unsigned long milliseconds = Timestamp::milliseconds();
+         return Timestamp::formatEpochMilliseconds(
+            milliseconds
          );
       }
 
-      static std::string formatEpochNanoseconds(
-         unsigned long nanoseconds
+      static std::string formatEpochMilliseconds(
+         unsigned long milliseconds
       ) {
          std::stringstream stream;
-         stream << nanoseconds;
+         stream << milliseconds;
          return stream.str();
       }
 
-      std::string epochNanoseconds() {
-         return Timestamp::formatEpochNanoseconds(
-            _nanoseconds
+      std::string epochMilliseconds() {
+         return Timestamp::formatEpochMilliseconds(
+            _milliseconds
          );
       }
 
    private:
 
-      static unsigned long& lastNanoseconds() {
-         static unsigned long _lastNanoseconds = 0;
-         return _lastNanoseconds;
+      static unsigned long& lastMilliseconds() {
+         static unsigned long _lastMilliseconds = 0;
+         return _lastMilliseconds;
       }
       
       static unsigned long& lastIncrement() {
@@ -90,18 +90,18 @@ namespace BeeFishId
       }
          
       static unsigned long increment(
-         unsigned long nanoseconds
+         unsigned long milliseconds
       )
       {
-         unsigned long& _lastNanoseconds = lastNanoseconds();
+         unsigned long& _lastMilliseconds = lastMilliseconds();
          unsigned long& _lastIncrement = lastIncrement();
 
-         if (nanoseconds <= _lastNanoseconds)
+         if (milliseconds <= _lastMilliseconds)
             ++_lastIncrement;
          else
             _lastIncrement = 0;
 
-         _lastNanoseconds = nanoseconds;
+         _lastMilliseconds = milliseconds;
             
          return _lastIncrement;
       }
@@ -133,11 +133,11 @@ namespace BeeFishId
 
       Id(
          const std::string& name,
-         unsigned long nanoseconds,
+         unsigned long milliseconds,
          unsigned int increment
       ) :
          _name(name),
-         _timestamp(nanoseconds, increment)
+         _timestamp(milliseconds, increment)
       {
       }
       
@@ -196,8 +196,8 @@ namespace BeeFishId
          BeeFishScript::Object output;
          
          output["name"] = _name;
-         output["epoch ns"] =
-            _timestamp.epochNanoseconds();
+         output["epoch ms"] =
+            _timestamp.epochMilliseconds();
          output["increment"] = (BeeFishScript::Number)_timestamp._increment;
 
          stringstream stream;
@@ -216,7 +216,7 @@ namespace BeeFishId
          
          stream
             << _name
-            << _timestamp._nanoseconds
+            << _timestamp._milliseconds
             << _timestamp._increment;
          
          stream.writeBit(0);
@@ -235,9 +235,9 @@ namespace BeeFishId
             throw logic_error("Id::createKey");
 
          // get the data
-         Data key = stream.toData();
+         Data data = stream.toData();
 
-         return key.toBase64();
+         return data.toBase64();
       }
       
       static Id decodeKey(const std::string& key) {
@@ -257,7 +257,7 @@ namespace BeeFishId
             (stream.readBit() == 1);
          
          std::string name;
-         unsigned long nanoseconds;
+         unsigned long milliseconds;
          unsigned long increment;
          
          if (read) {
@@ -265,7 +265,7 @@ namespace BeeFishId
             stream >> name;
          
             // read milliseconds
-            stream >> nanoseconds;
+            stream >> milliseconds;
          
             // read increment
             stream >> increment;
@@ -279,7 +279,7 @@ namespace BeeFishId
          if (!read || stream._count != 0)
             throw runtime_error("Invalid key");
 
-         Id id(name, nanoseconds, increment);
+         Id id(name, milliseconds, increment);
          id._key = key;
          
          return id;
@@ -287,11 +287,7 @@ namespace BeeFishId
       
 
    };
-   
-   //unsigned long Timestamp::_lastMs = 0;
-   //unsigned long Timestamp::_lastInc = 0;
 
- 
 }
 
 #endif

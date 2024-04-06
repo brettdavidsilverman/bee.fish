@@ -199,6 +199,10 @@ namespace BeeFishBString {
       const char* c_str() const {
          return (const char*) _data;
       }
+      
+      std::string bstr() const {
+         return BString(data(), size());//(size_t)ceil(size() / 8.0));
+      }
 
       virtual size_t size() const {
          return _size;

@@ -6,7 +6,7 @@ all:	$(JSON) $(MOD_DATABASE) Makefile
 $(JSON):
 	cd bee.fish && make $(DEBUG) test
 	
-$(MOD_DATABASE):
+$(MOD_DATABASE):	clean
 	cd Apache2/mod_database && sudo make $(DEBUG) install reload test
 	
 test:	all
@@ -14,7 +14,7 @@ test:	all
 	cd Apache2/mod_database && sudo make install reload test
 	
 clean:
-	cd bee.fish && make clean
+	#cd bee.fish && make clean
 	cd Apache2/mod_database && sudo make clean
 	
 stop:

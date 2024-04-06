@@ -145,6 +145,8 @@ namespace BeeFishBString
 
       return bstring;
    }
+   
+   
 }
 
 #endif

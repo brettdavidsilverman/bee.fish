@@ -33,9 +33,7 @@ namespace BeeFishId
       
       bool ok = true;
       
-      Id id = Id::fromKey("/jHiY+MeJxPjHicR+J4cnD4nhyY+J4ck+J4cj4nhxk+J4cT4nhw+J4ZPieGPieE+J4PicnD4nJj4nJPicj4nGT4nE+Jw+Jj4j4cnGT4cnGPhycT4cnD4cmT4cmPhxk+HGPhxPhk+GPJxk8nGPJxPJk8mPJPIQA==");
-      
-      ///jHiY+MeJxPjHicR+J4cnD4nhyY+J4ck+J4cj4nhxk+J4cT4nhw+J4ZPieGPieE+J4PicnD4nJj4nJPicj4nE+Jw+Jk+JPiPhycY+HJxPhyc");
+      Id id = Id::fromKey("/jHiY+MeJxPjHicR+J4Y+J4T4nJw+JyY+JyPicY+JxPiPhycY+HJxPhyY+HI+HE+GT4TycZPJw8Tk4mA");
 
       ok &= testResult(
          "Id from key",
@@ -51,6 +49,8 @@ namespace BeeFishId
    {
       ofstream ofile("test.txt");
       vector<Id> array(1000);
+      map<std::string, int> map;
+      
       for (Id& id : array)
       {
          cout << id.key() << endl;
@@ -64,19 +64,29 @@ namespace BeeFishId
 
       ifstream ifile("test.txt");
       string key;
+      bool duplicates = false;
+      
       for (;;) {
          getline(ifile, key);
          if (key == "")
             break;
+         if (map.count(key) == 0)
+            map[key] = 1;
+         else {
+            map[key]++;
+            cout << "Duplicate key" << endl;
+            duplicates = true;
+         }
+         
          Id id = Id::fromKey(key);
          cout << id.toString() << endl;
       }
 
       ifile.close();
       
-      remove("test.txt");
+      //remove("test.txt");
       
-      return true;
+      return !duplicates;
    
    }
    

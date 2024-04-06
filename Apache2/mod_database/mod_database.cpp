@@ -43,7 +43,7 @@
 #include "http_config.h"
 #include "http_protocol.h"
 #include "ap_config.h"
-
+#include "Id/Id.hpp"
 #include "Database/Database.hpp"
 #include "parser/parser.h"
 #include "ParseURI.hpp"
@@ -62,6 +62,8 @@ static int counter = 0;
 static bool inputJSON(Path path, request_rec *r);
 static bool outputJSON(Path path, request_rec *r);
 static bool outputDocument(Path path, request_rec *r);
+static bool outputId(request_rec *r);
+
 static Debug debug;
 static mutex _mutex;
 
@@ -94,12 +96,21 @@ static int database_handler(request_rec *r)
     
     if (!strcmp(r->method, "GET"))
     {
-        if (strcmp(r->uri, "/index.xhtml") == 0 ||
+        if (strcmp(r->uri, "/index.xhtml")    == 0 ||
             strcmp(r->uri, "/NotFound.xhtml") == 0 ||
-            strcmp(r->uri, "/error.js") == 0) {
-           
+            strcmp(r->uri, "/error.js")       == 0 ||
+            strcmp(r->uri, "/id.xhtml")       == 0)
+        {
            return DECLINED;
         }
+        else if (strcmp(r->uri, "/id") == 0)
+        {
+           if (!outputId(r))
+              return HTTP_INTERNAL_SERVER_ERROR;
+           else
+              return OK;
+        }
+        
         else if (path.contains("document") &&
                  path.contains("index"))
         {
@@ -136,7 +147,23 @@ static int database_handler(request_rec *r)
     return HTTP_INTERNAL_SERVER_ERROR;
 }
 
-static bool outputJSON(Path path, request_rec *r)
+static bool outputId(request_rec *r)
+{
+   ap_set_content_type(
+      r, "application/json; charset=utf-8"
+   );
+   BeeFishId::Id id("🐝");
+   
+   ApacheStream stream(r);
+   stream << "\"" << id.key() << "\"";
+   stream.flush();
+   
+   return true;
+   
+}
+
+
+bool outputJSON(Path path, request_rec *r)
 {
    ap_set_content_type(
       r, "application/json; charset=utf-8"

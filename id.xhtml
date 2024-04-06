@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+   <head>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title>bee.fish id</title>
+      <script src="/error.js"/>
+   </head>
+   <body>
+      <h1 id="h1">bee.fish id</h1>
+      <form onsubmit="return false;">
+         <button onclick="getIds()">Get Ids</button>
+         <pre id="ids"></pre>
+      </form>
+      <script>
+
+var ids = document.getElementById("ids");
+
+function getIds()
+{
+    var count = prompt("Count", 10);
+    
+    if (!count)
+       return;
+       
+    var i = 1;
+    for (;;)
+    {
+       getId().then(
+          function(id) {
+             ids.innerText += id + "\r\n";
+          }
+       );
+       
+       i = i + 1;
+       
+       if (i > count)
+          break;
+    }
+    
+}
+
+function getId() {
+    
+   var response =
+      fetch(
+         "/id"
+      ).then(
+         function (response) {
+            return response.json();
+         }
+      ).then(
+         function (json) {
+            return atob(json);
+         }
+      ).catch(
+         function(error) {
+            alert(error);
+         }
+      );
+
+   return response;
+}
+
+
+
+      </script>
+   </body>
+</html>

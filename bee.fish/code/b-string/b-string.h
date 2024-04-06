@@ -385,7 +385,7 @@ namespace BeeFishBString
          std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
          return myconv.from_bytes(*this);
       }
-
+      
       // convert wstring to UTF-8 string
       static BString wstring_to_utf8 (const std::wstring& str)
       {
