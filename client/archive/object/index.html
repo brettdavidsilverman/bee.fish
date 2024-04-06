@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="/head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <script src="../stream/stream.js"></script>
+      <script src="../power-encoding/power-encoding.js"></script>
+      <script src="../id/id.js"></script>
+      <script src="../pointer/pointer.js"></script>
+      <script src="../shorthand/shorthand.js"></script>
+      <script src="object.js"></script>
+  
+      <script src="../storage/storage.js"></script>
+      <script src="../memory/memory.js"></script>
+      <script src="../function/function.js"></script>
+      <link rel="stylesheet" type="text/css" href="/style.css" />
+      <link rel="stylesheet" type="text/css" href="../style.css" />
+      <title>Object</title>
+   </head>
+   <body>
+      <script src="/body.js"></script>
+      <h1>Object</h1>
+      <a href="object.js">object.js</a>
+
+      <h2>Constructor</h2>
+      <pre>
+         <script>
+class A  {
+
+   constructor(input) {
+      this["="];
+      Object.assign(this, input);
+   }
+   
+   a() {
+      return "a";
+   }
+}
+
+
+var input = {
+   hello: "world",
+   obj : {hello: "world2"}
+}
+
+var a = new A(input);
+
+document.writeln(a);
+
+         </script>
+      </pre>
+
+      <h2>Pointers</h2>
+      
+      <p>Properties that are objects get converted
+      to Pointers.</p>
+      
+      <p>This can also resolve circular references.</p>
+      
+      <pre>
+         <script>
+
+var start = new A();
+var end = new A();
+start.end = end;
+end.start = start;
+
+document.writeln(start);
+         </script>
+      </pre>
+      
+      <h2>Full shorthand</h2>
+      
+      <p>This mode is used for getting
+         the string values of singular
+         objects.</p>
+         
+      <p>This short hand mode doesn't
+         trigger the "fetch on demand"
+         properties.</p>
+         
+      <pre>
+         <script>
+document.writeln(
+   start.toString(Shorthand.FULL)
+);
+         </script>
+      </pre>
+      
+      <h2>Functions</h2>
+      
+      <p>Used for serializing functions</p>
+      
+      <pre id="function">
+         <script>
+var obj = {
+   a: "A",
+   f: function() {
+      alert(this.a);
+   }
+}
+
+writeln(
+   "function",
+   obj.toString(Shorthand.COMPUTER)
+);
+
+         </script>
+      </pre>
+      
+      <h2>Computer shorthand</h2>
+      
+      <p>Used for storing the object</p>
+      
+      <pre id="computer">
+         <script>
+writeln(
+   "computer",
+   start.toString(Shorthand.COMPUTER)
+)
+         </script>
+      </pre>
+
+      
+   </body>
+</html>

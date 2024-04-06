@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="/head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <link rel="stylesheet" type="text/css" href="/style.css" />
+      <title>Javascript parser</title>
+      <script src="/power-encoding/bit-string/bit-string.js"></script>
+      <script src="/power-encoding/stream/stream.js"></script>
+      <script src="/power-encoding/number/uint8/uint8.js"></script>
+      <script src="/power-encoding/number/uint16/uint16.js"></script>
+      <script src="/power-encoding/number/uint/uint.js"></script>
+      <script src="/power-encoding/number/number.js"></script>
+      <script src="/power-encoding/string/string.js"></script>
+      <script src="/short-hand/short-hand.js"></script>
+      <script src="/id/id.js"></script>
+      <script src="/pointer/pointer.js"></script>
+      <script src="/object/object.js"></script>
+      <script src="/memory/memory.js"></script>
+      <script src="/function/function.js"></script>
+      <script src="/array/array.js"></script>
+      <script src="/typed-array/typed-array.js"></script>
+      <script src="/image/image.js"></script>
+      <script src="/console/console.js"></script>
+      <style>
+pre {
+   color: red;
+}
+
+.highlight {
+   color: blue;
+}
+      </style>
+   </head>
+   <body>
+      <script src="/body.js"></script>
+      <h1>Javascript Parser</h1>
+
+      <h2>Match</h2>
+      
+      <details>
+      
+         <summary>
+A generic class for matching 
+characters from an input stream.
+         </summary>
+      
+         <pre>
+            <script class="export">
+class Match {
+   #success = undefined;
+   #value = "";
+   #inputs;
+   
+   constructor(...inputs) {
+      this.#inputs = inputs;
+   }
+   
+   match(character) {
+      this.#value += character;
+   }
+   
+   read(string, end = true) {
+     
+      var matched;
+      var i;
+      for (i = 0;
+           i < string.length;
+           )
+      {
+         var character = string[i];
+         
+         var matched =
+            this.match(character);
+         
+         if (matched)
+            document.write(
+               "{" + 
+               escape(character) + 
+               "}"
+            );
+      
+
+            
+         if (this.success !=
+             undefined)
+            return i;
+            
+         if (matched)
+            ++i;
+      }
+      
+      if (end)
+         this.readEnd();
+         
+      return i;
+      
+   }
+   
+   readEnd() {
+   }
+   
+   get success() {
+      return this.#success;
+   }
+   
+   set success(value) {
+      if (value != this.#success)
+      {
+         this.#success = value;
+         if (this.#success)
+            this.onsuccess();
+      }
+   }
+   
+   onsuccess() {
+   }
+   
+   get value() {
+      return this.#value;
+   }
+   
+   get inputs() {
+      return this.#inputs;
+   }
+   
+   write(doc) {
+      if (!doc)
+         doc = document;
+         
+      if (this.success)
+         doc.writeln("Match:" + this.value);
+      else
+         doc.writeln("No match");
+   }
+}
+
+
+            </script>
+         </pre>
+      </details>
+      
+      <h2>Character</h2>
+      
+      <details>
+         <summary>
+A class to match an individual character.
+         </summary>
+         <pre>
+            <script class="export">
+class Character extends Match {
+   #character;
+   
+   constructor(character) {
+      super();
+      this.#character = character;
+   }
+   
+   match(character) {
+      var matched =
+         this.#character === character;
+         
+      if (matched) {
+         super.match(character);
+         this.success = true;
+      }
+      else
+         this.success = false;
+         
+      return matched;
+   }
+   
+}
+            </script>
+         </pre>
+         
+         <h3>Testing Character</h3>
+      
+         <details>
+            <summary>
+Testing character 'A' with match and no
+match.
+            </summary>
+         
+            <pre>
+               <script>
+class CharA extends Character {
+   constructor() {
+      super("A");
+   }
+}
+
+var charA = new CharA();
+charA.read("A");
+charA.write(document);
+
+charA = new CharA();
+charA.read("x");
+charA.write(document);
+
+               </script>
+            </pre>
+         </details>
+         
+      </details>
+      
+      <h2>Range</h2>
+      
+      <details>
+         <summary>
+A class to match a character
+between a minimum and maximum.
+         </summary>
+         
+         <pre>
+            <script class="export">
+class Range extends Match {
+   #minimum;
+   #maximum;
+   constructor(minimum, maximum) {
+      super();
+      this.#minimum = minimum;
+      this.#maximum = maximum;
+   }
+   
+   match(character) {
+   
+      var matched =
+         (this.#minimum <= character) &&
+         (this.#maximum >= character);
+         
+      if (matched) {
+         super.match(character);
+         this.success = true;
+      }
+      else
+         this.success = false;
+      
+      return matched;
+   }
+   
+}
+            </script>
+         </pre>
+         <h3>Testing Range</h3>
+         <details>
+            <summary>
+Testing character 'A'-'Z' with match and
+no match.
+            </summary>
+         
+            <pre>
+               <script>
+class RangeAZ extends Range {
+   constructor() {
+      super("A", "Z");
+   }
+}
+
+var range = new RangeAZ();
+range.read("B");
+range.write(document);
+
+range = new RangeAZ();
+range.read("b");
+range.write(document);
+
+               </script>
+            </pre>
+         </details>
+      </details>
+      
+      <h2>Word</h2>
+     
+      <details>
+      
+         <summary>
+A class to match a string of 
+characters.
+         </summary>
+         
+         <pre>
+            <script class="export">
+class Word extends Match {
+   #index = 0;
+   #word;
+   constructor(word) {
+      super();
+      this.#word = word;
+   }
+   
+   match(character) {
+      var matched =
+         this.#word[this.#index] ===
+         character;
+         
+      if (matched)
+      {
+         super.match(character);
+         ++this.#index;
+         if (this.#index === this.#word.length) {
+            this.success = true;
+         }
+      }
+      else
+         this.success = false;
+         
+      return matched;
+   }
+   
+   
+}
+
+            </script>
+         </pre>
+         <h3>Testing Word</h3>
+         <details>
+            <summary>
+Testing word "Brett" with match and
+no match.
+            </summary>
+         
+            <pre>
+               <script>
+class WordBrett extends Word {
+   constructor() {
+      super("Brett");
+   }
+}
+
+var word = new WordBrett();
+word.read("Brett");
+word.write(document);
+
+word = new WordBrett();
+word.read("brett");
+word.write(document);
+
+               </script>
+            </pre>
+         </details>
+      </details>
+      </details>
+
+      <h2>And</h2>
+      
+      <details>
+      
+         <summary>
+A class to match all input items in
+order.
+         </summary>
+      
+         <pre>
+            <script class="export">
+class And extends Match {
+   #index = 0;
+   #matches = [];
+   constructor(...inputs) {
+      super(...inputs);
+      if (this.inputs.length === 0) {
+         this.success = false;
+      }
+   }
+   
+   match(character) {
+      var item;
+      var matched;
+      
+      do {
+         item =
+            this.inputs[this.#index];
+
+         matched =
+            item.match(character);
+    
+         if (item.success) {
+         
+            this.#matches.push(item);
+         
+            if (++this.#index  ===
+                this.inputs.length)
+            {
+               this.success = true;
+               break;
+            }
+         }
+         else if (item.success == false)
+         {
+            this.success = false;
+         }
+         
+      } while(item.success && !matched);
+         
+      return matched;
+   }
+   
+   readEnd(success) {
+      while(this.#index <
+            this.inputs.length) {
+         var item =
+            this.inputs[this.#index];
+
+         item.readEnd();
+         
+         if (item.success) {
+            this.#matches.push(item);
+            ++this.#index;
+         }
+         else {
+            if (item.success === false)
+               this.success = false;
+            break;
+         }
+         
+      }
+      
+      if (this.success === undefined &&
+          this.#index ===
+          this.inputs.length)
+         this.success = true;
+         
+      super.readEnd();
+      
+   }
+   
+   get matches() {
+      return this.#matches;
+   }
+   
+   get value() {
+      return this.matches.map(
+         item => {
+            return item.value;
+         }
+      )
+      .join("");
+   }
+}
+            </script>
+         </pre>
+
+         <h3>Testing And</h3>
+      
+         <details>
+            <summary>
+Create an instance of And with [a,b,c]
+characters to match.
+            </summary>
+            <pre>
+               <script>
+class TestAnd extends And {
+   constructor() {
+      super(
+         new Character("a"),
+         new Character("b"),
+         new Character("c")
+      )
+   }
+   
+}
+
+var and = new TestAnd();
+and.read("abc");
+and.write(document);
+
+and = new TestAnd();
+and.read("ab");
+and.write(document);
+               </script>
+            </pre>
+         </details>
+      </details>
+      
+      <h2>Or</h2>
+      
+      <details>
+         <summary>
+A class to match a single item from an
+array of input items.
+         </summary>
+         
+         <pre>
+            <script class="export">
+class Or extends Match {
+   #item;
+   constructor(...inputs) {
+      super(...inputs);
+   }
+   
+   match(character) {
+      var matched = false;
+ 
+      for (var i = 0;
+           i < this.inputs.length;
+           i++)
+      {
+         var item = this.inputs[i];
+         if (item.success === undefined) {
+         
+            if (item.match(character))
+               matched = true;
+            
+            if (item.success) {
+               this.#item = item;
+               this.index = i;
+               this.success = true;
+               return matched;
+            }
+            
+         }
+      }
+      
+      if (!matched)
+         this.success = false;
+         
+      return matched;
+   }
+   
+   readEnd() {
+      
+      for (var i = 0;
+           i < this.inputs.length;
+           i++)
+      {
+         var item = this.inputs[i];
+         if (item.success != false) {
+            item.readEnd();
+            if (item.success) {
+               this.#item = item;
+               this.index = i;
+               this.success = true;
+               break;
+            }
+         }
+      }
+      
+      super.readEnd();
+
+   }
+   
+   get item() {
+      return this.#item;
+   }
+   
+   get value() {
+      return this.item.value;
+   }
+   
+}
+            </script>
+         </pre>
+  
+         <h3>Testing Or</h3>
+      
+         <details>
+            <summary>
+Create an alphabet class with a range of
+upper and lower case chatacters.
+            </summary>
+            <pre>
+               <script>
+
+class Alphabet extends Or {
+   constructor() {
+      super(
+         new Range("A", "Z"),
+         new Range("a", "z")
+      );
+   }
+   
+}
+
+var alphabet = new Alphabet();
+alphabet.read("A");
+alphabet.write(document);
+
+alphabet = new Alphabet();
+alphabet.read("1");
+alphabet.write(document);
+               </script>
+            </pre>
+         </details>
+      </details>
+      
+
+      
+      <h2>Not</h2>
+      
+      <details>
+      
+         <summary>
+A class to match a single character 
+that doesnt match the input item.
+         </summary>
+      
+         <pre>
+            <script class="export">
+class Not extends Match {
+   #match;
+   constructor(match) {
+      super();
+      this.#match = match;
+   }
+   
+   match(character) {
+      
+      var matched =
+         this.#match.match(character);
+      
+      if (!matched)
+         super.match(character);
+         
+      if (this.#match.success === false) {
+         this.success = true;
+      }
+      else if (this.#match.success)
+         this.success = false;
+
+      return !matched;
+      
+   }
+   
+   
+}
+            </script>
+         </pre>
+      
+         
+         <h3>Testing Not</h3>
+         
+         <details>
+            <summary>
+Create a class that matches any character
+not in the alphabet.
+            </summary>
+            <pre>
+               <script>
+class NotAlphabet extends Not {
+   constructor() {
+      super(
+         new Alphabet()
+      );
+   }
+}
+
+var notAlphabet = new NotAlphabet();
+notAlphabet.read("@");
+notAlphabet.write(document);
+
+               </script>
+            </pre>
+         </details>
+      </details>
+
+      <h2>Optional</h2>
+      
+      <details>
+      
+         <summary>
+A class to optionally match an item.
+         </summary>
+      
+         <pre>
+            <script class="export">
+class Optional extends Match {
+   #match;
+   constructor(match) {
+      super();
+      this.#match = match;
+   }
+   
+   match(character) {
+      var matched =
+         this.#match.match(character);
+      
+      if (this.#match.success !=
+          undefined) {
+         this.success = true;
+      }
+      
+      return matched;
+   }
+   
+   readEnd() {
+      this.success = true;
+      super.readEnd();
+   }
+   
+   get value() {
+      return this.#match.value;
+   }
+ 
+}
+            </script>
+         </pre>
+      
+         
+         <h3>Testing Optional</h3>
+      
+         <details>
+            <summary>
+Extend [a,b,c] with optional hyphens.
+            </summary>
+            <pre>
+               <script>
+class TestOptional extends And {
+   constructor() {
+      super(
+         new Character("a"),
+         new Optional(
+            new Character("-")
+         ),
+         new Character("b"),
+         new Optional(
+            new Character("-")
+         ),
+         new Character("c"),
+         new Optional(
+            new Character(".")
+         )
+      );
+   }
+}
+
+var test;
+test = new TestOptional();
+test.read("abc");
+test.write(document);
+
+test = new TestOptional();
+test.read("a-b-c");
+test.write(document);
+   
+               </script>
+            </pre>
+         
+         </details>
+         
+      </details>
+      
+      <h2>Repeat</h2>
+      
+      <details>
+         <summary>
+A class to match an array of items
+matching the input Match constructor.
+
+When the input Match constructor fails,
+the repeat finishes.
+         </summary>
+      
+         <pre>
+            <script class="export">
+class Repeat extends Match {
+   #Match;
+   #match;
+   #items = [];
+  
+   constructor(Match) {
+      super();
+      this.#Match = Match;
+      this.#match = new this.#Match();
+      
+   }
+   
+   match(character) {
+   
+      var matched =
+         this.#match.match(character);
+         
+      if (this.#match.success) {
+      
+         this.#items.push(
+            this.#match
+         );
+            
+         this.#match =
+            new this.#Match();
+           
+      }
+      else if (this.#match.success ===
+               false)
+      {
+         this.checkSuccess();
+         this.#match =
+            new this.#Match();
+      }
+      
+      return matched;
+      
+   }
+   
+   readEnd() {
+      if (this.#match.success ===
+          undefined)
+      {
+         this.#match.readEnd();
+         if (this.#match.success) {
+
+            this.#items.push(
+               this.#match
+            );
+         }
+      }
+      this.checkSuccess();
+      super.readEnd();
+   }
+   
+   checkSuccess() {
+      
+      if (this.#items.length > 0) {
+         this.success = true;
+      }
+      else {
+         this.success = false;
+      }
+   }
+   
+   get items() {
+      return this.#items;
+   }
+   
+   get value() {
+      return this.items.map(
+         item => {
+            return item.value;
+         }
+      ).join("");
+   }
+   
+}
+
+
+            </script>
+         </pre>
+      
+         <h3>Simple test</h3>
+         <details>
+            <summary>
+Create a repeater class that matches the
+Not A class.
+            </summary>
+            <pre>
+               <script>
+class RepeatNotAlphabet extends Repeat {
+   constructor() {
+      super(NotAlphabet)
+   }
+      
+}
+
+var repeatNotAlphabet =
+   new RepeatNotAlphabet();
+repeatNotAlphabet.read("#$&@!?");
+repeatNotAlphabet.write(document);
+   
+               </script>
+            </pre>
+         </details>
+         
+         <h3>Testing Repeat with Sentence</h3>
+         
+         <details>
+            <summary>
+Create a series of classes to parse a
+sentence consisting of tokens seperated
+by punctuation.
+            </summary>
+            <pre>
+               <script>
+
+class Punctuation extends Or {
+   constructor() {
+      super(
+         new Character(" "),
+         new Character("\t"),
+         new Character("."),
+         new Character("!")
+      );
+   }
+   
+}
+
+class Char extends Not {
+   constructor() {
+      super(
+         new Punctuation()
+      );
+   }
+   
+}
+
+class Token extends Repeat {
+   constructor() {
+      super(
+         Char
+      );
+   }
+}
+
+class Seperator extends Repeat {
+
+   constructor() {
+      super(
+         Punctuation
+      );
+   }
+   
+}
+
+class TokenOr extends Or {
+   constructor() {
+      super(
+         new Token(),
+         new Seperator()
+      );
+   }
+   
+   get value() {
+      return this.item.value;
+   }
+}
+
+class TokenAnd extends And {
+   constructor() {
+      super(
+         new Token(),
+         new Optional(
+            new Seperator()
+         )
+      );
+   }
+   
+   get value() {
+      return this.inputs[0].value;
+   }
+}
+   
+class Sentence extends Repeat {
+   constructor() {
+      super(
+         TokenAnd
+      );
+   }
+   
+}
+
+var sentence = new Sentence();
+
+sentence.read("hello !world\t.");
+
+if (sentence.success) {
+
+   sentence.items.forEach(
+      token => {
+         document.write(
+            "\r\n*" +
+            token.value + 
+            "*"
+         );
+      }
+   );
+}
+else
+   document.writeln("No match");
+
+               </script>
+            </pre>
+         </details>
+      </details>
+      
+      <h2>Capture</h2>
+      
+      <details>
+         <summary>
+Matches all the properties in order.
+Allows for sub objects, or nested.
+
+The captured input is the value
+property.
+         </summary>
+      
+         <pre>
+            <script class="export">
+class Capture extends And {
+
+   #object;
+   #keys;
+   #value;
+   constructor(object) {
+      super(...Object.values(object));
+      this.#object = object;
+      this.#keys = Object.keys(object);
+   }
+   
+   match(character) {
+      var matched =
+         super.match(character);
+        
+      if (this.success) {
+         this.setValues();
+      }
+
+      return matched;
+
+   }
+   
+   readEnd() {
+      if (this.success === undefined) {
+         super.readEnd();
+         if (this.success)
+            this.setValues();
+      }
+   }
+   
+   setValues() {
+      var i = 0;
+      var object = this.#object;
+      var capture = this;
+      super.matches.forEach(
+         (item) => {
+            var key = capture.#keys[i++];
+            object[key] = item;
+         }
+      );
+    
+      Object.assign(this, object);
+   }
+ 
+   
+}
+            </script>
+         </pre>
+      
+         <h3>Testing Capture</h3>
+      
+         <details>
+            <summary>
+Capture a simple object with a sub object.
+            </summary>
+            <pre>
+               <script>
+var capture = new Capture(
+   {
+      a: new Character("a"),
+      b: new Character("b"),
+      c: new Capture(
+         {
+            word: new Word("nested")
+         }
+      )
+   }
+);
+
+capture.read("abnested");
+document.writeln(capture);
+document.writeln(capture.c.word.value);
+
+               </script>
+            </pre>
+         </details>
+      </details>
+
+      
+      
+      <h2 class="highlight">HTTP Request</h2>
+      <details>
+         
+         <summary>
+All the classes require to match a
+simple HTTP request
+         </summary>
+      
+         <h3>Whitespace</h3>
+       
+         <details>
+         
+            <summary>
+A class to match a repeating space or
+tab character.
+            </summary>
+      
+         <pre>
+            <script class="export">
+class WhitespaceCharacter extends Or {
+   constructor() {
+      super(
+         new Character(" "),
+         new Character("\t")
+      );
+   }
+   
+   get value() {
+      return this.item.value;
+   }
+}
+
+class Whitespace extends Repeat {
+
+   constructor() {
+      super(WhitespaceCharacter);
+   }
+   
+}
+            </script>
+         </pre>
+
+         <h4>Whitespace test</h4>
+         <details>
+            <summary>
+Test consecutive repeat of white space.
+            </summary>
+            <pre>
+               <script>
+var ws = new Whitespace();
+ws.read("\t  abc");
+if (ws.success)
+   document.writeln("Match:*" + ws.value + "*");
+else
+   document.writeln("No match");
+
+               </script>
+            </pre>
+         </details>
+      </details>
+      
+      <h3>Colon</h3>
+      
+      <details>
+         <summary>
+Create a Colon class wrapped with optional
+whitespace.
+
+This class is used the http request first
+line and headers.
+         </summary>
+         <pre>
+            <script class="export">
+class Colon extends And {
+   constructor() {
+       super(
+          new Optional(new Whitespace()),
+          new Character(":"),
+          new Optional(new Whitespace())
+       );
+   }
+   
+   get value() {
+      return ":";
+   }
+}
+            </script>
+         </pre>
+     
+      
+         <h4>Testing Colon</h4>
+         <details>
+            <summary>
+Test the Colon class.
+            </summary>
+            <pre>
+               <script>
+var colon = new Colon();
+colon.read(" :\t");
+document.writeln(colon.success);
+               </script>
+            </pre>
+         </details>
+      </details>
+      
+      <h3>NewLine</h3>
+      
+      <details>
+      
+         <summary>
+Matches the carriage return and line
+feed characters.
+         </summary>
+         
+         <pre>
+            <script class="export">
+class NewLine extends Or {
+   static standard = "\r\n";
+   constructor() {
+      super(
+         new And(
+            new Character("\r"),
+            new Optional(
+               new Character("\n")
+            )
+         ),
+         new Character("\n")
+      )
+   }
+   
+   get value() {
+      if (this.success)
+         return NewLine.standard;
+      else
+         return null;
+   }
+}
+             </script>
+         </pre>
+       
+         <h4>Testing New Line</h4>
+       
+         <details>
+            <summary>
+Test new line with different variations.
+            </summary>
+            <pre>
+               <script>
+var newLine1 = new NewLine();
+newLine1.read("\r\n");
+document.writeln(newLine1.success);
+
+var newLine2 = new NewLine();
+newLine2.read("\r");
+document.writeln(newLine2.success);
+
+var newLine3 = new NewLine();
+newLine3.read("\n");
+document.writeln(newLine3.success);
+
+               </script>
+            </pre>
+         </details>
+      </details>
+       
+      <h3>Identifier</h3>
+       
+      <details>
+         <summary>
+Define a valid javascript identifier.
+This is used instead of the standard http
+verb in the requests first line.
+         </summary>
+         <pre>
+            <script class="export">
+class FirstIdentifierCharacter
+   extends Or
+{
+   constructor() {
+      super(
+         new Range("a", "z"),
+         new Range("A", "Z"),
+         new Character("_")
+      )
+   }
+}
+
+class SubsequentIdentifierCharacter
+   extends Or
+{
+   constructor() {
+      super(
+         new Range("0", "9"),
+         new Range("a", "z"),
+         new Range("A", "Z"),
+         new Character("_")
+      )
+   }
+}
+
+class Identifier extends And
+{
+   #value = "";
+   constructor() {
+      super(
+         new FirstIdentifierCharacter(),
+         new Repeat(
+            SubsequentIdentifierCharacter
+         )
+      )
+   }
+   
+   match(character) {
+      var matched =
+         super.match(character);
+      if (matched)
+         this.#value += character;
+      return matched;
+   }
+   
+   get value() {
+      if (this.success)
+         return this.#value;
+      else
+         return null;
+   }
+   
+}
+             </script>
+         </pre>
+   
+       
+         <h4>Testing Identifier</h4>
+       
+         <details>
+            <summary>
+Test the identifier class correctly
+matched a sample.
+            </summary>
+            <pre>
+               <script>
+var identifier = new Identifier();
+identifier.read("a_bc1 ");
+if (identifier.success)
+   document.writeln(identifier.value + "*");
+else
+   document.writeln("No match");
+   
+              </script>
+           </pre>
+        </details>
+     </details>
+     
+     <h3>Path</h3>
+     <details>
+        <summary>
+For now, Path is a simple match of
+characters. Later, Path will be extended
+to count up and down via Power Encoding.
+        </summary>
+        <pre>
+           <script class="export">
+class PathCharacter extends Or {
+   constructor() {
+      super(
+         new Character("/"),
+         new Character("."),
+         new Character("-"),
+         new Character("_"),
+         new Range("a", "z"),
+         new Range("A", "Z")
+      )
+   }
+   
+   get value() {
+      return this.item.value;
+   }
+}
+
+class Path extends Repeat {
+   constructor() {
+      super(
+         PathCharacter
+      )
+   }
+
+}
+            </script>
+         </pre>
+        
+         <h4>Testing Path</h4>
+         <details>
+            <summary>
+Test with this path.
+            </summary>
+            <pre>
+               <script>
+var path = new Path();
+path.read("/parser/index.html");
+document.writeln(path);
+if (path.success) {
+   document.writeln(path.value);
+}
+               </script>
+            </pre>
+         </details>
+      </details>
+    
+      <h3>Request first line</h3>
+      <details>
+         <summary>
+Put the verb, path and version together
+in a Capture class for the HTTP request
+first line.
+         </summary>
+         <pre>
+            <script class="export">
+class FirstLine extends Capture {
+
+   constructor() {
+      super( {
+         verb: new Identifier(),
+         whitespace1: new Whitespace(),
+         path: new Path(),
+         whitespace2: new Whitespace(),
+         version:
+            new Word("HTTP/1.1"),
+         newLine:
+            new NewLine()
+     } );
+   }
+}
+            </script>
+         </pre>
+            
+         <h4>Test First Line</h4>
+         <details>
+            <summary>
+Check the FirstLine class.
+            </summary>
+            <pre>
+               <script>
+var firstLine = new FirstLine();
+firstLine.read(
+   "GET /parser/index.html HTTP/1.1\r\n"
+);
+
+if (firstLine.success)
+   document.writeln(firstLine);
+else
+   document.writeln("No match" + firstLine);
+               </script>
+            </pre>
+         </details>
+      </details>
+         
+      <h3>Header Name and Value</h3>
+      <details>
+         <summary>
+Define the header name and value as a 
+repeat if any character except colon (:)
+or new line.
+
+         </summary>
+         <pre>
+            <script class="export">
+class HeaderPunctuation extends Or {
+   constructor() {
+      super(
+         new Or(
+            new NewLine(),
+            new Character(":")
+         )
+      );
+   }
+}
+
+class HeaderCharacter extends Not {
+   constructor() {
+      super(
+         new HeaderPunctuation()
+      );
+   }
+}
+
+class HeaderName extends Repeat {
+   constructor() {
+      super(
+         HeaderCharacter
+      );
+   }
+}
+
+class HeaderValue extends Repeat {
+   constructor() {
+      super(
+         HeaderCharacter
+      );
+   }
+   
+}
+            </script>
+         </pre>
+         
+         <h4>Testing Header Value</h4>
+         <details>
+            <summary>
+Do a test of the HeaderValue class.
+            </summary>
+            <pre>
+               <script>
+var headerValue = new HeaderValue();
+headerValue.read("abc-%20:a\r\n");
+
+if (headerValue.success) {
+   document.writeln(headerValue.value);
+}
+else
+   document.writeln("No match");
+               </script>
+            </pre>
+         </details>
+      </details>
+      
+      <h3>Header Lines</h3>
+      <details>
+         <summary>
+Put the HeaderName, Colon, HeaderValue
+and NewLine together in a capture class
+for a HTTP requests headers.
+         </summary>
+         <pre>
+            <script class="export">
+class HeaderLine extends Capture {
+   constructor() {
+      super(
+         {
+            name: new HeaderName(),
+            colon: new Colon(),
+            _value: new HeaderValue(),
+            newLine: new NewLine()
+         }
+      );
+      
+   }
+   
+   write() {
+      document.write(
+         this.name.value
+      );
+      document.write(":\t");
+      document.writeln(
+         this._value.value
+      );
+   }
+   
+
+}
+
+class Headers extends Repeat {
+   constructor() {
+      super(HeaderLine)
+   }
+}
+
+            </script>
+         </pre>
+         
+         <h4>Testing Header Line</h4>
+         <details>
+            <summary>
+Test the HeaderLine class with a hello
+world example.
+            </summary>
+            <pre>
+               <script>
+var headerLine = new HeaderLine();
+headerLine.read("hello:world\r\n");
+
+if (headerLine.success) {
+   headerLine.write();
+}
+else
+   document.writeln("No match");
+               </script>
+            </pre>
+         </details>
+      </details>
+      
+      <h3>Complete Request</h3>
+      <details>
+         <summary>
+Create the Request class that captures
+the HTTP request first line and
+subsequent headers.
+         </summary>
+         <pre>
+            <script class="export">
+class Request extends Capture {
+   constructor() {
+      super(
+         {
+            firstLine: new FirstLine(),
+            headers: new Headers(),
+            newLine: new NewLine()
+         }
+      );
+   }
+}
+            </script>
+         </pre>
+       
+         <h4>Testing Request</h4>
+         
+         <details>
+            <summary>
+Test with sample input from the linux
+curl program.
+            </summary>
+            <pre>
+               <script>
+var input = [
+   "GET /parser/index.html HTTP/1.1",
+   "Host: bee.fish",
+   "User-Agent: curl/7.64.0",
+   "Accept: */*",
+   "",
+   ""
+].join("\r\n");
+
+var request = new Request();
+
+request.read(input);
+
+if (request.success) {
+   var firstLine =
+      request.firstLine;
+
+   document.writeln("********");
+   
+   document.writeln(
+      firstLine.verb.value + " " + 
+      firstLine.path.value
+   );
+   
+   var headers =
+      request.headers;
+   
+   headers.items.forEach(
+      (headerLine) =>
+         headerLine.write()
+   );
+   
+}
+
+               </script>
+            </pre>
+         </details>
+      </details>
+      
+      
+   </details>
+      <a onclick="generateCode()"><h2 class="highlight">Code</h2></a>
+      <pre>
+         <script>
+if (document.location.search === "?code")
+   generateCode();
+
+function generateCode() {
+   var x = document.querySelectorAll("script.export");
+
+   var doc = document.open();
+   doc.write("<html><body><textarea>");
+   x.forEach(
+      (script) =>
+         doc.write(script.innerText)
+   );
+   doc.write("</textarea></body></html>");
+   doc.close();
+}
+         </script>
+      </pre>
+   </body>
+</html>

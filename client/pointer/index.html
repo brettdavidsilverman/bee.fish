@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="/head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <script src="../console/console.js"></script>
+      <script src="../fetch.js"></script>
+      <script src="../stream/stream.js"></script>
+      <script src="../power-encoding/power-encoding.js"></script>
+      <script src="../storage/storage.js"></script>
+      <script src="../id/id.js"></script>
+      <script src="pointer.js"></script>
+      <link rel="stylesheet" type="text/css" href="/style.css" />
+      <link rel="stylesheet" type="text/css" href="../style.css" />
+
+      <title>Pointer</title>
+   </head>
+   <body>
+      <script src="/body.js"></script>
+      <h1>Pointer</h1>
+      
+      <a href="pointer.js">pointer.js</a>
+   
+      <script>
+var console = new Console();
+      </script>
+      
+      <p>A pointer is an object that points to
+      another instance of an object.</p>
+      
+      <p>When creating a pointer, simply pass in
+      the object it points to in the constructor
+      or a key that points to a previously stored
+      object.</p>
+      
+      <p>When copying, the key is copied 
+      from one pointer to another.</p>
+      
+
+      <h2>Pointer to object</h2>
+      <pre id="object">
+         <script>
+class A extends Id {
+
+   constructor(input)
+   {
+      super(input);
+      
+      if (this.date == undefined)
+         this.date = new Date();
+   }
+   
+   toJSON()
+   {
+      var object = super.toJSON();
+      object.date = this.date;
+      return object;
+   }
+   
+}
+
+var object = new A();
+
+var pointer = new Pointer({key: object.key});
+
+document.writeln(pointer);
+
+         </script>
+      </pre>
+  
+      <h2>Copy pointer</h2>
+      <pre>
+         <script>
+var copy = new Pointer({key: pointer.key});
+
+document.writeln(
+   "compare by key:  " + (pointer.key == copy.key)
+);
+
+
+document.writeln(
+   "copy:  " + pointer.equals(copy)
+);
+
+         </script>
+      </pre>
+      
+      <h2>Get pointer</h2>
+      <pre id="get">
+         <script>
+var object1;
+var object2;
+object.setItem()
+.then(
+   function(key) {
+      var pointer = new Pointer({key});
+      return pointer.getItem();
+   }
+)
+.then(
+   function(obj) {
+      writeln("get", "Got " + obj.name);
+      object1 = obj;
+      var pointer = new Pointer({key: obj.key});
+      return pointer.getItem();
+   }
+)
+.then(
+   function(obj) {
+      writeln("get", "Got "  + obj.name);
+      object2 = obj;
+      writeln("get", "Compare " + String(object1 === object2))
+
+      pointer = new Pointer({key: pointer.key});
+
+      return pointer.getItem();
+   }
+)
+.then(
+   function(object)  {
+      writeln("get", object.name);
+      pointer.release();
+      writeln("get", "");
+      writeln("get", "");
+   }
+)
+.catch(
+   function(error) {
+      alert(error);
+   }
+);
+         </script></pre>
+   </body>
+</html>

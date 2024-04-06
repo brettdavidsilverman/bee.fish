@@ -1,0 +1,65 @@
+<html>
+    <head>
+        <title>Power Encoding</title>
+        <script type="text/javascript" >
+window.onerror =  function(err, src, line) {
+    alert(err + "\n" + src + "\n" + line);
+}
+        </script>
+        <script type="text/javascript" src="../bit stream/bit stream.js">
+        </script>
+        <script type="text/javascript" src="../binary tree/binary tree.js">
+        </script>
+        <script type="text/javascript" src="power encoding.js">
+        </script>
+    </head>
+    <body>
+        <h1>Power Encoding</h1>
+        <h2>Properties</h2>
+        <p>Power Encoding allows us to read numbers from bit streams without the need to know the length of the number.</p>
+	 <p>Power encoded numbers compare for equality and greater/less than without the need to decode.</p>
+        <h2>Encoding</h2>
+        <ul>
+            <li>1. Zero has definition of 0</li>
+            <li>2. Find the greatest <b><i>power</i></b> such that <b><i>2<sup>power</sup> <= number</i></b></li>
+            <li>3. Find the remainder such that <b><i>2<sup>power</sup> + remainder = number</i></b></li>
+            <li>4. Repeat steps 1 to 4 for the <b><i>power</i></b> and <b><i>remainder</i></b></li>
+            <li><p>In other words <b><i>b => 0</i></b> or <b><i>b => (2<sup>b</sup> + b)</i></b></li></br>
+eg <b><i>3 = (2<sup>(2<sup>0</sup> + 0)</sup> + (2<sup>0</sup> + 0)	)</i></b></p></li>
+            <li>Reading from left to right:
+                <ul>
+                    <li>For every <b><i>2<sup>power</sup></i></b> write out a <b><i>1</b></i></li>
+                    <li>For every <b><i>remainder</b></i> write out a <b><i>0</i></b></li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>Numbers 0-100</h2>
+        <table>
+            <tbody id="table">
+                <tr>
+                    <th align="left">Number</th>
+                    <th align="left">Power encoded</th>
+                <tr>
+            </tbody>
+        </table>
+        <script type="text/javascript">
+var table = document.getElementById("table");
+for (var number = 0; number <= 100; number++) {
+
+    var encoded = new PowerEncoding(number);
+    var stream = new BitStream();
+    encoded.write(stream);
+
+    var row = document.createElement("tr");
+    var tableNumberData = document.createElement("td");
+    var tableEncodedData = document.createElement("td");
+    tableNumberData.innerHTML = number;
+    tableEncodedData.innerHTML = stream.array.join("");
+    row.appendChild(tableNumberData);
+    row.appendChild(tableEncodedData);
+    table.appendChild(row);
+}
+       </script>
+    </body>
+</html>

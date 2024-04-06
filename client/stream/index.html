@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="/head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1, user-scale=1"/>
+      <script src="../console/console.js"></script>
+      <script src="stream.js"></script>
+      <script src="../power-encoding/power-encoding.js"></script>
+      <link rel="stylesheet" type="text/css" href="/style.css" />
+      <link rel="stylesheet" type="text/css" href="../style.css" />
+
+      <title>Stream</title>
+   </head>
+   <body>
+      <script src="/body.js"></script>
+      <h1>Stream</h1>
+      <a href="stream.js">stream.js</a>
+      <br/>
+      <a href="../power-encoding/power-encoding.js">power-encoding.js</a>
+      
+      <h2>Encode</h2>
+      <p>
+         Here we use PowerEncoding that inherits from Stream, to encode and decode a set of numbers.
+      </p>
+      <pre>
+         <script>
+var console = new Console();
+
+var encoding = new PowerEncoding();
+
+encoding.write("1");
+
+for (var number = 0; number <= 100; number++)
+{
+   encoding.write("1");
+   encoding.encode(number); 
+}
+
+encoding.write("0");
+
+var string = encoding.toString();
+
+document.writeln(string);
+
+        </script>
+      </pre>
+      
+      <h2>Decode</h2>
+      <pre>
+         <script>
+var encoding = new PowerEncoding(string);
+
+CHECK("Start bit", encoding.read() == "1");
+
+while (encoding.read() == "1")
+{
+   var number = encoding.decode();
+   document.write(number);
+   document.write(" ");
+}
+document.writeln();
+CHECK("Zero count", encoding.count == 0);
+         </script>
+      </pre>
+   </body>
+</html>

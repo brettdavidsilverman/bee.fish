@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="/head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <link rel="stylesheet" type="text/css" href="/style.css" />
+      <title>Javascript parser</title>
+      <script src="/power-encoding/bit-string/bit-string.js"></script>
+      <script src="/power-encoding/stream/stream.js"></script>
+      <script src="/power-encoding/number/uint8/uint8.js"></script>
+      <script src="/power-encoding/number/uint16/uint16.js"></script>
+      <script src="/power-encoding/number/uint/uint.js"></script>
+      <script src="/power-encoding/number/number.js"></script>
+      <script src="/power-encoding/string/string.js"></script>
+      <script src="/short-hand/short-hand.js"></script>
+      <script src="/id/id.js"></script>
+      <script src="/pointer/pointer.js"></script>
+      <script src="/object/object.js"></script>
+      <script src="/memory/memory.js"></script>
+      <script src="/function/function.js"></script>
+      <script src="/array/array.js"></script>
+      <script src="/typed-array/typed-array.js"></script>
+      <script src="/image/image.js"></script>
+      <script src="/console/console.js"></script>
+      <style>
+pre {
+   color: red;
+}
+      </style>
+   </head>
+   <body>
+      <script src="/body.js"></script>
+      <script src="test.js"></script>
+      <h1>Javascript Parser</h1>
+
+      <h2>Match</h2>
+      <pre>
+         <script>
+var input = [
+   "GET /parser/index.html HTTP/1.1",
+   "Host: bee.fish",
+   "User-Agent: curl/7.64.0",
+   "Accept: */*",
+   "",
+   ""
+].join("\r\n");
+
+var request = new Request();
+
+request.read(input);
+
+if (request.success) {
+
+   document.writeln(
+      request.firstLine.verb.value + " " + 
+      request.firstLine.path.value
+   );
+   
+   request.headers.items.forEach(
+      (headerLine) =>
+         headerLine.write()
+   );
+   
+}
+         </script>
+      </pre>
+   </body>
+</html>

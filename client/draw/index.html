@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="/head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0"/>
+      <link rel="stylesheet" type="text/css" href="/style.css" />
+      <link rel="stylesheet" type="text/css" href="../style.css" />
+      <link rel="stylesheet" type="text/css" href="style.css" />
+
+
+      
+      <title>Bee Draw Simple</title>
+      <script src="../logon/authentication.js"></script>
+      <script src="../stream/stream.js"></script>
+      <script src="../power-encoding/power-encoding.js"></script>
+      <script src="../storage/storage.js"></script>
+      <script src="../id/id.js"></script>
+      <script src="../pointer/pointer.js"></script>
+      <script src="../console/console.js"></script>
+      <script src="matrix.js"></script>
+      <script src="dimensions.js"></script>
+      <script src="point.js"></script>
+      <script src="points.js"></script>
+      <script src="item.js"></script>
+      <script src="line.js"></script>
+      <script src="form.js"></script>
+      <script src="function-form.js"></script>
+      <script src="if-form.js"></script>
+      <script src="collection.js"></script>
+      <script src="child-pointer.js"></script>
+      <script src="children.js"></script>
+      <script src="connector.js"></script>
+      <script src="if-connector.js"></script>
+      <script src="rectangle.js"></script>
+      <script src="user-input.js"></script>
+      <script src="canvas.js"></script>
+      <script src="tools/toolbox.js"></script>
+      <script src="tools/toolbox-item.js"></script>
+      <script src="tools/label.js"></script>
+      <script src="tools/value.js"></script>
+      <script src="tools/function.js"></script>
+      <script src="tools/connector.js"></script>
+      <script src="tools/if-connector.js"></script>
+      <script src="tools/delete.js"></script>
+      <!--
+      <script src="rectangle.js"></script>
+      <script src="drawing.js"></script>
+      <script src="app.js"></script>
+      
+      <script src="connector.js"></script>
+      <script src="text.js"></script>
+      <script src="layers.js"></script>
+      
+      <script src="code.js"></script>
+      <script src="editor.js"></script>
+      -->
+      <style>
+html, body {
+   width: 100%;
+   height: 100%;
+   overflow: hidden;
+}
+
+body {
+   background-color: lightgrey;
+   background-size: auto 100%;
+   background-repeat: no-repeat;
+   background-position: top;
+   user-select: none;
+  /* background-imagea: none; */
+}
+
+script {
+   display: none;
+}
+     
+#thumbnail {
+   position: absolute;
+   top: 10px;
+   right: 10px;
+   margin: 0px;
+   z-index: -1;
+}
+
+      </style>
+   </head>
+   <body>
+      <script src="/body.js"></script>
+      <script>
+var console = new Console();
+console.log("Hello world");
+var instructions = [
+   ,
+   "Draw lines with one finger.",
+   "Scroll and zoom with two fingers.",
+   "Tap and hold to select.",
+   "Work in progress..."
+];
+
+console.log(instructions.join("\n"));
+
+var canvas;
+
+Canvas.load().then(
+   (result) => {
+      canvas = result;
+      handleHash();
+   }
+)
+.catch(
+   (error) => {
+      alert("index.html: " + error.stack);
+      canvas = new Canvas();
+   }
+);
+
+window.onhashchange = handleHash;
+
+function handleHash() {
+
+   if (window.location.hash === "#clear") {
+      if (confirm("Clear storage?"))
+         storage.clear();
+   }
+   
+   if (window.location.hash === "#reset") {
+      canvas.scrollToTop();
+      canvas.matrix = new Matrix();
+      canvas.save();
+      canvas.draw();
+   }
+   
+   if (window.location.hash.length) {
+      window.location.replace(
+         window.location.href.substr(
+            0,
+            window.location.href.indexOf("#")
+         )
+      );
+   }
+}
+
+      </script>
+
+   </body>
+</html>

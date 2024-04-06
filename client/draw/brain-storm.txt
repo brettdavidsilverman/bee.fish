@@ -1,0 +1,35 @@
+Editor(App)
+
+Button(App)
+   
+App(Drawing)
+
+Rectangle
+   strokeStyle
+   fillStyle
+   width
+   height
+   topleft
+   draw()
+   dimensions(width, height....
+   hitTest
+   
+Line(App)
+   strokeStyle
+   Points
+   setStyle
+   dimensions (points)
+   hitTest
+   
+Drawing
+   children:
+      draw->frame->rectangle(only draws at top
+   dimensions->[min, max], from child apps
+   setDimensions
+   hitTest
+   onclick
+   onlonglick
+   addChild
+   removeChild
+   hitTest
+   frame

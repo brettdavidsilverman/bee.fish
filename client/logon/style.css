@@ -1,0 +1,43 @@
+form {
+   width: 120px;
+}
+
+img, label {
+   border: none;
+   box-shadow: 5px 5px 3px black;
+   margin: 10px;
+}
+
+img {
+   position: relative;
+   left: 0px;
+   top: 0px;
+}
+
+label {
+   position: relative;
+   text-align: center;
+   background-color: lightgreen;
+   display: block;
+   width: 120px;
+   top: 10px;
+   font-weight: bold;
+}
+
+_form {
+   background-color: lightgreen;
+}
+
+
+.valid {
+   background-color: lightgreen;
+}
+
+.invalid {
+   background-color:  #FF7F87;
+}
+
+.pressed {
+   bordera: 1px solid black;
+   box-shadow: none;
+}

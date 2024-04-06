@@ -1,0 +1,6 @@
+class Storage extends remoteStorage
+{
+
+   
+   
+}

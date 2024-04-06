@@ -7,6 +7,24 @@
 #error HOME_DIR not defined
 #endif
 
-#define PAGE_SIZE 4096
+#ifndef PAGE_SIZE
+   #define PAGE_SIZE 4096
+#endif
+
+#ifndef DOMAIN
+   #define DOMAIN bee.fish
+#endif
+
+#ifdef DEBUG
+   #define DATABASE_FILENAME HOME_DIR "/dev." DOMAIN ".data"
+#else
+   #define DATABASE_FILENAME HOME_DIR "/" DOMAIN ".data"
+#endif
+
+#define HOST "https://" DOMAIN
+
+#define WWW_ROOT_DIRECTORY HOME_DIR "/" DOMAIN
+
+#define TEST_DIRECTORY WWW_ROOT_DIRECTORY "/tests"
 
 #endif

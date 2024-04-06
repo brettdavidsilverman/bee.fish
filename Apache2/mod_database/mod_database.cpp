@@ -93,13 +93,15 @@ static int database_handler(request_rec *r)
     );
 
     Variable result;
-    
+
     if (!strcmp(r->method, "GET"))
     {
-        if (strcmp(r->uri, "/index.xhtml")    == 0 ||
-            strcmp(r->uri, "/NotFound.xhtml") == 0 ||
-            strcmp(r->uri, "/error.js")       == 0 ||
-            strcmp(r->uri, "/id.xhtml")       == 0)
+        std::string filename = WWW_ROOT_DIRECTORY;
+        filename += r->uri;
+        if (filename.find("..") != std::string::npos)
+           return HTTP_INTERNAL_SERVER_ERROR;
+           
+        if (std::filesystem::exists(filename))
         {
            return DECLINED;
         }

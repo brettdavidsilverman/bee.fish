@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="../head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <script src="../console/console.js"></script>
+      <script src="../bit-string/bit-string.js"></script>
+      <script src="../number/number.js"></script>
+      <script src="../id/id.js"></script>
+      <link rel="stylesheet" type="text/css" href="../style.css" />
+      <title>Post Javascript</title>
+   </head>
+   <body>
+      <h1>Post with javascript</h1>
+      <input type="file" name="my_files[]" multiple/>
+      <pre>
+         <script>
+const input = document.querySelector('input[type="file"]');
+
+input.addEventListener('change', 
+   function (e){
+      const fd = new FormData();
+      // add all selected files
+      var files = e.target.files;
+      for (var i = 0; i < files.length; i++) {
+         var file = files[i];
+         fd.append(e.target.name, file, file.name);
+      }
+      
+      // create the request
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function() {
+         if (this.readyState === XMLHttpRequest.DONE)
+            document.write(this.responseText);
+      };
+      
+      xhr.onerror = function(event) {
+         alert(this.status);
+      }
+      
+      // path to server would be where you'd normally post the form to
+      xhr.open('POST', 'http://bee.fish/cgi/a.out', true);
+      xhr.send(fd);
+   }
+);
+         </script>
+      </pre>
+   </body>
+</html>

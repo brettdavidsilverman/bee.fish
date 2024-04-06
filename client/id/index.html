@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="/error.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <script src="../fetch.js"></script>
+      <script src="../stream/stream.js"></script>
+      <script src="../power-encoding/power-encoding.js"></script>
+      <script src="id.js"></script>
+      <link rel="stylesheet" type="text/css" href="/style.css" />
+      <link rel="stylesheet" type="text/css" href="../style.css" />
+
+      <title>Id</title>
+   </head>
+   <body>
+      <script src="/body.js"></script>
+      <h1>Id</h1>
+      <a href="id.js">id.js</a>
+      
+      <h2>Usage</h2>
+      <p>Create a new Id and write out its milliseconds
+      in milliseconds and increment, and its key.</p>
+      <pre>
+         <script>
+// Create the Id
+var id = new Id();
+
+// Write out its default string
+document.writeln(id);
+
+// Write out its string encoded key
+document.writeln(id.key);
+
+// Create a new id from old key
+var id2 = Id.fromKey(id.key);
+
+         </script>
+      </pre>
+
+      <h2>Id Form</h2>
+      <form>
+         <button onclick="createId()" type="button">New</button>
+         <br />
+         <label for="key">Key</label>
+         <br />
+         <textarea id="key" rows="3" cols="40"></textarea>
+         <br />
+         <button onclick="loadDataFromKey()" type="button">Ok</button>
+         <br />
+         Base 64
+         <textarea id="base64" rows="3" cols="40"></textarea>
+         <br />
+         <button onclick="loadDataFromBase64()" type="button">Ok</button>
+         <br />
+         Name
+         <br />
+         <input type="text" id="name"></input>
+         <br />
+         Seconds
+         <br />
+         <input type="text" id="seconds"></input>
+         <br />
+         Milliseconds
+         <br />
+         <input type="text" id="milliseconds"></input>
+         <br />
+         Increment
+         <br />
+         <input type="text" id="increment"></input>
+         <br />
+         <button onclick="loadKey()" type="button">Ok</button>
+         <script style="display:none;">
+function loadKey()
+{
+   var name =
+      document.getElementById("name").value;
+   var seconds =
+      document.getElementById("seconds").value;
+   var milliseconds =
+      document.getElementById("milliseconds").value;
+   var increment =
+      document.getElementById("increment").value;
+
+   var data =
+   {
+      name: name,
+      seconds: Number(seconds),
+      milliseconds: Number(milliseconds),
+      increment: Number(increment)
+   }
+   
+   id = new Id(data);
+      
+   document.getElementById("key").value =
+      atob(id.key);
+      
+   document.getElementById("base64").value =
+      id.key;
+}
+
+function loadDataFromKey()
+{
+   var key = btoa(document.getElementById("key").value);
+   
+   id = new Id({key});
+   
+   loadData(id);
+   
+}
+
+function loadDataFromBase64()
+{
+   var key = document.getElementById("base64").value;
+   
+   id = new Id({key});
+   alert(id.name);
+   loadData(id);
+   
+}
+
+function loadData(id) {
+    
+   document.getElementById("key").value =
+      atob(id.key);
+      
+   document.getElementById("name").value =
+      id.name;
+      
+   document.getElementById("seconds").value =
+      id.seconds;
+
+   document.getElementById("milliseconds").value =
+      id.milliseconds;
+      
+   document.getElementById("increment").value =
+      id.increment;
+      
+   document.getElementById("base64").value =
+      id.key;
+      
+   
+}
+
+function createId()
+{
+   var name = prompt("name");
+   
+   if (name == null)
+      return;
+      
+   id = new Id({name: name});
+
+   loadData(id);
+}
+
+createId();
+         </script>
+      </form>
+
+      <h2>Key sort order</h2>
+      <p>This shows that earlier created Ids
+      have a smaller key. This means they can
+      be sorted earliest to latest.</p>
+      <pre>
+         <script>
+var id1 = new Id();
+var id2 = new Id();
+
+document.writeln(id1.key < id2.key);
+         </script>
+      </pre>
+    
+      <h2>Copying</h2>
+      <p>Ids can be copied by passing in
+      the source id as the first parameter,
+      a key or a timestamp</p>
+      <pre>
+         <script>
+
+function compareEqual(label, id1, id2)
+{
+   document.writeln(
+      label + ":\t" + (id1.equals(id2))
+   );
+}
+
+var id3 = new Id(id);
+
+compareEqual("id3", id, id3);
+
+var id4 =
+   new Id(
+      {
+         name: id.name,
+         seconds: id.seconds,
+         milliseconds: id.milliseconds,
+         increment: id.increment
+      }
+   );
+   
+compareEqual("id4", id,  id4);
+
+var id5 = new Id({key: id.key});
+
+compareEqual("id5", id, id5);
+
+
+         </script>
+      </pre>
+      
+      <h2>Example</h2>
+      <p>Here we show how it creates an id
+      for any custom class.</p>
+      <pre id="example">
+         <script>
+class A extends Id
+{
+   constructor(input)
+   {
+      super(input ? input.id : null);
+
+      if (input)
+         this.data = input.data;
+   }
+
+   toJSON() {
+      return {
+         id: super.toJSON(),
+         data: this.data
+      }
+   }
+
+   toString() {
+      return JSON.stringify(this, null, "   ");
+   }
+
+}
+
+var a = new A();
+
+var key = a.key;
+
+document.writeln(
+   key
+);
+
+
+a2 = new A(
+   {
+      id: {
+         key
+      }
+   }
+);
+
+document.writeln(
+   a2.key
+);
+
+document.writeln(
+   a.equals(a2)
+);
+
+         </script>
+      </pre>
+<!--
+      <h2>Load/Save</h2>
+      <p>Here we show how it load and save
+      our custom class.</p>
+      <pre id="getItem">
+         <script>
+var a = new A({data:"Hello World"});
+
+a.setItem().then(
+   function(key) {
+      writeln("getItem", key);
+      var id = new Id({key});
+      return id.getItem();
+   }
+)
+.then(
+   function(b) {
+      writeln(
+         "getItem",
+         b.constructor.name  + " says " + b.data
+      )
+   }
+)
+.catch(
+   function(error) {
+      alert(error.stack)
+   }
+);
+         </script></pre>
+-->
+   </body>
+</html>
