@@ -77,21 +77,9 @@ namespace BeeFishMisc {
          break;
       default:
          {
-            if (false && (uint16_t)c <= 0x001F) {
-               std::stringstream stream;
-               // Control chars
-               stream << "\\u" 
-                      << std::hex
-                      << std::setw(4)
-                      << std::setfill('0')
-                      << (uint16_t)c;
-               return stream.str();
-            }
-            else {
-               std::string str;
-               str = c;
-               return str;
-            }
+            std::string str;
+            str = c;
+            return str;
          }
       }
       
