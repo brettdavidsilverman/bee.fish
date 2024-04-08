@@ -27,19 +27,16 @@
          <script>
 var console = new Console();
 
-var encoding = new PowerEncoding();
-
-encoding.write("1");
+var stream = new PowerEncoding();
 
 for (var number = 0; number <= 100; number++)
 {
-   encoding.write("1");
-   encoding.encode(number); 
+   number.encode(stream);
 }
 
-encoding.write("0");
-
-var string = encoding.toString();
+CHECK("Zero count", stream.count == 0);
+   
+var string = stream.toString();
 
 document.writeln(string);
 
@@ -49,18 +46,18 @@ document.writeln(string);
       <h2>Decode</h2>
       <pre>
          <script>
-var encoding = new PowerEncoding(string);
+var stream = new PowerEncoding(string);
 
-CHECK("Start bit", encoding.read() == "1");
-
-while (encoding.read() == "1")
+while (stream.peek() == "1")
 {
-   var number = encoding.decode();
+   var number = Number.decode(stream);
    document.write(number);
    document.write(" ");
 }
+
 document.writeln();
-CHECK("Zero count", encoding.count == 0);
+
+CHECK("Zero count", stream.count == 0);
          </script>
       </pre>
    </body>

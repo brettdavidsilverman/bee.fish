@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
    <head>
-      <script src="/error.js"></script>
+      <script src="/head.js"></script>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <!--
+      <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.7/base64.min.js"></script>
+      -->
+      <script src="../base64.min.js"></script>
       <script src="../fetch.js"></script>
       <script src="../stream/stream.js"></script>
       <script src="../power-encoding/power-encoding.js"></script>
       <script src="id.js"></script>
       <link rel="stylesheet" type="text/css" href="/style.css" />
       <link rel="stylesheet" type="text/css" href="../style.css" />
-
+      
       <title>Id</title>
    </head>
    <body>
@@ -25,10 +29,10 @@ document.getElementById("version").innerText ="Version: " + Id.version;
       </script>
       
       <h2>Usage</h2>
-      <p>Create a new Id and write out its milliseconds
+      <p>Create a new Id and write out 
       in milliseconds and increment, and its key.</p>
-      <pre>
-         <script>
+      <pre><script>
+      
 // Create the Id
 var id = new Id();
 
@@ -36,7 +40,7 @@ var id = new Id();
 document.writeln(id);
 
 // Write out its string encoded key
-document.writeln(id.key);
+document.writeln(Base64.encode(id.key));
 
 // Create a new id from old key
 var id2 = Id.fromKey(id.key);
@@ -91,7 +95,7 @@ function loadKey()
       id.key;
       
    document.getElementById("base64").value =
-      btoa(id.key);
+      Base64.encode(id.key);
 }
 
 function loadDataFromKey()
@@ -106,7 +110,7 @@ function loadDataFromKey()
 
 function loadDataFromBase64()
 {
-   var key = atob(document.getElementById("base64").value);
+   var key = Base64.decode(document.getElementById("base64").value);
    
    id = new Id({key});
 
@@ -129,7 +133,7 @@ function loadData(id) {
       id.increment;
       
    document.getElementById("base64").value =
-      btoa(id.key);
+      Base64.encode(id.key);
       
    
 }
@@ -234,9 +238,10 @@ var a = new A();
 var key = a.key;
 
 document.writeln(
-   key
+   Base64.encode(key)
 );
 
+document.writeln();
 
 a2 = new A(
    {
@@ -247,8 +252,10 @@ a2 = new A(
 );
 
 document.writeln(
-   a2.key
+   Base64.encode(a2.key)
 );
+
+document.writeln();
 
 document.writeln(
    a.equals(a2)

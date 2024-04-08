@@ -28,3 +28,4 @@ function (message, source, lineno, colno, error)
       alert(string);
    
 };
+

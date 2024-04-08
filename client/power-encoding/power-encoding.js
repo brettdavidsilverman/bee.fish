@@ -111,83 +111,76 @@ class PowerEncoding extends Stream {
 }
    
 
-Number.prototype.encode = function(encoding)
+Number.prototype.encode = function(stream)
 {
-   encoding.write("1");
-   encoding.encode(this.valueOf());
+   stream.write("1");
+   stream.encode(this.valueOf());
 }
 
-Number.decode = function(encoding)
+Number.decode = function(stream)
 {
    CHECK(
       "Number.decode start bit",
-      encoding.read() == "1"
+      stream.read() == "1"
    );
    
-   var number = encoding.decode();
+   var number = stream.decode();
    
    return number;
 }
 
-String.prototype.encode = function(encoding)
+String.prototype.encode = function(stream)
 {
-   encoding.write("1");
+   stream.write("1");
    
    for (var i = 0; i < this.length; ++i)
    {
       var charCode = this.charCodeAt(i);
       var byte1 = charCode >> 8;
       var byte2 = charCode & 0x00FF;
-      alert([byte1, byte2]);
-      byte1.encode(encoding);
-      byte2.encode(encoding);
+      byte1.encode(stream);
+      byte2.encode(stream);
+       //charCode.encode(stream);
    }
    
-   encoding.write("0");
+   stream.write("0");
+   
+   
+   CHECK(
+      "String.encode count",
+      stream.count == 0
+   );
+   
 }
 
-String.decode = function(encoding)
+String.decode = function(stream)
 {
    var string = "";
    
    CHECK(
       "Decode string start bit",
-      encoding.read() == "1"
+      stream.read() == "1"
    );
    
-   while (encoding.peek() == "1")
+   while (stream.peek() == "1")
    {
-      var byte1 = Number.decode(encoding);
-      var byte2 = Number.decode(encoding);
+      var byte1 = Number.decode(stream);
+      var byte2 = Number.decode(stream);
       var charCode = (byte1 << 8) + byte2;
+      //var charCode = Number.decode(stream);
       string += String.fromCharCode(charCode);
    }
    
    CHECK(
       "Decode string end bit",
-      encoding.read() == "0"
+      stream.read() == "0"
    );
-   
+
+
    return string;
    
 }
 
-class CheckError extends Error
-{   
-   constructor(label)
-   {
-      super("Check failed for " + label);
-      this.label = label;
-   }
-   
-}
 
-function CHECK(label, bool)
-{
-   if (bool == false)
-   {
-      throw new CheckError(label);
-   }
-}
 
 PowerEncoding.BASE = 2;

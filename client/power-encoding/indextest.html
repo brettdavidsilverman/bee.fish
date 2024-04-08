@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="/head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1, user-scale=1"/>
+      <script src="../console/console.js"></script>
+      <script src="../stream/stream.js"></script>
+      <script src="power-encoding.js"></script>
+      <link rel="stylesheet" type="text/css" href="/style.css" />
+      <link rel="stylesheet" type="text/css" href="../style.css" />
+
+      <title>Power Encoding</title>
+   </head>
+
+   <body>
+      <h1>Power Encoding</h1>
+<!--
+      <h2>Properties</h2>
+      
+      <p>Power Encoding allows us to read
+       numbers from bit streams without the 
+       need to know the length of the number.</p>
+       
+	     <p>Power encoded numbers compare for 
+	      equality and greater/less than without
+	      the need to decode.</p>
+      
+      <h2>Encoding</h2>
+      <ul>
+         <li>1. Zero has definition of 0</li>
+         <li>2. Find the greatest
+            <b><i>power</i></b> such that 
+            <b><i>2<sup>power</sup> <= number</i></b></li>
+         <li>3. Find the remainder such that 
+            <b><i>2<sup>power</sup> + remainder = number</i></b></li>
+         <li>4. Repeat steps 1 to 4 for the 
+            <b><i>power</i></b> and 
+            <b><i>remainder</i></b></li>
+         <li><p>In other words
+             <b><i>b => 0</i></b> or <br/>
+             <b><i>b => (2<sup>b</sup> + b)</i></b></li></br>
+             eg <b><i>3 = (2<sup>(2<sup>0</sup> + 0)</sup> + (2<sup>0</sup> + 0)	)</i></b></p></li>
+         <li>5. <p>Forming a binary tree of 
+            <b><i>power</i></b> and 
+            <b><i>remainder</i></b></p></li>
+         <li>6. <p>Descend into the binary tree
+            depth first, from power (left branch).
+            Write out a 1 for each open branch and
+            0 for each closed branch.</p></li>
+      </ul>
+      
+      <a href="power-encoding.js">power-encoding.js</a>
+      
+      <p>For a reference to <a href="../stream/index.html">stream</a></p>
+
+      <h2>Encode numbers</h2>
+      
+      <pre>
+         <script>
+for (var i = 0; i <= 100; ++i)
+{
+   // Encode to stream and get bits
+   var write = new PowerEncoding();
+   i.encode(write);
+
+   // Create stream from bits and decode
+   var read = new PowerEncoding(write);
+
+   var x = Number.decode(read);
+   document.writeln(
+      [x, read.bits].join("\t")
+   );
+   CHECK("End count", read.count == 0);
+   
+}
+         </script>
+      </pre>
+
+      <h2>Encode strings</h2>
+      <form onsubmit="event.preventDefault()">
+         String <input type="text" id="text" value="Brett"></input>
+         <button onclick="encodeString()">encode</button>
+      </form>
+      <pre>
+         <script>
+function encodeString() {
+   var string = document.getElementById("text").value;
+
+   var stream = new PowerEncoding();
+   string.encode(stream);
+   CHECK(stream.count == 0, "Zero count");
+   document.getElementById("data").value =
+      btoa(stream.toString());
+}
+
+         </script>
+      </pre>
+      
+      <h2>Decode strings</h2>
+      <form onsubmit="event.preventDefault()">
+         Data <input type="text" id="data"></input>
+         <button onclick="decodeString()">decode</button>
+      </form>
+      <pre>
+         <script>
+function decodeString() {
+   var data = document.getElementById("data").value;
+
+   var stream = new PowerEncoding(atob(data));
+   var string = String.decode(stream);
+   CHECK(stream.count == 0, "Zero count");
+   alert(string);
+}
+         </script>
+      </pre>
+-->
+   </body>
+</html>

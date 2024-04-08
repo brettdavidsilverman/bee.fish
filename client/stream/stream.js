@@ -39,7 +39,7 @@ class Stream
       
       ++this.index;
       
-      if (bit === "1")
+      if (bit == "1")
          this.count++;
       else
          this.count--;
@@ -49,6 +49,15 @@ class Stream
 
    write(bits)
    {
+      for (var i = 0; i < bits.length; ++i)
+      {
+         var bit = bits[i];
+         if (bit == "1")
+            this.count++;
+         else
+            this.count--;
+      }
+      
       this.bits += bits;
    }
    
