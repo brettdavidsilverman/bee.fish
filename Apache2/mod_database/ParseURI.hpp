@@ -14,7 +14,7 @@ namespace BeeFishWebServer {
    Path parseURI(const char* clientIP, const char* uri) {
        
       Path path = database;
-      path = path[clientIP];
+      //path = path[clientIP];
       
       string _uri = uri;
       
