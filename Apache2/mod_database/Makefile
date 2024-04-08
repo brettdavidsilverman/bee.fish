@@ -61,9 +61,9 @@ start:
 	$(APACHECTL) start
 	sleep 1
 
-restart:
-	$(APACHECTL) restart
-	sleep 1
+restart:	stop start
+	#$(APACHECTL) restart
+	#sleep 1
 stop:
 	$(APACHECTL) stop
 
