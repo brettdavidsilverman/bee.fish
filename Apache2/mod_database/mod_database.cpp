@@ -68,7 +68,7 @@ static Debug debug;
 static mutex _mutex;
 
 namespace BeeFishWebServer {
-   Database database("/home/bee/bee.fish.data");
+   Database database(DATABASE_FILENAME);
 
 }
 
@@ -87,6 +87,19 @@ static int database_handler(request_rec *r)
        
     debug << endl;
  
+    std::string filename =
+       WWW_ROOT_DIRECTORY;
+    
+    filename += r->uri;
+        
+    if (filename.find("..") != std::string::npos)
+       return HTTP_INTERNAL_SERVER_ERROR;
+         
+    if (std::filesystem::exists(filename))
+    {
+        return DECLINED;
+    }
+        
     Path path = parseURI(
        r->connection->client_ip,
        r->uri
@@ -94,18 +107,9 @@ static int database_handler(request_rec *r)
 
     Variable result;
 
-    if (!strcmp(r->method, "GET"))
+    if (strcmp(r->method, "GET") == 0)
     {
-        std::string filename = WWW_ROOT_DIRECTORY;
-        filename += r->uri;
-        if (filename.find("..") != std::string::npos)
-           return HTTP_INTERNAL_SERVER_ERROR;
-           
-        if (std::filesystem::exists(filename))
-        {
-           return DECLINED;
-        }
-        else if (strcmp(r->uri, "/id") == 0)
+        if (strcmp(r->uri, "/id") == 0)
         {
            if (!outputId(r))
               return HTTP_INTERNAL_SERVER_ERROR;
@@ -137,8 +141,7 @@ static int database_handler(request_rec *r)
         
     }
     else if (!strcmp(r->method, "POST")) {
-        #warning Post overlays existsing data"
-       //path.clear();
+       path.clear();
        
        if (inputJSON(path, r))
           return OK;
