@@ -12,7 +12,7 @@
 #include "../power-encoding/encoding.h"
 #include "../b-string/string.h"
 #include "../Script/Script.hpp"
-
+#include "Version.hpp"
 
 using namespace std;
 using namespace std::chrono;

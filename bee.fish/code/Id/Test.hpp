@@ -47,13 +47,14 @@ namespace BeeFishId
    
    inline bool testIds()
    {
+      cout << "Testing large array of ids " << flush;
       ofstream ofile("test.txt");
       vector<Id> array(1000);
       map<std::string, int> map;
       
       for (Id& id : array)
       {
-         cout << id.key() << endl;
+         //cout << id.key() << endl;
          ofile << id.key() << endl;
       }
 
@@ -79,14 +80,18 @@ namespace BeeFishId
          }
          
          Id id = Id::fromKey(key);
-         cout << id.toString() << endl;
+         //cout << id.toString() << endl;
       }
 
       ifile.close();
       
-      //remove("test.txt");
+      remove("test.txt");
       
-      return !duplicates;
+      bool ok = !duplicates;
+      
+      BeeFishMisc::outputSuccess(ok);
+      
+      return ok;
    
    }
    
