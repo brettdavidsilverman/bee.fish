@@ -12,7 +12,7 @@ using namespace BeeFishId;
 using namespace BeeFishBString;
 
 int main(int argc, const char* argv[]) {
-   
+  
    cout << "bee.fish.id"
            << endl
         << "C++ run time: "
@@ -36,6 +36,7 @@ int main(int argc, const char* argv[]) {
    if (hasArg(argc, argv, "-key") >= 0)
       fromKey = true;
       
+   
    while (!cin.eof())
    {
       std::string line;
@@ -49,6 +50,33 @@ int main(int argc, const char* argv[]) {
 
       if (line == "")
          break;
+        
+        
+/*
+      Data data;
+      if (fromKey) {
+         data = Data::fromBase64(line);
+         BitStream stream(data);
+         BString name;
+         stream >> name;
+         cout << "BString from base 64:"
+              << name
+              << endl;
+      }
+      else {
+         BitStream stream;
+         stream << line;
+         
+         cout << stream.bstr() << endl;
+         data = stream.toData();
+         cout << data.bstr() << endl;
+         BString base64 = data.toBase64();
+         cout << "Base64 from BString"
+              << endl
+              << base64
+              << endl;
+      }
+*/
 
       Id id;
       

@@ -223,21 +223,51 @@ namespace BeeFishBString
           PowerEncoding &stream,
           BString &bString)
       {
+         size_t startCount = stream._count;
+         
          if (stream.readBit() != 1)
             throw runtime_error("Invalid stream");
             
          bString.clear();
-         char character;
+         unsigned int character;
 
          while (stream.peekBit() == 1)
          {
             stream >> character;
-            bString.push_back(character);
+            bString.push_back((char)character);
          }
 
          if (stream.readBit() != 0)
             throw runtime_error("Invalid stream");
             
+         size_t endCount = stream._count - startCount;
+         
+         assert(endCount == 0);
+         
+         return stream;
+      }
+      
+      friend PowerEncoding &operator<<(
+          PowerEncoding &stream,
+          const BString &bString)
+      {
+         size_t startCount = stream._count;
+         
+         stream.writeBit(1);
+         uint8_t character;
+
+         for (char c : bString)
+         {
+            character = (uint8_t)c;
+            stream << character;
+         }
+         
+         stream.writeBit(0);
+         
+         size_t endCount = stream._count - startCount;
+         
+         assert(endCount == 0);
+         
          return stream;
       }
 

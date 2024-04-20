@@ -105,7 +105,7 @@ namespace BeeFishBString
    {
       cout << "Characters" << endl;
       
-      for (char c = 0; c <= 10; c++) {
+      for (char c = 0; c < 10; c++) {
          BitStream stream;
          stream << c;
          cout << "Char: " << (int)c << '\t' << stream.bstr() << endl;
@@ -280,7 +280,10 @@ namespace BeeFishBString
          "BitStreams compare",
          stream2 == stream2Compare
       );
-
+     
+      BeeFishMisc::outputSuccess(ok);
+      
+      assert(ok);
       cout << endl;
 
       return ok;

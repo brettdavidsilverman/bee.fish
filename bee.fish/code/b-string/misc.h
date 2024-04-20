@@ -19,24 +19,7 @@
 
 namespace BeeFishBString
 {
-   PowerEncoding& operator <<
-   (
-      PowerEncoding &output,
-      const BString& string
-   )
-   {
-      output.writeBit(1);
-
-      for (auto character : string)
-      {
-         output << character;
-      }
-
-      output.writeBit(0);
-
-      return output;
-   }
-
+   
    
 #ifdef SERVER
    inline BString Data::md5() const

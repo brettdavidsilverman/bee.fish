@@ -57,7 +57,7 @@ namespace BeeFishBase64
    
    inline BString
    encode(const Data& data) {
-      return encode((const Byte*)data.data(), data.size());
+      return encode((const Byte*)(&(data.data()[0])), data.size());
    }
 
    

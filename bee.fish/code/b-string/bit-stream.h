@@ -17,13 +17,13 @@
 namespace BeeFishBString {
 
    // A byte aligned stream of bits
-   // using a Data member as storage
+   // using a vector<bool> as storage
    // and PowerEncoding as the encoding
    // mechanism
 
    // This defines the readBit and writeBit
-   // functions of PowerEncodong, to append
-   // a bit to the current byte.
+   // functions of PowerEncoding, to append
+   // a bit to the vector.
    class BitStream :
       public PowerEncoding,
       public vector<bool>

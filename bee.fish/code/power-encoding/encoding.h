@@ -9,6 +9,8 @@ using namespace std;
 namespace BeeFishPowerEncoding
 {
     
+   // Encode/Decode std::string with chars
+   
    PowerEncoding& operator <<
    (
       PowerEncoding &output,
@@ -87,8 +89,6 @@ namespace BeeFishPowerEncoding
 
       return input;
    }
-
-   
 
    template<typename T>
    PowerEncoding& operator <<

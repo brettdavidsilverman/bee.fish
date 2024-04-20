@@ -113,12 +113,25 @@ class PowerEncoding extends Stream {
 
 Number.prototype.encode = function(stream)
 {
+   var startCount = stream.count;
+   
    stream.write("1");
    stream.encode(this.valueOf());
+   
+   var endCount =
+      stream.count - startCount;
+      
+   CHECK(
+      "Number.encode end count",
+      endCount == 0
+   );
+   
 }
 
 Number.decode = function(stream)
 {
+   var startCount = stream.count;
+   
    CHECK(
       "Number.decode start bit",
       stream.read() == "1"
@@ -126,61 +139,97 @@ Number.decode = function(stream)
    
    var number = stream.decode();
    
+   var endCount =
+      stream.count - startCount;
+      
+   CHECK(
+      "Number.decode end count",
+      endCount == 0
+   );
+   
    return number;
+}
+
+String.prototype.toUtf8 = function() {
+   const encoder = new TextEncoder("utf8");
+   var uint8array = encoder.encode(this);
+   return uint8array;
+}
+
+String.fromUtf8 = function(uint8array) {
+   const decoder = new TextDecoder("utf8");
+   var string = decoder.decode(uint8array);
+   return string;
 }
 
 String.prototype.encode = function(stream)
 {
-   stream.write("1");
+
+   var utf8 = this.toUtf8();
    
-   for (var i = 0; i < this.length; ++i)
+   var startCount = stream.count;
+   
+   stream.write("1");
+
+   for (var i = 0; i < utf8.length; ++i)
    {
-      var charCode = this.charCodeAt(i);
-      var byte1 = charCode >> 8;
-      var byte2 = charCode & 0x00FF;
-      byte1.encode(stream);
-      byte2.encode(stream);
-       //charCode.encode(stream);
+      var charCode = Number(utf8[i]);
+      charCode.encode(stream);
    }
    
    stream.write("0");
    
    
+   var endCount =
+      stream.count - startCount;
+      
    CHECK(
-      "String.encode count",
-      stream.count == 0
+      "String.encode end count",
+      endCount == 0
    );
    
 }
 
 String.decode = function(stream)
 {
-   var string = "";
+   var startCount = stream.count;
+   
+   var utf8 = [];
    
    CHECK(
       "Decode string start bit",
       stream.read() == "1"
    );
    
+   var i = 0;
    while (stream.peek() == "1")
    {
-      var byte1 = Number.decode(stream);
-      var byte2 = Number.decode(stream);
-      var charCode = (byte1 << 8) + byte2;
-      //var charCode = Number.decode(stream);
-      string += String.fromCharCode(charCode);
+      var charCode = Number.decode(stream);
+      utf8[i++] = charCode;
    }
    
    CHECK(
       "Decode string end bit",
       stream.read() == "0"
    );
+   
 
+   var endCount =
+      stream.count - startCount;
+      
+   CHECK(
+      "String.decode end count",
+      endCount == 0
+   );
+   
+   var data = Uint8Array.from(utf8);
+   
+   var string = String.fromUtf8(data);
 
    return string;
    
 }
 
-
-
 PowerEncoding.BASE = 2;
+
+

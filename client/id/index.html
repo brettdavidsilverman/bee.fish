@@ -6,8 +6,9 @@
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <!--
       <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.7/base64.min.js"></script>
-      -->
+      
       <script src="../base64.min.js"></script>
+      -->
       <script src="../fetch.js"></script>
       <script src="../stream/stream.js"></script>
       <script src="../power-encoding/power-encoding.js"></script>
@@ -40,7 +41,7 @@ var id = new Id();
 document.writeln(id);
 
 // Write out its string encoded key
-document.writeln(Base64.encode(id.key));
+document.writeln(btoa(id.key));
 
 // Create a new id from old key
 var id2 = Id.fromKey(id.key);
@@ -95,7 +96,7 @@ function loadKey()
       id.key;
       
    document.getElementById("base64").value =
-      Base64.encode(id.key);
+      btoa(id.key);
 }
 
 function loadDataFromKey()
@@ -110,7 +111,7 @@ function loadDataFromKey()
 
 function loadDataFromBase64()
 {
-   var key = Base64.decode(document.getElementById("base64").value);
+   var key = atob(document.getElementById("base64").value);
    
    id = new Id({key});
 
@@ -133,7 +134,7 @@ function loadData(id) {
       id.increment;
       
    document.getElementById("base64").value =
-      Base64.encode(id.key);
+      btoa(id.key);
       
    
 }
@@ -238,7 +239,7 @@ var a = new A();
 var key = a.key;
 
 document.writeln(
-   Base64.encode(key)
+   btoa(key)
 );
 
 document.writeln();
@@ -252,7 +253,7 @@ a2 = new A(
 );
 
 document.writeln(
-   Base64.encode(a2.key)
+   btoa(a2.key)
 );
 
 document.writeln();
