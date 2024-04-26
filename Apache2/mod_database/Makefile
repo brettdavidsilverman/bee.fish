@@ -66,4 +66,5 @@ restart:	stop start
 	#sleep 1
 stop:
 	$(APACHECTL) stop
+	sleep 1
 

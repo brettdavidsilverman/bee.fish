@@ -19,26 +19,20 @@ var ids = document.getElementById("ids");
 
 function getIds()
 {
-    var count = prompt("Count", 10);
+   var count = prompt("Count", 10);
 
-    if (!count)
-       return;
-       
-    var i = 1;
-    for (;;)
-    {
-       getId().then(
-          function(id) {
-             ids.innerText += id + "\r\n";
-          }
-       );
-       
-       i = i + 1;
-       
-       if (i > count)
-          break;
-    }
-    
+   if (!count)
+      return;
+
+   for (var i = 0; i < count; ++i)
+   {
+      getId().then(
+         function(id) {
+            ids.innerText += id + "\r\n";
+         }
+      );
+   }
+
 }
 
 async function getId() {

@@ -154,6 +154,7 @@ static int database_handler(request_rec *r)
 
 static bool outputId(request_rec *r)
 {
+   
    ap_set_content_type(
       r, "application/json; charset=utf-8"
    );
