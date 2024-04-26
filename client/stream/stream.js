@@ -85,12 +85,6 @@ class Stream
             i, Stream.BITS_PER_CHARACTER
          );
 
-         /*
-         chunk = chunk.padEnd(
-            Stream.BITS_PER_CHARACTER,
-            "0"
-         );
-         */
          for (var x = chunk.length; x < Stream.BITS_PER_CHARACTER; x++) {
             chunk += "0";
          }
@@ -111,13 +105,7 @@ class Stream
       {
          var number = string.charCodeAt(i);
          var chunk = number.toString(2);
-
-         /*
-         chunk = chunk.padStart(
-            Stream.BITS_PER_CHARACTER,
-            "0"
-         );
-         */
+         
          for (var x = chunk.length; x < Stream.BITS_PER_CHARACTER; x++) {
             chunk = "0" + chunk;
          };

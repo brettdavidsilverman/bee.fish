@@ -158,7 +158,13 @@ static bool outputId(request_rec *r)
    ap_set_content_type(
       r, "application/json; charset=utf-8"
    );
-   BeeFishId::Id id("🐝");
+   std::string name;
+   if (r->args && strlen(r->args))
+      name = BString(r->args).decodeURI();
+   else
+      name = "💋";
+      
+   BeeFishId::Id id(name);
    
    ApacheStream stream(r);
    stream << "\"" << id.key() << "\"";

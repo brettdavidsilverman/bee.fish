@@ -23,11 +23,11 @@ namespace BeeFishWebServer {
           _uri[_uri.length() -1] != '/')
          _uri += '/';
          
-      string segment;
+      BString segment;
       std::stringstream test(_uri);
       while(std::getline(test, segment, '/'))
       {
-         path = path[BString(segment)];
+         path = path[segment.decodeURI()];
       }
 
 /*

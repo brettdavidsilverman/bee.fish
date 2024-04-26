@@ -4,49 +4,45 @@
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <title>bee.fish id</title>
-      <script src="/error.js"/>
+      <script src="/head.js"/>
+      <script src="client/fetch.js"></script>
+      <script src="client/stream/stream.js"></script>
+      <script src="client/power-encoding/power-encoding.js"></script>
+      <script src="client/id/id.js"></script>
+      
       <link rel="stylesheet" type="text/css" href="/style.css" />
    </head>
    <body>
       <h1 id="h1">bee.fish id</h1>
       <form onsubmit="return false;">
-         <button onclick="getIds()">Get Ids</button>
-         <pre id="ids"></pre>
+         <button onclick="getId()">Get Id</button>
+         <pre id="idPre"></pre>
       </form>
       <script>
 
-var ids = document.getElementById("ids");
+var idPre = document.getElementById("idPre");
 
-function getIds()
-{
-   var count = prompt("Count", 10);
 
-   if (!count)
+function getId() {
+   
+   var name = prompt("Name", "🐝");
+   if (!name)
       return;
-
-   for (var i = 0; i < count; ++i)
-   {
-      getId().then(
-         function(id) {
-            ids.innerText += id + "\r\n";
-         }
-      );
-   }
-
-}
-
-async function getId() {
-    
+      
    var response =
       fetch(
-         "/id"
+         "/id?" + encodeURIComponent(name)
       ).then(
          function (response) {
             return response.json();
          }
       ).then(
          function (json) {
-            return atob(json);
+            return Id.fromKey(atob(json));
+         }
+      ).then(
+         function (id) {
+            idPre.innerText = id.toJSON();
          }
       ).catch(
          function(error) {

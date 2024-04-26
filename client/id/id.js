@@ -217,7 +217,6 @@ class Id {
    }   
 
    setItem() {
-      console.log("Set:" + this.name);
       var value = JSON.stringify(this, null, "   ");
 
       
