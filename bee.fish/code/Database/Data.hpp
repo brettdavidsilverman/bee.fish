@@ -28,7 +28,48 @@ namespace BeeFishDatabase {
    {
    public:
       size_t _size = 0;
-      char _data[];
+      char* _data = nullptr;
+      
+      Data(size_t size = 0)
+      {
+         _size = size;
+         if (_size)
+            _data = new char[size];
+      }
+      
+      Data(const Data& source)
+      {
+         _size = source._size;
+         if (_size) {
+            _data = new char[_size];
+            memcpy(_data, source._data, _size);
+         }
+      }
+      
+      Data& operator = (const Data& rhs)
+      {
+         if (_data)
+            delete[] _data;
+            
+         _data = nullptr;
+         
+         _size = rhs._size;
+         
+         if (_size) {
+           _data = new char[_size];
+           memcpy(_data, rhs.data(), _size);
+         }
+         
+         return (*this);
+      }
+      
+      ~Data()
+      {
+         if (_data) {
+            delete[] _data;
+            _data = nullptr;
+         }
+      }
    
       template<typename T>
       Data& operator = (const T& rhs) {
@@ -43,18 +84,18 @@ namespace BeeFishDatabase {
       }
 
       char* data() {
-         return &_data[0];
+         return _data;
       }
 
       const char* data() const {
-         return &_data[0];
+         return _data;
       }
 
       size_t size() const {
          return _size;
       }
 
-      operator std::string() const
+      std::string str() const
       {
          return std::string(data(), _size);
       }

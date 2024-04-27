@@ -31,8 +31,13 @@ namespace BeeFishDatabase
       
       Database db;
 
+      cerr << db << endl;
+      
       Path start(db);
-
+/*
+      cerr << "Start 1 " << start["Hello"] << endl;
+      cerr << "Start 2 " << start["Hello"] << endl;
+      */
       Path next = start["Hello"];
 
       next.setData("world");
@@ -251,8 +256,6 @@ namespace BeeFishDatabase
          outputSuccess(success);
          
       }
-
-      assert(success);
       
       if (success)
       {

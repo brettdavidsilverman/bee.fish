@@ -14,9 +14,9 @@ namespace BeeFishDatabase
 
    struct Branch
    {
-      Index _left;
-      Index _right;
-      Index _dataIndex;
+      Index _left = 0;
+      Index _right = 0;
+      Index _dataIndex = 0;
       
       bool isDeadEnd() const
       {

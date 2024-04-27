@@ -38,44 +38,28 @@ namespace BeeFishDatabase {
    public:
       typedef PowerEncoding Encoding;
    private:
+       
+      
       
       struct Header
       {
-         char   _version[256];
-         size_t _pageSize;
-         AtomicIndex _nextIndex;
-         Mutex _growLock;
-         std::atomic_flag _writtingFlag;
-      };
+         char _version[256];
+         Size _pageSize;
+      } _header;
     
-      struct Tree
-      {
-         Header _header;
-         Branch _root[];
-      };
       
-      Size    _incrementSize;
-      Size    _size;
-      Tree*   _tree {nullptr};
-      Branch* _root;
-      AtomicIndex*  _nextIndex;
-      Size    _branchCount;
+
+      AtomicIndex  _nextIndex;
       Size    _pageSize;
-      Mutex*  _mutex;
-   public:
-      std::atomic_flag* _writtingFlag;
+
    public:
       Database(
          string filePath = "",
-         const Size initialSize = 1000 * 1000,
-         const Size incrementSize = 1000 * 1000,
          const Size pageSize = getPageSize()
       ) :
          File(
-            filePath,
-            initialSize
+            filePath
          ),
-         _incrementSize(incrementSize),
          _pageSize(pageSize)
       {
          Debug debug;
@@ -84,8 +68,6 @@ namespace BeeFishDatabase {
                << escape(_filename)
                << "\")"
                << endl;
-               
-         mapFile();
          
          if (isNew())
          {
@@ -93,22 +75,23 @@ namespace BeeFishDatabase {
          }
     
          checkHeader();
+
+         Size branchCount =
+            floor((double)(size() - sizeof(Header)) /
+               (double)sizeof(Branch));
+            
+         _nextIndex = branchCount;
          
       }
-      
+      /*
       Database(const Database& source) :
          File(source),
-         _incrementSize(source._incrementSize),
-         _size(source._size),
          _pageSize(source._pageSize)
       {
-         mapFile();
       }
-      
+      */
       virtual ~Database()
       {
-         if (_tree)
-            munmap(_tree, _size);
 
          Debug debug;
          debug << now() << " "
@@ -124,80 +107,41 @@ namespace BeeFishDatabase {
 
       virtual void initializeHeader()
       {
-         Header& header = _tree->_header;
-         //memset(&header, '\0', sizeof(Header));
-         strcpy(header._version, DATABASE_VERSION);
-         header._pageSize = _pageSize;
-         memcpy((void*)&(header._nextIndex), new AtomicIndex{Branch::Root}, sizeof(AtomicIndex));
-         memcpy((void*)&(header._growLock), new Mutex(), sizeof(Mutex));
-         memcpy((void*)&(header._writtingFlag), new std::atomic_flag{false}, sizeof(std::atomic_flag));
+          
+         memset(&_header, 0, sizeof(Header));
+         strcpy(_header._version, DATABASE_VERSION);
+         _header._pageSize = _pageSize;
+         seek(0);
+         write(&_header, 1, sizeof(Header));
       }
       
       virtual void checkHeader()
       {
-         if (strcmp(_tree->_header._version, DATABASE_VERSION) != 0)
+         seek(0);
+         read(&_header, 1, sizeof(Header));
+         
+         if (strcmp(_header._version, DATABASE_VERSION) != 0)
          {
             std::string error = "Invalid file version.";
             error += " Program version ";
             error += DATABASE_VERSION;
             error += ". File version ";
-            error += _tree->_header._version;
+            error += _header._version;
             throw runtime_error(error);
          }
 
-         if (_tree->_header._pageSize != _pageSize)
+         if (_header._pageSize != _pageSize)
          {
             std::stringstream stream;
             stream
                << "Invalid page size."
                << "Program is " << _pageSize
-               << ". Database is " << _tree->_header._pageSize
+               << ". Database is " << _header._pageSize
                << ".";
             throw runtime_error(stream.str());
          }
 
-      }
-      
-      virtual void mapFile()
-      {
-         if (_tree)
-            munmap(_tree, _size);
-
-         _size = size();
-         
-         _tree = (Tree*)
-            mmap(
-               NULL,
-               _size,
-               PROT_READ | PROT_WRITE,
-               MAP_SHARED,
-               _fileNumber,
-               0
-            );
-
-         setMembers();
-            
-      }
-
-      void setMembers() {
-
-         _size = size();
-
-         _root = _tree->_root;
-         
-         _branchCount =
-            floor((float)(_size - sizeof(Header)) /
-               (float)sizeof(Branch));
-            
-         _nextIndex = 
-           &(_tree->_header._nextIndex);
-           
-         _mutex = &(_tree->_header._growLock);
-         
-         _writtingFlag = &(_tree->_header._writtingFlag);
-         
-      }
-         
+      }
       
    public:
 
@@ -207,8 +151,7 @@ namespace BeeFishDatabase {
 
       inline Index getNextIndex()
       {
-         return ++(*_nextIndex);
-         //return _nextIndex->load();
+         return ++_nextIndex;
 
       }
  
@@ -219,113 +162,91 @@ namespace BeeFishDatabase {
          Size size = sizeof(Size) + byteSize;
   
          Index branchCount =
-            ceil((float)size /
-                 (float)sizeof(Branch));
+            ceil((double)size /
+                 (double)sizeof(Branch));
 
          Index dataIndex;
          dataIndex = getNextIndex();
          
-         (*_nextIndex) += (branchCount);
+         _nextIndex += branchCount;
 
-         // Check for resize
-         while ( _branchCount < *_nextIndex  )
-         {
-            growFile();
-         }
         
-         Data* data = getData(dataIndex);
-         
-         data->_size = byteSize;
+         Data data(byteSize);
+         memset(data.data(), 0, data.size());
+         setData(dataIndex, data);
          
          return dataIndex;
             
       }
       
-      inline Branch& getBranch(Index index)
-      {
-         if (index >= _branchCount)
-         {
-            growFile();
-         }
-
-         return _root[index];
+      inline Branch getBranch(Index index)
+      {
+         Size offset = sizeof(Header) + index * sizeof(Branch);
          
-      }
+         Branch branch;
+         if (offset + sizeof(Branch) > size())
+         {
+            // Seek past end of file
+            // This will write a cleared branch
+            seek(offset);
+            write(&branch, 1, sizeof(branch));
+         }
+         
+         seek(offset);
+         
+         read(&branch, 1, sizeof(branch));
 
-      inline const Branch& getBranch(Index index) const
-      {
-         if (index >= _branchCount)
-            throw runtime_error("Index out of bounds");
-
-         return _root[index];
+         return branch;
          
       }
       
-      inline Data* getData(Index dataIndex)
+      inline const Branch getBranch(Index index) const
+      {
+         Size offset = sizeof(Header) + index * sizeof(Branch);
+         assert(offset + sizeof(Branch) <= size());
+         
+         seek(sizeof(Header) + index * sizeof(Branch));
+         Branch branch;
+         read(&branch, 1, sizeof(branch));
+
+         return branch;
+         
+      }
+      
+      inline void setBranch(Index index, const Branch& branch)
+      {
+         seek(sizeof(Header) + index * sizeof(Branch));
+         write(&branch, 1, sizeof(branch));
+      }
+
+      
+      inline Data getData(Index dataIndex)
       {
          if (dataIndex == 0)
-            return nullptr;
+            return Data();
          
-         Data* data =
-            (Data*)
-               (&(_root[dataIndex]));
-            
+         seek(sizeof(Header) + dataIndex * sizeof(Branch));
+         Size size;
+         read(&size, 1, sizeof(Size));
+         Data data(size);
+         read(data.data(), 1, size);
+
          return data;
       }
 
-      inline const Data* getData(Index dataIndex) const
+      
+      inline void setData(Index dataIndex, const Data& source)
       {
-         if (dataIndex == 0)
-            return nullptr;
+         seek(sizeof(Header) + dataIndex * sizeof(Branch));
+         Size size = source.size();
+         write(&size, 1, sizeof(Size));
+         write(source.data(), 1, size);
          
-         const Data* data =
-            (Data*)
-               (&(_root[dataIndex]));
-            
-         return data;
       }
  
-      virtual Size growFile()
-      {
-
-         _mutex->lock();
-         
-         Size oldSize = _size;
-         Size newSize = oldSize
-            + _incrementSize;
-
-         Debug debug;
-         debug << now()
-            << " Grow File \""
-               << escape(_filename)
-            << "\" "
-            << (newSize / 1000 / 1000)
-               << "Mb" << endl;
-         
-        
-         if (newSize > size())
-            newSize = File::resize(newSize);
-         
-         _tree = (Tree*)
-            mremap(
-               _tree,
-               oldSize,
-               newSize,
-               MREMAP_MAYMOVE
-            );
-            
-         assert(_tree);
-            
-         setMembers();
-
-         _mutex->unlock();
-         
-         return size();
-
-      }
       
       string version() const {
-         return _tree->_header._version;
+         return _header._version;
       }
 
    protected:
@@ -336,13 +257,13 @@ namespace BeeFishDatabase {
       {
 
          out << "Database: " 
-             << db._tree->_header._version
+             << db._header._version
              << endl
              << "Filename: "
              << db._filename
              << endl
              << "Next: "
-             << (unsigned long long)(db._tree->_header._nextIndex)
+             << (Size)(db._nextIndex)
              << endl
              << "Branch size: "
              << sizeof(Branch)

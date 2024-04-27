@@ -25,8 +25,7 @@ namespace BeeFishDatabase {
 
    public:
       File(
-         const string& filename = "",
-         const Size initialSize = 0
+         const string& filename = ""
       ) : _file(NULL),
           _filename(filename)
       {
@@ -39,14 +38,13 @@ namespace BeeFishDatabase {
             _isTemp = true;
             ::close(fileNo);
             open();
-            resize(initialSize);
          }
          else {
 
             // Create the file if it
             // doesnt exist
             if (exists() == false) {
-               create(initialSize);
+               create();
                _isNew = true;
             }
             else
@@ -99,7 +97,6 @@ namespace BeeFishDatabase {
          int origin = SEEK_SET
       ) const
       {
-         
          size_t result =
             fseek(
                _file,
@@ -191,7 +188,7 @@ namespace BeeFishDatabase {
          );
       }
 
-      void create(const Size initialSize)
+      void create()
       {
          FILE* file = fopen(
             _filename.c_str(), "w+"
@@ -203,11 +200,6 @@ namespace BeeFishDatabase {
                _filename
             );
          }
-   
-         resize(
-            fileno(file),
-            initialSize
-         );
    
          fclose(file);
 
@@ -229,18 +221,6 @@ namespace BeeFishDatabase {
          _fileNumber = fileno(_file);
       }
 
-      Size resize(const Size newSize)
-      {
-
-         resize(
-            _fileNumber,
-            newSize
-         );
-         
-         return size();
-   
-      }
-
       Size size() const
       {
          Size size = getFileSize(_fileNumber);
@@ -248,27 +228,7 @@ namespace BeeFishDatabase {
       }
       
       int _fileNumber = -1;
-      
-   private:
-      static void resize(
-         int fileNumber,
-         Size newSize
-      )
-      {
-         int result =
-            ftruncate(fileNumber, newSize);
-
-         if (result != 0)
-         {
-            string str = "Couldn't resize file. ";
-            str += to_string(newSize) +
-                   strerror(errno);
-            
-            throw runtime_error(str);
-         }
-         
-      }
-      
+     
    private:
       
       static Size getFileSize(int file)
