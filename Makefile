@@ -9,7 +9,7 @@ $(JSON):
 $(MOD_DATABASE):
 	cd Apache2/mod_database && sudo make $(DEBUG) install reload test
 	
-test:	all
+test:
 	cd bee.fish && make test
 	cd Apache2/mod_database && sudo make install stop start test
 	

@@ -46,9 +46,9 @@
 #include "Id/Id.hpp"
 #include "Database/Database.hpp"
 #include "parser/parser.h"
-#include "ParseURI.hpp"
 #include "ApacheStream.hpp"
 #include "Miscellaneous/Debug.hpp"
+#include "ParseURI.hpp"
 
 using namespace BeeFishDatabase;
 using namespace BeeFishWebServer;
@@ -57,24 +57,23 @@ using namespace BeeFishMisc;
 
 using namespace std;
 
-static int counter = 0;
 
 static bool inputJSON(Path path, request_rec *r);
 static bool outputJSON(Path path, request_rec *r);
 static bool outputDocument(Path path, request_rec *r);
 static bool outputId(request_rec *r);
 
-static Debug debug;
-static mutex _mutex;
 
 namespace BeeFishWebServer {
    Database database(DATABASE_FILENAME);
-
+   Debug debug;
+   mutex _mutex;
 }
 
 /* The sample content handler */
 static int database_handler(request_rec *r)
 {
+    scoped_lock<mutex> lock(_mutex);
     
     debug << now() << " "
           << r->connection->client_ip << " "
@@ -104,8 +103,6 @@ static int database_handler(request_rec *r)
        r->connection->client_ip,
        r->uri
     );
-
-    Variable result;
 
     if (strcmp(r->method, "GET") == 0)
     {
@@ -221,7 +218,7 @@ static bool inputJSON(Path path, request_rec *r) {
    int pageSize = getPageSize();
    char buffer[pageSize];
    Size pageIndex = 0;
-   JSON2Path index(path["index"]);
+   JSON2Path index = path["index"];
    
    MinMaxPath document = path["document"];
    

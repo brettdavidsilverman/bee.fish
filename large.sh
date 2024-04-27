@@ -6,8 +6,8 @@ curl -X POST \
    https://bee.fish/large.json \
    -H "Content-Type: application/json; charset=utf-8" \
    -H "Expect: " \
-   -T /home/bee/bee.fish/large.json -s
-   
+   -T /home/bee/bee.fish/large.json -s > /dev/null
+
 echo "Downloading large.json?document"
 
 curl https://bee.fish/large.json?document -s > large2.json
@@ -26,7 +26,7 @@ curl -X POST \
    https://bee.fish/large2a.json \
    -H "Content-Type: application/json; charset=utf-8" \
    -H "Expect: " \
-   -T large2a.json -s
+   -T large2a.json -s > /dev/null
    
 echo "Downloading large2b.json"
 

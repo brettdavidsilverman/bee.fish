@@ -2,6 +2,7 @@
 #define BEE_FISH_WEB_SERVER__PARSE_URI
 
 #include "Database/Database.hpp"
+#include "mod_database.hpp"
 
 using namespace std;
 using namespace BeeFishDatabase;
@@ -14,7 +15,7 @@ namespace BeeFishWebServer {
    Path parseURI(const char* clientIP, const char* uri) {
        
       Path path = database;
-      //path = path[clientIP];
+      path = path[clientIP];
       
       string _uri = uri;
       
@@ -23,11 +24,13 @@ namespace BeeFishWebServer {
           _uri[_uri.length() -1] != '/')
          _uri += '/';
          
-      BString segment;
+      std::string segment;
       std::stringstream test(_uri);
       while(std::getline(test, segment, '/'))
       {
-         path = path[segment.decodeURI()];
+         BString uri = segment;
+         debug << uri.decodeURI() << endl
+         path = path[uri.decodeURI().str()];
       }
 
 /*

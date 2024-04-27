@@ -41,7 +41,6 @@ clean:
 
 #   simple test
 test: a.out reload
-	curl http://localhost/ -s > /dev/null
 	./a.out -test
 
 debug:	clean
@@ -60,6 +59,7 @@ reload: install restart
 start:
 	$(APACHECTL) start
 	sleep 1
+	curl http://localhost/ -s > /dev/null
 
 restart:	stop start
 	#$(APACHECTL) restart

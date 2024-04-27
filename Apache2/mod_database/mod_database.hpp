@@ -19,8 +19,6 @@
 #include "Miscellaneous/Debug.hpp"
 #include "../Config.hpp"
 
-static Debug debug;
-static Database database(DATABASE_FILENAME);
 
 namespace BeeFishWebServer {
     
@@ -30,13 +28,12 @@ namespace BeeFishWebServer {
 
    using namespace std;
 
-   static int counter = 0;
+   extern Database database;
+   
+   extern Debug debug;
 
-   static bool inputJSON(Path path, request_rec *r);
-   static bool outputJSON(Path path, request_rec *r);
-   static bool outputDocument(Path path, request_rec *r);
-   
-   
+   extern mutex _mutex;
+
 }
 
 

@@ -1,6 +1,6 @@
 #ifndef BEE_FISH__DATABASE__VERSION_HPP
 #define BEE_FISH__DATABASE__VERSION_HPP
 
-#define DATABASE_VERSION "0.5.0-branch"
+#define DATABASE_VERSION "0.5.1"
 
 #endif

@@ -148,8 +148,9 @@ namespace BeeFishDatabase {
  
       Path operator [] (const char* key)
       {
+          #warning untested used to be BString
          return Path::operator[] 
-            (BeeFishBString::BString(key));
+            (std::string(key));
       }
 
       Size getDataSize() const
