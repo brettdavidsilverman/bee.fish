@@ -13,7 +13,8 @@ all:	$(OUTPUT)
 $(BUILD)/json:
 	cd ../json && make $(DEBUG)
 
-time:	CFLAGS += -D TIME -Ofast -DDEBUG
+time:	clean
+time:	CFLAGS += -DTIME -Ofast
 time:	$(OUTPUT)
 time:	run_time
 

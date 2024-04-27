@@ -148,7 +148,6 @@ namespace BeeFishDatabase {
  
       Path operator [] (const char* key)
       {
-          #warning untested used to be BString
          return Path::operator[] 
             (std::string(key));
       }
