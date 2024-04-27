@@ -550,9 +550,9 @@ namespace BeeFishDatabase {
          public PowerEncoding
       {
       protected:
-         bool _isDeadEnd;
          const Database* _database;
          Index _index;
+         Branch _branch;
          bool _contains;
       public:
          Contains
@@ -563,30 +563,29 @@ namespace BeeFishDatabase {
             _database(database),
             _index(index)
          {
-            const Branch& branch =
+             _branch =
                _database->getBranch(_index);
                
-            _contains = !branch.isDeadEnd();
+            _contains = !_branch.isDeadEnd();
          }
          
          virtual void writeBit(bool bit)
          {
             if (!_contains)
                return;
-            
-            const Branch& branch =
-               _database->getBranch(_index);
-            
-            if (!bit && branch._left)
-               _index = branch._left;
-            else if (bit && branch._right)
-               _index = branch._right;
+               
+            if (!bit && _branch._left)
+               _index = _branch._left;
+            else if (bit && _branch._right)
+               _index = _branch._right;
             else
             {
                _index = Branch::Root;
                _contains = false;
             }
 
+            _branch = _database->getBranch(_index);
+            
             PowerEncoding::writeBit(bit);
          }
          

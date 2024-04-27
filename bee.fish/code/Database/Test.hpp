@@ -38,11 +38,11 @@ namespace BeeFishDatabase
       Path next = start["Hello"];
 
       next.setData("world");
-
+/*
       cerr << "Start 1 " << start["Hello"] << endl;
       cerr << "Start 2 " << start["Hello"] << endl;
       cerr << "Next    " << next << endl;
-      
+*/
       std::string world;
       start["Hello"].getData(world);
 
@@ -61,6 +61,13 @@ namespace BeeFishDatabase
       
       
       data.refresh();
+      
+      if (success)
+      {
+         cout << "\tTesting Contains " << flush;
+         success = data.contains(100);
+         outputSuccess(success);
+      }
       
       if (success)
       {
@@ -478,9 +485,10 @@ namespace BeeFishDatabase
       
       if (success) {
          cout << "\tItem 0: ";
-         Path path = root["array"];
-         path = path[Type::ARRAY];
-         success = path.contains(0);
+         Path path = root["array"][Type::ARRAY];
+         Size test = MinMaxPath(path).min<Size>();
+         cerr << test;
+         success = path.contains(Size(0));
          BeeFishMisc::outputSuccess(success);
       }
       
@@ -553,7 +561,6 @@ namespace BeeFishDatabase
       }
       
       BeeFishMisc::outputSuccess(success);
-      assert(success);
       
       return success;
    }

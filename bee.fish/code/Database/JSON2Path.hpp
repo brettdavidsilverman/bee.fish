@@ -32,9 +32,8 @@ namespace BeeFishDatabase {
          {
              // Get next array index
              Size count = path.getData();
-             cerr << "JSON2Path " << count << endl;
              path.setData(++count);
-             path = path[count];
+             path = path[count - 1];
              
          }
          else if (_keyStack.size()) {
