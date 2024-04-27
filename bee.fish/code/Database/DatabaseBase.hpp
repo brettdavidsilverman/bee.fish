@@ -189,12 +189,12 @@ namespace BeeFishDatabase {
             // Seek past end of file
             // This will write a cleared branch
             seek(offset);
-            write(&branch, 1, sizeof(branch));
+            write(&branch, 1, sizeof(Branch));
          }
          
          seek(offset);
          
-         read(&branch, 1, sizeof(branch));
+         read(&branch, 1, sizeof(Branch));
 
          return branch;
          

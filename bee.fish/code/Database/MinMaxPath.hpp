@@ -93,16 +93,15 @@ namespace BeeFishDatabase {
       ) const
       {
 
+         MinMaxPath path(*this, index);
          
-         Branch branch =
-            getBranch(index);
+         Branch branch = path._branch;
 
          Size count = stack.count();
          
          while (!branch.isDeadEnd())
          {
-            MinMaxPath path(*this, index);
-
+            
             bool bit;
          
             if (branch._right) {
@@ -126,7 +125,8 @@ namespace BeeFishDatabase {
             if (count == 0)
                break;
                
-            branch = getBranch(index);
+            MinMaxPath next(path, index);
+            branch = next.getBranch();
          }
       
       }
@@ -194,14 +194,12 @@ namespace BeeFishDatabase {
          }
          
          Branch branch;
-         MinMaxPath path;
          StackValue entry;
          // Up the tree until first right
          do 
          {
             entry = stack.last();
-            path = entry._path;
-            branch = path.getBranch();
+            branch = getBranch(entry._path._index);
             stack.pop_back();
          }
          while (stack.size() && 
@@ -222,7 +220,7 @@ namespace BeeFishDatabase {
          // Follow the next min from
          // this right
          stack.push_back(
-             StackValue(path, 1)
+             StackValue(entry._path, 1)
          );
          
          min(branch._right, stack);
