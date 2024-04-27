@@ -14,9 +14,19 @@ namespace BeeFishDatabase
 
    struct Branch
    {
-      Index _left = 0;
-      Index _right = 0;
-      Index _dataIndex = 0;
+      Index _left;
+      Index _right;
+      Index _dataIndex;
+      
+      Branch()
+      {
+         memset(this, 0, sizeof(Branch));
+      }
+      
+      Branch(const Branch& source)
+      {
+         memcpy(this, &source, sizeof(Branch));
+      }
       
       bool isDeadEnd() const
       {

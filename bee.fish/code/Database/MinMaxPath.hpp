@@ -47,14 +47,15 @@ namespace BeeFishDatabase {
          Stack& stack
       ) const
       {
-         Branch branch =
-            getBranch(index);
 
          Size count = stack.count();
+         MinMaxPath path(*this, index);
          
+         
+         Branch branch = path._branch;
+
          while (!branch.isDeadEnd())
          {
-            MinMaxPath path(*this, index);
             
             bool bit;
 
@@ -79,9 +80,11 @@ namespace BeeFishDatabase {
             if (count == 0)
                break;
                
-            branch = getBranch(index);
-            
+            MinMaxPath next(path, index);
+            branch = next._branch;
+         
          }
+        
       }
 
       void max(

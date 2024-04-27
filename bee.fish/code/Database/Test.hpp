@@ -49,19 +49,25 @@ namespace BeeFishDatabase
       success = (world == "world");
       outputSuccess(success);
 
-      // Min / Max
-      MinMaxPath data = start["data"];
-
-      for (size_t i = min; i <= max; ++i)
+      
       {
-         data[i] = i;
+         // Min / Max
+         MinMaxPath data = start["data"];
+
+         for (Size i = min; i <= max; ++i)
+         {
+            data[i].setData(i);
+         }
       }
+      
+      MinMaxPath data = start["data"];
 
       if (success)
       {
          data.setData("");
          cout << "\tTesting Data string" << flush;
-         success = data.hasData();
+         success = !data.hasData();
+         
          string value;
          data.getData(value);
          success = success && (value == "");
@@ -70,7 +76,7 @@ namespace BeeFishDatabase
 
       if (success) {
          cout << "\tTesting Data Path Min: " << flush;
-
+         
          Stack stack;
 
          Size minimum =
@@ -81,6 +87,9 @@ namespace BeeFishDatabase
          success = (minimum == min);
 
          outputSuccess(success);
+         
+         assert(success);
+         
       }
 
       if (success) {
@@ -132,7 +141,7 @@ namespace BeeFishDatabase
 
          Path data = start;
          Size count = -1;
-         data = 22;
+         data.setData(22);
          data.getData(count);
          success =
             (count == 22);

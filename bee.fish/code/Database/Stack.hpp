@@ -101,14 +101,16 @@ namespace BeeFishDatabase {
 
       friend ostream& operator << (ostream& out, const Stack& stack)
       {
-         int index = 0;
-         
-         
+         bool start = true;
+
          for (auto value : stack)
          {
-            if (index++ == 0)
+            if (start)
+            {
                out << value._path;
-               
+               start = false;
+            }
+            
             out << value._bit;
          }
          

@@ -127,7 +127,6 @@ namespace BeeFishDatabase {
             
          }
         
-
          _branch = getBranch();
          
          PowerEncoding::writeBit(bit);
@@ -172,12 +171,7 @@ namespace BeeFishDatabase {
       {
          if (_branch._dataIndex)
          {
-            const Data data =
-               _database->getData(
-                  _branch._dataIndex
-               );
-               
-            return data.size();
+            return true;
          }
 
          return false;
@@ -227,18 +221,21 @@ namespace BeeFishDatabase {
 
       void getData(std::string& destination)
       {
-         const Data data = getData();
-
-         if (data.size() == 0)
-            destination = "";
+         if (hasData()) {
+            const Data data = getData();
+            if (data.size())
+               destination = std::string(
+                  data.data(),
+                  data.size()
+               );
+            else
+               destination = "";
+         }
          else
-            destination = std::string(
-               data.data(),
-               data.size()
-            );
+            destination = "";
       }
 
-
+/*
       operator string() const
       {
          const Data data = getData();
@@ -252,14 +249,14 @@ namespace BeeFishDatabase {
          );
 
       }
-
+     */
       void setData(const void* value, Size size) {
          const string string((const char*)value, size);
          setData(string);
       }
          
       void setData(const std::string& value) {
-         //cerr << "Path::setData: " << value << endl;
+
          Data destination = createData(value.size());
 
          if (value.size()) {
@@ -269,6 +266,9 @@ namespace BeeFishDatabase {
                value.size()
             );
             _database->setData(_branch._dataIndex, destination);
+         }
+         else if (_branch._dataIndex) {
+            deleteData();
          }
          
       }
@@ -334,14 +334,18 @@ namespace BeeFishDatabase {
       
       Branch getBranch()
       {
-         return
+         Branch branch =
             _database->getBranch(_index);
+
+         return branch;
       }
 
       const Branch getBranch() const
       {
-         return
+         Branch branch =
             _database->getBranch(_index);
+  
+         return branch;
       }
       
       void setBranch(const Branch& branch) const
@@ -397,21 +401,22 @@ namespace BeeFishDatabase {
          _index = rhs._index;
          return *this;
       }
-      
+      /*
       template<typename T>
       T operator=(const T& rhs)
       {
          setData(rhs);
          return rhs;
       }
-
+      */
+      /*
       string operator=(const char* rhs)
       {
          string value(rhs);
          setData(value);
          return value;
       }
-      
+      */
 
       bool operator == (const Path& rhs)
       {
