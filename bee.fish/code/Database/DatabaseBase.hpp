@@ -37,19 +37,14 @@ namespace BeeFishDatabase {
    {
    public:
       typedef PowerEncoding Encoding;
-   private:
        
-      
-      
       struct Header
       {
          char _version[256];
          Size _pageSize;
       } _header;
     
-      
-
-      Index  _nextIndex;
+      AtomicIndex  _nextIndex;
       Size    _pageSize;
 
    public:

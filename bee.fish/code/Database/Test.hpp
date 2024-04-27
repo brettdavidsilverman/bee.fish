@@ -12,6 +12,7 @@ namespace BeeFishDatabase
    using namespace BeeFishTest;
    using namespace BeeFishPowerEncoding;
 
+   inline bool testNextIndex();
    inline bool testPath();
    inline bool testArray2Path();
    inline bool testSubArray2Path();
@@ -378,6 +379,9 @@ namespace BeeFishDatabase
       }
      
       success = success &&
+         testNextIndex();
+         
+      success = success &&
          testPath();
          
       success= success &&
@@ -396,6 +400,39 @@ namespace BeeFishDatabase
 
       return success;
    }
+   
+   inline bool testNextIndex()
+   {
+      using namespace std;
+
+      cout << "Testing next index" << endl;
+
+      bool success = true;
+      std::string filename = TEMP_DIRECTORY "/temp.db";
+      remove(filename);
+      Index nextIndex;
+      {
+         Database database(filename);
+         Path test = database;
+         test["Hello"];
+         nextIndex = database._nextIndex;
+      }
+      
+      {
+         Database database(filename);
+         Path test = database;
+         success = test.contains("Hello");
+         success = success &&
+            (nextIndex == database._nextIndex);
+      }
+      
+      outputSuccess(success);
+      
+      remove(filename);
+      
+      return success;
+   }
+   
    
    inline bool testPath()
    {

@@ -192,7 +192,7 @@ namespace BeeFishDatabase {
 
          }
 
-         return Data();
+         assert(false);
 
       }
       
