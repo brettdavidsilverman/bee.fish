@@ -40,9 +40,20 @@ namespace BeeFishDatabase {
       Data(const Data& source)
       {
          _size = source._size;
-         if (_size) {
+         if (_size)
+         {
             _data = new char[_size];
             memcpy(_data, source._data, _size);
+         }
+      }
+      
+      Data(const std::string& data)
+      {
+         _size = data.size();
+         if (_size)
+         {
+            _data = new char[_size];
+            memcpy(_data, data.data(), _size);
          }
       }
       
@@ -60,7 +71,7 @@ namespace BeeFishDatabase {
            memcpy(_data, rhs.data(), _size);
          }
          
-         return (*this);
+         return *this;
       }
       
       ~Data()

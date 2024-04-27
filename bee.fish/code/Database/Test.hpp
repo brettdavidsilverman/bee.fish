@@ -34,14 +34,15 @@ namespace BeeFishDatabase
       cerr << db << endl;
       
       Path start(db);
-/*
-      cerr << "Start 1 " << start["Hello"] << endl;
-      cerr << "Start 2 " << start["Hello"] << endl;
-      */
+
       Path next = start["Hello"];
 
       next.setData("world");
 
+      cerr << "Start 1 " << start["Hello"] << endl;
+      cerr << "Start 2 " << start["Hello"] << endl;
+      cerr << "Next    " << next << endl;
+      
       std::string world;
       start["Hello"].getData(world);
 
@@ -49,19 +50,18 @@ namespace BeeFishDatabase
       success = (world == "world");
       outputSuccess(success);
 
+      MinMaxPath data = start["data"];
       
-      {
-         // Min / Max
-         MinMaxPath data = start["data"];
+      // Min / Max
 
-         for (Size i = min; i <= max; ++i)
-         {
-            data[i].setData(i);
-         }
+      for (Size i = min; i <= max; ++i)
+      {
+         data[i].setData(i);
       }
       
-      MinMaxPath data = start["data"];
-
+      
+      data.refresh();
+      
       if (success)
       {
          data.setData("");
@@ -141,8 +141,9 @@ namespace BeeFishDatabase
 
          Path data = start;
          Size count = -1;
-         data.setData(22);
+         data.setData((Size)22);
          data.getData(count);
+         cerr << count << endl;
          success =
             (count == 22);
 
@@ -175,24 +176,31 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tTesting int next" << endl;
 
+
          MinMaxPath data = start["skip3"];
          data[0];
          data[1];
+         data.refresh();
+         
+         cout << "\t\tFirst: " << flush;
          
          Stack stack;
          int first = - 1;
          bool next =
             data.next(stack, first);
-         if (next)
-            cout << "\t\tFirst: " << first << "," << next << endl;
+         
+         
          success = (first == 0) && next;
 
+         outputSuccess(success);
+         
          if (success) {
+            cout << "\t\t" << "Second: " << flush;
             int second = -1;
             next =
                data.next(stack, second);
-            cout << "\t\t" << "Second: " << second << ", " << next << endl;
             success &= (second == 1) && next;
+            outputSuccess(success);
          }
 
          if (success) {
@@ -202,6 +210,7 @@ namespace BeeFishDatabase
  
             cout << "\t\t" << "End: " << third << ", " << next << endl;
             success &= (third == -1) && !next;
+            outputSuccess(success);
          }
 
 

@@ -76,11 +76,6 @@ namespace BeeFishDatabase {
             ::remove(_filename.c_str());
       }
       
-      Size fileSize() const
-      {
-         return size();
-      }
-
       bool isNew() const
       {
          return _isNew;
@@ -91,7 +86,7 @@ namespace BeeFishDatabase {
          return _filename;
       }
 
-      virtual Size seek
+      Size seek
       (
          Size offset,
          int origin = SEEK_SET
@@ -116,10 +111,10 @@ namespace BeeFishDatabase {
             );
          }
          
-         return offset;
+         return ftell(_file);;
       }
       
-      virtual void close()
+      void close()
       {
          if (_file) {
             fclose(_file);
@@ -218,17 +213,14 @@ namespace BeeFishDatabase {
             );
          }
 
-         _fileNumber = fileno(_file);
       }
 
       Size size() const
       {
-         Size size = getFileSize(_fileNumber);
-         return size;
+         return seek(0, SEEK_END);
       }
       
-      int _fileNumber = -1;
-     
+   /*
    private:
       
       static Size getFileSize(int file)
@@ -237,6 +229,7 @@ namespace BeeFishDatabase {
          fstat(file, &buffer);
          return buffer.st_size;
       }
+      */
   public:
   
     

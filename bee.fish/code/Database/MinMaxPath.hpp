@@ -35,11 +35,9 @@ namespace BeeFishDatabase {
    
       MinMaxPath(const Path& source) :
          Path(source)
-         
       {
-         
       }
-
+      
    protected:
 
       void min(
@@ -80,8 +78,8 @@ namespace BeeFishDatabase {
             if (count == 0)
                break;
                
-            MinMaxPath next(path, index);
-            branch = next._branch;
+            path = MinMaxPath(*this, index);
+            branch = path._branch;
          
          }
         
@@ -192,14 +190,17 @@ namespace BeeFishDatabase {
             stack >> value;
             return true;
          }
-         
+ 
          Branch branch;
+         
          StackValue entry;
+         
          // Up the tree until first right
          do 
          {
+            
             entry = stack.last();
-            branch = getBranch(entry._path._index);
+            branch = entry._path._branch;
             stack.pop_back();
          }
          while (stack.size() && 

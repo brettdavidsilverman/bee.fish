@@ -28,6 +28,12 @@ namespace BeeFishDatabase
          memcpy(this, &source, sizeof(Branch));
       }
       
+      Branch& operator = (const Branch& rhs)
+      {
+         memcpy(this, &rhs, sizeof(Branch));
+         return *this;
+      }
+      
       bool isDeadEnd() const
       {
          return ( _left  == 0 ) &&

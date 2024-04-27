@@ -31,12 +31,15 @@ namespace BeeFishDatabase {
          if (isArrayContainer)
          {
              // Get next array index
-             Size& count = path.getData();
-             path = path[count++];
+             Size count = path.getData();
+             cerr << "JSON2Path " << count << endl;
+             path.setData(++count);
+             path = path[count];
+             
          }
          else if (_keyStack.size()) {
-             Size& count = path.getData();
-             ++count;
+             Size count = path.getData();
+             path.setData(++count);
              std::string key = topKey();
              pop_back_key();
              path = path[key];

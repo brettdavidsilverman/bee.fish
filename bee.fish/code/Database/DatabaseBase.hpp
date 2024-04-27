@@ -170,11 +170,6 @@ namespace BeeFishDatabase {
          
          _nextIndex += branchCount;
 
-        
-         Data data(byteSize);
-         memset(data.data(), 0, data.size());
-         setData(dataIndex, data);
-         
          return dataIndex;
             
       }

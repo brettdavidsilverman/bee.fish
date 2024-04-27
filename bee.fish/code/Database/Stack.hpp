@@ -28,6 +28,7 @@ namespace BeeFishDatabase {
           _bit(source._bit)
       {
       }
+      
       /*
       virtual ~StackValue() {
          if (_path) {
@@ -138,7 +139,7 @@ namespace BeeFishDatabase {
       
       virtual void pop_back()
       {
-         StackValue value = (*this)[size() - 1];
+         StackValue value = last();
          
          if (value._bit)
             --_count;

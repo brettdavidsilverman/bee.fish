@@ -32,7 +32,8 @@ namespace BeeFishDatabase {
          _database(database),
          _index(index)
       {
-         _branch = getBranch();
+         if (database)
+            _branch = getBranch();
       }
 
       Path( Database& database,
@@ -251,68 +252,44 @@ namespace BeeFishDatabase {
       }
      */
       void setData(const void* value, Size size) {
-         const string string((const char*)value, size);
+         const std::string string((const char*)value, size);
          setData(string);
       }
          
       void setData(const std::string& value) {
-
-         Data destination = createData(value.size());
-
-         if (value.size()) {
-            memcpy(
-               destination.data(),
-               value.data(),
-               value.size()
-            );
-            _database->setData(_branch._dataIndex, destination);
-         }
-         else if (_branch._dataIndex) {
-            deleteData();
-         }
+          
+         createData(value);
          
       }
 
-      Data createData(Size byteSize) 
+      Size createData(const std::string& value) 
       {
-         Data destination(0);
 
-         Index dataIndex;
+         if (value.size() == 0) {
+            if (_branch._dataIndex)
+               deleteData();
+            return 0;
+         }
          
+         Data data(value);
+
          if (_branch._dataIndex)
          {
-            destination =
-               _database->getData(
-                  _branch._dataIndex
-               );
-            dataIndex = _branch._dataIndex;
+            if (getDataSize() < data.size())
+               deleteData();
          }
-
-         if ( destination.size() < byteSize )
+         
+         if (_branch._dataIndex == 0)
          {
-         
-            deleteData();
+            _branch._dataIndex = 
+               _database->allocate(data.size());
             
-            dataIndex = 
-               _database->allocate(byteSize);
-            
-            destination =
-               _database->getData(
-                  dataIndex
-               );
-            
-         }
-         else if (destination.size() > byteSize)
-         {
-            destination._size = byteSize;
-            _database->setData(_branch._dataIndex, destination);
+            setBranch();
          }
          
-         _branch._dataIndex = dataIndex;
-         setBranch();
+         _database->setData(_branch._dataIndex, data);
          
-         
-         return destination;
+         return data.size();
          
       }
       
@@ -330,6 +307,11 @@ namespace BeeFishDatabase {
       )
       {
          setData(std::string(source));
+      }
+      
+      void refresh()
+      {
+         _branch = getBranch();
       }
       
       Branch getBranch()
@@ -375,7 +357,6 @@ namespace BeeFishDatabase {
       void deleteData()
       {
          if (_branch._dataIndex) {
-            
             _branch._dataIndex = 0;
             setBranch();
          }
@@ -394,29 +375,8 @@ namespace BeeFishDatabase {
       
      
    public:
-         
-      Path& operator=(const Path& rhs)
-      { 
-         _database = rhs._database;
-         _index = rhs._index;
-         return *this;
-      }
-      /*
-      template<typename T>
-      T operator=(const T& rhs)
-      {
-         setData(rhs);
-         return rhs;
-      }
-      */
-      /*
-      string operator=(const char* rhs)
-      {
-         string value(rhs);
-         setData(value);
-         return value;
-      }
-      */
+      
+      
 
       bool operator == (const Path& rhs)
       {
