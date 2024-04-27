@@ -60,8 +60,6 @@ namespace BeeFishDatabase
       }
       
       
-      data.refresh();
-      
       if (success)
       {
          cout << "\tTesting Contains " << flush;
@@ -187,7 +185,6 @@ namespace BeeFishDatabase
          MinMaxPath data = start["skip3"];
          data[0];
          data[1];
-         data.refresh();
          
          cout << "\t\tFirst: " << flush;
          

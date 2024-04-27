@@ -49,7 +49,7 @@ namespace BeeFishDatabase {
     
       
 
-      AtomicIndex  _nextIndex;
+      Index  _nextIndex;
       Size    _pageSize;
 
    public:
@@ -197,9 +197,7 @@ namespace BeeFishDatabase {
       
       inline const Branch getBranch(Index index) const
       {
-         Size offset = sizeof(Header) + index * sizeof(Branch);
-         assert(offset + sizeof(Branch) <= size());
-         
+         Size offset = sizeof(Header) + index * sizeof(Branch);
          seek(sizeof(Header) + index * sizeof(Branch));
          Branch branch;
          read(&branch, 1, sizeof(branch));
