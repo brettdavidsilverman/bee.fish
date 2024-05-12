@@ -39,11 +39,14 @@ namespace BeeFishDatabase
       Path next = start["Hello"];
 
       next.setData("world");
-/*
+      /*
+      cerr << "DatabaseTest start: " << start["Hello"] << endl;
+      cerr << "DatabaseTest next : " << next << endl;
+*/
       cerr << "Start 1 " << start["Hello"] << endl;
       cerr << "Start 2 " << start["Hello"] << endl;
       cerr << "Next    " << next << endl;
-*/
+
       std::string world;
       start["Hello"].getData(world);
 
@@ -414,10 +417,12 @@ namespace BeeFishDatabase
       {
          Database database(filename);
          Path test = database;
+         success = database._nextIndex == 0;
          test["Hello"];
          nextIndex = database._nextIndex;
       }
       
+      if (success)
       {
          Database database(filename);
          Path test = database;

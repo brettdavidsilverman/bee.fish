@@ -21,7 +21,7 @@ namespace BeeFishDatabase {
       public PowerEncoding
    {
    public:
-      Database* _database;
+      Database* _database = nullptr;
       Index     _index = 0;
    public:
 
@@ -41,14 +41,6 @@ namespace BeeFishDatabase {
       {
       }
 
-      Path( const Path& source,
-            Index index) :
-         PowerEncoding(),
-         _database(source._database),
-         _index(index)
-      {
-      }
-   
       Path(const Path& source) :
          PowerEncoding(),
          _database(source._database),
@@ -101,7 +93,7 @@ namespace BeeFishDatabase {
       virtual void writeBit(bool bit)
       {
 
-         //scoped_lock lock(_database->_mutex);
+         
          Branch branch = getBranch();
          
          if (bit == 0)
@@ -261,18 +253,11 @@ namespace BeeFishDatabase {
          
       void setData(const std::string& value) {
           
-         createData(value);
-         
-      }
-
-      Size createData(const std::string& value) 
-      {
-
          
          if (value.size() == 0) {
             if (hasData())
                deleteData();
-            return 0;
+            return;
          }
          
          Branch branch = getBranch();
@@ -283,20 +268,21 @@ namespace BeeFishDatabase {
          if (branch._dataIndex)
          {
             if (getDataSize() < data.size())
+            {
                deleteData();
+               branch._dataIndex = 0;
+            }
          }
          
          if (branch._dataIndex == 0)
          {
             branch._dataIndex = 
                _database->allocate(data.size());
-            
             setBranch(branch);
          }
          
          _database->setData(branch._dataIndex, data);
          
-         return data.size();
          
       }
       
@@ -318,18 +304,15 @@ namespace BeeFishDatabase {
       
       Branch getBranch()
       {
-         Branch branch =
+         return
             _database->getBranch(_index);
 
-         return branch;
       }
 
       const Branch getBranch() const
       {
-         const Branch branch =
-            _database->getBranch(_index);
-  
-         return branch;
+         return
+           _database->getBranch(_index);
       }
       
       void setBranch(const Branch& branch) const
@@ -363,11 +346,12 @@ namespace BeeFishDatabase {
       
       void clear()
       {
+         deleteData();
+         
          Branch branch = getBranch();
          
          branch._left = 0;
          branch._right = 0;
-         branch._dataIndex = 0;
          
          setBranch(branch);
          
@@ -397,7 +381,7 @@ namespace BeeFishDatabase {
       
       bool isDeadEnd() const
       {
-         const Branch& branch =
+         Branch branch =
             getBranch();
             
          return branch.isDeadEnd();
@@ -552,23 +536,22 @@ namespace BeeFishDatabase {
          public PowerEncoding
       {
       protected:
-         const Database* _database;
+         Database* _database;
          Index _index;
-         Branch _branch;
          bool _contains;
       public:
          Contains
          (
-            const Database* database,
+            Database* database,
             Index index
          ) :
             _database(database),
             _index(index)
          {
-             _branch =
+             Branch branch =
                _database->getBranch(_index);
                
-            _contains = !_branch.isDeadEnd();
+            _contains = !branch.isDeadEnd();
          }
          
          virtual void writeBit(bool bit)
@@ -576,18 +559,19 @@ namespace BeeFishDatabase {
             if (!_contains)
                return;
                
-            if (!bit && _branch._left)
-               _index = _branch._left;
-            else if (bit && _branch._right)
-               _index = _branch._right;
+            Branch branch =
+               _database->getBranch(_index);
+               
+            if (!bit && branch._left)
+               _index = branch._left;
+            else if (bit && branch._right)
+               _index = branch._right;
             else
             {
                _index = Branch::Root;
                _contains = false;
             }
 
-            _branch = _database->getBranch(_index);
-            
             PowerEncoding::writeBit(bit);
          }
          

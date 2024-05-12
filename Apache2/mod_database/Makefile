@@ -33,11 +33,11 @@ all: mod_database.so a.out
 
 #   install the shared object file into Apache 
 install: mod_database.so
-	cp mod_database.so /usr/lib/apache2/modules/mod_database.so
+	sudo cp mod_database.so /usr/lib/apache2/modules/mod_database.so
 
 #   cleanup
 clean:
-	-rm -f mod_database.o mod_database.lo mod_database.slo mod_database.la mod_database.so a.out
+	-sudo rm -f mod_database.o mod_database.lo mod_database.slo mod_database.la mod_database.so a.out
 
 #   simple test
 test: a.out reload
@@ -57,7 +57,7 @@ reload: install restart
 #   the general Apache start/restart/stop
 #   procedures
 start:
-	$(APACHECTL) start
+	sudo $(APACHECTL) start
 	sleep 1
 	curl http://localhost/ -s > /dev/null
 
@@ -65,6 +65,6 @@ restart:	stop start
 	#$(APACHECTL) restart
 	#sleep 1
 stop:
-	$(APACHECTL) stop
+	sudo $(APACHECTL) stop
 	sleep 1
 

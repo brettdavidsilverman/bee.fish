@@ -18,19 +18,26 @@ namespace BeeFishDatabase
       Index _right;
       Index _dataIndex;
       
-      Branch()
+      Branch() :
+         _left(0),
+         _right(0),
+         _dataIndex(0)
       {
-         memset(this, 0, sizeof(Branch));
       }
       
-      Branch(const Branch& source)
+      Branch(const Branch& source) :
+         _left(source._left),
+         _right(source._right),
+         _dataIndex(source._dataIndex)
       {
-         memcpy(this, &source, sizeof(Branch));
       }
       
       Branch& operator = (const Branch& rhs)
       {
-         memcpy(this, &rhs, sizeof(Branch));
+         _left = rhs._left;
+         _right = rhs._right;
+         _dataIndex = rhs._dataIndex;
+         
          return *this;
       }
       

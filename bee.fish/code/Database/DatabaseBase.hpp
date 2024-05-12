@@ -46,7 +46,7 @@ namespace BeeFishDatabase {
     
       AtomicIndex  _nextIndex;
       Size    _pageSize;
-
+      Mutex _mutex;
    public:
       Database(
          string filePath = "",

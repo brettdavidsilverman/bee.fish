@@ -67,13 +67,12 @@ static bool outputId(request_rec *r);
 namespace BeeFishWebServer {
    Database database(DATABASE_FILENAME);
    Debug debug;
-   Mutex _mutex;
 }
 
 /* The sample content handler */
 static int database_handler(request_rec *r)
 {
-    lock_guard lock(_mutex);
+    lock_guard lock(database._mutex);
     
     debug << now() << " "
           << r->connection->client_ip << " "
@@ -100,10 +99,13 @@ static int database_handler(request_rec *r)
     }
         
     Path path = parseURI(
+       database,
        r->connection->client_ip,
        r->uri
     );
 
+    debug << "mod_database.cpp: " << path << endl;
+    
     if (strcmp(r->method, "GET") == 0)
     {
         if (strcmp(r->uri, "/id") == 0)
@@ -138,7 +140,7 @@ static int database_handler(request_rec *r)
         
     }
     else if (!strcmp(r->method, "POST")) {
-       path.clear();
+       //path.clear();
        
        if (inputJSON(path, r))
           return OK;
@@ -217,7 +219,7 @@ static bool inputJSON(Path path, request_rec *r) {
    string posted;
    int pageSize = getPageSize();
    char buffer[pageSize];
-   Size pageIndex = 0;
+   Size pageCount = 0;
    JSON2Path index = path["index"];
    
    MinMaxPath document = path["document"];
@@ -239,7 +241,7 @@ static bool inputJSON(Path path, request_rec *r) {
             posted =
                string(buffer, dataBytesRead);
                
-            document[pageIndex++].setData(posted);
+            document[pageCount++].setData(posted);
           
          }
       }
@@ -249,24 +251,26 @@ static bool inputJSON(Path path, request_rec *r) {
          << " Parsing document "
          << endl;
    
-   Size countPages = pageIndex;
-   
-   for (pageIndex = 0; pageIndex < countPages; ++pageIndex)
+   for (Size pageIndex = 0; pageIndex < pageCount; ++pageIndex)
    {
-      document[pageIndex]
-         .getData(posted);
-           
+      
       float percentage =
-         ((float)pageIndex / (float)countPages) * 100.0;
+         ((float)pageIndex / (float)pageCount) * 100.0;
          
       debug << now() << " "
             << percentage << "%" 
             << endl;
       
-      if (index.read(posted) == false)
-      {
-         isOk == false;
-         break;
+      document[pageIndex]
+         .getData(posted);
+           
+      if (posted.size()) {
+      
+         if (index.read(posted) == false)
+         {
+            isOk == false;
+            break;
+         }
       }
    }
    
@@ -278,7 +282,7 @@ static bool inputJSON(Path path, request_rec *r) {
            
    Variable result;
    
-   if (isOk == true &&
+   if (isOk &&
        index.result() == true)
    {
       debug << now()

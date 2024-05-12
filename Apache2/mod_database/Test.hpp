@@ -74,13 +74,14 @@ namespace BeeFishApache2 {
    inline bool testFile(string url, string directory, string file, bool expect)
    {
       cout << "\tTesting "
-           << file << " -> " << url
+           << url << "/" << file
            << endl;
 
       string tempFile =
          TEMP_DIRECTORY;
          
       tempFile += "test.curl.txt";
+      remove(tempFile);
       
       stringstream stream;
       bool success = true;
@@ -115,9 +116,11 @@ namespace BeeFishApache2 {
          success = success &&
             compareFiles(tempFile, directory + "/" + file);
 
-         remove(tempFile);
+         
       }
 
+      remove(tempFile);
+      
       outputSuccess(success);
       return success;
    }

@@ -10,18 +10,16 @@ using namespace BeeFishParser;
 
 namespace BeeFishWebServer {
 
-   extern Database database;
-      
-   Path parseURI(const char* clientIP, const char* uri) {
+   Path parseURI(Database& database, const char* clientIP, const char* uri) {
        
-      Path path = database;
-      path = path[clientIP];
+      Path path(database);
+      path = path[HOST][clientIP];
       
       string _uri = uri;
       
       // Add trailing /
       if (_uri.length() == 0 ||
-          _uri[_uri.length() -1] != '/')
+          _uri[_uri.length() - 1] != '/')
          _uri += '/';
          
       BString segment;
@@ -60,16 +58,14 @@ namespace BeeFishWebServer {
             }
          );
             
-      auto uriParser =
-         Repeat(segmentParser, 1);
-         
-      uriParser.read(_uri);
-      */
+         }
+      }
+*/
+      
       return path;
       
    }
    
-
 }
 
 #endif
