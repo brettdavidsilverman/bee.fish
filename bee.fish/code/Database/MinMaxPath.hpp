@@ -26,13 +26,13 @@ namespace BeeFishDatabase {
          Path(database, index)
       {
       }
-
+/*
       MinMaxPath( const Path& source,
             Index index) :
          Path(source, index)
       {
       }
-   
+   */
       MinMaxPath(const Path& source) :
          Path(source)
       {
@@ -47,7 +47,7 @@ namespace BeeFishDatabase {
       {
 
          Size count = stack.count();
-         MinMaxPath path(*this, index);
+         MinMaxPath path(_database, index);
          
          
          Branch branch = path.getBranch();
@@ -78,7 +78,7 @@ namespace BeeFishDatabase {
             if (count == 0)
                break;
                
-            path = MinMaxPath(*this, index);
+            path = MinMaxPath(_database, index);
             branch = path.getBranch();
          
          }
@@ -91,7 +91,7 @@ namespace BeeFishDatabase {
       ) const
       {
 
-         MinMaxPath path(*this, index);
+         MinMaxPath path(_database, index);
          
          Branch branch = path.getBranch();
 
@@ -123,7 +123,7 @@ namespace BeeFishDatabase {
             if (count == 0)
                break;
                
-            path = MinMaxPath(path, index);
+            path = MinMaxPath(_database, index);
             branch = path.getBranch();
          }
       

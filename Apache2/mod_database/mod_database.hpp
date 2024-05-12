@@ -28,10 +28,8 @@ namespace BeeFishWebServer {
 
    using namespace std;
 
-   extern Database database;
-   
    extern Debug debug;
-
+   extern Database database;
    extern mutex _mutex;
 
 }
