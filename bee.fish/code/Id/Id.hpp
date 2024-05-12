@@ -10,7 +10,7 @@
 #include <ctime>
 
 #include "../power-encoding/encoding.h"
-#include "../b-string/string.h"
+#include "../b-string/b-string.h"
 #include "../Script/Script.hpp"
 #include "Version.hpp"
 

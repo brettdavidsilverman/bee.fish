@@ -4,7 +4,7 @@
 #include <vector>
 #include "../misc/misc.h"
 #include "config.h"
-#include "string.h"
+#include "b-string.h"
 #include "test.h"
 #include "version.h"
 

@@ -7,7 +7,7 @@
 #include "../power-encoding/power-encoding.h"
 #include "../parser/parser.h"
 #include "blank-space.h"
-#include "string.h"
+#include "json-string.h"
 #include "keyed-set.h"
 
 using namespace BeeFishParser;

@@ -14,7 +14,7 @@ test:
 	cd Apache2/mod_database && sudo make install stop start test
 	
 clean:
-	#cd bee.fish && make clean
+	cd bee.fish && make clean
 	cd Apache2/mod_database && sudo make clean
 	
 stop:

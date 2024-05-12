@@ -12,7 +12,7 @@
 #include "set.h"
 #include "keyed-set.h"
 #include "array.h"
-#include "string.h"
+#include "json-string.h"
 #include "object.h"
 #include "../Script/Type.hpp"
 

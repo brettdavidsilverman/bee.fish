@@ -26,7 +26,7 @@ namespace BeeFishDatabase {
    
    using namespace BeeFishMisc;
 
-   typedef boost::interprocess::interprocess_mutex Mutex;
+   typedef recursive_mutex Mutex;
    
    // Store [left, right] branch elements.
    // A zero is stored if the branch
@@ -136,7 +136,8 @@ namespace BeeFishDatabase {
             throw runtime_error(stream.str());
          }
 
-      }
+      }
+
       
    public:
 
@@ -160,7 +161,8 @@ namespace BeeFishDatabase {
             ceil((double)size /
                  (double)sizeof(Branch));
 
-         Index dataIndex;
+         Index dataIndex;
+
          dataIndex = getNextIndex();
          
          _nextIndex += branchCount;
@@ -170,7 +172,8 @@ namespace BeeFishDatabase {
       }
       
       inline Branch getBranch(Index index)
-      {
+      {
+
          Size offset = sizeof(Header) + index * sizeof(Branch);
          
          Branch branch;
@@ -192,7 +195,8 @@ namespace BeeFishDatabase {
       
       inline const Branch getBranch(Index index) const
       {
-         Size offset = sizeof(Header) + index * sizeof(Branch);
+         Size offset = sizeof(Header) + index * sizeof(Branch);
+
          seek(sizeof(Header) + index * sizeof(Branch));
          Branch branch;
          read(&branch, 1, sizeof(branch));

@@ -1,7 +1,7 @@
 #ifndef BEE_FISH_B_STRING__TEST_H
 #define BEE_FISH_B_STRING__TEST_H
 
-#include "string.h"
+#include "b-string.h"
 #include "../test/test-result.h"
 
 using namespace BeeFishTest;

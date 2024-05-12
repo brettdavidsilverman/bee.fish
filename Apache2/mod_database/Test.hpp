@@ -92,7 +92,7 @@ namespace BeeFishApache2 {
          "-H \"Content-Type: application/json; charset=utf-8\" " <<
          "-H Expect: " <<
          "-T " << directory << "/" << file
-         << " -s | grep Success > /dev/null ";
+         << " -s -k | grep Success > /dev/null ";
 
 
       string command = stream.str();
@@ -105,7 +105,7 @@ namespace BeeFishApache2 {
          stream1
             << "curl "
             << url  << "/" << file << " "
-            << " -s > "
+            << " -s -k > "
             << tempFile;
             
          string command = stream1.str();

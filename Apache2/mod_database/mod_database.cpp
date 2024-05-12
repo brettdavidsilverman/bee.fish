@@ -67,13 +67,13 @@ static bool outputId(request_rec *r);
 namespace BeeFishWebServer {
    Database database(DATABASE_FILENAME);
    Debug debug;
-   mutex _mutex;
+   Mutex _mutex;
 }
 
 /* The sample content handler */
 static int database_handler(request_rec *r)
 {
-    scoped_lock<mutex> lock(_mutex);
+    lock_guard lock(_mutex);
     
     debug << now() << " "
           << r->connection->client_ip << " "
@@ -249,16 +249,15 @@ static bool inputJSON(Path path, request_rec *r) {
          << " Parsing document "
          << endl;
    
-   Size maxPageIndex = pageIndex;
+   Size countPages = pageIndex;
    
-   Stack stack;
-   while (document.next(stack, pageIndex))
+   for (pageIndex = 0; pageIndex < countPages; ++pageIndex)
    {
       document[pageIndex]
          .getData(posted);
            
       float percentage =
-         ((float)pageIndex / (float)maxPageIndex) * 100.0;
+         ((float)pageIndex / (float)countPages) * 100.0;
          
       debug << now() << " "
             << percentage << "%" 

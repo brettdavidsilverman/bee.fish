@@ -32,7 +32,7 @@ namespace BeeFishWebServer {
    
    extern Debug debug;
 
-   extern mutex _mutex;
+   extern Mutex _mutex;
 
 }
 
