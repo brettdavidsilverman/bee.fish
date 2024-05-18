@@ -1,7 +1,12 @@
-<FilesMatch "\.(xhtml|html|htm|js|css)$">
-   FileETag None
-   Header unset ETag
-   Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
-   Header set Pragma "no-cache"
-   Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
-</FilesMatch>
+#begin mod bds
+DirectoryIndex index.xhtml
+
+ErrorDocument 404 /NotFound.xhtml
+
+FileETag None
+Header unset ETag
+Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+Header set Pragma "no-cache"
+Header set Expires "Thu, 12 Jan 1984 05:00:00 GMT"
+
+#endmod

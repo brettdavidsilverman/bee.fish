@@ -31,16 +31,7 @@ namespace BeeFishDatabase
          _dataIndex(source._dataIndex)
       {
       }
-      
-      Branch& operator = (const Branch& rhs)
-      {
-         _left = rhs._left;
-         _right = rhs._right;
-         _dataIndex = rhs._dataIndex;
-         
-         return *this;
-      }
-      
+
       bool isDeadEnd() const
       {
          return ( _left  == 0 ) &&
@@ -49,8 +40,8 @@ namespace BeeFishDatabase
 
       Variable getVariable() const {
          Variable var = BeeFishScript::Object{
-            {"left", (Number)_left},
-            {"right", (Number)_right}
+            {"left", (BeeFishScript::Integer)_left},
+            {"right", (BeeFishScript::Integer)_right}
          };
          return var;
       }

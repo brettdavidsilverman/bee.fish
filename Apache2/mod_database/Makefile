@@ -58,13 +58,12 @@ reload: install restart
 #   procedures
 start:
 	sudo $(APACHECTL) start
-	sleep 1
+	sleep 2
 	curl http://localhost/ -s > /dev/null
 
 restart:	stop start
-	#$(APACHECTL) restart
-	#sleep 1
+
 stop:
 	sudo $(APACHECTL) stop
-	sleep 1
+	sleep 2
 

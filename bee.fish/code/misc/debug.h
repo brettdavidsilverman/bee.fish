@@ -16,7 +16,7 @@ extern "C" inline const char* esp_err_to_name(esp_err_t err) {
 
 #ifdef DEBUG
    #define DEBUG_OUT(x) \
-        { std::cerr << x; }
+        { std::cout << x; }
 #else
    #define DEBUG_OUT(x)
 #endif

@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <memory>
 #include <filesystem>
+#include <pwd.h>
 #include "Log.hpp"
 #include "Optional.hpp"
 #include "../Config.hpp"
@@ -129,6 +130,17 @@ namespace BeeFishMisc {
       
    }
    
+   inline std::string getUserName()
+   {
+      uid_t uid = geteuid ();
+      struct passwd *pw = getpwuid (uid);
+      if (pw)
+      {
+         return std::string(pw->pw_name);
+      }
+      return {};
+   }
+
    
 }
 

@@ -18,6 +18,7 @@
 #include <filesystem>
 #endif
 
+#include "../power-encoding/power-encoding.h"
 #include "char.h"
 
 #include "utf-8.h"
@@ -223,52 +224,17 @@ namespace BeeFishBString
           PowerEncoding &stream,
           BString &bString)
       {
-         size_t startCount = stream._count;
-         
-         if (stream.readBit() != 1)
-            throw runtime_error("Invalid stream");
-            
-         bString.clear();
-         unsigned int character;
-
-         while (stream.peekBit() == 1)
-         {
-            stream >> character;
-            bString.push_back((char)character);
-         }
-
-         if (stream.readBit() != 0)
-            throw runtime_error("Invalid stream");
-            
-         size_t endCount = stream._count - startCount;
-         
-         assert(endCount == 0);
-         
-         return stream;
+         return BeeFishPowerEncoding::
+            operator>>(stream, (std::string&)bString);
       }
       
+
       friend PowerEncoding &operator<<(
           PowerEncoding &stream,
           const BString &bString)
       {
-         size_t startCount = stream._count;
-         
-         stream.writeBit(1);
-         uint8_t character;
-
-         for (char c : bString)
-         {
-            character = (uint8_t)c;
-            stream << character;
-         }
-         
-         stream.writeBit(0);
-         
-         size_t endCount = stream._count - startCount;
-         
-         assert(endCount == 0);
-         
-         return stream;
+         return BeeFishPowerEncoding::
+            operator<<(stream, (std::string&)bString);
       }
 
       // trim from start
