@@ -71,11 +71,6 @@ namespace BeeFishDatabase {
     
          checkHeader();
 
-         Size branchCount =
-            floor((double)(size() - sizeof(Header)) /
-               (double)sizeof(Branch));
-            
-         _nextIndex = branchCount;
          
       }
 
@@ -130,6 +125,14 @@ namespace BeeFishDatabase {
                << ".";
             throw runtime_error(stream.str());
          }
+         
+         Size branchCount =
+            floor((double)(size() - sizeof(Header)) /
+               (double)sizeof(Branch));
+            
+         _nextIndex = branchCount;
+         
+
 
       }
       

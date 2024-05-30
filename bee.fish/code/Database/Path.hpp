@@ -253,7 +253,7 @@ namespace BeeFishDatabase {
          
       void setData(const std::string& value) {
           
-         lock_guard lock(_database->_mutex);
+         scoped_lock lock(_database->_writeMutex);
 
          if (value.size() == 0) {
             if (hasData())
@@ -337,7 +337,7 @@ namespace BeeFishDatabase {
       
       void deleteData()
       {
-         lock_guard lock(_database->_mutex);
+         scoped_lock lock(_database->_writeMutex);
 
          Branch branch = getBranch();
          
@@ -349,8 +349,9 @@ namespace BeeFishDatabase {
       
       void clear()
       {
-         lock_guard lock(_database->_mutex);
          deleteData();
+         
+         scoped_lock lock(_database->_writeMutex);
          
          Branch branch = getBranch();
          

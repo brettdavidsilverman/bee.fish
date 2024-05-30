@@ -57,11 +57,10 @@ using namespace BeeFishMisc;
 
 using namespace std;
 
-bool inputJSON(Path path, request_rec *r);
-bool outputJSON(Path path, request_rec *r);
-bool outputDocument(Path path, request_rec *r);
-bool outputId(request_rec *r);
-
+static bool inputJSON(Path path, request_rec *r);
+static bool outputJSON(Path path, request_rec *r);
+static bool outputDocument(Path path, request_rec *r);
+static bool outputId(request_rec *r);
 static bool inputJSON(Path path, request_rec *r);
 static bool outputJSON(Path path, request_rec *r);
 static bool outputDocument(Path path, request_rec *r);
@@ -69,25 +68,35 @@ static bool outputId(request_rec *r);
 
 
 namespace BeeFishWebServer {
+ 
+   mutex _mutex;
    Debug debug;
-   Database database(DATABASE_FILENAME);
+   
+    
 }
 
 /* The sample content handler */
-int database_handler(request_rec *r)
+static int database_handler(request_rec *r)
 {
+    
+    //Debug debug;
     
     debug << now() << " "
           << r->connection->client_ip << " "
           << r->method << " "
           << HOST 
           << r->uri;
-    
+          
     if (r->args && strlen(r->args) > 0)
        debug << "?" << r->args;
        
-    debug << endl;
- 
+    debug << "\r\n";
+    debug.flush();
+    
+    scoped_lock lock(_mutex);
+
+    Database database(DATABASE_FILENAME);
+    
     std::string filename =
        WWW_ROOT_DIRECTORY;
     
@@ -154,7 +163,7 @@ int database_handler(request_rec *r)
 
 }
 
-bool outputId(request_rec *r)
+static bool outputId(request_rec *r)
 {
 
    ap_set_content_type(
@@ -174,7 +183,7 @@ bool outputId(request_rec *r)
    return true;
 }
 
-bool outputJSON(Path path, request_rec *r)
+static bool outputJSON(Path path, request_rec *r)
 {
    ap_set_content_type(
        r, "application/json; charset=utf-8");
@@ -187,7 +196,7 @@ bool outputJSON(Path path, request_rec *r)
    return true;
 }
 
-bool outputDocument(Path path, request_rec *r)
+static bool outputDocument(Path path, request_rec *r)
 {
    ap_set_content_type(
        r, "application/json; charset=utf-8");
@@ -210,9 +219,11 @@ bool outputDocument(Path path, request_rec *r)
    return true;
 }
 
-bool inputJSON(Path path, request_rec *r)
+static bool inputJSON(Path path, request_rec *r)
 {
 
+   Debug debug;
+   
    bool isOk = true;
    string posted;
    int pageSize = getPageSize();

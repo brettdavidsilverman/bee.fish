@@ -17,6 +17,12 @@ namespace BeeFishMisc {
          open();
       }
       
+      virtual ~Debug()
+      {
+         flush();
+         close();
+      }
+      
       virtual void open()
       {
          ofstream::open(
