@@ -29,6 +29,8 @@ namespace BeeFishDatabase {
       ) : _file(NULL),
           _filename(filename)
       {
+
+         
          if (_filename == "") {
             std::string temp = TEMP_DIRECTORY;
             temp += "bee.fish.XXXXXX";
@@ -205,8 +207,10 @@ namespace BeeFishDatabase {
          _file = fopen(
             _filename.c_str(), "rw+"
          );
-      
+
          if (_file == NULL) {
+
+         
             throw runtime_error(
                "Couldnt open file " +
                _filename

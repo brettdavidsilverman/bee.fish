@@ -253,7 +253,8 @@ namespace BeeFishDatabase {
          
       void setData(const std::string& value) {
           
-         
+         lock_guard lock(_database->_mutex);
+
          if (value.size() == 0) {
             if (hasData())
                deleteData();
@@ -336,6 +337,8 @@ namespace BeeFishDatabase {
       
       void deleteData()
       {
+         lock_guard lock(_database->_mutex);
+
          Branch branch = getBranch();
          
          if (branch._dataIndex) {
@@ -346,6 +349,7 @@ namespace BeeFishDatabase {
       
       void clear()
       {
+         lock_guard lock(_database->_mutex);
          deleteData();
          
          Branch branch = getBranch();
@@ -374,7 +378,7 @@ namespace BeeFishDatabase {
          return (_index > Branch::Root);
       }
       
-      const Index& index() const
+      Index index() const
       {
          return _index;
       }
@@ -435,7 +439,7 @@ namespace BeeFishDatabase {
          if (path._database) {
             variable["hasData"] = path.hasData();
             if (path.hasData())
-               variable["dataSize"] = (Integer)path.getDataSize();
+               variable["dataSize"] = (BeeFishScript::Integer)path.getDataSize();
             variable["branch"] = path.getBranch().getVariable();
          }
          else

@@ -100,7 +100,7 @@ namespace BeeFishParser
             _match->setup(this);
             
 #ifdef DEBUG
-         cerr << escape((char)byte);
+         cout << escape((char)byte);
 #endif
          ++_charCount;
 

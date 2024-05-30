@@ -32,20 +32,11 @@ namespace BeeFishDatabase
       
       Database db;
 
-      cerr << db << endl;
-      
       Path start(db);
 
       Path next = start["Hello"];
 
       next.setData("world");
-      /*
-      cerr << "DatabaseTest start: " << start["Hello"] << endl;
-      cerr << "DatabaseTest next : " << next << endl;
-*/
-      cerr << "Start 1 " << start["Hello"] << endl;
-      cerr << "Start 2 " << start["Hello"] << endl;
-      cerr << "Next    " << next << endl;
 
       std::string world;
       start["Hello"].getData(world);
@@ -152,7 +143,6 @@ namespace BeeFishDatabase
          Size count = -1;
          data.setData((Size)22);
          data.getData(count);
-         cerr << count << endl;
          success =
             (count == 22);
 
@@ -526,7 +516,6 @@ namespace BeeFishDatabase
          cout << "\tItem 0: ";
          Path path = root["array"][Type::ARRAY];
          Size test = MinMaxPath(path).min<Size>();
-         cerr << test;
          success = path.contains(Size(0));
          BeeFishMisc::outputSuccess(success);
       }

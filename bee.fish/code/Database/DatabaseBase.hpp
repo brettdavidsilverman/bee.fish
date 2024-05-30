@@ -11,7 +11,6 @@
 #include <future>
 #include <iostream>
 #include <thread>
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include "../Miscellaneous/Debug.hpp"
 #include "Version.hpp"
 #include "File.hpp"
@@ -63,7 +62,7 @@ namespace BeeFishDatabase {
                << "Database(\""
                << escape(_filename)
                << "\")"
-               << endl;
+               << "\r\n";
          
          if (isNew())
          {
@@ -79,13 +78,7 @@ namespace BeeFishDatabase {
          _nextIndex = branchCount;
          
       }
-      /*
-      Database(const Database& source) :
-         File(source),
-         _pageSize(source._pageSize)
-      {
-      }
-      */
+
       virtual ~Database()
       {
 
@@ -94,7 +87,7 @@ namespace BeeFishDatabase {
                << "~Database(\""
                << escape(_filename)
                << "\")"
-               << endl;
+               << "\r\n";
 
       }
       
@@ -102,8 +95,8 @@ namespace BeeFishDatabase {
    private:
 
       virtual void initializeHeader()
-      {
-         scoped_lock lock(_mutex);
+      {
+         scoped_lock lock(_mutex);
          memset(&_header, 0, sizeof(Header));
          strcpy(_header._version, DATABASE_VERSION);
          _header._pageSize = _pageSize;
@@ -113,7 +106,7 @@ namespace BeeFishDatabase {
       
       virtual void checkHeader()
       {
-         scoped_lock lock(_mutex);
+         scoped_lock lock(_mutex);
          seek(0);
          read(&_header, 1, sizeof(Header));
          
@@ -148,6 +141,7 @@ namespace BeeFishDatabase {
 
       inline Index getNextIndex()
       {
+         
          return ++_nextIndex;
 
       }
@@ -156,6 +150,7 @@ namespace BeeFishDatabase {
       {
          
          scoped_lock lock(_mutex);
+
          Size size = sizeof(Size) + byteSize;
   
          Index branchCount =
@@ -181,8 +176,8 @@ namespace BeeFishDatabase {
          {
             // Seek past end of file
             // This will write a cleared branch
-            seek(offset);
-            write(&branch, 1, sizeof(Branch));
+            seek(offset + sizeof(Branch));
+            //write(&branch, 1, sizeof(Branch));
          }
          
          seek(offset);
@@ -192,20 +187,8 @@ namespace BeeFishDatabase {
          return branch;
          
       }
-      /*
-      inline const Branch getBranch(Index index) const
-      {
-         lock_guard<Mutex> lock(_mutex);
-         
-         Size offset = sizeof(Header) + index * sizeof(Branch);         assert(offset + sizeof(Branch) <= size());
-         seek(offset);
-         Branch branch;
-         read(&branch, 1, sizeof(branch));
 
-         return branch;
-         
-      }
-      */
+
       inline void setBranch(Index index, const Branch& branch)
       {
          scoped_lock lock(_mutex);
@@ -231,8 +214,9 @@ namespace BeeFishDatabase {
 
       
       inline void setData(Index dataIndex, const Data& source)
-      {
+      {
          scoped_lock lock(_mutex);
+
          seek(sizeof(Header) + dataIndex * sizeof(Branch));
          Size size = source.size();
          write(&size, 1, sizeof(Size));
@@ -276,5 +260,3 @@ namespace BeeFishDatabase {
 }
 
 #endif
-
-

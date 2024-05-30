@@ -2,6 +2,7 @@
 #define BEE_FISH_B_STRING__TEST_H
 
 #include "b-string.h"
+#include "../power-encoding/power-encoding.h"
 #include "../test/test-result.h"
 
 using namespace BeeFishTest;

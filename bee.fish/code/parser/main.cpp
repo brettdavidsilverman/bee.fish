@@ -81,40 +81,8 @@ namespace Test {
    
 int main(int argc, const char* argv[]) {
    using namespace Test;
-   /*
-   optional<bool> result = true;
    
-   cerr << result << endl;
-   
-   if (result != true)
-      cerr << "!True";
-   if (result != false)
-      cerr << "!False";
-   if (result != nullopt)
-      cerr << "!Null";
- 
-      
-   cerr << endl;
-   
-   return 1;
-   */
-   /*
-   bool ok = true;
-   
-   Match* word =
-      new Capture(
-         new Word("test")
-      );
-      
-   ok &= testMatch("Simple 'test' match", word, "test", nullopt, "test");
-   delete word;
-
-   cerr << (ok ? "ok" : "error") << endl;
-   
-   return 0;
-   */
-   
-   cerr << "bee.fish.parser"
+   cout << "bee.fish.parser"
            << endl
         << "C++ run time: "
            << __cplusplus

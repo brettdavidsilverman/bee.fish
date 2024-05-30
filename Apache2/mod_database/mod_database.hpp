@@ -30,7 +30,6 @@ namespace BeeFishWebServer {
 
    extern Debug debug;
    extern Database database;
-
 }
 
 
