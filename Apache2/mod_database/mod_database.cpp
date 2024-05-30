@@ -65,14 +65,14 @@ static bool outputId(request_rec *r);
 
 
 namespace BeeFishWebServer {
-   Database database(DATABASE_FILENAME);
+   
    Debug debug;
+   Database database(DATABASE_FILENAME);
 }
 
 /* The sample content handler */
 static int database_handler(request_rec *r)
 {
-    lock_guard lock(database._mutex);
     
     debug << now() << " "
           << r->connection->client_ip << " "
@@ -97,14 +97,13 @@ static int database_handler(request_rec *r)
     {
         return DECLINED;
     }
-        
+    
+    
     Path path = parseURI(
        database,
        r->connection->client_ip,
        r->uri
     );
-
-    debug << "mod_database.cpp: " << path << endl;
     
     if (strcmp(r->method, "GET") == 0)
     {
@@ -250,7 +249,7 @@ static bool inputJSON(Path path, request_rec *r) {
    debug << now()
          << " Parsing document "
          << endl;
-   
+  
    for (Size pageIndex = 0; pageIndex < pageCount; ++pageIndex)
    {
       

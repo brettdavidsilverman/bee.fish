@@ -93,7 +93,7 @@ namespace BeeFishDatabase {
       virtual void writeBit(bool bit)
       {
 
-         
+         scoped_lock lock(_database->_writeMutex);
          Branch branch = getBranch();
          
          if (bit == 0)
