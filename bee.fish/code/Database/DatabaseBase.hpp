@@ -25,7 +25,7 @@ namespace BeeFishDatabase {
    
    using namespace BeeFishMisc;
 
-   typedef recursive_mutex Mutex;
+   typedef std::mutex Mutex;
    
    // Store [left, right] branch elements.
    // A zero is stored if the branch
@@ -45,7 +45,8 @@ namespace BeeFishDatabase {
     
       AtomicIndex  _nextIndex;
       Size    _pageSize;
-      Mutex _mutex;
+      Mutex   _mutex;
+      Mutex   _writeMutex;
    public:
       Database(
          string filePath = "",
@@ -70,11 +71,6 @@ namespace BeeFishDatabase {
     
          checkHeader();
 
-         Size branchCount =
-            floor((double)(size() - sizeof(Header)) /
-               (double)sizeof(Branch));
-            
-         _nextIndex = branchCount;
          
       }
 
@@ -94,9 +90,8 @@ namespace BeeFishDatabase {
    private:
 
       virtual void initializeHeader()
-      {
-         lock_guard lock(_mutex);
-          
+      {
+         scoped_lock lock(_mutex);
          memset(&_header, 0, sizeof(Header));
          strcpy(_header._version, DATABASE_VERSION);
          _header._pageSize = _pageSize;
@@ -106,7 +101,7 @@ namespace BeeFishDatabase {
       
       virtual void checkHeader()
       {
-         lock_guard lock(_mutex);
+         scoped_lock lock(_mutex);
          seek(0);
          read(&_header, 1, sizeof(Header));
          
@@ -130,9 +125,16 @@ namespace BeeFishDatabase {
                << ".";
             throw runtime_error(stream.str());
          }
+         
+         Size branchCount =
+            floor((double)(size() - sizeof(Header)) /
+               (double)sizeof(Branch));
+            
+         _nextIndex = branchCount;
+         
 
-      }
 
+      }
       
    public:
 
@@ -142,7 +144,6 @@ namespace BeeFishDatabase {
 
       inline Index getNextIndex()
       {
-         lock_guard lock(_mutex);
          
          return ++_nextIndex;
 
@@ -151,7 +152,7 @@ namespace BeeFishDatabase {
       inline Index allocate(Size byteSize)
       {
          
-         lock_guard lock(_mutex);
+         scoped_lock lock(_mutex);
 
          Size size = sizeof(Size) + byteSize;
   
@@ -159,8 +160,7 @@ namespace BeeFishDatabase {
             ceil((double)size /
                  (double)sizeof(Branch));
 
-         Index dataIndex;
-
+         Index dataIndex;
          dataIndex = getNextIndex();
          
          _nextIndex += branchCount;
@@ -170,15 +170,13 @@ namespace BeeFishDatabase {
       }
       
       inline Branch getBranch(Index index)
-      {
-
-         lock_guard lock(_mutex);
-
+      {
+         scoped_lock lock(_mutex);
          Size offset = sizeof(Header) + index * sizeof(Branch);
          
          Branch branch;
          if (offset + sizeof(Branch) > size())
-         {
+         {
             // Seek past end of file
             // This will write a cleared branch
             seek(offset + sizeof(Branch));
@@ -193,23 +191,21 @@ namespace BeeFishDatabase {
          
       }
 
+
       inline void setBranch(Index index, const Branch& branch)
       {
-         lock_guard lock(_mutex);
-
+         scoped_lock lock(_mutex);
          seek(sizeof(Header) + index * sizeof(Branch));
-         write(&branch, 1, sizeof(branch));
-
+         write(&branch, 1, sizeof(Branch));
       }
 
       
       inline Data getData(Index dataIndex)
       {
-         lock_guard lock(_mutex);
-
          if (dataIndex == 0)
             return Data();
-         
+            
+         scoped_lock lock(_mutex);
          seek(sizeof(Header) + dataIndex * sizeof(Branch));
          Size size;
          read(&size, 1, sizeof(Size));
@@ -221,8 +217,8 @@ namespace BeeFishDatabase {
 
       
       inline void setData(Index dataIndex, const Data& source)
-      {
-         lock_guard lock(_mutex);
+      {
+         scoped_lock lock(_mutex);
 
          seek(sizeof(Header) + dataIndex * sizeof(Branch));
          Size size = source.size();

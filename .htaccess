@@ -1,7 +1,5 @@
 #begin mod bds
-DirectoryIndex index.xhtml
 
-ErrorDocument 404 /NotFound.xhtml
 
 FileETag None
 Header unset ETag

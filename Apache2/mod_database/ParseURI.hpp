@@ -13,7 +13,7 @@ namespace BeeFishWebServer {
    Path parseURI(Database& database, const char* clientIP, const char* uri) {
        
       Path path(database);
-      path = path[DOMAIN][clientIP];
+      path = path[HOST];//[clientIP];
       
       string _uri = uri;
       
@@ -23,49 +23,21 @@ namespace BeeFishWebServer {
          _uri += '/';
          
       BString segment;
-      std::stringstream test(_uri);
-      while(std::getline(test, segment, '/'))
+      std::stringstream segments(_uri);
+      while(std::getline(segments, segment, '/'))
       {
-         path = path[segment.decodeURI().str()];
-      }
-
-/*
-      const auto segmentParser =
-         Invoke(
-            Capture(
-               Character("/") and
-               Repeat(
-                  not Character("/"),
-                  0
-               ),
-               segment
-            ),
-            [&segment, &path](Parser*) {
-                   
-               bool success = true;
-
-               if ( segment != "/" )
-               {
-                  string _segment =
-                     segment.substr(1);
-           
-                  path = path[_segment];
-               }
-
-               segment = "";
-
-               return success;
-            }
-         );
+         if (segment.size())
+         {
+            path = path[segment.decodeURI().str()];
             
          }
       }
-*/
       
       return path;
       
    }
    
+
 }
 
 #endif

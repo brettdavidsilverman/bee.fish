@@ -33,11 +33,11 @@ namespace BeeFishDatabase
       Database db;
 
       Path start(db);
-
+      
       Path next = start["Hello"];
-
+cerr << "Here2" << endl;
       next.setData("world");
-
+cerr << "Here3" << endl;
       std::string world;
       start["Hello"].getData(world);
 

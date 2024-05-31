@@ -57,99 +57,113 @@ using namespace BeeFishMisc;
 
 using namespace std;
 
-bool inputJSON(Path path, request_rec *r);
-bool outputJSON(Path path, request_rec *r);
-bool outputDocument(Path path, request_rec *r);
-bool outputId(request_rec *r);
+static bool inputJSON(Path path, request_rec *r);
+static bool outputJSON(Path path, request_rec *r);
+static bool outputDocument(Path path, request_rec *r);
+static bool outputId(request_rec *r);
+static bool inputJSON(Path path, request_rec *r);
+static bool outputJSON(Path path, request_rec *r);
+static bool outputDocument(Path path, request_rec *r);
+static bool outputId(request_rec *r);
 
-namespace BeeFishWebServer
-{
+
+namespace BeeFishWebServer {
+ 
+   mutex _mutex;
    Debug debug;
+   
+    
 }
 
 /* The sample content handler */
-int database_handler(request_rec *r)
+static int database_handler(request_rec *r)
 {
+    
+    //Debug debug;
+    
+    debug << now() << " "
+          << r->connection->client_ip << " "
+          << r->method << " "
+          << HOST 
+          << r->uri;
+          
+    if (r->args && strlen(r->args) > 0)
+       debug << "?" << r->args;
+       
+    debug << "\r\n";
+    debug.flush();
+    
+    scoped_lock lock(_mutex);
 
-   debug << now() << " "
-         << r->connection->client_ip << " "
-         << r->method << " "
-         << HOST
-         << r->uri;
-
-   Database database(DATABASE_FILENAME);
-
-   lock_guard lock(database._mutex);
-
-   if (r->args && strlen(r->args) > 0)
-      debug << "?" << r->args;
-
-   debug << "\r\n";
-   debug.flush();
-
-   std::string filename =
+    Database database(DATABASE_FILENAME);
+    
+    std::string filename =
        WWW_ROOT_DIRECTORY;
+    
+    filename += r->uri;
+        
+    if (filename.find("..") != std::string::npos)
+       return HTTP_INTERNAL_SERVER_ERROR;
+         
+    if (std::filesystem::exists(filename))
+    {
+        return DECLINED;
+    }
+    
+    
+    Path path = parseURI(
+       database,
+       r->connection->client_ip,
+       r->uri
+    );
+    
+    if (strcmp(r->method, "GET") == 0)
+    {
+        if (strcmp(r->uri, "/id") == 0)
+        {
+           if (!outputId(r))
+              return HTTP_INTERNAL_SERVER_ERROR;
+           else
+              return OK;
+        }
+        
+        else if (path.contains("document") &&
+                 path.contains("index"))
+        {
+           if (r->args) {
+              if (strcmp(r->args, "document") == 0)
+              {
+                 if (!outputDocument(path, r))
+                    return HTTP_INTERNAL_SERVER_ERROR;
+                 else
+                    return OK;
+              }
+           }
+           
+           if (!outputJSON(path, r))
+              return HTTP_INTERNAL_SERVER_ERROR;
+           else
+              return OK;
+           
+        }
+        
+        return HTTP_NOT_FOUND; // NotFound.xhtml
+        
+    }
+    else if (!strcmp(r->method, "POST")) {
+       path.clear();
+       
+       if (inputJSON(path, r))
+          return OK;
 
-   filename += r->uri;
+    }
+    
+   
+    return HTTP_INTERNAL_SERVER_ERROR;
 
-   if (filename.find("..") != std::string::npos)
-      return HTTP_INTERNAL_SERVER_ERROR;
-
-   if (std::filesystem::exists(filename))
-   {
-      return DECLINED;
-   }
-
-   Path path = parseURI(
-      database,
-      r->connection->client_ip,
-      r->uri
-   );
-
-   if (strcmp(r->method, "GET") == 0)
-   {
-      if (strcmp(r->uri, "/id") == 0)
-      {
-         if (!outputId(r))
-            return HTTP_INTERNAL_SERVER_ERROR;
-         else
-            return OK;
-      }
-
-      else if (path.contains("document") &&
-               path.contains("index"))
-      {
-         if (r->args)
-         {
-            if (strcmp(r->args, "document") == 0)
-            {
-               if (!outputDocument(path, r))
-                  return HTTP_INTERNAL_SERVER_ERROR;
-               else
-                  return OK;
-            }
-         }
-
-         if (!outputJSON(path, r))
-            return HTTP_INTERNAL_SERVER_ERROR;
-         else
-            return OK;
-      }
-
-      return HTTP_NOT_FOUND; // NotFound.xhtml
-   }
-   else if (strcmp(r->method, "POST") == 0)
-   {
-      path.clear();
-
-      if (inputJSON(path, r))
-         return OK;
-   }
-
-   return HTTP_INTERNAL_SERVER_ERROR;
 }
 
-bool outputId(request_rec *r)
+static bool outputId(request_rec *r)
 {
 
    ap_set_content_type(
@@ -169,7 +183,7 @@ bool outputId(request_rec *r)
    return true;
 }
 
-bool outputJSON(Path path, request_rec *r)
+static bool outputJSON(Path path, request_rec *r)
 {
    ap_set_content_type(
        r, "application/json; charset=utf-8");
@@ -182,7 +196,7 @@ bool outputJSON(Path path, request_rec *r)
    return true;
 }
 
-bool outputDocument(Path path, request_rec *r)
+static bool outputDocument(Path path, request_rec *r)
 {
    ap_set_content_type(
        r, "application/json; charset=utf-8");
@@ -205,9 +219,11 @@ bool outputDocument(Path path, request_rec *r)
    return true;
 }
 
-bool inputJSON(Path path, request_rec *r)
+static bool inputJSON(Path path, request_rec *r)
 {
 
+   Debug debug;
+   
    bool isOk = true;
    string posted;
    int pageSize = getPageSize();
@@ -242,7 +258,7 @@ bool inputJSON(Path path, request_rec *r)
    debug << now()
          << " Parsing document "
          << "\r\n";
-
+         
    for (Size pageIndex = 0; pageIndex < pageCount; ++pageIndex)
    {
 
