@@ -11,6 +11,7 @@
 #include <future>
 #include <iostream>
 #include <thread>
+#include <boost/interprocess/shared_memory_object.hpp>
 #include "../Miscellaneous/Debug.hpp"
 #include "Version.hpp"
 #include "File.hpp"
@@ -57,13 +58,14 @@ namespace BeeFishDatabase {
          ),
          _pageSize(pageSize)
       {
+#ifdef DEBUG
          Debug debug;
          debug << now() << " "
                << "Database(\""
                << escape(_filename)
                << "\")"
                << "\r\n";
-         
+#endif
          if (isNew())
          {
             initializeHeader();
@@ -76,14 +78,15 @@ namespace BeeFishDatabase {
 
       virtual ~Database()
       {
-
+#ifdef DEBUG
          Debug debug;
+
          debug << now() << " "
                << "~Database(\""
                << escape(_filename)
                << "\")"
                << "\r\n";
-
+#endif
       }
       
       

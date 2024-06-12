@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <atomic>
+#include <fcntl.h>
+
 #include "../power-encoding/power-encoding.h"
 #include "../Miscellaneous/Optional.hpp"
 #include "../Script/Variable.hpp"
@@ -23,13 +25,17 @@ namespace BeeFishDatabase {
    public:
       Database* _database = nullptr;
       Index     _index = 0;
+      int     _lockFile = 0;
+      Index     _lockIndex = 0;
    public:
 
       Path( Database* database = nullptr,
             Index index = Branch::Root ) :
          PowerEncoding(),
          _database(database),
-         _index(index)
+         _index(index),
+         _lockFile(0),
+         _lockIndex(0)
       {
       }
 
@@ -37,15 +43,33 @@ namespace BeeFishDatabase {
             Index index = Branch::Root ) :
          PowerEncoding(),
          _database(&database),
-         _index(index)
+         _index(index),
+         _lockFile(0),
+         _lockIndex(0)
       {
       }
 
       Path(const Path& source) :
          PowerEncoding(),
          _database(source._database),
-         _index(source._index)
+         _index(source._index),
+         _lockFile(0),
+         _lockIndex(0)
       {
+      }
+      
+      virtual ~Path()
+      {
+         scoped_lock lock(_database->_writeMutex);
+         if (_lockFile > 0)
+         {
+            cerr << "Unlocking index " << _lockIndex << ":" << "\r\n";
+            close(_lockFile);
+            remove(lockFilename(_lockIndex).c_str());
+            _lockFile = 0;
+            _lockIndex = 0;
+         }
+         
       }
       
       virtual bool readBit()
@@ -93,15 +117,14 @@ namespace BeeFishDatabase {
       virtual void writeBit(bool bit)
       {
 
-         scoped_lock lock(_database->_writeMutex);
+        // scoped_lock lock(_database->_writeMutex);
          Branch branch = getBranch();
          
          if (bit == 0)
          {
             if (branch._left == 0) {
                branch._left =
-                  _database->getNextIndex();
-               setBranch(branch);
+                  goLeft();
             }
             _index = branch._left;
             
@@ -110,8 +133,7 @@ namespace BeeFishDatabase {
          {
             if (branch._right == 0) {
                branch._right =
-                  _database->getNextIndex();
-               setBranch(branch);
+                  goRight();
             }
             _index = branch._right;
             
@@ -120,6 +142,58 @@ namespace BeeFishDatabase {
          PowerEncoding::writeBit(bit);
          
          
+      }
+      
+      Index goLeft()
+      {
+         lockBranch();
+         Branch branch = getBranch();
+         if (branch._left == 0) {
+            branch._left =
+               _database->getNextIndex();
+            setBranch(branch);
+         }
+         return branch._left;
+      }
+      
+      Index goRight()
+      {
+         lockBranch();
+         Branch branch = getBranch();
+         if (branch._right == 0) {
+            branch._right =
+               _database->getNextIndex();
+            setBranch(branch);
+         }
+         return branch._right;
+      }
+      
+      void lockBranch() {
+          
+         scoped_lock lock(_database->_writeMutex);
+         
+         if (_lockFile > -1)
+            return;
+            
+         cerr << "Locking index " <<_index << "\r\n";
+         _lockIndex = _index;
+         _lockFile = open(lockFilename(_lockIndex).c_str(), O_RDWR | O_EXCL | O_CREAT);
+        // cerr << "Lock file fd:" << _lockFile << "\r\n";
+        // flock( fileno(_lockFile), LOCK_EX);
+         
+      }
+      
+      std::string lockFilename(Index lockIndex)
+      {
+         std::stringstream stream;
+         stream <<
+            _database->filename() <<
+            "." <<
+            lockIndex <<
+            ".lock";
+            
+         return stream.str();
+            
       }
       
 

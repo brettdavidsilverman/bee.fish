@@ -151,7 +151,13 @@ static int database_handler(request_rec *r)
         
     }
     else if (!strcmp(r->method, "POST")) {
-       path.clear();
+        
+       if (path.contains("document") &&
+           path.contains("index"))
+       {
+// uncomment to stop multiple posts
+          //return HTTP_INTERNAL_SERVER_ERROR;
+       }
        
        if (inputJSON(path, r))
           return OK;
