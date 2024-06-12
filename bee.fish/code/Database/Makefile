@@ -6,7 +6,7 @@ OUTPUT = $(BUILD)/Database
 LARGE = ../../../large.json
 
 $(OUTPUT):	$(DEPS)
-	$(CC) $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -lstdc++fs
+	$(CC) $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -lstdc++fs -lrt
 
 all:	$(OUTPUT)
 

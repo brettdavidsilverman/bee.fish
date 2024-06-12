@@ -20,13 +20,13 @@ DATABASE=../../bee.fish/build/Database
 
 
 mod_database.so:	mod_database.cpp ParseURI.hpp ApacheStream.hpp $(DATABASE) a.out
-	g++ -std=c++17 -fPIC -shared -o mod_database.so $(INCLUDES) mod_database.cpp -lpthread
+	g++ -std=c++17 -fPIC -shared -o mod_database.so $(INCLUDES) mod_database.cpp -lpthread -lrt
 	
 $(DATABASE):
 	cd ../../bee.fish && make $(DEBUG)
 
 a.out:
-	g++ -std=c++17 -o a.out $(INCLUDES) main.cpp -lpthread
+	g++ -std=c++17 -o a.out $(INCLUDES) main.cpp -lpthread -lrt
 	
 #   the default target
 all: mod_database.so a.out

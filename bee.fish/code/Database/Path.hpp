@@ -60,7 +60,7 @@ namespace BeeFishDatabase {
       
       virtual ~Path()
       {
-         scoped_lock lock(_database->_writeMutex);
+         std::scoped_lock lock(_database->_writeMutex);
          if (_lockFile > 0)
          {
             cerr << "Unlocking index " << _lockIndex << ":" << "\r\n";
@@ -117,7 +117,7 @@ namespace BeeFishDatabase {
       virtual void writeBit(bool bit)
       {
 
-        // scoped_lock lock(_database->_writeMutex);
+        // std::scoped_lock lock(_database->_writeMutex);
          Branch branch = getBranch();
          
          if (bit == 0)
@@ -170,7 +170,7 @@ namespace BeeFishDatabase {
       
       void lockBranch() {
           
-         scoped_lock lock(_database->_writeMutex);
+         std::scoped_lock lock(_database->_writeMutex);
          
          if (_lockFile > -1)
             return;
@@ -327,7 +327,7 @@ namespace BeeFishDatabase {
          
       void setData(const std::string& value) {
           
-         scoped_lock lock(_database->_writeMutex);
+         std::scoped_lock lock(_database->_writeMutex);
 
          if (value.size() == 0) {
             if (hasData())
@@ -411,7 +411,7 @@ namespace BeeFishDatabase {
       
       void deleteData()
       {
-         scoped_lock lock(_database->_writeMutex);
+         std::scoped_lock lock(_database->_writeMutex);
 
          Branch branch = getBranch();
          
@@ -425,7 +425,7 @@ namespace BeeFishDatabase {
       {
          deleteData();
          
-         scoped_lock lock(_database->_writeMutex);
+         std::scoped_lock lock(_database->_writeMutex);
          
          Branch branch = getBranch();
          

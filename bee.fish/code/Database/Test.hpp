@@ -401,15 +401,18 @@ cerr << "Here3" << endl;
       cout << "Testing next index" << endl;
 
       bool success = true;
-      std::string filename = TEMP_DIRECTORY "/temp.db";
+      std::string filename = TEMP_DIRECTORY "temp.db";
       remove(filename);
       Index nextIndex;
       {
          Database database(filename);
+         cerr << database << endl;
          Path test = database;
-         success = database._nextIndex == 0;
+         success = *(database._nextIndex) == 0;
          test["Hello"];
-         nextIndex = database._nextIndex;
+         nextIndex = *(database._nextIndex);
+         
+         cerr << "NextIndex 1:" << nextIndex << endl;
       }
       
       if (success)
@@ -418,7 +421,8 @@ cerr << "Here3" << endl;
          Path test = database;
          success = test.contains("Hello");
          success = success &&
-            (nextIndex == database._nextIndex);
+            (nextIndex == *(database._nextIndex));
+         cerr << "NextIndex 2:" << (Index)(*(database._nextIndex)) << endl;
       }
       
       outputSuccess(success);

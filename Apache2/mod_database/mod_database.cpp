@@ -93,7 +93,7 @@ static int database_handler(request_rec *r)
     debug << "\r\n";
     debug.flush();
     
-    scoped_lock lock(_mutex);
+    //std::scoped_lock lock(_mutex);
 
     Database database(DATABASE_FILENAME);
     

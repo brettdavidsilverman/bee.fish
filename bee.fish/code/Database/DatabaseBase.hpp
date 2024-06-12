@@ -11,6 +11,9 @@
 #include <future>
 #include <iostream>
 #include <thread>
+#include <filesystem>
+
+#include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
 #include "../Miscellaneous/Debug.hpp"
 #include "Version.hpp"
@@ -25,7 +28,8 @@ using namespace std::literals;
 namespace BeeFishDatabase {
    
    using namespace BeeFishMisc;
-
+   using namespace boost::interprocess;
+   
    typedef std::mutex Mutex;
    
    // Store [left, right] branch elements.
@@ -43,11 +47,16 @@ namespace BeeFishDatabase {
          char _version[256];
          Size _pageSize;
       } _header;
-    
-      AtomicIndex  _nextIndex;
-      Size    _pageSize;
-      Mutex   _mutex;
-      Mutex   _writeMutex;
+    
+      AtomicIndex* _nextIndex;
+      Size         _pageSize;
+      Mutex        _mutex;
+      Mutex        _writeMutex;
+
+      std::string          _nextIndexFilename;
+      shared_memory_object _sharedMemory;
+      mapped_region        _region;
+      
    public:
       Database(
          string filePath = "",
@@ -66,6 +75,7 @@ namespace BeeFishDatabase {
                << "\")"
                << "\r\n";
 #endif
+
          if (isNew())
          {
             initializeHeader();
@@ -73,11 +83,16 @@ namespace BeeFishDatabase {
     
          checkHeader();
 
+         initializeNextIndex();
          
       }
 
       virtual ~Database()
       {
+         shared_memory_object::remove(
+            _nextIndexFilename.c_str()
+         );
+         
 #ifdef DEBUG
          Debug debug;
 
@@ -89,12 +104,87 @@ namespace BeeFishDatabase {
 #endif
       }
       
+      virtual void initializeNextIndex()
+      {
+         boost::interprocess
+            ::permissions permissions;
+         permissions.set_default();
+         
+         _nextIndexFilename = _filename
+            + ".next_index";
+            
+         std::replace(
+            _nextIndexFilename.begin(),
+            _nextIndexFilename.end(),
+            '/', 
+            '_'
+         );
+         
+         _sharedMemory = 
+            shared_memory_object(
+               boost::interprocess
+                  ::open_or_create,
+               _nextIndexFilename.c_str(),
+               boost::interprocess
+                  ::mode_t::read_write,
+               permissions
+            );
+            
+         cerr << "Create name: " << _nextIndexFilename << endl;
+         
+         bool createdSharedMemory = false;
+         offset_t sharedMemorySize = 0;
+         if (
+             !_sharedMemory.get_size(sharedMemorySize) ||
+              sharedMemorySize == 0
+            )
+         {
+             
+             cerr << "Truncate" << endl;
+         
+            _sharedMemory.truncate(sizeof(AtomicIndex));
+            createdSharedMemory = true;
+         }
+         
+         
+         // Map the whole shared memory in this process
+         _region = mapped_region(
+            _sharedMemory,
+            boost::interprocess
+               ::mode_t::read_write,
+            0,
+            sizeof(AtomicIndex)
+         );
+         
+         if (createdSharedMemory)
+         {
+            // Initialize the shared memory
+            // with current branch count
+            Size branchCount =
+               floor((double)(size() - sizeof(Header)) /
+               (double)sizeof(Branch));
+         
+            AtomicIndex* atomicIndex =
+               new AtomicIndex((Index)branchCount);
+            memcpy(_region.get_address(), atomicIndex, sizeof(AtomicIndex));
+         
+            
+         }
+         
+         _nextIndex =
+            (AtomicIndex*)
+            _region.get_address();
+
+         
+
+      }
+      
       
    private:
 
       virtual void initializeHeader()
       {
-         scoped_lock lock(_mutex);
+         std::scoped_lock lock(_mutex);
          memset(&_header, 0, sizeof(Header));
          strcpy(_header._version, DATABASE_VERSION);
          _header._pageSize = _pageSize;
@@ -104,7 +194,7 @@ namespace BeeFishDatabase {
       
       virtual void checkHeader()
       {
-         scoped_lock lock(_mutex);
+         std::scoped_lock lock(_mutex);
          seek(0);
          read(&_header, 1, sizeof(Header));
          
@@ -129,12 +219,6 @@ namespace BeeFishDatabase {
             throw runtime_error(stream.str());
          }
          
-         Size branchCount =
-            floor((double)(size() - sizeof(Header)) /
-               (double)sizeof(Branch));
-            
-         _nextIndex = branchCount;
-         
 
 
       }
@@ -147,15 +231,14 @@ namespace BeeFishDatabase {
 
       inline Index getNextIndex()
       {
-         
-         return ++_nextIndex;
+         return ++(*_nextIndex);
 
       }
  
       inline Index allocate(Size byteSize)
       {
          
-         scoped_lock lock(_mutex);
+         std::scoped_lock lock(_mutex);
 
          Size size = sizeof(Size) + byteSize;
   
@@ -166,7 +249,7 @@ namespace BeeFishDatabase {
          Index dataIndex;
          dataIndex = getNextIndex();
          
-         _nextIndex += branchCount;
+         *_nextIndex += branchCount;
 
          return dataIndex;
             
@@ -174,7 +257,7 @@ namespace BeeFishDatabase {
       
       inline Branch getBranch(Index index)
       {
-         scoped_lock lock(_mutex);
+         std::scoped_lock lock(_mutex);
          Size offset = sizeof(Header) + index * sizeof(Branch);
          
          Branch branch;
@@ -197,7 +280,7 @@ namespace BeeFishDatabase {
 
       inline void setBranch(Index index, const Branch& branch)
       {
-         scoped_lock lock(_mutex);
+         std::scoped_lock lock(_mutex);
          seek(sizeof(Header) + index * sizeof(Branch));
          write(&branch, 1, sizeof(Branch));
       }
@@ -208,7 +291,7 @@ namespace BeeFishDatabase {
          if (dataIndex == 0)
             return Data();
             
-         scoped_lock lock(_mutex);
+         std::scoped_lock lock(_mutex);
          seek(sizeof(Header) + dataIndex * sizeof(Branch));
          Size size;
          read(&size, 1, sizeof(Size));
@@ -221,7 +304,7 @@ namespace BeeFishDatabase {
       
       inline void setData(Index dataIndex, const Data& source)
       {
-         scoped_lock lock(_mutex);
+         std::scoped_lock lock(_mutex);
 
          seek(sizeof(Header) + dataIndex * sizeof(Branch));
          Size size = source.size();
@@ -249,7 +332,7 @@ namespace BeeFishDatabase {
              << db._filename
              << endl
              << "Next: "
-             << (Size)(db._nextIndex)
+             << (Index)(*(db._nextIndex))
              << endl
              << "Branch size: "
              << sizeof(Branch)
