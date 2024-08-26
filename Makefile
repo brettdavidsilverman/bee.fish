@@ -1,22 +1,25 @@
 MOD_DATABASE=Apache2/mod_database/mod_database.so
-JSON=bee.fish/build/json
+DATABASE=bee.fish/build/Database
 
 all:	$(JSON) $(MOD_DATABASE) Makefile
 	
-$(JSON):
+$(DATABASE):
 	cd bee.fish && make $(DEBUG) test
 	
 $(MOD_DATABASE):
 	cd Apache2/mod_database && sudo make $(DEBUG) install reload test
 	
-test:	all
+test:
 	cd bee.fish && make test
-	cd Apache2/mod_database && sudo make install stop start test
+	cd Apache2/mod_database && sudo make install reload test
 	
 clean:
-	#cd bee.fish && make clean
+	cd bee.fish && make clean
 	cd Apache2/mod_database && sudo make clean
-	
+
+apache2:
+	cd Apache2/mod_database && sudo make clean install reload test
+
 stop:
 	cd Apache2/mod_database && sudo make stop
 

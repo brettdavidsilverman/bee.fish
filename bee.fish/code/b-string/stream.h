@@ -143,9 +143,6 @@ namespace BeeFishBString {
 
             Data data(_bytes.data(), size());
 
-#ifdef DEBUG
-//            cerr.write((const char*)_data._data, _data.size());
-#endif
             _onbuffer(data);
 
          }

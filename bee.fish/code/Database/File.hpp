@@ -1,6 +1,7 @@
 #ifndef BEE_FISH_DATABASE__FILE_H
 #define BEE_FISH_DATABASE__FILE_H
 
+#include <stdlib.h>
 #include <iostream>
 #include <cstring>
 #include <limits.h>
@@ -18,51 +19,34 @@ namespace BeeFishDatabase {
    
    class File {
    protected:
-      FILE* _file = NULL;
-      bool _isNew;
-      bool _isTemp;
+      int  _fileNumber = 0;
+      bool _isNew = false;
+      bool _isTemp = false;
       string _filename;
 
    public:
       File(
-         const string& filename = "",
-         const Size initialSize = 0
-      ) : _file(NULL),
-          _filename(filename)
+         const string& filename = ""
+      ) : _filename(filename)
       {
+
+         
          if (_filename == "") {
-            std::string temp = TEMP_DIRECTORY;
-            temp += "bee.fish.XXXXXX";
-            int fileNo = mkstemp(temp.data());
+            std::string temp =
+               TEMP_DIRECTORY
+               "bee.fish.XXXXXX";
+               
+            _fileNumber = mkstemp(temp.data());
             _filename = temp;
             _isNew = true;
             _isTemp = true;
-            ::close(fileNo);
-            open();
-            resize(initialSize);
          }
-         else {
-
-            // Create the file if it
-            // doesnt exist
-            if (exists() == false) {
-               create(initialSize);
-               _isNew = true;
-            }
-            else
-               _isNew = false;
-               
-            _isTemp = false;
-
+         else
             open();
-
-         }
-
 
       }
 
       File(const File& source) :
-         _file(NULL),
          _filename(source._filename)
          
       {
@@ -72,17 +56,12 @@ namespace BeeFishDatabase {
       }
       
          
-      ~File() {
+      virtual ~File() {
          close();
          if (_isTemp && exists())
             ::remove(_filename.c_str());
       }
       
-      Size fileSize() const
-      {
-         return size();
-      }
-
       bool isNew() const
       {
          return _isNew;
@@ -92,58 +71,78 @@ namespace BeeFishDatabase {
       {
          return _filename;
       }
-
-      virtual Size seek
+      
+      
+      Size seek
       (
-         Size offset,
+         long int offset,
          int origin = SEEK_SET
       ) const
       {
-         
-         size_t result =
-            fseek(
-               _file,
+
+         ssize_t result =
+            lseek(
+               _fileNumber,
                offset,
                origin
             );
             
-         if (result != 0)
+         if (result < 0)
          {
             string error =
                std::strerror(errno);
-            error =
-               "Error seeking file." +
-               error;
+
+            stringstream stream;
+            stream
+               << "Error seeking file." << endl
+               << "\tSize: " << size() << endl
+               << "\tOffset u: " << offset << endl
+               << "\tOffset s: " << (long int)offset << endl
+               << "\tOffset -s: " << -offset << endl
+               << "\tOrigin: " << origin << endl
+               << "\tError: " << error << endl;
+
             throw runtime_error(
-               error
+               stream.str()
             );
          }
          
-         return offset;
+         return result;
       }
       
-      virtual void close()
+      void close()
       {
-         if (_file) {
-            fclose(_file);
-            _file = NULL;
+         if (_fileNumber > 0) {
+            ::close(_fileNumber);
+            _fileNumber = 0;
          }
       }
       
       Size read
       (
          void * ptr,
-         size_t count,
          size_t size
       ) const
       {
-         size_t result =
-            fread(
-               ptr,
-               count,
-               size,
-               _file
+         ssize_t result = ::read(_fileNumber, ptr, size);
+
+         if (result < 0)
+         {
+            string error =
+               std::strerror(errno);
+
+            stringstream stream;
+
+            stream 
+               << "Error reading file: " 
+               << "Requested " << size << ". "
+               << "Returned " << result << ". "
+               << error;
+
+            throw runtime_error(
+               stream.str()
             );
+         }
 
          return result;
       }
@@ -152,19 +151,17 @@ namespace BeeFishDatabase {
       Size write
       (
          const void * ptr,
-         size_t count,
          size_t size
       )
       {
          size_t result =
-            fwrite(
+            ::write(
+               _fileNumber,
                ptr,
-               count,
-               size,
-               _file
+               size
             );
 
-         if (result != (count * size))
+         if (result != size)
          {
             string error =
                std::strerror(errno);
@@ -175,10 +172,15 @@ namespace BeeFishDatabase {
                error
             );
          }
-         
+
          return result;
       }
-   
+      
+      Size size() const
+      {
+         return seek(0, SEEK_END);
+      }
+      
    protected:
 
       bool exists()
@@ -191,96 +193,24 @@ namespace BeeFishDatabase {
          );
       }
 
-      void create(const Size initialSize)
-      {
-         FILE* file = fopen(
-            _filename.c_str(), "w+"
-         );
-         
-         if (file == NULL) {
-            throw runtime_error(
-               "Couldn't create file " +
-               _filename
-            );
-         }
-   
-         resize(
-            fileno(file),
-            initialSize
-         );
-   
-         fclose(file);
-
-      }
-
       void open() {
          // Open the file
-         _file = fopen(
-            _filename.c_str(), "rw+"
-         );
-      
-         if (_file == NULL) {
+         _fileNumber = ::open(_filename.c_str(), O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+
+         if (_fileNumber <= 0) {
+
+            string error =
+               std::strerror(errno);
+            error =
+               "Error opening file " + _filename + ". " + 
+               error;
             throw runtime_error(
-               "Couldnt open file " +
-               _filename
+               error
             );
+
          }
 
-         _fileNumber = fileno(_file);
       }
-
-      Size resize(const Size newSize)
-      {
-
-         resize(
-            _fileNumber,
-            newSize
-         );
-         
-         return size();
-   
-      }
-
-      Size size() const
-      {
-         Size size = getFileSize(_fileNumber);
-         return size;
-      }
-      
-      int _fileNumber = -1;
-      
-   private:
-      static void resize(
-         int fileNumber,
-         Size newSize
-      )
-      {
-         int result =
-            ftruncate(fileNumber, newSize);
-
-         if (result != 0)
-         {
-            string str = "Couldn't resize file. ";
-            str += to_string(newSize) +
-                   strerror(errno);
-            
-            throw runtime_error(str);
-         }
-         
-      }
-      
-   private:
-      
-      static Size getFileSize(int file)
-      {
-         struct stat buffer;
-         fstat(file, &buffer);
-         return buffer.st_size;
-      }
-  public:
-  
-    
-     
    };
 
 }

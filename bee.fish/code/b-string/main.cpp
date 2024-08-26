@@ -4,7 +4,7 @@
 #include <vector>
 #include "../misc/misc.h"
 #include "config.h"
-#include "string.h"
+#include "b-string.h"
 #include "test.h"
 #include "version.h"
 
@@ -14,7 +14,7 @@ using namespace BeeFishBString;
 
 int main(int argc, const char* argv[]) {
    
-   cerr << "bee.fish.b-string"
+   cout << "bee.fish.b-string"
            << endl
         << "C++ run time: "
            << __cplusplus

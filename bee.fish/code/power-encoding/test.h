@@ -1,7 +1,7 @@
 #include <iostream>
 #include "../test/test-result.h"
 #include "power-encoding-base.h"
-#include "../b-string/string.h"
+#include "../b-string/b-string.h"
 #include "../b-string/misc.h"
 #include "encoding.h"
 
@@ -106,10 +106,7 @@ namespace BeeFishPowerEncoding
          "Bit Stream",
          start == finish
       );
-      
-      cout << finish << endl;
-      cout << stream.toData().toBase64() << endl;
-      
+
       if (ok)
          cout << endl << "SUCCESS" << endl;
       else

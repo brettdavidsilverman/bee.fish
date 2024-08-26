@@ -75,7 +75,7 @@ namespace BeeFishScript {
          return out;
       }
 
-      friend ostream& operator << (ostream& out, const Variable& variable);
+      //friend ostream& operator << (ostream& out, const Variable& variable);
 
       virtual std::string str() const {
          stringstream stream;
@@ -527,7 +527,7 @@ namespace BeeFishScript {
       if (tabs == 0)
          tabs++;
 
-      output << "{" << endl;
+      output << "{" << "\r\n";
 
       for (Object::const_iterator it = cbegin(); it != cend();) {
          const String& key = it->first;
@@ -542,11 +542,11 @@ namespace BeeFishScript {
          }
 
          if (++it != cend())
-            output << "," << endl;
+            output << "," << "\r\n";
 
       }
 
-      output << endl;
+      output << "\r\n";
 
       if (tabs > 0)
          --tabs;

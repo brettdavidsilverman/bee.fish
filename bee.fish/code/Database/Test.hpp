@@ -12,12 +12,35 @@ namespace BeeFishDatabase
    using namespace BeeFishTest;
    using namespace BeeFishPowerEncoding;
 
+   inline bool testNextIndex();
    inline bool testPath();
    inline bool testArray2Path();
    inline bool testSubArray2Path();
    inline bool testAllFiles(string url, string directory);
    inline bool testFile(Path root, string file, bool expect);
    
+
+   inline bool testNextIndex()
+   {
+      using namespace std;
+
+      cout << "Testing next index" << endl;
+
+      Database db;
+ 
+      Index index1 = db.getNextIndex();
+      Index index2 = db.getNextIndex();
+ 
+      cerr << "index1 " << index1 << ", index2 " << index2 << endl;
+
+      bool success =
+        (index1 == sizeof(Branch)) &&
+        (index2 == index1 + sizeof(Branch));
+        
+      outputSuccess(success);
+      
+      return success;
+   }
 
    inline bool test()
    {
@@ -29,34 +52,107 @@ namespace BeeFishDatabase
       
       cout << "Test Database" << endl;
       
+      success = success &&
+         testNextIndex();
+         
+      if (!success)
+         return false;
+         
       Database db;
-
       Path start(db);
+      
+
+      cout << "\tSimple path [] " << flush;
+
+      cout << endl << "Start: " << start.index()  << endl;
+
+
+      //cout << "Next: " << next.index() << endl;
+      Index first, second;
+
+      cout << "Hello 0: " << (first = start["Hello"].index())  << endl;
+      cout << "Hello 1: " << (second = start["Hello"].index())  << endl;
+      cout << "Hello 2: " << start["Hello"].index()  << endl;
 
       Path next = start["Hello"];
 
-      next.setData("world");
-
-      std::string world;
-      start["Hello"].getData(world);
-
-      cout << "\t" << "Hello: " << world;
-      success = (world == "world");
+      success = (first == second && first == next.index());
+      
       outputSuccess(success);
 
-      // Min / Max
-      MinMaxPath data = start["data"];
+      if (!success)
+         return false;
 
-      for (size_t i = min; i <= max; ++i)
+      if (success)
       {
-         data[i] = i;
-      }
 
+            cout << "\tGet/Set Data size() " << flush;
+            next.setData("world");
+            Data testHelloData = next.getData();
+            cerr << "TEST:size: " << testHelloData.size();
+            success = testHelloData.size() == strlen("world");
+            outputSuccess(success);
+
+            cout << "\tGet/Set Data str(): " << flush;
+            std::string testHelloStr = testHelloData.str();
+            cerr << testHelloStr << " " << flush;
+            success = (testHelloStr == "world");
+            outputSuccess(success);
+      }      
+
+      if (success)
+      {
+
+            cout << "\tGet/Set Data size() " << flush;
+
+            Data testHello = next.getData();
+            cerr << "TEST:size: " << testHello.size();
+
+            success = testHello.size() == strlen("world");
+            outputSuccess(success);
+
+            cout << "\tGet/Set Data str(): " << flush;
+            std::string testHelloStr = testHello.str();
+            cerr << testHelloStr << " " << flush;
+            success = (testHelloStr == "world");
+            outputSuccess(success);
+      }      
+
+      Data testNext1 = start["Hello"].getData();
+      cout << "\t" << "Hello 1: " << testNext1.size() ;
+      std::string world1 = testNext1.str();
+      success = success && (world1 == "world");
+      outputSuccess(success);
+
+      Data testNext2 = next.getData();
+      std::string world2 = testNext2.str();
+      cout << "\t" << "Hello 2: " << testNext2.size() ;
+      success = success && (world2 == "world");
+      outputSuccess(success);
+
+      MinMaxPath data = start["data"];
+      
+      // Min / Max
+
+      for (Size i = min; i <= max; ++i)
+      {
+         data[i].setData(i);
+      }
+      
+      
+      if (success)
+      {
+         cout << "\tTesting Contains " << flush;
+         success = data.contains(100);
+         outputSuccess(success);
+      }
+      
       if (success)
       {
          data.setData("");
          cout << "\tTesting Data string" << flush;
-         success = data.hasData();
+         success = !data.hasData();
+         
          string value;
          data.getData(value);
          success = success && (value == "");
@@ -65,26 +161,25 @@ namespace BeeFishDatabase
 
       if (success) {
          cout << "\tTesting Data Path Min: " << flush;
-
-         Stack stack;
-
+         
          Size minimum =
-            data.min<Size>(stack);
+            data.min<Size>();
 
          cout << minimum << flush;
 
          success = (minimum == min);
 
          outputSuccess(success);
+         
+         assert(success);
+         
       }
 
       if (success) {
          cout << "\tTesting Data Path Max: ";
 
-         Stack stack;
-
          Size maximum =
-            data.max<Size>(stack);
+            data.max<Size>();
 
          success = (maximum == max);
 
@@ -106,9 +201,7 @@ namespace BeeFishDatabase
 
          data[min][0];
          data[min][1];
-         Stack stack;
-         success &= (data.min<Size>(stack) == min);
-         success &= (stack.size() == 4);
+         success = success && (data.min<Size>() == min);
          outputSuccess(success);
       }
 
@@ -117,6 +210,7 @@ namespace BeeFishDatabase
 
          data[max][0];
          data[max][1];
+
          success = (data.max<Size>() == max);
          outputSuccess(success);
       }
@@ -125,9 +219,9 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tTesting get/set data: ";
 
-         Path data = start;
+         Path data = start["getset"];
          Size count = -1;
-         data = 22;
+         data.setData((Size)22);
          data.getData(count);
          success =
             (count == 22);
@@ -161,24 +255,30 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tTesting int next" << endl;
 
+
          MinMaxPath data = start["skip3"];
          data[0];
          data[1];
          
-         Stack stack;
+         cout << "\t\tFirst: " << flush;
+         
+         Stack stack(data);
          int first = - 1;
          bool next =
             data.next(stack, first);
-         if (next)
-            cout << "\t\tFirst: " << first << "," << next << endl;
+         
+         
          success = (first == 0) && next;
 
+         outputSuccess(success);
+
          if (success) {
+            cout << "\t\t" << "Second: " << flush;
             int second = -1;
             next =
                data.next(stack, second);
-            cout << "\t\t" << "Second: " << second << ", " << next << endl;
             success &= (second == 1) && next;
+            outputSuccess(success);
          }
 
          if (success) {
@@ -188,6 +288,7 @@ namespace BeeFishDatabase
  
             cout << "\t\t" << "End: " << third << ", " << next << endl;
             success &= (third == -1) && !next;
+            outputSuccess(success);
          }
 
 
@@ -202,7 +303,7 @@ namespace BeeFishDatabase
          data["second"];
          data["third"];
 
-         Stack stack;
+         Stack stack(data);
          vector<string> values;
          string value;
          while (data.next<string>(stack, value))
@@ -235,7 +336,7 @@ namespace BeeFishDatabase
          for (int i = 1; i <= 10; ++i)
             data[i];
 
-         Stack stack;
+         Stack stack(data);
          int i;
          int check = 1;
          int last = data.max<int>();
@@ -251,8 +352,6 @@ namespace BeeFishDatabase
          outputSuccess(success);
          
       }
-
-      assert(success);
       
       if (success)
       {
@@ -262,7 +361,7 @@ namespace BeeFishDatabase
          data["one"];
          data["two"];
          data["three"];
-         Stack stack;
+         Stack stack(data);
          string key;
          string last;
          while (data.next(stack, key)) {
@@ -316,31 +415,63 @@ namespace BeeFishDatabase
          success &= (contains == false);
          outputSuccess(success);
       }
-      
+////      
+      if (success)
+      {
+         cout << "\tTesting string contains" << flush;
+
+         MinMaxPath data = start["skip8.1"];
+         data["hello"];
+
+         bool contains = data.contains("hello");
+
+         success &= (contains == true);
+         outputSuccess(success);
+      }
+
+      if (success)
+      {
+         cout << "\tTesting string does not contain" << flush;
+
+         MinMaxPath data = start["skip9.1"];
+         data["hello"];
+
+         bool contains = data.contains("help");
+
+         success &= (contains == false);
+         outputSuccess(success);
+      }
+
+////
       if (success)
       {
          cout << "\tTesting nested keys" << flush;
           
          Path data = start["skip10"];
          data[1][1];
-         Stack stack1;
+         data[1][2];
+         
+         Stack stack1(data);
          MinMaxPath test1 = data;
          int min1 = test1.min<int>(stack1);
          
          success &= (min1 == 1);
          
-         data[1][2];
-         Stack stack2;
+         outputSuccess(success);
+
+         Stack stack2(data);
          MinMaxPath test2 = data;
          int min2 = test2.min<int>(stack2);
+
          success &= (min2 == 1);
-         
+
+         outputSuccess(success);
+
          MinMaxPath keys = data;
    
          int key;
-         
          int count = 0;
-         Stack stack;
+         Stack stack(keys);
          while (keys.next<int>(stack, key))
          {
             ++count;
@@ -352,6 +483,7 @@ namespace BeeFishDatabase
    
       }
      
+      
       success = success &&
          testPath();
          
@@ -364,13 +496,12 @@ namespace BeeFishDatabase
       success = success &&
          testAllFiles(HOST, TEST_DIRECTORY);
      
-      db.close();
-      remove(db.filename().c_str());
-
       outputSuccess(success);
 
       return success;
    }
+   
+   
    
    inline bool testPath()
    {
@@ -381,27 +512,30 @@ namespace BeeFishDatabase
       bool success = true;
       Database database;
       Path root = database;
+      cout << "\tTest data: " << std::flush;
+      {
       
-      std::string str1 = "Hello 🤗";
-      Path path = root["str"];
-      path.setData(str1);
-      Path path2 = root["str"];
-      std::string str2;
-      path2.getData(str2);
+         std::string str1 = "Hello 🤗";
+         Path path = root["str"];
+         path.setData(str1);
+         Path path2 = root["str"];
+         std::string str2;
+         path2.getData(str2);
       
-      success = testValue(str1,str2);
-      BeeFishMisc::outputSuccess(success);
+         success = testValue(str1,str2);
+         BeeFishMisc::outputSuccess(success);
+      }
       
       // Test string
-      cout << "Test strings" << endl;
+      cout << "\tTest strings" << endl;
       
       if (success)
       {
-         Path path = root["string"];
+         MinMaxPath path = root["string"];
          JSON2Path parser(path);
          parser.read("\"Hello World\"");
          
-         cout << "\tParse string ";
+         cout << "\t\tParse string ";
          success = success &&
             parser.result() == true;
          BeeFishMisc::outputSuccess(success);
@@ -457,9 +591,9 @@ namespace BeeFishDatabase
       
       if (success) {
          cout << "\tItem 0: ";
-         Path path = root["array"];
-         path = path[Type::ARRAY];
-         success = path.contains(0);
+         Path path = root["array"][Type::ARRAY];
+         Size test = MinMaxPath(path).min<Size>();
+         success = path.contains(Size(0));
          BeeFishMisc::outputSuccess(success);
       }
       
@@ -532,7 +666,6 @@ namespace BeeFishDatabase
       }
       
       BeeFishMisc::outputSuccess(success);
-      assert(success);
       
       return success;
    }
@@ -713,7 +846,7 @@ namespace BeeFishDatabase
    
    inline bool testFile(Path root, string file, bool expect)
    {
-      cout << "\t" << file << flush;
+      cout << "\t" << file << endl;
       
       string tempFile =
          TEMP_DIRECTORY;

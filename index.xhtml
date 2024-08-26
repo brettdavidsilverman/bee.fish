@@ -6,26 +6,24 @@
       <script src="/head.js"/>
       <title>bee.fish</title>
       <style>
-body {
-   opacity:0.1;
-   background-image: url("feebee-small.jpg");
-   background-size: cover;
-   background-repeat: no-repeat;
-   background-position: center;}
       </style>
    </head>
    <body>
-      <h1>bee.fish</h1>
+      <h1 id="h1">bee.fish</h1>
       <form>
          <input type="url" id="url" ></input>
          <button onclick="loadURL()">Go</button>
       </form>
       <br />
-      <a href="client/">Bee.Fish javascript client library</a>
+      <a href="client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
       
       <script>
+         
+document.getElementById("h1").innerText =
+   window.location.hostname;
+
 function loadURL() {
 
    var url =
@@ -35,5 +33,6 @@ function loadURL() {
       
 }
       </script>
+
    </body>
 </html>

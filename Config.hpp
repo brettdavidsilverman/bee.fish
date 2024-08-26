@@ -15,15 +15,11 @@
    #define DOMAIN bee.fish
 #endif
 
-#ifdef DEBUG
-   #define DATABASE_FILENAME HOME_DIR "/dev." DOMAIN ".data"
-#else
-   #define DATABASE_FILENAME HOME_DIR "/" DOMAIN ".data"
-#endif
+#define DATABASE_FILENAME HOME_DIR "/data/" DOMAIN ".data"
 
 #define HOST "https://" DOMAIN
 
-#define WWW_ROOT_DIRECTORY HOME_DIR "/" DOMAIN
+#define WWW_ROOT_DIRECTORY HOME_DIR "/bee.fish"
 
 #define TEST_DIRECTORY WWW_ROOT_DIRECTORY "/tests"
 

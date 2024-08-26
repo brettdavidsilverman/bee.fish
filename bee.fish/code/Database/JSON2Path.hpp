@@ -18,12 +18,13 @@ namespace BeeFishDatabase {
       Path _start;
       vector<Path> _pathStack;
       vector<bool> _containerStack;
+      vector<Size> _arrayIndexStack;
       vector<std::string> _keyStack;
       
       virtual void setVariable(const Type type, const std::string& value = "")
       {
 
-         MinMaxPath path =
+         Path path =
             topPath();
             
             
@@ -31,12 +32,13 @@ namespace BeeFishDatabase {
          if (isArrayContainer)
          {
              // Get next array index
-             Size& count = path.getData();
-             path = path[count++];
+             Size index = topArrayIndex()++;
+             path = path[index];
+             
          }
          else if (_keyStack.size()) {
-             Size& count = path.getData();
-             ++count;
+             //Size count = path.getData();
+             //path.setData(++count);
              std::string key = topKey();
              pop_back_key();
              path = path[key];
@@ -77,12 +79,11 @@ namespace BeeFishDatabase {
             case Type::ARRAY:
                push_back_path(path);
                push_back_container(true);
-               path.setData(Size(0));
                break;
             case Type::OBJECT:
                push_back_path(path);
                push_back_container(false);
-               path.setData(Size(0));
+               //path.setData(Size(0));
                break;
             default:
                throw std::logic_error("JSON2Path");
@@ -110,7 +111,6 @@ namespace BeeFishDatabase {
       virtual ~JSON2Path()
       {
          pop_back_path();
-         assert(_pathStack.size() == 0);
       }
       
       Path topPath() {
@@ -129,33 +129,48 @@ namespace BeeFishDatabase {
             _keyStack
             [_keyStack.size() - 1];
       }
+
+      Size& topArrayIndex() {
+         return 
+            _arrayIndexStack
+            [_arrayIndexStack.size() - 1];
+      }
       
-      virtual void push_back_path(Path path)
+      void push_back_path(Path path)
       {
          _pathStack.push_back(path);
       }
       
-      virtual void push_back_container(bool isArrayContainer)
+      void push_back_container(bool isArrayContainer)
       {
          _containerStack.push_back(isArrayContainer);
+         if (isArrayContainer)
+         {
+            _arrayIndexStack.push_back(0);
+         }
       }
-      
-      virtual void push_back_key(const std::string& key)
+
+      void push_back_key(const std::string& key)
       {
          _keyStack.push_back(key);
       }
       
-      virtual void pop_back_path()
+      void pop_back_path()
       {
          _pathStack.pop_back();
       }
       
-      virtual void pop_back_container()
+      void pop_back_container()
       {
+         bool isArrayContainer = topContainer();
+         if (isArrayContainer) {
+            _arrayIndexStack.pop_back();
+         }
+         
          _containerStack.pop_back();
       }
-      
-      virtual void pop_back_key()
+
+      void pop_back_key()
       {
          _keyStack.pop_back();
       }
@@ -187,6 +202,7 @@ namespace BeeFishDatabase {
       virtual void onbeginarray(JSON* match)
       override
       {
+
          setVariable(
             Type::ARRAY
          );

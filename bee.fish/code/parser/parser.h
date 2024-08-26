@@ -100,7 +100,7 @@ namespace BeeFishParser
             _match->setup(this);
             
 #ifdef DEBUG
-         cerr << escape((char)byte);
+         cout << escape((char)byte);
 #endif
          ++_charCount;
 
@@ -136,7 +136,8 @@ namespace BeeFishParser
  
       }
       
-      virtual optional<bool> read(
+      virtual optional<bool>
+      read(
          istream& input
       )
       {

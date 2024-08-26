@@ -20,28 +20,27 @@ DATABASE=../../bee.fish/build/Database
 
 
 mod_database.so:	mod_database.cpp ParseURI.hpp ApacheStream.hpp $(DATABASE) a.out
-	g++ -std=c++17 -fPIC -shared -o mod_database.so $(INCLUDES) mod_database.cpp -lpthread
+	g++ -std=c++17 -fPIC -shared -o mod_database.so $(INCLUDES) mod_database.cpp -lpthread -lrt
 	
 $(DATABASE):
 	cd ../../bee.fish && make $(DEBUG)
 
 a.out:
-	g++ -std=c++17 -o a.out $(INCLUDES) main.cpp -lpthread
+	g++ -std=c++17 -o a.out $(INCLUDES) main.cpp $(CFLAGS) -lpthread -lrt
 	
 #   the default target
 all: mod_database.so a.out
 
 #   install the shared object file into Apache 
 install: mod_database.so
-	cp mod_database.so /usr/lib/apache2/modules/mod_database.so
+	sudo cp mod_database.so /usr/lib/apache2/modules/mod_database.so
 
 #   cleanup
 clean:
-	-rm -f mod_database.o mod_database.lo mod_database.slo mod_database.la mod_database.so a.out
+	-sudo rm -f mod_database.o mod_database.lo mod_database.slo mod_database.la mod_database.so a.out
 
 #   simple test
 test: a.out reload
-	curl http://localhost/ -s > /dev/null
 	./a.out -test
 
 debug:	clean
@@ -58,13 +57,13 @@ reload: install restart
 #   the general Apache start/restart/stop
 #   procedures
 start:
-	$(APACHECTL) start
+	sudo $(APACHECTL) start
 	sleep 1
+	curl http://localhost/ -s > /dev/null
 
 restart:	stop start
-	#$(APACHECTL) restart
-	#sleep 1
+
 stop:
-	$(APACHECTL) stop
+	sudo $(APACHECTL) stop
 	sleep 1
 

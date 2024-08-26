@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <bitset>
-#include "../b-string/string.h"
+#include "../b-string/b-string.h"
 #include "../misc/optional.h"
 
 #include "misc.h"
@@ -36,7 +36,6 @@ namespace BeeFishParser {
    
       Match(void* params = nullptr)
       {
-         //cerr << "Match(" << params << ")" << endl;
          ++matchInstanceCount();
       }
 

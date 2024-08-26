@@ -28,10 +28,63 @@ namespace BeeFishDatabase {
    {
    public:
       size_t _size = 0;
-      char _data[];
+      char* _data = nullptr;
+      
+      Data(size_t size = 0)
+      {
+         _size = size;
+         if (_size)
+            _data = new char[size];
+      }
+      
+      Data(const Data& source)
+      {
+         _size = source._size;
+         if (_size)
+         {
+            _data = new char[_size];
+            memcpy(_data, source._data, _size);
+         }
+      }
+      
+      Data(const std::string& data)
+      {
+         _size = data.size();
+         if (_size)
+         {
+            _data = new char[_size];
+            memcpy(_data, data.data(), _size);
+         }
+      }
+      
+      Data& operator = (const Data& rhs)
+      {
+         if (_data)
+            delete[] _data;
+            
+         _data = nullptr;
+         
+         _size = rhs._size;
+         
+         if (_size) {
+           _data = new char[_size];
+           memcpy(_data, rhs.data(), _size);
+         }
+         
+         return *this;
+      }
+      
+      ~Data()
+      {
+         if (_data) {
+            delete[] _data;
+            _data = nullptr;
+         }
+      }
    
       template<typename T>
-      Data& operator = (const T& rhs) {
+      Data& operator = (const T& rhs) 
+      {
 
          if (_size < sizeof(T))
             throw runtime_error("Data buffer size to small");
@@ -42,19 +95,39 @@ namespace BeeFishDatabase {
          
       }
 
+      Data& operator = (const std::string& rhs) 
+      {
+         
+         if (_size < sizeof(rhs.size()))
+            throw runtime_error("Data buffer size to small");
+
+         _size = rhs.size();
+
+         memcpy(data(), rhs.data(), _size);
+
+         return *this;
+         
+      }
+
+      Data& operator = (const char* rhs) 
+      {
+         return operator = (std::string(rhs));
+      }
+
+
       char* data() {
-         return &_data[0];
+         return _data;
       }
 
       const char* data() const {
-         return &_data[0];
+         return _data;
       }
 
       size_t size() const {
          return _size;
       }
 
-      operator std::string() const
+      std::string str() const
       {
          return std::string(data(), _size);
       }
@@ -84,13 +157,38 @@ namespace BeeFishDatabase {
       }
       
       
-      bool operator == (const Data& rhs) const {
+      bool operator == (const Data& rhs) const
+      {
          if (_size != rhs._size)
             return false;
-         int result = memcmp(_data, rhs._data, _size);
+      
+         int result = 
+            memcmp(
+               _data, 
+               rhs._data, 
+               _size
+            );
+       
          return (result == 0);
       }
       
+      bool operator != (const Data& rhs) const 
+      {
+         if (_size == rhs._size)
+         {
+            int result = 
+               memcmp(
+                  _data, 
+                  rhs._data, 
+                  _size
+               );
+            return (result != 0);
+
+          }
+
+          return true;
+      }
+
       //operator string() const;
 
       string toHex() const;

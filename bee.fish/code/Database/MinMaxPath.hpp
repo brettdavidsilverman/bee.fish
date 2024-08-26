@@ -50,37 +50,38 @@ namespace BeeFishDatabase {
          Branch branch =
             getBranch(index);
 
-         Size count = stack.count();
-         
          while (!branch.isDeadEnd())
          {
-            MinMaxPath path(*this, index);
-            
-            bool bit;
+            bool bit = stack.last()._bit;
 
-            if (branch._left) {
+            index = 0;
+
+            if (bit == 0) {
                index = branch._left;
-               bit = 0;
-               --count;
             }
-            else if (branch._right) {
+            else if (bit == 1) {
                index = branch._right;
-               bit = 1;
-               ++count;
             }
+            else
+               assert(false);
+
+            branch = getBranch(index);
+
+            if (branch._left)
+               bit = 0;
+            else if (branch._right)
+               bit = 1;
 
             stack.push_back(
-                StackValue(
-                   path,
-                   bit
-                )
+               StackValue(
+                  index,
+                  bit
+               )
             );
 
-            if (count == 0)
+            if (stack._count == 0)
                break;
-               
-            branch = getBranch(index);
-            
+
          }
       }
 
@@ -89,63 +90,71 @@ namespace BeeFishDatabase {
          Stack& stack
       ) const
       {
-
-         
          Branch branch =
             getBranch(index);
 
-         Size count = stack.count();
-         
          while (!branch.isDeadEnd())
          {
-            MinMaxPath path(*this, index);
-
             bool bit;
-         
+
+            index = 0;
+
             if (branch._right) {
                index = branch._right;
-               bit = 1;
-               ++count;
             }
             else if (branch._left) {
                index = branch._left;
-               bit = 0;
-               --count;
             }
+            else
+               assert(false);
+
+
+            branch = getBranch(index);
+            
+            bit = 0;
+
+            if (branch._right)
+               bit = 1;
+            else if (branch._left)
+               bit = 0;
 
             stack.push_back(
                StackValue(
-                  path,
+                  index,
                   bit
                )
             );
 
-            if (count == 0)
+            if (stack.count() == 0)
                break;
-               
-            branch = getBranch(index);
+            
          }
-      
       }
 
    public:
+
       template<typename T>
       T min(
          Stack& stack
       ) const
       {
+         if (stack.size() == 0)
+            stack.push_back(StackValue(_index, 1));
+
          min(_index, stack);
          T minimum = T();
          stack >> minimum;
-         assert(stack.count() == 0);
          return minimum;
       }
 
       template<typename T>
       T max(
          Stack& stack
-      ) 
+      ) const
       {
+         if (stack.size() == 0)
+            stack.push_back(StackValue(_index, 1));
+
          max(_index, stack);
          T maximum;
          stack >> maximum;
@@ -153,26 +162,24 @@ namespace BeeFishDatabase {
       }
 
       template<typename T>
-      T min() const {
-         Stack stack;
-         min(_index, stack);
-         T minimum;
-         stack >> minimum;
+      T min() const 
+      {
+         Stack stack(*this);
+         T minimum = min<T>(stack);
          return minimum;
       }
 
       template<typename T>
-      T max() const {
-
-         Stack stack;
-         max(_index, stack);
-         T maximum;
-         stack >> maximum;
+      T max() const 
+      {
+         Stack stack(*this);
+         T maximum = max<T>(stack);
          return maximum;
       }
 
       template<typename T>
       bool next(Stack& stack, T& value) {
+
          // Algorithm:
          // Up the tree until first
          // right with a left
@@ -185,48 +192,53 @@ namespace BeeFishDatabase {
 
          if (stack.size() == 0)
          {
-            min(_index, stack);
-            stack >> value;
+            value = min<T>(stack);
             return true;
          }
          
-         Branch branch;
-         MinMaxPath path;
          StackValue entry;
+         Index index;
+         Branch branch;
+         bool bit;
+         bool found = false;
+
          // Up the tree until first right
-         do 
+         // that hasn't been taken yet
+         
+         while(stack.size())
          {
             entry = stack.last();
-            path = entry._path;
-            branch = path.getBranch();
+            bit = entry._bit;
+            index = entry._index;
+            branch = getBranch(index);
+
+            if (
+               branch._left &&
+               branch._right &&
+               bit == 0 )
+            {
+               stack[stack.size() - 1]._bit = 1;
+               stack._count+=2;
+               found = true;
+               break;
+            }
+         
+            
             stack.pop_back();
+
          }
-         while (stack.size() && 
-                ( !(branch._left &&
-                     branch._right) ||
-                   entry._bit == 1
-                ) 
-                );
 
-         if ( ! (branch._left and
-                  branch._right) ||
-              (entry._bit == 1) )
+         if (!found) {
             return false;
-
-
-         assert(branch._left && branch._right && entry._bit == 0);
+         }
 
          // Follow the next min from
          // this right
-         stack.push_back(
-             StackValue(path, 1)
-         );
-         
-         min(branch._right, stack);
+
+         min(index, stack);
 
          // Get this value
          stack.reset();
-         value = T();
          stack >> value;
 
          return true;

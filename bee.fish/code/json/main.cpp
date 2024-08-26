@@ -15,7 +15,17 @@ using namespace BeeFishJSON;
 using namespace BeeFishMisc;
 
 int main(int argc, const char* argv[]) {
-    
+    /*
+   BeeFishJSON::JSONParser p;
+   cout << "{\"hello\":\"world\"" << endl;
+   p.read("{\"hello\":\"world\"");
+   if (p.result() == nullopt)
+      p.eof();
+
+   cout << "RESULT: " << p.getErrorMessage() << endl;
+
+   return 0;
+   */
    cout << "bee.fish.json"
            << endl
         << "C++ run time: "

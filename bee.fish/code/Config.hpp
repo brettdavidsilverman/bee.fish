@@ -15,7 +15,7 @@
 #include "../Config.hpp"
 
 #define TEMP_DIRECTORY "/var/tmp/"
-#define TEMP_FILENAME TEMP_DIRECTORY "bee.fish.data"
+#define TEMP_FILENAME TEMP_DIRECTORY DOMAIN ".data"
 
 #define DEBUG_FILE HOME_DIR "/debug.txt"
 #endif

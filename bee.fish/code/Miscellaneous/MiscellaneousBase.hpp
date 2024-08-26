@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <memory>
 #include <filesystem>
+#include <pwd.h>
+#include <cmath>
 #include "Log.hpp"
 #include "Optional.hpp"
 #include "../Config.hpp"
@@ -33,8 +35,8 @@ namespace BeeFishMisc {
    }
 
    
-   inline void sleep(long seconds) {
-      usleep(seconds * 1000L * 1000L);
+   inline void sleep(double seconds) {
+      usleep((unsigned long)ceil(seconds * 1000.0 * 1000.0));
    }
 
    inline void outputSuccess(bool success)
@@ -129,6 +131,17 @@ namespace BeeFishMisc {
       
    }
    
+   inline std::string getUserName()
+   {
+      uid_t uid = geteuid ();
+      struct passwd *pw = getpwuid (uid);
+      if (pw)
+      {
+         return std::string(pw->pw_name);
+      }
+      return {};
+   }
+
    
 }
 

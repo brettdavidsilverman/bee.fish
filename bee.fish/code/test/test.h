@@ -7,7 +7,7 @@
 #endif
 
 #include "../parser/parser.h"
-#include "../b-string/string.h"
+#include "../b-string/b-string.h"
 #include "../json/json-parser.h"
 
 #include "test-result.h"

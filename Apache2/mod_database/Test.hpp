@@ -15,7 +15,7 @@ namespace BeeFishApache2 {
    using namespace std::filesystem;
 
    inline bool testAllFiles(string url, string directory);
-   inline bool testFile(string url, string file, bool expect = true);
+   inline bool testFile(string url, string directory, string file, bool expect = true);
    
    inline bool test() {
       cout << "Testing Apache2" << endl;
@@ -53,7 +53,7 @@ namespace BeeFishApache2 {
 
       for (const auto & entry : directory_iterator(directory))
       {
-         files.push_back(entry.path());
+         files.push_back(entry.path().filename());
       }
 
       sort(files.begin(), files.end());
@@ -61,7 +61,7 @@ namespace BeeFishApache2 {
       // Test via apache web server
       for (auto file : files) {
          if (success)
-            success = testFile(url, file);
+            success = testFile(url, directory, file, true);
          else
             break;
       }
@@ -71,28 +71,29 @@ namespace BeeFishApache2 {
       return success;
    }
    
-   inline bool testFile(string url, string file, bool expect)
+   inline bool testFile(string url, string directory, string file, bool expect)
    {
       cout << "\tTesting "
-           << url << file
+           << url << "/" << file
            << endl;
 
       string tempFile =
          TEMP_DIRECTORY;
          
       tempFile += "test.curl.txt";
+      remove(tempFile);
       
       stringstream stream;
       bool success = true;
 
       stream << 
          "curl -X POST " <<
-         url  <<
+         url  << "/" <<
          file << " "
          "-H \"Content-Type: application/json; charset=utf-8\" " <<
          "-H Expect: " <<
-         "-T " << file
-         << " -s | grep Success > /dev/null ";
+         "-T " << directory << "/" << file
+         << " -s -k | grep Success > /dev/null ";
 
 
       string command = stream.str();
@@ -104,8 +105,8 @@ namespace BeeFishApache2 {
          stringstream stream1;
          stream1
             << "curl "
-            << url  << file << " "
-            << " -s > "
+            << url  << "/" << file << " "
+            << " -s -k > "
             << tempFile;
             
          string command = stream1.str();
@@ -113,11 +114,13 @@ namespace BeeFishApache2 {
 
          // Compare the files
          success = success &&
-            compareFiles(tempFile, file);
+            compareFiles(tempFile, directory + "/" + file);
 
-         remove(tempFile);
+         
       }
 
+      remove(tempFile);
+      
       outputSuccess(success);
       return success;
    }

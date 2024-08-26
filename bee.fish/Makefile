@@ -30,10 +30,6 @@ PowerEncoding:
 	-  mkdir build
 	cd code/PowerEncoding && make $(DEBUG)
 
-Database:
-	-  mkdir build
-	cd code/Database && make $(DEBUG)
-
 json:
 	-  mkdir build
 	cd code/json && make $(DEBUG)
@@ -42,6 +38,10 @@ JSON:
 	-  mkdir build
 	cd code/JSON && make $(DEBUG)
 	
+Database:
+	-  mkdir build
+	cd code/Database && make $(DEBUG)
+
 WebRequest:
 	-  mkdir build
 	cd code/WebRequest && make $(DEBUG)
@@ -51,8 +51,8 @@ WebServer:
 	cd code/WebServer && make $(DEBUG)
 	
 #DBServer:
-	#-  mkdir build
-	#cd code/DBServer && make $(DEBUG)
+#	#-  mkdir build
+#	#cd code/DBServer && make $(DEBUG)
 
 clean:
 	rm -f -r build

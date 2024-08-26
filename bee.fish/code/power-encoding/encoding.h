@@ -133,9 +133,6 @@ namespace BeeFishPowerEncoding
       
       virtual void writeBit(bool bit)
       {
-#ifdef DEBUG
-         cerr << 'w' << (bit ? '1' : '0');
-#endif
          _out << ( bit ? '1' : '0' );
 
          PowerEncoding::writeBit(bit);
@@ -151,10 +148,6 @@ namespace BeeFishPowerEncoding
          char bit; 
          _in >> bit;
       
-#ifdef DEBUG
-         cerr << 'r' << bit;
-#endif
-
          bool b = ( bit != '0' );
       
          return b;

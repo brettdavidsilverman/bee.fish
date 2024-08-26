@@ -26,7 +26,15 @@ var jsonText =
    document.getElementById("jsonText");
 
 function postJSON() {
-    
+   /* 
+   try {
+      var json = JSON.parse(jsonText.value);
+   }
+   catch (error) {
+      alert(error);
+      return;
+   }
+   */
    var response =
       fetch(
          window.location.href,

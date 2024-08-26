@@ -10,44 +10,39 @@ namespace BeeFishDatabase {
     
    struct StackValue {
    public:
-      Path _path;
+      Index _index = 0;
       bool _bit = false;
       
       StackValue() {
-         _bit = false;
       }
       
-      StackValue(const Path& path, bool bit) :
-          _path(path),
+      StackValue(Index index, bool bit) :
+          _index(index),
           _bit(bit)
       {
       }
       
       StackValue(const StackValue& source) :
-          _path(source._path),
+          _index(source._index),
           _bit(source._bit)
       {
       }
-      /*
-      virtual ~StackValue() {
-         if (_path) {
-            delete _path;
-            _path = nullptr;
-         }
-      */
+      
+
    };
 
    class Stack :
       public PowerEncoding,
       public vector<StackValue>
    {
-   protected:
-      Size _index {0};
-      long int _count {0};
-
    public:
+      Size _index = 0;
+      long int _count = 0;
       
-      Stack()
+   public:
+      const Path& _start;
+
+      Stack(const Path& start) : _start(start)
       {
       }
      
@@ -69,7 +64,7 @@ namespace BeeFishDatabase {
 
          if (value)
             ++_count;
-         else
+         else if (_count > 0)
             --_count;
 
          ++_index;
@@ -83,7 +78,7 @@ namespace BeeFishDatabase {
          PowerEncoding::writeBit(bit);
          if (bit)
             ++_count;
-         else
+         else if (_count > 0)
             --_count;
       }
 
@@ -93,40 +88,69 @@ namespace BeeFishDatabase {
          _count = 0;
       }
 
-      virtual long int count() const
+      long int count() const
       {
          return _count;
       }
       
 
-      friend ostream& operator << (ostream& out, const Stack& stack)
+      friend ostream& operator << (ostream& out, const Stack& stack) 
       {
-         int index = 0;
-         
-         
+
+         out << "StackStart: Index: " << stack._start.index()  << ", Count " << stack._count << endl;
+         Index index = 0;
+
          for (auto value : stack)
          {
-            if (index++ == 0)
-               out << value._path;
-               
-            out << value._bit;
+            Branch branch = stack._start.getBranch(value._index);
+            out << index++
+                << ":[" << value._index << "]"
+                << "{" 
+                  << branch._left << ", " << branch._right 
+                << "}"
+                << "[" << value._bit << "]"
+                <<  endl;
+
          }
-         
+
          return out;
+      }
+
+      Variable getVariable() const
+      {
+         Variable var = BeeFishScript::Object{
+            {"start", (BeeFishScript::Number)_start.index()}
+         };
+
+         BeeFishScript::Array array;
+
+         for (auto value : *this)
+         {
+            Variable entry = BeeFishScript::Object{
+               {"index", BeeFishScript::Integer(value._index)},
+               {"bit", BeeFishScript::Integer(value._bit ? 1 : 0)}
+            };
+
+            array.push_back(entry);
+         }
+
+         var["bits"] = array;
+
+         return var;
 
       }
  
-      StackValue last() {
+      StackValue last() const {
          size_t size = vector<StackValue>::size();
          assert(size);
          return (*this)[size - 1];
       }
-      
+
       virtual void push_back(const StackValue& value)
       {
          if (value._bit)
             ++_count;
-         else
+         else if (_count > 0)
             --_count;
             
          vector<StackValue>::push_back(
@@ -136,14 +160,20 @@ namespace BeeFishDatabase {
       
       virtual void pop_back()
       {
-         StackValue value = (*this)[size() - 1];
+         StackValue value = last();
          
-         if (value._bit)
+         if (value._bit && _count > 0)
             --_count;
-         else
+         else if (!value._bit)
             ++_count;
             
          vector<StackValue>::pop_back();
+      }
+
+      Branch getLastBranch() const
+      {
+         StackValue entry = last();
+         return _start.getBranch(entry._index);
       }
  
 
@@ -152,4 +182,3 @@ namespace BeeFishDatabase {
 }
 
 #endif
-

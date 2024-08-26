@@ -1,24 +1,19 @@
 #include <iostream>
 #include <filesystem>
-#include "Config.hpp"
-#include "Miscellaneous/Miscellaneous.hpp"
-#include "parser/parser.h"
-#include "parser/test.h"
+#include "../Config.hpp"
 #include "Database/Database.hpp"
+#include "Database/Test.hpp"
+#include "Miscellaneous/Miscellaneous.hpp"
 #include "Test.hpp"
-#include "json/test.h"
+#include "ParseURI.hpp"
 
 using namespace std;
 using namespace BeeFishMisc;
-using namespace BeeFishParser;
 using namespace BeeFishApache2;
 
 
-std::optional<bool> testParser(Parser* parser);
-
 int main(int argc, const char* argv[]) {
-   
-   
+
    cout << "apache2.mod_database"
            << endl
         << "C++ run time: "
@@ -35,8 +30,8 @@ int main(int argc, const char* argv[]) {
 
    if (hasArg(argc, argv, "-test") >= 0)
    {
-      cout << "Testing json..." << endl << endl;
-      if (!BeeFishJSON::test())
+      cout << "Testing database..." << endl << endl;
+      if (!BeeFishDatabase::test())
          return 1;
          
       cout << "Testing apache2..." << endl << endl;

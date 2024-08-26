@@ -94,7 +94,11 @@ namespace BeeFishJSON
          case Type::ARRAY:
          {
             out << "[";
-            Size count = path.getData();
+            
+            Size count = 0;
+            
+            if (!path.isDeadEnd())
+               count = path.max<Size>() + 1;
             
             if (count > 1) {
                out << "\r\n";
@@ -141,13 +145,13 @@ namespace BeeFishJSON
                 
                out << "\r\n";
                
-               if (path.hasData())
-                  count = path.getData();
-                  
-               Size i = 0;
-               Stack stack;
+               Stack stack(*this);
                BeeFishScript::String key;
+               BeeFishScript::String lastKey;
                MinMaxPath keys = path;
+
+               lastKey = keys.max<BeeFishScript::String>();
+
                while(keys.next<BeeFishScript::String>(stack, key))
                {
                   out << tabs(tabCount + 1)
@@ -159,8 +163,10 @@ namespace BeeFishJSON
                   
                   value.write(out, tabCount + 1);
                   
-                  if (++i < count)
+                  if (key != lastKey)
                      out << ",\r\n";
+
+                  ++count;
                   
                }
             }
