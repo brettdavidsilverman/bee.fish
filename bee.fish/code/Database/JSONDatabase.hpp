@@ -4,4 +4,16 @@
 #include "JSON2Path.hpp"
 #include "Path2JSON.hpp"
 
+
+namespace BeeFishDatabase 
+{
+
+    class JSONDatabase : public Database
+    {
+    public: 
+    
+    }
+}
+
+
 #endif
