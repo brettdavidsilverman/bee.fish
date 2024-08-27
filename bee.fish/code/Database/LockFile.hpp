@@ -10,8 +10,8 @@ namespace BeeFishDatabase
    {
    protected:
       Size _lockCount = 0;
-      std::mutex _mutex;
    public:
+      std::recursive_mutex _mutex;
    
       LockFile(const std::string& filename) :
          File(filename)

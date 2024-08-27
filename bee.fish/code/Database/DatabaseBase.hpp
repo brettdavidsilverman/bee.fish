@@ -44,7 +44,6 @@ namespace BeeFishDatabase {
    public:
 
       Size                 _pageSize = 0;
-      std::recursive_mutex _mutex;
    public:
 
       struct ScopedFileLock{
@@ -191,8 +190,8 @@ namespace BeeFishDatabase {
          while (branch._locked) {
             unlock();
             while (branch._locked) {
-#warning "Sleep for how long?"         
-               BeeFishMisc::sleep(0.1);
+//#warning "Sleep for how long?"         
+               BeeFishMisc::sleep(0.01);
 
                branch = getBranch(lockIndex);
             }
