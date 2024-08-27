@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "../misc/misc.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "parser.h"
 #include "test.h"
 

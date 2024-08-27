@@ -2,7 +2,7 @@
 #define BEE_FISH_JSON__SET_H
 #include <ostream>
 #include <vector>
-#include "../misc/optional.h"
+#include "../Miscellaneous/Optional.hpp"
 #include "../parser/parser.h"
 #include "blank-space.h"
 

@@ -4,13 +4,13 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "../misc/debug.h"
+#include "../Miscellaneous/Debug.hpp"
 #include <sstream>
 #include <ostream>
 #include <chrono>
 
 #include "version.h"
-#include "misc.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "match.h"
 #include "capture.h"
 #include "character.h"

@@ -60,6 +60,8 @@ return 0;
    bool test =
       (hasArg(argc, argv, "-test") != -1);
 
+   test = true;
+   
    if (test)
    {
       if (!BeeFishDatabase::test())

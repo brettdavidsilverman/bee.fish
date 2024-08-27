@@ -5,9 +5,7 @@
 #include <string>
 #include <bitset>
 #include "../b-string/b-string.h"
-#include "../misc/optional.h"
-
-#include "misc.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
 
 using namespace std;
 

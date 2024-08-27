@@ -9,7 +9,8 @@
 #include <functional>
 
 #include "../power-encoding/power-encoding.h"
-#include "../misc/misc.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
+
 
 #include "b-string.h"
 

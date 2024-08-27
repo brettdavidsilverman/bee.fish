@@ -2,7 +2,7 @@
 #define BEE_FISH_PARSER__BLANKS_H
 #include <ostream>
 #include <vector>
-#include "../misc/optional.h"
+#include "../Miscellaneous/Optional.hpp"
 #include "match.h"
 
 using namespace std;

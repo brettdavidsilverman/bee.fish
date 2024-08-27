@@ -21,6 +21,28 @@ namespace BeeFishDatabase {
       vector<Size> _arrayIndexStack;
       vector<std::string> _keyStack;
       
+   public:
+
+      JSON2Path(const Path& start) :
+         JSONParser(),
+         _start(start)
+         //_properties(_start[0])
+      {
+         push_back_path(_start);
+         push_back_container(false);
+      }
+      
+      JSON2Path(Database& database) :
+         JSON2Path(Path(database))
+      {
+      }
+
+      virtual ~JSON2Path()
+      {
+         pop_back_path();
+      }
+
+   protected:
       virtual void setVariable(const Type type, const std::string& value = "")
       {
 
@@ -95,23 +117,6 @@ namespace BeeFishDatabase {
       
    public:
     
-      JSON2Path(Path start) :
-         JSONParser(),
-         _start(start)
-      {
-         push_back_path(_start);
-         push_back_container(false);
-      }
-      
-      JSON2Path(Database& database) :
-         JSON2Path(Path(database))
-      {
-      }
-
-      virtual ~JSON2Path()
-      {
-         pop_back_path();
-      }
       
       Path topPath() {
          return 

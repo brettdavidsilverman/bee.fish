@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "../misc/misc.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "config.h"
 #include "b-string.h"
 #include "test.h"

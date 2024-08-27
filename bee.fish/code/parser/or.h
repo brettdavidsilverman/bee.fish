@@ -1,7 +1,7 @@
 #ifndef BEE_FISH_PARSER__OR_H
 #define BEE_FISH_PARSER__OR_H
 #include <vector>
-#include "../misc/optional.h"
+#include "../Miscellaneous/Optional.hpp"
 #include "match.h"
 
 namespace BeeFishParser {

@@ -3,8 +3,7 @@
 
 #include <iostream>
 
-#include "misc.h"
-
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "parser.h"
 
 #include "../test/test.h"

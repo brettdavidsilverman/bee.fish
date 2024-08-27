@@ -14,7 +14,7 @@
 #include <openssl/err.h>
 #endif
 
-#include "../misc/misc.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
 //#include "../power-encoding/power-encoding-base.h"
 //#include "b-string.h"
 
