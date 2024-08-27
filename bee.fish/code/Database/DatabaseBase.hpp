@@ -35,7 +35,6 @@ namespace BeeFishDatabase {
    // Store [left, right] branch elements.
    // A zero is stored if the branch
    // hasnt been visited yet.
-   // The _next points to the furthest element.
    class Database : public LockFile
    {
    public:
@@ -177,6 +176,9 @@ namespace BeeFishDatabase {
 
       }
 
+      // Waits till lock on branch is released
+      // Sets the lock on the branch to true
+      // Returns the latest version of the branch.
       inline Branch lockBranch(Index lockIndex) 
       {
 
@@ -186,26 +188,43 @@ namespace BeeFishDatabase {
 
          Branch branch = getBranch(lockIndex);
 
-
+         // Wait until branch is unlocked
          while (branch._locked) {
+            // Unlock the process lock
             unlock();
+            
+            // Wait until branch is unlocked
             while (branch._locked) {
-//#warning "Sleep for how long?"         
+
+               // Sleep to avoid spin wait
                BeeFishMisc::sleep(0.01);
 
+               // Refresh the branch
                branch = getBranch(lockIndex);
+
             }
+
+            // Regain exclusive lock
             lock();
+
+            // Get the refreshed branch
             branch = getBranch(lockIndex);
          }
 
+         // Because we have an exclusive lock
+         // and have rereshed the branch
+         // The branch must have been unlocked
+         // by another process
          assert(!branch._locked);
 
+         // Set the branch locked flag
          branch._locked = true;
          setBranch(lockIndex, branch);
 
+         // Release the process lock
          unlock();
          
+         // Return the lated version of branch
          return branch;
       }
 
