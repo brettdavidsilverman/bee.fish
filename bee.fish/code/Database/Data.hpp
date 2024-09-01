@@ -18,7 +18,9 @@
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../power-encoding/power-encoding.h"
 
+
 using namespace BeeFishPowerEncoding;
+
 
 namespace BeeFishDatabase {
 
@@ -57,6 +59,16 @@ namespace BeeFishDatabase {
          }
       }
       
+      Data(const BString& data)
+      {
+         _size = data.size();
+         if (_size)
+         {
+            _data = new char[_size];
+            memcpy(_data, data.data(), _size);
+         }
+      }
+
       Data& operator = (const Data& rhs)
       {
          if (_data)

@@ -1,9 +1,10 @@
 #ifndef BEE_FISH_JSON__PATH_2_JSON_HPP
 #define BEE_FISH_JSON__PATH_2_JSON_HPP
+#include "../b-string/string.h"
 #include "../Database/Path.hpp"
 #include "../Database/MinMaxPath.hpp"
 #include "../Script/Type.hpp"
-
+#include "JSONIndex.hpp"
 
 namespace BeeFishJSON
 {
@@ -14,15 +15,21 @@ namespace BeeFishJSON
    
    class Path2JSON : public MinMaxPath
    {
+   protected:
+      MinMaxPath _properties;
    public:
        
-      Path2JSON(const Path& start) :
-         MinMaxPath(start)
+      Path2JSON(const Path& objects, const Path& properties) :
+         MinMaxPath(objects),
+         _properties(properties)
       {
       }
        
-      Path2JSON(Database& start) :
-         Path2JSON(Path(start))
+      Path2JSON( Database& database) :
+         Path2JSON(
+            Path(database)[OBJECTS],
+            Path(database)[PROPERTIES]
+         )
       {
       }
       
@@ -33,7 +40,7 @@ namespace BeeFishJSON
          return out;
       }
       
-      std::string tabs(Size tabCount)
+      BString tabs(Size tabCount)
       {
          return string(tabCount * TAB_SPACES, ' ');
       }
@@ -57,36 +64,21 @@ namespace BeeFishJSON
             out << "null";
             break;
          case Type::BOOLEAN:
-         {
-            bool value = path.getData();
-            if (value)
-               out << "true";
-            else
-               out << "false";
-            break;
-         }
          case Type::INTEGER:
-         {
-            string number;
-            path.getData(number);
-            out << number;
-            break;
-         }
          case Type::NUMBER:
          {
-            string number;
-            path.getData(number);
-            out << number;
-            
+            BString value;
+            path.getData(value);
+            out << value;
             break;
          }
          case Type::STRING:
          {
-            std::string string;
+            BString string;
             path.getData(string);
               
             out << "\""
-                   << escape(string)
+                   << string.escape()
                 << "\"";
             
             break;
@@ -109,8 +101,10 @@ namespace BeeFishJSON
                  index < count;
                  ++index)
             {
-               Path2JSON item =
-                  path[index];
+               Path2JSON item(
+                  path[index],
+                  Path(path, PROPERTIES)
+               );
                   
                Size _tabCount = tabCount + 1;
                      
@@ -146,28 +140,28 @@ namespace BeeFishJSON
                out << "\r\n";
                
                Stack stack(*this);
-               BeeFishScript::String key;
-               BeeFishScript::String lastKey;
-               MinMaxPath keys = path;
-
-               lastKey = keys.max<BeeFishScript::String>();
-
-               while(keys.next<BeeFishScript::String>(stack, key))
+               BString key;
+               Index keyIndex;
+               MinMaxPath keyIndexes = path;
+               count = path.max<Size>() + 1;
+               for (Size index = 0; index < count; ++index) 
                {
+                  path[index].getData(keyIndex);
+                  Path keyPath(path, keyIndex);
+                  keyPath.getData(key);
+
                   out << tabs(tabCount + 1)
                       << "\""
                          << escape(key)
                       << "\": ";
                       
-                  Path2JSON value = path[key];
+                  Path2JSON value(path[index], _properties);
                   
                   value.write(out, tabCount + 1);
                   
-                  if (key != lastKey)
+                  if (index < count - 1)
                      out << ",\r\n";
 
-                  ++count;
-                  
                }
             }
             

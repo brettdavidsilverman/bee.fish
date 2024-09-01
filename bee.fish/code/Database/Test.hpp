@@ -532,7 +532,7 @@ namespace BeeFishDatabase
       if (success)
       {
          MinMaxPath path = root["string"];
-         JSON2Path parser(path);
+         JSON2Path parser(path, root[PROPERTIES]);
          parser.read("\"Hello World\"");
          
          cout << "\t\tParse string ";
@@ -557,7 +557,7 @@ namespace BeeFishDatabase
          cout << "\tString value ";
          MinMaxPath path = root["string"];
          path = path[Type::STRING];
-         std::string value;
+         BString value;
          path.getData(value);
          
          success = testValue("Hello World", value);
@@ -569,7 +569,7 @@ namespace BeeFishDatabase
       if (success)
       {
          Path path = root["array"];
-         JSON2Path parser(path);
+         JSON2Path parser(path, root[PROPERTIES]);
          parser.read("[1,[]]");
          
          cout << "\tParse array ";
@@ -607,7 +607,7 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tValue item 0 ";
          Path path = root["array"][Type::ARRAY][0][Type::INTEGER];
-         string value;
+         BString value;
          path.getData(value);
          success = (value == "1");
          BeeFishMisc::outputSuccess(success);
@@ -639,7 +639,7 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tInteger" << flush;
          Path path = root["integer"];
-         JSON2Path parser(path);
+         JSON2Path parser(path, root[PROPERTIES]);
          parser.read("1234");
          parser.eof();
          success = parser.matched();
@@ -659,7 +659,7 @@ namespace BeeFishDatabase
       {
          cout << "\tInteger value" << endl;
          Path path = root["integer"][Type::INTEGER];
-         string value;
+         BString value;
          path.getData(value);
          success = (value == "1234");
          BeeFishMisc::outputSuccess(success);
@@ -677,16 +677,11 @@ namespace BeeFishDatabase
  
       Database database;
       Path path = database;
-      JSON2Path parser(database);
+      JSON2Path parser(path, Path(database)[PROPERTIES]);
       parser.read("[[]]");
       bool success = true;
       
       success = (parser.result() == true);
-      
-      if (success)
-      {
-          //success = path[ARRAY][0].contains(ARRAY);
-      }
       
       if (success) {
          success = path.contains(Type::ARRAY);
@@ -733,7 +728,7 @@ namespace BeeFishDatabase
       
       Database database;
       Path path = database;
-      JSON2Path parser(database);
+      JSON2Path parser(path, Path(database)[PROPERTIES]);
       parser.read("[[1]]");
       bool success = true;
       
@@ -803,7 +798,7 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tInner array value" << endl;
          path = path[Type::INTEGER];
-         std::string value;
+         BString value;
          path.getData(value);
          success = (value == "1");
          BeeFishMisc::outputSuccess(success);
@@ -855,7 +850,7 @@ namespace BeeFishDatabase
       remove(tempFile);
       
       ifstream inputFile(file);
-      JSON2Path parser(root[file]);
+      JSON2Path parser(root[file], root[PROPERTIES]);
       parser.read(inputFile);
       parser.eof();
       inputFile.close();
@@ -865,7 +860,7 @@ namespace BeeFishDatabase
       if (success && expect)
       {
          ofstream outputFile(tempFile);
-         Path2JSON path = root[file];
+         Path2JSON path(root[file], root[PROPERTIES]);
          outputFile << path;
          outputFile.close();
          

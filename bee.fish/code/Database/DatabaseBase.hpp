@@ -16,6 +16,7 @@
 #include <mutex>
 
 #include "../Miscellaneous/Debug.hpp"
+#include "../b-string/b-string.h"
 #include "Version.hpp"
 #include "File.hpp"
 #include "LockFile.hpp"

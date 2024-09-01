@@ -57,11 +57,10 @@ using namespace BeeFishMisc;
 
 using namespace std;
 
-static void inputJSON(Path path, request_rec *r);
-static void outputJSON(Path path, request_rec *r);
+static void inputJSON(Database& database, Path path, request_rec *r);
+static void outputJSON(Database& database, Path path, request_rec *r);
 static void outputDocument(Path path, request_rec *r);
 static void outputId(request_rec *r);
-
 
 namespace BeeFishWebServer {
  
@@ -121,7 +120,7 @@ static int database_handler(request_rec *r)
       else if (path.contains("document") &&
                path.contains("index"))
       {
-         outputJSON(path, r);
+         outputJSON(database, path, r);
 
       }
       else
@@ -137,7 +136,7 @@ static int database_handler(request_rec *r)
          path.clear();
       }
       
-      inputJSON(path, r);
+      inputJSON(database, path, r);
 
 
    }
@@ -166,12 +165,12 @@ static void outputId(request_rec *r)
 
 }
 
-static void outputJSON(Path path, request_rec *r)
+static void outputJSON(Database& database, Path path, request_rec *r)
 {
    ap_set_content_type(
        r, "application/json; charset=utf-8");
 
-   Path2JSON index = path["index"];
+   Path2JSON index(path["index"], Path(database)[PROPERTIES]);
    ApacheStream stream(r);
    stream << index;
    stream.flush();
@@ -198,7 +197,7 @@ static void outputDocument(Path path, request_rec *r)
    stream.flush();
 }
 
-static void inputJSON(Path path, request_rec *r)
+static void inputJSON(Database& database, Path path, request_rec *r)
 {
 
    bool isOk = true;
@@ -206,7 +205,7 @@ static void inputJSON(Path path, request_rec *r)
    int pageSize = getPageSize();
    char buffer[pageSize];
    Size pageCount = 0;
-   JSON2Path index = path["index"];
+   JSON2Path index(path["index"], Path(database)[PROPERTIES]);
 
    MinMaxPath document = path["document"];
 

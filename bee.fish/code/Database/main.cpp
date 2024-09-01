@@ -16,34 +16,6 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 { 
-/*
-   Database db;
-   Path root(db);
-   std::string str1 = "Hello 🤗";
-   cerr << "path1" << endl;
-   Path path1 = root["str"];
-   cerr << "setData" << endl;
-   path1.setData(str1);
-   std::string str2;
-   cerr << "path2" << endl;
-   Path path2 = root["str"];
-   cerr << "getData" << endl;
-   path2.getData(str2);
-
-   bool success = testValue(str1,str2);
-   BeeFishMisc::outputSuccess(success);
-return 0;
-   Branch branch = db.getBranch(0);
-   cerr << "Lock Branch" << endl;
-   db.lockBranch(0);
-
-   cerr << "Sleep" << endl;
-   BeeFishMisc::sleep(10);
-   cerr << "Unlock branch" << endl;
-   db.unlockBranch(0);
-
-   return 0;
-*/
 
    cout << "bee.fish.database"
            << endl
@@ -124,7 +96,7 @@ return 0;
    }
 
    cout << database << endl;
-   cout << "large.json 136771810" << endl;
+   cout << "large.json 127411713" << endl;
 
    return 0;
 

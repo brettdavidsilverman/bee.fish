@@ -295,6 +295,23 @@ namespace BeeFishDatabase {
             destination = "";
       }
 
+      void getData(BString& destination)
+      {
+         const Data data = getData();
+         if (data.size())
+            destination = BString(
+               data.data(),
+               data.size()
+            );
+         else
+            destination = "";
+      }
+
+      void setData(const BString& value) {
+         Data source(value);
+         setData(source);
+      }
+
       void setData(const std::string& value) {
          Data source(value);
          setData(source);

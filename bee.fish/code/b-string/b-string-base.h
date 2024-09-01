@@ -237,6 +237,17 @@ namespace BeeFishBString
             operator<<(stream, (std::string&)bString);
       }
 
+      friend ostream& operator<<(
+          ostream &output,
+          const BString  &bString)
+      {
+         for (auto c : bString) {
+            output << c;
+         }
+
+         return output;
+      }
+
       // trim from start
       BString ltrim()
       {
@@ -415,6 +426,10 @@ namespace BeeFishBString
          }
          
          return wstring_to_utf8(str);
+      }
+
+      BString escape() {
+         return BeeFishMisc::escape(this->str());
       }
       
 

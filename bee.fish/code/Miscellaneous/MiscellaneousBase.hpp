@@ -102,7 +102,6 @@ namespace BeeFishMisc {
       return stream.str();
    }
    
-   
    inline size_t getPageSize() {
       return PAGE_SIZE;
    }
