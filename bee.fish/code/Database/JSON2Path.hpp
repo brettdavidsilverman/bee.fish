@@ -47,11 +47,6 @@ namespace BeeFishDatabase {
       {
          pop_back_path();
          pop_back_container();
-         assert(_pathStack.size() == 0);
-         assert(_containerStack.size() == 0);
-         assert(_arrayIndexStack.size() == 0);
-         assert(_keyStack.size() == 0);
-         assert(_objectPropertyIndexStack.size() == 0);
       }
 
    protected:
