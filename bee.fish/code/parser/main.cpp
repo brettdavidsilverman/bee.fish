@@ -106,7 +106,7 @@ int main(int argc, const char* argv[]) {
    {
       cout << "Number: ";
       
-      Number number;
+      Test::Number number;
       
       cin >> number;
       

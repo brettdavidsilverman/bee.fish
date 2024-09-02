@@ -11,6 +11,8 @@
 
 #include "version.h"
 #include "../Miscellaneous/Miscellaneous.hpp"
+#include "../b-string/b-string.h"
+#include "../Script/Script.hpp"
 #include "match.h"
 #include "capture.h"
 #include "character.h"
@@ -31,6 +33,7 @@
 
 
 using namespace BeeFishBString;
+using namespace BeeFishScript;
 
 namespace BeeFishParser
 {
@@ -277,7 +280,7 @@ namespace BeeFishParser
          
       }
 
-      virtual string getErrorMessage() const {
+      virtual String getErrorMessage() const {
          stringstream stream;
          stream << "Invalid Content '" << escape(_lastCharacter) << "' at position "
                 << _charCount;

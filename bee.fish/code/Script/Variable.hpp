@@ -6,6 +6,7 @@
 #include <memory>
 #include <cmath>
 
+#include "../b-string/string.h"
 #include "../Database/File.hpp"
 #include "../Script/Type.hpp"
 #include "Config.hpp"
@@ -23,7 +24,7 @@ namespace BeeFishScript {
    typedef bool Boolean; 
    typedef Size Integer;
    typedef long double Number;
-   typedef std::string String;
+   typedef BString String;
    typedef vector<Variable> Array;
 
    typedef std::map<String, Variable>                ObjectBase;

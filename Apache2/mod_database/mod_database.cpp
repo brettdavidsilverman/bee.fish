@@ -212,6 +212,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    debug << now()
          << " Uploading document "
          << "\r\n";
+   debug.flush();
 
    int ret_code = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR);
    if (ret_code == OK)
@@ -236,6 +237,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    debug << now()
          << " Parsing document "
          << "\r\n";
+   debug.flush();
          
    optional<bool> read = nullopt;
    
@@ -248,6 +250,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
       debug << now() << " "
             << percentage << "%"
             << "\r\n";
+      debug.flush();
 
       document[pageIndex]
           .getData(posted);
@@ -280,6 +283,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
       debug << now()
             << " 100% Document Ok"
             << "\r\n";
+      debug.flush();
 
       reply =
           BeeFishScript::String("Success");
@@ -303,6 +307,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
             << reply
             << "\r\n"
             << flush;
+      debug.flush();
 
    }
 

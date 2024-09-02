@@ -18,6 +18,7 @@ using namespace std;
 using namespace std::chrono;
 using namespace BeeFishPowerEncoding;
 using namespace BeeFishBString;
+using namespace BeeFishScript;
 
 namespace BeeFishId
 {
@@ -63,7 +64,7 @@ namespace BeeFishId
          );
       }
 
-      static std::string formatEpochMilliseconds(
+      static String formatEpochMilliseconds(
          unsigned long milliseconds
       ) {
          std::stringstream stream;
@@ -71,7 +72,7 @@ namespace BeeFishId
          return stream.str();
       }
 
-      std::string epochMilliseconds() {
+      String epochMilliseconds() {
          return Timestamp::formatEpochMilliseconds(
             _milliseconds
          );
@@ -115,8 +116,8 @@ namespace BeeFishId
    public:
       
       
-      std::string _key;
-      std::string _name;
+      String _key;
+      String _name;
       Timestamp _timestamp;
       
       Id() : _timestamp()
@@ -124,7 +125,7 @@ namespace BeeFishId
       }
       
       Id(
-         const std::string& name
+         const String& name
       ) :
          _name(name),
          _timestamp()
@@ -132,7 +133,7 @@ namespace BeeFishId
       }
 
       Id(
-         const std::string& name,
+         const String& name,
          unsigned long milliseconds,
          unsigned int increment
       ) :
@@ -141,7 +142,7 @@ namespace BeeFishId
       {
       }
       
-      static Id fromKey(const std::string& key)
+      static Id fromKey(const String& key)
       {
          return decodeKey(key);
       }
@@ -172,7 +173,7 @@ namespace BeeFishId
 
       }
       
-      const std::string& key()
+      const String& key()
       {
          if (_key.size() == 0)
             _key = createKey();
@@ -185,12 +186,12 @@ namespace BeeFishId
          return _timestamp;
       }
       
-      const std::string& name()
+      const String& name()
       {
          return _name;
       }
       
-      std::string toString()
+      String toString()
       {
 
          BeeFishScript::Object output;
@@ -224,7 +225,7 @@ namespace BeeFishId
          return stream;
       }
       
-      std::string createKey()
+      String createKey()
       {
       
          BitStream stream;
@@ -240,7 +241,7 @@ namespace BeeFishId
          return data.toBase64();
       }
       
-      static Id decodeKey(const std::string& key) {
+      static Id decodeKey(const String& key) {
    
       
          // extract the raw data
@@ -256,7 +257,7 @@ namespace BeeFishId
          bool read =
             (stream.readBit() == 1);
          
-         std::string name;
+         String name;
          unsigned long milliseconds;
          unsigned long increment;
          
