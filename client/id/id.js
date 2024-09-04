@@ -129,7 +129,7 @@ class Id {
          }
       );
       
-      return key;
+      return btoa(key);
          
    }
       
@@ -143,7 +143,7 @@ class Id {
       
       // extract the name and timestamp
       // from the key
-      var data = this.key;
+      var data = atob(this.key);
       
       var stream = new PowerEncoding(
          data

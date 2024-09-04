@@ -51,15 +51,14 @@ function postJSON() {
             if (json.error)
                alert("Error " + json.error);
             else {
-               alert(json);
                if (json == "Success")
-                  window.location.reload();
+                  window.location.href = "index2.xhtml?" + encodeURI(path.innerText);
             }
                
          }
       ).catch(
          function(error) {
-            alert(error);
+            alert("Error " + error);
          }
       );
 

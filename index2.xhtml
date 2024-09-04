@@ -4,34 +4,90 @@
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <script src="/head.js"/>
+      <script src="/client/stream/stream.js"/>
+      <script src="/client/power-encoding/power-encoding.js"/>
+      <script src="/client/id/id.js"/>
+      <script src="/client/evaluate.js"/>
       <title>bee.fish</title>
       <style>
+textarea {
+   left: 10px;
+   width: calc(100% - 20px);
+   height: 120px;
+}
       </style>
    </head>
    <body>
       <h1 id="h1">bee.fish.2</h1>
-      <form>
-         <input type="url" id="url" ></input>
-         <button onclick="loadURL()">Go</button>
-      </form>
+      <div>
+         <form onsubmit="return false;">
+            <label for="url">Path</label>
+            <br/>
+            <input type="url" id="url"/>
+            <button 
+              onclick="loadJSON()">Go</button>
+         </form>
+         <br/>
+         <form onsubmit="return false;">
+         
+            <label for="jsonEditor">JSON Editor</label>
+            <br/>            <textarea id="jsonEditor"></textarea>
+            <button onclick="postJSON(url.value, jsonEditor.value);">Save</button>
+         
+         </form>
+      </div>
+      <br />
+      <pre id="result">
+      </pre>
+      <div id="html">
+      </div>
       <br />
       <a href="client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
       
       <script>
-         
+var url = document.getElementById("url");
+var result = document.getElementById("result");
+var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");
+
 document.getElementById("h1").innerText =
    window.location.hostname + ".2";
-
-function loadURL() {
-
-   var url =
-      document.getElementById("url").value;
    
-   window.location.href = url;
+if (window.location.search) {
+   // fill out form from search
+   var _url = decodeURI(
+      window.location.search.substr(1)
+   );
+   url.value =
+      _url;
+}
+
+function loadJSON() {
+   getJSON(url.value).then
+   (
+      function(text) {
+         var json = JSON.parse(text);
+         jsonEditor.value = "";
+         
+         if (json == undefined)
+            return; 
+            
+         jsonEditor.value = text;
+         
+         var evaluated = evaluate(json);
+         
+         result.innerText =
+            evaluated.toString();
+            
+         return json;
+      }
+   );
       
 }
+
+
+
       </script>
 
    </body>
