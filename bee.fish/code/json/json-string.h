@@ -139,7 +139,7 @@ namespace BeeFishJSON {
                [this, output](Match*)
                {
                   _character = output;
-                  success();
+                  return true;
                }
             );
       }
@@ -156,7 +156,7 @@ namespace BeeFishJSON {
                {
                   _character = 
                      _hex->character();
-                  success();
+                  return true;
                }
             );
             

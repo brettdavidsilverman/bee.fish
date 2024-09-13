@@ -18,7 +18,7 @@ namespace BeeFishParser {
    {
    public:
    
-      typedef std::function<void(Match*)> Function;
+      typedef std::function<bool(Match*)> Function;
       Function _function = nullptr;
 
    public:
@@ -45,8 +45,14 @@ namespace BeeFishParser {
       virtual void success()
       override
       {
-         if (_function)
-            _function(_match);
+         if (_function) {
+            if (!_function(_match))
+            {
+               fail();
+               return;
+            }
+         }
+         
          Match::success();
          
       }

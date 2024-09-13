@@ -672,6 +672,7 @@ namespace BeeFishParser {
          [&invokeValue](Match* item)
          {
             invokeValue = item->value();
+            return true;
          } 
       );
       
@@ -706,6 +707,7 @@ namespace BeeFishParser {
                [this](Match* match)
                {
                   virtualFunction(match);
+                  return true;
                }
             );
                

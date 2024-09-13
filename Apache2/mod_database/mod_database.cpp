@@ -101,12 +101,34 @@ static int database_handler(request_rec *r)
       return DECLINED;
    }
     
-   Path path = parseURI(
-      database,
-      r->connection->client_ip,
-      r->uri,
-      r->args
-   );
+   Path path;
+   
+   try {
+      path = parseURI(
+         database,
+         r->connection->client_ip,
+         r->uri,
+         r->args
+      );
+   }
+   catch (runtime_error& error)
+   {
+      debug << now() << " " << error.what() << endl;
+      
+      ap_set_content_type(
+       r, "application/json; charset=utf-8");
+       
+      ApacheStream stream(r);
+
+      Variable reply;
+      reply = BeeFishScript::String(
+          error.what()
+      );
+      stream << reply;
+      stream.flush();
+      
+      return OK;
+   }
    
 
    if (strcmp(r->method, "GET") == 0)

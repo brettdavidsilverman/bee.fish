@@ -67,6 +67,7 @@ protected:
                [this](Match* match)
                {
                   _set->onsetvalue(_item);
+                  return true;
                }
             )
          };
@@ -130,6 +131,7 @@ public:
             new OpenBrace(),
             [this](Match* match) {
                this->onbeginset(match);
+               return true;
             }
          ),
          new Optional(
@@ -138,6 +140,7 @@ public:
                   _setItem = createItem(),
                   [this](Match* match) {
                      this->onsetvalue(_setItem);
+                     return true;
                   }
                ),
                new Optional(
@@ -149,6 +152,7 @@ public:
             new CloseBrace(),
             [this](Match* match) {
                this->onendset(match);
+               return true;
             }
          )
       };

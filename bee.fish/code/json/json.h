@@ -53,7 +53,7 @@ namespace BeeFishJSON
             match,
             [this, type](Match* match) {
                _type = type;
-               //onvalue(this);
+               return true;
             }
          );
       }
@@ -72,7 +72,7 @@ namespace BeeFishJSON
                   _type = Type::NUMBER;
                else
                   _type = Type::INTEGER;
-               //onvalue(this);
+               return true;
             }
          );
       }

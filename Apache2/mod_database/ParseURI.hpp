@@ -53,6 +53,7 @@ namespace BeeFishWebServer {
                [this](Match* match)
                {
                   *this << Type::OBJECT;
+                  return true;
                }
             ),
             new BeginProperty(),
@@ -71,7 +72,11 @@ namespace BeeFishWebServer {
                      Size position = 0;
                      property.getData<Size>(position);
                      *this << position;
+                     
+                     return true;
                   }
+                  
+                  return false;
                }
             ),
             new EndProperty()
@@ -105,8 +110,10 @@ namespace BeeFishWebServer {
          query = query.decodeURI();
          PropertyPath propertyPath(path, properties);
          Parser parser(propertyPath);
-         parser.read(query);
-         path = propertyPath;
+         if (parser.read(query) == true)
+            path = propertyPath;
+         else
+            throw runtime_error("Invalid property");
       }
       
       return path;

@@ -136,6 +136,7 @@ namespace BeeFishJSON
          _key = new Key(),
          [this](Match* match) {
             _set->onkey(_key);
+            return true;
          }
       );
          
@@ -146,6 +147,7 @@ namespace BeeFishJSON
          _value = new Value(),
          [this](Match* match) {
             _set->onkeyvalue(_key, _value);
+            return true;
          }
       );
          
