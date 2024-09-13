@@ -103,6 +103,30 @@ function loadJSON() {
       
 }
 
+function postJSON(url, json) {
+   var response =
+      fetch(
+         url,
+         {
+            method: "POST",
+            body: json
+         }
+      ).then(
+         function (response) {
+            return response.json();
+         }
+      ).then(
+         function (json) {
+            alert("Ok");
+         }
+      ).catch(
+         function(error) {
+            alert("Error " + error);
+         }
+      );
+
+   return response;
+}
 
 
       </script>

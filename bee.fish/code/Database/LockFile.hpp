@@ -11,7 +11,6 @@ namespace BeeFishDatabase
    protected:
       Size _lockCount = 0;
    public:
-      std::recursive_mutex _mutex;
    
       LockFile(const std::string& filename) :
          File(filename)
@@ -25,16 +24,12 @@ namespace BeeFishDatabase
 
       virtual void lock() {
          
-         scoped_lock lock(_mutex);
-
          if (_lockCount++ == 0)
             flock(_fileNumber, LOCK_EX);
       }
        
       virtual void unlock() {
          
-         scoped_lock lock(_mutex);
-
          if (--_lockCount == 0)
             flock(_fileNumber, LOCK_UN);
       }

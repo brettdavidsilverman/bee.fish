@@ -319,8 +319,6 @@ namespace BeeFishDatabase {
 
       void setData(const Data& value) {
 
-         scoped_lock threadLock(_database->_mutex);
-
          Database::ScopedFileLock lock(_database);
          
          Branch branch = getBranch(_index);

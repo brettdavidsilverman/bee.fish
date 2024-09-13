@@ -45,30 +45,6 @@ function evaluate(json, parent)
 
 
 
-function postJSON(url, json) {
-   var response =
-      fetch(
-         url,
-         {
-            method: "POST",
-            body: json
-         }
-      ).then(
-         function (response) {
-            return response.json();
-         }
-      ).then(
-         function (json) {
-            return json;
-         }
-      ).catch(
-         function(error) {
-            alert("Error " + error);
-         }
-      );
-
-   return response;
-}
 
 function getJSON(url) {
 

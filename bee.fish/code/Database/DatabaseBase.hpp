@@ -105,7 +105,6 @@ namespace BeeFishDatabase {
       inline Index getNextIndex()
       {
 
-         scoped_lock threadLock(_mutex);
          ScopedFileLock lock(this);
 
          Branch branch;
@@ -127,7 +126,6 @@ namespace BeeFishDatabase {
       inline Index allocate(const Data& data)
       {
 
-         scoped_lock threadLock(_mutex);
          
          ScopedFileLock lock(this);
 
@@ -145,7 +143,6 @@ namespace BeeFishDatabase {
       
       inline Branch getBranch(Index index)
       {
-         scoped_lock threadLock(_mutex);
          
          if (size() == 0) 
          {
@@ -169,7 +166,6 @@ namespace BeeFishDatabase {
 
       inline void setBranch(Index index, const Branch& branch)
       {
-         scoped_lock threadLock(_mutex);
 
          seek(index);
          write(&branch, sizeof(Branch));
@@ -182,8 +178,6 @@ namespace BeeFishDatabase {
       // Returns the latest version of the branch.
       inline Branch lockBranch(Index lockIndex) 
       {
-
-         scoped_lock threadLock(_mutex);
 
          lock();
 
@@ -231,7 +225,6 @@ namespace BeeFishDatabase {
 
       inline void unlockBranch(Index lockIndex) 
       {
-         scoped_lock threadLock(_mutex);
          ScopedFileLock lock(this);
 
          Branch branch = getBranch(lockIndex);
@@ -248,7 +241,6 @@ namespace BeeFishDatabase {
          if (dataIndex == 0)
             return Data();
 
-         scoped_lock lock(_mutex);
 
          seek(dataIndex);
          Size size;
@@ -263,7 +255,6 @@ namespace BeeFishDatabase {
       
       inline void setData(Index dataIndex, const Data& source)
       {
-         scoped_lock lock(_mutex);
          seek(dataIndex);
          Size size = source.size();
          write(&size, sizeof(Size));
