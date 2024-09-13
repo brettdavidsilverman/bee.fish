@@ -19,40 +19,39 @@ namespace BeeFishScript {
       UNKNOWN
    };
 
-   
-   ostream& operator << (ostream& out, const Type& type)
+   const char* ToChar (const Type& type)
    {
       switch (type)
       {
          case Type::UNDEFINED:
-            out << "undefined";
+            return "undefined";
             break;
          case Type::NULL_:
-            out << "null";
+            return "null";
             break;
          case Type::BOOLEAN:
-            out << "bool";
+            return "bool";
             break;
          case Type::INTEGER:
-            out << "integer";
+            return "integer";
             break;
          case Type::NUMBER:
-            out << "number";
+            return "number";
             break;
          case Type::STRING:
-            out << "string";
+            return "string";
             break;
          case Type::ARRAY:
-            out << "array";
+            return "array";
             break;
          case Type::OBJECT:
-            out << "object";
+            return "object";
             break;
          case Type::UNKNOWN:
-            out << "UNKNOWN";
+            return "UNKNOWN";
       }
 
-      return out;
+      return nullptr;
    }
 
    PowerEncoding& operator << (PowerEncoding& out, const Type& type)

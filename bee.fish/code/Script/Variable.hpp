@@ -466,7 +466,7 @@ namespace BeeFishScript {
       String type() const {
 
          stringstream stream;
-         stream << _type;
+         stream << ToChar(_type);
          return stream.str();
 
       }

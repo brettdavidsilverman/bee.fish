@@ -96,6 +96,8 @@ static int database_handler(request_rec *r)
    if (filename.find("..") != std::string::npos)
       return HTTP_INTERNAL_SERVER_ERROR;
       
+   if (filename.find(".git") != std::string::npos)
+      return HTTP_INTERNAL_SERVER_ERROR;
    if (std::filesystem::exists(filename))
    {
       return DECLINED;
