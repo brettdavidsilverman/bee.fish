@@ -67,14 +67,13 @@ namespace BeeFishDatabase {
          else if (_keyStack.size()) {
             BString& key = topKey();
             Size& count = topObjectPropertyIndex();
-            Path property;
-
-            if (_properties.contains(key))
-               property = _properties[key];
-            else {
-               property = _properties[key];
+            Path property
+               = _properties[key];
+            if (!property.hasData())
+            {
                property.setData(key);
             }
+            property[path].setData(count);
             path = path[count++];
             path.setData(property.index());
             pop_back_key();

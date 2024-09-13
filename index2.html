@@ -64,7 +64,8 @@ if (window.location.search) {
 }
 
 
-function loadJSON() {
+function loadJSON() {   prompt("uri", encodeURI(url.value));
+   
    fetch(url.value)
    .then
    (

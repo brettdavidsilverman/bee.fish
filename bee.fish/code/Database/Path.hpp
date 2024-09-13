@@ -213,8 +213,6 @@ namespace BeeFishDatabase {
 
          Path path(*this);
 
-//         Database::ScopedFileLock lock(_database);
-         
          path << key;
 
          path.unlock();
@@ -226,6 +224,11 @@ namespace BeeFishDatabase {
       {
          std::string _key(key);
          return Path::operator[](_key);
+      }
+      
+      Path operator [] (const Path& key)
+      {
+         return Path::operator[](key._index);
       }
 
      

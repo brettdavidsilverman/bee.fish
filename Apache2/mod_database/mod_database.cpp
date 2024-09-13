@@ -64,14 +64,14 @@ static void outputId(request_rec *r);
 
 namespace BeeFishWebServer {
  
-   Debug debug;
+   
    
 }
 
 /* The sample content handler */
 static int database_handler(request_rec *r)
 {
-
+   Debug debug;
    debug << now() << " "
          << r->connection->client_ip << " "
          << r->method << " "
@@ -104,8 +104,10 @@ static int database_handler(request_rec *r)
    Path path = parseURI(
       database,
       r->connection->client_ip,
-      r->uri
+      r->uri,
+      r->args
    );
+   
 
    if (strcmp(r->method, "GET") == 0)
    {
@@ -117,8 +119,7 @@ static int database_handler(request_rec *r)
       {
          outputDocument(path, r);
       }
-      else if (path.contains("document") &&
-               path.contains("index"))
+      else if (!path.isDeadEnd())
       {
          outputJSON(database, path, r);
 
@@ -170,7 +171,7 @@ static void outputJSON(Database& database, Path path, request_rec *r)
    ap_set_content_type(
        r, "application/json; charset=utf-8");
 
-   Path2JSON index(path["index"], Path(database)[PROPERTIES]);
+   Path2JSON index(path, Path(database)[HOST][PROPERTIES]);
    ApacheStream stream(r);
    stream << index;
    stream.flush();
@@ -200,12 +201,14 @@ static void outputDocument(Path path, request_rec *r)
 static void inputJSON(Database& database, Path path, request_rec *r)
 {
 
+   Debug debug;
+   
    bool isOk = true;
    string posted;
    int pageSize = getPageSize();
    char buffer[pageSize];
    Size pageCount = 0;
-   JSON2Path index(path["index"], Path(database)[PROPERTIES]);
+   JSON2Path index(path, Path(database)[HOST][PROPERTIES]);
 
    MinMaxPath document = path["document"];
 
@@ -292,7 +295,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    else
    {
 
-      path["index"].clear();
+      path.clear();
 
       Variable error =
           index.getErrorMessage();

@@ -52,7 +52,7 @@ function postJSON() {
                alert("Error " + json.error);
             else {
                if (json == "Success")
-                  window.location.href = "index2.xhtml?" + encodeURI(path.innerText);
+                  window.location.href = encodeURI(path.innerText);
             }
                
          }
