@@ -1,47 +1,4 @@
-function evaluate(json, parent)
-{
-   switch(typeof(json)) {
-   case "string":
-      var string = json;
-      if (string.startsWith("_{") &&
-          string.endsWith("}"))
-      {
-         var func = new Function(string.substr(1));
-         var evaluated = func.call(parent);
-         
-         if (evaluated == undefined)
-            evaluated = string;
 
-         return evaluated;
-      }
-      else
-         return string;
-      break;
-   case "object":
-      for (property in json)
-      {
-         var newProperty =
-            evaluate(property, json);
-
-         if (newProperty == undefined)
-            newProperty = property;
-            
-         var newValue =
-            evaluate(json[property], json);
-            
-         json[newProperty] =
-            newValue;
-            
-         if (newProperty != property)
-            json[property] = undefined;
-      }
-      return json;
-      break;
-    
-   default:
-      return json;
-   }
-}
 
 
 function postJSON(url, json) {
@@ -58,7 +15,6 @@ function postJSON(url, json) {
          }
       ).then(
          function (json) {
-            alert(json);
             return json;
          }
       ).catch(

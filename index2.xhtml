@@ -3,11 +3,13 @@
    <head>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <script src="/head.js"/>
-      <script src="/client/stream/stream.js"/>
-      <script src="/client/power-encoding/power-encoding.js"/>
-      <script src="/client/id/id.js"/>
-      <script src="/client/evaluate.js"/>
+      <!--
+      <script src="https://bee.fish/head.js"/>
+      <script src="https://bee.fish/client/stream/stream.js"/>
+      <script src="https://bee.fish/client/power-encoding/power-encoding.js"/>
+      <script src="https://bee.fish/client/id/id.js"/>
+      <script src="https://bee.fish/client/evaluate.js"/>
+      -->
       <title>bee.fish</title>
       <style>
 textarea {
@@ -42,7 +44,7 @@ textarea {
       <div id="html">
       </div>
       <br />
-      <a href="client/">Javascript client library</a>
+      <a href="https://bee.fish/client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
       
@@ -63,10 +65,62 @@ if (window.location.search) {
       _url;
 }
 
-function loadJSON() {
-   getJSON(url.value).then
+function evaluate(json, parent)
+{
+   switch(typeof(json)) {
+   case "string":
+      var string = json;
+      if (string.startsWith("_{") &&
+          string.endsWith("}"))
+      {
+         var func = new Function(string.substr(1));
+         var evaluated = func.call(parent);
+         
+         if (evaluated == undefined)
+            evaluated = string;
+
+         return evaluated;
+      }
+      else
+         return string;
+      break;
+   case "object":
+      for (property in json)
+      {
+         var newProperty =
+            evaluate(property, json);
+
+         if (newProperty == undefined)
+            newProperty = property;
+            
+         var newValue =
+            evaluate(json[property], json);
+            
+         json[newProperty] =
+            newValue;
+            
+         if (newProperty != property)
+            json[property] = undefined;
+      }
+      return json;
+      break;
+    
+   default:
+      return json;
+   }
+}
+
+function loadJSON() {
+   fetch("https://bee.fish/" + url.value)
+   .then
    (
+      function (response) {
+         return response.text();
+      }
+   )
+   .then(
       function(text) {
+         alert(text);
          var json = JSON.parse(text);
          jsonEditor.value = "";
          
@@ -82,6 +136,11 @@ function loadJSON() {
             
          return json;
       }
+   )
+   .catch(
+      function (error) {
+         alert(error);
+      }
    );
       
 }
@@ -91,4 +150,5 @@ function loadJSON() {
       </script>
 
    </body>
+
 </html>
