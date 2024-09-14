@@ -27,7 +27,8 @@ namespace BeeFishWebServer {
       virtual void success()
       override
       {
-         *_path << Type::OBJECT;
+          
+         //*_path << Type::OBJECT;
       }
    };
    
@@ -47,14 +48,14 @@ namespace BeeFishWebServer {
       }
    };
    
-   class Property : public BeeFishJSON::String
+   
+   class IdentifierPath : public Match
    {
    protected:
-      Path& _properties;
+      Path _properties;
       Path* _path;
-      
    public:
-      Property(Path& properties, Path* path) :
+      IdentifierPath(const Path& properties, Path* path) :
          _properties(properties),
          _path(path)
       {
@@ -65,107 +66,171 @@ namespace BeeFishWebServer {
       {
          Path property =
             _properties[value()];
-                  
-         if (property.contains(_path->index()))
+               
+         debug << "PATH[" << value() << "]" << endl;
+         
+         if (_path->contains(Type::OBJECT))
          {
-            property = property[_path->index()];
-            Size position = 0;
-            property.getData<Size>(position);
-            *_path << position;
-            BeeFishJSON::String::success();
+            *_path << Type::OBJECT;
+            if (property.contains(_path->index()))
+            {
+               property = property[_path->index()];
+               Size position = -1;
+               property.getData<Size>(position);
+               *_path << position;
+               
+               Match::success();
+               return;
+            }
+            
          }
-         else
-            fail();
+         
+         Match::fail();
                   
       }
+      
+      
    };
    
-   class LatinCharacter : public Or
+   class QuotedIdentifier : public IdentifierPath
+   {
+   
+   public:
+      QuotedIdentifier(const Path& properties, Path* path) :
+         IdentifierPath(properties, path)
+      {
+         _match = new BeeFishJSON::String();
+      }
+      
+   };
+   
+   class Alpha : public Or
    {
    public:
-      LatinCharacter() : Or(
+      Alpha() : Or(
          new Range('a', 'z'),
          new Range('A', 'Z'),
-         new Range('0', '9')
+         new Character('_')
       )
       {
       }
    };
    
-   class Identifier : public Capture
+   class Numeric : public Range
    {
-   protected:
-      Path& _properties;
-      Path* _path;
-      
    public:
-      Identifier(Path& properties, Path* path) :
-         Capture(
-            new And(
-               new Optional(
-                  new Character('_')
-               ),
-               new Repeat<LatinCharacter>(1)
-            )
-         ),
-         _properties(properties),
-         _path(path)
+      Numeric() : Range('0', '9')
       {
       }
-      
-      virtual void success()
-      override
+   };
+   
+   class AlphaNumeric : public Or
+   {
+   public:
+      AlphaNumeric() : Or(
+         new Alpha(),
+         new Numeric()
+      )
       {
-         
-         Path property =
-            _properties[value()];
-                  
-         if (property.contains(_path->index()))
-         {
-            
-            property = property[_path->index()];
-            Size position = 0;
-            property.getData<Size>(position);
-            
-            *_path << position;
-            
-            Capture::success();
-         }
-         else {
-            fail();
-         }
-                  
+      }
+   };
+   
+   class Identifier : public IdentifierPath
+   {
+   public:
+      Identifier(const Path& properties, Path* path) :
+         IdentifierPath(properties, path)
+      {
+         _match =
+            new Capture(
+               new And(
+                  new Alpha(),
+                  new Repeat<AlphaNumeric>(0)
+               )
+            );
       }
       
    };
    
    class PropertyPath :
-      public Path,
-      public And
+      public Or
+   {
+   public:
+      PropertyPath() {
+         //assert(false);
+      }
+      
+      PropertyPath(const Path& properties, Path* start ) :
+         Or(
+            new And(
+               new Character('.'),
+               new Identifier(properties, start)
+            ),
+            new And(
+               new BeginProperty(),
+               new QuotedIdentifier(properties, start),
+               new EndProperty()
+            )
+         )
+      {
+      }
+   };
+   
+   class PropertyPaths : public Repeat<PropertyPath>
    {
    protected:
       Path _properties;
-      
+      Path* _start;
    public:
-      PropertyPath(Path start, Path properties) :
-         Path(start),
-         And(
-            new This(this),
-            new Or(
-               new And(
-                  new Character('.'),
-                  new Identifier(properties, this)
-               ),
-               new And(
-                  new BeginProperty(),
-                  new Property(properties, this),
-                  new EndProperty()
-               )
-            )
-         ),
-         _properties(properties)
+      PropertyPaths(const Path& properties, Path* start) :
+         Repeat<PropertyPath>(1),
+         _properties(properties),
+         _start(start)
       {
       }
+      
+      virtual PropertyPath* createItem()
+      override
+      {
+         PropertyPath* item =
+            new PropertyPath(_properties, _start);
+            
+         if (_parser)
+            item->setup(_parser);
+               
+         return item;
+      }
+      /*
+      virtual void eof(Parser* parser)
+      override
+      {
+         setup(parser);
+         
+         if (result() == nullopt) {
+             
+            _item->eof(parser);
+            if (_item->result() == true) {
+               success();
+               return;
+            }
+         }
+         
+      }
+     */
+   };
+   
+   class Query : public Match
+   {
+   public:
+      Query(const Path& properties, Path* start) 
+      {
+         _match = new And(
+            new This(start),
+            new PropertyPaths(properties, start)
+         );
+      }
+      
+     
    };
 
    Path parseURI(Database& database, const char* clientIP, const char* uri, const char* args) {
@@ -188,19 +253,19 @@ namespace BeeFishWebServer {
       }
 
       if (args) {
-         BString query = args;
-         query = query.decodeURI();
-         PropertyPath propertyPath(path, properties);
-         Parser parser(propertyPath);
-         parser.read(query);
+         BString _args = args;
+         Query query(properties, &path);
+         Parser parser(query);
+         parser.read(_args.decodeURI());
             
-         if (parser.result() == nullopt) 
+         if (parser.result() == nullopt)
+         {
+             debug << "EOF" << endl;
             parser.eof();
-         
-         if (propertyPath.result() == true)
-            path = propertyPath;
-         else
-            throw runtime_error("Invalid property");
+         }
+         debug << "QUERY_RESULT " << parser.result() << endl;
+         //if (query.result() != true)
+         //   throw runtime_error("Invalid property");
       }
       
       return path;

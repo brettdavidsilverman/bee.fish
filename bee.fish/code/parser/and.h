@@ -102,8 +102,6 @@ namespace BeeFishParser {
          if (result() != nullopt)
             return;
             
-         bool matched = true;
-         
          for (size_t index = _iterator; index < _inputs.size(); ++index)
          {
             Match* match = (*this)[index];
@@ -114,17 +112,12 @@ namespace BeeFishParser {
             if (match->result() != true && 
                 !match->isOptional())
             {
-               matched = false;
-               break;
+               fail();
+               return;
             }
          }
          
-         if (matched) {
-            success();
-         }
-         else {
-            fail();
-         }
+         success();
       }
       
       virtual Match* operator[] (size_t index)

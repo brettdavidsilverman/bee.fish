@@ -74,7 +74,6 @@ namespace BeeFishParser {
          if (result() != nullopt)
             return;
             
-         bool matched = false;
          _item = nullptr;
          
          for ( auto item : _inputs)
@@ -85,16 +84,13 @@ namespace BeeFishParser {
                
             if (item->result() == true)
             {
-               matched = true;
                _item = item;
-               break;
+               success();
+               return;
             }
          }
          
-         if (matched)
-            success();
-         else
-            fail();
+         fail();
             
          Match::eof(parser);
             

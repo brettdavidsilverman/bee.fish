@@ -496,10 +496,14 @@ namespace BeeFishDatabase {
             BeeFishScript::Object{};
 
          variable["index"] =
-            (BeeFishScript::Number)_index;
+            (BeeFishScript::Integer)_index;
 
-         variable["lockIndex"] =
-            (BeeFishScript::Number)_lockIndex;
+         if (_lockIndex == -1)
+            variable["lockIndex"] =
+               (BeeFishScript::Number)(-1);
+         else
+            variable["lockIndex"] =
+               (BeeFishScript::Integer)_lockIndex;
 
 
          if (_database) {

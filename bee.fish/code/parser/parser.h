@@ -268,15 +268,16 @@ namespace BeeFishParser
       
       virtual void eof() {
 
-         if (result() == nullopt && _match) {
+         if (result() == nullopt && 
+            _match && 
+            _match->result() == nullopt)
+         {
             _match->eof(this);
-            
-            if (_match->result() != nullopt)
-               _result = _match->result();
          }
-         
-         if (_result == nullopt)
-            _result = false;
+         _result = _match->result();
+            
+         Debug debug;
+         debug << "PARSER_EOF " << _result << endl;
          
       }
 
