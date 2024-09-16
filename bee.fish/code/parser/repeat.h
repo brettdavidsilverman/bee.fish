@@ -95,14 +95,23 @@ namespace BeeFishParser
 		}
         
         virtual void eof(Parser* parser) {
-          
-           setup(parser);
+           Debug debug;
            
-           //if (_item && _item->result() == nullopt)
-           //   _item->eof(parser);
+           setup(parser);
            
            if (result() == nullopt)
            {
+              if (_matchedCount == 0)
+              {
+                 if (_item && _item->result() == nullopt)
+                 {
+                    _item->eof(parser);
+                    if (_item->result() == true)
+                       ++_matchedCount;
+                    debug << "REPEAT_EOF" << _item->result() << endl;
+                 }
+              }
+              
               if (_matchedCount >= _minimum &&
                   (_matchedCount <= _maximum ||
                    _maximum == 0))

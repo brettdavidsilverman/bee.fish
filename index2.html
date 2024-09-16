@@ -23,9 +23,12 @@ textarea {
          <form onsubmit="return false;">
             <label for="url">Path</label>
             <br/>
-            <input type="url" id="url"/>
+            <input type="url" id="url"
+               onblur="encodedURL.href=this.value"/>
             <button 
               onclick="loadJSON()">Go</button>
+            <br/>
+            <a id="encodedURL">Link to path</a>
          </form>
          <br/>
          <form onsubmit="return false;">
@@ -50,6 +53,8 @@ textarea {
 var url = document.getElementById("url");
 var result = document.getElementById("result");
 var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");
+var encodedURL = document.getElementById("encodedURL");
+url.focus();
 
 document.getElementById("h1").innerText =
    window.location.hostname + ".2";

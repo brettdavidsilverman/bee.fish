@@ -23,31 +23,7 @@ namespace BeeFishWebServer {
       {
           
       }
-      
-      virtual void success()
-      override
-      {
-          
-         //*_path << Type::OBJECT;
-      }
    };
-   
-   class BeginProperty : public Character
-   {
-   public:
-      BeginProperty() : Character('[')
-      {
-      }
-   };
-   
-   class EndProperty : public Character
-   {
-   public:
-      EndProperty() : Character(']')
-      {
-      }
-   };
-   
    
    class IdentifierPath : public Match
    {
@@ -67,8 +43,6 @@ namespace BeeFishWebServer {
          Path property =
             _properties[value()];
                
-         debug << "PATH[" << value() << "]" << endl;
-         
          if (_path->contains(Type::OBJECT))
          {
             *_path << Type::OBJECT;
@@ -78,13 +52,12 @@ namespace BeeFishWebServer {
                Size position = -1;
                property.getData<Size>(position);
                *_path << position;
-               
                Match::success();
                return;
             }
             
          }
-         
+
          Match::fail();
                   
       }
@@ -153,26 +126,27 @@ namespace BeeFishWebServer {
    };
    
    class PropertyPath :
-      public Or
+      public Match
    {
    public:
       PropertyPath() {
          //assert(false);
       }
       
-      PropertyPath(const Path& properties, Path* start ) :
-         Or(
+      PropertyPath(const Path& properties, Path* start )
+      {
+         _match = new Or(
+            new And(
+               new Character('['),
+               new QuotedIdentifier(properties, start),
+               new Character(']')
+            ),
             new And(
                new Character('.'),
                new Identifier(properties, start)
-            ),
-            new And(
-               new BeginProperty(),
-               new QuotedIdentifier(properties, start),
-               new EndProperty()
             )
-         )
-      {
+            
+         );
       }
    };
    
@@ -200,23 +174,8 @@ namespace BeeFishWebServer {
                
          return item;
       }
-      /*
-      virtual void eof(Parser* parser)
-      override
-      {
-         setup(parser);
-         
-         if (result() == nullopt) {
-             
-            _item->eof(parser);
-            if (_item->result() == true) {
-               success();
-               return;
-            }
-         }
-         
-      }
-     */
+      
+     
    };
    
    class Query : public Match
@@ -258,14 +217,14 @@ namespace BeeFishWebServer {
          Parser parser(query);
          parser.read(_args.decodeURI());
             
-         if (parser.result() == nullopt)
+         if (query.result() == nullopt)
          {
-             debug << "EOF" << endl;
+            debug << "EOF" << endl;
             parser.eof();
          }
-         debug << "QUERY_RESULT " << parser.result() << endl;
-         //if (query.result() != true)
-         //   throw runtime_error("Invalid property");
+         debug << "QUERY_RESULT " << query.result() << endl;
+         if (query.result() != true)
+            throw runtime_error("Invalid property");
       }
       
       return path;
