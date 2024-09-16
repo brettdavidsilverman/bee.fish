@@ -29,8 +29,8 @@ namespace BeeFishWebServer {
                
          if (_properties.contains(value()))
          {
-             Path property =
-                _properties[value()];
+            Path property =
+               _properties[value()];
                 
             if (_path->contains(Type::OBJECT))
             {
@@ -41,12 +41,13 @@ namespace BeeFishWebServer {
                   Size position = -1;
                   property.getData<Size>(position);
                   *_path << position;
-                  Match::success();
                   return;
                }
             
             }
          }
+         
+         Match::fail();
          
          std::stringstream stream;
          stream
@@ -56,7 +57,7 @@ namespace BeeFishWebServer {
         
          throw runtime_error(stream.str());
         
-         Match::fail();
+         
                   
       }
       
@@ -116,7 +117,7 @@ namespace BeeFishWebServer {
             new Capture(
                new And(
                   new Alpha(),
-                  new Repeat<AlphaNumeric>(0)
+                  new Repeat<AlphaNumeric>()
                )
             );
       }
