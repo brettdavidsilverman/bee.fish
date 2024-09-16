@@ -11,20 +11,6 @@ namespace BeeFishWebServer {
     
    Debug debug;
    
-   class This : public Word
-   {
-   protected:
-      Path* _path;
-      
-   public:
-      This(Path* path) :
-         Word("this"),
-         _path(path)
-      {
-          
-      }
-   };
-   
    class IdentifierPath : public Match
    {
    protected:
@@ -40,24 +26,36 @@ namespace BeeFishWebServer {
       virtual void success()
       override
       {
-         Path property =
-            _properties[value()];
                
-         if (_path->contains(Type::OBJECT))
+         if (_properties.contains(value()))
          {
-            *_path << Type::OBJECT;
-            if (property.contains(_path->index()))
+             Path property =
+                _properties[value()];
+                
+            if (_path->contains(Type::OBJECT))
             {
-               property = property[_path->index()];
-               Size position = -1;
-               property.getData<Size>(position);
-               *_path << position;
-               Match::success();
-               return;
-            }
+               *_path << Type::OBJECT;
+               if (property.contains(_path->index()))
+               {
+                  property = property[_path->index()];
+                  Size position = -1;
+                  property.getData<Size>(position);
+                  *_path << position;
+                  Match::success();
+                  return;
+               }
             
+            }
          }
-
+         
+         std::stringstream stream;
+         stream
+            << "Invalid property"
+            << " "
+            << "'" << value() << "'";
+        
+         throw runtime_error(stream.str());
+        
          Match::fail();
                   
       }
@@ -184,7 +182,7 @@ namespace BeeFishWebServer {
       Query(const Path& properties, Path* start) 
       {
          _match = new And(
-            new This(start),
+            new Word("this"),
             new PropertyPaths(properties, start)
          );
       }
@@ -219,10 +217,9 @@ namespace BeeFishWebServer {
             
          if (query.result() == nullopt)
          {
-            debug << "EOF" << endl;
             parser.eof();
          }
-         debug << "QUERY_RESULT " << query.result() << endl;
+
          if (query.result() != true)
             throw runtime_error("Invalid property");
       }

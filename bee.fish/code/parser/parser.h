@@ -275,9 +275,6 @@ namespace BeeFishParser
             _match->eof(this);
          }
          _result = _match->result();
-            
-         Debug debug;
-         debug << "PARSER_EOF " << _result << endl;
          
       }
 

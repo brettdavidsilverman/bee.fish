@@ -95,8 +95,7 @@ namespace BeeFishParser
 		}
         
         virtual void eof(Parser* parser) {
-           Debug debug;
-           
+
            setup(parser);
            
            if (result() == nullopt)
@@ -108,7 +107,6 @@ namespace BeeFishParser
                     _item->eof(parser);
                     if (_item->result() == true)
                        ++_matchedCount;
-                    debug << "REPEAT_EOF" << _item->result() << endl;
                  }
               }
               
