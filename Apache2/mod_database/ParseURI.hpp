@@ -113,16 +113,6 @@ namespace BeeFishApache2 {
       Identifier(const Path& properties, Path* path) :
          IdentifierPath(properties, path)
       {
-         
-      }
-      
-      virtual void setup(Parser* parser)
-      override
-      {
-         
-         if (_parser)
-            return;
-            
          _match =
             new Capture(
                new And(
@@ -130,29 +120,7 @@ namespace BeeFishApache2 {
                   new Repeat<AlphaNumeric>(0)
                )
             );
-            
-         _match->setup(parser);
-         
-         Match::setup(parser);
-         
       }
-      
-      virtual void eof(Parser* parser)
-      override
-      {
-         setup(parser);
-         
-         if (_match->result() == nullopt)
-         {
-            _match->eof(parser);
-            
-            if (_match->result() != false) 
-               success();
-            else
-               fail();
-         }
-      }
-      
       
    };
    
@@ -165,7 +133,7 @@ namespace BeeFishApache2 {
       
    public:
       PropertyPath() {
-         //assert(false);
+         assert(false);
       }
       
       PropertyPath(const Path& properties, Path* start)
@@ -173,14 +141,6 @@ namespace BeeFishApache2 {
             _properties(properties),
             _start(start)
       {
-      }
-     
-      virtual void setup(Parser* parser)
-      override
-      {
-         if (_parser)
-            return;
-            
          _match = new Or(
             new And(
                new Character('['),
@@ -193,22 +153,6 @@ namespace BeeFishApache2 {
             )
             
          );
-         
-         _match->setup(parser);
-         
-         Match::setup(parser);
-      }
-      
-      virtual void eof(Parser* parser)
-      override
-      {
-         setup(parser);
-         
-         _match->eof(parser);
-         if (_match->result() == true)
-            success();
-         else if (_match->result() == false)
-            fail();
       }
       
    };
@@ -238,21 +182,6 @@ namespace BeeFishApache2 {
          return item;
       }
       
-      virtual void eof(Parser* parser)
-      override
-      {
-         setup(parser);
-         
-         if (result() != false)
-         {
-            _item->eof(parser);
-            if (_item->result())
-               success();
-            else
-               fail();
-         }
-      }
-      
      
    };
    
@@ -272,26 +201,14 @@ namespace BeeFishApache2 {
          _properties(properties),
          _start(start)
       {
-         
-      }
-      
-      virtual void setup(Parser* parser)
-      override
-      {
-         if (_parser)
-            return;
-            
          _match =
             new And(
                _wordThis = new Word("this"),
                _propertyPaths =
                   new PropertyPaths(_properties, _start)
             );
-            
-         _match->setup(parser);
-         
-         Match::setup(parser);
       }
+      
       
       virtual void eof(Parser* parser)
       override
@@ -300,14 +217,19 @@ namespace BeeFishApache2 {
          
          if (_wordThis->result() == true)
          {
-            _propertyPaths->eof(parser);
-            if (_propertyPaths->result() == true)
-               success();
-            else
-               fail();
+            if (_propertyPaths->result() != false)
+            {
+               _propertyPaths->eof(parser);
+               if (_propertyPaths->result() == true)
+               {
+                  success();
+                  return;
+               }
+            }
          }
-         else
-            fail();
+         
+         fail();
+       
       }
       
      

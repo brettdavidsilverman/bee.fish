@@ -101,16 +101,13 @@ namespace BeeFishParser
 
            setup(parser);
            
-           if (result() == nullopt)
+           if (result() != false)
            {
-              if (_matchedCount == 0)
+              if (_item && _item->result() == nullopt)
               {
-                 if (_item && _item->result() == nullopt)
-                 {
-                    _item->eof(parser);
-                    if (_item->result() == true)
-                       ++_matchedCount;
-                 }
+                 _item->eof(parser);
+                 if (_item->result() == true)
+                    ++_matchedCount;
               }
               
               if (_matchedCount >= _minimum &&
