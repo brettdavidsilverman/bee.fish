@@ -47,19 +47,21 @@ namespace BeeFishParser
 
 				matchedItem(_item);
 
-				_item = createItem();
-
 				++_matchedCount;
 
-				if (_maximum > 0 &&
-					_matchedCount > _maximum)
-				{
-					matched = false;
-					fail();
-				}
-
-				if (_matchedCount == _maximum)
-					success();
+				if (_maximum > 0)
+                {
+                   if (_matchedCount == _maximum)
+				      success();
+                   else if (_matchedCount > _maximum)
+				   {
+					  matched = false;
+					  fail();
+				   }
+                }
+				   
+                    
+                _item = createItem();
 
 			}
 			else if (

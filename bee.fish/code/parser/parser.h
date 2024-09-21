@@ -161,7 +161,9 @@ namespace BeeFishParser
          {
             
             c = i;
-
+#ifdef DEBUG
+            cerr << '{' << c << '}';
+#endif
             if (!match(c))
                return false;
 

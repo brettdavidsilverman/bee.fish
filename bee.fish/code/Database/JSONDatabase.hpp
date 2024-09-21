@@ -21,16 +21,14 @@ namespace BeeFishDatabase
 
         friend ostream& operator << (ostream& output, JSONDatabase& database)
         {
-            Path2JSON path(database, OBJECTS);
+            Path2JSON path(database);
             path.write(output, 0);
             return output;
         }
     
         friend istream& operator >> (istream& input, JSONDatabase& database)
         {
-            Path objects(database, OBJECTS);
-            Path properties(database, PROPERTIES);
-            JSON2Path json2Path(objects, properties);
+            JSON2Path json2Path(database);
             json2Path.read(input);
             return input;
         }

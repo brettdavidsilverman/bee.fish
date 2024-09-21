@@ -14,7 +14,6 @@ test:	$(OUTPUT)
 $(BUILD)/parser:
 	cd ../parser && make $(DEBUG) test
 
-debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -Og -g -D DEBUG
 debug:	$(OUTPUT) $(BUILD)/parser
@@ -37,7 +36,6 @@ trace:	$(OUTPUT)
 
 clean:
 	rm -f $(OUTPUT)
-	rm -f $(BUILD)/parser
 	rm -f *.o
 	rm -f a.out
 	rm -f json

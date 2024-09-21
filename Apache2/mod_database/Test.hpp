@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <bits/stdc++.h>
 #include "Miscellaneous/Miscellaneous.hpp"
+#include "ParseURI.hpp"
 
 namespace BeeFishApache2 {
 
@@ -14,6 +15,8 @@ namespace BeeFishApache2 {
 
    using namespace std::filesystem;
 
+   inline bool testParseURI();
+   inline bool testURIQuery(Database& db, const char* query);
    inline bool testAllFiles(string url, string directory);
    inline bool testFile(string url, string directory, string file, bool expect = true);
    
@@ -24,13 +27,63 @@ namespace BeeFishApache2 {
       string url = HOST;
      
       success = success &&
-         testAllFiles(url, TEST_DIRECTORY);
+         testParseURI();
          
+      success = success &&
+         testAllFiles(url, TEST_DIRECTORY);
+      
       outputSuccess(success);
       
       return success;
    }
 
+   bool testParseURI()
+   {
+      cout << "\t" << "Testing URIParser " << flush;
+      
+      bool success = true;
+      
+      Database db;
+      
+      JSON2Path json(db);
+      JSONParser parser(json);
+      parser.read("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\"}}");
+      parser.eof();
+      
+      success &= (parser.result() == true);
+      outputSuccess(success);
+
+      success &= testURIQuery(db, "this.name");
+      
+      
+      outputSuccess(success);
+      
+      return success;
+      
+   }
+   
+   bool testURIQuery(Database& db, const char* queryStr)
+   {
+      cout << "\t" << "Testing query " << queryStr << flush;
+      Path start(db);
+      Path objects = start[OBJECTS];
+      Path properties = start[PROPERTIES];
+      Query query(properties, &objects);
+      Parser parser(query);
+      std::stringstream stream(queryStr);
+      parser.read(stream);
+      parser.eof();
+      
+      cerr << "PARSER_RESULT " << parser.result() << endl;
+      
+      bool success =
+         (parser.result() == true);
+      
+      outputSuccess(success);
+      
+      return success;
+   }
+    
    std::optional<bool> testParser(Parser* parser) {
 
       parser->read(cin);

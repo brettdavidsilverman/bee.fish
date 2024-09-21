@@ -15,9 +15,9 @@ namespace BeeFishDatabase {
       public JSONParser
    {
    protected:
-      
-      Path _objects;
       Path _properties;
+      Path _objects;
+      
       vector<Path> _pathStack;
       vector<bool> _containerStack;
       vector<Size> _arrayIndexStack;
@@ -26,10 +26,10 @@ namespace BeeFishDatabase {
 
    public:
 
-      JSON2Path(const Path& objects, const Path& properties) :
+      JSON2Path(const Path& properties, const Path& objects ) :
          JSONParser(),
-         _objects(objects),
-         _properties(properties)
+         _properties(properties),
+         _objects(objects)
       {
          push_back_path(_objects);
          push_back_container(false);
@@ -37,8 +37,8 @@ namespace BeeFishDatabase {
       
       JSON2Path(Database& database) :
          JSON2Path(
-            Path(database)[OBJECTS],
-            Path(database)[PROPERTIES]
+            Path(database)[PROPERTIES],
+            Path(database)[OBJECTS]
          )
       {
       }

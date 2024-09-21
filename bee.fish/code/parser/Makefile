@@ -7,8 +7,7 @@ $(OUTPUT): $(DEPS)
 	
 test:	$(OUTPUT)
 	$(OUTPUT) -test
-	
-debug:	clean
+
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
 debug:	$(OUTPUT)

@@ -532,10 +532,10 @@ namespace BeeFishDatabase
       if (success)
       {
          MinMaxPath path = root["string"];
-         JSON2Path parser(path, root[PROPERTIES]);
+         JSON2Path parser(root[PROPERTIES], path);
          parser.read("\"Hello World\"");
          
-         cout << "\t\tParse string ";
+         cout << "\t\tParse string " << flush;
          success = success &&
             parser.result() == true;
          BeeFishMisc::outputSuccess(success);
@@ -569,7 +569,7 @@ namespace BeeFishDatabase
       if (success)
       {
          Path path = root["array"];
-         JSON2Path parser(path, root[PROPERTIES]);
+         JSON2Path parser(root[PROPERTIES], path);
          parser.read("[1,[]]");
          
          cout << "\tParse array ";
@@ -639,7 +639,7 @@ namespace BeeFishDatabase
       if (success) {
          cout << "\tInteger" << flush;
          Path path = root["integer"];
-         JSON2Path parser(path, root[PROPERTIES]);
+         JSON2Path parser(root[PROPERTIES], path);
          parser.read("1234");
          parser.eof();
          success = parser.matched();
@@ -677,7 +677,7 @@ namespace BeeFishDatabase
  
       Database database;
       Path path = database;
-      JSON2Path parser(path, Path(database)[PROPERTIES]);
+      JSON2Path parser(Path(database)[PROPERTIES], path);
       parser.read("[[]]");
       bool success = true;
       
@@ -728,7 +728,7 @@ namespace BeeFishDatabase
       
       Database database;
       Path path = database;
-      JSON2Path parser(path, Path(database)[PROPERTIES]);
+      JSON2Path parser(Path(database)[PROPERTIES], path);
       parser.read("[[1]]");
       bool success = true;
       
@@ -850,7 +850,7 @@ namespace BeeFishDatabase
       remove(tempFile);
       
       ifstream inputFile(file);
-      JSON2Path parser(root[file], root[PROPERTIES]);
+      JSON2Path parser(root[PROPERTIES], root[file]);
       parser.read(inputFile);
       parser.eof();
       inputFile.close();
@@ -860,7 +860,7 @@ namespace BeeFishDatabase
       if (success && expect)
       {
          ofstream outputFile(tempFile);
-         Path2JSON path(root[file], root[PROPERTIES]);
+         Path2JSON path(root[PROPERTIES], root[file]);
          outputFile << path;
          outputFile.close();
          

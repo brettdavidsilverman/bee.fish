@@ -19,7 +19,7 @@ namespace BeeFishJSON
       MinMaxPath _properties;
    public:
        
-      Path2JSON(const Path& objects, const Path& properties) :
+      Path2JSON(const Path& properties, const Path& objects) :
          MinMaxPath(objects),
          _properties(properties)
       {
@@ -27,8 +27,8 @@ namespace BeeFishJSON
        
       Path2JSON( Database& database) :
          Path2JSON(
-            Path(database)[OBJECTS],
-            Path(database)[PROPERTIES]
+            Path(database)[PROPERTIES],
+            Path(database)[OBJECTS]
          )
       {
       }
@@ -102,8 +102,8 @@ namespace BeeFishJSON
                  ++index)
             {
                Path2JSON item(
-                  path[index],
-                  Path(path, PROPERTIES)
+                  _properties,
+                  path[index]
                );
                   
                Size _tabCount = tabCount + 1;
@@ -155,7 +155,7 @@ namespace BeeFishJSON
                          << escape(key)
                       << "\": ";
                       
-                  Path2JSON value(path[index], _properties);
+                  Path2JSON value(_properties, path[index]);
                   
                   value.write(out, tabCount + 1);
                   

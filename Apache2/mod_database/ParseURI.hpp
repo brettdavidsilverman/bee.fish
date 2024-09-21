@@ -7,7 +7,7 @@ using namespace std;
 using namespace BeeFishDatabase;
 using namespace BeeFishParser;
 
-namespace BeeFishWebServer {
+namespace BeeFishApache2 {
     
    Debug debug;
    
@@ -117,7 +117,7 @@ namespace BeeFishWebServer {
             new Capture(
                new And(
                   new Alpha(),
-                  new Repeat<AlphaNumeric>()
+                  new Repeat<AlphaNumeric>(0)
                )
             );
       }
@@ -182,10 +182,11 @@ namespace BeeFishWebServer {
    public:
       Query(const Path& properties, Path* start) 
       {
-         _match = new And(
-            new Word("this"),
-            new PropertyPaths(properties, start)
-         );
+         _match =
+            new And(
+               new Word("this"),
+               new PropertyPaths(properties, start)
+            );
       }
       
      
@@ -215,11 +216,7 @@ namespace BeeFishWebServer {
          Query query(properties, &path);
          Parser parser(query);
          parser.read(_args.decodeURI());
-            
-         if (query.result() == nullopt)
-         {
-            parser.eof();
-         }
+         parser.eof();
 
          if (query.result() != true)
             throw runtime_error("Invalid property");

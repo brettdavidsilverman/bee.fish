@@ -1,34 +1,28 @@
 all:
 	- mkdir build
 	cd code && make $(DEBUG)
-
-install:
-	- mkdir build
-	cd code/DBServer && make install
-
-test:
-	-  mkdir build
-	cd code && make $(DEBUG) test
-
-id:
-	- mkdir build
-	cd code/Id && make $(DEBUG)
 	
-power-encoding:
+test:
 	- mkdir build
-	cd code/power-encoding && make $(DEBUG)
+	cd code && make $(DEBUG) test
 	
 b-string:
 	- mkdir build
 	cd code/b-string && make $(DEBUG)
 	
+power-encoding:
+	- mkdir build
+	cd code/power-encoding && make $(DEBUG)
+	
+id:
+	- mkdir build
+	cd code/Id && make $(DEBUG)
+	
+
 parser:
 	-  mkdir build
 	cd code/parser && make $(DEBUG)
 
-PowerEncoding:
-	-  mkdir build
-	cd code/PowerEncoding && make $(DEBUG)
 
 json:
 	-  mkdir build
@@ -60,7 +54,6 @@ clean:
 	rm -f large2b.json
 	rm -f large2.json
 
-debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	PORT = 8000

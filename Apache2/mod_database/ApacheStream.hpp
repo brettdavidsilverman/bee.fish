@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace BeeFishWebServer {
+namespace BeeFishApache2 {
 
    class ApacheStream :
       private std::streambuf,

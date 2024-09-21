@@ -51,7 +51,7 @@
 #include "ParseURI.hpp"
 
 using namespace BeeFishDatabase;
-using namespace BeeFishWebServer;
+using namespace BeeFishApache2;
 using namespace BeeFishJSON;
 using namespace BeeFishMisc;
 
