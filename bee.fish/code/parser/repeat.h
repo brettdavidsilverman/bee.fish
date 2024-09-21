@@ -68,13 +68,14 @@ namespace BeeFishParser
 				(_item->_result == false) ||
 				(!matched))
 			{
+                matched = false;
 				if (_matchedCount >= _minimum)
 				{
 					success();
 				}
 				else
 				{
-					matched = false;
+					
 					fail();
 				}
 			}

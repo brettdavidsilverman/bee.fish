@@ -26,7 +26,6 @@ namespace BeeFishApache2 {
       virtual void success()
       override
       {
-               
          if (_properties.contains(value()))
          {
             Path property =
@@ -41,6 +40,7 @@ namespace BeeFishApache2 {
                   Size position = -1;
                   property.getData<Size>(position);
                   *_path << position;
+                  Match::success();
                   return;
                }
             
@@ -113,6 +113,16 @@ namespace BeeFishApache2 {
       Identifier(const Path& properties, Path* path) :
          IdentifierPath(properties, path)
       {
+         
+      }
+      
+      virtual void setup(Parser* parser)
+      override
+      {
+         
+         if (_parser)
+            return;
+            
          _match =
             new Capture(
                new And(
@@ -120,33 +130,87 @@ namespace BeeFishApache2 {
                   new Repeat<AlphaNumeric>(0)
                )
             );
+            
+         _match->setup(parser);
+         
+         Match::setup(parser);
+         
       }
+      
+      virtual void eof(Parser* parser)
+      override
+      {
+         setup(parser);
+         
+         if (_match->result() == nullopt)
+         {
+            _match->eof(parser);
+            
+            if (_match->result() != false) 
+               success();
+            else
+               fail();
+         }
+      }
+      
       
    };
    
    class PropertyPath :
       public Match
    {
+   protected:
+      Path _properties;
+      Path* _start;
+      
    public:
       PropertyPath() {
          //assert(false);
       }
       
-      PropertyPath(const Path& properties, Path* start )
+      PropertyPath(const Path& properties, Path* start)
+         :
+            _properties(properties),
+            _start(start)
       {
+      }
+     
+      virtual void setup(Parser* parser)
+      override
+      {
+         if (_parser)
+            return;
+            
          _match = new Or(
             new And(
                new Character('['),
-               new QuotedIdentifier(properties, start),
+               new QuotedIdentifier(_properties, _start),
                new Character(']')
             ),
             new And(
                new Character('.'),
-               new Identifier(properties, start)
+               new Identifier(_properties, _start)
             )
             
          );
+         
+         _match->setup(parser);
+         
+         Match::setup(parser);
       }
+      
+      virtual void eof(Parser* parser)
+      override
+      {
+         setup(parser);
+         
+         _match->eof(parser);
+         if (_match->result() == true)
+            success();
+         else if (_match->result() == false)
+            fail();
+      }
+      
    };
    
    class PropertyPaths : public Repeat<PropertyPath>
@@ -156,7 +220,7 @@ namespace BeeFishApache2 {
       Path* _start;
    public:
       PropertyPaths(const Path& properties, Path* start) :
-         Repeat<PropertyPath>(1),
+         Repeat<PropertyPath>(0),
          _properties(properties),
          _start(start)
       {
@@ -174,19 +238,76 @@ namespace BeeFishApache2 {
          return item;
       }
       
+      virtual void eof(Parser* parser)
+      override
+      {
+         setup(parser);
+         
+         if (result() != false)
+         {
+            _item->eof(parser);
+            if (_item->result())
+               success();
+            else
+               fail();
+         }
+      }
+      
      
    };
    
    class Query : public Match
    {
+     
+   protected:
+      Word* _wordThis;
+      PropertyPaths* _propertyPaths;
+      protected:
+      Path _properties;
+      Path* _start;
+      
    public:
       Query(const Path& properties, Path* start) 
+         :
+         _properties(properties),
+         _start(start)
       {
+         
+      }
+      
+      virtual void setup(Parser* parser)
+      override
+      {
+         if (_parser)
+            return;
+            
          _match =
             new And(
-               new Word("this"),
-               new PropertyPaths(properties, start)
+               _wordThis = new Word("this"),
+               _propertyPaths =
+                  new PropertyPaths(_properties, _start)
             );
+            
+         _match->setup(parser);
+         
+         Match::setup(parser);
+      }
+      
+      virtual void eof(Parser* parser)
+      override
+      {
+         setup(parser);
+         
+         if (_wordThis->result() == true)
+         {
+            _propertyPaths->eof(parser);
+            if (_propertyPaths->result() == true)
+               success();
+            else
+               fail();
+         }
+         else
+            fail();
       }
       
      

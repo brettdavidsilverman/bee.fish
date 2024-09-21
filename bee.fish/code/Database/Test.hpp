@@ -534,7 +534,7 @@ namespace BeeFishDatabase
          MinMaxPath path = root["string"];
          JSON2Path parser(root[PROPERTIES], path);
          parser.read("\"Hello World\"");
-         
+         parser.eof();
          cout << "\t\tParse string " << flush;
          success = success &&
             parser.result() == true;

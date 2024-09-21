@@ -90,7 +90,7 @@ namespace BeeFishParser {
          
          bool matched = matchCharacter(character);
          
-        if (_result == true)
+         if (_result == true)
             success();
          else if (_result == false)
             fail();
@@ -118,11 +118,17 @@ namespace BeeFishParser {
       
       virtual void success()
       {
+         if (_match)
+            _match->_result = true;
+            
          _result = true;
       }
    
       virtual void fail()
       {
+         if (_match)
+            _match->_result = false;
+            
          _result = false;
       }
             

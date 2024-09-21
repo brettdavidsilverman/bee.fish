@@ -55,9 +55,13 @@ namespace BeeFishApache2 {
       
       if (success)
       {
+         
+       
+         success &= testURIQuery(db, "this.name.first", "\"Bee\"");
          success &= testURIQuery(db, "this[\"name\"][\"first\"]", "\"Bee\"");
          success &= testURIQuery(db, "this[\"name\"].first", "\"Bee\"");
-         success &= testURIQuery(db, "this.name.first", "\"Bee\"");
+         success &= testURIQuery(db, "this.name[\"first\"]", "\"Bee\"");
+         
          outputSuccess(success);
       }
       
@@ -78,13 +82,12 @@ namespace BeeFishApache2 {
       parser.eof();
       
       bool success =
-         (parser.result() == true);
-      
+         (query.result() == true);
+         
       if (success)
       {
          Path2JSON path(properties, objects);
          std::stringstream stream;
-         cerr << path;
          stream << path;
          success = (stream.str() == expected);
       }
