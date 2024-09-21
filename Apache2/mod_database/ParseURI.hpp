@@ -197,7 +197,7 @@ namespace BeeFishApache2 {
 
       Path path(database);
       path = path[HOST]; //[clientIP];
-      Path properties = path[PROPERTIES];
+      Path properties = path[HOST][PROPERTIES];
 
       string _uri = uri;
       

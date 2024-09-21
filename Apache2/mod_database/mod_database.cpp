@@ -195,7 +195,10 @@ static void outputJSON(Database& database, Path path, request_rec *r)
    ap_set_content_type(
        r, "application/json; charset=utf-8");
 
-   Path2JSON index(path, Path(database)[HOST][PROPERTIES]);
+   Path properties =
+      Path(database)[HOST][PROPERTIES];
+      
+   Path2JSON index(properties, path);
    ApacheStream stream(r);
    stream << index;
    stream.flush();
@@ -232,7 +235,10 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    int pageSize = getPageSize();
    char buffer[pageSize];
    Size pageCount = 0;
-   JSON2Path index(path, Path(database)[HOST][PROPERTIES]);
+   Path properties
+      = Path(database)[HOST][PROPERTIES];
+      
+   JSON2Path index(properties, path);
 
    MinMaxPath document = path["document"];
 

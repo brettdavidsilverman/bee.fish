@@ -16,7 +16,7 @@ namespace BeeFishApache2 {
    using namespace std::filesystem;
 
    inline bool testParseURI();
-   inline bool testURIQuery(Database& db, const char* query);
+   inline bool testURIQuery(Database& db, const std::string& query, const std::string& expected);
    inline bool testAllFiles(string url, string directory);
    inline bool testFile(string url, string directory, string file, bool expect = true);
    
@@ -46,23 +46,26 @@ namespace BeeFishApache2 {
       Database db;
       
       JSON2Path json(db);
-      JSONParser parser(json);
-      parser.read("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\"}}");
-      parser.eof();
+      std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\"}}");
+      json.read(stream);
+      json.eof();
       
-      success &= (parser.result() == true);
+      success &= (json.result() == true);
       outputSuccess(success);
-
-      success &= testURIQuery(db, "this.name");
       
-      
-      outputSuccess(success);
+      if (success)
+      {
+         success &= testURIQuery(db, "this[\"name\"][\"first\"]", "\"Bee\"");
+         success &= testURIQuery(db, "this[\"name\"].first", "\"Bee\"");
+         success &= testURIQuery(db, "this.name.first", "\"Bee\"");
+         outputSuccess(success);
+      }
       
       return success;
       
    }
    
-   bool testURIQuery(Database& db, const char* queryStr)
+   bool testURIQuery(Database& db, const std::string& queryStr, const std::string& expected)
    {
       cout << "\t" << "Testing query " << queryStr << flush;
       Path start(db);
@@ -74,10 +77,17 @@ namespace BeeFishApache2 {
       parser.read(stream);
       parser.eof();
       
-      cerr << "PARSER_RESULT " << parser.result() << endl;
-      
       bool success =
          (parser.result() == true);
+      
+      if (success)
+      {
+         Path2JSON path(properties, objects);
+         std::stringstream stream;
+         cerr << path;
+         stream << path;
+         success = (stream.str() == expected);
+      }
       
       outputSuccess(success);
       

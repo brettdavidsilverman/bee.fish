@@ -12,7 +12,7 @@
 #endif
 
 #ifndef DOMAIN
-   #define DOMAIN bee.fish
+   #define DOMAIN "bee.fish"
 #endif
 
 #define DATABASE_FILENAME HOME_DIR "/data/" DOMAIN ".data"

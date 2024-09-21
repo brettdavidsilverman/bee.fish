@@ -50,9 +50,7 @@ namespace BeeFishJSON
          if (isDeadEnd())
             return;
        
-         Type type = 
-            MinMaxPath(*this)
-            .value<Type>();
+         Type type = value<Type>();
             
          MinMaxPath path = (*this)[type];
             
