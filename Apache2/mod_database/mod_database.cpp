@@ -195,8 +195,8 @@ static void outputJSON(Database& database, Path path, request_rec *r)
    ap_set_content_type(
        r, "application/json; charset=utf-8");
 
-   Path properties =
-      Path(database)[HOST][PROPERTIES];
+   Path root(database);
+   Path properties = root[HOST][PROPERTIES];
       
    Path2JSON index(properties, path);
    ApacheStream stream(r);

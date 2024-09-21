@@ -53,7 +53,7 @@ namespace BeeFishApache2 {
          stream
             << "Invalid property"
             << " "
-            << "'" << value() << "'";
+            << "\"" << escape(value()) << "\"";
         
          throw runtime_error(stream.str());
         
@@ -316,9 +316,9 @@ namespace BeeFishApache2 {
    Path parseURI(Database& database, const char* clientIP, const char* uri, const char* args) {
       
 
-      Path path(database);
-      path = path[HOST]; //[clientIP];
-      Path properties = path[HOST][PROPERTIES];
+      Path root(database);
+      Path path = root[HOST];
+      Path properties = root[HOST][PROPERTIES];
 
       string _uri = uri;
       
