@@ -415,7 +415,7 @@ namespace BeeFishDatabase
          success &= (contains == false);
          outputSuccess(success);
       }
-////      
+
       if (success)
       {
          cout << "\tTesting string contains" << flush;
@@ -442,7 +442,6 @@ namespace BeeFishDatabase
          outputSuccess(success);
       }
 
-////
       if (success)
       {
          cout << "\tTesting nested keys" << flush;
@@ -483,6 +482,34 @@ namespace BeeFishDatabase
    
       }
      
+      if (success)
+      {
+         cout << "\tTesting latest string 1" << flush;
+
+         MinMaxPath data = start["skip10.1"];
+         data["hello"];
+         data["hello world"];
+         std::string string = data.latest<std::string>();
+
+         success &= (string == "hello world");
+         outputSuccess(success);
+
+      }
+      
+      if (success)
+      {
+         cout << "\tTesting latest string 2" << flush;
+
+         MinMaxPath data = start["skip10.2"];
+         data["hello world"];
+         data["hello"];
+         
+         std::string string = data.latest<std::string>();
+
+         success &= (string == "hello");
+         outputSuccess(success);
+
+      }
       
       success = success &&
          testPath();

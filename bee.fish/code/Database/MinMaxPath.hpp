@@ -95,19 +95,17 @@ namespace BeeFishDatabase {
 
          while (!branch.isDeadEnd())
          {
-            bool bit;
-
+            bool bit = stack.last()._bit;
             index = 0;
 
-            if (branch._right) {
-               index = branch._right;
-            }
-            else if (branch._left) {
+            if (bit == 0) {
                index = branch._left;
+            }
+            else if (bit == 1) {
+               index = branch._right;
             }
             else
                assert(false);
-
 
             branch = getBranch(index);
             
@@ -130,6 +128,65 @@ namespace BeeFishDatabase {
             
          }
       }
+      
+      void latest(
+         Index index,
+         Stack& stack
+      ) const
+      {
+         Branch branch =
+            getBranch(index);
+
+         while (!branch.isDeadEnd())
+         {
+            bool bit = stack.last()._bit;
+            index = 0;
+
+            if (bit == 0) {
+               index = branch._left;
+            }
+            else if (bit == 1) {
+               index = branch._right;
+            }
+            else
+               assert(false);
+
+            branch = getBranch(index);
+            
+            if (branch._left && branch._right)
+            {
+               if (branch._right > branch._left) {
+                  bit = 1;
+               }
+               else {
+                  bit = 0;
+               }
+            }
+            else if (branch._right) {
+               bit = 1;
+            }
+            else if (branch._left) {
+               bit = 0;
+            }
+            else
+               assert(false);
+
+
+            branch = getBranch(index);
+            
+            stack.push_back(
+               StackValue(
+                  index,
+                  bit
+               )
+            );
+
+            if (stack.count() == 0)
+               break;
+            
+         }
+      }
+      
 
    public:
 
@@ -160,6 +217,20 @@ namespace BeeFishDatabase {
          stack >> maximum;
          return maximum;
       }
+      
+      template<typename T>
+      T latest(
+         Stack& stack
+      ) const
+      {
+         if (stack.size() == 0)
+            stack.push_back(StackValue(_index, 1));
+
+         latest(_index, stack);
+         T _latest;
+         stack >> _latest;
+         return _latest;
+      }
 
       template<typename T>
       T min() const 
@@ -175,6 +246,14 @@ namespace BeeFishDatabase {
          Stack stack(*this);
          T maximum = max<T>(stack);
          return maximum;
+      }
+      
+      template<typename T>
+      T latest() const 
+      {
+         Stack stack(*this);
+         T _latest = latest<T>(stack);
+         return _latest;
       }
 
       template<typename T>
