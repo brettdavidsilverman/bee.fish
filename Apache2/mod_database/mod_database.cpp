@@ -78,9 +78,14 @@ static int database_handler(request_rec *r)
          << HOST 
          << r->uri;
          
+   std::string args;
    if (r->args && strlen(r->args) > 0)
+   {
+      if (strcmp(r->args, "document") != 0)
+         args = r->args;
       debug << "?" << r->args;
-      
+   }
+   
    debug << "\r\n";
    debug.flush();
     
@@ -110,7 +115,7 @@ static int database_handler(request_rec *r)
          database,
          r->connection->client_ip,
          r->uri,
-         r->args
+         (args.length() ? args.c_str() : nullptr)
       );
    }
    catch (runtime_error& error)
@@ -156,11 +161,7 @@ static int database_handler(request_rec *r)
    }
    else if (!strcmp(r->method, "POST")) {
       
-      if (!path.isDeadEnd())
-      {
-         //path.clear();
-      }
-      
+
       inputJSON(database, path, r);
 
 
@@ -236,6 +237,11 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    char buffer[pageSize];
    Size pageCount = 0;
    
+   if (!path.isDeadEnd())
+   {
+      path.clear();
+   }
+   
    MinMaxPath document = path["document"];
 
    debug << now()
@@ -269,10 +275,11 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    debug.flush();
          
    optional<bool> read = nullopt;
+   
    Path properties
       = Path(database)[HOST][PROPERTIES];
       
-   JSON2Path index(properties, path);
+   JSON2Path index(properties, path);
 
    for (Size pageIndex = 0; pageIndex < pageCount; ++pageIndex)
    {
@@ -325,7 +332,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    else
    {
 
-     // path.clear();
+      path.clear();
 
       Variable error =
           index.getErrorMessage();

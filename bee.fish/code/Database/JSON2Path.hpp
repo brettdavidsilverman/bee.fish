@@ -66,15 +66,15 @@ namespace BeeFishDatabase {
          }
          else if (_keyStack.size()) {
             BString& key = topKey();
-            Size& count = topObjectPropertyIndex();
+            Size& position = topObjectPropertyIndex();
             Path property
                = _properties[key];
             if (!property.hasData())
             {
                property.setData(key);
             }
-            property[path].setData(count);
-            path = path[count++];
+            property[path.index()].setData(position);
+            path = path[position++];
             path.setData(property.index());
             pop_back_key();
          }

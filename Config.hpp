@@ -15,7 +15,7 @@
    #define DOMAIN "bee.fish"
 #endif
 
-#define DATABASE_FILENAME HOME_DIR "/data/" DOMAIN ".data"
+#define DATABASE_FILENAME DATA_DIR "/" DOMAIN ".data"
 
 #define HOST "https://" DOMAIN
 

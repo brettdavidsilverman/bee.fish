@@ -40,7 +40,7 @@ int main(int argc, const char* argv[])
          return 1;
    }
    
-   string filename = "test.data";
+   string filename = DATA_DIR "/test.data";
    Database database(filename);
    cout << database << endl;
    

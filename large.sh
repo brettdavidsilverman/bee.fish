@@ -2,36 +2,39 @@ rm /home/bee/data/dev.bee.fish.data
 set -e
 make
 make restart
+DOMAIN="https://bee.fish"
+echo "$DOMAIN"
+
 echo "Uploading large.json"
 curl -X POST \
-   https://dev.bee.fish/large-test.json \
+   "$DOMAIN/large-test.json" \
    -H "Content-Type: application/json; charset=utf-8" \
    -H "Expect: " \
-   -T /home/bee/bee.fish/large.json -s -k > /dev/null
+   -T large.json -s -k > /dev/null
 
 echo "Downloading large-test.json?document"
 
-curl https://dev.bee.fish/large-test.json?document -s -k > large2.json
+curl "$DOMAIN/large-test.json?document" -s -k > large2.json
 
 echo "Comparing large.json and large2.json"
 
-diff /home/bee/bee.fish/large.json large2.json
+diff large.json large2.json
 
 echo "Downloading large2a.json"
 
-curl https://dev.bee.fish/large-test.json -s -k > large2a.json
+curl "$DOMAIN/large-test.json" -s -k > large2a.json
 
 echo "Uploading large2a.json"
 
 curl -X POST \
-   https://dev.bee.fish/large2a.json \
+   "$DOMAIN/large-test-2.json" \
    -H "Content-Type: application/json; charset=utf-8" \
    -H "Expect: " \
    -T large2a.json -s -k > /dev/null
    
 echo "Downloading large2b.json"
 
-curl https://dev.bee.fish/large2a.json -s -k > large2b.json
+curl "$DOMAIN/large-test-2.json" -s -k > large2b.json
 
 echo "Comparing large2a.json and large2b.json"
 

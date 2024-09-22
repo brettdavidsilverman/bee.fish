@@ -66,6 +66,7 @@ if (window.location.search) {
    );
    url.value =
       _url;
+   
 }
 
 
@@ -133,6 +134,10 @@ function postJSON(url, json) {
    return response;
 }
 
+window.onload = function()
+{
+   encodedURL.href = url.value
+}
 
       </script>
 
