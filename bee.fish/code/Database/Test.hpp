@@ -377,14 +377,18 @@ namespace BeeFishDatabase
 
       if (success)
       {
-         cout << "\tTesting string value" << flush;
+         cout << "\tTesting string min,latest,value " << flush;
 
          MinMaxPath data = start["skip7"];
          data["one"];
          data["two"];
          data["three"];
-         string first = data.value<string>();
-         success &= (first == "one");
+         string min = data.min<string>();
+         success &= (min == "one");
+         string latest = data.latest<string>();
+         success &= (latest == "three");
+         string value = data.value<string>();
+         success &= (value == latest);
          outputSuccess(success);
       }
 

@@ -58,7 +58,7 @@ url.focus();
 
 document.getElementById("h1").innerText =
    window.location.hostname + ".2";
-   
+
 if (window.location.search) {
    // fill out form from search
    var _url = decodeURI(
@@ -118,11 +118,11 @@ function postJSON(url, json) {
          }
       ).then(
          function (response) {
-            return response.json();
+            return response.text();
          }
       ).then(
          function (json) {
-            alert("Ok");
+            alert(json);
          }
       ).catch(
          function(error) {

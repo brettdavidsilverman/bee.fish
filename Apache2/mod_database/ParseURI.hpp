@@ -96,12 +96,14 @@ namespace BeeFishApache2 {
       }
    };
    
-   class AlphaNumeric : public Or
+   class AlphaNumeric : public Not
    {
    public:
-      AlphaNumeric() : Or(
-         new Alpha(),
-         new Numeric()
+      AlphaNumeric() : Not(
+         new Or(
+            new Character('.'),
+            new Character('[')
+         )
       )
       {
       }
@@ -116,7 +118,6 @@ namespace BeeFishApache2 {
          _match =
             new Capture(
                new And(
-                  new Alpha(),
                   new Repeat<AlphaNumeric>(0)
                )
             );

@@ -158,7 +158,7 @@ static int database_handler(request_rec *r)
       
       if (!path.isDeadEnd())
       {
-         path.clear();
+         //path.clear();
       }
       
       inputJSON(database, path, r);
@@ -235,11 +235,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    int pageSize = getPageSize();
    char buffer[pageSize];
    Size pageCount = 0;
-   Path properties
-      = Path(database)[HOST][PROPERTIES];
-      
-   JSON2Path index(properties, path);
-
+   
    MinMaxPath document = path["document"];
 
    debug << now()
@@ -273,7 +269,11 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    debug.flush();
          
    optional<bool> read = nullopt;
-   
+   Path properties
+      = Path(database)[HOST][PROPERTIES];
+      
+   JSON2Path index(properties, path);
+
    for (Size pageIndex = 0; pageIndex < pageCount; ++pageIndex)
    {
 
@@ -325,7 +325,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    else
    {
 
-      path.clear();
+     // path.clear();
 
       Variable error =
           index.getErrorMessage();

@@ -313,7 +313,6 @@ namespace BeeFishDatabase {
 
          // Follow the next min from
          // this right
-
          min(index, stack);
 
          // Get this value
@@ -330,7 +329,7 @@ namespace BeeFishDatabase {
          if (isDeadEnd())
             return T();
             
-         return min<T>();
+         return latest<T>();
       }
 
       
