@@ -35,7 +35,7 @@ namespace BeeFishTest
    {
       bool ok = true;
       
-      file = string(FILE_SYSTEM_PATH) + "/" + string(file);
+      file = string(HOME_DIR) + "/" + string(file);
 
       if (!exists(file)) {
          cout << "File not found: " << file << endl;
@@ -45,6 +45,7 @@ namespace BeeFishTest
       // open the sample session file
       ifstream input(file);
       parser.read(input);
+      parser.eof();
       
       ok &= testResult(
          label,
@@ -119,20 +120,7 @@ namespace BeeFishTest
       
       return ok;
    }
-   /*
-   inline bool testMatch(
-      BString label,
-      BeeFishJSON::JSON* match,
-      string text,
-      optional<bool> result = false,
-      BString expected = {}
-   ) 
-   {
-      BeeFishJSON::JSONParser parser(*match);
-     // Parser parser(*match);
-      return testMatch(parser, label, match, text, result, expected);
-   }
-   */
+   
    inline bool testMatch(
       BString label,
       Match* match,
@@ -157,20 +145,7 @@ namespace BeeFishTest
       delete match;
       return ok;
    }
-   /*
-   inline bool testMatchDelete(
-      BString label,
-      BeeFishJSON::JSON* json,
-      string text,
-      optional<bool> result = false,
-      BString expected = {}
-   )
-   {
-      bool ok = testMatch(label, json, text, result, expected);
-      delete json;
-      return ok;
-   }
-   */
+   
    inline bool testValue(
       string expected,
       string value

@@ -36,6 +36,7 @@ namespace BeeFishJSON
          Value* _value;
       
          Invoke* _invokeKey;
+         Invoke* _invokeSeperator;
          Invoke* _invokeValue;
          
       public:
@@ -96,7 +97,8 @@ namespace BeeFishJSON
          return keyValue;
       }
 
-      virtual void onkey(Key* key) {
+      virtual void onsetupkeyvalue(Key* key, Value* value) {
+         
       }
     
       virtual void onkeyvalue(Key* key, Value* value) {
@@ -135,7 +137,7 @@ namespace BeeFishJSON
       _invokeKey = new Invoke(
          _key = new Key(),
          [this](Match* match) {
-            _set->onkey(_key);
+            _set->onsetupkeyvalue(_key, _value);
             return true;
          }
       );
@@ -143,6 +145,15 @@ namespace BeeFishJSON
       _seperator =
          new KeyValueSeperator();
          
+      _invokeSeperator = new Invoke(
+         _seperator,
+         [this](Match* match)
+         {
+             _set->onsetupkeyvalue(_key, _value);
+             return true;
+         }
+      );
+      
       _invokeValue = new Invoke(
          _value = new Value(),
          [this](Match* match) {

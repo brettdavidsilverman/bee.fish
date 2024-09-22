@@ -161,9 +161,8 @@ namespace BeeFishJSON
       
       StringCharacters stringCharacters;
       ok &= testMatch("String characters", &stringCharacters, "hello world\\\\", true, "hello world\\");
-      ok &= testMatchDelete("String", new String(), "\"hello world\"", true, "hello world");
       
-
+      ok &= testMatchDelete("String", new String(), "\"hello world\"", true, "hello world");
       ok &= testMatchDelete("Empty string", new JSON(), "\"\"", true, "");
       ok &= testMatchDelete("Simple string", new JSON(), "\"hello\"", true, "hello");
       ok &= testMatchDelete("Unquoted", new JSON(), "hello", false);
@@ -593,7 +592,58 @@ assert(ok);
       return ok;
    }
    
+#ifdef SERVER
+   inline bool testStreams() 
+   {
       
+      cout << "Streams" << endl;
+      
+      bool ok = true;
+
+      JSON jsonImage;
+      JSONParser parser(jsonImage);
+
+      Size size = 0;
+      parser.streamValue("image",
+         [&size](const Data& buffer) {
+            size += buffer.size();
+         }
+      );
+
+      bool secretOk = false;
+      parser.invokeValue("secret",
+         [&secretOk](const BString& key, JSON& json) {
+            cerr << "SECRET KEY " << key << endl;
+            cerr << "SECRET VALUE " << json.value() << endl;
+            secretOk = (key == "secret") && (json.value() == "mysecret");
+         }
+      );
+
+      ok &= testFile(
+         parser,
+         "JSON with buffered image",
+         "bee.fish/code/json/tests/stream.json",
+         jsonImage,
+         true
+      );
+
+      ok &= testResult(
+         "JSON stream image",
+         size > getPageSize()
+      );
+      
+      ok &= testResult(
+         "JSON with invoke secret",
+         secretOk
+      );
+
+      cout << endl;
+      
+      return ok;
+   }
+#endif
+
+
 }
 
 #endif

@@ -296,6 +296,35 @@ namespace BeeFishDatabase {
 
          }
       }
+      
+      virtual void unlockAll() {
+
+         std::queue<Index> queue;
+         queue.push(0);
+
+         while (queue.size()) 
+         {
+            Index index = queue.front();
+            queue.pop();
+
+            Branch branch = getBranch(index);
+
+            if (branch._locked)
+            {
+               cout << "Unlocking " << index << endl;
+               branch._locked = false;
+               setBranch(index, branch);
+               
+            }
+
+            if (branch._left)
+               queue.push(branch._left);
+
+            if (branch._right)
+               queue.push(branch._right);
+
+         }
+      }
 
       friend ostream& operator <<
       (ostream& out, const Database& db)

@@ -107,6 +107,7 @@ static int database_handler(request_rec *r)
    {
       return DECLINED;
    }
+   return DECLINED;
     
    Path path;
    
@@ -115,7 +116,7 @@ static int database_handler(request_rec *r)
          database,
          r->connection->client_ip,
          r->uri,
-         (args.length() ? args.c_str() : nullptr)
+         args.c_str()
       );
    }
    catch (runtime_error& error)

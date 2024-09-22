@@ -40,6 +40,18 @@ int main(int argc, const char* argv[])
          return 1;
    }
    
+   bool unlock =
+      (hasArg(argc, argv, "-unlock") != -1);
+
+   
+   if (unlock)
+   {
+      cout << "Unlocking " << DATABASE_FILENAME << endl;
+      Database db(DATABASE_FILENAME);
+      db.unlockAll();
+      return 0;
+   }
+   
    string filename = DATA_DIR "/test.data";
    Database database(filename);
    cout << database << endl;

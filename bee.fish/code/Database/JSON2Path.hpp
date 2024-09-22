@@ -198,11 +198,11 @@ namespace BeeFishDatabase {
          
       }
       
-      virtual void onobjectkey(BString& key)
+      virtual void onobjectkey(BeeFishJSON::Object* object, ObjectKey* key)
       override
       {
-         push_back_key(key);
-         key.clear();
+         push_back_key(key->value());
+         //key.clear();
       }
       
       virtual void onendobject(JSON* match)

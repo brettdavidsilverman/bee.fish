@@ -223,7 +223,7 @@ namespace BeeFishDatabase {
       string sha3() const;
       
 
-      inline static Data fromRandom(
+      inline static BeeFishBString::Data fromRandom(
          size_t byteCount
       )
       {
@@ -243,7 +243,7 @@ namespace BeeFishDatabase {
          
          }
       
-         return Data(buffer, byteCount, true);
+         return BeeFishBString::Data(buffer, byteCount, true);
       }
 #endif
 

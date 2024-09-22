@@ -11,9 +11,6 @@
 #include "../power-encoding/power-encoding.h"
 #include "../Miscellaneous/Miscellaneous.hpp"
 
-
-#include "b-string.h"
-
 using namespace BeeFishPowerEncoding;
 using namespace BeeFishMisc;
 
@@ -22,16 +19,17 @@ namespace BeeFishBString {
    typedef std::vector<unsigned char> Bytes;
 
    class BStream :
-     private std::streambuf,
+      private std::streambuf,
       public std::ostream
    {
-   protected:
-      Bytes  _bytes;
-      size_t _totalSize = 0;
    public:
       typedef std::function<void(const Data& buffer)> OnBuffer;
       OnBuffer _onbuffer = nullptr;
       size_t _bufferSize;
+   protected:
+      Bytes  _bytes;
+      size_t _totalSize = 0;
+   
    public:
       
       BStream(
@@ -45,14 +43,16 @@ namespace BeeFishBString {
 
       BStream(const BStream& copy) :
          std::ostream(this),
-         _bytes(copy._bytes),
          _onbuffer(copy._onbuffer),
-         _bufferSize(copy._bufferSize)
+         _bufferSize(copy._bufferSize),
+         _bytes(copy._bytes)
+         
       {
          _bytes.reserve(_bufferSize);
       }
 
-      virtual ~BStream() {
+      virtual ~BStream()
+      {
       }
 
 
@@ -62,69 +62,71 @@ namespace BeeFishBString {
          return 0;
       }
 
-      size_t size() {
+      size_t size()
+      {
          return _bytes.size();
       }
       
-      virtual void push_back(unsigned char c) {
+      virtual void push_back(unsigned char c)
+      {
          _bytes.push_back(c);
          if (size() >= _bufferSize)
             onBuffer();
       }      
 
-      virtual void flush() {
+      virtual void flush()
+      {
          if (size() > 0)
             onBuffer();
       }
 
-      virtual void setOnBuffer(OnBuffer onbuffer) {
+      virtual void setOnBuffer(OnBuffer onbuffer)
+      {
          _onbuffer = onbuffer;
       }
 
-      virtual void write(const Data& data) {
+      virtual void write(const Data& data) 
+      {
          write((const char*)data._data, data.size());
       }
 
-      virtual void write(const char* data, size_t size) {
-         for (size_t i = 0; i < size; ++i) {
+      virtual void write(const char* data, size_t size)
+      {
+         for (size_t i = 0; i < size; ++i)
+         {
             push_back((char)data[i]);
          }
       }
 
-      inline friend BStream& operator << (BStream& out, std::string value) {
+      inline friend BStream& operator << (BStream& out, std::string value)
+      {
          const Data data(value);
          out.write(data);
          return out;
       }
 
-      inline friend BStream& operator << (BStream& out, const char* value) {
+      inline friend BStream& operator << (BStream& out, const char* value) 
+      {
          for (const char *pc = value; *pc != 0; ++pc) {
             out.push_back(*pc);
          }
          return out;
       }
-/*
-      inline friend BStream& operator << (BStream& out, BeeFishBString::Character character) {
-         const std::string chars = getChars(character);
-         
-         for (const char c : chars)
-            out.push_back(c);
 
-         return out;
-      }
-*/
-
-      inline friend BStream& operator << (BStream& out, const BeeFishBString::BString& bstring) {
+      inline friend BStream& operator << (BStream& out, const BeeFishBString::BString& bstring) 
+      {
          (ostream&)out << bstring;
          return out;
       }
 
-      inline friend BStream& operator << (BStream& out, int value) {
+      inline friend BStream& operator << (BStream& out, int value) 
+      {
          (ostream&)out << value;
          return out;
       }
 
-      inline friend BStream& operator << (BStream& out, size_t value) {
+      inline friend BStream& operator << (BStream& out, size_t value) 
+      {
          (ostream&)out << value;
          return out;
       }

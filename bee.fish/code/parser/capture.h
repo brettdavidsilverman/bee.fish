@@ -6,6 +6,7 @@
 #include "../Miscellaneous/Optional.hpp"
 #include <sstream>
 #include "match.h"
+#include "invoke.h"
 
 using namespace std;
 
@@ -25,6 +26,19 @@ namespace BeeFishParser {
       Capture(Match* match) :
          Match(match)
       {
+      }
+      
+      Capture(Match* match, BString& captured)
+      {
+         _match = new Invoke(
+            match,
+            [&captured](Match* match)
+            {
+               captured = match->value();
+               return true;
+            }
+         );
+               
       }
       
       virtual ~Capture() {

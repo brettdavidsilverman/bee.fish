@@ -255,7 +255,7 @@ namespace BeeFishApache2 {
          }
       }
 
-      if (args) {
+      if (args && strlen(args)) {
          BString _args = args;
          Query query(properties, &path);
          Parser parser(query);

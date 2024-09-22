@@ -7,7 +7,7 @@
 #include "../power-encoding/power-encoding.h"
 #include "../parser/parser.h"
 #include "blank-space.h"
-#include "json-string.h"
+#include "string.h"
 #include "keyed-set.h"
 
 using namespace BeeFishParser;
@@ -108,20 +108,16 @@ namespace BeeFishJSON {
       virtual void onobjectkey(ObjectKey* key);
       
       // Defined in json-parser.h
-      virtual void onobjectvalue(ObjectKey* key, JSON* value);
+      virtual void onobjectvalue(ObjectKey* key, ObjectValue* value);
       
-      virtual void onkey(ObjectKey* key)
-      override
-      {
-          onobjectkey(key);
-      }
+      // Defined in json-parser.h
+      virtual void onsetupkeyvalue(ObjectKey* key, ObjectValue* value) override;
       
+   private:
       virtual void onkeyvalue(ObjectKey* key, ObjectValue* value)
       override
       {
-          JSON* json = (JSON*)(value->_match);
-          
-          onobjectvalue(key, json);
+          onobjectvalue(key, value);
       }
 
    };

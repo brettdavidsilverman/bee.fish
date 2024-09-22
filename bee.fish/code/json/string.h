@@ -140,6 +140,7 @@ namespace BeeFishJSON {
                {
                   _character = output;
                   success();
+                  return true;
                }
             );
       }
@@ -156,7 +157,7 @@ namespace BeeFishJSON {
                {
                   _character = 
                      _hex->character();
-                  success();
+                  return true;
                }
             );
             
@@ -216,7 +217,7 @@ namespace BeeFishJSON {
          
    class StringCharacters :
       public Repeat<StringCharacter>,
-      //public BeeFishBString::BStream,
+      public BeeFishBString::BStream,
       public BString
    {
 
@@ -230,50 +231,75 @@ namespace BeeFishJSON {
       {
          const Char& character = item->character();
          BString::push_back(character);
-        // BStream::write(character);
+         BStream::write(character);
          Repeat::matchedItem(item);
       }
 
       virtual BString& value() {
          return *this;
       }
-/*
+      
       virtual void clear() {
          BString::clear();
          BeeFishBString::BStream::clear();
       }
-*/
+
    };
 
    class String :
       public Match
    {
+   public:
+      BStream::OnBuffer _onbuffer;
+      
    protected:
       StringCharacters*
          _stringCharacters = nullptr;
-
+      BString _value;
+      
    public:
       String() : Match()
       {
+      }
+      
+      virtual void setup(Parser* parser)
+      {
+            
          _stringCharacters =
             new StringCharacters();
          
+         _stringCharacters->_onbuffer =
+            [this](const BeeFishBString::Data& buffer) {
+               _value = _stringCharacters->value();
+               if (this->_onbuffer) {
+                  this->_onbuffer(buffer);
+               }
+               
+            };
+
+
          _match = new And(
             new Quote(),
             _stringCharacters,
             new Quote()
          );
+
+
+         Match::setup(parser);
       }
-      
       
       virtual BString& value()
       {
-         return *_stringCharacters;
+         return _value;
       }
       
       virtual const BString& value() const
       {
-         return *_stringCharacters;
+         return _value;
+      }
+      
+      virtual void success() {
+         _stringCharacters->flush();
       }
       
    protected:
