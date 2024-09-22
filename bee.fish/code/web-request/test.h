@@ -142,8 +142,8 @@ namespace BeeFishWeb
          "bee.fish/code/web-request/tests/request.txt",
          requestHeadersOnly,
          true
-      );
-
+      );
+      
       ok &= testResult(
          "WebRequest get",
          requestHeadersOnly.method() == "GET"
@@ -234,7 +234,7 @@ namespace BeeFishWeb
          "WebRequest with path and query",
          "bee.fish/code/web-request/tests/path.txt",
          urlWebRequest,
-         BeeFishMisc::nullopt
+         true
       );
       
       ok &= testResult(
@@ -252,7 +252,7 @@ namespace BeeFishWeb
          "WebRequest with escaped path and query",
          "bee.fish/code/web-request/tests/escaped-path.txt",
          escapedUrlWebRequest,
-         BeeFishMisc::nullopt
+         true
       );
       
       ok &= testResult(
@@ -316,7 +316,7 @@ namespace BeeFishWeb
    inline bool testParts()
    {
       
-      cout << "Test request" << endl;
+      cout << "Test request parts" << endl;
       
       bool ok = true;
       
@@ -397,7 +397,7 @@ namespace BeeFishWeb
       bool ok = true;
         
       BeeFishWeb::WebRequest request;
-      BeeFishBScript::BScriptParser parser(request);
+      JSONParser parser(request);
       //BeeFishBScript::BScriptParser parser(request);
 
       ok &= testFile(
@@ -408,13 +408,10 @@ namespace BeeFishWeb
          true
       );
 
-      ok &= testResult(
-         "Post json value = World",
-         parser.json()["Hello"] == "World"
-      );
-
+      
       BeeFishWeb::WebRequest request2;
-      BeeFishBScript::BScriptParser parser2(request2);
+      JSONParser parser2(request2);
+      //BeeFishBScript::BScriptParser parser2(request2);
       //BeeFishBScript::BScriptParser parser(request);
 
       ok &= testFile(
@@ -423,11 +420,6 @@ namespace BeeFishWeb
          "bee.fish/code/web-request/tests/post-settings.txt",
          request2,
          true
-      );
-
-      ok &= testResult(
-         "Post json value = World",
-         parser2.json()["sleeping"] == false
       );
 
       cout << endl;

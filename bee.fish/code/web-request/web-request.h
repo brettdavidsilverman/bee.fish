@@ -433,7 +433,6 @@ namespace BeeFishWeb {
       virtual ~WebRequest()
       {
       }
-      
 
       virtual void setOnData(BStream::OnBuffer ondata) {
          _ondata = ondata;
