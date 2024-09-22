@@ -202,7 +202,6 @@ namespace BeeFishDatabase {
       override
       {
          push_back_key(key->value());
-         //key.clear();
       }
       
       virtual void onendobject(JSON* match)

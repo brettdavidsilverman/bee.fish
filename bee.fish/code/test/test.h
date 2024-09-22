@@ -30,7 +30,7 @@ namespace BeeFishTest
       string label,
       path file,
       BeeFishParser::Match& match,
-      optional<bool> result
+      optional<bool> expectedResult
    )
    {
       bool ok = true;
@@ -45,15 +45,17 @@ namespace BeeFishTest
       // open the sample session file
       ifstream input(file);
       parser.read(input);
-      parser.eof();
+      
+      if (expectedResult != nullopt)
+         parser.eof();
       
       ok &= testResult(
          label,
-         (match.result() == result)
+         (match.result() == expectedResult)
       );
 
       if (!ok) {
-         cout << "Expected: " << result << endl;
+         cout << "Expected: " << expectedResult << endl;
          cout << "Got: " << match.result() << endl;
       }
       
@@ -79,7 +81,7 @@ namespace BeeFishTest
       BString label,
       Match* match,
       string text,
-      optional<bool> result = false,
+      optional<bool> expectedResult = false,
       BString expected = {}
    )
    {
@@ -88,14 +90,16 @@ namespace BeeFishTest
       bool ok = true;
 
       parser.read(text);
-      parser.eof();
+      
+      if (expectedResult != nullopt)
+         parser.eof();
       
       BString value;
 
       if (match->matched())
          value = match->value();
 
-      ok = (match->result() == result);
+      ok = (match->result() == expectedResult);
 
       if (expected.size())
       {
@@ -108,7 +112,7 @@ namespace BeeFishTest
       if (!ok)
       {
          cout << "FAIL. Expected "
-              << result
+              << expectedResult
               << " Got  "
               << match->result()
               << endl;

@@ -282,7 +282,7 @@ namespace BeeFishDatabase {
       template<typename T>
       void getData(T& destination)
       {
-         Data data = getData();
+         BeeFishDatabase::Data data = getData();
          destination = *(T*)data.data();
       }
 

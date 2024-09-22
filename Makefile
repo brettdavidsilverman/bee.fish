@@ -11,7 +11,7 @@ $(MOD_DATABASE):
 	
 test:
 	cd bee.fish && make $(DEBUG) test
-	cd Apache2/mod_database && sudo make $(DEBUG) install reload test
+#	cd Apache2/mod_database && sudo make $(DEBUG) install reload test
 	
 clean:
 	cd bee.fish && sudo make clean

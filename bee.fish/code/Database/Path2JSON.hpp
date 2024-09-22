@@ -142,10 +142,12 @@ namespace BeeFishJSON
                Index keyIndex;
                MinMaxPath keyIndexes = path;
                count = path.max<Size>() + 1;
-               for (Size index = 0; index < count; ++index) 
+               for (Size position = 0; position < count; ++position) 
                {
-                  path[index].getData(keyIndex);
-                  Path keyPath(path, keyIndex);
+                  assert(path[position].hasData());
+                  
+                  path[position].getData<Index>(keyIndex);
+                  Path keyPath(_properties, keyIndex);
                   keyPath.getData(key);
 
                   out << tabs(tabCount + 1)
@@ -153,11 +155,11 @@ namespace BeeFishJSON
                          << escape(key)
                       << "\": ";
                       
-                  Path2JSON value(_properties, path[index]);
+                  Path2JSON value(_properties, path[position]);
                   
                   value.write(out, tabCount + 1);
                   
-                  if (index < count - 1)
+                  if (position < count - 1)
                      out << ",\r\n";
 
                }

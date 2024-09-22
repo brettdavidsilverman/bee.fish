@@ -60,7 +60,8 @@ namespace BeeFishParser
 				   }
                 }
 				   
-                    
+                
+                
                 _item = createItem();
 
 			}

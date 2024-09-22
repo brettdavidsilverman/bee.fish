@@ -31,8 +31,8 @@ namespace BeeFishParser {
       Capture(Match* match, BString& captured)
       {
          _match = new Invoke(
-            match,
-            [&captured](Match* match)
+            new Capture(match),
+            [&captured, this](Match* match)
             {
                captured = match->value();
                return true;
@@ -49,7 +49,8 @@ namespace BeeFishParser {
          const Char& character
       )
       {
-         setup(parser);
+         if (!_parser)
+            setup(parser);
 
          bool matched = matchCharacter(character);
          

@@ -316,70 +316,6 @@ namespace BeeFishWeb {
 
       };
 
-   /*
-      class ObjectPath :
-         public _Object,
-         protected Path<PowerEncoding>
-      {
-      
-      public:
-         ObjectPath(const Path& start) :
-            _Object(),
-            Path(start)
-         {
-         }
-         
-         ObjectPath(const ObjectPath& source) :
-            _Object(),
-            Path(source)
-         {
-         }
-         
-         virtual Match* copy() const
-         {
-            return new ObjectPath(*this);
-         }
-         
-            
-         virtual _JSON* operator[] (const BString& key)
-         {
-            Path next = Path::operator [] (key);
-            _JSON* json = _Object::operator[] (key);
-            return json;
-         }
-         
-         virtual _JSON* operator[] (const char* key)
-         {
-            _JSON* json = ObjectPath::operator[] (BString(key));
-            return json;
-         }
-         
-         virtual bool contains(const BString& key)
-         {
-            bool value = _Object::contains(key);
-            return value;
-         }
-         
-         virtual bool contains(const char* key)
-         {
-            bool value = ObjectPath::contains(BString(key));
-            return value;
-         }
-         
-         void emplace(
-            const BString& key,
-            _JSON* value
-         )
-         {
-            Path::operator [] (key);
-            _Object::emplace(key, value);
-         }
-         
-      protected:
-         
-      };
-      */
-      
       FirstLine*           _firstLine = nullptr;
       BeeFishWeb::Headers* _headers   = nullptr;
       Body*                _body = nullptr;
@@ -454,11 +390,7 @@ namespace BeeFishWeb {
       {
          return *(_body->_json);
       }
-/*
-      virtual const std::vector<Byte>& body() const {
-         return _body->body();
-      }
-*/      
+
       Headers& headers()
       {
          return *_headers;
@@ -514,11 +446,11 @@ namespace BeeFishWeb {
          return url().query();
       }
 
-      BString query() const {
+      const BString& query() const {
          return url().query().value();
       }
       
-      BString version() const
+      const BString& version() const
       {
          return _firstLine->_version;
       }

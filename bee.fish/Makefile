@@ -36,6 +36,10 @@ Database:
 	-  mkdir build
 	cd code/Database && make $(DEBUG)
 
+web-request:
+	-  mkdir build
+	cd code/web-request && make $(DEBUG)
+	
 WebRequest:
 	-  mkdir build
 	cd code/WebRequest && make $(DEBUG)
