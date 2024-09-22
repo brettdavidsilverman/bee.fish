@@ -39,14 +39,6 @@ namespace BeeFishJSON
       {
           _delete = false;
       }
-      /*
-      JSONParser(JSON* json) :
-         Parser(*json),
-         _json(json),
-         _delete(true)
-      {
-      }
-      */
       
       JSONParser() :
          Parser(_json = new JSON())
@@ -177,6 +169,8 @@ namespace BeeFishJSON
 
       if (_parser->isJSONParser()) {
          JSONParser* parser = (JSONParser*)_parser;
+         parser->onobjectkey(this, key);
+         
          if (parser->_onkeys.count(key->value()) > 0) {
             JSONParser::OnKey _onkey = parser->_onkeys[key->value()];
             JSON* json = static_cast<JSON*>(value->_match);

@@ -164,7 +164,7 @@ namespace BeeFishJSON
          
       _match = new And(
           _invokeKey,
-          _seperator,
+          _invokeSeperator,
           _invokeValue
       );
          
