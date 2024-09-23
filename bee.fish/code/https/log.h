@@ -1,7 +1,7 @@
 #ifndef BEE_FISH_SERVER__LOG_H
 #define BEE_FISH_SERVER__LOG_H
 #include <fstream>
-#include "../config.h"
+#include "../Config.hpp"
 
 inline std::ofstream &logfile()
 {

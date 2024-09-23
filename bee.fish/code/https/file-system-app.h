@@ -179,7 +179,7 @@ namespace BeeFishHTTPS {
          {
             
             _filePath = getFilePath(requestPath);
-           
+            
             // Make sure file path is under
             // file system root
             if (!pathIsChild(_filePath, fileSystemPath()))
@@ -203,7 +203,7 @@ namespace BeeFishHTTPS {
             return;
          }
          
-         string contentType = "text/plain; charset=UTF-8";
+         string contentType = "text/plain; charset=utf-8";
          string cacheControl = _defaultCacheControl;
          
          if ( _status == 200 )
@@ -212,7 +212,7 @@ namespace BeeFishHTTPS {
             {
                // Directory listing
                _serve = App::SERVE_CONTENT;
-               contentType = "text/html; charset=UTF-8";
+               contentType = "text/html; charset=utf-8";
                _content = getDirectoryListing(
                   requestPath,
                   _filePath
@@ -231,7 +231,7 @@ namespace BeeFishHTTPS {
                cacheControl = mimeType.cacheControl;
                _serve = SERVE_FILE;
             }
-            else if ( _filePath.filename() ==
+            else if ( (std::string)_filePath.filename() ==
                       "Makefile" )
             {
                _serve = SERVE_FILE;
@@ -251,7 +251,7 @@ namespace BeeFishHTTPS {
             
             write(contentStream, _status, _statusText, requestPath, _filePath);
 
-            contentType = "application/json; charset=UTF-8";
+            contentType = "application/json; charset=utf-8";
             _content = contentStream.str();
             _serve = App::SERVE_CONTENT;
             
@@ -366,7 +366,9 @@ namespace BeeFishHTTPS {
       
       path fileSystemPath(string child = "") const
       {
-         return path(FILE_SYSTEM_PATH + child);
+         string filename = WWW_ROOT_DIRECTORY;
+         filename += child;
+         return path(filename);
       }
       
 
@@ -381,7 +383,7 @@ namespace BeeFishHTTPS {
             if (path[path.size() - 1] != '/')
             {
                BString newPath =
-                  path + "/" +
+                  path + BString("/") +
                   request.query();
                   
                redirect(newPath, true);
@@ -392,9 +394,9 @@ namespace BeeFishHTTPS {
          return false;
       }
       
-      void write(ostream& headerStream, const int status, const string& statusText, const BString& requestPath, const path& filePath)
+      void write(ostream& headerStream, const int status, const BString& statusText, const BString& requestPath, const path& filePath)
       {
-         BeeFishBScript::Object output;
+         BeeFishScript::Object output;
 
          output["status"] = status;
          output["statusText"] = statusText;
@@ -403,7 +405,7 @@ namespace BeeFishHTTPS {
          
          output["requestPath"] = requestPath;
                     
-         if (filePath != "")
+         if ((std::string)filePath != "")
          {
             BString path(filePath);
             

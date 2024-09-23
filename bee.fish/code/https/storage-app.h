@@ -1,13 +1,13 @@
 #ifndef BEE_FISH_SERVER__STORAGE_APP_H
 #define BEE_FISH_SERVER__STORAGE_APP_H
 
-#include "../misc/optional.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "session.h"
 #include "app.h"
 #include "authentication.h"
 #include "storage.h"
 #include "../json/json-parser.h"
-#include "../b-script/b-script.h"
+#include "../Script/Script.hpp"
 #include "../web-request/web-request.h"
 
 using namespace std;
@@ -33,7 +33,7 @@ namespace BeeFishHTTPS {
          WebRequest* request = _session->request();
 
          BeeFishBString::BString        path;
-         BeeFishBScript::ObjectPointer  json;
+         BeeFishScript::ObjectPointer  json;
          BeeFishMisc::optional<BString> key = BeeFishMisc::nullopt;
          BeeFishMisc::optional<Id>      id = BeeFishMisc::nullopt;
 
@@ -65,9 +65,9 @@ namespace BeeFishHTTPS {
 
          _bookmark = userData()[path];
 
-         if (key.hasValue())
+         if (key.has_value())
             _bookmark = _bookmark[key.value()];
-         else if (id.hasValue()) {
+         else if (id.has_value()) {
             _bookmark = _bookmark[id.value()];
          }
          else
@@ -81,21 +81,21 @@ namespace BeeFishHTTPS {
             if (request->headers().contains("content-type"))
                contentType = request->headers()["content-type"];
             else
-               contentType = "text/plain; charset=utf-8";
+               contentType = "application/json; charset=utf-8";
 
-            size_t pageIndex = 0;
-            size_t _contentLength = 0;
+            Size pageIndex = 0;
+            Size _contentLength = 0;
 
             WebRequest postRequest;
 
             postRequest.setOnData(
-               [&pageIndex, &_contentLength, this](const Data& data) {
+               [&pageIndex, &_contentLength, this](const BeeFishBString::Data& data) {
                   _contentLength += data.size();
-                  _bookmark[pageIndex++] = data;
+                  _bookmark[pageIndex++].setData(data);
                }
             );
 
-            BeeFishBScript::BScriptParser parser(postRequest);
+            BeeFishScript::ScriptParser parser(postRequest);
 
             std::cerr << "Parsing " << contentType << std::endl;
 
@@ -108,9 +108,9 @@ namespace BeeFishHTTPS {
             if ( _contentLength == 0 )
                deleteData();
             else {
-               _bookmark["Content length"] = _contentLength;
-               _bookmark["Content type"]   = contentType;
-               _bookmark["Page count"]     = pageIndex;
+               _bookmark["Content length"].setData(_contentLength);
+               _bookmark["Content type"].setData(contentType);
+               _bookmark["Page count"].setData(pageIndex);
             }
 
             returnJSON = true;
@@ -123,11 +123,11 @@ namespace BeeFishHTTPS {
          {
 
             if (_bookmark["Content length"].hasData())
-               contentType = _bookmark["Content type"];
+               _bookmark["Content type"].getData(contentType);
 
             if (contentType.length()) {
                _status = 200;
-               _contentLength = _bookmark["Content length"];
+                _bookmark["Content length"].setData(_contentLength);
                _serve = App::SERVE_DATA;
                returnJSON = false;
             }
@@ -153,7 +153,7 @@ namespace BeeFishHTTPS {
          {
             _responseHeaders.replace(
                "content-type",
-               "application/json; charset=UTF-8"
+               "application/json; charset=utf-8"
             );
          }
          else
@@ -174,16 +174,16 @@ namespace BeeFishHTTPS {
             return;
          }
 
-         BeeFishBScript::Object output;
+         BeeFishScript::Object output;
          
          output["method"] = method;
          
-         if ( key.hasValue() )
+         if ( key.has_value() )
          {
             output["key"] = key.value();
          }
          
-         if ( id.hasValue() )
+         if ( id.has_value() )
          {
             output["id"] = id.value().key();
          }

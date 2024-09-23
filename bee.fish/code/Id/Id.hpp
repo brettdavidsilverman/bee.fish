@@ -236,7 +236,7 @@ namespace BeeFishId
             throw logic_error("Id::createKey");
 
          // get the data
-         Data data = stream.toData();
+         BeeFishBString::Data data = stream.toData();
 
          return data.toBase64();
       }
@@ -245,7 +245,8 @@ namespace BeeFishId
    
       
          // extract the raw data
-         Data raw = Data::fromBase64(key);
+         BeeFishBString::Data raw =
+            BeeFishBString::Data::fromBase64(key);
 
          // extract the timestamp
          // from the key

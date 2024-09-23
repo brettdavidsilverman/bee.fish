@@ -21,9 +21,9 @@ namespace BeeFishHTTPS {
    private:
       Database& _database;
       bool _authenticated = false;
-      Path<PowerEncoding> _path;
-      Path<PowerEncoding> _sessionData;
-      Path<PowerEncoding> _userData;
+      Path _path;
+      Path _sessionData;
+      Path _userData;
       
    protected:
       BString _ipAddress;
@@ -80,7 +80,7 @@ namespace BeeFishHTTPS {
          // Save the secret
          // and set the user data path
          BString md5Secret =
-            Data(secret).md5();
+            BeeFishBString::Data(secret).md5();
 
          _userData = _path
             ["Secrets"]
@@ -90,7 +90,7 @@ namespace BeeFishHTTPS {
          // (Note, we use toHex, not toBase64 due to
          // cookie encoding rules)
          _sessionId =
-            Data::fromRandom(
+            BeeFishBString::Data::fromRandom(
                SESSION_ID_SIZE
             ).toHex();
 
@@ -182,8 +182,7 @@ namespace BeeFishHTTPS {
 
    public:
    
-      BeeFishDatabase::
-         Path<PowerEncoding> userData()
+      BeeFishDatabase::Path userData()
       {
          if (!_authenticated)
             throw runtime_error("Unauthenticated");
@@ -191,8 +190,7 @@ namespace BeeFishHTTPS {
          return _userData;
       }
       
-      BeeFishDatabase::
-         Path<PowerEncoding> sessionData()
+      BeeFishDatabase::Path sessionData()
       {
          if (!_authenticated)
             throw runtime_error("Unauthenticated");
@@ -200,12 +198,14 @@ namespace BeeFishHTTPS {
          return _sessionData;
       }
       
-      virtual void write(BeeFishBScript::Object& object) const {
+      virtual void write(BeeFishScript::Object& object) const {
          object["authenticated"] = _authenticated;
          if (_authenticated)
-            object["timeout"] = LOGON_TIMEOUT;
+            object["timeout"] = 
+               BeeFishScript::Integer(LOGON_TIMEOUT);
          else
-            object["timeout"] = 0.0f;
+            object["timeout"] =
+               BeeFishScript::Integer(0);
       }
       
       operator bool()

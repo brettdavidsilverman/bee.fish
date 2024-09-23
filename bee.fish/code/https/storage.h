@@ -5,9 +5,8 @@
 #include "../b-string/string.h"
 #include "../power-encoding/power-encoding.h"
 #include "authentication.h"
-#include "../database/database.h"
-#include "../database/path.h"
-#include "../id/id.h"
+#include "../Database/Database.hpp"
+#include "../Id/Id.hpp"
 
 using namespace BeeFishHTTPS;
 using namespace BeeFishId;
@@ -16,10 +15,6 @@ namespace BeeFishDatabase {
 
    class Storage
    {
-
-      typedef BeeFishDatabase::
-         Path<PowerEncoding> Path;
-
       Authentication& _auth;
       Path _bookmark;
    public:
@@ -126,7 +121,7 @@ namespace BeeFishDatabase {
             data
          );
          
-         if (contentType.hasValue()) {
+         if (contentType.has_value()) {
             setContentType(path, contentType.value());
          }
 
@@ -147,7 +142,8 @@ namespace BeeFishDatabase {
             if (path.hasData()) {
                Data data;
                path.getData(data);
-               BString contentType = BString::fromData(data);
+               BString contentType;
+               path.getData<BString>(contentType);
                return contentType;
             }
          }
@@ -155,7 +151,7 @@ namespace BeeFishDatabase {
       }
 
       virtual void setContentType(Path path, BString contentType) {
-         path["content-type"].setData(contentType.toData());
+         path["content-type"].setData(contentType);
       }
 
       template<typename Key>

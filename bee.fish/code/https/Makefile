@@ -1,20 +1,27 @@
 CC = g++
 CFLAGS = -std=c++17 -Wall -fmax-errors=1
 BUILD = ../../build
-OBJECTS=main.o
-DEPS=server.h session.h response.h response-headers.h app.h storage-app.h file-system-app.h test.h authentication.h version.h Makefile ../Config.hpp storage.h https.h authentication-app.h $(BUILD)/parser $(BUILD)/json $(BUILD)/web-request $(BUILD)/Database $(BUILD)/power-encoding  $(BUILD)/web-request Makefile
+OUTPUT=$(BUILD)/https
+DEPS=server.h session.h response.h response-headers.h app.h storage-app.h file-system-app.h test.h authentication.h version.h Makefile ../Config.hpp storage.h https.h authentication-app.h $(BUILD)/parser $(BUILD)/json $(BUILD)/web-request $(BUILD)/Database $(BUILD)/power-encoding $(BUILD)/script Makefile
+PORT=443
 
-%.o: %.cpp $(DEPS)
-	$(CC) $< -c $(CFLAGS)
-
-https: $(OBJECTS) $(DEPS)
+$(OUTPUT): $(DEPS)
 	@echo "Linking server"
-	$(CC) $(CFLAGS) -O -o $(BUILD)/https $(OBJECTS) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lpthread -latomic
-	sudo setcap cap_net_bind_service=ep $(BUILD)/https
+	$(CC) main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lpthread -latomic
+	sudo setcap cap_net_bind_service=ep $(OUTPUT)
 	
 install:
-	./start.sh
+	./start.sh $(PORT)
+	
+test:	$(OUTPUT)
+	$(BUILD)/https -test
 
+start:	$(OUTPUT)
+	./start.sh $(PORT)
+	
+stop:
+	./stop.sh
+	
 $(BUILD)/parser:
 	cd ../parser && make $(DEBUG)
 	
@@ -30,12 +37,13 @@ $(BUILD)/Database:
 $(BUILD)/web-request:
 	cd ../web-request && make $(DEBUG)
 
-#$(BUILD)/b-script:
-#	cd ../b-script && make $(DEBUG)
+$(BUILD)/script:
+	cd ../Script && make $(DEBUG)
 	
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
-debug:	https
+debug:	PORT = 8000
+debug:	$(OUTPUT)
 
 clean:
 	rm -f session.log

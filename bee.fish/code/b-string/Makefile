@@ -12,8 +12,8 @@ test:	$(OUTPUT)
 $(BUILD)/power-encoding:
 	cd ../power-encoding && make $(DEBUG)
 
+debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
-debug:	clean
 debug:	$(OUTPUT)
 
 clean:

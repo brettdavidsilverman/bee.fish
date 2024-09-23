@@ -60,7 +60,7 @@ namespace BeeFishHTTPS {
 
          if (request->hasJSON()) {
 
-            BeeFishBScript::ObjectPointer object = _session->parser()->json();
+            BeeFishScript::ObjectPointer object = _session->parser()->json();
 
             if (object->contains("method")) {
                method = (BString&)(*object)["method"];
@@ -71,7 +71,7 @@ namespace BeeFishHTTPS {
 
          }
 
-         if ( method.hasValue() )
+         if ( method.has_value() )
          {
 
             _status = 200;
@@ -80,7 +80,7 @@ namespace BeeFishHTTPS {
             {
                authenticate();
             }
-            else if ( method.value() == "logon" && secret.hasValue() )
+            else if ( method.value() == "logon" && secret.has_value() )
             {
                logon(
                   secret.value()
@@ -144,7 +144,7 @@ namespace BeeFishHTTPS {
                "set-cookie",
                BString("sessionId=") +
                _sessionId +
-               ";path=/;SameSite=None;Secure;HttpOnly;max-age=3600"
+               BString(";path=/;SameSite=None;Secure;HttpOnly;max-age=3600")
             );
          }
          else
@@ -182,7 +182,7 @@ namespace BeeFishHTTPS {
             "application/json; charset=utf-8"
          );
          
-         BeeFishBScript::Object output;
+         BeeFishScript::Object output;
 
          Authentication
             ::write(output);

@@ -129,10 +129,11 @@ static int database_handler(request_rec *r)
        
       ApacheStream stream(r);
 
-      Variable reply;
-      reply = BeeFishScript::String(
-          error.what()
-      );
+      Variable reply =
+         BeeFishScript::String(
+            error.what()
+         );
+         
       stream << reply;
       stream.flush();
       
@@ -146,7 +147,7 @@ static int database_handler(request_rec *r)
       {
          outputId(r);
       }
-      else if (r->args && strcmp(r->args, "document") == 0)
+      else if (r->args && (strcmp(r->args, "document") == 0))
       {
          outputDocument(path, r);
       }

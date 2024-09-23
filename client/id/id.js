@@ -1,6 +1,6 @@
 class Id {
  
-   static version = "Id-v0.0.2-client";
+   static version = "id-v0.1.0-client";
    
    // Creates a value that is
    // guaranteed to be unique
@@ -129,7 +129,7 @@ class Id {
          }
       );
       
-      return btoa(key);
+      return key;
          
    }
       
@@ -143,7 +143,7 @@ class Id {
       
       // extract the name and timestamp
       // from the key
-      var data = atob(this.key);
+      var data = this.key;
       
       var stream = new PowerEncoding(
          data

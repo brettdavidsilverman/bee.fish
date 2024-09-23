@@ -12,7 +12,7 @@ class RemoteStorage
 
       if (key instanceof Id) {
          var id = key;
-         query = "?id=" + encodeURI(id.key)
+         query = "?id=" + btoa(id.key)
       }
       else {
          query = "?key=" + encodeURI(key);
@@ -53,7 +53,7 @@ class RemoteStorage
                   throw json;
                
                if (json.id) {
-                  var id = Id.fromKey(json.id);
+                  var id = Id.fromKey(atob(json.id));
                   return id;
                }
 

@@ -30,7 +30,7 @@ namespace BeeFishHTTPS {
       string _statusText = "OK";
       ResponseHeaders& _responseHeaders;
       std::string _content;
-      Path<PowerEncoding> _bookmark;
+      Path _bookmark;
       path   _filePath;
       size_t _contentLength = 0;
 
@@ -118,7 +118,7 @@ namespace BeeFishHTTPS {
          
          _responseHeaders.replace(
             "content-type",
-            "text/plain; charset=UTF-8"
+            "text/plain; charset=utf-8"
          );
          
          if (path != from)
@@ -131,7 +131,7 @@ namespace BeeFishHTTPS {
             _responseHeaders.emplace(
                "set-cookie",
                BString("redirect=") + from +
-               ";path=/"
+               BString(";path=/")
             );
          }
          
@@ -145,7 +145,7 @@ namespace BeeFishHTTPS {
       {
             
          BString fullWebRequestPath =
-            BString(FILE_SYSTEM_PATH) +
+            BString(WWW_ROOT_DIRECTORY) +
             requestPath;
                
          path filePath = canonical(
@@ -158,7 +158,7 @@ namespace BeeFishHTTPS {
             {
                BString indexPath =
                   fullWebRequestPath +
-                  "index.html";
+                  BString("index.html");
                   
                filePath =
                   canonical(

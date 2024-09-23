@@ -31,6 +31,7 @@ script {
 var console = new Console();
 var url;
 var query;
+var key;
       </script>
       
       <h1 id="h1">Storage</h1>
@@ -113,10 +114,10 @@ function changeKey(newKey)
 function changeId(newId)
 {
    document.getElementById("setKey").value = "";
+   url = "?id=" + btoa(newId);
    key = Id.fromKey(newId);
-   url = "id=" + newId;
-   document.getElementById("link").href =
-      document.getElementById("storageURL").value + "?id=" + newId;
+   document.getElementById("link").href = url;
+   document.getElementById("storageURL").value = url;
    
 }
          </script>
@@ -163,8 +164,8 @@ function setItem()
 
    storage.url = document.getElementById("storageURL").value;
    return storage.setItem(key, value, contentType).then(
-      function() {
-         alert("Ok")
+      function(key) {
+         alert("Ok " + key)
       } 
    ).catch(
       function(error) {

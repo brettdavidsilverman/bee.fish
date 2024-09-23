@@ -127,10 +127,10 @@ namespace BeeFishHTTPS {
          }
       }
       
-      virtual Data getNext(size_t& length)
+      virtual BeeFishBString::Data getNext(size_t& length)
       { 
          
-         Data response;
+         BeeFishBString::Data response;
          
          if (_bytesTransferred < _headersLength)
          {
@@ -151,7 +151,7 @@ namespace BeeFishHTTPS {
                );
 */            
             response = 
-               Data(
+               BeeFishBString::Data(
                   (const Byte*)(_headers.data() + _bytesTransferred), 
                   length
                );
@@ -177,8 +177,8 @@ namespace BeeFishHTTPS {
                      (_bytesTransferred - _headersLength) /
                      _pageSize;
 
-                  Data page =
-                     _app->_bookmark[pageIndex];
+                  BeeFishBString::Data page =
+                     _app->_bookmark[pageIndex].getData();
                   
                   length = page.size();
 
@@ -187,7 +187,7 @@ namespace BeeFishHTTPS {
                }
                case App::SERVE_CONTENT:
                {
-                  response = Data(
+                  response = BeeFishBString::Data(
                      (const Byte*)
                         (
                            _app->_content.data()
@@ -201,7 +201,8 @@ namespace BeeFishHTTPS {
                }
                case App::SERVE_FILE:
                {
-                  Data buffer = Data::create(length);
+                  BeeFishBString::Data buffer =
+                     BeeFishBString::Data::create(length);
 
                   ifstream input(_app->_filePath);
                      input.seekg(

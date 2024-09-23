@@ -8,7 +8,6 @@ DEPS=power-encoding.h version.h encoding.h test.h Makefile main.cpp
 test:	$(OUTPUT)
 	$(OUTPUT) -test
 	
-debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -Og -g -D DEBUG
 debug:	$(OUTPUT)

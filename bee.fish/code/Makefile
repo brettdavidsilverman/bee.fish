@@ -3,7 +3,7 @@ CFLAGS = -std=c++17 -fmax-errors=1
 DEPS=Makefile
 TEMP = /var/tmp
 
-all:	$(DEPS)
+all:
 	cd b-string && make $(DEBUG) test
 	cd power-encoding && make $(DEBUG) test
 	cd Id && make $(DEBUG) test
@@ -12,6 +12,7 @@ all:	$(DEPS)
 	cd Database && make $(DEBUG) test
 	cd Script && make $(DEBUG) test
 	cd web-request && make $(DEBUG) test
+	cd https && make $(DEBUG) test
 	#cd PowerEncoding && make $(DEBUG)
 	#cd JSON && make $(DEBUG)
 	#cd WebRequest && make $(DEBUG)

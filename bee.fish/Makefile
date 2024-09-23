@@ -1,6 +1,4 @@
-all:
-	- mkdir build
-	cd code && make $(DEBUG)
+all:	test b-string power-encoding id parser json Database Script web-request https
 	
 test:
 	- mkdir build
@@ -39,6 +37,10 @@ Script:
 web-request:
 	-  mkdir build
 	cd code/web-request && make $(DEBUG)
+	
+https:
+	-  mkdir build
+	cd code/https && make $(DEBUG)
 	
 WebRequest:
 	-  mkdir build

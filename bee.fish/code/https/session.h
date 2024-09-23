@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <fstream>
 #include "../web-request/web-request.h"
-#include "../b-script/b-script.h"
+#include "../Script/Script.hpp"
 #include "server.h"
 #include "response.h"
 
@@ -29,7 +29,7 @@
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> SSLSocket;
 
 using namespace BeeFishWeb;
-using namespace BeeFishBScript;
+using namespace BeeFishScript;
 
 namespace BeeFishHTTPS {
 
@@ -41,9 +41,10 @@ namespace BeeFishHTTPS {
    protected:
       Server* _server;
       size_t _maxLength;
-      Data _data = Data::create();
+      BeeFishBString::Data _data =
+         BeeFishBString::Data::create();
       WebRequest* _request;
-      BScriptParser* _parser;
+      ScriptParser* _parser;
       Response* _response;
       string _tempFileName;
       std::fstream _tempFile;
@@ -100,7 +101,7 @@ namespace BeeFishHTTPS {
             return;
          }
          _request = new BeeFishWeb::WebRequest();
-         _parser = new BScriptParser(*_request);
+         _parser = new ScriptParser(*_request);
          asyncRead();
       }
    
@@ -169,7 +170,7 @@ namespace BeeFishHTTPS {
 #endif
             _parser->read(_data, bytesTransferred);
 
-            if (_request->result() == false)
+            if (_parser->result() == false)
             {
                logException("handleRead", "parser match error");
 #ifdef DEBUG
@@ -258,14 +259,11 @@ namespace BeeFishHTTPS {
          {
 
             // All input is now in
-            Server::writeDateTime(clog);
-
-            clog
-               << '\t'
-               << ipAddress()          << '\t'
-               << _request->method()   << '\t'
-               << HOST << _request->fullURL()  << '\t'
-               << _request->version()
+            clog << now()
+               << ' '
+               << ipAddress()          << ' '
+               << _request->method()   << ' '
+               << HOST << _request->fullURL()  << ' '
                << std::endl;
 
             _response = new Response(
@@ -374,9 +372,9 @@ namespace BeeFishHTTPS {
          if (closeOrRestart())
             return;
             
-         size_t length = _maxLength;
+         Size length = _maxLength;
          
-         Data data =
+         BeeFishBString::Data data =
             _response->getNext(length);
 
          boost::asio::async_write(
@@ -398,9 +396,9 @@ namespace BeeFishHTTPS {
          const BString& what
       )
       {
-         BeeFishBScript::Object error = {
+         BeeFishScript::Object error = {
             {
-               "exception", BeeFishBScript::Object {
+               "exception", BeeFishScript::Object {
                   {"where", where},
                   {"what", what},
                   {"ipAddress", ipAddress()},
@@ -514,7 +512,7 @@ namespace BeeFishHTTPS {
          return _response;
       }
 
-      BScriptParser* parser() {
+      ScriptParser* parser() {
          return _parser;
       }
   
@@ -590,7 +588,8 @@ namespace BeeFishHTTPS {
       
       ifstream input(_session->tempFileName());
       parser.read(input);
-
+      parser.eof();
+      
       input.close();
 
       if (parser.result() == true) {

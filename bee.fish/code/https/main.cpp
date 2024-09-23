@@ -36,7 +36,7 @@ int main(int argc, const char* argv[])
            << transactionFile
            << std::endl
         << "Host: "
-           << HOST_NAME
+           << HOST
            << std::endl;
 
       if (hasArg(argc, argv, "-test") >= 0)
@@ -72,7 +72,7 @@ int main(int argc, const char* argv[])
       BeeFishHTTPS::Server
          server
          (
-            HOST_NAME,
+            HOST,
             databaseFile,
             transactionFile,
             io_context,
