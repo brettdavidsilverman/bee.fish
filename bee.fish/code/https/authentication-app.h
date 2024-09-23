@@ -3,7 +3,6 @@
 
 #include "app.h"
 #include "session.h"
-#include "../b-script/b-script.h"
 
 namespace BeeFishHTTPS {
 

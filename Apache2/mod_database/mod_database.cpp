@@ -78,26 +78,26 @@ static int database_handler(request_rec *r)
          << HOST 
          << r->uri;
          
-   std::string args;
-   if (r->args && strlen(r->args) > 0)
+   char* args = nullptr;
+   if (r->args && strlen(r->args))
    {
-      if (strcmp(r->args, "document") != 0)
-         args = r->args;
       debug << "?" << r->args;
+      
+      if (strcmp(r->args, "document") == 0)
+         args = nullptr;
+      else
+         args = r->args;
    }
    
    debug << "\r\n";
    debug.flush();
     
-   //std::scoped_lock lock(_mutex);
-
-   Database database(DATABASE_FILENAME);
-    
+   
    std::string filename =
       WWW_ROOT_DIRECTORY;
    
    filename += r->uri;
-      
+   
    if (filename.find("..") != std::string::npos)
       return HTTP_INTERNAL_SERVER_ERROR;
       
@@ -107,7 +107,8 @@ static int database_handler(request_rec *r)
    {
       return DECLINED;
    }
-   return DECLINED;
+    
+   Database database(DATABASE_FILENAME);
     
    Path path;
    
@@ -116,7 +117,7 @@ static int database_handler(request_rec *r)
          database,
          r->connection->client_ip,
          r->uri,
-         args.c_str()
+         args
       );
    }
    catch (runtime_error& error)

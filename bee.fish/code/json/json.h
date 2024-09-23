@@ -15,8 +15,7 @@
 #include "string.h"
 #include "object.h"
 #include "../Script/Type.hpp"
-
-//#include "../b-script/object.h"
+#include "../Script/Variable.hpp"
 
 #include "../power-encoding/power-encoding.h"
 

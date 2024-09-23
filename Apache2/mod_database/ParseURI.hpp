@@ -9,7 +9,7 @@ using namespace BeeFishParser;
 
 namespace BeeFishApache2 {
     
-   Debug debug;
+   
    
    class IdentifierPath : public Match
    {
@@ -237,12 +237,15 @@ namespace BeeFishApache2 {
    };
 
    Path parseURI(Database& database, const char* clientIP, const char* uri, const char* args) {
+      Debug debug;
       
-
       Path root(database);
-      Path path = root[HOST];
+      Path path = root[HOST][OBJECTS];
       Path properties = root[HOST][PROPERTIES];
 
+      debug << database << endl;
+      debug.flush();
+      
       string _uri = uri;
       
       BString segment;

@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -std=c++17 -Wall -fmax-errors=1
 BUILD = ../../build
 OBJECTS=main.o
-DEPS=server.h session.h response.h response-headers.h app.h storage-app.h file-system-app.h test.h authentication.h version.h Makefile ../Config.hpp storage.h https.h authentication-app.h $(BUILD)/parser $(BUILD)/json $(BUILD)/web-request $(BUILD)/Database $(BUILD)/power-encoding  $(BUILD)/web-request $(BUILD)/b-script Makefile
+DEPS=server.h session.h response.h response-headers.h app.h storage-app.h file-system-app.h test.h authentication.h version.h Makefile ../Config.hpp storage.h https.h authentication-app.h $(BUILD)/parser $(BUILD)/json $(BUILD)/web-request $(BUILD)/Database $(BUILD)/power-encoding  $(BUILD)/web-request Makefile
 
 %.o: %.cpp $(DEPS)
 	$(CC) $< -c $(CFLAGS)
@@ -30,8 +30,8 @@ $(BUILD)/Database:
 $(BUILD)/web-request:
 	cd ../web-request && make $(DEBUG)
 
-$(BUILD)/b-script:
-	cd ../b-script && make $(DEBUG)
+#$(BUILD)/b-script:
+#	cd ../b-script && make $(DEBUG)
 	
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG

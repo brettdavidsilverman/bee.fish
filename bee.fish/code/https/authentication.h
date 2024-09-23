@@ -1,11 +1,11 @@
 #ifndef BEE_FISH_HTTPS__AUTHENTICATION_H
 #define BEE_FISH_HTTPS__AUTHENTICATION_H
+
 #include <exception>
-#include "../misc/optional.h"
 #include <ctime>
-#include "../database/database.h"
-#include "../database/path.h"
-#include "../b-script/b-script.h"
+
+#include "../Miscellaneous/Miscellaneous.hpp"
+#include "../Database/Database.hpp"
 
 using namespace BeeFishDatabase;
 using namespace BeeFishPowerEncoding;

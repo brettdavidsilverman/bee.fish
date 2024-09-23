@@ -5,7 +5,6 @@
 #include "../web-request/web-request.h"
 #include "response-headers.h"
 #include "authentication.h"
-#include "../b-script/b-script.h"
 
 using namespace std;
 using namespace std::filesystem;

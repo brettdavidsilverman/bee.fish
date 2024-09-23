@@ -12,12 +12,12 @@
 #include "version.h"
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../b-string/b-string.h"
-#include "../Script/Script.hpp"
+#include "../Script/Variable.hpp"
+
 #include "match.h"
 #include "capture.h"
 #include "character.h"
 #include "range.h"
-
 #include "word.h"
 #include "ciword.h"
 #include "and.h"
@@ -28,9 +28,6 @@
 #include "invoke.h"
 #include "blanks.h"
 #include "load-on-demand.h"
-#include "../Miscellaneous/Optional.hpp"
-
-
 
 using namespace BeeFishBString;
 using namespace BeeFishScript;

@@ -27,9 +27,9 @@
 
 #define SERVER
 
-#include "../config.h"
+#include "../Config.hpp"
 
-#include "../database/database.h"
+#include "../Database/Database.hpp"
 #include "../b-string/string.h"
 
 #include "date.h"

@@ -3,8 +3,7 @@
 
 #include "../parser/parser.h"
 
-using namespace BeeFishParser;
-
+using namespace BeeFishParser;
 namespace BeeFishJSON
 {
    
