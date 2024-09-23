@@ -196,6 +196,11 @@ namespace BeeFishScript {
          _type = Type::INTEGER;
          _value._integer = integer;
       }
+      
+      Variable(const int& integer) {
+         _type = Type::INTEGER;
+         _value._integer = integer;
+      }
 
       Variable(const Number& number) {
          _type = Type::NUMBER;

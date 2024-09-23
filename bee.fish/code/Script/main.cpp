@@ -5,23 +5,23 @@
 #include "../config.h"
 #include "../parser/parser.h"
 #include "../parser/test.h"
-#include "b-script.h"
-#include "test.h"
+#include "Script.hpp"
+#include "Test.hpp"
 
 using namespace std;
 using namespace BeeFishParser;
 using namespace BeeFishJSON;
-using namespace BeeFishBScript;
+using namespace BeeFishScript;
 
 int main(int argc, const char* argv[]) {
 
-   cout << "bee.fish.b-script"
+   cout << "bee.fish.script"
            << endl
         << "C++ run time: "
            << __cplusplus
            << endl
         << "Version: "
-           << BEE_FISH_B_SCRIPT_VERSION
+           << BEE_FISH_SCRIPT_VERSION
            << endl
         << "JSON Version: "
            << BEE_FISH_JSON_VERSION
@@ -33,7 +33,7 @@ int main(int argc, const char* argv[]) {
    if (hasArg(argc, argv, "-test") >= 0)
    {
       cout << "Testing b-script..." << endl << endl;
-      if (!BeeFishBScript::test())
+      if (!BeeFishScript::test())
          return 1;
             
       return 0;
@@ -41,10 +41,11 @@ int main(int argc, const char* argv[]) {
    
    BeeFishJSON::JSON json;
 
-   BScriptParser parser(json);
+   ScriptParser parser(json);
 
    parser.read(cin);
-
+   parser.eof();
+ 
    if (parser.matched())
    {
       cout << "Valid JSON: " << endl;

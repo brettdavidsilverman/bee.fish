@@ -1,6 +1,6 @@
-OUTPUT=../../build/parser
+OUTPUT=../../build/script
 CFLAGS=-std=c++17 -Wall -fmax-errors=1 -Ofast
-DEPS=main.cpp version.h Variable.hpp ../../build/json Makefile
+DEPS=main.cpp Version.hpp Variable.hpp Type.hpp Script.hpp ScriptParser.hpp Test.hpp ../../build/json Makefile
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
@@ -11,10 +11,12 @@ test:	$(OUTPUT)
 ../../build/json:
 	cd ../json && make $(DEBUG)
 	
-debug:	clean
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
-debug:	parser
+debug:	$(OUTPUT)
+
+run_debug:	debug
+	gdb --args $(OUTPUT) -test
 
 clean:
 	rm -f $(OUTPUT)
