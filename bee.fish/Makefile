@@ -28,13 +28,13 @@ json:
 	-  mkdir build
 	cd code/json && make $(DEBUG)
 
-JSON:
-	-  mkdir build
-	cd code/JSON && make $(DEBUG)
-	
 Database:
 	-  mkdir build
 	cd code/Database && make $(DEBUG)
+
+Script:
+	-  mkdir build
+	cd code/Script && make $(DEBUG)
 
 web-request:
 	-  mkdir build

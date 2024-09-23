@@ -10,6 +10,7 @@ all:	$(DEPS)
 	cd parser && make $(DEBUG) test
 	cd json && make $(DEBUG) test
 	cd Database && make $(DEBUG) test
+	cd Script && make $(DEBUG) test
 	cd web-request && make $(DEBUG) test
 	#cd PowerEncoding && make $(DEBUG)
 	#cd JSON && make $(DEBUG)
