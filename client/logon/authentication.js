@@ -1,11 +1,9 @@
 class Authentication
 {
-   constructor(input) {
-      Object.assign(this, input);
+   constructor(authenticatorServer = document.location.origin) {
+     // Object.assign(this, input);
       this._authenticated = false;
-   
-      this.url = document.location.origin;
-      
+      this.url = authenticatorServer;
    }
    
    logon(secret)

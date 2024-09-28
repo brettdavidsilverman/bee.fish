@@ -14,7 +14,7 @@ install:
 	./start.sh $(PORT)
 	
 test:	$(OUTPUT)
-	$(BUILD)/https -test
+	$(OUTPUT) -test
 
 start:	$(OUTPUT)
 	./start.sh $(PORT)
@@ -40,6 +40,7 @@ $(BUILD)/web-request:
 $(BUILD)/script:
 	cd ../Script && make $(DEBUG)
 	
+debug:	
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	PORT = 8000

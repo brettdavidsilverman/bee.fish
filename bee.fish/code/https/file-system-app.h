@@ -67,6 +67,14 @@ namespace BeeFishHTTPS {
                   "no-store, max-age=0"
                }
             },
+            
+            {
+               ".xhtml",
+               {
+                  "application/xhtml+xml; charset=utf-8",
+                  "no-store, max-age=0"
+               }
+            },
             {
                ".js",
                {

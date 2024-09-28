@@ -42,13 +42,13 @@ https:
 	-  mkdir build
 	cd code/https && make $(DEBUG)
 	
-WebRequest:
-	-  mkdir build
-	cd code/WebRequest && make $(DEBUG)
+#WebRequest:
+#	-  mkdir build
+#	cd code/WebRequest && make $(DEBUG)
 
-WebServer:
-	-  mkdir build
-	cd code/WebServer && make $(DEBUG)
+#WebServer:
+#	-  mkdir build
+#	cd code/WebServer && make $(DEBUG)
 	
 #DBServer:
 #	#-  mkdir build
@@ -60,6 +60,7 @@ clean:
 	rm -f large2b.json
 	rm -f large2.json
 
+debug:	
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	PORT = 8000

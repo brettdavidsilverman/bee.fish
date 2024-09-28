@@ -78,21 +78,14 @@ static int database_handler(request_rec *r)
          << HOST 
          << r->uri;
          
-   char* args = nullptr;
    if (r->args && strlen(r->args))
    {
-      debug << "?" << r->args;
-      
-      if (strcmp(r->args, "document") == 0)
-         args = nullptr;
-      else
-         args = r->args;
+      debug << "?" << r->args;
    }
    
    debug << "\r\n";
    debug.flush();
     
-   
    std::string filename =
       WWW_ROOT_DIRECTORY;
    
@@ -117,7 +110,7 @@ static int database_handler(request_rec *r)
          database,
          r->connection->client_ip,
          r->uri,
-         args
+         r->args
       );
    }
    catch (runtime_error& error)
@@ -146,10 +139,6 @@ static int database_handler(request_rec *r)
       if (r->uri && strcmp(r->uri, "/id") == 0)
       {
          outputId(r);
-      }
-      else if (r->args && (strcmp(r->args, "document") == 0))
-      {
-         outputDocument(path, r);
       }
       else if (!path.isDeadEnd())
       {
@@ -245,12 +234,15 @@ static void inputJSON(Database& database, Path path, request_rec *r)
       path.clear();
    }
    
-   MinMaxPath document = path["document"];
-
    debug << now()
          << " Uploading document "
          << "\r\n";
    debug.flush();
+   
+   Path properties
+      = Path(database)[HOST][PROPERTIES];
+      
+   JSON2Path index(properties, path);
 
    int ret_code = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR);
    if (ret_code == OK)
@@ -259,6 +251,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
       if (ap_should_client_block(r))
       {
          while (
+             (index.result() == nullopt) &&
              (dataBytesRead =
                   ap_get_client_block(r, buffer, pageSize)) > 0)
          {
@@ -266,65 +259,21 @@ static void inputJSON(Database& database, Path path, request_rec *r)
                 string(buffer, dataBytesRead);
 
             if (posted.size())
-               document[pageCount++]
-                   .setData(posted);
+            {
+               index.read(posted);
+            }
          }
       }
    }
 
-   debug << now()
-         << " Parsing document "
-         << "\r\n";
-   debug.flush();
-         
-   optional<bool> read = nullopt;
-   
-   Path properties
-      = Path(database)[HOST][PROPERTIES];
-      
-   JSON2Path index(properties, path);
-
-   for (Size pageIndex = 0; pageIndex < pageCount; ++pageIndex)
-   {
-
-      float percentage =
-          ((float)pageIndex / (float)pageCount) * 100.0;
-
-      debug << now() << " "
-            << percentage << "%"
-            << "\r\n";
-      debug.flush();
-
-      document[pageIndex]
-          .getData(posted);
-
-      read =
-         index.read(posted);
-
-      if (read == false)
-      {
-         isOk == false;
-         break;
-      }
-      
-      if (read == true)
-      {
-         isOk = true;
-         break;
-      }
-   }
-
-   if (isOk && (index.result() == nullopt))
-   {
-      index.eof();
-   }
+   index.eof();
 
    Variable reply;
 
    if (index.result() == true)
    {
       debug << now()
-            << " 100% Document Ok"
+            << " Document Ok"
             << "\r\n";
       debug.flush();
 

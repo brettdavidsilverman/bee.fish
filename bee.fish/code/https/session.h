@@ -51,6 +51,8 @@ namespace BeeFishHTTPS {
       bool _isStillPosting = false;
       BString _exception;
       BString _ipAddress;
+      // End Of File error value
+      const int END_OF_FILE = 2;
    public:
 
       Session(
@@ -155,11 +157,17 @@ namespace BeeFishHTTPS {
          size_t bytesTransferred
       )
       {
-         if (error)
+         
+         if (error && error.value() != END_OF_FILE)
          {
             logException("handleRead", error);
             delete this;
             return;
+         }
+         
+         if (error.value() == END_OF_FILE)
+         {
+            _parser->eof();
          }
          
          if (bytesTransferred > 0)

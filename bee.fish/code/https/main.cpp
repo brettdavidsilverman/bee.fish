@@ -58,6 +58,7 @@ int main(int argc, const char* argv[])
       else
          port = 443;
       
+      initializeLogs();
       
       std::cout << "Setting up App Factories" << std::endl;
 
@@ -79,8 +80,8 @@ int main(int argc, const char* argv[])
             port
          );
 
-      initializeLogs();
-     
+      std::cout << "Started https on port " << port << " 😊" << endl;
+      
       io_context.run();
       
 

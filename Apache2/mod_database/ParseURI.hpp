@@ -243,9 +243,6 @@ namespace BeeFishApache2 {
       Path path = root[HOST][OBJECTS];
       Path properties = root[HOST][PROPERTIES];
 
-      debug << database << endl;
-      debug.flush();
-      
       string _uri = uri;
       
       BString segment;

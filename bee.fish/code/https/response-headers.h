@@ -16,7 +16,12 @@ namespace BeeFishHTTPS {
       public ResponseHeadersBase
    {
    public:
-      ResponseHeaders()
+      ResponseHeaders() :
+         ResponseHeadersBase(
+            {
+               { "access-control-allow-origin", "bee.fish" }
+            }
+         )
       {
       }
 
