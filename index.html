@@ -45,11 +45,16 @@ textarea {
       <div id="html">
       </div>
       <br />
-      <a href="https://bee.fish/client/">Javascript client library</a>
+      <a href="/client/logon/" id="logon">Logon</a>
+      <br />
+      <a href="/client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
       
       <script>
+var logon = document.getElementById("logon");
+logon.href += "?redirect=" + encodeURIComponent(document.location.href);
+
 var url = document.getElementById("url");
 var result = document.getElementById("result");
 var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");

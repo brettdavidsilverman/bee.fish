@@ -234,11 +234,6 @@ static void inputJSON(Database& database, Path path, request_rec *r)
       path.clear();
    }
    
-   debug << now()
-         << " Uploading document "
-         << "\r\n";
-   debug.flush();
-   
    Path properties
       = Path(database)[HOST][PROPERTIES];
       
@@ -284,7 +279,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    else
    {
 
-      path.clear();
+     // path.clear();
 
       Variable error =
           index.getErrorMessage();

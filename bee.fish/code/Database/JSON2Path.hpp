@@ -11,6 +11,12 @@ namespace BeeFishDatabase {
    using namespace BeeFishScript;
    using namespace BeeFishJSON;
 
+   /*
+   db[OBJECTS][objectPath][position][type][value]
+   db[PROPERTIES][key][VALUE][type][value][objectPath]
+   db[PROPERTIES][key][POSITION][objectPath] = position;
+   */
+   
    class JSON2Path :
       public JSONParser
    {

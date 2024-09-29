@@ -28,6 +28,7 @@ namespace BeeFishHTTPS {
             "/style.css",
             "/client/style.css",
             "/client/fetch.js",
+            "/client/evaluate.js",
             "/client/console/console.js",
             "/client/logon/",
             "/client/logon/index.html",
