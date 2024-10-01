@@ -5,9 +5,10 @@
 
 namespace BeeFishDatabase {
 
-    inline static const Index PROPERTIES = 0;
-    inline static const Index OBJECTS = 1;
-
+    inline static const Index URL = 0;
+    inline static const Index PROPERTIES = 1;
+    inline static const Index OBJECTS = 2;
+    
 }
 
 #endif

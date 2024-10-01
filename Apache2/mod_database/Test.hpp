@@ -72,10 +72,10 @@ namespace BeeFishApache2 {
    bool testURIQuery(Database& db, const std::string& queryStr, const std::string& expected)
    {
       cout << "\t" << "Testing query " << queryStr << flush;
-      Path start(db);
-      Path objects = start[OBJECTS];
-      Path properties = start[PROPERTIES];
-      Query query(properties, &objects);
+      Path root(db);
+      Path object = root[HOST][OBJECTS];
+      Path properties = root[HOST][PROPERTIES];
+      Query query(properties, &object);
       Parser parser(query);
       std::stringstream stream(queryStr);
       parser.read(stream);
@@ -86,7 +86,7 @@ namespace BeeFishApache2 {
          
       if (success)
       {
-         Path2JSON path(properties, objects);
+         Path2JSON path(properties, object);
          std::stringstream stream;
          stream << path;
          success = (stream.str() == expected);

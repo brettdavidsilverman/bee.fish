@@ -45,7 +45,7 @@ textarea {
       <div id="html">
       </div>
       <br />
-      <a href="/client/logon/" id="logon">Logon</a>
+      <a href="https://bee.fish:8000/client/logon/" id="logon">Logon</a>
       <br />
       <a href="/client/">Javascript client library</a>
       <br />
@@ -53,7 +53,7 @@ textarea {
       
       <script>
 var logon = document.getElementById("logon");
-logon.href += "?redirect=" + encodeURIComponent(document.location.href);
+logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
 var url = document.getElementById("url");
 var result = document.getElementById("result");

@@ -240,8 +240,9 @@ namespace BeeFishApache2 {
       Debug debug;
       
       Path root(database);
-      Path path = root[HOST][OBJECTS];
       Path properties = root[HOST][PROPERTIES];
+      Path path = root[HOST][URL];
+      
 
       string _uri = uri;
       
