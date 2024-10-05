@@ -563,7 +563,7 @@ namespace BeeFishDatabase
       if (success)
       {
          MinMaxPath path = root["string"];
-         JSON2Path parser(root[PROPERTIES], path);
+         JSONPathParser parser(path);
          parser.read("\"Hello World\"");
          parser.eof();
          cout << "\t\tParse string " << flush;
@@ -600,9 +600,10 @@ namespace BeeFishDatabase
       if (success)
       {
          Path path = root["array"];
-         JSON2Path parser(root[PROPERTIES], path);
+         JSONPathParser parser(path);
          parser.read("[1,[]]");
-         
+         parser.eof();
+        
          cout << "\tParse array ";
          success &&
             parser.result() == true;
@@ -666,11 +667,12 @@ namespace BeeFishDatabase
          BeeFishMisc::outputSuccess(success);
       }
       
+
       cout << "Test numbers" << endl;
       if (success) {
          cout << "\tInteger" << flush;
          Path path = root["integer"];
-         JSON2Path parser(root[PROPERTIES], path);
+         JSONPathParser parser(path);
          parser.read("1234");
          parser.eof();
          success = parser.matched();
@@ -707,12 +709,14 @@ namespace BeeFishDatabase
       cout << "Test Array 2 Path: ";
  
       Database database;
-      Path path = database;
-      JSON2Path parser(Path(database)[PROPERTIES], path);
+      Path path = Path(database)["array"];
+      JSONPathParser parser(path);
       parser.read("[[]]");
+      parser.eof();
       bool success = true;
       
       success = (parser.result() == true);
+      BeeFishMisc::outputSuccess(success);
       
       if (success) {
          success = path.contains(Type::ARRAY);
@@ -727,6 +731,7 @@ namespace BeeFishDatabase
          MinMaxPath maxPath = path;
          Size max = maxPath.max<Size>();
          success &= testResult("\tmax == 0", max == 0);
+
          for (Size i = 0; i <= max; ++i)
          {
             if (!path.contains(i))
@@ -759,7 +764,7 @@ namespace BeeFishDatabase
       
       Database database;
       Path path = database;
-      JSON2Path parser(Path(database)[PROPERTIES], path);
+      JSON2Path parser(database, path);
       parser.read("[[1]]");
       bool success = true;
       
@@ -881,7 +886,7 @@ namespace BeeFishDatabase
       remove(tempFile);
       
       ifstream inputFile(file);
-      JSON2Path parser(root[PROPERTIES], root[file]);
+      JSON2Path parser(root.database(), root[file]);
       parser.read(inputFile);
       parser.eof();
       inputFile.close();

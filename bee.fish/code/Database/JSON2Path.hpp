@@ -22,7 +22,8 @@ namespace BeeFishDatabase {
    {
    protected:
       Path _properties;
-      Path _object;
+      Path _objects;
+      Path _start;
       
       vector<Path> _pathStack;
       vector<bool> _containerStack;
@@ -31,7 +32,8 @@ namespace BeeFishDatabase {
       vector<Size> _objectPropertyIndexStack;
 
    public:
-
+       
+/*
       JSON2Path(const Path& properties, const Path& object ) :
          JSONParser(),
          _properties(properties),
@@ -40,19 +42,34 @@ namespace BeeFishDatabase {
          push_back_path(_object);
          push_back_container(false);
       }
-      
-      JSON2Path(Database& database, const Path& object) :
-         JSON2Path(
-            Path(database)[HOST][PROPERTIES],
-            object
-         )
+      */
+      JSON2Path(Database& database, const Path& start)
       {
+          
+         _properties =
+            Path(database)[HOST][PROPERTIES];
+            
+         _objects =
+            Path(database)[HOST][OBJECTS];
+            
+         _start = start;
+         
+         push_back_path(_start);
+         push_back_container(false);
       }
       
       JSON2Path(Database& database) :
          JSON2Path(
             database,
-            Path(database)[HOST][OBJECTS]
+            Path(database)
+         )
+      {
+      }
+      
+      JSON2Path(Path& path) :
+         JSON2Path(
+            path.database(),
+            path
          )
       {
       }

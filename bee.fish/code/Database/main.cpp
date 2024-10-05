@@ -56,6 +56,8 @@ int main(int argc, const char* argv[])
    Database database(filename);
    cout << database << endl;
    
+   Path root(database);
+   
    bool read =
       (hasArg(argc, argv, "-read") != -1);
    
@@ -90,14 +92,14 @@ int main(int argc, const char* argv[])
    
    if (large)
    {
-      JSON2Path json(database);
+      JSON2Path json(database, root);
       ifstream file("/home/bee/bee.fish/large.json");
       json.read(file);
    }
 
    if (input)
    {
-      JSON2Path json(database);
+      JSON2Path json(database, root);
       json.read(cin);
    }
    
