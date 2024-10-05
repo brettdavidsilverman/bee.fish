@@ -16,7 +16,7 @@ namespace BeeFishApache2 {
    using namespace std::filesystem;
 
    inline bool testParseURI();
-   inline bool testURIQuery(Database& db, const std::string& query, const std::string& expected);
+   inline bool testURIQuery(Path start, const std::string& query, const std::string& expected);
    inline bool testAllFiles(string url, string directory);
    inline bool testFile(string url, string directory, string file, bool expect = true);
    
@@ -44,8 +44,8 @@ namespace BeeFishApache2 {
       bool success = true;
       
       Database db;
-      
-      JSON2Path json(db);
+      Path start = Path(db)[HOST][URLS]["name"];
+      JSONPathParser json(start);
       std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\"}}");
       json.read(stream);
       json.eof();
@@ -57,10 +57,10 @@ namespace BeeFishApache2 {
       {
          
        
-         success &= testURIQuery(db, "this.name.first", "\"Bee\"");
-         success &= testURIQuery(db, "this[\"name\"][\"first\"]", "\"Bee\"");
-         success &= testURIQuery(db, "this[\"name\"].first", "\"Bee\"");
-         success &= testURIQuery(db, "this.name[\"first\"]", "\"Bee\"");
+         success &= testURIQuery(start, "this.name.first", "\"Bee\"");
+         success &= testURIQuery(start, "this[\"name\"][\"first\"]", "\"Bee\"");
+         success &= testURIQuery(start, "this[\"name\"].first", "\"Bee\"");
+         success &= testURIQuery(start, "this.name[\"first\"]", "\"Bee\"");
          
          outputSuccess(success);
       }
@@ -69,13 +69,10 @@ namespace BeeFishApache2 {
       
    }
    
-   bool testURIQuery(Database& db, const std::string& queryStr, const std::string& expected)
+   bool testURIQuery(Path object, const std::string& queryStr, const std::string& expected)
    {
       cout << "\t" << "Testing query " << queryStr << flush;
-      Path root(db);
-      Path object = root[HOST][OBJECTS];
-      Path properties = root[HOST][PROPERTIES];
-      Query query(properties, &object);
+      Query query(&object);
       Parser parser(query);
       std::stringstream stream(queryStr);
       parser.read(stream);
@@ -86,7 +83,7 @@ namespace BeeFishApache2 {
          
       if (success)
       {
-         Path2JSON path(properties, object);
+         JSONPath path(object);
          std::stringstream stream;
          stream << path;
          success = (stream.str() == expected);

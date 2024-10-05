@@ -234,10 +234,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
       path.clear();
    }
    
-   Path properties
-      = Path(database)[HOST][PROPERTIES];
-      
-   JSON2Path index(properties, path);
+   JSON2Path index(path);
 
    int ret_code = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR);
    if (ret_code == OK)

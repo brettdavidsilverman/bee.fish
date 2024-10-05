@@ -14,11 +14,12 @@ namespace BeeFishApache2 {
    class IdentifierPath : public Match
    {
    protected:
-      Path _properties;
+      JSONPath _jsonPath;
       Path* _path;
+      BString _error;
    public:
-      IdentifierPath(const Path& properties, Path* path) :
-         _properties(properties),
+      IdentifierPath(Path* path) :
+         _jsonPath(*path),
          _path(path)
       {
       }
@@ -26,23 +27,23 @@ namespace BeeFishApache2 {
       virtual void success()
       override
       {
-         if (_properties.contains(value()))
+         BString& key = value();
+         if (_path->contains(Type::OBJECT))
          {
-            Path property =
-               _properties[value()];
-                
-            if (_path->contains(Type::OBJECT))
+            if (_jsonPath.contains(*_path, key))
             {
                *_path << Type::OBJECT;
-               if (property.contains(_path->index()))
-               {
-                  property = property[_path->index()];
-                  Size position = -1;
-                  property.getData<Size>(position);
-                  *_path << position;
-                  Match::success();
-                  return;
-               }
+                #warning path might need [type]
+               Index position =
+                  _jsonPath.getObjectKeyPosition(
+                     *_path,
+                     key
+                  );
+                  
+               *_path << position;
+                      
+               Match::success();
+               return;
             
             }
          }
@@ -53,12 +54,16 @@ namespace BeeFishApache2 {
          stream
             << "Invalid property"
             << " "
-            << "\"" << escape(value()) << "\"";
+            << "\"" << escape(key) << "\"";
         
-         throw runtime_error(stream.str());
+         _error = stream.str();
         
-         
                   
+      }
+      
+      const BString& getError() const
+      {
+         return _error;
       }
       
       
@@ -68,8 +73,8 @@ namespace BeeFishApache2 {
    {
    
    public:
-      QuotedIdentifier(const Path& properties, Path* path) :
-         IdentifierPath(properties, path)
+      QuotedIdentifier(Path* path) :
+         IdentifierPath(path)
       {
          _match = new BeeFishJSON::String();
       }
@@ -112,8 +117,8 @@ namespace BeeFishApache2 {
    class Identifier : public IdentifierPath
    {
    public:
-      Identifier(const Path& properties, Path* path) :
-         IdentifierPath(properties, path)
+      Identifier(Path* path) :
+         IdentifierPath(path)
       {
          _match =
             new Capture(
@@ -129,31 +134,49 @@ namespace BeeFishApache2 {
       public Match
    {
    protected:
-      Path _properties;
       Path* _start;
+      QuotedIdentifier* _quotedIdentifier;
+      Identifier* _identifier;
+      BString _error;
       
    public:
       PropertyPath() {
          assert(false);
       }
       
-      PropertyPath(const Path& properties, Path* start)
-         :
-            _properties(properties),
-            _start(start)
+      PropertyPath(Path* start) :
+         _start(start)
       {
          _match = new Or(
             new And(
                new Character('['),
-               new QuotedIdentifier(_properties, _start),
+               _quotedIdentifier =
+                 new QuotedIdentifier(_start),
                new Character(']')
             ),
             new And(
                new Character('.'),
-               new Identifier(_properties, _start)
+               _identifier =
+                  new Identifier(_start)
             )
             
          );
+      }
+      
+      virtual void fail()
+      override
+      {
+         if (_quotedIdentifier->getError().length())
+            _error = _quotedIdentifier->getError();
+         else if (_identifier->getError().length())
+            _error = _identifier->getError();
+            
+         Match::fail();
+      }
+      
+      const BString& getError() const
+      {
+         return _error;
       }
       
    };
@@ -161,12 +184,13 @@ namespace BeeFishApache2 {
    class PropertyPaths : public Repeat<PropertyPath>
    {
    protected:
-      Path _properties;
       Path* _start;
+      PropertyPath* _last;
+      BString _error;
+      
    public:
-      PropertyPaths(const Path& properties, Path* start) :
+      PropertyPaths(Path* start) :
          Repeat<PropertyPath>(0),
-         _properties(properties),
          _start(start)
       {
       }
@@ -175,12 +199,25 @@ namespace BeeFishApache2 {
       override
       {
          PropertyPath* item =
-            new PropertyPath(_properties, _start);
+            new PropertyPath(_start);
             
          if (_parser)
             item->setup(_parser);
                
+         _last = item;
+         
          return item;
+      }
+      
+      virtual void fail()
+      override
+      {
+         _error = _last->getError();
+      }
+      
+      const BString& getError() const
+      {
+         return _error;
       }
       
      
@@ -192,21 +229,17 @@ namespace BeeFishApache2 {
    protected:
       Word* _wordThis;
       PropertyPaths* _propertyPaths;
-      protected:
-      Path _properties;
       Path* _start;
       
    public:
-      Query(const Path& properties, Path* start) 
-         :
-         _properties(properties),
+      Query(Path* start) :
          _start(start)
       {
          _match =
             new And(
                _wordThis = new Word("this"),
                _propertyPaths =
-                  new PropertyPaths(_properties, _start)
+                  new PropertyPaths(_start)
             );
       }
       
@@ -233,6 +266,11 @@ namespace BeeFishApache2 {
        
       }
       
+      const BString& getError() const
+      {
+         return _propertyPaths->getError();
+      }
+      
      
    };
 
@@ -240,8 +278,7 @@ namespace BeeFishApache2 {
       Debug debug;
       
       Path root(database);
-      Path properties = root[HOST][PROPERTIES];
-      Path path = root[HOST][URL];
+      Path path = root[HOST][URLS];
       
 
       string _uri = uri;
@@ -258,13 +295,10 @@ namespace BeeFishApache2 {
 
       if (args && strlen(args)) {
          BString _args = args;
-         Query query(properties, &path);
+         Query query(&path);
          Parser parser(query);
          parser.read(_args.decodeURI());
          parser.eof();
-
-         if (query.result() != true)
-            throw runtime_error("Invalid property");
       }
       
       return path;
