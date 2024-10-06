@@ -18,6 +18,8 @@ namespace BeeFishScript {
       OBJECT,
       UNKNOWN
    };
+   
+   
 
    const char* ToChar (const Type& type)
    {
@@ -52,6 +54,12 @@ namespace BeeFishScript {
       }
 
       return nullptr;
+   }
+   
+   ostream& operator << (ostream& out, const Type& type)
+   {
+      out << ToChar(type);
+      return out;
    }
 
    PowerEncoding& operator << (PowerEncoding& out, const Type& type)

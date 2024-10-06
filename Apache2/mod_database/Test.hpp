@@ -16,7 +16,7 @@ namespace BeeFishApache2 {
    using namespace std::filesystem;
 
    inline bool testParseURI();
-   inline bool testURIQuery(Path start, const std::string& query, const std::string& expected);
+   inline bool testURIQuery(JSONPath start, const std::string& query, const std::string& expected);
    inline bool testAllFiles(string url, string directory);
    inline bool testFile(string url, string directory, string file, bool expect = true);
    
@@ -46,6 +46,8 @@ namespace BeeFishApache2 {
       Database db;
       Path start = Path(db)[HOST][URLS]["name"];
       JSONPathParser json(start);
+      cerr << "testParseURI " << json.index() << endl;
+      
       std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\"}}");
       json.read(stream);
       json.eof();
@@ -69,7 +71,7 @@ namespace BeeFishApache2 {
       
    }
    
-   bool testURIQuery(Path object, const std::string& queryStr, const std::string& expected)
+   bool testURIQuery(JSONPath object, const std::string& queryStr, const std::string& expected)
    {
       cout << "\t" << "Testing query " << queryStr << flush;
       Query query(&object);

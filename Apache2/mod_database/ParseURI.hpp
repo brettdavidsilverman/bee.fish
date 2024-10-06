@@ -14,12 +14,10 @@ namespace BeeFishApache2 {
    class IdentifierPath : public Match
    {
    protected:
-      JSONPath _jsonPath;
-      Path* _path;
+      JSONPath* _path;
       BString _error;
    public:
-      IdentifierPath(Path* path) :
-         _jsonPath(*path),
+      IdentifierPath(JSONPath* path) :
          _path(path)
       {
       }
@@ -28,27 +26,22 @@ namespace BeeFishApache2 {
       override
       {
          BString& key = value();
-         if (_path->contains(Type::OBJECT))
+         cerr << endl << "IdentifierSuccess: " << key << ":" << (*_path).index() << " " << (_path->contains(key) ? "contains" : "no contain") << endl;
+         if (_path->contains(key))
          {
-            if (_jsonPath.contains(*_path, key))
-            {
-               *_path << Type::OBJECT;
-                #warning path might need [type]
-               Index position =
-                  _jsonPath.getObjectKeyPosition(
-                     *_path,
-                     key
-                  );
+            Index position =
+               _path->getObjectKeyPosition(key);
                   
-               *_path << position;
-                      
-               Match::success();
-               return;
+            *_path << Type::OBJECT
+                   << position;
+                   
+            _path->unlock();
             
-            }
+            Match::success();
+            return;
+            
+           
          }
-         
-         Match::fail();
          
          std::stringstream stream;
          stream
@@ -58,6 +51,8 @@ namespace BeeFishApache2 {
         
          _error = stream.str();
         
+         Match::fail();
+         
                   
       }
       
@@ -73,7 +68,7 @@ namespace BeeFishApache2 {
    {
    
    public:
-      QuotedIdentifier(Path* path) :
+      QuotedIdentifier(JSONPath* path) :
          IdentifierPath(path)
       {
          _match = new BeeFishJSON::String();
@@ -117,7 +112,7 @@ namespace BeeFishApache2 {
    class Identifier : public IdentifierPath
    {
    public:
-      Identifier(Path* path) :
+      Identifier(JSONPath* path) :
          IdentifierPath(path)
       {
          _match =
@@ -134,7 +129,7 @@ namespace BeeFishApache2 {
       public Match
    {
    protected:
-      Path* _start;
+      JSONPath* _start;
       QuotedIdentifier* _quotedIdentifier;
       Identifier* _identifier;
       BString _error;
@@ -144,14 +139,14 @@ namespace BeeFishApache2 {
          assert(false);
       }
       
-      PropertyPath(Path* start) :
+      PropertyPath(JSONPath* start) :
          _start(start)
       {
          _match = new Or(
             new And(
                new Character('['),
                _quotedIdentifier =
-                 new QuotedIdentifier(_start),
+                  new QuotedIdentifier(_start),
                new Character(']')
             ),
             new And(
@@ -184,12 +179,12 @@ namespace BeeFishApache2 {
    class PropertyPaths : public Repeat<PropertyPath>
    {
    protected:
-      Path* _start;
+      JSONPath* _start;
       PropertyPath* _last;
       BString _error;
       
    public:
-      PropertyPaths(Path* start) :
+      PropertyPaths(JSONPath* start) :
          Repeat<PropertyPath>(0),
          _start(start)
       {
@@ -229,10 +224,10 @@ namespace BeeFishApache2 {
    protected:
       Word* _wordThis;
       PropertyPaths* _propertyPaths;
-      Path* _start;
+      JSONPath* _start;
       
    public:
-      Query(Path* start) :
+      Query(JSONPath* start) :
          _start(start)
       {
          _match =
@@ -293,15 +288,20 @@ namespace BeeFishApache2 {
          }
       }
 
+      JSONPath jsonPath(path);
+      
+      
       if (args && strlen(args)) {
          BString _args = args;
-         Query query(&path);
+         
+         Query query(&jsonPath);
          Parser parser(query);
          parser.read(_args.decodeURI());
          parser.eof();
+        
       }
       
-      return path;
+      return jsonPath;
       
    }
    

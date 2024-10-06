@@ -169,7 +169,7 @@ namespace BeeFishJSON
 
       if (_parser->isJSONParser()) {
          JSONParser* parser = (JSONParser*)_parser;
-         parser->onobjectkey(this, key);
+         //parser->onobjectkey(this, key);
          
          if (parser->_onkeys.count(key->value()) > 0) {
             JSONParser::OnKey _onkey = parser->_onkeys[key->value()];

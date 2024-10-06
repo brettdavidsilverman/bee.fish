@@ -32,7 +32,7 @@ int main(int argc, const char* argv[])
    bool test =
       (hasArg(argc, argv, "-test") != -1);
 
-   test = true;
+   //test = false;
    
    if (test)
    {
@@ -92,20 +92,20 @@ int main(int argc, const char* argv[])
    
    if (large)
    {
-      JSON2Path json(database, root);
+      JSONPathParser json(root);
       ifstream file("/home/bee/bee.fish/large.json");
       json.read(file);
    }
 
    if (input)
    {
-      JSON2Path json(database, root);
+      JSONPathParser json(root);
       json.read(cin);
    }
    
    if (output)
    {
-      Path2JSON path(database);
+      JSONPath path(root);
       cout << path << endl;
    }
 

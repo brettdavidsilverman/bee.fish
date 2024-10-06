@@ -596,7 +596,7 @@ namespace BeeFishDatabase
          BeeFishMisc::outputSuccess(success);
       }
       
-      cout << "Test arrays" << endl;
+      cout << "Test arrays \"[1,[]]\"" << endl;
       if (success)
       {
          Path path = root["array"];
@@ -706,7 +706,7 @@ namespace BeeFishDatabase
    inline bool testArray2Path()
    {
 
-      cout << "Test Array 2 Path: ";
+      cout << "Test Array 2 Path \"[[]]\" " << endl;
  
       Database database;
       Path path = Path(database)["array"];
@@ -729,9 +729,15 @@ namespace BeeFishDatabase
       
       if (success) {
          MinMaxPath maxPath = path;
+         Stack stack(maxPath);
+         int i;
+         while (maxPath.next(stack, i))
+            cerr << "MAX: " << (Type)i << endl;
+            
          Size max = maxPath.max<Size>();
          success &= testResult("\tmax == 0", max == 0);
-
+         assert(success);
+         
          for (Size i = 0; i <= max; ++i)
          {
             if (!path.contains(i))
@@ -764,7 +770,7 @@ namespace BeeFishDatabase
       
       Database database;
       Path path = database;
-      JSON2Path parser(database, path);
+      JSONPathParser parser(path);
       parser.read("[[1]]");
       bool success = true;
       
@@ -886,7 +892,7 @@ namespace BeeFishDatabase
       remove(tempFile);
       
       ifstream inputFile(file);
-      JSON2Path parser(root.database(), root[file]);
+      JSONPathParser parser(root[file]);
       parser.read(inputFile);
       parser.eof();
       inputFile.close();
@@ -896,7 +902,7 @@ namespace BeeFishDatabase
       if (success && expect)
       {
          ofstream outputFile(tempFile);
-         Path2JSON path(root[PROPERTIES], root[file]);
+         JSONPath path(root[file]);
          outputFile << path;
          outputFile.close();
          

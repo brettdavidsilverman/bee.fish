@@ -24,34 +24,41 @@ namespace BeeFishDatabase {
    {
    protected:
       
-      vector<Path> _pathStack;
+      vector<JSONPath> _pathStack;
       vector<bool> _containerStack;
       vector<Index> _arrayIndexStack;
       vector<BString> _keyStack;
       vector<Index> _objectPropertyIndexStack;
 
    public:
-       
+      using JSONParser::read;
 
-      JSONPathParser(Path& path) :
+      JSONPathParser(Path path) :
          JSONParser(),
          JSONPath(path)
       {
-        // push_back_path(path);
-       //  push_back_container(false);
+         push_back_path(*this);
+         push_back_container(false);
       }
 
       virtual ~JSONPathParser()
       {
-         //pop_back_path();
-        // pop_back_container();
+         pop_back_path();
+         pop_back_container();
+         /*
+         cerr << "_pathStack:" << _pathStack.size() << endl;
+         cerr << "_containerStack:" << _containerStack.size() << endl;
+         cerr << "_arrayIndexStack:" << _arrayIndexStack.size() << endl;
+         cerr << "_keyStack:" << _keyStack.size() << endl;
+         cerr << "_objectPropertyIndexStack:" << _objectPropertyIndexStack.size() << endl;
+        */
+         assert(_pathStack.size() == 0 &&
+                _containerStack.size() == 0 &&
+                _arrayIndexStack.size() == 0 &&
+                _keyStack.size() == 0 &&
+                _objectPropertyIndexStack.size() == 0);
       }
-      
-      virtual optional<bool> read(const char* str)
-      {
-         return JSONParser::read(str);
-      }
-          
+     
       /*
    _objects[objectId][position][type][value]
    
@@ -59,62 +66,67 @@ namespace BeeFishDatabase {
       
    protected:
       
-      virtual void setVariable(Path path, const Type type, const BString& value = "")
+      virtual void setVariable(const Type type, const BString& value = "")
       {
-         /*
-         Path valuePath;
-         
+
+         JSONPath path = topPath();
+            
          bool isArrayContainer = topContainer();
+         cerr << "setVariable1 " << path.id(isArrayContainer ? Type::ARRAY : Type::OBJECT) << ":" << type << ":" << value << endl;
          if (isArrayContainer)
          {
              // Get next array index
-             Index& index = topArrayIndex();
-             valuePath = topPath()[index++];
+             Size& index = topArrayIndex();
+             path = path[index++];
              
          }
-         else if (_keyStack.size())
-         {
+         else if (_keyStack.size()) {
             BString& key = topKey();
-            JSONPath jsonPath(topPath());
-            valuePath = jsonPath[key];
+            path = path[key];
             pop_back_key();
          }
-         else
-            valuePath = topPath();
-            
-         */
-         Path valuePath = path[type];
-       
+         
+         setVariable(path, type, value);
+
+     }
+     
+     virtual void setVariable(JSONPath path, const Type type, const BString& value)
+     {
+         cerr << "setVariable2 " << path.index() << ":" << type << ":" << value << endl;
+         path = path[type];
+         
          switch (type)
          {
             case Type::UNDEFINED:
-               valuePath.deleteData();
+               path.deleteData();
                break;
             case Type::NULL_:
             case Type::BOOLEAN:
             case Type::INTEGER:
             case Type::NUMBER:
             case Type::STRING:
-               valuePath.setData(value);
+               path.setData(value);
+               break;
+            case Type::ARRAY:
+               push_back_path(path);
+               push_back_container(true);
                break;
             case Type::OBJECT:
-            case Type::ARRAY:
+               push_back_path(path);
+               push_back_container(false);
                break;
             default:
-               throw std::logic_error("JSONPath");
+               throw std::logic_error("JSON2Path");
          }
 
              
-     }
+      }
 
+      
    public:
     
       
-      Path& topPath() {
-          
-         if (_pathStack.size() == 0)
-            return *this;
-            
+      JSONPath topPath() {
          return 
             _pathStack[_pathStack.size() - 1];
       }
@@ -131,19 +143,19 @@ namespace BeeFishDatabase {
             [_keyStack.size() - 1];
       }
 
-      Index& topObjectPropertyIndex() {
+      Size& topObjectPropertyIndex() {
          return
             _objectPropertyIndexStack
             [_objectPropertyIndexStack.size() - 1];
       }
 
-      Index& topArrayIndex() {
+      Size& topArrayIndex() {
          return 
             _arrayIndexStack
             [_arrayIndexStack.size() - 1];
       }
       
-      void push_back_path(const Path& path)
+      void push_back_path(JSONPath path)
       {
          _pathStack.push_back(path);
       }
@@ -151,15 +163,10 @@ namespace BeeFishDatabase {
       void push_back_container(bool isArrayContainer)
       {
          _containerStack.push_back(isArrayContainer);
-         //if (isArrayContainer)
-            
-         //else
-         //   _objectPropertyIndexStack.push_back(0);
-      }
-      
-      void push_back_array_index(Index start = 0)
-      {
-         _arrayIndexStack.push_back(start);
+         if (isArrayContainer)
+            _arrayIndexStack.push_back(0);
+         else
+            _objectPropertyIndexStack.push_back(0);
       }
 
       void push_back_key(const BString& key)
@@ -174,12 +181,14 @@ namespace BeeFishDatabase {
       
       void pop_back_container()
       {
+         bool isArrayContainer = topContainer();
+         if (isArrayContainer) {
+            _arrayIndexStack.pop_back();
+         }
+         else 
+            _objectPropertyIndexStack.pop_back();
+
          _containerStack.pop_back();
-      }
-      
-      void pop_back_array_index()
-      {
-         _arrayIndexStack.pop_back();
       }
 
       void pop_back_key()
@@ -191,15 +200,16 @@ namespace BeeFishDatabase {
       virtual void onbeginobject(JSON* match) 
       override {
  
-         push_back_path(topPath()[Type::OBJECT]);
-         push_back_container(false);
-         
+         setVariable(
+            Type::OBJECT
+         );
          
       }
       
       virtual void onobjectkey(BeeFishJSON::Object* object, ObjectKey* key)
       override
       {
+         cerr << "PUSH_BACK_KEY " << key->value() << endl;
          push_back_key(key->value());
       }
       
@@ -214,49 +224,42 @@ namespace BeeFishDatabase {
       override
       {
 
-         push_back_path(topPath()[Type::ARRAY]);
-         push_back_container(true);
-         push_back_array_index(0);
+         setVariable(
+            Type::ARRAY
+         );
+         
       }
 
-      virtual void onarrayvalue(JSON* json) 
-      {
-         // Get next array index
-         Index& index = topArrayIndex();
-         cerr << index << ": " << json->type() << ": " << json->value() << endl;
-         Path path = topPath()[index++];
-         setVariable(path, json->type(), json->value());
+      virtual void onarrayvalue(JSON* json) {
+
       }
 
-      virtual void onendarray(JSON* match) 
-      {
+      virtual void onendarray(JSON* match) {
           
          pop_back_path();
          pop_back_container();
-         pop_back_array_index();
+        
       }
 
-      virtual void onobjectvalue(BString& key, const JSON* json)
-      {
-         JSONPath jsonPath(topPath());
-         Path valuePath = jsonPath[key];
-         setVariable(valuePath, json->type(), json->value());
+      virtual void onobjectvalue(BString& key, const JSON* json) {
+
+         
       }
       
       virtual void onvalue(JSON* json)
       override
       {
-         
-         if ( _pathStack.size() == 0 )
+          
+         if (json->type() != Type::ARRAY &&
+             json->type() != Type::OBJECT)
          {
             setVariable(
-               topPath(),
                json->type(),
                json->value()
             );
          }
          
- 
+         
       }
                
       
@@ -264,7 +267,7 @@ namespace BeeFishDatabase {
    };
 
    
-
+   
 }
 
 #endif

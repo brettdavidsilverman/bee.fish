@@ -1,7 +1,7 @@
 BUILD = ../../build
 CC = g++
 CFLAGS = -std=c++17 -fmax-errors=1
-DEPS= $(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp Data.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Version.hpp Path.hpp Stack.hpp Iterator.hpp Makefile JSON2Path.hpp Path2JSON.hpp
+DEPS= $(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp Data.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Version.hpp Path.hpp Stack.hpp Iterator.hpp Makefile JSONPath.hpp
 OUTPUT = $(BUILD)/Database
 LARGE = ../../../large.json
 

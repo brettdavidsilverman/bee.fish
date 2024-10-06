@@ -43,6 +43,9 @@ clean:
 test: a.out reload
 	./a.out -test
 
+run_debug:	debug a.out
+	gdb --args ./a.out -test
+	
 debug:	clean
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG

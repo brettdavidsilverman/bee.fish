@@ -39,6 +39,24 @@ namespace BeeFishDatabase {
       {
          
       }
+      
+      template<typename T>
+      MinMaxPath operator [] (const T& key)
+      {
+
+         Path path(*this);
+
+         path << key;
+
+         path.unlock();
+
+         return path;
+      }
+      
+      MinMaxPath operator [] (const char* key)
+      {
+         return (*this)[BString(key)];
+      }
 
    protected:
 
