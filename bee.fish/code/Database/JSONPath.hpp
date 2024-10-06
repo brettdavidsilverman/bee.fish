@@ -94,7 +94,7 @@ namespace BeeFishDatabase {
       JSONPath operator [] (Index arrayIndex)
       {
        
-         JSONPath path(*this);
+         JSONPath path = *this;
          
          cerr << "operator[arrayIndex] " << path.id(Type::ARRAY) << ":" << arrayIndex << endl;
          
@@ -107,9 +107,10 @@ namespace BeeFishDatabase {
       
       JSONPath operator [] (Type type)
       {
-          cerr << "OPERATOR[]" << type << endl;
+          cerr << "OPERATOR[" << index() << "]" << type;
           JSONPath path = *this;
           path << (Size)type;
+          cerr << " -> " << path.index() << endl;
           return path;
       }
       
@@ -155,12 +156,11 @@ namespace BeeFishDatabase {
                
             MinMaxPath object = (*this);
             
-            if (!object.contains(Type::OBJECT) ||
-                object[Type::OBJECT].isDeadEnd())
+            if (object.isDeadEnd())
                position = 0;
             else {
                position =
-                  object[Type::OBJECT].max<Index>()
+                  object.max<Index>()
                   + 1;
             }
             

@@ -92,8 +92,9 @@ namespace BeeFishDatabase {
      
      virtual void setVariable(JSONPath path, const Type type, const BString& value)
      {
-         cerr << "setVariable2 " << path.index() << ":" << type << ":" << value << endl;
          path = path[type];
+         
+         cerr << "setVariable2 " << path.index() << ":" << type << ":" << value << endl;
          
          switch (type)
          {
@@ -206,7 +207,7 @@ namespace BeeFishDatabase {
          
       }
       
-      virtual void onobjectkey(BeeFishJSON::Object* object, ObjectKey* key)
+      virtual void onobjectkey(ObjectKey* key)
       override
       {
          cerr << "PUSH_BACK_KEY " << key->value() << endl;

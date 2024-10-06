@@ -96,8 +96,9 @@ namespace BeeFishJSON
       virtual void onbeginobject(JSON* match) {
       }
       
-      virtual void onobjectkey(Object* object, ObjectKey* key)
+      virtual void onobjectkey(ObjectKey* key)
       {
+          cerr << key->value() << endl;
       }
       
       virtual void onobjectvalue(Object* object, ObjectKey* key, JSON* value)
@@ -169,8 +170,6 @@ namespace BeeFishJSON
 
       if (_parser->isJSONParser()) {
          JSONParser* parser = (JSONParser*)_parser;
-         //parser->onobjectkey(this, key);
-         
          if (parser->_onkeys.count(key->value()) > 0) {
             JSONParser::OnKey _onkey = parser->_onkeys[key->value()];
             JSON* json = static_cast<JSON*>(value->_match);
@@ -197,7 +196,7 @@ namespace BeeFishJSON
    {
 
       if (_parser->isJSONParser()) {
-         jsonParser()->onobjectkey(this, key);
+         jsonParser()->onobjectkey(key);
       }
 
    }

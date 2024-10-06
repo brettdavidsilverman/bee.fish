@@ -104,6 +104,9 @@ namespace BeeFishJSON
       virtual void onkeyvalue(Key* key, Value* value) {
       }
       
+      virtual void onobjectkey(Key* key)
+      {
+      }
       
       
 
@@ -138,6 +141,7 @@ namespace BeeFishJSON
          _key = new Key(),
          [this](Match* match) {
             _set->onsetupkeyvalue(_key, _value);
+            _set->onobjectkey(_key);
             return true;
          }
       );

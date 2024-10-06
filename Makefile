@@ -26,7 +26,7 @@ test:	data
 	cd Apache2/mod_database && sudo make $(DEBUG) install reload test
 	
 clean:
-	cd bee.fish/code/https && sudo make clean
+	cd bee.fish && sudo make clean
 	cd Apache2/mod_database && sudo make clean $(DEBUG)
 
 stop:
