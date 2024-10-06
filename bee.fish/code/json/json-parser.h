@@ -98,7 +98,6 @@ namespace BeeFishJSON
       
       virtual void onobjectkey(ObjectKey* key)
       {
-          cerr << key->value() << endl;
       }
       
       virtual void onobjectvalue(Object* object, ObjectKey* key, JSON* value)

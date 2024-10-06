@@ -42,8 +42,6 @@ namespace BeeFishDatabase {
             
          _objects =
             root[HOST][OBJECTS];
-            
-         //cerr << "JSONPATH: " << id() << endl;
            
       }
       
@@ -60,7 +58,7 @@ namespace BeeFishDatabase {
            
       }
       
-      Id id(Type type)
+      Id id()
       {
          //Path path = *this;
         // Index index = path[type].index();
@@ -81,9 +79,7 @@ namespace BeeFishDatabase {
             getObjectKeyPosition(key);
             
          JSONPath path(*this);
-         
-         cerr << "operator[key] " << path.id(Type::OBJECT) << ":" << key << ":" << position << endl;
-         
+        
          path //<< Type::OBJECT
               << position;
               
@@ -96,8 +92,6 @@ namespace BeeFishDatabase {
        
          JSONPath path = *this;
          
-         cerr << "operator[arrayIndex] " << path.id(Type::ARRAY) << ":" << arrayIndex << endl;
-         
          path //<< Type::ARRAY
               << arrayIndex;
 
@@ -107,10 +101,8 @@ namespace BeeFishDatabase {
       
       JSONPath operator [] (Type type)
       {
-          cerr << "OPERATOR[" << index() << "]" << type;
           JSONPath path = *this;
           path << (Size)type;
-          cerr << " -> " << path.index() << endl;
           return path;
       }
       
@@ -126,9 +118,8 @@ namespace BeeFishDatabase {
             [key]
             [POSITIONS];
          
-         cerr << "CONTAINS: " << id(Type::OBJECT) << " " << (path.contains(id(Type::OBJECT)) ? "contains" : "no contain") << endl;
          return path.contains(
-            id(Type::OBJECT)
+            id()
          );
       }
       
@@ -136,8 +127,7 @@ namespace BeeFishDatabase {
       // properties[key][POSITION][objectId]
       Index getObjectKeyPosition(const BString& key)
       {
-         Id id = this->id(Type::OBJECT);
-         cerr << "getObjectKeyPosition: " << id << ":" << key << endl;
+         Id id = this->id();
          
          Path keyPath =
             _properties[BY_KEY][key];
@@ -163,7 +153,7 @@ namespace BeeFishDatabase {
                   object.max<Index>()
                   + 1;
             }
-            
+
             path.setData<Index>(position);
             
          }
@@ -180,10 +170,11 @@ namespace BeeFishDatabase {
       // properties[key][POSITION][objectId]
       BString getObjectKey(Index position)
       {
-         cerr << "GETOBJECTKEY: " << id(Type::OBJECT) << " " << position << " " << flush;
+         Id id = (*this)[Type::OBJECT].id();
+
          Path path = _properties
             [BY_OBJECT]
-            [id(Type::OBJECT)]
+            [id]
             [position];
             
          assert(path.hasData());
@@ -193,8 +184,6 @@ namespace BeeFishDatabase {
          BString key;
          Path keyPath(database(), keyIndex);
          keyPath.getData(key);
-         
-         cerr << key << endl;
          
          return key;
         
@@ -224,11 +213,6 @@ namespace BeeFishDatabase {
          if (isDeadEnd())
             return;
        
-         Stack stack(*this);
-         int i = -1;
-         while (this->next(stack, i))
-            cerr << "WRITE " << Type(i) << endl;
-            
          Type type = max<Type>();
          
          

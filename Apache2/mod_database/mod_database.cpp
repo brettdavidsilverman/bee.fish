@@ -188,10 +188,7 @@ static void outputJSON(Database& database, Path path, request_rec *r)
    ap_set_content_type(
        r, "application/json; charset=utf-8");
 
-   Path root(database);
-   Path properties = root[HOST][PROPERTIES];
-      
-   Path2JSON index(properties, path);
+   JSONPath index(path);
    ApacheStream stream(r);
    stream << index;
    stream.flush();
@@ -234,7 +231,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
       path.clear();
    }
    
-   JSON2Path index(path);
+   JSONPathParser index(path);
 
    int ret_code = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR);
    if (ret_code == OK)
@@ -279,7 +276,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
      // path.clear();
 
       Variable error =
-          index.getErrorMessage();
+          index.getError();
 
       reply =
           BeeFishScript::Object{

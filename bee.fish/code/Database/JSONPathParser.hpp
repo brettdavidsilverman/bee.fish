@@ -72,7 +72,7 @@ namespace BeeFishDatabase {
          JSONPath path = topPath();
             
          bool isArrayContainer = topContainer();
-         cerr << "setVariable1 " << path.id(isArrayContainer ? Type::ARRAY : Type::OBJECT) << ":" << type << ":" << value << endl;
+
          if (isArrayContainer)
          {
              // Get next array index
@@ -93,8 +93,6 @@ namespace BeeFishDatabase {
      virtual void setVariable(JSONPath path, const Type type, const BString& value)
      {
          path = path[type];
-         
-         cerr << "setVariable2 " << path.index() << ":" << type << ":" << value << endl;
          
          switch (type)
          {
@@ -210,7 +208,6 @@ namespace BeeFishDatabase {
       virtual void onobjectkey(ObjectKey* key)
       override
       {
-         cerr << "PUSH_BACK_KEY " << key->value() << endl;
          push_back_key(key->value());
       }
       

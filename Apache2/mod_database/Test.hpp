@@ -76,12 +76,11 @@ namespace BeeFishApache2 {
       cout << "\t" << "Testing query " << queryStr << flush;
       Query query(&object);
       Parser parser(query);
-      std::stringstream stream(queryStr);
-      parser.read(stream);
+      parser.read(queryStr);
       parser.eof();
       
       bool success =
-         (query.result() == true);
+         (parser.result() == true);
          
       if (success)
       {
@@ -89,6 +88,10 @@ namespace BeeFishApache2 {
          std::stringstream stream;
          stream << path;
          success = (stream.str() == expected);
+      }
+      else
+      {
+          cerr << parser.getError() << endl;
       }
       
       outputSuccess(success);

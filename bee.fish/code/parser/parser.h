@@ -46,6 +46,7 @@ namespace BeeFishParser
       size_t _charCount = 0;
       ssize_t _dataBytes = -1;
       BeeFishBString::UTF8Character _utf8 = "";
+      String _error;
    public:
       Char _lastCharacter = "";
       
@@ -184,6 +185,9 @@ namespace BeeFishParser
                break;            
             }
          }
+         
+         if (_result == false)
+            fail();
 
          return _result;
       }
@@ -275,13 +279,41 @@ namespace BeeFishParser
          }
          _result = _match->result();
          
+         if (_result == false)
+            fail();
+         else if (_result == true)
+            success();
+         
       }
 
-      virtual String getErrorMessage() const {
+      virtual const String& getError() const {
+         return _error;
+      }
+      
+      virtual void success()
+      {
+         _result = true;
+         _error.clear();
+      }
+      
+      virtual void fail() {
+         if (_error.length())
+            return;
          stringstream stream;
          stream << "Invalid Content '" << escape(_lastCharacter) << "' at position "
                 << _charCount;
-         return stream.str();
+         _error = stream.str();
+         _result = false;
+      }
+      
+      virtual void fail(const String& error)
+      {
+         assert(false);
+         if (_error.length())
+            return;
+            
+         _error = error;
+         _result = false;
       }
    };
    
@@ -302,6 +334,15 @@ namespace BeeFishParser
    const Char& Match::character() const {
       return _parser->_lastCharacter;
    }
+   
+   // Declared in match.h
+   void Match::fail(const BString& error)
+   {
+      fail();
+      if (_parser)
+         _parser->fail(error);
+   }
+            
    
 }
 

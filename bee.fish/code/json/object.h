@@ -15,10 +15,6 @@ using namespace BeeFishPowerEncoding;
 
 namespace BeeFishJSON {
    class JSONParser;
-}
-
-namespace BeeFishJSON {
-   
    class JSON;
    class Object; 
 

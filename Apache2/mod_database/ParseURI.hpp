@@ -26,7 +26,7 @@ namespace BeeFishApache2 {
       override
       {
          BString& key = value();
-         cerr << endl << "IdentifierSuccess: " << key << ":" << (*_path).index() << " " << (_path->contains(key) ? "contains" : "no contain") << endl;
+
          if (_path->contains(key))
          {
             Index position =
@@ -49,18 +49,13 @@ namespace BeeFishApache2 {
             << " "
             << "\"" << escape(key) << "\"";
         
-         _error = stream.str();
-        
-         Match::fail();
+         Match::fail(stream.str());
          
                   
       }
       
-      const BString& getError() const
-      {
-         return _error;
-      }
       
+
       
    };
    
@@ -132,7 +127,6 @@ namespace BeeFishApache2 {
       JSONPath* _start;
       QuotedIdentifier* _quotedIdentifier;
       Identifier* _identifier;
-      BString _error;
       
    public:
       PropertyPath() {
@@ -157,7 +151,7 @@ namespace BeeFishApache2 {
             
          );
       }
-      
+      /*
       virtual void fail()
       override
       {
@@ -173,7 +167,7 @@ namespace BeeFishApache2 {
       {
          return _error;
       }
-      
+      */
    };
    
    class PropertyPaths : public Repeat<PropertyPath>
@@ -181,7 +175,7 @@ namespace BeeFishApache2 {
    protected:
       JSONPath* _start;
       PropertyPath* _last;
-      BString _error;
+      //BString _error;
       
    public:
       PropertyPaths(JSONPath* start) :
@@ -203,7 +197,7 @@ namespace BeeFishApache2 {
          
          return item;
       }
-      
+      /*
       virtual void fail()
       override
       {
@@ -214,7 +208,7 @@ namespace BeeFishApache2 {
       {
          return _error;
       }
-      
+      */
      
    };
    
@@ -260,13 +254,13 @@ namespace BeeFishApache2 {
          fail();
        
       }
-      
+      /*
       const BString& getError() const
       {
          return _propertyPaths->getError();
       }
       
-     
+     */
    };
 
    Path parseURI(Database& database, const char* clientIP, const char* uri, const char* args) {
@@ -298,6 +292,9 @@ namespace BeeFishApache2 {
          Parser parser(query);
          parser.read(_args.decodeURI());
          parser.eof();
+         
+         if (parser.result() != true)
+            cerr << parser.getError() << endl;
         
       }
       

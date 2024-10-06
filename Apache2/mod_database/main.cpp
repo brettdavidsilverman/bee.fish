@@ -48,8 +48,7 @@ int main(int argc, const char* argv[]) {
    
    std::optional<bool> result;
    
-   JSON2Path parser =
-      JSON2Path(database);
+   JSONPathParser parser(database);
   
    parser.read(cin);
    parser.eof();

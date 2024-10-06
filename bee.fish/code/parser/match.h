@@ -131,7 +131,11 @@ namespace BeeFishParser {
             
          _result = false;
       }
-            
+      
+      
+      // Defined in parser.h
+      virtual void fail(const BString& error);
+      
       virtual optional<bool> result() const
       {
          if (_match)
