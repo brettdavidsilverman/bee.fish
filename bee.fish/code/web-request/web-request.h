@@ -71,6 +71,8 @@ namespace BeeFishWeb {
                stream >> u32;
                _character = Char(u32);
                
+               Match::success();
+               
             }
 
             virtual const Char& character() const

@@ -29,16 +29,16 @@ namespace BeeFishWeb
    
       bool ok = true;
 
-      //ok &= testJSON();
+      //ok = ok && testJSON();
       //return ok;
 
-      ok &= testURL();
+      ok = ok && testURL();
 
 #ifdef SERVER
-      ok &= testWebRequest();
-      ok &= testParts();
-      ok &= testStreams();
-      ok &= testJSON();
+      ok = ok && testWebRequest();
+      ok = ok && testParts();
+      ok = ok && testStreams();
+      ok = ok && testJSON();
 #endif
 
       if (ok)
@@ -57,7 +57,7 @@ namespace BeeFishWeb
       WebRequest::URL::Hex hex;
       Parser hexParser(hex);
       hexParser.read("a");
-      ok &= testResult("URL Hex is 'a'", 
+      ok = ok && testResult("URL Hex is 'a'", 
          hexParser.result() == true && 
          hex.value() == Char('a'));
       
@@ -66,16 +66,27 @@ namespace BeeFishWeb
       hexCharacterParser.read("%38");
       hexCharacterParser.eof();
       
-      ok &= testResult("URL hex value is '8'", 
-         hexCharacter.result() == true && 
-         hexCharacter.character() == Char('8'));
+      cerr << "hexCharacterParser.result() = " << hexCharacterParser.result() << endl;
+      ok = ok && testResult("URL hex Parser", 
+         hexCharacterParser.result() == true);
+       
+      ok = ok && testResult("URL hex character", 
+         hexCharacter.result() == true);
             
+      ok = ok && testResult("URL hex value is '8'", 
+         hexCharacter.character() == Char('8'));      assert(ok);
+      
       WebRequest::URL::Path path;
       Parser pathParser(path);
       pathParser.read("Hello%20World%25");
       pathParser.eof();
 
-      ok &= testResult("Path with escaped space is \"Hello World%\"",
+      ok = ok && testResult("Path with escaped space is \"Hello World%\"",
+         path.result() == true &&
+         path.value() == "Hello World%"
+      );
+      
+      ok = ok && testResult("Path with escaped space is \"Hello World%\"",
          path.result() == true &&
          path.value() == "Hello World%"
       );
@@ -85,28 +96,28 @@ namespace BeeFishWeb
       urlWithQueryParser.read("/beehive/settings/?key1=value1&key2=value2&key3 HTTP/1.1");
       urlWithQueryParser.eof();
    
-      ok &= testResult(
+      ok = ok && testResult(
          "Path with query",
          url.query().result() == true
       );
 
-      ok &= testResult(
+      ok = ok && testResult(
          "Path with query value",
          url.query().value() == "key1=value1&key2=value2&key3"
       );
 
-      ok &= testResult(
+      ok = ok && testResult(
          "Path with query key 1",
          url.query()["key1"] == "value1"
       );
 
-      ok &= testResult(
+      ok = ok && testResult(
          "Path with query key 2",
          url.query()["key2"] == "value2"
       );
 
 
-      ok &= testResult(
+      ok = ok && testResult(
          "Path with query key 3",
          url.query().contains("key3") && 
          url.query()["key3"].length() == 0
@@ -117,7 +128,7 @@ namespace BeeFishWeb
       urlWithQueryParser2.read("/beehive/settings/?key=hello%20world HTTP/1.1");
       urlWithQueryParser2.eof();
       
-      ok &= testResult(
+      ok = ok && testResult(
          "Path with escaped query",
          url2.query()["key"] == "hello world"
       );
@@ -138,32 +149,32 @@ namespace BeeFishWeb
       
       
       BeeFishWeb::WebRequest requestHeadersOnly;
-      ok &= testFile(
+      ok = ok && testFile(
          "WebRequest with only headers",
          "bee.fish/code/web-request/tests/request.txt",
          requestHeadersOnly,
          true
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest get",
          requestHeadersOnly.method() == "GET"
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest has no json",
          requestHeadersOnly.hasJSON() == false
       );
       
       BeeFishWeb::WebRequest requestBody;
-      ok &= testFile(
+      ok = ok && testFile(
          "WebRequest with body",
          "bee.fish/code/web-request/tests/request-body.txt",
          requestBody,
          true
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest has json",
          requestBody.hasJSON() == true
       );
@@ -182,7 +193,7 @@ namespace BeeFishWeb
       JSONParser parser(requestFull);
       parser.invokeValue("name", invokeOnName);
 
-      ok &= testFile(
+      ok = ok && testFile(
          parser,
          "WebRequest with full json",
          "bee.fish/code/web-request/tests/request-full.txt",
@@ -190,17 +201,17 @@ namespace BeeFishWeb
          true
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest full has json",
          requestFull.hasJSON() == true
       );
 
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest full has name",
          hit == true
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest full name is Brett",
          name == "Brett"
       );
@@ -212,7 +223,7 @@ namespace BeeFishWeb
       JSONParser parser2(request2);
       parser2.captureValue("name", name2);
 
-      ok &= testFile(
+      ok = ok && testFile(
          parser2,
          "WebRequest with full json 2",
          "bee.fish/code/web-request/tests/request-full.txt",
@@ -220,55 +231,55 @@ namespace BeeFishWeb
          true
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest full has name 2",
          name2.has_value()
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest full name is Brett 2",
          name2 == BString("Brett")
       );
 
       BeeFishWeb::WebRequest urlWebRequest;
-      ok &= testFile(
+      ok = ok && testFile(
          "WebRequest with path and query",
          "bee.fish/code/web-request/tests/path.txt",
          urlWebRequest,
          true
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest path is /path",
          urlWebRequest.path() == "/path"
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest query is query",
          urlWebRequest.query() == "query"
       );
       
       BeeFishWeb::WebRequest escapedUrlWebRequest;
-      ok &= testFile(
+      ok = ok && testFile(
          "WebRequest with escaped path and query",
          "bee.fish/code/web-request/tests/escaped-path.txt",
          escapedUrlWebRequest,
          true
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest escaped path is /path",
          escapedUrlWebRequest.path() == "/path"
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest escaped query is query<space>query",
          escapedUrlWebRequest.query() == "query%20query"
       );
 
       BeeFishWeb::WebRequest postWebRequest;
       
-      ok &= testFile(
+      ok = ok && testFile(
          "Post with encoded name value pairs",
          "bee.fish/code/web-request/tests/post.txt",
          postWebRequest,
@@ -284,7 +295,7 @@ namespace BeeFishWeb
       );
 
       // Post with anything
-      ok &= testFile(
+      ok = ok && testFile(
          "Post with content length text",
          "bee.fish/code/web-request/tests/request-text.txt",
          postWebRequest2,
@@ -294,14 +305,14 @@ namespace BeeFishWeb
       postWebRequest2.flush();
       
 
-      ok &= testResult(
+      ok = ok && testResult(
          "Post with hello world body",
          body == "<h1>Hello world</h1>"
       );
 
       // Post with anything
       BeeFishWeb::WebRequest postWebRequest3;
-      ok &= testFile(
+      ok = ok && testFile(
          "Post with zero content length",
          "bee.fish/code/web-request/tests/zero-content-length.txt",
          postWebRequest3,
@@ -324,28 +335,28 @@ namespace BeeFishWeb
       
       BeeFishWeb::WebRequest request;
       
-      ok &= testFile(
+      ok = ok && testFile(
          "WebRequest part 0",
          "bee.fish/code/web-request/tests/request-part-0.txt",
          request,
          BeeFishMisc::nullopt
       );
       
-      ok &= testFile(
+      ok = ok && testFile(
          "WebRequest part 1",
          "bee.fish/code/web-request/tests/request-part-1.txt",
          request,
          BeeFishMisc::nullopt
       );
       
-      ok &= testFile(
+      ok = ok && testFile(
          "WebRequest part 2",
          "bee.fish/code/web-request/tests/request-part-2.txt",
          request,
          true
       );
       
-      ok &= testResult(
+      ok = ok && testResult(
          "WebRequest object is valid",
          request.hasJSON()
       );
@@ -375,7 +386,7 @@ namespace BeeFishWeb
 
       parser.streamValue("image", onimage);
 
-      ok &= testFile(
+      ok = ok && testFile(
          parser,
          "WebRequest Image JSON",
          "bee.fish/code/web-request/tests/image-json.txt",
@@ -401,7 +412,7 @@ namespace BeeFishWeb
       JSONParser parser(request);
       //BeeFishBScript::BScriptParser parser(request);
 
-      ok &= testFile(
+      ok = ok && testFile(
          parser,
          "POST with hello world sample",
          "bee.fish/code/web-request/tests/post-json.txt",
@@ -415,7 +426,7 @@ namespace BeeFishWeb
       //BeeFishBScript::BScriptParser parser2(request2);
       //BeeFishBScript::BScriptParser parser(request);
 
-      ok &= testFile(
+      ok = ok && testFile(
          parser2,
          "POST to settings",
          "bee.fish/code/web-request/tests/post-settings.txt",
