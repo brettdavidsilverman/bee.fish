@@ -66,7 +66,7 @@ namespace BeeFishJSON {
          if (matched)
             _character = character;
             
-         _result = _match->result();
+         setResult(_match->result());
 
          return matched;
       }

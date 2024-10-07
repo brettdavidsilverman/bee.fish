@@ -51,18 +51,7 @@ namespace BeeFishJSON
          if (_delete)
             delete _json;
       }
-      /*
-      virtual void eof()
-      override
-      {
-         if (_json->result() == nullopt) {
-            _json->eof(this);
-            _result = _json->result();
-         }
-         
-         Parser::eof();
-      }
-      */
+      
       void captureValue(const BString& key, optional<BString>& value) {
          _onvalues[key] = 
             [&value] (const BString& key, JSON& json) {
