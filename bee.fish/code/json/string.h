@@ -230,9 +230,16 @@ namespace BeeFishJSON {
       override
       {
          const Char& character = item->character();
+         //cerr << "{" << character << "}" << std::flush;
          BString::push_back(character);
          BStream::write(character);
          Repeat::matchedItem(item);
+      }
+      
+      virtual void fail()
+      override
+      {
+          //assert(false);
       }
 
       virtual BString& value() {

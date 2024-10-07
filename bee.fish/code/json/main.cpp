@@ -15,17 +15,12 @@ using namespace BeeFishJSON;
 using namespace BeeFishMisc;
 
 int main(int argc, const char* argv[]) {
-    /*
-   BeeFishJSON::JSONParser p;
-   cout << "{\"hello\":\"world\"" << endl;
-   p.read("{\"hello\":\"world\"");
-   if (p.result() == nullopt)
-      p.eof();
-
-   cout << "RESULT: " << p.getErrorMessage() << endl;
-
-   return 0;
-   */
+   JSON integer;
+   bool ok = testMatch("integer", &integer, "10", true, "10");
+   ok &= testResult("integer type", integer.type() == Type::INTEGER);
+   cerr << "INT TYPE: " << integer.type() << endl;
+   assert(ok);
+      
    cout << "bee.fish.json"
            << endl
         << "C++ run time: "

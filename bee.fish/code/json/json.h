@@ -35,7 +35,7 @@ namespace BeeFishJSON
       Undefined* _undefined;
       Null*      _null;
       Boolean*   _boolean;
-      //Integer*  _integer;
+     // Integer*   _integer;
       Number*    _number;
       Invoke*    _invokeNumber;
       String*    _string;
@@ -91,7 +91,7 @@ namespace BeeFishJSON
       
          _boolean = new Boolean();
          
-        // _integer = new Integer();
+         //_integer = new Integer();
          
          _number  = new Number();
   
@@ -105,6 +105,8 @@ namespace BeeFishJSON
             invoke(_undefined, Type::UNDEFINED),
             invoke(_null, Type::NULL_),
             invoke(_boolean, Type::BOOLEAN),
+            //invoke(_number, Type::NUMBER),
+            //invoke(_integer, Type::INTEGER),
             _invokeNumber = invokeNumber(_number),
             invoke(_string, Type::STRING),
             invoke(_array, Type::ARRAY),

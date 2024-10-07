@@ -21,11 +21,17 @@ namespace BeeFishJSON {
       }
    };
       
-   class Integer : public IntegerCharacters
+   class Integer : public Match
    {
+   protected:
+      IntegerCharacters* _integerCharacters;
+      
    public:
-      Integer() : IntegerCharacters()
+      Integer() : Match()
       {
+          _match = new Capture(
+             _integerCharacters = new IntegerCharacters()
+          );
       }
       
       virtual void eof(Parser* parser) 
@@ -35,8 +41,8 @@ namespace BeeFishJSON {
           
           if (result() != nullopt)
              return;
-          
-          if (_matchedCount > 0)
+             
+          if (_integerCharacters->matchedCount() > 0)
           {
               success();
           }

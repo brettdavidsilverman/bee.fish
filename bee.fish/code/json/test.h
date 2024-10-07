@@ -1,6 +1,6 @@
 #ifndef BEE_FISH__JSON__TEST_H
 #define BEE_FISH__JSON__TEST_H
-
+#define SERVER
 #include "../test/test.h"
 #include "../parser/test.h"
 #include "json.h"
@@ -161,7 +161,7 @@ namespace BeeFishJSON
       
       StringCharacters stringCharacters;
       ok &= testMatch("String characters", &stringCharacters, "hello world\\\\", true, "hello world\\");
-      
+
       ok &= testMatchDelete("String", new String(), "\"hello world\"", true, "hello world");
       ok &= testMatchDelete("Empty string", new JSON(), "\"\"", true, "");
       ok &= testMatchDelete("Simple string", new JSON(), "\"hello\"", true, "hello");
@@ -572,6 +572,7 @@ assert(ok);
       
       ok &= testMatch("integer", &integer, "10", true, "10");
       ok &= testResult("integer type", integer.type() == Type::INTEGER);
+      cerr << "INT TYPE: " << integer.type() << endl;
       assert(ok);
       ok &= testMatch("number", &number, "1.1", true, "1.1");
       ok &= testResult("number type", number.type() == Type::NUMBER);
