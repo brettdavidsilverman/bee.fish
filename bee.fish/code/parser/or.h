@@ -58,10 +58,14 @@ namespace BeeFishParser {
          }
        
          if (_item)
-            _result = true;
-         else if ( _result == nullopt && 
+         {
+            success();
+         }
+         else if ( result() == nullopt && 
                    !matched )
-            _result = false;
+         {
+            fail();
+         }
          
          return matched;
          
@@ -89,7 +93,7 @@ namespace BeeFishParser {
                return;
             }
          }
-         
+
          fail();
             
          Match::eof(parser);

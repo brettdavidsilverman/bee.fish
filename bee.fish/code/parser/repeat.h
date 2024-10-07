@@ -47,26 +47,23 @@ namespace BeeFishParser
 
 				matchedItem(_item);
 
-				++_matchedCount;
-
 				if (_maximum > 0)
                 {
                    if (_matchedCount == _maximum)
+                   {
 				      success();
+                   }
                    else if (_matchedCount > _maximum)
 				   {
-					  matched = false;
 					  fail();
 				   }
                 }
-				   
-                
-                
+              
                 _item = createItem();
 
 			}
 			else if (
-				(_item->_result == false) ||
+				(_item->result() == false) ||
 				(!matched))
 			{
                 matched = false;
@@ -76,7 +73,6 @@ namespace BeeFishParser
 				}
 				else
 				{
-					
 					fail();
 				}
 			}
@@ -86,6 +82,7 @@ namespace BeeFishParser
 
 		virtual void matchedItem(T *match)
 		{
+            ++_matchedCount;
 			delete match;
 		}
 
@@ -102,25 +99,24 @@ namespace BeeFishParser
 
            setup(parser);
            
-           if (result() != false)
+           if (_item && _item->result() == nullopt)
            {
-              if (_item && _item->result() == nullopt)
-              {
-                 _item->eof(parser);
-                 if (_item->result() == true)
-                    ++_matchedCount;
-              }
-              
-              if (_matchedCount >= _minimum &&
-                  (_matchedCount <= _maximum ||
-                   _maximum == 0))
-              {
-                 success();
-              }
-              else
-                 fail();
+              _item->eof(parser);
+              if (_item->result() == true)
+                 ++_matchedCount;
            }
+              
+           if (_matchedCount >= _minimum &&
+               (_matchedCount <= _maximum ||
+                _maximum == 0))
+           {
+              success();
+           }
+           else
+              fail();
+
         }
+       
 	};
 
 };

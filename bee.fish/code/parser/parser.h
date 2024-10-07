@@ -186,7 +186,9 @@ namespace BeeFishParser
             }
          }
          
-         if (_result == false)
+         if (result() == true)
+            success();
+         else if (result() == false)
             fail();
 
          return _result;
@@ -270,14 +272,13 @@ namespace BeeFishParser
       }
       
       virtual void eof() {
-
-         if (result() == nullopt && 
-            _match && 
+          
+         if (_match && 
             _match->result() == nullopt)
          {
             _match->eof(this);
+            _result = _match->result();
          }
-         _result = _match->result();
          
          if (_result == false)
             fail();
@@ -292,28 +293,30 @@ namespace BeeFishParser
       
       virtual void success()
       {
+         _match->setResult(true);
          _result = true;
          _error.clear();
       }
       
       virtual void fail() {
-         if (_error.length())
-            return;
          stringstream stream;
          stream << "Invalid Content '" << escape(_lastCharacter) << "' at position "
                 << _charCount;
-         _error = stream.str();
-         _result = false;
+         fail(stream.str());
       }
       
       virtual void fail(const String& error)
       {
-         assert(false);
-         if (_error.length())
-            return;
-            
-         _error = error;
+         _match->setResult(false);
          _result = false;
+ 
+          setError(error);
+         
+      }
+      
+      virtual void setError(const BString& error)
+      {
+         _error = error;
       }
    };
    
@@ -334,16 +337,14 @@ namespace BeeFishParser
    const Char& Match::character() const {
       return _parser->_lastCharacter;
    }
-   
+            
    // Declared in match.h
    void Match::fail(const BString& error)
    {
-      fail();
-      if (_parser)
-         _parser->fail(error);
+      _parser->setError(error);
+  
+      setResult(false);
    }
-            
-   
 }
 
 #endif

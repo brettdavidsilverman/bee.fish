@@ -51,7 +51,7 @@ namespace BeeFishParser {
          }
 
          if (succeeded)
-            _result = true;
+            success();
 
          return matched;
       }

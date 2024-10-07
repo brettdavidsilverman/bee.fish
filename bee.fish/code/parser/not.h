@@ -30,18 +30,12 @@ namespace BeeFishParser {
          
          
          if (_match->result() == false)
-            _result = true;
+            success();
          else if (_match->result() == true)
-            _result = false;
+            fail();
          
          return !matched;
         
-      }
-      
-      virtual optional<bool> result() const
-      override
-      {
-         return _result;
       }
       
 

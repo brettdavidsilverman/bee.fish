@@ -90,11 +90,12 @@ namespace BeeFishParser {
          
          bool matched = matchCharacter(character);
          
-         if (_result == true)
+         if (result() == true)
             success();
-         else if (_result == false)
+         else if (result() == false) {
             fail();
-
+         }
+         
          return matched;
       }
       
@@ -110,7 +111,7 @@ namespace BeeFishParser {
          }
          else  {
             matched = _match->match(_parser, character);
-            _result = _match->result();
+            setResult(_match->result());
          }
 
          return matched;
@@ -118,20 +119,21 @@ namespace BeeFishParser {
       
       virtual void success()
       {
-         if (_match)
-            _match->_result = true;
-            
-         _result = true;
-      }
-   
-      virtual void fail()
-      {
-         if (_match)
-            _match->_result = false;
-            
-         _result = false;
+         setResult(true);
       }
       
+      // Defined in parser.h
+      virtual void fail()
+      {
+         string error;
+         if (_match)
+            error = typeid(*_match).name();
+         else
+            error = typeid(*this).name();
+      
+         fail(error);
+         
+      }
       
       // Defined in parser.h
       virtual void fail(const BString& error);
@@ -142,6 +144,15 @@ namespace BeeFishParser {
             return _match->result();
             
          return _result;
+      }
+      
+      virtual void setResult(optional<bool> newResult)
+      {
+         if (_match)
+            _match->setResult(newResult);
+            
+         _result = newResult;
+         
       }
 
       
@@ -182,14 +193,7 @@ namespace BeeFishParser {
           if (_match && result() == nullopt)
           {
               _match->eof(_parser);
-              if (_match->result() == true)
-              {
-                 success();
-              }
-              else if (_match->result() == false)
-              {
-                 fail();
-              }
+              setResult(_match->result());
           }
           
       }

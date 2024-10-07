@@ -51,13 +51,13 @@ namespace BeeFishParser {
          {
             if (_index == _word.end())
             {
-               _result = true;
+               success();
             }
          
          }
          else
          {
-            _result = false;
+            fail();
          }
        
          return matched;

@@ -461,6 +461,8 @@ namespace BeeFishParser {
    inline bool testOptional()
    {
    
+      cout << "Test Optional" << endl;
+      
       bool ok = true;
       
       class OneOptTwo : public And {
@@ -490,6 +492,8 @@ namespace BeeFishParser {
 
    inline bool testBString()
    {
+      cout << "Test BString" << endl;
+      
       bool ok = true;
   
       class Runes : public Word {
@@ -521,6 +525,8 @@ namespace BeeFishParser {
    
    inline bool testCapture()
    {
+      cout << "Test Capture" << endl;
+      
       bool ok = true;
 
       class WordCapture : public Word {
@@ -582,21 +588,13 @@ namespace BeeFishParser {
             _parser = parser;
             
             _match = _and = new And(
-               new Capture(new Name()),
+               new Capture(new Name(), _name),
                new Character(' '),
-               new Capture(new Value())
+               new Capture(new Value(), _value)
             );
             
             _match->setup(parser);
             
-         }
-         
-         virtual void success()
-         {
-            _name =  ((*_and)[0])->value();
-            _value = ((*_and)[2])->value();
-            
-            Match::success();
          }
          
          
@@ -804,6 +802,25 @@ namespace BeeFishParser {
          parser.result() == true;
          
       ok &= testResult("Multipart", multipartResult);
+      
+      
+      Capture* error = new Capture(
+         new And(
+            new Word("a"),
+            new Word("b")
+         )
+      );
+      
+      Parser parserError(error);
+      parserError.read("az");
+      ok &= testResult(
+         "Error",
+            parserError.result() == false &&
+            error->result() == false &&
+            parserError.getError().length()
+      );
+      
+      delete error;
       
       BeeFishMisc::outputSuccess(ok);
       
