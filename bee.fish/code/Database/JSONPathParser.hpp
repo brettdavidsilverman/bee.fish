@@ -45,13 +45,7 @@ namespace BeeFishDatabase {
       {
          pop_back_path();
          pop_back_container();
-         /*
-         cerr << "_pathStack:" << _pathStack.size() << endl;
-         cerr << "_containerStack:" << _containerStack.size() << endl;
-         cerr << "_arrayIndexStack:" << _arrayIndexStack.size() << endl;
-         cerr << "_keyStack:" << _keyStack.size() << endl;
-         cerr << "_objectPropertyIndexStack:" << _objectPropertyIndexStack.size() << endl;
-        */
+         
          assert(_pathStack.size() == 0 &&
                 _containerStack.size() == 0 &&
                 _arrayIndexStack.size() == 0 &&
@@ -78,7 +72,6 @@ namespace BeeFishDatabase {
              // Get next array index
              Size& index = topArrayIndex();
              path = path[index++];
-             
          }
          else if (_keyStack.size()) {
             BString& key = topKey();
@@ -92,6 +85,8 @@ namespace BeeFishDatabase {
      
      virtual void setVariable(JSONPath path, const Type type, const BString& value)
      {
+         JSONPath start = path;
+         
          path = path[type];
          
          switch (type)
@@ -107,11 +102,11 @@ namespace BeeFishDatabase {
                path.setData(value);
                break;
             case Type::ARRAY:
-               push_back_path(path);
+               push_back_path(start);
                push_back_container(true);
                break;
             case Type::OBJECT:
-               push_back_path(path);
+               push_back_path(start);
                push_back_container(false);
                break;
             default:

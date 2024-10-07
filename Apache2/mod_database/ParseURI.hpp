@@ -42,14 +42,14 @@ namespace BeeFishApache2 {
             
            
          }
-         
+
          std::stringstream stream;
          stream
             << "Invalid property"
             << " "
             << "\"" << escape(key) << "\"";
         
-         Match::fail(stream.str());
+         _parser->fail(stream.str());
          
                   
       }
@@ -240,7 +240,7 @@ namespace BeeFishApache2 {
          
          if (_wordThis->result() == true)
          {
-            if (_propertyPaths->result() != false)
+            if (_propertyPaths->result() == nullopt)
             {
                _propertyPaths->eof(parser);
                if (_propertyPaths->result() == true)

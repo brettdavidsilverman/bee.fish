@@ -623,9 +623,13 @@ namespace BeeFishDatabase
       
       if (success) {
          cout << "\tItem 0: ";
-         Path path = root["array"][Type::ARRAY];
+         MinMaxPath path = root["array"][Type::ARRAY];
+         
          Size test = MinMaxPath(path).min<Size>();
-         success = path.contains(Size(0));
+         success = success &&
+            testResult("Item 0 index", test == 0);
+         success = success && 
+            path.contains(test);
          BeeFishMisc::outputSuccess(success);
       }
       

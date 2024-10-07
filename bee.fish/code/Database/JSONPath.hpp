@@ -27,6 +27,7 @@ namespace BeeFishDatabase {
       
    public:
       typedef Index Id;
+      using MinMaxPath::contains;
       
       JSONPath()
       {
@@ -60,8 +61,6 @@ namespace BeeFishDatabase {
       
       Id id()
       {
-         //Path path = *this;
-        // Index index = path[type].index();
          return index();
       }
       
@@ -74,13 +73,12 @@ namespace BeeFishDatabase {
 
       JSONPath operator [] (const BString& key)
       {
-        
          Index position =
             getObjectKeyPosition(key);
             
-         JSONPath path(*this);
+         Path path(*this);
         
-         path //<< Type::OBJECT
+         path << Type::OBJECT
               << position;
               
          return path;
@@ -90,9 +88,9 @@ namespace BeeFishDatabase {
       JSONPath operator [] (Index arrayIndex)
       {
        
-         JSONPath path = *this;
+         Path path = *this;
          
-         path //<< Type::ARRAY
+         path << Type::ARRAY
               << arrayIndex;
 
          return path;
@@ -101,26 +99,38 @@ namespace BeeFishDatabase {
       
       JSONPath operator [] (Type type)
       {
-          JSONPath path = *this;
-          path << (Size)type;
+          Path path = *this;
+          path << type;
           return path;
       }
       
       bool contains(const BString& key)
       {
-         Path keyPath =
+         if (!contains(Type::OBJECT))
+            return false;
+            
+         MinMaxPath path =
             _properties[BY_KEY];
             
-         if (!keyPath.contains(key))
+         if (!path.contains(key))
+         {
             return false;
+         }
  
-         Path path = keyPath
+         path = path
             [key]
             [POSITIONS];
          
-         return path.contains(
-            id()
+         
+         JSONPath object =
+            (*this);
+         
+         bool contains = path.contains(
+            object.id()
          );
+         
+         return contains;
+         
       }
       
       
@@ -129,10 +139,13 @@ namespace BeeFishDatabase {
       {
          Id id = this->id();
          
-         Path keyPath =
-            _properties[BY_KEY][key];
- 
-         keyPath.setData(key);
+         Path keyPath = 
+            _properties[BY_KEY];
+            
+         if (!keyPath.contains(key))
+            keyPath[key].setData(key);
+            
+         keyPath = keyPath[key];
          
          Path path = keyPath
             [POSITIONS]
@@ -144,7 +157,7 @@ namespace BeeFishDatabase {
             path.getData<Index>(position);
          else {
                
-            MinMaxPath object = (*this);
+            MinMaxPath object = (*this)[Type::OBJECT];
             
             if (object.isDeadEnd())
                position = 0;
@@ -163,20 +176,25 @@ namespace BeeFishDatabase {
             [id]
             [position]
             .setData<Index>(keyPath.index());
-
+            
          return position;
       }
       
       // properties[key][POSITION][objectId]
       BString getObjectKey(Index position)
       {
-         Id id = (*this)[Type::OBJECT].id();
+         Id id = this->id();
 
-         Path path = _properties
-            [BY_OBJECT]
-            [id]
-            [position];
-            
+         Path path = _properties[BY_OBJECT];
+         
+         assert(path.contains(id));
+         
+         path = path[id];
+         
+         assert(path.contains(position));
+         
+         path = path[position];
+         
          assert(path.hasData());
          
          Index keyIndex = 0;
@@ -302,9 +320,10 @@ namespace BeeFishDatabase {
             if (!path.isDeadEnd()) {
                
                out << "\r\n";
-               
+              
                BString key;
                count = path.max<Size>() + 1;
+
                for (Size position = 0; position < count; ++position) 
                {
                   key = getObjectKey(position);
@@ -314,7 +333,8 @@ namespace BeeFishDatabase {
                          << escape(key)
                       << "\": ";
                       
-                  JSONPath value(path[position]);
+                  JSONPath value =
+                     path[position];
                   
                   value.write(out, tabCount + 1);
                   

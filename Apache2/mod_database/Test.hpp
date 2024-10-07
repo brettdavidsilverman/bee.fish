@@ -84,14 +84,13 @@ namespace BeeFishApache2 {
          
       if (success)
       {
-         JSONPath path(object);
          std::stringstream stream;
-         stream << path;
+         stream << object;
          success = (stream.str() == expected);
       }
       else
       {
-          cerr << parser.getError() << endl;
+         cout << endl << parser.getError() << endl;
       }
       
       outputSuccess(success);
