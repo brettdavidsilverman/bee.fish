@@ -1,5 +1,6 @@
 #ifndef BEE_FISH_WEB__TEST_REQUEST_H
 #define BEE_FISH_WEB__TEST_REQUEST_H
+#define SERVER
 #include "../test/test.h"
 
 #include "../json/json-parser.h"

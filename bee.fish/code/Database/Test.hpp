@@ -675,7 +675,7 @@ namespace BeeFishDatabase
          JSONPathParser parser(path);
          parser.read("1234");
          parser.eof();
-         success = parser.matched();
+         success = (parser.result() == true);
          BeeFishMisc::outputSuccess(success);
          assert(success);
       }
@@ -683,7 +683,12 @@ namespace BeeFishDatabase
       if (success)
       {
          cout << "\tInteger type" << endl;
-         Path path = root["integer"];
+         MinMaxPath path = root["integer"];
+         
+         Stack stack(path);
+         int i;
+         while (path.next(stack, i))
+            cerr << (Type)i << endl;
          success = path.contains(Type::INTEGER);
          BeeFishMisc::outputSuccess(success);
       }

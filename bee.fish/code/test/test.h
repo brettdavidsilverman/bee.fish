@@ -92,7 +92,9 @@ namespace BeeFishTest
       parser.read(text);
       
       if (expectedResult != nullopt)
+      {
          parser.eof();
+      }
       
       BString value;
 
@@ -115,6 +117,8 @@ namespace BeeFishTest
               << expectedResult
               << " Got  "
               << match->result()
+              << " With error "
+              << parser.getError()
               << endl;
 
          cout << "\tTested   " << text << endl;
@@ -134,6 +138,7 @@ namespace BeeFishTest
    ) 
    {
       BeeFishJSON::JSONParser parser(match);
+      //Parser parser(match);
       return testMatch(parser, label, match, text, result, expected);
    }
 

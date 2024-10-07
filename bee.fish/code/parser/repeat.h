@@ -85,6 +85,11 @@ namespace BeeFishParser
             ++_matchedCount;
 			delete match;
 		}
+        
+        virtual size_t matchedCount() const
+		{
+            return _matchedCount;
+		}
 
 		virtual T* createItem() {
 			T* item = new T();

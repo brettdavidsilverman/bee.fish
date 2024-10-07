@@ -164,6 +164,7 @@ namespace BeeFishJSON
          return (JSONParser*)_parser;
       }
       
+      
    };
 
    
