@@ -58,7 +58,7 @@ int main(int argc, const char* argv[]) {
 
    if (parser.result() == false) {
       string error =
-         parser.getErrorMessage();
+         parser.getError();
       cout << error << endl;
       returnCode = 2;
    }
