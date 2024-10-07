@@ -224,6 +224,11 @@ namespace BeeFishParser
                return false;
          }
 
+         if (_result == true)
+            success();
+         else if (_result == false)
+            fail();
+            
          return _result;
       
       }
@@ -239,6 +244,11 @@ namespace BeeFishParser
                return false;
          }
 
+         if (_result == true)
+            success();
+         else if (_result == false)
+            fail();
+            
          return _result;
       
       }
@@ -247,8 +257,16 @@ namespace BeeFishParser
       {
 
          if (!match(c))
+         {
+            fail();
             return false;
-
+         }
+         
+         if (_result == true)
+            success();
+         else if (_result == false)
+            fail();
+            
          return _result;
       
       }
@@ -302,7 +320,7 @@ namespace BeeFishParser
          fail(stream.str());
       }
       
-      virtual void fail(const String& error)
+      virtual void fail(const BString& error)
       {
          _match->setResult(false);
          _result = false;
@@ -313,10 +331,8 @@ namespace BeeFishParser
       
       virtual void setError(const BString& error)
       {
-         if (_error.length() == 0) 
-         {
+         if (_error.length() == 0)
             _error = error;
-         }
          
       }
       
@@ -356,9 +372,7 @@ namespace BeeFishParser
        
       setResult(false);
       if (match() == _parser->match())
-      {
          _parser->fail(error);
-      }
      
    }
 }

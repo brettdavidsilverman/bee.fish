@@ -49,7 +49,7 @@ namespace BeeFishParser {
          bool matched = false;
             
          if ( _iterator == size() ) {
-            _result = false;
+            fail();
             return false;
          }
             
@@ -62,17 +62,18 @@ namespace BeeFishParser {
             matched =
                item->match(_parser, character);
          
-            if (item->_result == true) {
+            if (item->result() == true) {
             
                if ( ++_iterator == 
-                    size() ) {
-                  _result = true;
+                    size() )
+               {
+                  success();
                }
                
             }
             else if (item->_result == false) {
             
-               _result = false;
+               fail();
                
             }
             
