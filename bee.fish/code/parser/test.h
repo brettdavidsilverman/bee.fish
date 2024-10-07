@@ -813,11 +813,20 @@ namespace BeeFishParser {
       
       Parser parserError(error);
       parserError.read("az");
+ 
       ok &= testResult(
-         "Error",
-            parserError.result() == false &&
-            error->result() == false &&
-            parserError.getError().length()
+         "Parser Error result",
+            parserError.result() == false
+      );
+      
+      ok &= testResult(
+         "Match Error result",
+         error->result() == false
+      );
+      
+      ok &= testResult(
+         "Parser Error value",
+         parserError.getError().length() > 0
       );
       
       delete error;

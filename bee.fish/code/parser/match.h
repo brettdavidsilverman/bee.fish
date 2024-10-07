@@ -122,7 +122,6 @@ namespace BeeFishParser {
          setResult(true);
       }
       
-      // Defined in parser.h
       virtual void fail()
       {
          string error;
@@ -133,6 +132,13 @@ namespace BeeFishParser {
       
          fail(error);
          
+      }
+      
+      virtual Match* match()
+      {
+          if (_match)
+             return _match->match();
+          return this;
       }
       
       // Defined in parser.h
