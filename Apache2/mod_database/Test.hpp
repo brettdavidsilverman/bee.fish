@@ -97,6 +97,10 @@ namespace BeeFishApache2 {
          
       outputSuccess(success);
       
+      if (!success)
+         cout << endl << stream.str() << endl;
+         
+      
       return success;
    }
     
