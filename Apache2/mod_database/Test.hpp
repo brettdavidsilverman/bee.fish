@@ -62,7 +62,7 @@ namespace BeeFishApache2 {
          success &= testURIQuery(db, "name", "this[\"name\"][\"first\"]", true, "\"Bee\"");
          success &= testURIQuery(db, "name", "this[\"name\"].first", true, "\"Bee\"");
          success &= testURIQuery(db, "name", "this.name[\"first\"]", true, "\"Bee\"");
-         success &= testURIQuery(db, "name", "this.nameb", false);
+         success &= testURIQuery(db, "name", "this.nameb", false, "Invalid property \"nameb\"");
 
          
          outputSuccess(success);
@@ -87,21 +87,14 @@ namespace BeeFishApache2 {
          queryStr
       );
       
-      bool success = object.has_value();
+      bool result = object.has_value();
 
-      if (success)
-      {
-         std::stringstream stream;
-         stream << object.value();
-         if (expectedResult)
-            success = (stream.str() == expectedValue);
-      }
-      else
-      {
-         cout << endl << error << endl;
-         success = (expectedResult == false);
-      }
-      
+      std::stringstream stream;
+      stream << object.value();
+      bool success = (expectedResult == result);
+      success = success &&
+         (stream.str() == expectedValue);
+         
       outputSuccess(success);
       
       return success;

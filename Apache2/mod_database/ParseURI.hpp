@@ -60,7 +60,7 @@ namespace BeeFishApache2 {
             << " "
             << "\"" << escape(key) << "\"";
         
-         _parser->setError(stream.str());
+         _parser->fail(stream.str());
          
          return false;
       }

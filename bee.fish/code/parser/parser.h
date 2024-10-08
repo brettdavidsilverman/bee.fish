@@ -337,12 +337,15 @@ namespace BeeFishParser
          
       }
       
+   private:
       virtual void setError(const BString& error)
       {
          if (_error.length() == 0)
             _error = error;
          
       }
+      
+   public:
       
       virtual const BString& getError() const
       {
