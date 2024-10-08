@@ -121,7 +121,7 @@ namespace BeeFishParser {
       {
          setResult(true);
       }
-      
+      /*
       virtual void fail()
       {
          string error;
@@ -133,7 +133,7 @@ namespace BeeFishParser {
          fail(error);
          
       }
-      
+      */
       virtual Match* match()
       {
           if (_match)
@@ -142,7 +142,7 @@ namespace BeeFishParser {
       }
       
       // Defined in parser.h
-      virtual void fail(const BString& error);
+      virtual void fail();
       
       virtual optional<bool> result() const
       {

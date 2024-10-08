@@ -16,7 +16,8 @@ namespace BeeFishApache2 {
    using namespace std::filesystem;
 
    inline bool testParseURI();
-   inline bool testURIQuery(JSONPath start, const std::string& query, const std::string& expected);
+   inline bool testURIQuery(Database& database, const BString& uri, const BString& queryStr, bool expectedResult, const BString& expectedValue = "");
+   
    inline bool testAllFiles(string url, string directory);
    inline bool testFile(string url, string directory, string file, bool expect = true);
    
@@ -44,10 +45,8 @@ namespace BeeFishApache2 {
       bool success = true;
       
       Database db;
-      Path start = Path(db)[HOST][URLS]["name"];
-      JSONPathParser json(start);
-      cerr << "testParseURI " << json.index() << endl;
-      
+      Path start = Path(db)[HOST][URLS];
+      JSONPathParser json(start["name"]);
       std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\"}}");
       json.read(stream);
       json.eof();
@@ -59,10 +58,12 @@ namespace BeeFishApache2 {
       {
          
        
-         success &= testURIQuery(start, "this.name.first", "\"Bee\"");
-         success &= testURIQuery(start, "this[\"name\"][\"first\"]", "\"Bee\"");
-         success &= testURIQuery(start, "this[\"name\"].first", "\"Bee\"");
-         success &= testURIQuery(start, "this.name[\"first\"]", "\"Bee\"");
+         success &= testURIQuery(db, "name", "this.name.first", true, "\"Bee\"");
+         success &= testURIQuery(db, "name", "this[\"name\"][\"first\"]", true, "\"Bee\"");
+         success &= testURIQuery(db, "name", "this[\"name\"].first", true, "\"Bee\"");
+         success &= testURIQuery(db, "name", "this.name[\"first\"]", true, "\"Bee\"");
+         success &= testURIQuery(db, "name", "this.nameb", false);
+
          
          outputSuccess(success);
       }
@@ -71,26 +72,34 @@ namespace BeeFishApache2 {
       
    }
    
-   bool testURIQuery(JSONPath object, const std::string& queryStr, const std::string& expected)
+
+   bool testURIQuery(Database& database, const BString& uri, const BString& queryStr, bool expectedResult, const BString& expectedValue)
    {
       cout << "\t" << "Testing query " << queryStr << flush;
-      Query query(&object);
-      Parser parser(query);
-      parser.read(queryStr);
-      parser.eof();
+     
+      BString error;
+
+      optional<JSONPath> object = parseURI(
+         database,
+         error,
+         "127.0.0.1",
+         uri,
+         queryStr
+      );
       
-      bool success =
-         (parser.result() == true);
-         
+      bool success = object.has_value();
+
       if (success)
       {
          std::stringstream stream;
-         stream << object;
-         success = (stream.str() == expected);
+         stream << object.value();
+         if (expectedResult)
+            success = (stream.str() == expectedValue);
       }
       else
       {
-         cout << endl << parser.getError() << endl;
+         cout << endl << error << endl;
+         success = (expectedResult == false);
       }
       
       outputSuccess(success);

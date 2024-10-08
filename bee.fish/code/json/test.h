@@ -572,8 +572,7 @@ assert(ok);
       
       ok &= testMatch("integer", &integer, "10", true, "10");
       ok &= testResult("integer type", integer.type() == Type::INTEGER);
-      cerr << "INT TYPE: " << integer.type() << endl;
-      assert(ok);
+
       ok &= testMatch("number", &number, "1.1", true, "1.1");
       ok &= testResult("number type", number.type() == Type::NUMBER);
 

@@ -19,7 +19,7 @@ INCLUDES=-I/usr/include/apache2 -I/usr/include/apr-1.0 -I../../bee.fish/code
 DATABASE=../../bee.fish/build/Database
 
 
-mod_database.so:	mod_database.cpp ParseURI.hpp ApacheStream.hpp $(DATABASE) a.out
+mod_database.so:	mod_database.cpp ParseURI.hpp ApacheStream.hpp $(DATABASE) Test.hpp a.out
 	g++ -std=c++17 -fPIC -shared -o mod_database.so $(INCLUDES) mod_database.cpp -lpthread -lrt
 	
 $(DATABASE):

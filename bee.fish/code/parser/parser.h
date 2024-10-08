@@ -291,23 +291,31 @@ namespace BeeFishParser
       
       virtual void eof() {
           
-         if (_match && 
-            _match->result() == nullopt)
+         if (result() == nullopt)
          {
-            _match->eof(this);
-            _result = _match->result();
-         }
          
-         if (_result == false)
-            fail();
-         else if (_result == true)
-            success();
+            if (_match && 
+               _match->result() == nullopt)
+            {
+               _match->eof(this);
+               _result = _match->result();
+            }
+         
+            if (_result == false)
+            {
+               fail();
+            }
+            else if (_result == true)
+            {
+               success();
+            }
+         }
          
       }
 
       virtual void success()
       {
-         _match->setResult(true);
+         //_match->setResult(true);
          _result = true;
          _error.clear();
       }
@@ -367,12 +375,12 @@ namespace BeeFishParser
    }
             
    // Declared in match.h
-   void Match::fail(const BString& error)
+   void Match::fail()
    {
        
       setResult(false);
       if (match() == _parser->match())
-         _parser->fail(error);
+         _parser->fail();
      
    }
 }

@@ -14,33 +14,44 @@ namespace BeeFishApache2 {
    class IdentifierPath : public Match
    {
    protected:
-      JSONPath* _path;
-      BString _error;
+      Path* _path;
    public:
-      IdentifierPath(JSONPath* path) :
+      IdentifierPath(Path* path) :
          _path(path)
       {
       }
       
-      virtual void success()
-      override
+      void setMatch(Match* match)
+      {
+         _match = new Invoke(
+            match,
+            [this](Match* match)
+            {
+               if (!onmatch())
+               {
+                  _parser->fail();
+                  return false;
+               }
+               else
+                  return true;
+               
+            }
+         );
+      }
+      
+      
+      
+      bool onmatch()
+
       {
          BString& key = value();
-
-         if (_path->contains(key))
+         JSONPath path = *_path;
+         if (path.contains(key))
          {
-            Index position =
-               _path->getObjectKeyPosition(key);
-                  
-            *_path << Type::OBJECT
-                   << position;
-                   
-            _path->unlock();
-            
-            Match::success();
-            return;
-            
+            (*_path) = path[key];
            
+            return true;
+            
          }
 
          std::stringstream stream;
@@ -49,9 +60,9 @@ namespace BeeFishApache2 {
             << " "
             << "\"" << escape(key) << "\"";
         
-         _parser->fail(stream.str());
+         _parser->setError(stream.str());
          
-                  
+         return false;
       }
       
       
@@ -63,10 +74,10 @@ namespace BeeFishApache2 {
    {
    
    public:
-      QuotedIdentifier(JSONPath* path) :
+      QuotedIdentifier(Path* path) :
          IdentifierPath(path)
       {
-         _match = new BeeFishJSON::String();
+         setMatch(new BeeFishJSON::String());
       }
       
    };
@@ -107,15 +118,16 @@ namespace BeeFishApache2 {
    class Identifier : public IdentifierPath
    {
    public:
-      Identifier(JSONPath* path) :
+      Identifier(Path* path) :
          IdentifierPath(path)
       {
-         _match =
+         setMatch(
             new Capture(
                new And(
                   new Repeat<AlphaNumeric>(0)
                )
-            );
+            )
+         );
       }
       
    };
@@ -124,7 +136,7 @@ namespace BeeFishApache2 {
       public Match
    {
    protected:
-      JSONPath* _start;
+      Path* _start;
       QuotedIdentifier* _quotedIdentifier;
       Identifier* _identifier;
       
@@ -133,7 +145,7 @@ namespace BeeFishApache2 {
          assert(false);
       }
       
-      PropertyPath(JSONPath* start) :
+      PropertyPath(Path* start) :
          _start(start)
       {
          _match = new Or(
@@ -173,12 +185,12 @@ namespace BeeFishApache2 {
    class PropertyPaths : public Repeat<PropertyPath>
    {
    protected:
-      JSONPath* _start;
+      Path* _start;
       PropertyPath* _last;
       //BString _error;
       
    public:
-      PropertyPaths(JSONPath* start) :
+      PropertyPaths(Path* start) :
          Repeat<PropertyPath>(0),
          _start(start)
       {
@@ -218,10 +230,10 @@ namespace BeeFishApache2 {
    protected:
       Word* _wordThis;
       PropertyPaths* _propertyPaths;
-      JSONPath* _start;
+      Path* _start;
       
    public:
-      Query(JSONPath* start) :
+      Query(Path* start) :
          _start(start)
       {
          _match =
@@ -263,17 +275,14 @@ namespace BeeFishApache2 {
      */
    };
 
-   Path parseURI(Database& database, const char* clientIP, const char* uri, const char* args) {
+   optional<Path> parseURI(Database& database, BString& error, const BString& clientIP, const BString& uri, const BString& args) {
       Debug debug;
       
       Path root(database);
       Path path = root[HOST][URLS];
       
-
-      string _uri = uri;
-      
       BString segment;
-      std::stringstream segments(_uri);
+      std::stringstream segments(uri);
       while(std::getline(segments, segment, '/'))
       {
          if (segment.size())
@@ -282,23 +291,22 @@ namespace BeeFishApache2 {
          }
       }
 
-      JSONPath jsonPath(path);
       
-      
-      if (args && strlen(args)) {
-         BString _args = args;
-         
-         Query query(&jsonPath);
+      if (args.length()) {
+         Query query(&path);
          Parser parser(query);
-         parser.read(_args.decodeURI());
+         parser.read(args.decodeURI());
          parser.eof();
-         
-         if (parser.result() != true)
-            cerr << parser.getError() << endl;
-        
+         if (parser.result() == false)
+         {
+            error = parser.getError();
+            if (!error.length())
+               error = "Unkown error";
+            return nullopt;
+         }
       }
       
-      return jsonPath;
+      return path;
       
    }
    

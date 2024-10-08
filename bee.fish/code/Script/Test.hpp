@@ -91,7 +91,6 @@ namespace BeeFishScript
 
       Variable var;
       ok &= parse("undefined", var);
-      std::cout << "VARIABLE: " << var << std::endl;
       ok &= testResult("Parse undefined", var._type == Type::UNDEFINED);
 
       ok &= parse("true", variable);

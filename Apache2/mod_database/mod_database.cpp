@@ -103,19 +103,21 @@ static int database_handler(request_rec *r)
     
    Database database(DATABASE_FILENAME);
     
-   Path path;
    
-   try {
-      path = parseURI(
-         database,
-         r->connection->client_ip,
-         r->uri,
-         r->args
-      );
-   }
-   catch (runtime_error& error)
+   BString error;
+   
+   optional<Path> _path = parseURI(
+      database,
+      error,
+      r->connection->client_ip,
+      r->uri,
+      r->args
+   );
+   
+   bool success = _path.has_value();
+   
+   if (!success)
    {
-      debug << now() << " " << error.what() << endl;
       
       ap_set_content_type(
        r, "application/json; charset=utf-8");
@@ -124,8 +126,11 @@ static int database_handler(request_rec *r)
 
       Variable reply =
          BeeFishScript::String(
-            error.what()
+            error
          );
+         
+      debug << now() << " " << reply << endl;
+      
          
       stream << reply;
       stream.flush();
@@ -133,6 +138,7 @@ static int database_handler(request_rec *r)
       return OK;
    }
    
+   Path path = _path.value();
 
    if (strcmp(r->method, "GET") == 0)
    {

@@ -93,7 +93,12 @@ namespace BeeFishBString
       }
 
       // c string
-      BString(const char *cstring) : BString(std::string(cstring))
+      BString(const char *cstring) :
+         BString(
+            cstring ?
+               std::string(cstring) :
+               std::string("")
+         )
       {
       }
 
