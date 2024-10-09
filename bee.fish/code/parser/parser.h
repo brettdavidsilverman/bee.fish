@@ -181,7 +181,7 @@ namespace BeeFishParser
                start = now();
             }
 #endif
-            if (_result != nullopt) {
+            if (result() != nullopt) {
                break;            
             }
          }
@@ -191,7 +191,7 @@ namespace BeeFishParser
          else if (_result == false)
             fail();
 
-         return _result;
+         return result();
       }
    
       virtual optional<bool> read(const string& str)
@@ -273,6 +273,9 @@ namespace BeeFishParser
       
       optional<bool> result() const
       {
+         if (_error.length())
+            return false;
+            
          return _result;
       }
       
@@ -301,11 +304,11 @@ namespace BeeFishParser
                _result = _match->result();
             }
          
-            if (_result == false)
+            if (result() == false)
             {
                fail();
             }
-            else if (_result == true)
+            else if (result() == true)
             {
                success();
             }

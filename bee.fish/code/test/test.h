@@ -167,6 +167,19 @@ namespace BeeFishTest
 
       return success;
    }
+   
+   inline bool testValue(
+      string label,
+      bool value
+   )
+   {
+      bool success = (value);
+      cout << "\t" << label << ": " << flush;
+     
+      BeeFishMisc::outputSuccess(success);
+
+      return success;
+   }
 }
 
 #endif

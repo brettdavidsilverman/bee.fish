@@ -114,9 +114,7 @@ static int database_handler(request_rec *r)
       r->args
    );
    
-   bool success = _path.has_value();
-   
-   if (!success)
+   if (!_path.has_value())
    {
       
       ap_set_content_type(

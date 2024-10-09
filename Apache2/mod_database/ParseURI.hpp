@@ -10,11 +10,13 @@ using namespace BeeFishParser;
 namespace BeeFishApache2 {
     
    
+   Debug debug;
    
    class IdentifierPath : public Match
    {
    protected:
       Path* _path;
+
    public:
       IdentifierPath(Path* path) :
          _path(path)
@@ -27,18 +29,11 @@ namespace BeeFishApache2 {
             match,
             [this](Match* match)
             {
-               if (!onmatch())
-               {
-                  _parser->fail();
-                  return false;
-               }
-               else
-                  return true;
-               
+               return onmatch();
             }
          );
+            
       }
-      
       
       
       bool onmatch()
@@ -60,8 +55,10 @@ namespace BeeFishApache2 {
             << " "
             << "\"" << escape(key) << "\"";
         
-         _parser->fail(stream.str());
+         BString error = stream.str();
          
+         _parser->fail(stream.str());
+       
          return false;
       }
       

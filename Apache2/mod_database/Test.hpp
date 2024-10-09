@@ -4,6 +4,7 @@
 #include <bits/stdc++.h>
 #include "Miscellaneous/Miscellaneous.hpp"
 #include "ParseURI.hpp"
+#include "test/test.h"
 
 namespace BeeFishApache2 {
 
@@ -88,17 +89,24 @@ namespace BeeFishApache2 {
       );
       
       bool result = object.has_value();
-
+      bool success = testValue("Expected result", expectedResult == result);
+      
       std::stringstream stream;
-      stream << object.value();
-      bool success = (expectedResult == result);
+
+      if (result)
+         stream << object.value();
+      else
+         stream << error;
+         
       success = success &&
-         (stream.str() == expectedValue);
+         testValue("\tExpected value",
+            (stream.str() == expectedValue)
+         );
          
       outputSuccess(success);
       
       if (!success)
-         cout << endl << stream.str() << endl;
+         cout << endl << stream.str() << endl << error << endl;
          
       
       return success;

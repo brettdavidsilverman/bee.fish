@@ -25,7 +25,7 @@ mod_database.so:	mod_database.cpp ParseURI.hpp ApacheStream.hpp $(DATABASE) Test
 $(DATABASE):
 	cd ../../bee.fish && make $(DEBUG)
 
-a.out:
+a.out: main.cpp Test.hpp Makefile ParseURI.hpp
 	g++ -std=c++17 -o a.out $(INCLUDES) main.cpp $(CFLAGS) -lpthread -lrt
 	
 #   the default target
