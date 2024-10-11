@@ -78,7 +78,7 @@ namespace BeeFishApache2 {
       }
       
    };
-   
+  
    class Alpha : public Or
    {
    public:

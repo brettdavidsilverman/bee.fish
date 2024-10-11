@@ -7,7 +7,7 @@
       <script src="/client/stream/stream.js"></script>
       <script src="/client/power-encoding/power-encoding.js"></script>
       <script src="/client/id/id.js"></script>
-      <script src="/client/evaluate.js"></script>
+      <script src="/client/evaluate.js"></script>      <script src="/client/logon/authentication.js"></script>
       <title>bee.fish</title>
       <style>
 textarea {
@@ -24,11 +24,10 @@ textarea {
             <label for="url">Path</label>
             <br/>
             <input type="url" id="url"
-               onblur="encodedURL.href='https://bee.fish/' + this.value"/>
+               onblur="setLink()"/>
             <button 
-              onclick="loadJSON(url.value)">Go</button>
+              onclick="loadJSON(url.value)">Fetch</button>
             <br/>
-            <a id="encodedURL">Link to path</a>
          </form>
          <br/>
          <form onsubmit="return false;">
@@ -38,7 +37,9 @@ textarea {
             <button onclick="postJSON(url.value, jsonEditor.value);">Save</button>
          
          </form>
+         
       </div>
+      <a id="encodedURL" target="_blank">Link to path</a>
       <br />
       <pre id="result">
       </pre>
@@ -50,9 +51,7 @@ textarea {
       <a href="https://bee.fish:8000/client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
-      
-      <script>
-var logon = document.getElementById("logon");
+      <script>var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
 var url = document.getElementById("url");
@@ -85,24 +84,30 @@ function loadJSON(url) {
          else if (response.status != 200)
             throw new Error(response.status);
                
-         return response.json();
+         return response.text();
       }
    )
    .then(
-      function(json) {
-         jsonEditor.value = "";
-         
+      function(json) {
+          
          if (json == undefined)
+         {
+            jsonEditor.value = "";
             return; 
-            
-         jsonEditor.value = 
-            JSON.stringify(json, null, "   "); 
+         }
+
+         jsonEditor.value = json;
          
-         var evaluated = evaluate(json);
-         
-         result.innerText =
-            evaluated.toString();
+         if (document.location.hash == "#go")
+         {
+            var evaluated = evaluate(
+               JSON.parse(json)
+            );
             
+            result.innerText =
+               evaluated.toString();
+         }
+         
          return json;
       }
    )
@@ -139,10 +144,19 @@ function postJSON(url, json) {
    return response;
 }
 
-window.onload = function()
+function setLink()
 {
-   encodedURL.href = url.value
+   encodedURL.href = 
+      "https://bee.fish/?" +
+      url.value +
+      "#go";
+      
+   encodedURL.innerHTML =
+      encodedURL.href;
 }
+
+loadJSON(url.value);
+setLink();
 
       </script>
 
