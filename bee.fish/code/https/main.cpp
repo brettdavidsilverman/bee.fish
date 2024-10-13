@@ -3,6 +3,8 @@
 #include <iostream>
 #include "https.h"
 
+#define SERVER
+
 #ifdef SERVER
 
 #include <linux/limits.h>
@@ -20,6 +22,7 @@ int main(int argc, const char* argv[])
    {
       BString databaseFile    = BEE_FISH_DATABASE_FILE;
       BString transactionFile = BEE_FISH_TRANSACTION_FILE;
+      BString logFile         = BEE_FISH_SERVER_LOG_FILE;
       
       std::cout << "HTTPS Secure Server" << std::endl;
       std::cout 
@@ -35,8 +38,8 @@ int main(int argc, const char* argv[])
         << "Transaction file: "
            << transactionFile
            << std::endl
-        << "Host: "
-           << HOST
+        << "Log file: "
+           << logFile
            << std::endl;
 
       if (hasArg(argc, argv, "-test") >= 0)
@@ -52,11 +55,12 @@ int main(int argc, const char* argv[])
       int portArg;
       if ((portArg = hasArg(argc, argv, "-port")) >= 0)
       {
-         
          port = std::atoi(argv[portArg + 1]);
       }
       else
          port = 443;
+         
+      std::cout << "Host: " << HOST << ":" << port << endl;
       
       initializeLogs();
       
@@ -80,7 +84,7 @@ int main(int argc, const char* argv[])
             port
          );
 
-      std::cout << "Started https on port " << port << " 😊" << endl;
+      std::cout << "Started " << server.hostName() << " 😊" << endl;
       
       io_context.run();
       

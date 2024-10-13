@@ -31,10 +31,11 @@ namespace BeeFishHTTPS {
    public:
       Response(
          Session* session
-      )
+      ) :
+         _session(session)
       {
          
-         ResponseHeaders headers;
+         ResponseHeaders headers(_session);
 
          App* app = nullptr;
 
@@ -64,7 +65,9 @@ namespace BeeFishHTTPS {
          if (app)
          {
             if (_log) {
-               clog << _status
+               clog << now() 
+                  << " " << ipAddress()
+                  << " " << _status
                   << " " << _statusText
                   << " Served by "
                   << app->name()
@@ -116,16 +119,21 @@ namespace BeeFishHTTPS {
          headersStream << "\r\n";
          _headers = headersStream.str();
          _headersLength = _headers.size();
+         
        
       }
       
       virtual ~Response()
-         {
+      {
          if (_app) {
             delete _app;
             _app = nullptr;
          }
       }
+      
+      // Defined in session.h
+      const BString& ipAddress() const;
+      
       
       virtual BeeFishBString::Data getNext(size_t& length)
       { 
@@ -201,7 +209,7 @@ namespace BeeFishHTTPS {
                }
                case App::SERVE_FILE:
                {
-                  BeeFishBString::Data buffer =
+                  response =
                      BeeFishBString::Data::create(length);
 
                   ifstream input(_app->_filePath);
@@ -210,11 +218,10 @@ namespace BeeFishHTTPS {
                         _headersLength
                      );
                   
-                  input.read((char*)buffer.data(), length);
+                  input.read((char*)response.data(), length);
                   
                   input.close();
                
-                  response = buffer;   
                   break;
                }
                default:

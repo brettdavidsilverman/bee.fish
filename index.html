@@ -155,7 +155,9 @@ function setLink()
       encodedURL.href;
 }
 
-loadJSON(url.value);
+if (url.value)
+   loadJSON(url.value);
+   
 setLink();
 
       </script>

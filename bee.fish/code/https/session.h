@@ -86,6 +86,7 @@ namespace BeeFishHTTPS {
       
       virtual void start()
       {
+            
          clear();
          
          try
@@ -102,6 +103,7 @@ namespace BeeFishHTTPS {
             delete this;
             return;
          }
+         
          _request = new BeeFishWeb::WebRequest();
          _parser = new ScriptParser(*_request);
          asyncRead();
@@ -165,19 +167,16 @@ namespace BeeFishHTTPS {
             return;
          }
          
-         if (error.value() == END_OF_FILE)
-         {
-            _parser->eof();
-         }
-         
          if (bytesTransferred > 0)
          {
 #ifdef DEBUG
 //            cerr << "Bytes transfeferred: " << bytesTransferred << endl;            
 //            cerr.write((const char*)_data._data, bytesTransferred);
 #endif
-            _parser->read(_data, bytesTransferred);
-
+            if (_parser->result() == nullopt)
+               _parser->read(_data, bytesTransferred);
+         
+            
             if (_parser->result() == false)
             {
                logException("handleRead", "parser match error");
@@ -187,6 +186,7 @@ namespace BeeFishHTTPS {
                delete this;
                return;
             }
+            
             
                
             if ( _request->_headers &&
@@ -213,17 +213,10 @@ namespace BeeFishHTTPS {
             }
             _tempFile.write((const char*)_data._data, bytesTransferred);
          }
-         else {
-            if (_request->result() != true)
-            {
-               logException("handleRead", "Parser input incomplete");
-               delete this;
-               return;
-            }
-         }
+         
 
          // Check if finished request
-         if ( _request->result() == true )
+         if ( _parser->result() == true )
          {
             _tempFile.close();
 
@@ -271,7 +264,7 @@ namespace BeeFishHTTPS {
                << ' '
                << ipAddress()          << ' '
                << _request->method()   << ' '
-               << HOST << _request->fullURL()  << ' '
+               << hostName() << _request->fullURL()  << ' '
                << std::endl;
 
             _response = new Response(
@@ -280,8 +273,7 @@ namespace BeeFishHTTPS {
 
             if (!closeOrRestart())
                asyncWrite();
-
-
+            
          }
          catch (std::exception& ex) {
             logException("Session::handleResponse", ex.what());
@@ -329,7 +321,7 @@ namespace BeeFishHTTPS {
          
          permissions(
             _tempFileName,
-            perms::owner_read |
+               perms::owner_read |
                perms::owner_write,
             perm_options::replace
          );
@@ -352,8 +344,8 @@ namespace BeeFishHTTPS {
             return;
          }
    
-         if (!closeOrRestart())
-            asyncWrite();
+         asyncWrite();
+            
       }
       
       virtual void asyncRead()
@@ -397,6 +389,7 @@ namespace BeeFishHTTPS {
                boost::asio::placeholders::error
             )
          );
+
       }
 
       virtual void logException(
@@ -466,6 +459,11 @@ namespace BeeFishHTTPS {
       {
          return _ipAddress;
       }
+      
+      const BString& hostName() const
+      {
+         return server()->hostName();
+      }
    
       void handshake()
       {
@@ -489,17 +487,16 @@ namespace BeeFishHTTPS {
          }
          else
          {
-            /*
-            logException(
-               "Session::handleHandshake",
-               error
-            );
-            */
             delete this;
          }
       }
 
       Server* server()
+      {
+         return _server;
+      }
+      
+      const Server* server() const
       {
          return _server;
       }
@@ -593,7 +590,7 @@ namespace BeeFishHTTPS {
       Parser& parser
    )
    {
-      
+ 
       ifstream input(_session->tempFileName());
       parser.read(input);
       parser.eof();
@@ -612,6 +609,24 @@ namespace BeeFishHTTPS {
 
    inline WebRequest* App::request() {
       return _session->request();
+   }
+   
+   // Declared in response.h
+   const BString& Response::ipAddress() const
+   {
+      return _session->ipAddress();
+   }
+   
+   // Declared in response-headers.h
+   ResponseHeaders::ResponseHeaders(
+      Session* session
+   ) :
+      ResponseHeadersBase(
+         {
+            { "access-control-allow-origin", session->hostName() }
+         }
+      )
+   {
    }
 
 }

@@ -16,15 +16,9 @@ namespace BeeFishHTTPS {
       public ResponseHeadersBase
    {
    public:
-      ResponseHeaders() :
-         ResponseHeadersBase(
-            {
-               { "access-control-allow-origin", "bee.fish" }
-            }
-         )
-      {
-      }
-
+      // Defined in session.h
+      ResponseHeaders(Session* session);
+      
       void replace(string key, BString value)
       {
          erase(key);

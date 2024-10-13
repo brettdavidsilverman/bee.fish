@@ -22,7 +22,7 @@ using namespace BeeFishPowerEncoding;
       
 namespace BeeFishWeb {
 
-   class WebRequest : public And {
+   class WebRequest : public Match {
    public:
 
       class URL : public Match
@@ -280,6 +280,18 @@ namespace BeeFishWeb {
       public:
          FirstLine() : Match()
          {
+         }
+         
+         virtual ~FirstLine()
+         {
+         }
+         
+         virtual void setup(Parser* parser)
+         override
+         {
+            if (_parser)
+               return;
+               
             _match = new And(
                new Capture(
                   new Method(),
@@ -297,12 +309,11 @@ namespace BeeFishWeb {
                ),
                new NewLine()
             );
-
+            
+            Match::setup(parser);
+            
          }
          
-         virtual ~FirstLine()
-         {
-         }
          
          const URL& url() const {
             return *_url;
@@ -324,20 +335,20 @@ namespace BeeFishWeb {
       BStream::OnBuffer    _ondata = nullptr;
    public:
 
-      WebRequest() : And()
+      WebRequest() : Match()
       {
       }
 
       virtual void setup(Parser* parser) {
-          
+         
          if (_parser)
             return;
-            
+           
          _firstLine = new FirstLine();
          _headers   = new Headers(),
          _body      = nullptr;
 
-         _inputs = {
+         _match = new And(
             _firstLine,
             new Invoke(
                _headers,
@@ -356,16 +367,17 @@ namespace BeeFishWeb {
                      _body = new Body();
                      _body->setup(parser, _headers);
                      _body->setOnBuffer(_ondata);
-                     _inputs.push_back(_body);
+                     And* _and = (And*)_match;
+                     _and->push_back(_body);
                   }
                   return true;
                }
             ),
             new NewLine()
-         };
+         );
          
-         And::setup(parser);
-         
+         Match::setup(parser);
+        
       }
     
       virtual ~WebRequest()
@@ -381,6 +393,35 @@ namespace BeeFishWeb {
       virtual void flush() {
          if (_body)
             _body->flush();
+      }
+      
+      virtual void eof(Parser* parser)
+      override
+      {
+          
+         setup(parser);
+         
+         if (result() != nullopt)
+            return;
+           
+         if (_body)
+         {
+            if ( _body->result() == nullopt)
+            {
+             
+               _body->eof(parser);
+               if (_body->result() == true)
+                  success();
+               else
+                  fail();
+            }
+            
+         }
+         else
+         {
+             success();
+         }
+ 
       }
 
       virtual bool hasJSON()

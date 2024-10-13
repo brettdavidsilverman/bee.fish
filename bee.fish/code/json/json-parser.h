@@ -28,14 +28,14 @@ namespace BeeFishJSON
        
       JSONParser(Match& match) :
          Parser(match),
-         _json((JSON*)&match)
+         _json(&match)
       {
          _delete = false;
       }
       
       JSONParser(Match* match) :
          Parser(*match),
-         _json((JSON*)match)
+         _json(match)
       {
           _delete = false;
       }
@@ -53,6 +53,7 @@ namespace BeeFishJSON
       }
       
       virtual void eof()
+      override
       {
          
          if (_json->result() == nullopt)

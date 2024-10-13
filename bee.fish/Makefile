@@ -1,4 +1,4 @@
-all:	test b-string power-encoding id parser json Database Script web-request https
+all:	test b-string power-encoding id parser json Database Script web-request https install
 	
 test:
 	- mkdir build
@@ -41,6 +41,9 @@ web-request:
 https:
 	-  mkdir build
 	cd code/https && make $(DEBUG)
+	
+install:	https
+	cd code/https && make install
 	
 #WebRequest:
 #	-  mkdir build

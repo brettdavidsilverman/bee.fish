@@ -27,6 +27,9 @@ namespace BeeFishWeb {
         }
 
         virtual void setup(Parser* parser, Headers*  headers) {
+            if (_parser)
+               return;
+              
             BString contentType;
             
             if ( headers->contains("content-type")) {
@@ -39,7 +42,7 @@ namespace BeeFishWeb {
             }
             else if (headers->contains("content-length") ) {
                 std::string contentLengthString = (*headers)["content-length"].str();
-                size_t contentLength = atoi(contentLengthString.c_str());
+                size_t contentLength = atol(contentLengthString.c_str());
                 if (contentLength > 0) {
                     _contentLength = new ContentLength(contentLength);
                     parser->setDataBytes(contentLength);
@@ -67,6 +70,15 @@ namespace BeeFishWeb {
             }
 
             return false;
+        }
+        
+        virtual void eof(Parser* parser)
+        override
+        {
+           Match::setup(parser);
+           
+           if (_match->result() == nullopt)
+              _match->eof(parser);
         }
 
 

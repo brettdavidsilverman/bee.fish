@@ -56,7 +56,7 @@ namespace BeeFishHTTPS {
                  ioContext,
               unsigned short port
       ) :
-         _hostName(hostName),
+         _port(port),
          _ioContext(ioContext),
          _acceptor(
             ioContext,
@@ -67,6 +67,12 @@ namespace BeeFishHTTPS {
          ),
          _context(boost::asio::ssl::context::sslv23)
       {
+         _hostName = hostName;
+         if (_port != 443) {
+            _hostName += ":";
+            _hostName += std::to_string(_port);
+         }
+         
          std::cout << "Opening transaction file " << std::endl;
    
          _transactionFile.open(
@@ -118,14 +124,21 @@ namespace BeeFishHTTPS {
    
       const BString& hostName() const
       {
+          
          return _hostName;
+      }
+      
+      const unsigned short port() const
+      {
+          
+         return _port;
       }
       
       Database* database()
       {
          return _database;
       }
-      
+            
       // Defined in session.h
       void startAccept();
 
@@ -162,6 +175,7 @@ namespace BeeFishHTTPS {
 
    private:
       BString _hostName;
+      unsigned short _port;
       boost::asio::io_context& _ioContext;
       boost::asio::ip::tcp::acceptor _acceptor;
       boost::asio::ssl::context _context;

@@ -106,7 +106,7 @@ namespace BeeFishHTTPS {
          if (requestHeaders.contains("origin"))
             origin = requestHeaders["origin"].str();
          else
-            origin = HOST;
+            origin = session()->hostName();
 
          _responseHeaders.replace(
             "connection",

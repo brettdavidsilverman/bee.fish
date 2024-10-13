@@ -67,15 +67,15 @@ namespace BeeFishParser {
          if (_parser)
             return;
             
+         if (_match)
+            _match->setup(parser);
+            
          _parser = parser;
 
          if (_parser == nullptr)
             throw std::logic_error("Match::setup _parser is not defined.");
          
-         if (_match)
-            _match->setup(parser);
-            
-
+         
       }
 
 

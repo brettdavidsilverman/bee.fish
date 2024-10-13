@@ -90,6 +90,11 @@ namespace BeeFishHTTPS {
          return "App base class";
       }
       
+      Session* session()
+      {
+         return _session;
+      }
+      
       void redirect(
          BString path,
          bool permanent,
