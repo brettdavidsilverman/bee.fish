@@ -85,13 +85,12 @@ namespace BeeFishDatabase {
           
       }
       
-      JSONPath operator [] (Index arrayIndex)
+      JSONPath operator [] (const Index& index)
       {
-       
-         Path path = *this;
-         
+         Path path(*this);
+        
          path << Type::ARRAY
-              << arrayIndex;
+              << index;
 
          return path;
           
@@ -130,6 +129,23 @@ namespace BeeFishDatabase {
          );
          
          return contains;
+         
+      }
+      
+      bool contains(const Index& index)
+      {
+         if (!contains(Type::ARRAY))
+            return false;
+            
+         Path path = (*this)[Type::ARRAY];
+         
+         if (!path.contains(index))
+         {
+            return false;
+         }
+         
+ 
+         return true;
          
       }
       
@@ -187,15 +203,9 @@ namespace BeeFishDatabase {
 
          Path path = _properties[BY_OBJECT];
          
-         assert(path.contains(id));
-         
          path = path[id];
          
-         assert(path.contains(position));
-         
          path = path[position];
-         
-         assert(path.hasData());
          
          Index keyIndex = 0;
          path.getData<Index>(keyIndex);

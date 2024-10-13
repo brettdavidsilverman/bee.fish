@@ -30,11 +30,10 @@ int main(int argc, const char* argv[]) {
 
    if (hasArg(argc, argv, "-test") >= 0)
    {
-      /*
       cout << "Testing database..." << endl << endl;
       if (!BeeFishDatabase::test())
          return 1;
-      */
+
       cout << "Testing apache2..." << endl << endl;
       if (!BeeFishApache2::test())
          return 1;

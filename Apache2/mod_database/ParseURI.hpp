@@ -29,14 +29,19 @@ namespace BeeFishApache2 {
             match,
             [this](Match* match)
             {
-               return onmatch();
+               bool matched = onmatch();
+               if (!matched)
+               {
+                  return false;
+               }
+               return true;
             }
          );
             
       }
       
       
-      bool onmatch()
+      virtual bool onmatch()
 
       {
          BString& key = value();
@@ -56,15 +61,61 @@ namespace BeeFishApache2 {
             << "\"" << escape(key) << "\"";
         
          BString error = stream.str();
-         
-         _parser->fail(stream.str());
-       
+
+         fail(stream.str());
+        
          return false;
       }
       
       
 
       
+   };
+   
+   class ArrayIndexPath : public IdentifierPath
+   {
+   
+   public:
+      ArrayIndexPath(Path* path) :
+         IdentifierPath(path)
+      {
+         
+      }
+      
+      virtual bool onmatch()
+      override
+
+      {
+
+         BString& stringIndex = value();
+         Index index = atol(stringIndex.c_str());
+  
+         JSONPath path = *_path;
+         if (path.contains(index))
+         {
+            (*_path) = path[index];
+           
+            return true;
+            
+         }
+         std::stringstream stream;
+         stream
+            << "Invalid index"
+            << " "
+            << stringIndex;
+        
+         BString error = stream.str();
+         
+         fail(error);
+
+         return false;
+      }
+      
+      virtual void setup(Parser* parser)
+      {
+         setMatch(new BeeFishJSON::Integer());
+         IdentifierPath::setup(parser);
+      }
    };
    
    class QuotedIdentifier : public IdentifierPath
@@ -74,8 +125,16 @@ namespace BeeFishApache2 {
       QuotedIdentifier(Path* path) :
          IdentifierPath(path)
       {
-         setMatch(new BeeFishJSON::String());
+         
       }
+      
+      virtual void setup(Parser* parser)
+      {
+         setMatch(new BeeFishJSON::String());
+         IdentifierPath::setup(parser);
+         
+      }
+      
       
    };
   
@@ -118,6 +177,11 @@ namespace BeeFishApache2 {
       Identifier(Path* path) :
          IdentifierPath(path)
       {
+         
+      }
+      
+      virtual void setup(Parser* parser)
+      {
          setMatch(
             new Capture(
                new And(
@@ -125,8 +189,8 @@ namespace BeeFishApache2 {
                )
             )
          );
+         IdentifierPath::setup(parser);
       }
-      
    };
    
    class PropertyPath :
@@ -134,6 +198,7 @@ namespace BeeFishApache2 {
    {
    protected:
       Path* _start;
+      ArrayIndexPath* _arrayIndex;
       QuotedIdentifier* _quotedIdentifier;
       Identifier* _identifier;
       
@@ -148,6 +213,12 @@ namespace BeeFishApache2 {
          _match = new Or(
             new And(
                new Character('['),
+               _arrayIndex =
+                  new ArrayIndexPath(_start),
+               new Character(']')
+            ),
+            new And(
+               new Character('['),
                _quotedIdentifier =
                   new QuotedIdentifier(_start),
                new Character(']')
@@ -160,23 +231,7 @@ namespace BeeFishApache2 {
             
          );
       }
-      /*
-      virtual void fail()
-      override
-      {
-         if (_quotedIdentifier->getError().length())
-            _error = _quotedIdentifier->getError();
-         else if (_identifier->getError().length())
-            _error = _identifier->getError();
-            
-         Match::fail();
-      }
       
-      const BString& getError() const
-      {
-         return _error;
-      }
-      */
    };
    
    class PropertyPaths : public Repeat<PropertyPath>
@@ -184,7 +239,7 @@ namespace BeeFishApache2 {
    protected:
       Path* _start;
       PropertyPath* _last;
-      //BString _error;
+     
       
    public:
       PropertyPaths(Path* start) :
@@ -294,6 +349,7 @@ namespace BeeFishApache2 {
          Parser parser(query);
          parser.read(args.decodeURI());
          parser.eof();
+         
          if (parser.result() == false)
          {
             error = parser.getError();

@@ -46,11 +46,13 @@ namespace BeeFishDatabase {
          pop_back_path();
          pop_back_container();
          
+#ifdef DEBUG
          assert(_pathStack.size() == 0 &&
                 _containerStack.size() == 0 &&
                 _arrayIndexStack.size() == 0 &&
                 _keyStack.size() == 0 &&
                 _objectPropertyIndexStack.size() == 0);
+#endif
       }
      
       /*

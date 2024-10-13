@@ -143,6 +143,7 @@ namespace BeeFishParser {
       
       // Defined in parser.h
       virtual void fail();
+      virtual void fail(const BString& error);
       
       virtual optional<bool> result() const
       {

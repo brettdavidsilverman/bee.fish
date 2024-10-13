@@ -48,7 +48,7 @@ namespace BeeFishApache2 {
       Database db;
       Path start = Path(db)[HOST][URLS];
       JSONPathParser json(start["name"]);
-      std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\"}}");
+      std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\", \"middle\": [\"David\"]}}");
       json.read(stream);
       json.eof();
       
@@ -57,15 +57,14 @@ namespace BeeFishApache2 {
       
       if (success)
       {
-         
        
          success &= testURIQuery(db, "name", "this.name.first", true, "\"Bee\"");
          success &= testURIQuery(db, "name", "this[\"name\"][\"first\"]", true, "\"Bee\"");
          success &= testURIQuery(db, "name", "this[\"name\"].first", true, "\"Bee\"");
          success &= testURIQuery(db, "name", "this.name[\"first\"]", true, "\"Bee\"");
          success &= testURIQuery(db, "name", "this.nameb", false, "Invalid property \"nameb\"");
-
-         
+         success &= testURIQuery(db, "name", "this.name.middle[0]", true, "\"David\"");
+         success &= testURIQuery(db, "name", "this.name.middle[1]", false, "Invalid index 1");
          outputSuccess(success);
       }
       
@@ -95,19 +94,24 @@ namespace BeeFishApache2 {
 
       if (result)
          stream << object.value();
-      else
+      else {
          stream << error;
-         
+      }
+      
+      BString value = stream.str();
+      
       success = success &&
          testValue("\tExpected value",
-            (stream.str() == expectedValue)
+            (value == expectedValue)
          );
          
       outputSuccess(success);
-      
+
       if (!success)
-         cout << endl << stream.str() << endl << error << endl;
-         
+      {
+         cout << "Expected: " << expectedValue << endl;
+         cout << "Got: " << value << endl;
+      }
       
       return success;
    }

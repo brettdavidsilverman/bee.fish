@@ -35,18 +35,19 @@ using namespace BeeFishScript;
 namespace BeeFishParser
 {
    
-
+   class Match;
+   
    class Parser
    {
-   public:
-      optional<bool> _result;
-   protected:
       
+   protected:
+      optional<bool> _result;
       Match* _match;
       size_t _charCount = 0;
       ssize_t _dataBytes = -1;
       BeeFishBString::UTF8Character _utf8 = "";
       String _error;
+      
    public:
       Char _lastCharacter = "";
       
@@ -318,9 +319,12 @@ namespace BeeFishParser
 
       virtual void success()
       {
-         //_match->setResult(true);
-         _result = true;
-         _error.clear();
+         if (_result == nullopt)
+         {
+            _match->setResult(true);
+            _result = true;
+            _error.clear();
+         }
       }
       
       virtual void fail() {
@@ -335,20 +339,18 @@ namespace BeeFishParser
       {
          _match->setResult(false);
          _result = false;
- 
-          setError(error);
-         
+         setError(error);
       }
       
-   private:
+      
+   public:
+       
       virtual void setError(const BString& error)
       {
          if (_error.length() == 0)
             _error = error;
          
       }
-      
-   public:
       
       virtual const BString& getError() const
       {
@@ -383,11 +385,24 @@ namespace BeeFishParser
    // Declared in match.h
    void Match::fail()
    {
-       
+      //_result = false;
       setResult(false);
-      if (match() == _parser->match())
+      
+      if (_match)
+         _match->fail();
+      
+      if (//this == _parser->_match ||
+         // match() == _parser->_match ||
+          match() == _parser->match())
+      {
          _parser->fail();
-     
+      }
+   }
+   
+   void Match::fail(const BString& error)
+   {
+      _parser->setError(error);
+      fail();
    }
 }
 
