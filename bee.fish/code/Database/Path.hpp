@@ -222,7 +222,7 @@ namespace BeeFishDatabase {
  
       Path operator [] (const char* key)
       {
-         std::string _key(key);
+         BString _key(key);
          return Path::operator[](_key);
       }
       
@@ -285,7 +285,7 @@ namespace BeeFishDatabase {
          BeeFishDatabase::Data data = getData();
          destination = *(T*)data.data();
       }
-
+/*
       void getData(std::string& destination)
       {
          const Data data = getData();
@@ -297,10 +297,11 @@ namespace BeeFishDatabase {
          else
             destination = "";
       }
-
+*/
       void getData(BString& destination)
       {
          const Data data = getData();
+         
          if (data.size())
             destination = BString(
                data.data(),
@@ -310,16 +311,17 @@ namespace BeeFishDatabase {
             destination = "";
       }
 
-      void setData(const BString& value) {
-         Data source(value);
-         setData(source);
+      void setData(const BString& value)
+      {
+         Data data(value);
+         setData(data);
       }
-
+/*
       void setData(const std::string& value) {
          Data source(value);
          setData(source);
       }
-
+*/
       void setData(const Data& value) {
 
          Database::ScopedFileLock lock(_database);
@@ -359,9 +361,9 @@ namespace BeeFishDatabase {
       template<typename T>
       void setData(const T& source)
       {
-         const char* data = (const char*)&source;
-         std::string string(data, sizeof(T));
-         setData(string);
+         const char* bytes = (const char*)&source;
+         Data data(bytes, sizeof(T));
+         setData(data);
          
       }
 
@@ -369,7 +371,7 @@ namespace BeeFishDatabase {
          const char* source
       )
       {
-         setData(std::string(source));
+         setData(BString(source));
       }
       
       Branch getBranch()

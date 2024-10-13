@@ -149,13 +149,17 @@ namespace BeeFishDatabase
       
       if (success)
       {
-         data.setData("");
          cout << "\tTesting Data string" << flush;
-         success = !data.hasData();
          
-         string value;
-         data.getData(value);
-         success = success && (value == "");
+         data.setData("");
+         
+         success = !data.hasData();
+         if (success)
+         {
+            BString value;
+            data.getData(value);
+            success = success && (value == "");
+         }
          outputSuccess(success);
       }
 
@@ -546,11 +550,11 @@ namespace BeeFishDatabase
       cout << "\tTest data: " << std::flush;
       {
       
-         std::string str1 = "Hello 🤗";
+         BString str1 = "Hello 🤗";
          Path path = root["str"];
          path.setData(str1);
          Path path2 = root["str"];
-         std::string str2;
+         BString str2;
          path2.getData(str2);
       
          success = testValue(str1,str2);

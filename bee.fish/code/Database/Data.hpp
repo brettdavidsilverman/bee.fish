@@ -49,13 +49,13 @@ namespace BeeFishDatabase {
          }
       }
       
-      Data(const std::string& data)
+      Data(const char* data, size_t size)
       {
-         _size = data.size();
+         _size = size;
          if (_size)
          {
             _data = new char[_size];
-            memcpy(_data, data.data(), _size);
+            memcpy(_data, data, _size);
          }
       }
       

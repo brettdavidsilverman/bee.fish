@@ -123,9 +123,9 @@ static int database_handler(request_rec *r)
       ApacheStream stream(r);
 
       Variable reply =
-         BeeFishScript::String(
-            error
-         );
+          BeeFishScript::Object{
+              {"error", error}
+          };
          
       debug << now() << " " << reply << endl;
       

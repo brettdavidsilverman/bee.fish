@@ -46,9 +46,10 @@ namespace BeeFishApache2 {
       bool success = true;
       
       Database db;
-      Path start = Path(db)[HOST][URLS];
-      JSONPathParser json(start["name"]);
-      std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\", \"middle\": [\"David\"]}}");
+      Path start = Path(db)[HOST][URLS]["name"];
+      start.clear();
+      JSONPathParser json(start);
+      std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\", \"middle\": [\"David\", \"PK\"]}}");
       json.read(stream);
       json.eof();
       
@@ -62,9 +63,9 @@ namespace BeeFishApache2 {
          success &= testURIQuery(db, "name", "this[\"name\"][\"first\"]", true, "\"Bee\"");
          success &= testURIQuery(db, "name", "this[\"name\"].first", true, "\"Bee\"");
          success &= testURIQuery(db, "name", "this.name[\"first\"]", true, "\"Bee\"");
-         success &= testURIQuery(db, "name", "this.nameb", false, "Invalid property \"nameb\"");
+         success &= testURIQuery(db, "name", "this.nameb", false, "Invalid property \"nameb\". Expected one of\r\n   \"name\"");
          success &= testURIQuery(db, "name", "this.name.middle[0]", true, "\"David\"");
-         success &= testURIQuery(db, "name", "this.name.middle[1]", false, "Invalid index 1");
+         success &= testURIQuery(db, "name", "this.name.middle[2]", false, "Invalid index 2. Expected index range is [0, 1]");
          outputSuccess(success);
       }
       
@@ -109,8 +110,8 @@ namespace BeeFishApache2 {
 
       if (!success)
       {
-         cout << "Expected: " << expectedValue << endl;
-         cout << "Got: " << value << endl;
+         cout << "Expected: " << endl << expectedValue << endl;
+         cout << "Got: " << endl << value << endl;
       }
       
       return success;

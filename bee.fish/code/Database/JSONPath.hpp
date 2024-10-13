@@ -12,11 +12,13 @@ namespace BeeFishDatabase {
    using namespace BeeFishJSON;
 
    /*
-   db[OBJECTS][objectId][position][type][value]
+   db[OBJECTS][objectId][position] = keyIndex //[type][value]
    db[PROPERTIES][key][VALUE][type][value][objectId]
    db[PROPERTIES][key][POSITION][objectId] = position;
-   db[PROPERTIES][objectId][position] = key
+   //db[PROPERTIES][objectId][position] = keyIndex
    */
+   
+   
    
    class JSONPath :
       public MinMaxPath
@@ -27,6 +29,7 @@ namespace BeeFishDatabase {
       
    public:
       typedef Index Id;
+      
       using MinMaxPath::contains;
       
       JSONPath()
@@ -62,6 +65,16 @@ namespace BeeFishDatabase {
       Id id()
       {
          return index();
+      }
+      
+      Path objects()
+      {
+         return _objects;
+      }
+      
+      Path properties()
+      {
+         return _properties;
       }
       
       template<typename T>
@@ -119,7 +132,7 @@ namespace BeeFishDatabase {
          path = path
             [key]
             [POSITIONS];
-         
+        
          
          JSONPath object =
             (*this);
@@ -154,14 +167,17 @@ namespace BeeFishDatabase {
       Index getObjectKeyPosition(const BString& key)
       {
          Id id = this->id();
-         
          Path keyPath = 
             _properties[BY_KEY];
             
          if (!keyPath.contains(key))
             keyPath[key].setData(key);
             
+         
          keyPath = keyPath[key];
+         
+         Index keyPathIndex =
+            keyPath.index();
          
          Path path = keyPath
             [POSITIONS]
@@ -191,7 +207,7 @@ namespace BeeFishDatabase {
             [BY_OBJECT]
             [id]
             [position]
-            .setData<Index>(keyPath.index());
+            .setData<Index>(keyPathIndex);
             
          return position;
       }
@@ -208,7 +224,7 @@ namespace BeeFishDatabase {
          path = path[position];
          
          Index keyIndex = 0;
-         path.getData<Index>(keyIndex);
+         path.getData(keyIndex);
          BString key;
          Path keyPath(database(), keyIndex);
          keyPath.getData(key);

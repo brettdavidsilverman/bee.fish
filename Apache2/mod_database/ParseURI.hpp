@@ -58,11 +58,34 @@ namespace BeeFishApache2 {
          stream
             << "Invalid property"
             << " "
-            << "\"" << escape(key) << "\"";
-        
+            << "\"" << escape(key) << "\""
+            << ". Expected one of";
+            
+         JSONPath::Id objectId = path.id();
+         
+         Path properties =
+            path.properties()
+            [BY_OBJECT];
+         
+         MinMaxPath object =
+            properties[path.id()];
+            
+         assert(!object.isDeadEnd());
+         
+         Stack stack(object);
+         Index position;
+         while (object.next(stack, position))
+         {
+            BString key =
+               path.getObjectKey(position);
+               
+            stream << "\r\n   \"" << escape(key) << "\"";
+            
+         }
+         
          BString error = stream.str();
 
-         fail(stream.str());
+         fail(error);
         
          return false;
       }
@@ -102,7 +125,9 @@ namespace BeeFishApache2 {
          stream
             << "Invalid index"
             << " "
-            << stringIndex;
+            << stringIndex
+            << ". Expected index range is [0, "
+            << path[Type::ARRAY].max<Index>() << "]";
         
          BString error = stream.str();
          
