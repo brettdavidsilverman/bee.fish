@@ -72,7 +72,7 @@ function logon(secret)
          if (authentication.authenticated) {
             const params = new URL(document.location.href).searchParams;
             if (params.has("redirect")) {
-               const redirect = params.get("redirect");
+               redirect = params.get("redirect");
                document.location.href = redirect;
             }
             else {
@@ -93,6 +93,8 @@ function logon(secret)
          updateForm();
       }
    ); 
+   
+   
    
 }
 
@@ -263,7 +265,7 @@ document.body.onload = function()
 {
    form.reset();
    authentication.getStatus().then(
-      function(status){
+      function(auth){
          updateForm();
       }
    );

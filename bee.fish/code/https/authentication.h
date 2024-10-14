@@ -201,8 +201,11 @@ namespace BeeFishHTTPS {
       virtual void write(BeeFishScript::Object& object) const {
          object["authenticated"] = _authenticated;
          if (_authenticated)
+         {
             object["timeout"] = 
                BeeFishScript::Integer(LOGON_TIMEOUT);
+            object["sessionId"] = sessionId();
+         }
          else
             object["timeout"] =
                BeeFishScript::Integer(0);

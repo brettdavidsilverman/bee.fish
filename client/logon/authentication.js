@@ -2,7 +2,7 @@ class Authentication
 {
    constructor(authenticatorServer = document.location.origin) {
      // Object.assign(this, input);
-      this._authenticated = false;
+      this.authenticated = false;
       this.url = authenticatorServer;
    }
    
@@ -11,7 +11,7 @@ class Authentication
    
       var _this = this;
       
-      this._authenticated = false;
+      this.authenticated = false;
       
       if ( secret == null || !secret.length )
          throw new Error("Missing secret");
@@ -39,7 +39,10 @@ class Authentication
          )
          .then(
             function(json) {
-               return _this._authenticated = json.authenticated;
+               _this.authenticated = 
+                  json.authenticated;
+               _this.sessionId =
+                  json.sessionId;
             }
          )
          .catch(
@@ -55,7 +58,7 @@ class Authentication
    {
       var _this = this;
       
-      this._authenticated = false;
+      this.authenticated = false;
       
       var params = {}
       params.method = "POST";
@@ -80,8 +83,12 @@ class Authentication
          )
          .then(
             function(json) {
-               _this._authenticated = json.authenticated;
-               return _this.authenticated;
+               _this.authenticated =
+                  json.authenticated;
+               _this.sessionId =
+                  json.sessionId;
+               
+               return json;
             }
          )
          .catch(
@@ -97,7 +104,7 @@ class Authentication
    {
       var _this = this;
       
-      this._authenticated = false;
+      this.authenticated = false;
 
       var params = {}
       params.method = "POST";
@@ -126,31 +133,33 @@ class Authentication
          );
 
          
-      this._authenticated = false;
+      this.authenticated = false;
       this.secret = null;
 
       return promise;
-   }
-   
-   get authenticated()
-   {
-      return this._authenticated;
    }
    
 }
 
 var authentication = new Authentication();
 
-function authenticate() {
+async function authenticate() {
 
-    authentication.getStatus().then(
-        function(authenticated) {
-            if (!authenticated) {
+    return await authentication.getStatus()
+    .then(
+        function(auth) {
+            if (!auth.authenticated) {
+                
                var currentPage = document.location.href;
+               
                var newPage = document.location.origin + "/client/logon/"
                var url = newPage + "?redirect=" + encodeURIComponent(currentPage);
-               document.location.href = url
+               document.location.href = url;
             }
+            return auth;
         }
     );
+
 }
+
+

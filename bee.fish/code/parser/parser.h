@@ -101,9 +101,6 @@ namespace BeeFishParser
          if (!_match->_parser)
             _match->setup(this);
             
-#ifdef DEBUG
-         cout << escape((char)byte);
-#endif
          ++_charCount;
 
          
@@ -161,8 +158,9 @@ namespace BeeFishParser
             
             c = i;
 #ifdef DEBUG
-            cerr << '{' << c << '}';
+            cout << c;
 #endif
+      
             if (!match(c))
                return false;
 

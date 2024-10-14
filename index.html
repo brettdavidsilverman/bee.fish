@@ -8,6 +8,15 @@
       <script src="/client/power-encoding/power-encoding.js"></script>
       <script src="/client/id/id.js"></script>
       <script src="/client/evaluate.js"></script>      <script src="/client/logon/authentication.js"></script>
+      <script>
+authenticate().then(
+   function(auth)
+   {
+      if (auth.authenticated)
+         alert(auth.sessionId);
+   }
+);
+      </script>
       <title>bee.fish</title>
       <style>
 textarea {
@@ -51,7 +60,9 @@ textarea {
       <a href="https://bee.fish:8000/client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
-      <script>var logon = document.getElementById("logon");
+      <script>
+
+var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
 var url = document.getElementById("url");
@@ -137,7 +148,7 @@ function postJSON(url, json) {
          }
       ).catch(
          function(error) {
-            alert("Error " + error);
+            alert(error);
          }
       );
 
@@ -159,7 +170,7 @@ if (url.value)
    loadJSON(url.value);
    
 setLink();
-
+
       </script>
 
    </body>

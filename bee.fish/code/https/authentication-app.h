@@ -32,7 +32,7 @@ namespace BeeFishHTTPS {
             "/client/console/console.js",
             "/client/logon/",
             "/client/logon/index.html",
-            "/client/logon/logoff.html",
+           // "/client/logon/logoff.html",
             "/client/logon/style.css",
             "/client/logon/sha512.js",
             "/client/logon/hash-secret.js",
@@ -112,23 +112,7 @@ namespace BeeFishHTTPS {
             "connection",
             "keep-alive"
          );
-/*         
-         _responseHeaders.replace(
-            "access-control-allow-methods",
-            "*"
-         );
-            
 
-         _responseHeaders.replace(
-            "access-control-request-method",
-            "POST"
-         );
-
-         _responseHeaders.replace(
-            "access-control-allow-headers",
-            "*"
-         );
-*/
          _responseHeaders.replace(
             "access-control-allow-origin",
             origin

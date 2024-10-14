@@ -121,19 +121,7 @@ namespace BeeFishParser {
       {
          setResult(true);
       }
-      /*
-      virtual void fail()
-      {
-         string error;
-         if (_match)
-            error = typeid(*_match).name();
-         else
-            error = typeid(*this).name();
       
-         fail(error);
-         
-      }
-      */
       virtual Match* match()
       {
           if (_match)
