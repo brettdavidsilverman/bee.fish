@@ -97,14 +97,14 @@ namespace BeeFishHTTPS {
             }
          }
       
-         string origin;
+         BString origin;
    
          const BeeFishWeb::Headers&
             requestHeaders =
                request->headers();
 
          if (requestHeaders.contains("origin"))
-            origin = requestHeaders["origin"].str();
+            origin = requestHeaders["origin"];
          else
             origin = session()->hostName();
 
@@ -117,7 +117,7 @@ namespace BeeFishHTTPS {
             "access-control-allow-origin",
             origin
          );
-
+         
          _responseHeaders.replace(
             "access-control-allow-credentials",
             "true"
@@ -129,14 +129,14 @@ namespace BeeFishHTTPS {
                "set-cookie",
                BString("sessionId=") +
                _sessionId +
-               BString(";path=/;SameSite=None;Secure;HttpOnly;max-age=3600")
+              BString(";path=/;max-age=3600;")
             );
          }
          else
          {
             _responseHeaders.emplace(
                "set-cookie",
-               "sessionId=;path=/;SameSite=None;Secure;HttpOnly;max-age=0"
+               "sessionId=;path=/;max-age=0;"
             );
          }
 
@@ -154,11 +154,9 @@ namespace BeeFishHTTPS {
          {
             _status = 401;
             _statusText = "Not authenticated";
-            //if (webMethod == "GET") {
-               _serve = SERVE_FILE;
-               _filePath = getFilePath("/client/logon/index.html");
-               return;     
-            //}
+            _serve = SERVE_FILE;
+            _filePath = getFilePath("/client/logon/index.html");
+            return;
             
          }
 

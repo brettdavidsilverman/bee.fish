@@ -135,7 +135,7 @@ class Authentication
          
       this.authenticated = false;
       this.secret = null;
-
+      document.cookie = "sessionId=;path=/;max-age=0;"
       return promise;
    }
    

@@ -128,11 +128,13 @@ namespace BeeFishHTTPS {
          
          if (path != from)
          {
+             
             _responseHeaders.emplace(
                "set-cookie",
                BString("redirect=;path=/;max-age=0")
             
             );
+            
             _responseHeaders.emplace(
                "set-cookie",
                BString("redirect=") + from +
