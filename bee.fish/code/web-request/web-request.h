@@ -252,7 +252,6 @@ namespace BeeFishWeb {
 //               new Word("PUT"),
                new Word("POST"),
                new Word("DELETE")
-//               new Word("OPTIONS")
             )
             {
 
@@ -354,7 +353,8 @@ namespace BeeFishWeb {
                _headers,
                [this, parser](Match* match) 
                {
-                  if ( _firstLine->_method == "POST" ) {
+                  if ( _firstLine->_method == "POST")
+                  {
                      // Currently we only handle json or image/jpeg
                      if (_headers->contains("content-length") ) {
                         if (_headers->at("content-length") == "0") {

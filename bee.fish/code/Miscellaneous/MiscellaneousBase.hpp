@@ -53,6 +53,9 @@ namespace BeeFishMisc {
    {
       switch ((int)c)
       {
+      case 0:
+         return "{null}";
+         break;
       case '\"':
          return "\\\"";
          break;
@@ -93,7 +96,7 @@ namespace BeeFishMisc {
    )
    {
       std::stringstream stream;
-      for (const char& c : input) {
+      for (char c : input) {
 
          stream << escape(c);
 

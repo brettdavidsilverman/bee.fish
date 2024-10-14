@@ -36,7 +36,7 @@ namespace BeeFishWeb {
                 contentType = (*headers)["content-type"];
             }
 
-            if (_parseJSON && contentType.startsWith("application/json") ) {
+            if (_parseJSON) { //&& contentType.startsWith("application/json") ) {
                 _json = new BeeFishJSON::Object();
                 _match = _json;
             }

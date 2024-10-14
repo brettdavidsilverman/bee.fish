@@ -69,11 +69,11 @@ namespace BeeFishHTTPS {
       {
          // Create the temp file name.
          stringstream stream;
-         stream << this;
+         stream << "bee.fish." << (void*)this;
          _tempFileName =
             string(TEMP_DIRECTORY) +
-            "/" +
             stream.str();
+            
       }
   
   
@@ -160,60 +160,64 @@ namespace BeeFishHTTPS {
       )
       {
          
-         if (error && error.value() != END_OF_FILE)
+         if (error)
          {
-            logException("handleRead", error);
-            delete this;
+            if (error.value() != END_OF_FILE)
+            {
+               logException("handleRead", error);
+               delete this;
+            }
             return;
          }
          
          if (bytesTransferred > 0)
          {
 #ifdef DEBUG
-//            cerr << "Bytes transfeferred: " << bytesTransferred << endl;            
-//            cerr.write((const char*)_data._data, bytesTransferred);
+            cerr << "Bytes transfeferred: " << bytesTransferred << endl;            
+            cerr.write((const char*)_data._data, bytesTransferred);
 #endif
             if (_parser->result() == nullopt)
                _parser->read(_data, bytesTransferred);
-         
+         }
+         else {
+            if (_parser->result() == nullopt)
+               _parser->eof();
+         }
             
-            if (_parser->result() == false)
-            {
-               logException("handleRead", "parser match error");
+         if (_parser->result() == false)
+         {
+            logException("handleRead", BString("Parser match error: ") + _parser->getError());
 #ifdef DEBUG
-               dumpTempFile();
+            dumpTempFile();
 #endif
+            delete this;
+            return;
+         }
+            
+         if ( _request->_headers &&
+              _request->headers().result() == true && 
+              _request->method() == "GET" )
+         {
+            handleResponse();
+            return;
+         }
+
+         // Write current session data to file
+         if (!_tempFile.is_open())
+         {
+            try
+            {
+               openTempFile();
+            }
+            catch (...)
+            {
                delete this;
                return;
             }
             
-            
-               
-            if ( _request->_headers &&
-                 _request->headers().result() == true && 
-                 _request->method() == "GET" )
-            {
-               handleResponse();
-               return;
-            }
-
-            // Write current session data to file
-            if (!_tempFile.is_open())
-            {
-               try
-               {
-                  openTempFile();
-               }
-               catch (...)
-               {
-                  delete this;
-                  return;
-               }
-            
-            }
-            _tempFile.write((const char*)_data._data, bytesTransferred);
          }
          
+         _tempFile.write((const char*)_data._data, bytesTransferred);
 
          // Check if finished request
          if ( _parser->result() == true )
@@ -343,6 +347,8 @@ namespace BeeFishHTTPS {
             delete this;
             return;
          }
+         
+         
    
          asyncWrite();
             
@@ -376,6 +382,7 @@ namespace BeeFishHTTPS {
          
          BeeFishBString::Data data =
             _response->getNext(length);
+
 
          boost::asio::async_write(
             *this,

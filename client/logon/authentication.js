@@ -19,13 +19,15 @@ class Authentication
       var params = {}
       params.method = "POST";
       params.credentials = "include";
+      /*
       params.headers = new Headers([
          ["Content-Type", "application/json; charset=utf-8"]
       ]);
+      */
       var body =
          {
             method: "logon",
-            secret
+            secret: secret
          }
          
       params.body = JSON.stringify(body);
@@ -47,7 +49,7 @@ class Authentication
          )
          .catch(
             function(error) {
-               alert(error);
+               throw new Error(error);
             }
          );
 
@@ -62,10 +64,7 @@ class Authentication
       
       var params = {}
       params.method = "POST";
-      params.credentials = "include";
-      params.headers = new Headers([
-         ["Content-Type", "application/json; charset=utf-8"]
-      ]);
+      params.credentials = "include";
       var body =
          {
             method: "getStatus"
@@ -78,7 +77,13 @@ class Authentication
          fetch(this.url, params)
          .then(
             function(response) {
-               return response.json()
+               return response.text()
+            }
+         )
+         .then(
+            function(text)
+            {
+               return JSON.parse(text);
             }
          )
          .then(
@@ -108,10 +113,7 @@ class Authentication
 
       var params = {}
       params.method = "POST";
-      params.credentials = "include";
-      params.headers = new Headers([
-         ["Content-Type", "application/json; charset=utf-8"]
-      ]);
+      params.credentials = "include";
       var body =
          {
             method: "logoff"
@@ -141,7 +143,7 @@ class Authentication
    
 }
 
-var authentication = new Authentication();
+var authentication = new Authentication("https://bee.fish:8000");
 
 async function authenticate() {
 
@@ -151,12 +153,17 @@ async function authenticate() {
             if (!auth.authenticated) {
                 
                var currentPage = document.location.href;
-               
-               var newPage = document.location.origin + "/client/logon/"
+               var newPage = authentication.url + "/client/logon/";
                var url = newPage + "?redirect=" + encodeURIComponent(currentPage);
                document.location.href = url;
             }
             return auth;
+        }
+    )
+    .catch (
+       function(error) {
+           alert("authentication.js " + error);
+          throw new Error(error);
         }
     );
 

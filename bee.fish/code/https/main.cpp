@@ -67,7 +67,7 @@ int main(int argc, const char* argv[])
       std::cout << "Setting up App Factories" << std::endl;
 
       appFactories.add<AuthenticationApp>();
-      appFactories.add<StorageApp>();
+      //appFactories.add<StorageApp>();
       appFactories.add<FileSystemApp>();
             
       boost::asio::io_context io_context;

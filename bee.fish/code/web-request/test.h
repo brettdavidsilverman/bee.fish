@@ -309,7 +309,7 @@ namespace BeeFishWeb
 
       ok = ok && testResult(
          "Post with hello world body",
-         body == "<h1>Hello world</h1>"
+         body == "{\"hi\":\"world\"}"
       );
 
       // Post with anything

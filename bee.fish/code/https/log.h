@@ -22,7 +22,7 @@ inline void initializeLogs() {
    using namespace BeeFishMisc;
    
 #ifndef DEBUG   
-   clog.rdbuf(logfile().rdbuf());
+//   clog.rdbuf(logfile().rdbuf());
 // cerr.rdbuf(errfile().rdbuf());
 #endif
 

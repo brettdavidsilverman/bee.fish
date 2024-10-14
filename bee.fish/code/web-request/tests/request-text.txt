@@ -4,8 +4,7 @@ Connection: keep-alive
 sec-ch-ua: " Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"
 sec-ch-ua-mobile: ?1
 User-Agent: Mozilla/5.0 (Linux; Android 10; SM-A115F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.66 Mobile Safari/537.36
-Content-Type: image/jpeg
-Content-Length: 20
+Content-Length: 14
 Accept: */*
 Origin: http://bee.fish
 Sec-Fetch-Site: cross-site
@@ -15,4 +14,4 @@ Referer: http://bee.fish/
 Accept-Encoding: gzip, deflate, br
 Accept-Language: en-AU,en-GB;q=0.9,en-US;q=0.8,en;q=0.7
 
-<h1>Hello world</h1>
+{"hi":"world"}

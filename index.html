@@ -8,13 +8,12 @@
       <script src="/client/power-encoding/power-encoding.js"></script>
       <script src="/client/id/id.js"></script>
       <script src="/client/evaluate.js"></script>      <script src="/client/logon/authentication.js"></script>
-      <script>
+      <script>
 authenticate().then(
    function(auth)
    {
       if (auth.authenticated)
          alert("Logged in with session id " + auth.sessionId);
-
    }
 );
 
@@ -176,5 +175,5 @@ setLink();
       </script>
 
    </body>
-
+
 </html>

@@ -34,7 +34,7 @@ namespace BeeFishHTTPS {
       ) :
          _session(session)
       {
-         
+
          ResponseHeaders headers(_session);
 
          App* app = nullptr;
@@ -47,7 +47,7 @@ namespace BeeFishHTTPS {
                session,
                headers
             );
-            
+          
             app->handleResponse();
             
             _status = app->status();
@@ -151,13 +151,13 @@ namespace BeeFishHTTPS {
                   _bytesTransferred;
             }
             
-/*            
-            string response =
+
+            string str =
                _headers.substr(
                   _bytesTransferred,
                   length
                );
-*/            
+
             response = 
                BeeFishBString::Data(
                   (const Byte*)(_headers.data() + _bytesTransferred), 

@@ -53,9 +53,19 @@ namespace BeeFishHTTPS {
 
          WebRequest* request = _session->request();
          
+         if (request->result() != true) {
+            _status = -1;
+            return;
+         }
+         
          BString path = request->path();
          BString webMethod = request->method();
-      
+
+         if (webMethod != "POST") {
+            _status = -1;
+            return;
+         }
+         
          BeeFishMisc::optional<BString> method;
          BeeFishMisc::optional<BString> secret;
 
@@ -94,35 +104,45 @@ namespace BeeFishHTTPS {
             else
             {
                _status = -1;
+               return;
             }
          }
+        
       
-         BString origin;
-   
          const BeeFishWeb::Headers&
             requestHeaders =
                request->headers();
 
+         BString origin;
+         
          if (requestHeaders.contains("origin"))
             origin = requestHeaders["origin"];
          else
             origin = session()->hostName();
 
          _responseHeaders.replace(
-            "connection",
-            "keep-alive"
-         );
-
-         _responseHeaders.replace(
             "access-control-allow-origin",
             origin
          );
-         
+
+         _responseHeaders.replace(
+            "vary",
+            "origin"
+         );
+
          _responseHeaders.replace(
             "access-control-allow-credentials",
             "true"
          );
+         
+         
+         _responseHeaders.replace(
+            "connection",
+            "keep-alive"
+         );
 
+         
+         
          if (authenticated())
          {
             _responseHeaders.emplace(
@@ -173,7 +193,8 @@ namespace BeeFishHTTPS {
          _serve = App::SERVE_CONTENT;
 
          _content = output.str();
-
+         _status = 200;
+         
       }
       
       bool isPrivileged(const BString& path, const BString& webMethod)

@@ -131,20 +131,21 @@ namespace BeeFishHTTPS {
              
             _responseHeaders.emplace(
                "set-cookie",
-               BString("redirect=;path=/;max-age=0")
+               BString("redirect=;path=/;max-age=0;")
             
             );
             
             _responseHeaders.emplace(
                "set-cookie",
                BString("redirect=") + from +
-               BString(";path=/")
+               BString(";path=/;")
             );
          }
          
          _content = "redirecting...";
          
          _serve = App::SERVE_CONTENT;
+         
 
       }
 
