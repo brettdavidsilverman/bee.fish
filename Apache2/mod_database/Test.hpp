@@ -5,6 +5,7 @@
 #include "Miscellaneous/Miscellaneous.hpp"
 #include "ParseURI.hpp"
 #include "test/test.h"
+#include "Id/Id.hpp"
 
 namespace BeeFishApache2 {
 
@@ -13,7 +14,8 @@ namespace BeeFishApache2 {
    using namespace BeeFishDatabase;
    using namespace BeeFishScript;
    using namespace BeeFishTest;
-
+   using namespace BeeFishId;
+   
    using namespace std::filesystem;
 
    inline bool testParseURI();
@@ -26,7 +28,11 @@ namespace BeeFishApache2 {
       cout << "Testing Apache2" << endl;
       bool success = true;
       
+      Id id;
+      
       string url = HOST;
+      
+         //BString(HOST) + BString("/") + id.key();
      
       success = success &&
          testParseURI();

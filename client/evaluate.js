@@ -56,7 +56,7 @@ function getJSON(url) {
       ).then(
          function (response) {
             if (response.status == 404)
-               throw new Error("Not found");
+               throw new Error("Not found. Please feel free to create one.");
             else if (response.status != 200)
                throw new Error(response.status);
                
@@ -64,7 +64,7 @@ function getJSON(url) {
          }
       ).catch(
          function(error) {
-            alert(error);
+            throw new Error(url + " " + error);
          }
       );
 
@@ -72,19 +72,39 @@ function getJSON(url) {
 }
 
 function HTML(url, parent=document.body) {
+ 
+   url = evaluate(url);
 
-   var element;
-   getJSON(url)
-   .then(
-      (json) => {
-         var element = createElement(JSON.parse(json), parent);
-      }
-   );
+   if (typeof url == "object")
+   {
+      var json = evaluate(url);
+      var element = createElement(url, parent);
+   }
+   else
+   {
+      fetch(url)
+      .then(
+         (response) => {
+            return response.json();
+         }
+      )
+      .then(
+         (json) => {
+            return evaluate(json);
+         }
+      )
+      .then(
+         (json) => {
+            var element = createElement(json, parent);
+         }
+      );
+   }
    
    function createElement(json, parent)
    {
       for (var tag in json) {
              
+         
          var element =
            document.createElement(tag);
 

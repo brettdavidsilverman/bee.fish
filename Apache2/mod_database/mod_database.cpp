@@ -116,12 +116,12 @@ static int database_handler(request_rec *r)
    
    if (!_path.has_value())
    {
-      
       ap_set_content_type(
        r, "application/json; charset=utf-8");
        
       ApacheStream stream(r);
-
+      if (error == "Error,: Not found")         error += ". Please create one";
+         
       Variable reply =
           BeeFishScript::Object{
               {"error", error}

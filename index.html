@@ -8,16 +8,6 @@
       <script src="/client/power-encoding/power-encoding.js"></script>
       <script src="/client/id/id.js"></script>
       <script src="/client/evaluate.js"></script>      <script src="/client/logon/authentication.js"></script>
-      <script>
-authenticate().then(
-   function(auth)
-   {
-      if (auth.authenticated)
-         alert("Logged in with session id " + auth.sessionId);
-   }
-);
-
-      </script>
       <title>bee.fish</title>
       <style>
 textarea {
@@ -26,6 +16,9 @@ textarea {
    height: 120px;
 }
       </style>
+      <script>
+authenticate();
+      </script>
    </head>
    <body>
       <h1 id="h1">bee.fish.2</h1>
@@ -33,9 +26,8 @@ textarea {
          <form onsubmit="return false;">
             <label for="url">Path</label>
             <br/>
-            <input type="url" id="url"
-               onblur="setLink()"/>
-            <button 
+            <input type="text" id="url"/>
+            <button id="fetch"
               onclick="loadJSON(url.value)">Fetch</button>
             <br/>
          </form>
@@ -49,28 +41,29 @@ textarea {
          </form>
          
       </div>
-      <a id="encodedURL" target="_blank">Link to path</a>
+      <a id="goLink" href="https://bee.fish/">Go Link</a>
       <br />
       <pre id="result">
       </pre>
       <div id="html">
       </div>
       <br />
-      <a href="https://bee.fish:8000/client/logon/" id="logon">Logon</a>
+      <a href="https://bee.fish:8000/client/logon/" id="logon">Logon/Logoff</a>
       <br />
       <a href="https://bee.fish:8000/client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
       <script>
 
-var logon = document.getElementById("logon");
+const defaultURL = 
+   "Type the path of your document";
+   var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
 var url = document.getElementById("url");
 var result = document.getElementById("result");
 var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");
-var encodedURL = document.getElementById("encodedURL");
-url.focus();
+var goLink = document.getElementById("goLink");var _fetch = document.getElementById("fetch");
 
 document.getElementById("h1").innerText =
    window.location.hostname + ".2";
@@ -87,6 +80,9 @@ if (window.location.search) {
 
 
 function loadJSON(url) {
+   if (url == defaultURL)
+      return;
+      
    fetch("https://bee.fish/" + url)
    .then
    (
@@ -96,7 +92,7 @@ function loadJSON(url) {
          else if (response.status != 200)
             throw new Error(response.status);
                
-         return response.text();
+         return response.json();
       }
    )
    .then(
@@ -107,13 +103,22 @@ function loadJSON(url) {
             jsonEditor.value = "";
             return; 
          }
+         
+         if (json.error)
+            throw new Error(json.error);
 
-         jsonEditor.value = json;
+         if(typeof(json) == "string")
+         {
+            jsonEditor.value =
+               JSON.stringify(json);
+         }
+         else
+            jsonEditor.value = json.toString();
          
          if (document.location.hash == "#go")
          {
             var evaluated = evaluate(
-               JSON.parse(json)
+               json
             );
             
             result.innerText =
@@ -121,6 +126,11 @@ function loadJSON(url) {
          }
          
          return json;
+      }
+   ).then(
+      () =>
+      {
+         setLink();
       }
    )
    .catch(
@@ -158,20 +168,45 @@ function postJSON(url, json) {
 
 function setLink()
 {
-   encodedURL.href = 
+   if (url.value == defaultURL)
+      goLink.style.visibility = "hidden";
+   else
+      goLink.style.visibility = "";
+      
+   goLink.href = 
       "https://bee.fish/?" +
       url.value +
       "#go";
       
-   encodedURL.innerHTML =
-      encodedURL.href;
 }
 
-if (url.value)
-   loadJSON(url.value);
-   
-setLink();
+url.onchange =
+   () => {
+      setLink();
+   }
 
+
+if (!url.value)
+   url.value = defaultURL;else
+   loadJSON(url.value);
+url.onfocus = 
+   () => {
+      if (url.value == defaultURL)
+         url.value = "";
+   };
+   
+   
+url.onblur =
+   () => {
+      if (url.value == "")
+         url.value = defaultURL;
+      else
+         goLink.value = "";
+   }
+   
+   
+url.onchange();
+
       </script>
 
    </body>
