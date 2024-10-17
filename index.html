@@ -37,17 +37,21 @@ authenticate();
          
             <label for="jsonEditor">JSON Editor</label>
             <br/>            <textarea id="jsonEditor"></textarea>
-            <button onclick="postJSON(urlInput.value, jsonEditor.value);">Save</button>
+            <button id="saveButton">Save</button>
          
          </form>
          
       </div>
-      <a id="goLink" href="https://bee.fish/">Go Link</a>
+      <br />
+      <button id="goButton">Go</button>
       <br />
       <pre id="result">
       </pre>
       <div id="html">
       </div>
+      <br />
+      <a id="goLink"></a>
+      <br />
       <br />
       <a href="https://bee.fish:8000/client/logon/" id="logon">Logon/Logoff</a>
       <br />
@@ -63,16 +67,19 @@ logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 var urlInput = document.getElementById("urlInput");
 var result = document.getElementById("result");
 var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");
-var goLink = document.getElementById("goLink");var _fetch = document.getElementById("fetch");
+var goButton = document.getElementById("goButton");var goLink = document.getElementById("goLink");var _fetch = document.getElementById("fetch");var saveButton = document.getElementById("saveButton");
+
 
 document.getElementById("h1").innerText =
    window.location.hostname;
 
-if (window.location.search) {
+if (document.location.search) {
+    
    // fill out form from search
    var url = decodeURI(
-      window.location.search.substr(1)
+      document.location.search.substr(1)
    );
+
    urlInput.value =
       url;
       
@@ -95,6 +102,7 @@ function loadJSON() {
       return;
    }
    
+   
    var promise =
    fetchJSON(url).
    then(
@@ -102,22 +110,16 @@ function loadJSON() {
 
          if (json == undefined)
          {
-            jsonEditor.value = "";
+            jsonEditor.value = "undefined";
             return; 
          }
          
          if (json.error) {
-            Error(json.error, loadJSON);
+            throw json.error;
             return;
          }
          
-         if(typeof(json) == "string")
-         {
-            jsonEditor.value =
-               JSON.stringify(json);
-         }
-         else
-            jsonEditor.value = json.toString();
+         jsonEditor.value = JSON.stringify(json, null, "   ");
          
          if (document.location.hash == "#go")
          {
@@ -129,7 +131,7 @@ function loadJSON() {
                evaluated.toString();
          }
          
-         setLink();
+         //setLink();
       
         // alert(url + " Ok");
          
@@ -148,16 +150,28 @@ function loadJSON() {
 
 function setLink()
 {
-   if (urlInput.value == defaultURL)
+   var url = urlInput.value;
+   
+   if (url == defaultURL) {
       goLink.style.visibility = "hidden";
+      return;
+   }
    else
       goLink.style.visibility = "";
       
    goLink.href = 
        "https://bee.fish/?" +
-            urlInput.value + "#go";
+            url + "#go";
+            
+   goLink.innerText = "Go link for " + url;
       
 }
+
+function getJSON()
+{
+   return eval("(" + jsonEditor.value +")");
+}
+
 
 urlInput.onchange =
    () => {
@@ -180,19 +194,20 @@ urlInput.onblur =
       if (urlInput.value == "")
          urlInput.value = defaultURL;
       else
-         goLink.value = "";
+         goButton.value = "";
    }
    
    
 urlInput.onchange();
 
-goLink.onclick =
+goButton.onclick =
    function()
    {
       fetchJSON(urlInput.value).
       then(
          function(json) {
-            evaluate(json);
+            result.innerText =
+               evaluate(json);
          }
       ).catch(
          function(error)
@@ -201,7 +216,34 @@ goLink.onclick =
          }
       );
    }
-
+   
+jsonEditor.onblur =
+   function() {
+      if (jsonEditor.value == "")
+         return;
+         
+      try {
+         var json = getJSON();
+         jsonEditor.value = json;
+      }
+      catch (error)
+      {
+         Error(error, jsonEditor.onblur);
+      }
+   }
+
+goLink.onclick =
+   function() {
+      document.location.hash = "#go";
+      loadJSON();
+   }
+   
+
+saveButton.onclick =
+   function() {
+      postJSON(urlInput.value, getJSON() );
+   }
+setLink();
       </script>
 
    </body>

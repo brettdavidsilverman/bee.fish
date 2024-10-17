@@ -50,27 +50,34 @@ function evaluate(json, parent=json)
 
 function fetchJSON(url) {
 
-  // url = document.location.origin + 
-  //      "/" + url;
-
    var promise =
       fetch("https://bee.fish/" + url).
       then(
          function (response) {
-            if (response.status == "404")
-               return undefined;
-            else if (response.status != "200")
+            if (response.status != "200")
                throw response.statusText;
-               
-            return response.json();
+        
+            return response.text();
          }
       ).
-      catch(
-         function(error) {
-            Error(error + "\r\n" + url, fetchJSON);
+      then(
+         function(text) {
+            if (text == "undefined")
+               return undefined
+            var json = JSON.parse(text);
+            if (json.error)
+               throw json.error;
+               
+            return json;
          }
       );
-      
+      /*
+      catch(
+         function(error) {
+            Error(error + "\r\n\t" + url, fetchJSON);
+         }
+      );
+      */
    return promise;
 
 }

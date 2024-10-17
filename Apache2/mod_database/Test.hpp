@@ -90,6 +90,7 @@ namespace BeeFishApache2 {
          database,
          error,
          "127.0.0.1",
+         "GET",
          uri,
          queryStr
       );

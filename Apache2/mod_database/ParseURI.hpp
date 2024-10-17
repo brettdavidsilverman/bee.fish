@@ -286,19 +286,7 @@ namespace BeeFishApache2 {
          
          return item;
       }
-      /*
-      virtual void fail()
-      override
-      {
-         _error = _last->getError();
-      }
       
-      const BString& getError() const
-      {
-         return _error;
-      }
-      */
-     
    };
    
    class Query : public Match
@@ -343,16 +331,10 @@ namespace BeeFishApache2 {
          fail();
        
       }
-      /*
-      const BString& getError() const
-      {
-         return _propertyPaths->getError();
-      }
       
-     */
    };
 
-   optional<Path> parseURI(Database& database, BString& error, const BString& clientIP, const BString& uri, const BString& args) {
+   optional<Path> parseURI(Database& database, BString& error, const BString& clientIP, const BString& method, const BString& uri, const BString& args) {
       Debug debug;
       
       Path root(database);
@@ -367,9 +349,20 @@ namespace BeeFishApache2 {
             path = path[segment.decodeURI()];
          }
       }
+      
+      if (method == "GET")
+      {
+         if (path.isDeadEnd())
+         {
+            error = "Not found";
+            return nullopt;
+         }
+         
+      }
 
       
-      if (args.length()) {
+      if (args.length())
+      {
          Query query(&path);
          Parser parser(query);
          parser.read(args.decodeURI());
