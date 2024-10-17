@@ -57,27 +57,10 @@ function fetchJSON(url) {
             if (response.status != "200")
                throw response.statusText;
         
-            return response.text();
-         }
-      ).
-      then(
-         function(text) {
-            if (text == "undefined")
-               return undefined
-            var json = JSON.parse(text);
-            if (json.error)
-               throw json.error;
-               
-            return json;
+            return response.json();
          }
       );
-      /*
-      catch(
-         function(error) {
-            Error(error + "\r\n\t" + url, fetchJSON);
-         }
-      );
-      */
+      
    return promise;
 
 }

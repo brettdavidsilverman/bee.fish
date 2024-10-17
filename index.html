@@ -166,13 +166,6 @@ function setLink()
       
 }
 
-function getJSON()
-{
-   return JSON.stringify(
-       eval("(" + jsonEditor.value +")")
-    , null, "   ");
-}
-
 
 urlInput.onchange =
    () => {
@@ -218,14 +211,30 @@ goButton.onclick =
       );
    }
    
+function formatJSON(jsonText)
+{
+   var formatted =
+     JSON.stringify(
+        JSON.parse(
+           jsonText
+        ),
+        null,
+        "   "
+     );
+     
+   return formatted;
+}
+
 jsonEditor.onblur =
    function() {
       if (jsonEditor.value == "")
          return;
          
       try {
-         var json = getJSON();
-         jsonEditor.value = json;
+         var jsonText =
+            formatJSON(jsonEditor.value);
+         jsonEditor.value = jsonText;
+       
          saveButton.disabled = false;
       }
       catch (error)
@@ -250,7 +259,7 @@ goLink.onclick =
 
 saveButton.onclick =
    function() {
-      postJSON(urlInput.value, getJSON() );
+      postJSON(urlInput.value, jsonEditor.text);
    }
 setLink();
       </script>
