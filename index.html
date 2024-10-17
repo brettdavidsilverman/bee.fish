@@ -102,7 +102,6 @@ function loadJSON() {
       return;
    }
    
-   
    var promise =
    fetchJSON(url).
    then(
@@ -169,7 +168,9 @@ function setLink()
 
 function getJSON()
 {
-   return eval("(" + jsonEditor.value +")");
+   return JSON.stringify(
+       eval("(" + jsonEditor.value +")")
+    , null, "   ");
 }
 
 
@@ -225,11 +226,19 @@ jsonEditor.onblur =
       try {
          var json = getJSON();
          jsonEditor.value = json;
+         saveButton.disabled = false;
       }
       catch (error)
       {
+         saveButton.disabled = true;
          Error(error, jsonEditor.onblur);
+         
       }
+   }
+   
+jsonEditor.onfocus =
+   function() {
+      saveButton.disabled = false;
    }
 
 goLink.onclick =
