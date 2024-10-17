@@ -4,6 +4,7 @@
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <script src="/head.js"></script>
+      <script src="/error.js"></script>
       <script src="/client/stream/stream.js"></script>
       <script src="/client/power-encoding/power-encoding.js"></script>
       <script src="/client/id/id.js"></script>
@@ -21,14 +22,14 @@ authenticate();
       </script>
    </head>
    <body>
-      <h1 id="h1">bee.fish.2</h1>
+      <h1 id="h1">bee.fish</h1>
       <div>
          <form onsubmit="return false;">
-            <label for="url">Path</label>
+            <label for="urlInput">Path</label>
             <br/>
-            <input type="text" id="url"/>
+            <input type="text" id="urlInput"/>
             <button id="fetch"
-              onclick="loadJSON(url.value)">Fetch</button>
+              onclick="loadJSON()">Fetch</button>
             <br/>
          </form>
          <br/>
@@ -36,7 +37,7 @@ authenticate();
          
             <label for="jsonEditor">JSON Editor</label>
             <br/>            <textarea id="jsonEditor"></textarea>
-            <button onclick="postJSON(url.value, jsonEditor.value);">Save</button>
+            <button onclick="postJSON(urlInput.value, jsonEditor.value);">Save</button>
          
          </form>
          
@@ -53,60 +54,63 @@ authenticate();
       <a href="https://bee.fish:8000/client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
-      <script>
-
+      <script>
 const defaultURL = 
    "Type the path of your document";
    var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
-var url = document.getElementById("url");
+var urlInput = document.getElementById("urlInput");
 var result = document.getElementById("result");
 var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");
 var goLink = document.getElementById("goLink");var _fetch = document.getElementById("fetch");
 
 document.getElementById("h1").innerText =
-   window.location.hostname + ".2";
+   window.location.hostname;
 
 if (window.location.search) {
    // fill out form from search
-   var _url = decodeURI(
+   var url = decodeURI(
       window.location.search.substr(1)
    );
-   url.value =
-      _url;
+   urlInput.value =
+      url;
+      
+   loadJSON();
    
 }
 
 
-function loadJSON(url) {
+function loadJSON() {
+   var url = urlInput.value;
+   
    if (url == defaultURL)
       return;
       
-   fetch("https://bee.fish/" + url)
-   .then
-   (
-      function (response) {
-         if (response.status == 404)
-            throw new Error("Not found");
-         else if (response.status != 200)
-            throw new Error(response.status);
-               
-         return response.json();
-      }
-   )
-   .then(
+   url = evaluate(url);
+   
+   if (document.location.search != ("?" + url))
+   {
+      document.location.search = "?" + url;
+      return;
+   }
+   
+   var promise =
+   fetchJSON(url).
+   then(
       function(json) {
-          
+
          if (json == undefined)
          {
             jsonEditor.value = "";
             return; 
          }
          
-         if (json.error)
-            throw new Error(json.error);
-
+         if (json.error) {
+            Error(json.error, loadJSON);
+            return;
+         }
+         
          if(typeof(json) == "string")
          {
             jsonEditor.value =
@@ -125,88 +129,79 @@ function loadJSON(url) {
                evaluated.toString();
          }
          
-         return json;
-      }
-   ).then(
-      () =>
-      {
          setLink();
+      
+        // alert(url + " Ok");
+         
+         return json;
       }
    )
    .catch(
       function (error) {
-         alert(error);
+         Error(error, loadJSON);
       }
    );
+   
+   return promise;
       
-}
-
-function postJSON(url, json) {
-   var response =
-      fetch(
-         "https://bee.fish/" + url,
-         {
-            method: "POST",
-            body: json
-         }
-      ).then(
-         function (response) {
-            return response.text();
-         }
-      ).then(
-         function (json) {
-            alert(json);
-         }
-      ).catch(
-         function(error) {
-            alert(error);
-         }
-      );
-
-   return response;
 }
 
 function setLink()
 {
-   if (url.value == defaultURL)
+   if (urlInput.value == defaultURL)
       goLink.style.visibility = "hidden";
    else
       goLink.style.visibility = "";
       
    goLink.href = 
-      "https://bee.fish/?" +
-      url.value +
-      "#go";
+       "https://bee.fish/?" +
+            urlInput.value + "#go";
       
 }
 
-url.onchange =
+urlInput.onchange =
    () => {
       setLink();
    }
 
 
-if (!url.value)
-   url.value = defaultURL;else
-   loadJSON(url.value);
-url.onfocus = 
-   () => {
-      if (url.value == defaultURL)
-         url.value = "";
+if (!urlInput.value)
+   urlInput.value = defaultURL;
+   
+urlInput.onfocus = 
+   function() {
+      if (urlInput.value == defaultURL)
+         urlInput.value = "";
    };
    
    
-url.onblur =
-   () => {
-      if (url.value == "")
-         url.value = defaultURL;
+urlInput.onblur =
+   function() {
+      if (urlInput.value == "")
+         urlInput.value = defaultURL;
       else
          goLink.value = "";
    }
    
    
-url.onchange();
+urlInput.onchange();
 
+goLink.onclick =
+   function()
+   {
+      fetchJSON(urlInput.value).
+      then(
+         function(json) {
+            evaluate(json);
+         }
+      ).catch(
+         function(error)
+         {
+            Error(error);
+         }
+      );
+   }
+
       </script>
 
    </body>

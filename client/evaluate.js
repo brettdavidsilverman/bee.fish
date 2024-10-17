@@ -7,10 +7,10 @@ function evaluate(json, parent=json)
       if (string.startsWith("{") &&
           string.endsWith("}"))
       {
-         
-         var func = new Function(string);
-         var evaluated = func.call(parent);
-         
+          
+         var f = new Function(string);
+         var evaluated = f.call(parent);
+
          if (evaluated == undefined)
             evaluated = string;
 
@@ -48,56 +48,90 @@ function evaluate(json, parent=json)
 
 
 
-function getJSON(url) {
+function fetchJSON(url) {
 
-   var response =
+  // url = document.location.origin + 
+  //      "/" + url;
+
+   var promise =
+      fetch("https://bee.fish/" + url).
+      then(
+         function (response) {
+            if (response.status == "404")
+               return undefined;
+            else if (response.status != "200")
+               throw response.statusText;
+               
+            return response.json();
+         }
+      ).
+      catch(
+         function(error) {
+            Error(error + "\r\n" + url, fetchJSON);
+         }
+      );
+      
+   return promise;
+
+}
+
+function postJSON(url, json) {
+   var promise =
       fetch(
-         url
+         "https://bee.fish/" + url,
+         {
+            method: "POST",
+            body: json
+         }
       ).then(
          function (response) {
-            if (response.status == 404)
-               throw new Error("Not found. Please feel free to create one.");
-            else if (response.status != 200)
-               throw new Error(response.status);
-               
             return response.text();
+         }
+      ).then(
+         function (json) {
+            alert(json);
          }
       ).catch(
          function(error) {
-            throw new Error(url + " " + error);
+            Error(error + "\r\n" + url, fetchJSON);
          }
       );
 
-   return response;
+   return promise;
 }
 
+
 function HTML(url, parent=document.body) {
- 
-   url = evaluate(url);
+   
 
    if (typeof url == "object")
    {
       var json = evaluate(url);
-      var element = createElement(url, parent);
+      var element = createElement(json, parent);
+      return element;
    }
    else
    {
-      fetch(url)
-      .then(
-         (response) => {
-            return response.json();
-         }
-      )
-      .then(
-         (json) => {
-            return evaluate(json);
-         }
-      )
-      .then(
-         (json) => {
-            var element = createElement(json, parent);
-         }
-      );
+      url = evaluate(url);
+      
+      var promise =
+         fetchJSON(url).
+         then(
+            function(json)
+            {
+                json = evaluate(json);
+                
+                var element = createElement(json, parent);
+                return element;
+            }
+         ).
+         catch(
+            function (error) {
+               Error(error);
+            }
+         );
+         
+      return promise;
    }
    
    function createElement(json, parent)
