@@ -31,5 +31,11 @@ function (message, source, lineno, colno, error)
 
 function Error(error, f)
 {
-    alert(error + "\r\n   " + f.name);
+    var where;
+    if (f && f.name)
+       where = f.name;
+    else
+       where = "Unknown";
+       
+    alert(error + "\r\n   " + where);
 }

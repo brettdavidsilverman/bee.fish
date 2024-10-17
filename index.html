@@ -28,8 +28,7 @@ authenticate();
             <label for="urlInput">Path</label>
             <br/>
             <input type="text" id="urlInput"/>
-            <button id="fetch"
-              onclick="loadJSON()">Fetch</button>
+            <button id="fetchButton" onclick="loadJSON()">Fetch</button>
             <br/>
          </form>
          <br/>
@@ -67,59 +66,39 @@ logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 var urlInput = document.getElementById("urlInput");
 var result = document.getElementById("result");
 var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");
-var goButton = document.getElementById("goButton");var goLink = document.getElementById("goLink");var _fetch = document.getElementById("fetch");var saveButton = document.getElementById("saveButton");
-
+var goButton = document.getElementById("goButton");var goLink = document.getElementById("goLink");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");
 
 document.getElementById("h1").innerText =
    window.location.hostname;
 
-if (document.location.search) {
+
+function loadJSON() {
     
-   // fill out form from search
-   var url = decodeURI(
-      document.location.search.substr(1)
-   );
-
-   urlInput.value =
-      url;
-      
-   loadJSON();
-   
-}
-
-
-function loadJSON() {
    var url = urlInput.value;
    
    if (url == defaultURL)
       return;
-      
-   url = evaluate(url);
    
-   if (document.location.search != ("?" + url))
-   {
-      document.location.search = "?" + url;
-      return;
-   }
-   
+   fetchButton.disabled = true;
+ 
    var promise =
    fetchJSON(url).
    then(
       function(json) {
-
-         if (json == undefined)
-         {
+         if (json == undefined) {
             jsonEditor.value = "undefined";
-            return; 
-         }
-         
-         if (json.error) {
-            throw json.error;
             return;
          }
-         
-         jsonEditor.value = JSON.stringify(json, null, "   ");
-         
+         else if (json.error) {
+            throw(json.error);
+            return;
+         }
+         else if (typeof(json) == "string") {
+            json = JSON.stringify(json);
+         }
+          
+         jsonEditor.value = json;
+               
          if (document.location.hash == "#go")
          {
             var evaluated = evaluate(
@@ -129,21 +108,20 @@ function loadJSON() {
             result.innerText =
                evaluated.toString();
          }
-         
-         //setLink();
-      
-        // alert(url + " Ok");
+         //setLink();
+         fetchButton.disabled = false;
+         saveButton.disabled = false;
          
          return json;
       }
    )
    .catch(
       function (error) {
+         fetchButton.disabled = false;
          Error(error, loadJSON);
       }
    );
    
-   return promise;
       
 }
 
@@ -191,40 +169,29 @@ urlInput.onblur =
          goButton.value = "";
    }
    
-   
-urlInput.onchange();
-
 goButton.onclick =
    function()
    {
+      goButton.disabled = true;
+      
       fetchJSON(urlInput.value).
       then(
          function(json) {
+            json = evaluate(json);
             result.innerText =
-               evaluate(json);
+               functionsToJSON(json);
+            goButton.disabled = false;
          }
       ).catch(
          function(error)
          {
-            Error(error);
+            goButton.disabled = false;
+            Error(error, goButton.onclick);
          }
       );
    }
    
-function formatJSON(jsonText)
-{
-   var formatted =
-     JSON.stringify(
-        JSON.parse(
-           jsonText
-        ),
-        null,
-        "   "
-     );
-     
-   return formatted;
-}
-
+
 jsonEditor.onblur =
    function() {
       if (jsonEditor.value == "")
@@ -259,9 +226,39 @@ goLink.onclick =
 
 saveButton.onclick =
    function() {
-      postJSON(urlInput.value, jsonEditor.text);
+      postJSON(
+         urlInput.value,
+         formatJSON(jsonEditor.value)
+      );
    }
-setLink();
+
+fetchButton.onclick =
+   function() {
+      if (document.location.search != 
+           ("?" + encodeURI(url)))
+      {
+         document.location.search = "?" + url;
+         //return;
+      }
+      loadJSON();
+
+   }
+   setLink();
+
+if (document.location.search) {
+    
+   // fill out form from search
+   var url = decodeURI(
+      document.location.search.substr(1)
+   );
+
+   urlInput.value =
+      url;
+      
+   loadJSON();
+   
+}
+
       </script>
 
    </body>

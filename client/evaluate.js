@@ -1,14 +1,24 @@
 function evaluate(json, parent=json)
 {
+
    switch(typeof(json)) {
    case "string":
 
-      var string = json
+      var string = json;
+ 
       if (string.startsWith("{") &&
           string.endsWith("}"))
       {
-          
-         var f = new Function(string);
+         var value =
+            string.substring(1, string.length - 1);
+         
+         var f =
+            new Function(
+               "return (" + 
+                   value +
+               ")"
+            )
+         
          var evaluated = f.call(parent);
 
          if (evaluated == undefined)
@@ -24,7 +34,7 @@ function evaluate(json, parent=json)
       {
          var newProperty =
             evaluate(property, json);
-
+            
          if (newProperty == undefined)
             newProperty = property;
             
@@ -34,7 +44,7 @@ function evaluate(json, parent=json)
          json[newProperty] =
             newValue;
             
-         if (newProperty != property)
+         if (property != newProperty)
             json[property] = undefined;
       }
       return json;
@@ -54,10 +64,12 @@ function fetchJSON(url) {
       fetch("https://bee.fish/" + url).
       then(
          function (response) {
-            if (response.status != "200")
-               throw response.statusText;
-        
-            return response.json();
+            return response.text();
+         }
+      ).
+      then(
+         function (text) {
+            return JSON.parse(text);
          }
       );
       
@@ -66,6 +78,7 @@ function fetchJSON(url) {
 }
 
 function postJSON(url, json) {
+   
    var promise =
       fetch(
          "https://bee.fish/" + url,
@@ -90,6 +103,42 @@ function postJSON(url, json) {
    return promise;
 }
 
+function functionsToJSON(json)
+{
+   if (typeof json == "function")
+      return "{" + json + "}";
+
+   if (typeof json != "object")
+      return json;
+      
+   for (var property in json) {
+      json[property] =
+         functionsToJSON(
+            json[property]
+         );
+   }
+   
+   return json;
+   
+}
+
+function formatJSON(jsonText){
+    
+   var f = new Function("return (" + jsonText + ");");
+   
+   var json = f();
+   
+   json = functionsToJSON(json);
+   
+   var formatted =
+      JSON.stringify(
+         json,
+         null,
+         "   "
+      );
+
+   return formatted;
+}
 
 function HTML(url, parent=document.body) {
    

@@ -162,9 +162,8 @@ async function authenticate() {
     )
     .catch (
        function(error) {
-           alert("authentication.js " + error);
-          throw new Error(error);
-        }
+          Error(error);
+       }
     );
 
 }
