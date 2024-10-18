@@ -85,6 +85,8 @@ function loadJSON() {
    fetchJSON(url).
    then(
       function(json) {
+         setLink();
+
          if (json == undefined) {
             jsonEditor.value = "undefined";
             return;
@@ -106,9 +108,8 @@ function loadJSON() {
             );
             
             result.innerText =
-               evaluated.toString();
-         }
-         //setLink();
+              functionsToJSON(evaluated);
+         }
          fetchButton.disabled = false;
          saveButton.disabled = false;
          
@@ -133,9 +134,9 @@ function setLink()
       goLink.style.visibility = "hidden";
       return;
    }
-   else
-      goLink.style.visibility = "";
-      
+ 
+   goLink.style.visibility = "inline";
+   
    goLink.href = 
        "https://bee.fish/?" +
             url + "#go";
@@ -243,8 +244,7 @@ fetchButton.onclick =
       loadJSON();
 
    }
-   setLink();
-
+   
 if (document.location.search) {
     
    // fill out form from search
