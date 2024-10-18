@@ -34,7 +34,7 @@ authenticate();
          <br/>
          <form onsubmit="return false;">
          
-            <label for="jsonEditor">JSON Editor <input type="checkbox" onclick="switchFunctions(this.checked)"><i> f()</i></input></label>
+            <label for="jsonEditor">JSON Editor <input type="checkbox" id="functionCheckbox" onclick="switchFunctions(this.checked)"><i> f()</i></input></label>
             <br/>            <textarea id="jsonEditor"></textarea>
             <button id="saveButton">Save</button>
          
@@ -66,7 +66,7 @@ logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 var urlInput = document.getElementById("urlInput");
 var result = document.getElementById("result");
 var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");
-var goButton = document.getElementById("goButton");var goLink = document.getElementById("goLink");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");
+var goButton = document.getElementById("goButton");var goLink = document.getElementById("goLink");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");
 
 document.getElementById("h1").innerText =
    window.location.hostname;
@@ -75,6 +75,10 @@ document.getElementById("h1").innerText =
 function getJSON()
 {
    var json = jsonEditor.value;
+   
+   if (json == "")
+      return undefined;
+      
    var f = new Function(
       "return (" + json + ")"
    );
@@ -87,11 +91,15 @@ function switchFunctions(showFunctions)
 
    var json = getJSON();
    
-   if (showFunctions)
-      json = JSONToFunctions(json);
-   else
-      json = functionsToJSON(json);
-            
+   if (showFunctions) {
+      json = displayFunctions(json);
+   }
+   else {
+      json = hideFunctions(json);
+      if (typeof json == "string")
+         json = JSON.stringify(json);
+   
+   }
    jsonEditor.value = json;
 }
 
@@ -103,9 +111,11 @@ function loadJSON() {
       return;
       
    var search = document.location.search;
-   if (search != ("?" + encodeURI(url)))
+   if (search != ("?" + encodeURI(url))) {
       document.location.search =
          "?" + url;
+      return;
+   }
 
    fetchButton.disabled = true;
  
@@ -131,7 +141,9 @@ function loadJSON() {
             
          fetchButton.disabled = false;
          saveButton.disabled = false;
-         
+         switchFunctions(
+             functionCheckbox.checked
+         );
          return json;
       }
    )
@@ -172,7 +184,7 @@ function Go() {
    json = evaluate(json);
    
    result.innerText =
-      functionsToJSON(json);
+      hideFunctions(json);
  
 }
 
@@ -206,32 +218,6 @@ goButton.onclick =
       Go();
    }
    
-
-jsonEditor.onblur =
-   function() {
-      if (jsonEditor.value == "")
-         return;
-         
-      try {
-         var jsonText =
-            formatJSON(jsonEditor.value);
-         jsonEditor.value = jsonText;
-       
-         saveButton.disabled = false;
-      }
-      catch (error)
-      {
-         saveButton.disabled = true;
-         Error(error, jsonEditor.onblur);
-         
-      }
-   }
-   
-jsonEditor.onfocus =
-   function() {
-      saveButton.disabled = false;
-   }
-
 goLink.onclick =
    function() {
       document.location.hash = "#go";
@@ -268,11 +254,16 @@ if (document.location.search) {
 
    urlInput.value =
       url;
+      
+   
 }
-if (document.location.hash == "#go") {
-   Go();}
-else {
-   loadJSON();}
+loadJSON().then(
+   function(json) {
+      if (document.location.hash == "#go")
+         Go();
+   }
+);
+
       </script>
 
    </body>

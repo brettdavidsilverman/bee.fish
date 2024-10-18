@@ -103,17 +103,18 @@ function postJSON(url, json) {
    return promise;
 }
 
-function functionsToJSON(json)
+function hideFunctions(json)
 {
+
    if (typeof json == "function")
       return "{" + json + "}";
 
    if (typeof json != "object")
       return json;
-      
+     
    for (var property in json) {
       json[property] =
-         functionsToJSON(
+         hideFunctions(
             json[property]
          );
    }
@@ -122,17 +123,17 @@ function functionsToJSON(json)
    
 }
 
-function JSONToFunctions(json) {
-   
+function displayFunctions(json) {
+ 
    var strings = [];
    ObjectToString(json, strings);
    var string = strings.join("");
    return string;
    
-   function ObjectToString(object, strings)
+   function ObjectToString(json, strings)
    {
-      if (typeof object == "string") {
-         var string = object;
+      if (typeof json == "string") {
+         var string = json;
          if (string.startsWith("{function") &&
              string.endsWith("}"))
          {
@@ -148,11 +149,13 @@ function JSONToFunctions(json) {
          else
             strings.push(JSON.stringify(string));
       }
-      else if (typeof object != "object")
-         strings.push(JSON.stringify(object));
+      else if (typeof json != "object")
+         strings.push(JSON.stringify(json));
       else {
-      
+         var object = json;
+         
          strings.push("{");
+         
          var count =
             Object.keys(object).length;
 
@@ -185,7 +188,7 @@ function formatJSON(jsonText){
    
    var json = f();
    
-   json = functionsToJSON(json);
+   json = hideFunctions(json);
    
    var formatted =
       JSON.stringify(
