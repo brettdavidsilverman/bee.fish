@@ -55,6 +55,7 @@ function writeln(pre, text)
 }
 
 Object.prototype.toString = function() {
+   
    return JSON.stringify(this, null, "   ");
 }
 

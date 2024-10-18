@@ -122,6 +122,63 @@ function functionsToJSON(json)
    
 }
 
+function JSONToFunctions(json) {
+   
+   var strings = [];
+   ObjectToString(json, strings);
+   var string = strings.join("");
+   return string;
+   
+   function ObjectToString(object, strings)
+   {
+      if (typeof object == "string") {
+         var string = object;
+         if (string.startsWith("{function") &&
+             string.endsWith("}"))
+         {
+            var f = new Function(
+               "return " +
+                  string.substring(
+                     1, string.length - 1
+                  )
+            );
+            string = f().toString();
+            strings.push("\r\n" + string + "\r\n");
+         }
+         else
+            strings.push(JSON.stringify(string));
+      }
+      else if (typeof object != "object")
+         strings.push(JSON.stringify(object));
+      else {
+      
+         strings.push("{");
+         var count =
+            Object.keys(object).length;
+
+         var i = 0;
+         
+         for (var property in object)
+         {
+            strings.push(
+               JSON.stringify(property)
+            );
+            strings.push(":");
+            ObjectToString(
+               object[property],
+               strings
+            );
+            if (++i < count)
+               strings.push(",\r\n");
+         }
+         
+         strings.push("\r\n}")
+         
+      }
+   }
+}
+   
+   
 function formatJSON(jsonText){
     
    var f = new Function("return (" + jsonText + ");");
