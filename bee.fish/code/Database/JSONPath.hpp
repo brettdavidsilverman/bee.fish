@@ -213,14 +213,15 @@ namespace BeeFishDatabase {
       }
       
       // properties[key][POSITION][objectId]
-      BString getObjectKey(Index position)
+      optional<BString> getObjectKey(Index position)
       {
          Id id = this->id();
 
-         Path path = _properties[BY_OBJECT];
+         Path path = getObjectProperties();
          
-         path = path[id];
-         
+         if (!path.contains(position))
+            return nullopt;
+            
          path = path[position];
          
          Index keyIndex = 0;
@@ -250,6 +251,26 @@ namespace BeeFishDatabase {
       BString tabs(Size tabCount) const
       {
          return string(tabCount * TAB_SPACES, ' ');
+      }
+      
+      Path getObjectProperties()
+      {
+         Path getObjectProperties =
+            _properties
+               [BY_OBJECT]
+               [id()];
+               
+         return getObjectProperties;
+      }
+      
+      virtual void clear()
+      override
+      {
+               
+         getObjectProperties().clear();
+            
+         Path::clear();
+         
       }
       
       virtual void write(ostream& out, Size tabCount)
@@ -339,33 +360,43 @@ namespace BeeFishDatabase {
          }
          case Type::OBJECT:
          {
+            Path objProps = getObjectProperties();
             
+            if (objProps.isDeadEnd())
+            {
+               out << "{}";
+               break;
+            }
+               
             out << "{";
             Size count = 0;
-
+            
+            
             if (!path.isDeadEnd()) {
                
                out << "\r\n";
               
-               BString key;
+               optional<BString> key;
                count = path.max<Size>() + 1;
 
                for (Size position = 0; position < count; ++position) 
                {
                   key = getObjectKey(position);
 
-                  out << tabs(tabCount + 1)
-                      << "\""
-                         << escape(key)
-                      << "\": ";
+                  if (key.has_value()) {
+                     out << tabs(tabCount + 1)
+                         << "\""
+                            << escape(key.value())
+                         << "\": ";
                       
-                  JSONPath value =
-                     path[position];
+                     JSONPath value =
+                        path[position];
                   
-                  value.write(out, tabCount + 1);
+                     value.write(out, tabCount + 1);
                   
-                  if (position < count - 1)
-                     out << ",\r\n";
+                     if (position < count - 1)
+                        out << ",\r\n";
+                  }
 
                }
             }

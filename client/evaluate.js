@@ -113,6 +113,8 @@ function hideFunctions(json)
       return json;
      
    for (var property in json) {
+      
+      
       json[property] =
          hideFunctions(
             json[property]

@@ -231,7 +231,7 @@ static void inputJSON(Database& database, Path path, request_rec *r)
    
    if (!path.isDeadEnd())
    {
-      path.clear();
+      JSONPath(path).clear();
    }
    
    JSONPathParser index(path);

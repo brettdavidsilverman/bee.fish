@@ -412,7 +412,7 @@ namespace BeeFishDatabase {
 
       }
       
-      void clear()
+      virtual void clear()
       {
          Database::ScopedFileLock lock(_database);
 

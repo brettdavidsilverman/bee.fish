@@ -76,11 +76,14 @@ namespace BeeFishApache2 {
          Index position;
          while (object.next(stack, position))
          {
-            BString key =
+            optional<BString> key =
                path.getObjectKey(position);
                
-            stream << "\r\n   \"" << escape(key) << "\"";
-            
+            if (key.has_value()) {
+               stream << "\r\n   \""
+                      << escape(key.value()) 
+                      << "\"";
+            }  
          }
          
          BString error = stream.str();
