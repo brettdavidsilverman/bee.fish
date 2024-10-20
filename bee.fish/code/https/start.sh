@@ -1,12 +1,12 @@
 #!/bin/bash
 
-./stop.sh
-
 if [[ -n "$1" ]]; then
     PORT=$1
 else
     PORT=443
 fi
+
+./stop.sh $PORT
 
 echo "Starting on port $PORT"
 
