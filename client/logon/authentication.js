@@ -143,7 +143,7 @@ class Authentication
    
 }
 
-var authentication = new Authentication("https://bee.fish:8000");
+var authentication = new Authentication(document.location.origin);
 
 async function authenticate() {
 

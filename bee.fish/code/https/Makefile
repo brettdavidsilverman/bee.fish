@@ -3,7 +3,7 @@ CFLAGS = -std=c++17 -Wall -fmax-errors=1
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
 DEPS=server.h session.h response.h response-headers.h app.h storage-app.h file-system-app.h test.h authentication.h version.h Makefile ../Config.hpp storage.h https.h authentication-app.h $(BUILD)/parser $(BUILD)/json $(BUILD)/web-request $(BUILD)/Database $(BUILD)/power-encoding $(BUILD)/script Makefile
-PORT=8000
+PORT=443
 
 $(OUTPUT): $(DEPS)
 	@echo "Linking server"
@@ -44,7 +44,7 @@ debug:
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	PORT = 8000
-debug:	$(OUTPUT)
+debug:	start
 
 run_debug:	debug
 	gdb --args $(OUTPUT) -port 8000

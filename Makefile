@@ -3,7 +3,7 @@ HTTPS=bee.fish/build/https
 PORT=8000
 DATA_FILE=~/data/bee.fish.data
 
-all:	data https Apache2 Makefile
+all:	data https  Makefile
 
 data:
 	touch $(DATA_FILE)
@@ -27,15 +27,15 @@ test:	data
 	
 clean:
 	cd bee.fish && sudo make clean
-	cd Apache2/mod_database && sudo make clean $(DEBUG)
+#	cd Apache2/mod_database && sudo make clean $(DEBUG)
 
 stop:
 	cd bee.fish/code/https && ./stop.sh
-	cd Apache2/mod_database && sudo make stop
+#	cd Apache2/mod_database && sudo make stop
 
-start:	data https Apache2
+start:	data https 
 	cd bee.fish/code/https && ./start.sh $(PORT)
-	cd Apache2/mod_database && sudo make start
+#	cd Apache2/mod_database && sudo make start
 
 restart:	stop start
 

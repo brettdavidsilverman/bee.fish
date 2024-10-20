@@ -215,8 +215,6 @@ namespace BeeFishDatabase {
       // properties[key][POSITION][objectId]
       optional<BString> getObjectKey(Index position)
       {
-         Id id = this->id();
-
          Path path = getObjectProperties();
          
          if (!path.contains(position))

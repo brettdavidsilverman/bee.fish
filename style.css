@@ -1,3 +1,4 @@
+
 pre {
    display: block;
    font-family: monospace;
@@ -20,19 +21,27 @@ form {
    border: outset 2px;
    border-radius: 10px;
 }
-
+/*
 @media (orientation: landscape) {
-  body {
-     width: 50%;
-     padding-left: 25%
+  form {
+     width: 100%;
   }
 }
 
 @media (orientation: portrait) {
    form {
       width: 100%;
+      
    }
 }
+
+*/
+form {
+   width: calc(100% - 20px);
+ 
+   padding: 10px;
+}
+
 
 input, textarea {
    margin: 10px;
@@ -42,7 +51,13 @@ input, textarea {
 }
 
 
+textarea {
+   left: 10px;
+   height: 120px;
+}
+
 button {
+   position: relativ;
    margin: 10px;
    bottom: 10px;
    right: 10px;
@@ -53,8 +68,12 @@ div {
 }
 
 label {
-   position: relative;
    font-weight: bold;
-   top: 5px;
-   left: 10px;
+   margin-top:10px
+}
+
+input[type=checkbox] {
+    display: inline;
+    vertical-align: middle;
+    width: auto;
 }

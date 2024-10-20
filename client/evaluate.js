@@ -61,7 +61,9 @@ function evaluate(json, parent=json)
 function fetchJSON(url) {
 
    var promise =
-      fetch("https://bee.fish/" + url).
+      fetch(
+          url
+      ).
       then(
          function (response) {
             return response.text();
@@ -81,7 +83,7 @@ function postJSON(url, json) {
    
    var promise =
       fetch(
-         "https://bee.fish/" + url,
+         url,
          {
             method: "POST",
             body: json

@@ -3,18 +3,17 @@
    <head>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title>bee.fish</title>
       <script src="/head.js"></script>
       <script src="/error.js"></script>
       <script src="/client/stream/stream.js"></script>
       <script src="/client/power-encoding/power-encoding.js"></script>
       <script src="/client/id/id.js"></script>
       <script src="/client/evaluate.js"></script>      <script src="/client/logon/authentication.js"></script>
-      <title>bee.fish</title>
-      <style>
-textarea {
-   left: 10px;
-   width: calc(100% - 20px);
-   height: 120px;
+       <script src="/client/punycode.js"></script>
+      <link rel="stylesheet" type="text/css" href="style.css"/>
+      <style>label {
+    margin: 20px;
 }
       </style>
       <script>
@@ -25,17 +24,21 @@ authenticate();
       <h1 id="h1">bee.fish</h1>
       <div>
          <form onsubmit="return false;">
-            <label for="urlInput">Path</label>
-            <br/>
+            <div style="text-align:left;">
+               <label for="urlInput">Path</label>
+            </div>
             <input type="text" id="urlInput"/>
             <button id="fetchButton" onclick="loadJSON()">Fetch</button>
             <br/>
          </form>
          <br/>
          <form onsubmit="return false;">
-         
-            <label for="jsonEditor">JSON Editor <input type="checkbox" id="functionCheckbox" onclick="switchFunctions(this.checked)"><i> f()</i></input></label>
-            <br/>            <textarea id="jsonEditor"></textarea>
+            <div style="text-align:left;">
+               <label for="jsonEditor">JSON Editor</label>
+               <br/>
+               <label for="functionCheckbox">f()</label>
+               <input type="checkbox" id="functionCheckbox" onclick="switchFunctions(this.checked)" />            </div>
+            <textarea id="jsonEditor"></textarea>
             <button id="saveButton">Save</button>
          
          </form>
@@ -52,9 +55,9 @@ authenticate();
       <a id="goLink"></a>
       <br />
       <br />
-      <a href="https://bee.fish:8000/client/logon/" id="logon">Logon/Logoff</a>
+      <a href="/client/logon/" id="logon">Logon/Logoff</a>
       <br />
-      <a href="https://bee.fish:8000/client/">Javascript client library</a>
+      <a href="/client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
       <script>
@@ -67,9 +70,11 @@ var urlInput = document.getElementById("urlInput");
 var result = document.getElementById("result");
 var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");
 var goButton = document.getElementById("goButton");var goLink = document.getElementById("goLink");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");
+fetchButton.disabled = true;
 
 document.getElementById("h1").innerText =
-   window.location.hostname;
+   punycode.toUnicode(window.location.hostname);
+   //window.location.hostname
 
 
 function getJSON()
@@ -103,17 +108,19 @@ function switchFunctions(showFunctions)
    jsonEditor.value = json;
 }
 
-function loadJSON() {
-    
+function loadJSON() {
    var url = urlInput.value;
    
-   if (url == defaultURL)
+   if (url == defaultURL ||
+       url == "")
+   {
       return;
+   }
       
-   var search = document.location.search;
-   if (search != ("?" + encodeURI(url))) {
-      document.location.search =
-         "?" + url;
+   var search = "?" + encodeURI(url);
+   
+   if (document.location.search != search) {
+      document.location.search = search;
       return;
    }
 
@@ -129,7 +136,6 @@ function loadJSON() {
             jsonEditor.value = "undefined";
          }
          else if (json.error) {
-            throw(json.error);
             return;
          }
          else if (typeof(json) == "string") {
@@ -188,13 +194,6 @@ function Go() {
  
 }
 
-
-urlInput.onchange =
-   () => {
-      setLink();
-   }
-
-
 if (!urlInput.value)
    urlInput.value = defaultURL;
    
@@ -202,15 +201,22 @@ urlInput.onfocus =
    function() {
       if (urlInput.value == defaultURL)
          urlInput.value = "";
+      fetchButton.disabled = false;
    };
    
    
 urlInput.onblur =
    function() {
-      if (urlInput.value == "")
+      if (urlInput.value == "" ||
+          urlInput.value == defaultURL)
+      {
+         fetchButton.disabled = true;
          urlInput.value = defaultURL;
-      else
-         goButton.value = "";
+      }
+      else {
+          fetchButton.disabled = false;
+          setLink();
+      }
    }
    
 goButton.onclick =
@@ -235,11 +241,13 @@ saveButton.onclick =
 
 fetchButton.onclick =
    function() {
+
+      var search = "?" + encodeURI(urlInput.value);
       if (document.location.search != 
-           ("?" + encodeURI(url)))
+           search)
       {
-         document.location.search = "?" + url;
-         //return;
+         document.location.search = search;
+         return;
       }
       loadJSON();
 
@@ -254,16 +262,22 @@ if (document.location.search) {
 
    urlInput.value =
       url;
-      
-   
-}
-loadJSON().then(
-   function(json) {
-      if (document.location.hash == "#go")
-         Go();
-   }
-);
+   fetchButton.disabled = false;
+}else
+   fetchButton.disabled = true;
 
+var promise =
+   loadJSON();
+if (promise != undefined) {
+
+   promise.then(
+      function(json) {
+         if (json) {
+            if (document.location.hash == "#go")
+               Go();
+         }
+      }
+   );}
       </script>
 
    </body>
