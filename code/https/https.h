@@ -19,5 +19,6 @@
 #include "json-app.h"
 #include "not-found-app.h"
 #include "error-app.h"
+#include "response-stream.h"
 
 #endif

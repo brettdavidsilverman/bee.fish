@@ -5,10 +5,10 @@ all:	https  Makefile
 https:	$(HTTPS)
 
 $(HTTPS):
-	cd code && make $(DEBUG) test
+	cd code && make $(DEBUG) test PORT=$(PORT)
 
 test:
-	cd code && make $(DEBUG) test
+	cd code && make $(DEBUG) test PORT=$(PORT)
 
 clean:
 	cd code && sudo make clean

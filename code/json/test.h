@@ -613,8 +613,6 @@ assert(ok);
       bool secretOk = false;
       parser.invokeValue("secret",
          [&secretOk](const BString& key, JSON& json) {
-            cerr << "SECRET KEY " << key << endl;
-            cerr << "SECRET VALUE " << json.value() << endl;
             secretOk = (key == "secret") && (json.value() == "mysecret");
          }
       );

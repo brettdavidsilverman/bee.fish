@@ -585,7 +585,7 @@ namespace BeeFishHTTPS {
       throw std::logic_error("Should not reach here in session.h");      
    }
 
-   inline WebRequest* App::request() {
+   WebRequest* App::request() {
       return _session->request();
    }
    
@@ -607,57 +607,13 @@ namespace BeeFishHTTPS {
    {
    }
    
-
    
-   // Declared in response.h
-   void Response::ResponseStream::flush()
-   {
-      std::ostream::flush();
-          
-      if (_count == 0)
-         return;
-      
-      /*
-      boost::asio::async_write(
-            *_session,
-            boost::asio::buffer(
-               _buffer,
-               _count
-            ),
-            boost::bind(
-               &Session::handleWrite,
-               _session,
-               boost::asio::placeholders::error
-            )
-         );
-      
-      */
-      try {
-         boost::asio::write(
-            *_session,
-            boost::asio::buffer(
-               _buffer,
-               _count
-            )
-         );
-      
-      }
-      catch(...)
-      {
-         cerr << "response.h writeResponse error" << endl;
-         return;
-      }
-      
-      _bytesTransferred += _count;
-
-      _count = 0;
-   }
-
    // Declared in response.h
    void Response::closeOrRestart()
    {
       _session->closeOrRestart();
    }
+   
 
 }
 

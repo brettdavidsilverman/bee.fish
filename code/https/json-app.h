@@ -29,12 +29,13 @@ namespace BeeFishHTTPS {
       virtual void handleResponse()
       override
       {
-         
+         /*
          if (!authenticated())
          {
             _status = -1;
             return;
          }
+         */
          
          _responseHeaders.replace(
             "content-type",

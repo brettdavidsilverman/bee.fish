@@ -18,10 +18,6 @@ namespace BeeFishHTTPS {
       const bool _log = true;
 
       Session* _session;
-      
-      string _headers;
-      
-      Size _headersLength = 0;
       Size _bytesTransferred = 0;
       ssize_t _contentLength = 0;
       const Size _pageSize = getPageSize();
@@ -92,8 +88,13 @@ namespace BeeFishHTTPS {
 
             _contentLength = _app->contentLength();
             
-            if (_contentLength == -1)
+            if (_contentLength == -1) {
                headers.erase("content-length");
+               headers.replace(
+                  "transfer-encoding",
+                  "chunked"
+               );
+            }
             else
                headers.replace(
                   "content-length",
@@ -142,7 +143,6 @@ namespace BeeFishHTTPS {
          {
             cerr << "response.h end " << endl;
             
-            _headers.clear();
             if (_app)
             {
                delete _app;
@@ -155,79 +155,15 @@ namespace BeeFishHTTPS {
          
       }
      
-
-      void write()
-      {
-
-         ResponseStream stream(_session);
-         
-         _app->write(stream);
-         
-         stream.flush();
-         
-         _bytesTransferred =
-            stream.bytesTransferred();
-      }
-      
+      // Defined in response-stream.h
+      void write();
       
       App* app()
       {
          return _app;
       }
-   
-      class ResponseStream :
-         private std::streambuf,
-         public std::ostream
-      {
-      private:
-         Size _pageSize;
-         char* _buffer;
-         Size _count;
-         Size _bytesTransferred;
-         Session* _session;
-         
-      public:
-          ResponseStream(Session* session) : std::ostream(this)
-      {
-         _pageSize = getPageSize();
-         _buffer = new char[_pageSize];
-         _count = 0;
-         _bytesTransferred = 0;
-         _session = session;
-      }
-      
-      virtual ~ResponseStream()
-      {
-         delete[] _buffer;
-      }
-      
-      void put(int c)
-      {
-         _buffer[_count++] = (char)c;
-         
-         if (_count == _pageSize)
-            flush();
-      }
-      
-      Size bytesTransferred() const
-      {
-         return _bytesTransferred;
-      }
-      
-      // Definef in session.h
-      virtual void flush();
-      
-      private:
-         int overflow(int c) override
-         {
-            put(c);
-            return 0;
-         }
-      };
 
    };
-   
-
    
 }
 

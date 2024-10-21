@@ -14,13 +14,14 @@ install:	$(OUTPUT)
 	./start.sh $(PORT)
 	
 test:	$(OUTPUT)
-	$(OUTPUT) -test -port 8000
+	./stop.sh $(PORT)
+	$(OUTPUT) -test -port $(PORT)
 
 start:	$(OUTPUT)
 	./start.sh $(PORT)
 	
 stop:
-	./stop.sh
+	./stop.sh $(PORT)
 	
 $(BUILD)/parser:
 	cd ../parser && make $(DEBUG)

@@ -25,6 +25,21 @@ namespace BeeFishHTTPS {
          emplace(key, value);
       }
       
+      bool contains(string key) const
+      {
+         return count(key) > 0;
+      }
+      
+      BString operator[] (string key) const
+      {
+         BString value;
+         for (auto search = find(key); search != end(); ++search)
+            value = search->second;
+            
+         return value;
+      }
+      
+      
    };
    
 
