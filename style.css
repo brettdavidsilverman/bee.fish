@@ -45,7 +45,7 @@ form {
 
 input, textarea {
    margin: 10px;
-   width: calc(100% - 30px);
+   width: calc(100% - 20px);
    border: inset 2px;
    background-color: lightgrey;
 }

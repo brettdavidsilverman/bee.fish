@@ -1,7 +1,0 @@
-build/**
-**/a.out
-**/trace.txt
-**/*.pid
-**/perf.data
-**/perf.data.old
-**/*.data

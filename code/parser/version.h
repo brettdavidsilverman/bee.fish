@@ -1,0 +1,6 @@
+#ifndef BEE_FISH_PARSER__VERSION_H
+#define BEE_FISH_PARSER__VERSION_H
+
+#define BEE_FISH_PARSER_VERSION "2.0.0"
+
+#endif

@@ -1,0 +1,129 @@
+#ifndef BEE_FISH__WEB__URL_HPP
+#define BEE_FISH__WEB__URL_HPP
+#include "../Parser/ParserBase.hpp"
+#include "../DBServer/JSONPath.hpp"
+#include "URLHandler.hpp"
+
+namespace BeeFishDBServer {
+   class DBServer;
+}
+
+namespace BeeFishWeb {
+
+   using namespace std;
+   using namespace BeeFishParser;
+   using namespace BeeFishJSON;
+   using namespace BeeFishDBServer;
+
+   class WebServer;
+
+   class URL : public Parser {
+   protected:
+      URLHandler _handler;
+      string _segment;
+      Parser* _urlParser = nullptr;
+      string _url;
+      JSONPath _path;
+   public:
+
+      using Parser::read;
+
+      URL(const URLHandler& source, Path root) :
+         _handler(source),
+         _path(root)
+      {
+         _urlParser = createParser();
+         if (!_handler._onsegment)
+            _handler._onsegment = createSegmentHandler();
+      }
+
+      URL(const URL& url) :
+         _handler(url._handler),
+         _path(url._path)
+      {
+         _urlParser = createParser();
+         if (!_handler._onsegment)
+            _handler._onsegment = createSegmentHandler();
+      }
+
+      URLHandler::OnSegment createSegmentHandler() {
+         return  
+            [this](string segment) {
+               _path = _path[segment];
+               _url += "/";
+               _url += segment;
+               return true;
+            };
+
+      }
+      
+      // Defined in WebServer.hpp
+      URL(WebServer* webServer);
+
+      virtual ~URL() {
+         delete _urlParser;
+      }
+
+      Parser* createParser() {
+
+         const auto seperator =
+            Character("/") or
+            Character("?") or
+            Character(".");
+
+         const And parser =
+            Character("/") and
+            Repeat(
+               Invoke(
+                  Capture(
+                     Repeat(
+                        not (
+                           seperator or blank
+                        ),
+                        1
+                     ),
+                     _segment
+                  ),
+                  [this](Parser*) {
+
+                     bool success = true;
+
+                     if (_handler._onsegment) {
+                        success = _handler._onsegment(
+                           _segment
+                        );
+                     }
+
+                     _segment.clear();
+                     return success;
+                  }
+               )
+               and Optional(seperator),
+               0
+            );
+
+         return parser.copy();
+
+      }
+
+      virtual bool read(char c)
+      override
+      {
+         bool matched = _urlParser->read(c);
+
+         if (_urlParser->_result != nullopt)
+            setResult(_urlParser->_result);
+
+         return matched;
+      }
+
+      Parser* copy() const override
+      {
+         return new URL(*this);
+      }
+
+   };
+
+}
+
+#endif

@@ -10,12 +10,8 @@
       <script src="/client/power-encoding/power-encoding.js"></script>
       <script src="/client/id/id.js"></script>
       <script src="/client/evaluate.js"></script>      <script src="/client/logon/authentication.js"></script>
-       <script src="/client/punycode.js"></script>
+      <script src="/client/punycode.js"></script>
       <link rel="stylesheet" type="text/css" href="style.css"/>
-      <style>label {
-    margin: 20px;
-}
-      </style>
       <script>
 authenticate();
       </script>
@@ -156,7 +152,8 @@ function loadJSON() {
    .catch(
       function (error) {
          fetchButton.disabled = false;
-         Error(error, loadJSON);
+         jsonEditor.value =
+            error;
       }
    );
    
@@ -236,6 +233,22 @@ saveButton.onclick =
       postJSON(
          urlInput.value,
          formatJSON(jsonEditor.value)
+      ).
+      then(
+         function(response) {
+            return response.json();
+         }
+      ).
+      then(
+         function (json) {
+            alert(json);
+         }
+      ).
+      catch(
+         function (error)
+         {
+            Error(error, saveButton.onclick);
+         }
       );
    }
 
@@ -266,8 +279,8 @@ if (document.location.search) {
 }else
    fetchButton.disabled = true;
 
-var promise =
-   loadJSON();
+var promise = undefined;
+//   loadJSON();
 if (promise != undefined) {
 
    promise.then(

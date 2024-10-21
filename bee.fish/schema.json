@@ -1,8 +1,0 @@
-{
-   host() : {
-      urlPath() : {
-         "document": "[++page]",
-         "JSON": "...",
-      }
-   }
-}

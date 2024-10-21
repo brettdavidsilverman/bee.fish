@@ -1,0 +1,6 @@
+#ifndef BEE_FISH__DATABASE__VERSION_HPP
+#define BEE_FISH__DATABASE__VERSION_HPP
+
+#define DATABASE_VERSION "v3.0.1"
+
+#endif

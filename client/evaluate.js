@@ -60,18 +60,34 @@ function evaluate(json, parent=json)
 
 function fetchJSON(url) {
 
+   var status;
+   
+   var parameters = {
+      method: "GET",
+      credentials: "include"
+   }
+   
    var promise =
       fetch(
-          url
+          url,
+          parameters
       ).
       then(
          function (response) {
+            status = response.status;
             return response.text();
          }
       ).
       then(
          function (text) {
             return JSON.parse(text);
+         }
+      ).
+      then(
+         function (json) {
+            if (status != "200")
+               throw json;
+            return json;
          }
       );
       
@@ -80,25 +96,36 @@ function fetchJSON(url) {
 }
 
 function postJSON(url, json) {
-   
+   var status;
+
+   var parameters = {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify(json)
+   }
+  
    var promise =
       fetch(
          url,
-         {
-            method: "POST",
-            body: json
-         }
-      ).then(
+         parameters
+      ).
+      then(
          function (response) {
+            status = response.status;
             return response.text();
          }
-      ).then(
-         function (json) {
-            alert(json);
+      ).
+      then(
+         function (text) {
+            return JSON.parse(text);
          }
-      ).catch(
-         function(error) {
-            Error(error + "\r\n" + url, fetchJSON);
+      ).
+      then(
+         function (json) {
+             
+            if (status != "200")
+               throw json;
+            alert(json);
          }
       );
 

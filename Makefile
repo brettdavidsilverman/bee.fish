@@ -1,23 +1,23 @@
-HTTPS=bee.fish/build/https
+HTTPS=build/https
 
 all:	https  Makefile
 
 https:	$(HTTPS)
 
 $(HTTPS):
-	cd bee.fish && make $(DEBUG) test
+	cd code && make $(DEBUG) test
 
 test:
-	cd bee.fish && make $(DEBUG) test
+	cd code && make $(DEBUG) test
 
 clean:
-	cd bee.fish && sudo make clean
+	cd code && sudo make clean
 
 stop:
-	cd bee.fish/code/https && ./stop.sh $(PORT)
+	cd code/https && ./stop.sh $(PORT)
 	
 start:	https 
-	cd bee.fish/code/https && ./start.sh $(PORT)
+	cd code/https && ./start.sh $(PORT)
 
 install:	start
 

@@ -32,10 +32,15 @@ function (message, source, lineno, colno, error)
 function Error(error, f)
 {
     var where;
-    if (f && f.name)
+    if (typeof f == "string")
+       where = f
+    else if (typeof f == "function")
        where = f.name;
+    else if (f)
+       where = f;
     else
-       where = "Unknown";
+       where = "Unknown function";
        
     alert(error + "\r\n   " + where);
+    
 }

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title>bee.fish</title>
+      <script>
+window.onerror =
+function (message, source, lineno, colno, error)
+{
+
+   
+   if (!error)
+      error = {}
+
+   var stack = "";
+   if (error.stack)
+      stack = String(error.stack);
+
+   if (message instanceof Object)
+      message = JSON.stringify(message, null, "   ");
+   
+   var string = 
+      [
+         message,
+         source,
+         "line: " + lineno,
+         "col: " + colno,
+         stack
+      ].join("\n");
+      
+   if (alert.silent)
+      console.log(string);
+   else
+      alert(string);
+   
+};
+
+      </script>
+   </head>
+   <body>
+      <h1 id="h1">bee.fish <span id="path"></span> page not taken yet</h1>
+      <form onsubmit="return false;">
+         <label for="contentType">Content Type</label><br />
+         <input type="text" id="contentType" value="application/json; charset=utf-8"></input><br />
+         <label for="bodyText">Body Text</label><br />
+         <textarea id="bodyText">{"🐝":"🌎"}</textarea><br />
+         <button onclick="postBody()">Submit</button>
+      </form><br />
+
+      <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
+
+      <script>
+var path =
+   document.getElementById("path");
+
+path.innerHTML = document.location.pathname;
+
+var contentType =
+   document.getElementById("contentType");
+
+var bodyText =
+   document.getElementById("bodyText");
+
+function postBody() {
+
+   var response =
+      fetch(
+         window.location.href,
+         {
+            method: "POST",
+            headers: {
+               "Content-Type": contentType.value
+            },
+            body: bodyText.value
+         }
+      ).then(
+         function (response) {
+            return response.json();
+         }
+      ).then(
+         function (json) {
+            alert(JSON.stringify(json));
+            if (json.success)
+               window.location.reload();
+         }
+      ).catch(
+         function(error) {
+            alert(error);
+         }
+      );
+
+   return response;
+}
+
+      </script>
+
+   </body>
+</html>

@@ -1,6 +1,0 @@
-#ifndef BEE_FISH_HTTPS__VERSION_H
-#define BEE_FISH_HTTPS__VERSION_H
-
-#define BEE_FISH_HTTPS_VERSION "v1.0.2"
-
-#endif

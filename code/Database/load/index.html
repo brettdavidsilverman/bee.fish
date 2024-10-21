@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="../../head.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <script src="../../console/console.js"></script>
+      <script src="../../power-encoding/bit-string/bit-string.js"></script>
+      <script src="../../power-encoding/stream/stream.js"></script>
+      <script src="../../power-encoding/number/number.js"></script>
+      <script src="../../power-encoding/string/string.js"></script>
+      <script src="../../pointer/pointer.js"></script>
+      <script src="../../object/object.js"></script>
+      <script src="../../id/id.js"></script>
+      <link rel="stylesheet" type="text/css" href="../../style.css" />
+      <title>Load</title>
+   </head>
+   <body>
+      <h1>Load</h1>
+      <button onclick="go()">Go</button>
+      <div id="response"></div>
+      <pre>
+         <script>
+//prompt("?", new Id().key);
+const count = 1000;
+var check = 0;
+
+async function db(id) {
+   
+   var url = "http://bee.fish/database/db.bin?" + id.key;
+
+   const response = await fetch(url);
+   response.text().then(
+      function (text) {
+         postMessage(text.trim());
+      }
+   );
+ 
+}
+
+var response =
+   document.getElementById("response");
+
+window.onmessage = function(event) {
+
+   response.innerHTML += event.data + " ";
+   if (++check == count)
+      alert("Done");
+}
+
+function go() {
+   check = 0n
+   var map = new Map();
+   for (var i = 0; i < count; ++i) {
+      var id = new Id();
+      if (map.has(id.key))
+         alert("Duplicate key");
+      else
+         map.set(id.key, id);
+      db(id);
+   }
+}
+         </script>
+      </pre>
+   </body>
+</html>

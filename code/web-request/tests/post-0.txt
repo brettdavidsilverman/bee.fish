@@ -1,0 +1,18 @@
+POST /beehive/?key=settings HTTP/1.1
+Host: laptop
+Connection: keep-alive
+Cookie: sessionId=66e53a5461ad94ee16ba83f3ff9d9498392b6597751096119dd77cd20ff46ba5;path=/;SameSite=None;Secure;HttpOnly;max-age=3600
+content-length: 788
+content-type: application/json; charset=utf-8
+
+{
+   "wakeupEvery": 3600,
+   "takePictureEvery": 3540,
+   "wakeup": false,
+   "label": "Bloody Bees",
+   "url": "http://192.168.137.175/",
+   "lastImageURL": "https://laptop/beehive/images/?id=%2FjHick%2BMeJycT4x4k%2BMeJxk%2BMeJxPicnGT4x4nJj4x4ng%2BMeJxPjHicZH4cnGPhycT4ck%2BHI%2BHGPhk%2BE%2BDycTycPJk8mPJPI8ZPGPE8J8jxjxPDk4xA%3D",
+   "lastImageTime": "16 Oct 2022 09:19:14",
+   "lastWeatherURL": "https://laptop/beehive/weather/?id=%2FjHiT4x4ng%2BMeJ4PjHicnD4x4nJPjHiZPjHiT4x4nhw%2BMeJyT4x4nJxk%2BMeJycY%2BJycZPjHicmPjHieGT4x4nJxk%2BMeJycY%2BJ4cmT4j4x4mT4x4nI%2BMeJPjHieGPjHieGT4x4nE%2BMeJ4cPieHJxPjHieHE%2BMeJ4cPjHicY%2BJycT4nhyH4cnGPhycT4ck%2BHI%2BHGPhk%2BE%2BDycY8mPE5MfI8ZPE8OMQ",
+   "sleeping": true,
+   "sleepTime": "16 Oct 2022 09:37:16

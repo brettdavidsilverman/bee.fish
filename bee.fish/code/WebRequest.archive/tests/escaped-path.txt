@@ -1,2 +1,0 @@
-GET /path?query%20query HTTP/1.1
-Host: bee.fish

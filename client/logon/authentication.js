@@ -4,6 +4,7 @@ class Authentication
      // Object.assign(this, input);
       this.authenticated = false;
       this.url = authenticatorServer;
+      
    }
    
    logon(secret)
@@ -16,24 +17,17 @@ class Authentication
       if ( secret == null || !secret.length )
          throw new Error("Missing secret");
       
-      var params = {}
-      params.method = "POST";
-      params.credentials = "include";
-      /*
-      params.headers = new Headers([
-         ["Content-Type", "application/json; charset=utf-8"]
-      ]);
-      */
-      var body =
-         {
+      var parameters = {
+         method: "POST",
+         credentials: "include",
+         body: JSON.stringify({
             method: "logon",
             secret: secret
-         }
-         
-      params.body = JSON.stringify(body);
+         })
+      }
 
       var promise =  
-         fetch(this.url, params)
+         fetch(this.url, parameters)
          .then(
             function(response) {
                return response.json();
@@ -46,11 +40,6 @@ class Authentication
                _this.sessionId =
                   json.sessionId;
             }
-         )
-         .catch(
-            function(error) {
-               throw new Error(error);
-            }
          );
 
       return promise;
@@ -62,21 +51,21 @@ class Authentication
       
       this.authenticated = false;
       
-      var params = {}
-      params.method = "POST";
-      params.credentials = "include";
-      var body =
-         {
-            method: "getStatus"
-         }
+      var parameters = {
+         method: "POST",
+         credentials: "include",
+         body: JSON.stringify({
+            method: "getStatus",
+         })
+      }
          
-      params.body = JSON.stringify(body);
       var _this = this;
 
       var promise =
-         fetch(this.url, params)
+         fetch(this.url, parameters)
          .then(
             function(response) {
+                
                return response.text()
             }
          )
@@ -95,11 +84,6 @@ class Authentication
                
                return json;
             }
-         )
-         .catch(
-            function(error) {
-               throw new Error(error);
-            }
          );
 
       return promise;
@@ -111,29 +95,21 @@ class Authentication
       
       this.authenticated = false;
 
-      var params = {}
-      params.method = "POST";
-      params.credentials = "include";
-      var body =
-         {
+      var parameters = {
+         method: "POST",
+         credentials: "include",
+         body: JSON.stringify({
             method: "logoff"
-         }
+         })
+      }
          
-      params.body = JSON.stringify(body);
-
       var promise =
-         fetch(this.url, params)
+         fetch(this.url, parameters)
          .then(
             function(response) {
                response.json();
             }
-         )
-         .catch(
-            function(error) {
-               throw new Error(error);
-            }
          );
-
          
       this.authenticated = false;
       this.secret = null;
@@ -143,13 +119,16 @@ class Authentication
    
 }
 
-var authentication = new Authentication(document.location.origin);
+function authenticate() {
 
-async function authenticate() {
-
-    return await authentication.getStatus()
-    .then(
-        function(auth) {
+   var authentication =
+      new Authentication(
+         document.location.origin
+      );
+   var promise =
+      authentication.getStatus().
+      then(
+         function(auth) {
             if (!auth.authenticated) {
                 
                var currentPage = document.location.href;
@@ -158,14 +137,15 @@ async function authenticate() {
                document.location.href = url;
             }
             return auth;
-        }
-    )
-    .catch (
-       function(error) {
-          Error(error);
-       }
-    );
+         }
+      )
+      .catch (
+         function(error) {
+            Error(error, authenticate);
+          }
+      );
+      
+   return promise;
 
 }
-
 
