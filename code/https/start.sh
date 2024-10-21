@@ -12,8 +12,6 @@ echo "Starting on port $PORT"
 
 ../../build/https -port $PORT &
 
-echo $! >> https.pid
-
 #tail -f ~/server.err &
 #echo $! >> tailErr.pid
 #tail -f ~/server.log &

@@ -187,10 +187,100 @@ namespace BeeFishHTTPS {
          return filePath;
       }
       
-      // Defined in response-stream.h
       virtual void write(
-         ResponseStream* stream
-      );
+         ostream& stream
+      )
+      {
+         if (serve() == App::SERVE_JSON)
+         {
+            JSONPath json(_bookmark);
+            json.write(stream);
+            return;
+         }
+  
+         
+         Size pageSize = getPageSize();
+         ssize_t _contentLength = contentLength();
+         Size length = _contentLength;
+         std::string buffer(pageSize, '\0');
+         
+         while ((ssize_t)_bytesTransferred < _contentLength)
+         {
+            if ((_contentLength - _bytesTransferred) 
+                  > pageSize)
+               length = pageSize;
+            else
+               length = _contentLength - _bytesTransferred;
+                     
+            if (!length)
+               break;
+               
+            switch (serve())
+            {
+               case App::SERVE_DATA:
+               {
+            
+                  Size pageIndex =
+                  _bytesTransferred  /
+                  pageSize;
+
+                  BeeFishDatabase::Data data =
+                     _bookmark[pageIndex].getData();
+                  
+                  length = data.size();
+
+                  memcpy(buffer.data(), data.data(), length);
+                  
+                  break;
+               }
+               case App::SERVE_CONTENT:
+               {
+                 
+                  memcpy(
+                     buffer.data(),
+                     (const Byte*)
+                     (
+                        _content.data()
+                        + _bytesTransferred 
+                     ),
+                     length
+                  );
+                  break;
+               }
+               case App::SERVE_FILE:
+               {
+                  ifstream input(_filePath);
+                     
+                  input.seekg(
+                     _bytesTransferred
+                  );
+                  
+                  input.read(
+                     buffer.data(),
+                     length
+                  );
+                  
+                  input.close();
+               
+                  break;
+               }
+               default:
+               {
+                  throw std::logic_error("Invalid Serve enum value");
+               }
+            }
+             
+            stream.write(
+               buffer.data(),
+               length
+            );
+         
+            _bytesTransferred += length;
+             
+         }
+      
+          
+      }
       
       virtual ssize_t contentLength()
       {

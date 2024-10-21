@@ -129,11 +129,6 @@ namespace BeeFishHTTPS {
       
       void end() 
       {
-         cerr << "response.h " 
-              <<_app->bytesTransferred() << " of "
-              << _app->contentLength()
-              << endl;
-
          bool end = !_app ||
             ( _app->bytesTransferred() ==
              (Size) _app->contentLength() ) ||
@@ -141,8 +136,6 @@ namespace BeeFishHTTPS {
             
          if ( end )
          {
-            cerr << "response.h end " << endl;
-            
             if (_app)
             {
                delete _app;

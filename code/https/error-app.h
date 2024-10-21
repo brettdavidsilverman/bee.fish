@@ -64,7 +64,6 @@ namespace BeeFishHTTPS {
          _status = 500;
          _statusText = "Internal Error";
          
-         cerr << "error-app.h " << _content << endl << _status << endl;
       }
       
       virtual BString name()
