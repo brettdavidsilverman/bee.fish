@@ -64,7 +64,7 @@ namespace BeeFishHTTPS {
                ".html",
                {
                   "text/html; charset=utf-8",
-                  "no-store, max-age=0"
+                  _defaultCacheControl
                }
             },
             
@@ -72,7 +72,7 @@ namespace BeeFishHTTPS {
                ".xhtml",
                {
                   "application/xhtml+xml; charset=utf-8",
-                  "no-store, max-age=0"
+                  _defaultCacheControl
                }
             },
             {
@@ -149,7 +149,7 @@ namespace BeeFishHTTPS {
                ".bin",
                {
                   "application/octet-stream",
-                  _noCacheControl
+                  _defaultCacheControl
                }
             },
             {

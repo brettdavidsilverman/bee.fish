@@ -29,13 +29,12 @@ namespace BeeFishHTTPS {
       virtual void handleResponse()
       override
       {
-         /*
+
          if (!authenticated())
          {
-            _status = -1;
+            throw std::runtime_error("Not authenticated");
             return;
          }
-         */
          
          _responseHeaders.replace(
             "content-type",

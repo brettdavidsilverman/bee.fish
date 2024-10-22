@@ -13,7 +13,7 @@
       <script src="/client/punycode.js"></script>
       <link rel="stylesheet" type="text/css" href="style.css"/>
       <script>
-authenticate();
+
       </script>
    </head>
    <body>
@@ -30,10 +30,17 @@ authenticate();
          <br/>
          <form onsubmit="return false;">
             <div style="text-align:left;">
-               <label for="jsonEditor">JSON Editor</label>
+               <label for="jsonEditor">
+                  JSON Editor
+               </label>
                <br/>
-               <label for="functionCheckbox">f()</label>
-               <input type="checkbox" id="functionCheckbox" onclick="switchFunctions(this.checked)" />            </div>
+               <label for="functionCheckbox">
+                  <i>f()</i>
+               </label>
+               <input type="checkbox"
+                      id="functionCheckbox"
+                      onclick="switchFunctions(this.checked)" 
+               />            </div>
             <textarea id="jsonEditor"></textarea>
             <button id="saveButton">Save</button>
          
@@ -123,8 +130,11 @@ function loadJSON() {
    fetchButton.disabled = true;
  
    var promise =
-   fetchJSON(url).
-   then(
+   authenticate().then(
+      function(authenticaton) {
+         return fetchJSON(url);
+      }
+   ).then(
       function(json) {
          setLink();
 
