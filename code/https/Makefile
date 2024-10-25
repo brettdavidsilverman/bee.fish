@@ -2,11 +2,8 @@ CC = g++
 CFLAGS = -std=c++17 -Wall -fmax-errors=1
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
-DEPS=server.h session.h response.h response-headers.h app.h storage-app.h json-app.h file-system-app.h error-app.h test.h authentication.h version.h Makefile ParseURL.hpp main.cpp ../Config.hpp storage.h https.h authentication-app.h $(BUILD)/parser $(BUILD)/json $(BUILD)/web-request $(BUILD)/Database $(BUILD)/power-encoding $(BUILD)/script Makefile
+DEPS=server.h session.h response.h response-headers.h app.h storage-app.h json-app.h file-system-app.h error-app.h test.h authentication.h version.h Makefile ParseURL.hpp main.cpp ../Config.hpp storage.h https.h authentication-app.h Makefile
 
-ifeq ("$(PORT)","")
-   PORT=443
-endif
 
 $(OUTPUT): $(DEPS)
 	@echo "Linking server"
@@ -16,8 +13,7 @@ $(OUTPUT): $(DEPS)
 install:	$(OUTPUT)
 	./start.sh $(PORT)
 	
-test:	$(OUTPUT)
-	./stop.sh $(PORT)
+test:	$(OUTPUT) install
 	$(OUTPUT) -test -port $(PORT)
 
 start:	$(OUTPUT)
@@ -26,30 +22,17 @@ start:	$(OUTPUT)
 stop:
 	./stop.sh $(PORT)
 	
-$(BUILD)/parser:
-	cd ../parser && make $(DEBUG)
 	
-$(BUILD)/json:
-	cd ../json && make $(DEBUG)
-	
-$(BUILD)/power-encoding:
-	cd ../power-encoding && make $(DEBUG)
-
-$(BUILD)/Database:
-	cd ../database && make $(DEBUG)
-	
-$(BUILD)/web-request:
-	cd ../web-request && make $(DEBUG)
-
-$(BUILD)/script:
-	cd ../Script && make $(DEBUG)
-	
-debug:	$(OUTPUT)
-debug:	DEBUG = debug
+debug:	DEBUG=debug
 debug:	CFLAGS += -g -DDEBUG
-#debug:	PORT = 8000
+debug:	$(OUTPUT)
+debug:	PORT=8000
+debug:	install
 
-run_debug:	debug
+
+run_debug:	DEBUG=debug
+run_debug:	CFLAGS += -g -DDEBUG
+run_debug:	$(OUTPUT)
 	gdb --args $(OUTPUT) -port 8000 -test
 
 clean:

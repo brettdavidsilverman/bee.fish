@@ -1,6 +1,6 @@
 HTTPS=build/https
 
-all:	https  Makefile
+all:	https  Makefile start
 
 https:	$(HTTPS)
 
