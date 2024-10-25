@@ -215,7 +215,7 @@ function displayFunctions(json) {
    
 function formatJSON(jsonText){
     
-   var f = new Function("return (" + jsonText + ");");
+   var f = new Function("return " + jsonText);
    
    var json = f();
    
