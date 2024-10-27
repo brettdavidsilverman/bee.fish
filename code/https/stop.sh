@@ -7,10 +7,8 @@ else
 fi
 
 echo "Stopping " $PORT " ..."
-if [[ -n "$(lsof -t -i:$PORT)" ]]; then
-    kill "$(lsof -t -i:$PORT)"
-else
-   echo "Not running"
-fi
+for pid in $(lsof -t -i:$PORT); do
+    kill $pid;
+done
 
 echo "Stopped"
