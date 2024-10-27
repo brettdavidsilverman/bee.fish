@@ -1,6 +1,14 @@
 function evaluate(json, parent=json)
 {
 
+   if (Array.isArray(json)) {
+      var array = json;
+      for (var i = 0; i < array.length; i++) {
+         array[i] = evaluate(array[i], json);
+      }
+      return array;
+   }
+   
    switch(typeof(json)) {
    case "string":
 
@@ -139,6 +147,14 @@ function postJSON(url, json) {
 function hideFunctions(json)
 {
 
+   if (Array.isArray(json)) {
+      var array = json;
+      for (var i = 0; i < array.length; i++) {
+         array[i] = hideFunctions(array[i]);
+      }
+      return array;
+   }
+   
    if (typeof json == "function")
       return "{" + json + "}";
 
@@ -160,13 +176,33 @@ function hideFunctions(json)
 
 function displayFunctions(json) {
  
+   const tab = "   ";
    var strings = [];
-   ObjectToString(json, strings);
+   objectToString(json, strings);
    var string = strings.join("");
+   
    return string;
    
-   function ObjectToString(json, strings)
+   function objectToString(json, strings, tabs = 0)
    {
+      
+      
+      if (Array.isArray(json)) {
+         strings.push(tab.repeat(tabs));
+         strings.push("[\r\n");
+         var array = json;
+         for (var i = 0; i < array.length; i++) {
+            strings.push(tab.repeat(tabs + 1));
+            objectToString(array[i], strings, tabs + 1);
+            if (i < array.length - 1)
+               strings.push(",");
+            strings.push("\r\n"); 
+         }
+         strings.push(tab.repeat(tabs));
+         strings.push("]\r\n");
+         return
+      }
+   
       if (typeof json == "string") {
          var string = json;
          if (string.startsWith("{function") &&
@@ -188,8 +224,8 @@ function displayFunctions(json) {
          strings.push(JSON.stringify(json));
       else {
          var object = json;
-         
-         strings.push("{");
+         //strings.push(tab.repeat(tabs));
+         strings.push("{\r\n");
          
          var count =
             Object.keys(object).length;
@@ -198,19 +234,24 @@ function displayFunctions(json) {
          
          for (var property in object)
          {
+            strings.push(tab.repeat(tabs + 1));
             strings.push(
                JSON.stringify(property)
             );
-            strings.push(":");
-            ObjectToString(
+            strings.push(": ");
+            objectToString(
                object[property],
-               strings
+               strings,
+               tabs + 1
             );
-            if (++i < count)
-               strings.push(",\r\n");
+            if (++i < count) 
+               strings.push(",");
+               
+            strings.push("\r\n");
          }
          
-         strings.push("\r\n}")
+         strings.push(tab.repeat(tabs));
+         strings.push("}")
          
       }
    }
