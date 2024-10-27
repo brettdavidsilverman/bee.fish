@@ -120,14 +120,14 @@ function loadJSON() {
    {
       return Promise.resolve(undefined);
    }
-      
+      /*
    var search = "?" + encodeURI(url);
    
    if (document.location.search != search) {
       document.location.search = search;
       return Promise.resolve(undefined);
    }
-
+*/
    fetchButton.disabled = true;
  
    var promise =
@@ -241,14 +241,19 @@ goLink.onclick =
 
 saveButton.onclick =
    function() {
+    
+      var json;
+   
+      try {
+         json = formatJSON(jsonEditor.value);
+      }
+      catch (error) {
+         Error(error, "saveButton.onclick");
+         return;
+      }
       postJSON(
          urlInput.value,
-         formatJSON(jsonEditor.value)
-      ).
-      then(
-         function(response) {
-            return response.json();
-         }
+         json
       ).
       then(
          function (json) {
@@ -258,7 +263,7 @@ saveButton.onclick =
       catch(
          function (error)
          {
-            Error(error, saveButton.onclick);
+            Error(error, "saveButton.onclick");
          }
       );
    }
@@ -266,7 +271,7 @@ saveButton.onclick =
 fetchButton.onclick =
    function() {
 
-      var search = "?" + encodeURI(urlInput.value);
+      var search = "?" + encodeURIComponent(urlInput.value);
       if (document.location.search != 
            search)
       {
@@ -280,7 +285,7 @@ fetchButton.onclick =
 if (document.location.search) {
     
    // fill out form from search
-   var url = decodeURI(
+   var url = decodeURIComponent(
       document.location.search.substr(1)
    );
 

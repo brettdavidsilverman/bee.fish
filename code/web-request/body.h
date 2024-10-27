@@ -19,7 +19,7 @@ namespace BeeFishWeb {
     {
     protected:
         BeeFishWeb::ContentLength* _contentLength = nullptr;
-        BeeFishJSON::Object* _json = nullptr;
+        BeeFishJSON::JSON* _json = nullptr;
         bool _parseJSON;
     public:
         Body(bool parseJSON = true) : Match() {
@@ -31,7 +31,7 @@ namespace BeeFishWeb {
                return;
               
             if (_parseJSON) {
-                _json = new BeeFishJSON::Object();
+                _json = new BeeFishJSON::JSON();
                 _match = _json;
             }
             else if (headers->contains("content-length") ) {
@@ -55,7 +55,7 @@ namespace BeeFishWeb {
             return _json && _json->matched();            
         }
         
-        BeeFishJSON::Object* json()
+        BeeFishJSON::JSON* json()
         {
            return _json;
         }

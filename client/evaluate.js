@@ -125,7 +125,8 @@ function postJSON(url, json) {
              
             if (status != "200")
                throw json;
-            alert(json);
+               
+            return json;
          }
       );
 
@@ -215,7 +216,9 @@ function displayFunctions(json) {
    
 function formatJSON(jsonText){
     
-   var f = new Function("return " + jsonText);
+   var f;
+   
+   f = new Function("return " + jsonText);
    
    var json = f();
    
