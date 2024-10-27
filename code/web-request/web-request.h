@@ -95,6 +95,8 @@ namespace BeeFishWeb {
                //new BeeFishParser::Character('&'),
                new BeeFishParser::Character('-'),
                new BeeFishParser::Character('_'),
+               new BeeFishParser::Character('['),
+               new BeeFishParser::Character(']'),
                new BeeFishParser::Character('/'),
                new HexCharacter()
             )
@@ -332,9 +334,13 @@ namespace BeeFishWeb {
       BeeFishWeb::Headers* _headers   = nullptr;
       Body*                _body = nullptr;
       BStream::OnBuffer    _ondata = nullptr;
+      bool                 _parseJSON = true;
    public:
 
-      WebRequest() : Match()
+      WebRequest(bool parseJSON = true) :
+         Match(),
+         _parseJSON(parseJSON)
+         
       {
       }
 
@@ -364,7 +370,7 @@ namespace BeeFishWeb {
                         }
                      }
                   
-                     _body = new Body();
+                     _body = new Body(_parseJSON);
                      _body->setup(parser, _headers);
                      _body->setOnBuffer(_ondata);
                      And* _and = (And*)_match;

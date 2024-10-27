@@ -18,7 +18,7 @@ namespace BeeFishWeb {
         public BeeFishBString::BStream
     {
     protected:
-        BeeFishWeb::ContentLength* _contentLength = nullptr;
+        BeeFishWeb::ContentLength* _contentLengthBody = nullptr;
         BeeFishJSON::JSON* _json = nullptr;
         bool _parseJSON;
     public:
@@ -30,18 +30,19 @@ namespace BeeFishWeb {
             if (_parser)
                return;
               
-            if (_parseJSON) {
-                _json = new BeeFishJSON::JSON();
-                _match = _json;
-            }
-            else if (headers->contains("content-length") ) {
+             if (!_parseJSON &&
+                 headers->contains("content-length") ) {
                 std::string contentLengthString = (*headers)["content-length"].str();
                 size_t contentLength = atol(contentLengthString.c_str());
                 if (contentLength > 0) {
-                    _contentLength = new ContentLength(contentLength);
+                    _contentLengthBody = new ContentLength(contentLength);
                     parser->setDataBytes(contentLength);
-                    _match = _contentLength;
+                    _match = _contentLengthBody;
                 }
+            }
+            else {
+                _json = new BeeFishJSON::JSON();
+                _match = _json;
             }
 
             Match::setup(parser);

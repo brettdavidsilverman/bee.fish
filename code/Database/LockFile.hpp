@@ -43,7 +43,6 @@ namespace BeeFishDatabase
          data.l_start = position;
          data.l_len = length;
 
-//         cerr << "Lock  " << position << endl;
          fcntl(_fileNumber, F_SETLKW, &data);
          
       }
@@ -57,7 +56,6 @@ namespace BeeFishDatabase
          data.l_start = position;
          data.l_len = length;
          
-//         cerr << "~Lock " << position << endl;
          fcntl(_fileNumber, F_SETLK, &data);
 
       }

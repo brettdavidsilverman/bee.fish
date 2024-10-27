@@ -605,7 +605,7 @@ assert(ok);
 
       Size size = 0;
       parser.streamValue("image",
-         [&size](const Data& buffer) {
+         [&size](const std::string& buffer) {
             size += buffer.size();
          }
       );

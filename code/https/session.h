@@ -105,7 +105,7 @@ namespace BeeFishHTTPS {
             return;
          }
          
-         _request = new BeeFishWeb::WebRequest();
+         _request = new BeeFishWeb::WebRequest(false);
          _parser = new Parser(*_request);
          asyncRead();
       }
@@ -179,7 +179,8 @@ namespace BeeFishHTTPS {
             if (_parser->result() == nullopt)
                _parser->eof();
          }
-            
+         
+         
          if (_parser->result() == false)
          {
             logException("handleRead", BString("Parser match error: ") + _parser->getError());
@@ -265,7 +266,7 @@ namespace BeeFishHTTPS {
                << ' '
                << ipAddress()          << ' '
                << _request->method()   << ' '
-               << hostName() << _request->fullURL()  << ' '
+               << origin() << _request->fullURL()  << ' '
                << std::endl;
 
             _response = new Response(
@@ -382,7 +383,7 @@ namespace BeeFishHTTPS {
             }
          };
          
-         cerr << error << endl;
+         cout << error << endl;
       }
 
       BString getPointerString() {
@@ -427,9 +428,9 @@ namespace BeeFishHTTPS {
          return _ipAddress;
       }
       
-      const BString& hostName() const
+      const BString& origin() const
       {
-         return server()->hostName();
+         return server()->origin();
       }
    
       void handshake()
@@ -557,20 +558,10 @@ namespace BeeFishHTTPS {
       Parser& parser
    )
    {
-       /*
-      {
-         ifstream input(_session->tempFileName());
-         int c;
-         while ((c = input.get()) != -1)
-         {
-            cerr << (char)c;
-         }
-         cerr << endl;
-      }
-      */
       ifstream input(_session->tempFileName());
       
       parser.read(input);
+      
       parser.eof();
       
       input.close();
@@ -601,7 +592,7 @@ namespace BeeFishHTTPS {
    ) :
       ResponseHeadersBase(
          {
-            { "access-control-allow-origin", session->hostName() }
+            { "access-control-allow-origin", session->origin() }
          }
       )
    {
@@ -612,6 +603,12 @@ namespace BeeFishHTTPS {
    void Response::closeOrRestart()
    {
       _session->closeOrRestart();
+   }
+   
+   // Declared in app.h
+   const BString& App::origin() const
+   {
+      return _session->origin();
    }
    
 

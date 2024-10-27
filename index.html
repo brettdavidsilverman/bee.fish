@@ -105,9 +105,7 @@ function switchFunctions(showFunctions)
    }
    else {
       json = hideFunctions(json);
-      //if (typeof json == "string")
-      //   json = JSON.stringify(json);
-   
+      json = JSON.stringify(json, null, "   ");
    }
    jsonEditor.value = json;
 }
@@ -133,24 +131,22 @@ function loadJSON() {
    var promise =
    authenticate().then(
       function(authenticaton) {
-         return fetchJSON(url);
+         return fetchJSON(encodeURI(url));
       }
    ).then(
       function(json) {
          setLink();
-
          if (json == undefined) {
             jsonEditor.value = "undefined";
+            return undefined;
          }
-         else if (json.error) {
-            return;
+         
+         if (json.error) {
+            Error(json.error, loadJSON);
          }
-         else if (typeof(json) == "string") {
-            jsonEditor.value =
-               JSON.stringify(json);
-         }
-         else
-            jsonEditor.value = json;
+         
+         jsonEditor.value =
+            JSON.stringify(json, null, "   ");
             
          fetchButton.disabled = false;
          saveButton.disabled = false;
@@ -163,8 +159,7 @@ function loadJSON() {
    .catch(
       function (error) {
          fetchButton.disabled = false;
-         jsonEditor.value =
-            error;
+         Error(error, loadJSON);
       }
    );
    

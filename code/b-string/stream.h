@@ -23,7 +23,7 @@ namespace BeeFishBString {
       public std::ostream
    {
    public:
-      typedef std::function<void(const Data& buffer)> OnBuffer;
+      typedef std::function<void(const std::string& buffer)> OnBuffer;
       OnBuffer _onbuffer = nullptr;
       size_t _bufferSize;
    protected:
@@ -85,9 +85,9 @@ namespace BeeFishBString {
          _onbuffer = onbuffer;
       }
 
-      virtual void write(const Data& data) 
+      virtual void write(const std::string& data) 
       {
-         write((const char*)data._data, data.size());
+         write(data.data(), data.size());
       }
 
       virtual void write(const char* data, size_t size)
@@ -144,7 +144,7 @@ namespace BeeFishBString {
 
          if (_onbuffer) {
 
-            Data data(_bytes.data(), size());
+            std::string data((char*)_bytes.data(), size());
 
             _onbuffer(data);
 

@@ -14,13 +14,9 @@ using namespace BeeFishParser;
 using namespace BeeFishJSON;
 using namespace BeeFishMisc;
 
-int main(int argc, const char* argv[]) {
-   JSON integer;
-   bool ok = testMatch("integer", &integer, "10", true, "10");
-   ok &= testResult("integer type", integer.type() == Type::INTEGER);
-   cerr << "INT TYPE: " << integer.type() << endl;
-   assert(ok);
-      
+int main(int argc, const char* argv[])
+{
+    
    cout << "bee.fish.json"
            << endl
         << "C++ run time: "

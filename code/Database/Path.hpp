@@ -234,73 +234,63 @@ namespace BeeFishDatabase {
      
       bool hasData() const
       {
-         Data data = getData();
+         std::string data = getData();
          
          return (data.size() > 0);
       }
       
-      Data getData() {
+      std::string getData() {
           
          Branch branch = getBranch();
          
          if (branch._dataIndex)
          {
-            Data source =
+            return
                _database->getData(
                   branch._dataIndex
                );
-
-            return source;
          }
 
-         return Data();
+         return "";
 
 
       }
       
-      const Data getData() const {
+      const std::string getData() const {
 
          Branch branch = getBranch();
          
          if (branch._dataIndex)
          {
-            Data source =
+            return
                _database->getData(
                   branch._dataIndex
                );
-
-            return source;
-
          }
 
-         return Data();
-
-
+         return "";
+         
       }
       
       
       template<typename T>
-      void getData(T& destination)
+      void _getData(T& destination)
       {
-         BeeFishDatabase::Data data = getData();
+         std::string data = getData();
          destination = *(T*)data.data();
       }
-/*
+
       void getData(std::string& destination)
       {
-         const Data data = getData();
-         if (data.size())
-            destination = std::string(
-               data.data(),
-               data.size()
-            );
-         else
-            destination = "";
+         destination = getData();
       }
-*/
+
       void getData(BString& destination)
       {
-         const Data data = getData();
+         destination = getData();
+         return;
+         
+         const std::string data = getData();
          
          if (data.size())
             destination = BString(
@@ -311,24 +301,20 @@ namespace BeeFishDatabase {
             destination = "";
       }
 
-      void setData(const BString& value)
-      {
-         Data data(value);
-         setData(data);
-      }
+      
 /*
       void setData(const std::string& value) {
          Data source(value);
          setData(source);
       }
 */
-      void setData(const Data& value) {
+      void setData(const std::string& value) {
 
          Database::ScopedFileLock lock(_database);
          
          Branch branch = getBranch(_index);
 
-         Data current =
+         std::string current =
             _database->getData(branch._dataIndex);
 
          if (value.size() == 0) {
@@ -358,21 +344,27 @@ namespace BeeFishDatabase {
          
       }
       
-      template<typename T>
-      void setData(const T& source)
-      {
-         const char* bytes = (const char*)&source;
-         Data data(bytes, sizeof(T));
-         setData(data);
-         
-      }
-
       void setData(
          const char* source
       )
       {
-         setData(BString(source));
+         setData(std::string(source));
       }
+      
+      void setData(const BString& value)
+      {
+         setData(value.str());
+      }
+  
+      template<typename T>
+      void _setData(const T& source)
+      {
+         const char* bytes = (const char*)&source;
+         std::string data(bytes, sizeof(T));
+         setData(data);
+         
+      }
+      
       
       Branch getBranch()
       {
@@ -509,7 +501,7 @@ namespace BeeFishDatabase {
 
 
          if (_database) {
-            Data data = getData();
+            std::string data = getData();
             variable["hasData"] = (data.size() > 0);
             if (data.size())
             {

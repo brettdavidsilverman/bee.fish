@@ -92,24 +92,31 @@ int main(int argc, const char* argv[])
           test = true;
       }
       
+      bool ok = true;
       if (test) {
-         if (!BeeFishHTTPS::test())
-            io_context.stop();
+         ok = BeeFishHTTPS::test(port);
+         io_context.stop();
+            
       }
       
       startThread.join();
       
+      if (ok)
+         return 0;
+      
+      return 1;
+      
    }
    catch (std::exception& e)
    {
-      std::cerr << "Exception: " << e.what() << std::endl;
+      std::cout << "Exception: " << e.what() << std::endl;
       return -1;
    }
    catch(...) {
-      std::cerr << "Unkown exception" << std::endl;
+      std::cout << "Unkown exception" << std::endl;
    }
 
-   cerr << "main shoudln't quit" << endl;
+   std::cout << "main shoudln't quit" << endl;
    
    return 0;
 }
@@ -134,7 +141,7 @@ void start(
          port
       );
 
-   std::cout << "Started " << server.hostName() << " 😊" << endl;
+   std::cout << "Started " << server.origin() << " 😊" << endl;
       
    _wait.unlock();
    
@@ -144,8 +151,8 @@ void start(
 #else
 int main(int argc, const char* argv[])
 {
-   std::cerr << "Https only runs on server" << std::endl;
-   return 0;
+   std::cout << "Https only runs on server" << std::endl;
+   return 1;
 }
 #endif
 

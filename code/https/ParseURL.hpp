@@ -15,10 +15,10 @@ namespace BeeFishHTTPS {
    class IdentifierPath : public Match
    {
    protected:
-      Path* _path;
+      JSONPath* _path;
 
    public:
-      IdentifierPath(Path* path) :
+      IdentifierPath(JSONPath* path) :
          _path(path)
       {
       }
@@ -45,10 +45,9 @@ namespace BeeFishHTTPS {
 
       {
          BString& key = value();
-         JSONPath path = *_path;
-         if (path.contains(key))
+         if (_path->contains(key))
          {
-            (*_path) = path[key];
+            (*_path) = (*_path)[key];
            
             return true;
             
@@ -58,29 +57,27 @@ namespace BeeFishHTTPS {
          stream
             << "Invalid property"
             << " "
-            << "\"" << escape(key) << "\""
+            << "'" << key << "'"
             << ". Expected one of";
             
          Path properties =
-            path.properties()
+            _path->properties()
             [BY_OBJECT];
          
          MinMaxPath object =
-            properties[path.id()];
+            properties[_path->id()];
             
-         assert(!object.isDeadEnd());
-         
          Stack stack(object);
          Index position;
          while (object.next(stack, position))
          {
             optional<BString> key =
-               path.getObjectKey(position);
+               _path->getObjectKey(position);
                
             if (key.has_value()) {
-               stream << "\r\n   \""
-                      << escape(key.value()) 
-                      << "\"";
+               stream << "\r\n   '"
+                      << key.value()
+                      << "'";
             }  
          }
          
@@ -100,7 +97,7 @@ namespace BeeFishHTTPS {
    {
    
    public:
-      ArrayIndexPath(Path* path) :
+      ArrayIndexPath(JSONPath* path) :
          IdentifierPath(path)
       {
          
@@ -148,7 +145,7 @@ namespace BeeFishHTTPS {
    {
    
    public:
-      QuotedIdentifier(Path* path) :
+      QuotedIdentifier(JSONPath* path) :
          IdentifierPath(path)
       {
          
@@ -200,7 +197,7 @@ namespace BeeFishHTTPS {
    class Identifier : public IdentifierPath
    {
    public:
-      Identifier(Path* path) :
+      Identifier(JSONPath* path) :
          IdentifierPath(path)
       {
          
@@ -223,7 +220,7 @@ namespace BeeFishHTTPS {
       public Match
    {
    protected:
-      Path* _start;
+      JSONPath* _start;
       ArrayIndexPath* _arrayIndex;
       QuotedIdentifier* _quotedIdentifier;
       Identifier* _identifier;
@@ -233,7 +230,7 @@ namespace BeeFishHTTPS {
          assert(false);
       }
       
-      PropertyPath(Path* start) :
+      PropertyPath(JSONPath* start) :
          _start(start)
       {
          _match = new Or(
@@ -263,12 +260,12 @@ namespace BeeFishHTTPS {
    class PropertyPaths : public Repeat<PropertyPath>
    {
    protected:
-      Path* _start;
+      JSONPath* _start;
       PropertyPath* _last;
      
       
    public:
-      PropertyPaths(Path* start) :
+      PropertyPaths(JSONPath* start) :
          Repeat<PropertyPath>(0),
          _start(start)
       {
@@ -296,10 +293,10 @@ namespace BeeFishHTTPS {
    protected:
       Word* _wordThis;
       PropertyPaths* _propertyPaths;
-      Path* _start;
+      JSONPath* _start;
       
    public:
-      Query(Path* start) :
+      Query(JSONPath* start) :
          _start(start)
       {
          _match =
@@ -335,11 +332,11 @@ namespace BeeFishHTTPS {
       
    };
 
-   optional<Path> parseURL(Database& database, BString& error, const BString& clientIP, const BString& method, const BString& uri, const BString& args) {
+   optional<JSONPath> parseURL(JSONDatabase& database, BString& error, const BString& clientIP, const BString& method, const BString& uri, const BString& args) {
       Debug debug;
       
-      Path root(database);
-      Path path = root[HOST][URLS];
+      Path path = database.origin()[URLS];
+      
       
       BString segment;
       std::stringstream segments(uri);
@@ -351,9 +348,11 @@ namespace BeeFishHTTPS {
          }
       }
       
+      JSONPath jsonPath = path;
+      
       if (method == "GET")
       {
-         if (path.isDeadEnd())
+         if (jsonPath.isDeadEnd())
          {
             error = "Path not found";
             return nullopt;
@@ -364,7 +363,7 @@ namespace BeeFishHTTPS {
       
       if (args.length())
       {
-         Query query(&path);
+         Query query(&jsonPath);
          Parser parser(query);
          parser.read(args.decodeURI());
          parser.eof();
@@ -378,7 +377,7 @@ namespace BeeFishHTTPS {
          }
       }
       
-      return path;
+      return jsonPath;
       
    }
    

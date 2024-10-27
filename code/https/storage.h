@@ -71,9 +71,8 @@ namespace BeeFishDatabase {
          
          if (path.hasData())
          {
-            Data data;
-            path.getData(data);
-            BString value = BString::fromData(data);
+            BString value;
+            path.getData(value);
             contentType = getContentType(path);
 
             return value;
@@ -87,7 +86,7 @@ namespace BeeFishDatabase {
       void getItem(
          const Key& key,
          BeeFishMisc::optional<BString>& contentType,
-         Data& data
+         std::string& data
       )
       {
          
@@ -108,7 +107,7 @@ namespace BeeFishDatabase {
       void setItem(
          const Key& key,
          BeeFishMisc::optional<BString> contentType,
-         const BeeFishBString::Data& data
+         const std::string& data
       )
       {
       
@@ -140,10 +139,10 @@ namespace BeeFishDatabase {
          if (path.contains("content-type")) {
             path = path["content-type"];
             if (path.hasData()) {
-               Data data;
-               path.getData(data);
+               std::string data =
+                  path.getData();
                BString contentType;
-               path.getData<BString>(contentType);
+               path.getData(contentType);
                return contentType;
             }
          }

@@ -22,7 +22,7 @@
 using namespace BeeFishPowerEncoding;
 
 
-namespace BeeFishDatabase {
+namespace BeeFishDatabaseX {
 
    typedef uint8_t Byte;
 

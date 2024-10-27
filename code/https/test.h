@@ -18,41 +18,45 @@ namespace BeeFishHTTPS {
    
    using namespace std::filesystem;
 
-   inline bool testParseURL();
-   inline bool testURLQuery(Database& database, const BString& uri, const BString& queryStr, bool expectedResult, const BString& expectedValue = "");
+   inline bool testParseURL(const BString& origin);
+   inline bool testURLQuery(JSONDatabase& database, const BString& uri, const BString& queryStr, bool expectedResult, const BString& expectedValue = "");
+   inline bool testLogon(const BString& origin);
+   inline bool testAllFiles(const BString& origin, string directory);
+   inline bool testFile(const BString& origin, string directory, string file, bool expect = true);
    
-   inline bool testAllFiles(string url, string directory);
-   inline bool testFile(string url, string directory, string file, bool expect = true);
-   
-   inline bool test() {
+   inline bool test(int port) {
       cout << "Testing HTTPS" << endl;
       bool success = true;
       
       Id id;
       
-      string url = HOST;
+      BString origin = HOST;
+      origin += ":";
+      origin += std::to_string(port);
       
-         //BString(HOST) + BString("/") + id.key();
-     
       success = success &&
-         testParseURL();
+         testParseURL(origin);
          
       success = success &&
-         testAllFiles(url, TEST_DIRECTORY);
+         testLogon(origin);
+         
+      success = success &&
+         testAllFiles(origin, TEST_DIRECTORY);
       
       outputSuccess(success);
       
       return success;
    }
 
-   bool testParseURL()
+   bool testParseURL(const BString& origin)
    {
-      cout << "\t" << "Testing URIParser " << flush;
+      cout << "\t" << "Testing URLParser " << flush;
       
       bool success = true;
       
-      Database db;
-      Path start = Path(db)[HOST][URLS]["name"];
+      JSONDatabase db(origin);
+      
+      Path start = db.origin()[URLS]["name"];
       start.clear();
       JSONPathParser json(start);
       std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\", \"middle\": [\"David\", \"PK\"]}}");
@@ -69,7 +73,7 @@ namespace BeeFishHTTPS {
          success &= testURLQuery(db, "name", "this[\"name\"][\"first\"]", true, "\"Bee\"");
          success &= testURLQuery(db, "name", "this[\"name\"].first", true, "\"Bee\"");
          success &= testURLQuery(db, "name", "this.name[\"first\"]", true, "\"Bee\"");
-         success &= testURLQuery(db, "name", "this.nameb", false, "Invalid property \"nameb\". Expected one of\r\n   \"name\"");
+         success &= testURLQuery(db, "name", "this.nameb", false, "Invalid property 'nameb'. Expected one of\r\n   'name'");
          success &= testURLQuery(db, "name", "this.name.middle[0]", true, "\"David\"");
          success &= testURLQuery(db, "name", "this.name.middle[2]", false, "Invalid index 2. Expected index range is [0, 1]");
          outputSuccess(success);
@@ -80,7 +84,7 @@ namespace BeeFishHTTPS {
    }
    
 
-   bool testURLQuery(Database& database, const BString& uri, const BString& queryStr, bool expectedResult, const BString& expectedValue)
+   bool testURLQuery(JSONDatabase& database, const BString& url, const BString& queryStr, bool expectedResult, const BString& expectedValue)
    {
       cout << "\t" << "Testing query " << queryStr << flush;
      
@@ -91,7 +95,7 @@ namespace BeeFishHTTPS {
          error,
          "127.0.0.1",
          "GET",
-         uri,
+         url,
          queryStr
       );
       
@@ -136,7 +140,7 @@ namespace BeeFishHTTPS {
 
    }
    
-   inline bool testAllFiles(string url, string directory)
+   inline bool testAllFiles(const BString& origin, string directory)
    {
       cout << "Testing all files in " << directory << endl;
 
@@ -154,7 +158,7 @@ namespace BeeFishHTTPS {
       // Test via apache web server
       for (auto file : files) {
          if (success)
-            success = testFile(url, directory, file, true);
+            success = testFile(origin, directory, file, true);
          else
             break;
       }
@@ -164,10 +168,42 @@ namespace BeeFishHTTPS {
       return success;
    }
    
-   inline bool testFile(string url, string directory, string file, bool expect)
+   inline bool testLogon(const BString& origin)
+   {
+      cout << "Testing logon" << endl;
+
+      
+      stringstream stream;
+      bool success = true;
+
+      BeeFishScript::Object auth {
+         {"method", "logon"},
+         {"secret", "boo"}
+      };
+      
+      BString str = escape(auth.str(false));
+      
+      stream
+         << "curl "
+         << origin  << "/authenticate"
+         << " -c cookies -b cookies "
+         << " -d \"" << str << "\"";
+         //<< " -s -k ";
+
+
+      string command = stream.str();
+
+      success = (system(command.c_str()) == 0);
+      
+      outputSuccess(success);
+      
+      return success;
+   }
+   
+   inline bool testFile(const BString& origin, string directory, string file, bool expect)
    {
       cout << "\tTesting "
-           << url << "/" << file
+           << file
            << endl;
 
       string tempFile =
@@ -181,12 +217,13 @@ namespace BeeFishHTTPS {
 
       stream << 
          "curl -X POST " <<
-         url  << "/" <<
+         origin << "/" <<
          file << " "
+         << "-c cookies -b cookies " <<
          "-H \"Content-Type: application/json; charset=utf-8\" " <<
          "-H Expect: " <<
          "-T " << directory << "/" << file
-         << " -s -k | grep Success > /dev/null ";
+         << " -s -k";
 
 
       string command = stream.str();
@@ -198,7 +235,8 @@ namespace BeeFishHTTPS {
          stringstream stream1;
          stream1
             << "curl "
-            << url  << "/" << file << " "
+            << origin  << "/" << file << " "
+            << "-c cookies -b cookies "
             << " -s -k > "
             << tempFile;
             

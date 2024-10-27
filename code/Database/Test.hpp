@@ -26,15 +26,12 @@ namespace BeeFishDatabase
 
       cout << "Testing next index" << endl;
 
-      Database db;
+      JSONDatabase db("test");
  
       Index index1 = db.getNextIndex();
       Index index2 = db.getNextIndex();
  
-      cerr << "index1 " << index1 << ", index2 " << index2 << endl;
-
       bool success =
-        (index1 == sizeof(Branch)) &&
         (index2 == index1 + sizeof(Branch));
         
       outputSuccess(success);
@@ -58,7 +55,7 @@ namespace BeeFishDatabase
       if (!success)
          return false;
          
-      Database db;
+      JSONDatabase db("test");
       Path start(db);
       
 
@@ -87,15 +84,15 @@ namespace BeeFishDatabase
       {
 
             cout << "\tGet/Set Data size() " << flush;
-            next.setData("world");
-            Data testHelloData = next.getData();
-            cerr << "TEST:size: " << testHelloData.size();
+            BString test = "world";
+            next.setData(test);
+            std::string testHelloData = next.getData();
             success = testHelloData.size() == strlen("world");
             outputSuccess(success);
 
             cout << "\tGet/Set Data str(): " << flush;
-            std::string testHelloStr = testHelloData.str();
-            cerr << testHelloStr << " " << flush;
+            std::string testHelloStr = testHelloData;
+
             success = (testHelloStr == "world");
             outputSuccess(success);
       }      
@@ -106,14 +103,12 @@ namespace BeeFishDatabase
             cout << "\tGet/Set Data size() " << flush;
 
             Data testHello = next.getData();
-            cerr << "TEST:size: " << testHello.size();
 
             success = testHello.size() == strlen("world");
             outputSuccess(success);
 
             cout << "\tGet/Set Data str(): " << flush;
             std::string testHelloStr = testHello.str();
-            cerr << testHelloStr << " " << flush;
             success = (testHelloStr == "world");
             outputSuccess(success);
       }      
@@ -136,7 +131,7 @@ namespace BeeFishDatabase
 
       for (Size i = min; i <= max; ++i)
       {
-         data[i].setData(i);
+         data[i]._setData<Size>(i);
       }
       
       
@@ -225,8 +220,8 @@ namespace BeeFishDatabase
 
          Path data = start["getset"];
          Size count = -1;
-         data.setData((Size)22);
-         data.getData(count);
+         data._setData<Size>(22);
+         data._getData<Size>(count);
          success =
             (count == 22);
 
@@ -545,7 +540,7 @@ namespace BeeFishDatabase
       cout << endl << "Testing path" << endl;
 
       bool success = true;
-      Database database;
+      JSONDatabase database("test");
       Path root = database;
       cout << "\tTest data: " << std::flush;
       {
@@ -694,9 +689,6 @@ namespace BeeFishDatabase
          MinMaxPath path = root["integer"];
          
          Stack stack(path);
-         int i;
-         while (path.next(stack, i))
-            cerr << (Type)i << endl;
          success = path.contains(Type::INTEGER);
          BeeFishMisc::outputSuccess(success);
       }
@@ -721,7 +713,7 @@ namespace BeeFishDatabase
 
       cout << "Test Array 2 Path \"[[]]\" " << endl;
  
-      Database database;
+      JSONDatabase database("test");
       Path path = Path(database)["array"];
       JSONPathParser parser(path);
       parser.read("[[]]");
@@ -743,10 +735,6 @@ namespace BeeFishDatabase
       if (success) {
          MinMaxPath maxPath = path;
          Stack stack(maxPath);
-         int i;
-         while (maxPath.next(stack, i))
-            cerr << "MAX: " << (Type)i << endl;
-            
          Size max = maxPath.max<Size>();
          success &= testResult("\tmax == 0", max == 0);
          assert(success);
@@ -781,7 +769,7 @@ namespace BeeFishDatabase
 
       cout << "Test Sub Array 2 Path: ";
       
-      Database database;
+      JSONDatabase database("test");
       Path path = database;
       JSONPathParser parser(path);
       parser.read("[[1]]");
@@ -880,7 +868,7 @@ namespace BeeFishDatabase
       sort(files.begin(), files.end());
 
       // Test direct to database
-      Database tempDB;
+      JSONDatabase tempDB("temp");
          
       for (auto file : files) {
          if (success)

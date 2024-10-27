@@ -11,7 +11,7 @@ test:
 	cd code && make $(DEBUG) test PORT=$(PORT)
 
 clean:
-	cd code && sudo make clean
+	cd code && make clean
 
 stop:
 	cd code/https && ./stop.sh $(PORT)

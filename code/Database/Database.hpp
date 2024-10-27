@@ -20,6 +20,7 @@
 #include "Data.hpp"
 #include "Path.hpp"
 #include "MinMaxPath.hpp"
+#include "JSONDatabase.hpp"
 #include "JSONIndex.hpp"
 #include "JSONPath.hpp"
 #include "JSONPathParser.hpp"

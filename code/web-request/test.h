@@ -68,7 +68,6 @@ namespace BeeFishWeb
       hexCharacterParser.read("%38");
       hexCharacterParser.eof();
       
-      cerr << "hexCharacterParser.result() = " << hexCharacterParser.result() << endl;
       ok = ok && testResult("URL hex Parser", 
          hexCharacterParser.result() == true);
        

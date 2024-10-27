@@ -72,10 +72,10 @@ namespace BeeFishHTTPS {
          ),
          _context(boost::asio::ssl::context::sslv23)
       {
-         _hostName = hostName;
+         _origin = hostName;
          if (_port != 443) {
-            _hostName += ":";
-            _hostName += std::to_string(_port);
+            _origin += ":";
+            _origin += std::to_string(_port);
          }
          
          std::cout << "Opening transaction file " << std::endl;
@@ -107,7 +107,7 @@ namespace BeeFishHTTPS {
 
          std::cout << "Setting up database..." << std::endl;
 
-         _database = new Database(databaseFile);
+         _database = new JSONDatabase(_origin, databaseFile);
    
          std::cout << "Start accepting..." << std::endl;
 
@@ -130,10 +130,10 @@ namespace BeeFishHTTPS {
          return "test";
       }
    
-      const BString& hostName() const
+      const BString& origin() const
       {
           
-         return _hostName;
+         return _origin;
       }
       
       const unsigned short port() const
@@ -142,7 +142,7 @@ namespace BeeFishHTTPS {
          return _port;
       }
       
-      Database* database()
+      JSONDatabase* database()
       {
          return _database;
       }
@@ -182,12 +182,12 @@ namespace BeeFishHTTPS {
       }
 
    private:
-      BString _hostName;
+      BString _origin;
       unsigned short _port;
       boost::asio::io_context& _ioContext;
       boost::asio::ip::tcp::acceptor _acceptor;
       boost::asio::ssl::context _context;
-      Database* _database = nullptr;
+      JSONDatabase* _database = nullptr;
       std::ofstream _transactionFile;
       std::mutex _mutex;
    };

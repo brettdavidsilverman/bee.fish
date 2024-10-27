@@ -24,8 +24,7 @@ namespace BeeFishDatabase {
       public MinMaxPath
    {
    protected:
-      Path _properties;
-      Path _objects;
+      
       
    public:
       typedef Index Id;
@@ -36,30 +35,26 @@ namespace BeeFishDatabase {
       {
       }
       
-      JSONPath(Database& database, const Path& start) :
+      JSONPath(JSONDatabase& database, const Path& start) :
          MinMaxPath(start)
       {
-         Path root(database);
          
-         _properties =
-            root[HOST][PROPERTIES];
-            
-         _objects =
-            root[HOST][OBJECTS];
-           
       }
       
       JSONPath(Path start) :
-         JSONPath(start.database(), start)
+         JSONPath((JSONDatabase&)start.database(), start)
       {
       }
       
       JSONPath(const JSONPath& source) :
-         MinMaxPath(source),
-         _properties(source._properties),
-         _objects(source._objects)
+         MinMaxPath(source)
       {
            
+      }
+      
+      JSONDatabase& database()
+      {
+         return (JSONDatabase&)(*_database);
       }
       
       Id id()
@@ -69,12 +64,12 @@ namespace BeeFishDatabase {
       
       Path objects()
       {
-         return _objects;
+         return database().objects();
       }
       
       Path properties()
       {
-         return _properties;
+         return database().properties();
       }
       
       template<typename T>
@@ -122,7 +117,7 @@ namespace BeeFishDatabase {
             return false;
             
          MinMaxPath path =
-            _properties[BY_KEY];
+            properties()[BY_KEY];
             
          if (!path.contains(key))
          {
@@ -134,12 +129,8 @@ namespace BeeFishDatabase {
             [POSITIONS];
         
          
-         JSONPath object =
-            (*this);
-         
-         bool contains = path.contains(
-            object.id()
-         );
+         bool contains =
+            path.contains(id());
          
          return contains;
          
@@ -168,7 +159,7 @@ namespace BeeFishDatabase {
       {
          Id id = this->id();
          Path keyPath = 
-            _properties[BY_KEY];
+            properties()[BY_KEY];
             
          if (!keyPath.contains(key))
             keyPath[key].setData(key);
@@ -186,7 +177,7 @@ namespace BeeFishDatabase {
          Index position;
          
          if (path.hasData())
-            path.getData<Index>(position);
+            path._getData(position);
          else {
                
             MinMaxPath object = (*this)[Type::OBJECT];
@@ -199,15 +190,15 @@ namespace BeeFishDatabase {
                   + 1;
             }
 
-            path.setData<Index>(position);
+            path._setData<Index>(position);
             
          }
          
-         _properties
+         properties()
             [BY_OBJECT]
             [id]
             [position]
-            .setData<Index>(keyPathIndex);
+            ._setData<Index>(keyPathIndex);
             
          return position;
       }
@@ -223,7 +214,7 @@ namespace BeeFishDatabase {
          path = path[position];
          
          Index keyIndex = 0;
-         path.getData(keyIndex);
+         path._getData<Index>(keyIndex);
          BString key;
          Path keyPath(database(), keyIndex);
          keyPath.getData(key);
@@ -254,7 +245,7 @@ namespace BeeFishDatabase {
       Path getObjectProperties()
       {
          Path getObjectProperties =
-            _properties
+            properties()
                [BY_OBJECT]
                [id()];
                
@@ -304,7 +295,7 @@ namespace BeeFishDatabase {
             path.getData(string);
               
             out << "\""
-                   << string.escape()
+                   << escape(string)
                 << "\"";
             
             break;
@@ -327,9 +318,7 @@ namespace BeeFishDatabase {
                  index < count;
                  ++index)
             {
-               JSONPath item(
-                  path[index]
-               );
+               JSONPath item = path[index];
                   
                Size _tabCount = tabCount + 1;
                      

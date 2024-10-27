@@ -7,8 +7,8 @@ else
 fi
 
 echo "Stopping " $PORT " ..."
-if [[ -n "$(sudo lsof -t -i:$PORT)" ]]; then
-    sudo kill "$(sudo lsof -t -i:$PORT)"
+if [[ -n "$(lsof -t -i:$PORT)" ]]; then
+    kill "$(lsof -t -i:$PORT)"
 else
    echo "Not running"
 fi

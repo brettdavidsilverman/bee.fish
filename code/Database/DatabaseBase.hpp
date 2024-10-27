@@ -22,7 +22,6 @@
 #include "LockFile.hpp"
 #include "Index.hpp"
 #include "Branch.hpp"
-#include "Data.hpp"
 
 using namespace std;
 using namespace std::literals;
@@ -38,6 +37,7 @@ namespace BeeFishDatabase {
    // hasnt been visited yet.
    class Database : public LockFile
    {
+   
    public:
       typedef PowerEncoding Encoding;
 
@@ -121,7 +121,7 @@ namespace BeeFishDatabase {
          return index;
       }
  
-      inline Index allocate(const Data& data)
+      inline Index allocate(const std::string& data)
       {
 
          
@@ -129,8 +129,9 @@ namespace BeeFishDatabase {
 
          Index dataIndex = size();
 
-         write(&data._size, sizeof(Size));
-         write(data.data(), data._size);
+         Size dataSize = data.size();
+         write(&dataSize, sizeof(Size));
+         write(data.data(), dataSize);
 
 
          assert(size() == dataIndex + sizeof(Size) + data.size());
@@ -170,6 +171,7 @@ namespace BeeFishDatabase {
 
 
       }
+      
 
       // Waits till lock on branch is released
       // Sets the lock on the branch to true
@@ -230,28 +232,27 @@ namespace BeeFishDatabase {
          if (branch._locked) {
             branch._locked = false;
             setBranch(lockIndex, branch);
-      //      cerr << lockIndex << '\t' << "unlocked" << endl;
          }
       }
       
-      inline Data getData(Index dataIndex)
+      inline std::string getData(Index dataIndex)
       {
          if (dataIndex == 0)
-            return Data();
+            return "";
 
 
          seek(dataIndex);
          Size size;
 
          read(&size, sizeof(Size));
-         Data data(size);
-         read(data.data(), size);
+         std::string buffer(size, '\0');
+         read(buffer.data(), size);
 
-         return data;
+         return buffer;
       }
 
       
-      inline void setData(Index dataIndex, const Data& source)
+      inline void setData(Index dataIndex, const std::string& source)
       {
          seek(dataIndex);
          Size size = source.size();
@@ -265,6 +266,7 @@ namespace BeeFishDatabase {
          return DATABASE_VERSION;
       }
 
+      
       virtual void stripe(ostream& out) {
 
          std::queue<Index> queue;

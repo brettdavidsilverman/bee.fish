@@ -86,18 +86,16 @@ namespace BeeFishHTTPS {
             Size pageIndex = 0;
             ssize_t _contentLength = 0;
 
-            WebRequest postRequest;
+            WebRequest postRequest(false);
 
             postRequest.setOnData(
-               [&pageIndex, &_contentLength, this](const BeeFishBString::Data& data) {
+               [&pageIndex, &_contentLength, this](const std::string& data) {
                   _contentLength += data.size();
                   _bookmark[pageIndex++].setData(data);
                }
             );
 
             BeeFishScript::ScriptParser parser(postRequest);
-
-            std::cerr << "Parsing " << contentType << std::endl;
 
             if (!parseWebRequest(parser)) {
                throw std::runtime_error("Invalid input post to storage-app.h");
@@ -108,16 +106,14 @@ namespace BeeFishHTTPS {
             if ( _contentLength == 0 )
                deleteData();
             else {
-               _bookmark["Content length"].setData(_contentLength);
+               _bookmark["Content length"]._setData(_contentLength);
                _bookmark["Content type"].setData(contentType);
-               _bookmark["Page count"].setData(pageIndex);
+               _bookmark["Page count"]._setData(pageIndex);
             }
 
             returnJSON = true;
             _status = 200;
-
-            std::cerr << " OK" << std::endl;
-                     
+            
          }
          else if ( method == "GET" )
          {
@@ -127,7 +123,7 @@ namespace BeeFishHTTPS {
 
             if (contentType.length()) {
                _status = 200;
-                _bookmark["Content length"].setData(_contentLength);
+                _bookmark["Content length"]._setData(_contentLength);
                _serve = App::SERVE_DATA;
                returnJSON = false;
             }

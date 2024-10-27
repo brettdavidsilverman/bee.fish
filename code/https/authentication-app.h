@@ -30,6 +30,7 @@ namespace BeeFishHTTPS {
             "/client/style.css",
             "/client/fetch.js",
             "/client/evaluate.js",
+            "/client/punycode.js",
             "/client/console/console.js",
             "/client/logon/",
             "/client/logon/index.html",
@@ -77,7 +78,7 @@ namespace BeeFishHTTPS {
          }
          else if (webMethod == "POST")
          {
-            WebRequest* request = new WebRequest();
+            WebRequest* request = new WebRequest(true);
             ScriptParser parser(*request);
             
             if (parseWebRequest(parser) &&
@@ -138,7 +139,7 @@ namespace BeeFishHTTPS {
          if (requestHeaders.contains("origin"))
             origin = requestHeaders["origin"];
          else
-            origin = session()->hostName();
+            origin = session()->origin();
 
          _responseHeaders.replace(
             "access-control-allow-origin",

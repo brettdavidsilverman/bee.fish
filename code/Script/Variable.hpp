@@ -69,18 +69,18 @@ namespace BeeFishScript {
 
       void loadObject(List list);
 
-      virtual void write(ostream& out, size_t tabs = 0) const;
+      virtual void write(ostream& out, bool blankSpace, size_t tabs = 0) const;
 
       friend ostream& operator << (ostream& out, const Object& object) {
-         object.write(out);
+         object.write(out, true);
          return out;
       }
 
       //friend ostream& operator << (ostream& out, const Variable& variable);
 
-      virtual std::string str() const {
+      virtual std::string str(bool blankSpace = true) const {
          stringstream stream;
-         stream << *this;
+         this->write(stream, blankSpace);
          return stream.str();
       }
 
@@ -374,11 +374,11 @@ namespace BeeFishScript {
       }
 
       friend ostream& operator << (ostream& out, const Variable& variable) {
-         variable.write(out);
+         variable.write(out, true);
          return out;
       }
 
-      virtual void write(ostream& out, size_t tabIndex = 0) const {
+      virtual void write(ostream& out, bool blankSpace, size_t tabIndex = 0) const {
          switch (_type) {
          case Type::UNDEFINED:
             out << "undefined";
@@ -424,7 +424,8 @@ namespace BeeFishScript {
             out << "[";            
             const Array* array = _value._array.get();
             if (array->size() > 1) {
-               out << "\r\n";
+               if (blankSpace)
+                  out << "\r\n";
                tabIndex++;
             }
             
@@ -433,11 +434,11 @@ namespace BeeFishScript {
             for  (Array::const_iterator it = array->cbegin();
                    it != array->cend();)
             {
-               if (array->size() > 1)
+               if (array->size() > 1 && blankSpace)
                   out << std::string(tabIndex * TAB_SPACES, ' ');
                const Variable& element = *it;
-               element.write(out, tabIndex);
-               if (++it != array->cend()) {
+               element.write(out, blankSpace, tabIndex);
+               if (++it != array->cend() && blankSpace ) {
                   out << ",\r\n";
                }
             }
@@ -446,14 +447,16 @@ namespace BeeFishScript {
             
             if (array->size() > 1) {
                 --tabIndex;
-               out << "\r\n";
-               out << std::string(tabIndex * TAB_SPACES, ' ');
+               if (blankSpace) {
+                  out << "\r\n";
+                  out << std::string(tabIndex * TAB_SPACES, ' ');
+               }
             }
             out << "]";
             break;
          }
          case Type::OBJECT: {
-            _value._object->write(out, tabIndex + 1);
+            _value._object->write(out, blankSpace, tabIndex + 1);
             break;
          }
          default:
@@ -462,9 +465,9 @@ namespace BeeFishScript {
          }
       }
 
-      virtual String str() const {
+      virtual String str(bool blankSpace = true) const {
          std::stringstream stream;
-         stream << *this;
+         this->write(stream, blankSpace);
          return stream.str();
       }
 
@@ -519,7 +522,7 @@ namespace BeeFishScript {
       }
    };
 
-   inline void Object::write(ostream& out, size_t tabs) const {
+   inline void Object::write(ostream& out, bool blankSpace, size_t tabs) const {
 
       ostream& output = out;
       
@@ -533,31 +536,40 @@ namespace BeeFishScript {
       if (tabs == 0)
          tabs++;
 
-      output << "{" << "\r\n";
+      output << "{";
+      
+      if (blankSpace)
+         output << "\r\n";
 
       for (Object::const_iterator it = cbegin(); it != cend();) {
          const String& key = it->first;
          const Variable& value = it->second;
          if (value._type != Type::UNDEFINED) {
-            if (tabs > 0)
+            if (tabs > 0 && blankSpace)
                output << std::string(tabs * TAB_SPACES, ' ');
             output << "\"";
             output << BeeFishMisc::escape(key);
-            output << "\": ";
-            value.write(output, tabs);
+            output << "\":";
+            if (blankSpace)
+               output << " ";
+            value.write(output, blankSpace, tabs);
          }
 
-         if (++it != cend())
-            output << "," << "\r\n";
+         if (++it != cend()) {
+            output << ",";
+            if (blankSpace)
+               output << "\r\n";
+         }
 
       }
 
-      output << "\r\n";
+      if (blankSpace)
+         output << "\r\n";
 
       if (tabs > 0)
          --tabs;
 
-      if (tabs > 0)
+      if (tabs > 0 && blankSpace)
          output << std::string(tabs * TAB_SPACES, ' ');
 
       output << "}";

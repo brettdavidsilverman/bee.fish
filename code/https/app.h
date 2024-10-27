@@ -187,13 +187,16 @@ namespace BeeFishHTTPS {
          return filePath;
       }
       
+      // Defined in session.h
+      const BString& origin() const;
+      
       virtual void write(
          ostream& stream
       )
       {
          if (serve() == App::SERVE_JSON)
          {
-            JSONPath json(_bookmark);
+            JSONPath json = _bookmark;
             json.write(stream);
             return;
          }

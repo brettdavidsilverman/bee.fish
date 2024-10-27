@@ -85,8 +85,11 @@ function fetchJSON(url) {
       ).
       then(
          function (json) {
-            if (status != "200")
+            if (status != "200") {
+               if (json.error)
+                  throw json.error;
                throw json;
+            }
             return json;
          }
       );
@@ -231,7 +234,7 @@ function formatJSON(jsonText){
          "   "
       );
 
-   return formatted;
+   return json;
 }
 
 function HTML(url, parent=document.body) {

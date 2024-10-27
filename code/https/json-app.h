@@ -45,17 +45,19 @@ namespace BeeFishHTTPS {
          _serve = App::SERVE_JSON;
          _contentLength = -1;
          
-         Database* database =
+         JSONDatabase* database =
+            (JSONDatabase*)
             session()->server()->database();
          BString error;
+   
          const BString& clientIPAddress = 
             session()->ipAddress();
          const BString& method =
-            request->method();
+            request()->method();
          const BString& url =
-            request->path();
+            request()->path();
          const BString& query =
-             request->query();
+            request()->query();
          
          optional<Path> jsonPath =
             parseURL(
@@ -81,10 +83,13 @@ namespace BeeFishHTTPS {
                
                // Stream posted file to
                // database
-               WebRequest postRequest;
+               WebRequest postRequest(true);
                
                BeeFishDatabase::JSONPathParser
-                  parser(_bookmark, postRequest);
+                  parser(
+                     _bookmark,
+                     postRequest
+                  );
 
                if (!parseWebRequest(parser)) {
                   BeeFishScript::Object object

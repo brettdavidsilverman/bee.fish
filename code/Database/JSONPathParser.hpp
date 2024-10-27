@@ -33,8 +33,16 @@ namespace BeeFishDatabase {
    public:
       using JSONParser::read;
 
-      JSONPathParser(Path path, Match& match) :
+      JSONPathParser(JSONPath path, Match& match) :
          JSONParser(match),
+         JSONPath(path)
+      {
+         push_back_path(*this);
+         push_back_container(false);
+      }
+      
+      JSONPathParser(JSONPath path) :
+         JSONParser(),
          JSONPath(path)
       {
          push_back_path(*this);
@@ -55,11 +63,11 @@ namespace BeeFishDatabase {
          pop_back_container();
          
 #ifdef DEBUG
-         assert(_pathStack.size() == 0 &&
-                _containerStack.size() == 0 &&
-                _arrayIndexStack.size() == 0 &&
-                _keyStack.size() == 0 &&
-                _objectPropertyIndexStack.size() == 0);
+         assert(_pathStack.size() == 0);
+         assert(_containerStack.size() == 0);
+         assert(_arrayIndexStack.size() == 0);
+         assert(_keyStack.size() == 0);
+         assert(_objectPropertyIndexStack.size() == 0);
 #endif
       }
      
@@ -98,7 +106,7 @@ namespace BeeFishDatabase {
          JSONPath start = path;
          
          path = path[type];
-         
+
          switch (type)
          {
             case Type::UNDEFINED:
