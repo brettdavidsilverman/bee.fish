@@ -428,10 +428,10 @@ namespace BeeFishWeb {
       {
          return _body && _body->hasJSON();
       }
-   
+
       virtual BeeFishJSON::Object& json()
       {
-         return *(_body->_json);
+         return *(_body->json());
       }
 
       Headers& headers()

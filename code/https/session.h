@@ -44,7 +44,7 @@ namespace BeeFishHTTPS {
       BeeFishBString::Data _data =
          BeeFishBString::Data::create();
       WebRequest* _request;
-      ScriptParser* _parser;
+      Parser* _parser;
       Response* _response;
       string _tempFileName;
       std::fstream _tempFile;
@@ -106,7 +106,7 @@ namespace BeeFishHTTPS {
          }
          
          _request = new BeeFishWeb::WebRequest();
-         _parser = new ScriptParser(*_request);
+         _parser = new Parser(*_request);
          asyncRead();
       }
    
@@ -484,7 +484,7 @@ namespace BeeFishHTTPS {
          return _response;
       }
 
-      ScriptParser* parser() {
+      Parser* parser() {
          return _parser;
       }
   

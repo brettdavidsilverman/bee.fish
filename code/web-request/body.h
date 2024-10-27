@@ -17,7 +17,7 @@ namespace BeeFishWeb {
         public Match,
         public BeeFishBString::BStream
     {
-    public:
+    protected:
         BeeFishWeb::ContentLength* _contentLength = nullptr;
         BeeFishJSON::Object* _json = nullptr;
         bool _parseJSON;
@@ -30,13 +30,7 @@ namespace BeeFishWeb {
             if (_parser)
                return;
               
-            BString contentType;
-            
-            if ( headers->contains("content-type")) {
-                contentType = (*headers)["content-type"];
-            }
-
-            if (_parseJSON) { //&& contentType.startsWith("application/json") ) {
+            if (_parseJSON) {
                 _json = new BeeFishJSON::Object();
                 _match = _json;
             }
@@ -59,6 +53,11 @@ namespace BeeFishWeb {
 
         virtual bool hasJSON() const {
             return _json && _json->matched();            
+        }
+        
+        BeeFishJSON::Object* json()
+        {
+           return _json;
         }
 
         virtual bool matchCharacter(const Char& character) {

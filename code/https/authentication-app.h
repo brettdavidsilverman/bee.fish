@@ -19,6 +19,7 @@ namespace BeeFishHTTPS {
       inline static vector<BString>
          _privileged{
             "/",
+            "/authenticate",
             "/index.html",
             "/favicon.ico",
             "/feebee.jpg",
@@ -59,27 +60,42 @@ namespace BeeFishHTTPS {
          }
          
          BString path = request->path();
-         BString webMethod = request->method();
-
-         if (webMethod != "POST") {
+         
+         if (path != "/authenticate") {
             _status = -1;
             return;
          }
          
+         BString webMethod = request->method();
+         
          BeeFishMisc::optional<BString> method;
          BeeFishMisc::optional<BString> secret;
 
-         if (request->hasJSON()) {
+         if (webMethod == "GET")
+         {
+            method = "getStatus";
+         }
+         else if (webMethod == "POST")
+         {
+            WebRequest* request = new WebRequest();
+            ScriptParser parser(*request);
+            
+            if (parseWebRequest(parser) &&
+                request->hasJSON())
+            {
 
-            BeeFishScript::ObjectPointer object = _session->parser()->json();
+               BeeFishScript::ObjectPointer object =
+                  parser.json();
 
-            if (object->contains("method")) {
-               method = (BString&)(*object)["method"];
+               if (object->contains("method")) {
+                  method = (BString&)(*object)["method"];
+               }
+
+               if (object->contains("secret"))
+                  secret = (BString&)(*object)["secret"];
+
             }
-
-            if (object->contains("secret"))
-               secret = (BString&)(*object)["secret"];
-
+            delete request;
          }
 
          if ( method.has_value() )
