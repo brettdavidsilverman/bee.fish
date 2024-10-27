@@ -1,14 +1,17 @@
 HTTPS=build/https
+ifeq ("$(PORT)","")
+	PORT=443
+endif
 
-all:	https  Makefile start
+all:
+all:	https
+all:	start
 
-https:	$(HTTPS)
-
-$(HTTPS):
-	cd code && make $(DEBUG) test PORT=$(PORT)
+https:
+	cd code/https && make $(DEBUG) test PORT=$(PORT)
 
 test:
-	cd code && make $(DEBUG) test PORT=$(PORT)
+	cd code/https && make $(DEBUG) test PORT=$(PORT)
 
 clean:
 	cd code && make clean
@@ -16,7 +19,7 @@ clean:
 stop:
 	cd code/https && ./stop.sh $(PORT)
 	
-start:	https 
+start: 
 	cd code/https && ./start.sh $(PORT)
 
 install:	start
@@ -25,4 +28,5 @@ restart:	stop start
 
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
+debug:	PORT=8000
 debug:	https

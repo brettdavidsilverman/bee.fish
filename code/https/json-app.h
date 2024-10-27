@@ -5,7 +5,7 @@
 #include "session.h"
 #include "app.h"
 #include "authentication.h"
-#include "storage.h"
+#include "file-system-app.h"
 #include "../json/json-parser.h"
 #include "../Script/Script.hpp"
 #include "../web-request/web-request.h"
@@ -41,7 +41,10 @@ namespace BeeFishHTTPS {
             "application/json; charset=utf-8"
          );
          
-         
+         _responseHeaders.replace(
+           "cache-control",
+            FileSystemApp::_noCacheControl
+         );
          _serve = App::SERVE_JSON;
          _contentLength = -1;
          
