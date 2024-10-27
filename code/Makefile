@@ -12,15 +12,12 @@ all:	$(BUILD)
 	cd Database && make $(DEBUG) test
 	cd Script && make $(DEBUG) test
 	cd web-request && make $(DEBUG) test
-	cd https && make $(DEBUG) test PORT=$(PORT)
+	cd https && make $(DEBUG) test
 	
 $(BUILD):
 		mkdir $(BUILD)
 
 test:	all
-
-install:	all
-	 cd https && ./start.sh $(PORT)
 
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
