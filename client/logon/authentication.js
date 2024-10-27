@@ -1,9 +1,12 @@
 class Authentication
 {
-   constructor(authenticatorServer = document.location.origin) {
+   constructor(authenticationServer = document.location.origin) {
      // Object.assign(this, input);
       this.authenticated = false;
-      this.url = authenticatorServer;
+      this.authenticationServer =
+         authenticationServer;
+      this.url = this.authenticationServer +
+         "/authenticate";
       
    }
    
@@ -39,6 +42,7 @@ class Authentication
                   json.authenticated;
                _this.sessionId =
                   json.sessionId;
+               return _this;
             }
          );
 
@@ -52,11 +56,8 @@ class Authentication
       this.authenticated = false;
       
       var parameters = {
-         method: "POST",
-         credentials: "include",
-         body: JSON.stringify({
-            method: "getStatus",
-         })
+         method: "GET",
+         credentials: "include"
       }
          
       var _this = this;
@@ -65,7 +66,6 @@ class Authentication
          fetch(this.url, parameters)
          .then(
             function(response) {
-                
                return response.text()
             }
          )
@@ -82,7 +82,7 @@ class Authentication
                _this.sessionId =
                   json.sessionId;
                
-               return json;
+               return _this;
             }
          );
 
@@ -129,10 +129,11 @@ function authenticate() {
       authentication.getStatus().
       then(
          function(auth) {
+ 
             if (!auth.authenticated) {
                 
                var currentPage = document.location.href;
-               var newPage = authentication.url + "/client/logon/";
+               var newPage = authentication.authenticationServer + "/client/logon/";
                var url = newPage + "?redirect=" + encodeURIComponent(currentPage);
                document.location.href = url;
             }

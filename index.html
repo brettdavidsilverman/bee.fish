@@ -63,7 +63,8 @@
       <a href="/client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
-      <script>
+      <script>authenticate();
+
 const defaultURL = 
    "Type the path of your document";
    var logon = document.getElementById("logon");
@@ -117,14 +118,14 @@ function loadJSON() {
    if (url == defaultURL ||
        url == "")
    {
-      return;
+      return Promise.resolve(undefined);
    }
       
    var search = "?" + encodeURI(url);
    
    if (document.location.search != search) {
       document.location.search = search;
-      return;
+      return Promise.resolve(undefined);
    }
 
    fetchButton.disabled = true;
@@ -289,18 +290,15 @@ if (document.location.search) {
 }else
    fetchButton.disabled = true;
 
-var promise = undefined;
-   loadJSON();
-if (promise != undefined) {
-
-   promise.then(
+loadJSON().
+   then(
       function(json) {
          if (json) {
             if (document.location.hash == "#go")
                Go();
          }
       }
-   );}
+   );
       </script>
 
    </body>
