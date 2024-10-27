@@ -21,7 +21,7 @@ namespace BeeFishHTTPS {
       Size _bytesTransferred = 0;
       ssize_t _contentLength = 0;
       const Size _pageSize = getPageSize();
-      App*      _app = nullptr;
+     // App*      _app = nullptr;
    public:
       Response(
          Session* session
@@ -34,10 +34,11 @@ namespace BeeFishHTTPS {
       {
 
          ResponseHeaders headers(_session);
-
          App* app = nullptr;
-
+         
          try {
+            
+            
             for ( auto factory : appFactories )
             {
 
@@ -83,10 +84,8 @@ namespace BeeFishHTTPS {
                   << endl;
             }
                  
-           
-            _app = app;
-
-            _contentLength = _app->contentLength();
+          
+            _contentLength = app->contentLength();
             
             if (_contentLength == -1) {
                headers.erase("content-length");
@@ -102,9 +101,12 @@ namespace BeeFishHTTPS {
                );
                
          
-            write();
+            write(app);
             
-            end();
+            delete app;
+            app = nullptr;
+            
+            closeOrRestart();
             
          }
          
@@ -115,10 +117,6 @@ namespace BeeFishHTTPS {
       
       virtual ~Response()
       {
-         if (_app) {
-            delete _app;
-            _app = nullptr;
-         }
       }
       
       // Defined in session.h
@@ -126,15 +124,16 @@ namespace BeeFishHTTPS {
       
       // Defined in session.h
       void closeOrRestart();
-      
+      /*
       void end() 
       {
+          
          bool end = !_app ||
             ( _app->bytesTransferred() ==
              (Size) _app->contentLength() ) ||
              _app->contentLength() == -1;
             
-         if ( end )
+         if ( true)
          {
             if (_app)
             {
@@ -145,16 +144,18 @@ namespace BeeFishHTTPS {
             closeOrRestart();
 
          }
-         
       }
+         */
+     
      
       // Defined in response-stream.h
-      void write();
-      
+      void write(App* app);
+      /*
       App* app()
       {
          return _app;
       }
+      */
 
    };
    

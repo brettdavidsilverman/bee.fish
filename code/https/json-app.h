@@ -50,9 +50,6 @@ namespace BeeFishHTTPS {
          BString error;
          const BString& clientIPAddress = 
             session()->ipAddress();
-         WebRequest* request =
-         session()->request();
-         
          const BString& method =
             request->method();
          const BString& url =
@@ -79,6 +76,11 @@ namespace BeeFishHTTPS {
             }
             else if (method == "POST")
             {
+               // Clear the bookmarks contents
+               _bookmark.clear();
+               
+               // Stream posted file to
+               // database
                WebRequest postRequest;
                
                BeeFishDatabase::JSONPathParser
@@ -92,7 +94,7 @@ namespace BeeFishHTTPS {
                   _content = object.str();
                   _serve = App::SERVE_CONTENT;
                   _status = 500;
-                  _statusText = "Parser error";
+                  _statusText = "JSONPathParser error";
                }
                else {
                   _content = "\"Ok\"";

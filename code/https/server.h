@@ -119,6 +119,9 @@ namespace BeeFishHTTPS {
            
       ~Server()
       {
+         if (_database)
+            delete _database;
+            
          _transactionFile.close();
       }
    
@@ -184,7 +187,7 @@ namespace BeeFishHTTPS {
       boost::asio::io_context& _ioContext;
       boost::asio::ip::tcp::acceptor _acceptor;
       boost::asio::ssl::context _context;
-      Database* _database;
+      Database* _database = nullptr;
       std::ofstream _transactionFile;
       std::mutex _mutex;
    };

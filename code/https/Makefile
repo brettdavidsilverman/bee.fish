@@ -8,13 +8,13 @@ DEPS=server.h session.h response.h response-headers.h app.h storage-app.h json-a
 $(OUTPUT): $(DEPS)
 	@echo "Linking server"
 	$(CC) main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lpthread -latomic
-	sudo setcap cap_net_bind_service=ep $(OUTPUT)
+#	sudo setcap cap_net_bind_service=ep $(OUTPUT)
 	
 install:	$(OUTPUT)
 	./start.sh $(PORT)
 	
-test:	$(OUTPUT) install
-	$(OUTPUT) -test -port $(PORT)
+test:	$(OUTPUT)
+	$(OUTPUT) -port $(PORT) -test
 
 start:	$(OUTPUT)
 	./start.sh $(PORT)

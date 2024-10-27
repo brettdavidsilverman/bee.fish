@@ -25,14 +25,14 @@ namespace BeeFishHTTPS {
       bool _writingHeaders = true;
          
    public:
-      ResponseStream(Session* session) : std::ostream(this)
+      ResponseStream(Session* session, App* app) : std::ostream(this)
       {
          _pageSize = getPageSize();
          _buffer = new char[_pageSize];
          _count = 0;
          _bytesTransferred = 0;
          _session = session;
-         setChunkedEncoding();
+         setChunkedEncoding(app);
       }
       
       virtual ~ResponseStream()
@@ -53,23 +53,21 @@ namespace BeeFishHTTPS {
          return _bytesTransferred;
       }
       
-      void writeHeaders()
+      void writeHeaders(App* app)
       {
          _writingHeaders = true;
          
          ResponseStream& stream = *this;
          
-         const App* _app = app();
-         
          stream
             << "HTTP/1.1 " 
-            << _app->status()
+            << app->status()
             << " "
-            << _app->statusText()
+            << app->statusText()
             << "\r\n";
             
          const ResponseHeaders& headers =
-            responseHeaders();
+            app->responseHeaders();
             
          for (auto pair : headers)
          {
@@ -87,9 +85,9 @@ namespace BeeFishHTTPS {
         _writingHeaders = false;
       }
       
-      void writeContent()
+      void writeContent(App* app)
       {
-         app()->write(*this);
+         app->write(*this);
          
          flush();
       }
@@ -103,13 +101,12 @@ namespace BeeFishHTTPS {
       {
          return _writingHeaders;
       }
-      
+      /*
       const ResponseHeaders&
       responseHeaders()
       {
          const ResponseHeaders& headers =
-            app()->
-            responseHeaders();
+            
           return headers;
       }
      
@@ -121,11 +118,11 @@ namespace BeeFishHTTPS {
             response()->
             app();
       }
-   
-      void setChunkedEncoding()
+   */
+      void setChunkedEncoding(App* app)
       {
          const ResponseHeaders& headers =
-            responseHeaders();
+            app->responseHeaders();
             
          _chunkedEncoding =
             ( headers["transfer-encoding"]
@@ -191,14 +188,14 @@ namespace BeeFishHTTPS {
 
   
    // Declared in response.h
-   void Response::write()
+   void Response::write(App* app)
    {
 
-      ResponseStream stream(_session);
+      ResponseStream stream(_session, app);
          
-      stream.writeHeaders();
+      stream.writeHeaders(app);
          
-      stream.writeContent();
+      stream.writeContent(app);
         
       stream.flush();
       
