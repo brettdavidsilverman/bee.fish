@@ -32,7 +32,7 @@ namespace BeeFishHTTPS {
 
          if (!authenticated())
          {
-            throw std::runtime_error("Not authenticated");
+            //throw std::runtime_error("Not authenticated");
             return;
          }
          
