@@ -41,8 +41,7 @@ namespace BeeFishHTTPS {
    protected:
       Server* _server;
       size_t _maxLength;
-      BeeFishBString::Data _data =
-         BeeFishBString::Data::create();
+      std::string _data;
       WebRequest* _request;
       Parser* _parser;
       Response* _response;
@@ -65,6 +64,7 @@ namespace BeeFishHTTPS {
          SSLSocket(ioContext, sslContext),
          _server(server),
          _maxLength(getPageSize()),
+         _data(_maxLength, '\0'),
          _request(nullptr),
          _parser(nullptr),
          _response(nullptr)
@@ -75,7 +75,6 @@ namespace BeeFishHTTPS {
          _tempFileName =
             string(TEMP_DIRECTORY) +
             stream.str();
-            
          
       }
   
@@ -180,7 +179,7 @@ namespace BeeFishHTTPS {
          if (bytesTransferred > 0)
          {
             if (_parser->result() == nullopt)
-               _parser->read(_data, bytesTransferred);
+               _parser->read(_data.data(), bytesTransferred);
          }
          else {
             if (_parser->result() == nullopt)
@@ -221,7 +220,7 @@ namespace BeeFishHTTPS {
             
          }
          
-         _tempFile.write((const char*)_data._data, bytesTransferred);
+         _tempFile.write((const char*)_data.data(), bytesTransferred);
 
          // Check if finished request
          if ( _parser->result() == true )
@@ -365,7 +364,7 @@ namespace BeeFishHTTPS {
       {
          async_read_some(
             boost::asio::buffer(
-               _data._readWrite,
+               _data.data(),
                _maxLength
             ),
             boost::bind(

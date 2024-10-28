@@ -35,7 +35,7 @@ namespace BeeFishHTTPS {
 
          ResponseHeaders headers(_session);
          App* app = nullptr;
-         
+
          try {
             
             
