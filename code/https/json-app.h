@@ -49,8 +49,8 @@ namespace BeeFishHTTPS {
          _contentLength = -1;
          
          JSONDatabase* database =
-            (JSONDatabase*)
-            session()->server()->database();
+            session()->database();
+            
          BString error;
    
          const BString& clientIPAddress = 

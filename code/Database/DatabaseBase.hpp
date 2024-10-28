@@ -71,7 +71,7 @@ namespace BeeFishDatabase {
          ),
          _pageSize(pageSize)
       {
-#ifdef DEBUG
+#ifdef DEBUG_
          Debug debug;
          debug << now() << " "
                << "Database(\""
@@ -82,7 +82,7 @@ namespace BeeFishDatabase {
 
       virtual ~Database()
       {
-#ifdef DEBUG
+#ifdef DEBUG_
          Debug debug;
 
          debug << now() << " "

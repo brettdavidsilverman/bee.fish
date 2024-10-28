@@ -23,6 +23,10 @@ namespace BeeFishDatabase
       
       inline void setOrigin(const BString& origin)
       {
+          
+         if (_origin == origin)
+            return;
+            
          _origin = origin;
          
          Path root(*this);

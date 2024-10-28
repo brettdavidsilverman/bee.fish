@@ -107,7 +107,7 @@ namespace BeeFishHTTPS {
 
          std::cout << "Setting up database..." << std::endl;
 
-         _database = new JSONDatabase(_origin, databaseFile);
+         _databaseFile = databaseFile;
    
          std::cout << "Start accepting..." << std::endl;
 
@@ -119,9 +119,6 @@ namespace BeeFishHTTPS {
            
       ~Server()
       {
-         if (_database)
-            delete _database;
-            
          _transactionFile.close();
       }
    
@@ -130,10 +127,15 @@ namespace BeeFishHTTPS {
          return "test";
       }
    
-      const BString& origin() const
+      const BString origin() const
       {
           
          return _origin;
+      }
+      
+      const BString databaseFile() const
+      {
+         return _databaseFile;
       }
       
       const unsigned short port() const
@@ -142,11 +144,6 @@ namespace BeeFishHTTPS {
          return _port;
       }
       
-      JSONDatabase* database()
-      {
-         return _database;
-      }
-            
       // Defined in session.h
       void startAccept();
 
@@ -163,7 +160,7 @@ namespace BeeFishHTTPS {
       }
 
 
-      void appendToLogFile(path inputFilePath) {
+      void appendToTransactionFile(path inputFilePath) {
          ifstream input(inputFilePath);
          std::unique_lock<std::mutex> lock(_mutex);
          _transactionFile << input.rdbuf();
@@ -187,7 +184,7 @@ namespace BeeFishHTTPS {
       boost::asio::io_context& _ioContext;
       boost::asio::ip::tcp::acceptor _acceptor;
       boost::asio::ssl::context _context;
-      JSONDatabase* _database = nullptr;
+      BString _databaseFile;
       std::ofstream _transactionFile;
       std::mutex _mutex;
    };

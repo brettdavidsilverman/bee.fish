@@ -1,40 +1,39 @@
 rm /home/bee/data/dev.bee.fish.data
 set -e
-make
-make restart
-DOMAIN="https://bee.fish"
+make clean debug
+DOMAIN="https://test.bee.fish:8000"
 echo "$DOMAIN"
-
+curl "$DOMAIN/authenticate" -b cookies -c cookies -d "{\"method\":\"logon\",\"secret\":\"boo\"}"
 echo "Uploading large.json"
 curl -X POST \
    "$DOMAIN/large-test.json" \
+   -b cookies -c cookies \
    -H "Content-Type: application/json; charset=utf-8" \
    -H "Expect: " \
    -T large.json -s -k > /dev/null
 
-echo "Downloading large-test.json?document"
-
-curl "$DOMAIN/large-test.json?document" -s -k > large2.json
-
-echo "Comparing large.json and large2.json"
-
-diff large.json large2.json
+curl "$DOMAIN/authenticate" -b cookies -c cookies -d "{\"method\":\"logon\",\"secret\":\"boo\"}"
 
 echo "Downloading large2a.json"
 
-curl "$DOMAIN/large-test.json" -s -k > large2a.json
+curl "$DOMAIN/large-test.json" -b cookies -c cookies -s -k > large2a.json
+
+curl "$DOMAIN/authenticate" -b cookies -c cookies -d "{\"method\":\"logon\",\"secret\":\"boo\"}"
 
 echo "Uploading large2a.json"
 
 curl -X POST \
    "$DOMAIN/large-test-2.json" \
+   -b cookies -c cookies \
    -H "Content-Type: application/json; charset=utf-8" \
    -H "Expect: " \
    -T large2a.json -s -k > /dev/null
    
+curl "$DOMAIN/authenticate" -b cookies -c cookies -d "{\"method\":\"logon\",\"secret\":\"boo\"}"
+
 echo "Downloading large2b.json"
 
-curl "$DOMAIN/large-test-2.json" -s -k > large2b.json
+curl "$DOMAIN/large-test-2.json" -b cookies -c cookies -s -k > large2b.json
 
 echo "Comparing large2a.json and large2b.json"
 

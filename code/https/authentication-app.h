@@ -129,23 +129,17 @@ namespace BeeFishHTTPS {
             _status = -1;
             return;
          }
-      
-         const BeeFishWeb::Headers&
-            requestHeaders =
-               request->headers();
-
+      /*
+         
          BString origin;
          
-         if (requestHeaders.contains("origin"))
-            origin = requestHeaders["origin"];
-         else
-            origin = session()->origin();
+         origin = session()->origin();
 
          _responseHeaders.replace(
             "access-control-allow-origin",
             origin
          );
-
+*/
          _responseHeaders.replace(
             "vary",
             "origin"

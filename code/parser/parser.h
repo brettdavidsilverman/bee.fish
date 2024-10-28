@@ -158,7 +158,7 @@ namespace BeeFishParser
             
             c = i;
 #ifdef DEBUG
-            cout << c;
+            //cout << c;
 #endif
       
             if (!match(c))

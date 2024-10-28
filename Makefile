@@ -14,12 +14,13 @@ test:
 	cd code/https && make $(DEBUG) test PORT=$(PORT)
 
 clean:
-	cd code && make clean
+	cd code/https && make clean
 
 stop:
 	cd code/https && ./stop.sh $(PORT)
 	
-start: 
+start:
+start:	https
 	cd code/https && ./start.sh $(PORT)
 
 install:	start

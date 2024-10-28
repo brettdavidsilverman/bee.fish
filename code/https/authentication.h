@@ -19,7 +19,7 @@ namespace BeeFishHTTPS {
    class Authentication
    {
    private:
-      Database& _database;
+      JSONDatabase& _database;
       bool _authenticated = false;
       Path _path;
       Path _sessionData;
@@ -47,7 +47,7 @@ namespace BeeFishHTTPS {
       Authentication(Session* session);
       
       Authentication(
-         Database& database,
+         JSONDatabase& database,
          BString ipAddress,
          BString sessionId
       ) :

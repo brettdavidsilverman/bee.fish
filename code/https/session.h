@@ -51,6 +51,7 @@ namespace BeeFishHTTPS {
       bool _isStillPosting = false;
       BString _exception;
       BString _ipAddress;
+      JSONDatabase* _database = nullptr;
       // End Of File error value
       const int END_OF_FILE = 2;
    public:
@@ -75,6 +76,7 @@ namespace BeeFishHTTPS {
             string(TEMP_DIRECTORY) +
             stream.str();
             
+         
       }
   
   
@@ -83,6 +85,9 @@ namespace BeeFishHTTPS {
          clear();
          if (filesystem::exists(_tempFileName))
              remove(_tempFileName);
+             
+         if (_database)
+            delete _database;
       }
       
       virtual void start()
@@ -107,6 +112,8 @@ namespace BeeFishHTTPS {
          
          _request = new BeeFishWeb::WebRequest(false);
          _parser = new Parser(*_request);
+         
+         
          asyncRead();
       }
    
@@ -184,7 +191,7 @@ namespace BeeFishHTTPS {
          if (_parser->result() == false)
          {
             logException("handleRead", BString("Parser match error: ") + _parser->getError());
-#ifdef DEBUG
+#ifdef DEBUG_
             dumpTempFile();
 #endif
             delete this;
@@ -221,9 +228,7 @@ namespace BeeFishHTTPS {
          {
             _tempFile.close();
 
-            //dumpTempFile();
-
-            _server->appendToLogFile(_tempFileName);
+            _server->appendToTransactionFile(_tempFileName);
 
             handleResponse();
             return;
@@ -269,6 +274,15 @@ namespace BeeFishHTTPS {
                << origin() << _request->fullURL()  << ' '
                << std::endl;
 
+            if (_database == nullptr)
+               _database =
+                  new JSONDatabase(
+                     origin(),
+                     _server->databaseFile()
+                  );
+            else
+               _database->setOrigin(origin());
+            
             _response = new Response(
                this
             );
@@ -428,9 +442,29 @@ namespace BeeFishHTTPS {
          return _ipAddress;
       }
       
-      const BString& origin() const
+      JSONDatabase* database()
       {
-         return server()->origin();
+         return _database;
+      }
+      
+      const BString origin() const
+      {
+         const BeeFishWeb::Headers&
+            requestHeaders =
+               _request->headers();
+        
+         BString origin;
+         
+         if (requestHeaders.contains("host")) {
+            BString host = requestHeaders["host"];
+            host = BString("https://") + host;
+            origin = host;
+         }
+         else
+            origin = server()->origin();
+            
+         return origin;
+            
       }
    
       void handshake()
@@ -544,7 +578,7 @@ namespace BeeFishHTTPS {
    inline Authentication::Authentication(
       Session* session
    ) : Authentication(
-          *( session->server()->database() ),
+          *( session->database() ),
             session->ipAddress(),
             session->
                request()->
@@ -606,7 +640,7 @@ namespace BeeFishHTTPS {
    }
    
    // Declared in app.h
-   const BString& App::origin() const
+   const BString App::origin() const
    {
       return _session->origin();
    }

@@ -188,7 +188,7 @@ namespace BeeFishHTTPS {
       }
       
       // Defined in session.h
-      const BString& origin() const;
+      const BString origin() const;
       
       virtual void write(
          ostream& stream
