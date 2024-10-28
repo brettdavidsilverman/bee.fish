@@ -23,6 +23,7 @@ void start(
 );
 
 std::mutex _wait;
+const int _threadCount = 4;
 
 int main(int argc, const char* argv[])
 
@@ -72,7 +73,7 @@ int main(int argc, const char* argv[])
       appFactories.add<FileSystemApp>();
       appFactories.add<JSONApp>();
       appFactories.add<NotFoundApp>();
-      boost::asio::io_context io_context;
+      boost::asio::io_context io_context(_threadCount);
       _wait.lock();
       
       std::thread startThread(
