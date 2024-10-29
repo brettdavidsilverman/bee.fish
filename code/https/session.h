@@ -165,6 +165,9 @@ namespace BeeFishHTTPS {
          size_t bytesTransferred
       )
       {
+          
+
+         
          
          if (error)
          {
@@ -175,6 +178,18 @@ namespace BeeFishHTTPS {
             }
             return;
          }
+         
+
+         boost::asio::post(
+            *_server,
+            [this, bytesTransferred]() {
+               threadedHandleRead(bytesTransferred);
+            }
+         );
+      }
+      
+      void threadedHandleRead(Size bytesTransferred)
+      {
          
          if (bytesTransferred > 0)
          {
@@ -262,43 +277,38 @@ namespace BeeFishHTTPS {
       void handleResponse() 
       {
 
-         boost::asio::post(
-            *_server,
-            [this]()
-            {
+         try {
 
-               // All input is now in
-               clog << now()
-                    << ' '
-                    << ipAddress()          << ' '
-                    << _request->method()   << ' '
-                    << origin() << _request->fullURL()  << ' '
-                    << std::endl;
+            // All input is now in
+            clog << now()
+                 << ' '
+                 << ipAddress()          << ' '
+                 << _request->method()   << ' '
+                 << origin() << _request->fullURL()  << ' '
+                 << std::endl;
 
-               if (_database == nullptr)
-                  _database =
-                     new JSONDatabase(
-                        origin(),
-                        _server->databaseFile()
-                     );
-               else
-                  _database->setOrigin(origin());
+            if (_database == nullptr)
+               _database =
+                  new JSONDatabase(
+                     origin(),
+                     _server->databaseFile()
+                  );
+            else
+               _database->setOrigin(origin());
             
-               _response = new Response(
-                  this
-               );
+            _response = new Response(
+               this
+            );
             
-               _response->handleResponse();
+            _response->handleResponse();
             
-            }
-         );
-         /*
+         }
          catch (std::exception& ex) {
             logException("Session::handleResponse", ex.what());
             delete this;
             return;
          }
-         */
+         
       }
       
       void handleWrite(

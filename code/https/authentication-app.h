@@ -224,7 +224,7 @@ namespace BeeFishHTTPS {
       
       virtual BString name()
       {
-         return "HTTPS Authentication";
+         return "HTTPS Authentication App";
       }
    };
    

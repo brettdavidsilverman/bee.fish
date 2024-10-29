@@ -187,8 +187,8 @@ namespace BeeFishHTTPS {
          << "curl "
          << origin  << "/authenticate"
          << " -c cookies -b cookies "
-         << " -d \"" << str << "\"";
-         //<< " -s -k ";
+         << " -d \"" << str << "\""
+         << " -s -k > /dev/null";
 
 
       string command = stream.str();

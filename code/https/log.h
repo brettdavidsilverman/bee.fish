@@ -21,9 +21,9 @@ inline void initializeLogs() {
    using namespace std;
    using namespace BeeFishMisc;
    
-#ifndef DEBUG   
-//  clog.rdbuf(logfile().rdbuf());
-// cerr.rdbuf(errfile().rdbuf());
+#ifndef DEBUG
+   clog.rdbuf(logfile().rdbuf());
+   cerr.rdbuf(errfile().rdbuf());
 #endif
 
    cout << now() << " cout output" << endl;
