@@ -158,7 +158,7 @@ namespace BeeFishHTTPS {
             error
       );
 
-      std::ofstream& log()
+      std::ofstream& transactionFile()
       {
          return _transactionFile;
       }
