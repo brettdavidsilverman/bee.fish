@@ -1,17 +1,6 @@
 #ifndef BEE_FISH__CONFIG_CODE_HPP
 #define BEE_FISH__CONFIG_CODE_HPP
 
-#ifndef DEBUG
-   #define WEB_SERVER_PORT 80
-   #define WEB_SERVER_HOST "bee.fish"
-#else
-   #define WEB_SERVER_PORT 8000
-   #define WEB_SERVER_HOST "localhost"
-#endif
-
-#define TEST_SERVER_HOST "localhost"
-#define TEST_SERVER_PORT 8000
-
 #include "../Config.hpp"
 
 #define TEMP_DIRECTORY "/var/tmp/"
@@ -47,6 +36,6 @@
    #define KEY_FILE "/etc/letsencrypt/live/" DOMAIN "/privkey.pem"
 #endif
 
-#define TMP_DH_FILE HOME_DIR "/bee.fish/dhparam4096.pem"
+#define TMP_DH_FILE WWW_ROOT_DIRECTORY "/dhparam4096.pem"
 
 #endif

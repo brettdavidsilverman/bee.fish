@@ -1,0 +1,15 @@
+# Save this to the parent directory
+# and rename as Makefile
+
+live:
+	cd bee.fish/code/https && sudo make PORT=443
+
+clean:
+	cd bee.fish/code/https && sudo make clean
+	
+debug:
+	cd dev.bee.fish/code/https && make debug PORT=8000
+
+debug_clean:
+	cd dev.bee.fish/code/https && make clean
+	

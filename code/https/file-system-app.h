@@ -3,7 +3,7 @@
 
 #include <filesystem>
 #include <algorithm>
-#include "../config.h"
+#include "../Config.hpp"
 #include "session.h"
 #include "../web-request/web-request.h"
 #include "response.h"
