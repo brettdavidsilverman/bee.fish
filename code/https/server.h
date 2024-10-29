@@ -40,6 +40,8 @@ using namespace BeeFishDatabase;
 
 namespace BeeFishHTTPS {
     
+   using namespace boost::asio;
+   
    typedef boost::asio::ssl::stream
       <boost::asio::ip::tcp::socket>
       SSLSocket;
@@ -51,7 +53,7 @@ namespace BeeFishHTTPS {
       boost::asio::ssl::context::password_purpose purpose
    );
    
-   class Server
+   class Server : public thread_pool
    {
    public:
       Server( const BString& hostName,
@@ -59,8 +61,10 @@ namespace BeeFishHTTPS {
               const BString& transactionFile,
               boost::asio::io_context&
                  ioContext,
-              unsigned short port
+              unsigned short port,
+              Size threadCount
       ) :
+         thread_pool(threadCount),
          _port(port),
          _ioContext(ioContext),
          _acceptor(

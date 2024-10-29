@@ -19,7 +19,7 @@
 
 #define HOST "https://" DOMAIN
 
-#define WWW_ROOT_DIRECTORY HOME_DIR "/bee.fish"
+#define WWW_ROOT_DIRECTORY HOME_DIR "/" DOMAIN
 
 #define TEST_DIRECTORY WWW_ROOT_DIRECTORY "/tests"
 

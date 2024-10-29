@@ -28,7 +28,7 @@ stop:
 	
 	
 debug:	DEBUG=debug
-debug:	CFLAGS += -g -DDEBUG -DTIME
+debug:	CFLAGS += -g -DDEBUG
 debug:	$(OUTPUT)
 debug:	PORT=8000
 debug:	test

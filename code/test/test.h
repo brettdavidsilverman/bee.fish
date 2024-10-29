@@ -35,7 +35,7 @@ namespace BeeFishTest
    {
       bool ok = true;
       
-      file = string(HOME_DIR) + "/" + string(file);
+     // file = string(HOME_DIR) + "/" + string(file);
 
       if (!exists(file)) {
          cout << "File not found: " << file << endl;

@@ -152,7 +152,7 @@ namespace BeeFishWeb
       BeeFishWeb::WebRequest requestHeadersOnly;
       ok = ok && testFile(
          "WebRequest with only headers",
-         "bee.fish/code/web-request/tests/request.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/request.txt",
          requestHeadersOnly,
          true
       );
@@ -170,7 +170,7 @@ namespace BeeFishWeb
       BeeFishWeb::WebRequest requestBody;
       ok = ok && testFile(
          "WebRequest with body",
-         "bee.fish/code/web-request/tests/request-body.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/request-body.txt",
          requestBody,
          true
       );
@@ -197,7 +197,7 @@ namespace BeeFishWeb
       ok = ok && testFile(
          parser,
          "WebRequest with full json",
-         "bee.fish/code/web-request/tests/request-full.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/request-full.txt",
          requestFull,
          true
       );
@@ -227,7 +227,7 @@ namespace BeeFishWeb
       ok = ok && testFile(
          parser2,
          "WebRequest with full json 2",
-         "bee.fish/code/web-request/tests/request-full.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/request-full.txt",
          request2,
          true
       );
@@ -245,7 +245,7 @@ namespace BeeFishWeb
       BeeFishWeb::WebRequest urlWebRequest;
       ok = ok && testFile(
          "WebRequest with path and query",
-         "bee.fish/code/web-request/tests/path.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/path.txt",
          urlWebRequest,
          true
       );
@@ -263,7 +263,7 @@ namespace BeeFishWeb
       BeeFishWeb::WebRequest escapedUrlWebRequest;
       ok = ok && testFile(
          "WebRequest with escaped path and query",
-         "bee.fish/code/web-request/tests/escaped-path.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/escaped-path.txt",
          escapedUrlWebRequest,
          true
       );
@@ -282,7 +282,7 @@ namespace BeeFishWeb
       
       ok = ok && testFile(
          "Post with encoded name value pairs",
-         "bee.fish/code/web-request/tests/post.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/post.txt",
          postWebRequest,
          true
       );
@@ -298,7 +298,7 @@ namespace BeeFishWeb
       // Post with anything
       ok = ok && testFile(
          "Post with content length text",
-         "bee.fish/code/web-request/tests/request-text.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/request-text.txt",
          postWebRequest2,
          true
       );
@@ -315,7 +315,7 @@ namespace BeeFishWeb
       BeeFishWeb::WebRequest postWebRequest3;
       ok = ok && testFile(
          "Post with zero content length",
-         "bee.fish/code/web-request/tests/zero-content-length.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/zero-content-length.txt",
          postWebRequest3,
          true
       );
@@ -338,21 +338,21 @@ namespace BeeFishWeb
       
       ok = ok && testFile(
          "WebRequest part 0",
-         "bee.fish/code/web-request/tests/request-part-0.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/request-part-0.txt",
          request,
          BeeFishMisc::nullopt
       );
       
       ok = ok && testFile(
          "WebRequest part 1",
-         "bee.fish/code/web-request/tests/request-part-1.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/request-part-1.txt",
          request,
          BeeFishMisc::nullopt
       );
       
       ok = ok && testFile(
          "WebRequest part 2",
-         "bee.fish/code/web-request/tests/request-part-2.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/request-part-2.txt",
          request,
          true
       );
@@ -390,7 +390,7 @@ namespace BeeFishWeb
       ok = ok && testFile(
          parser,
          "WebRequest Image JSON",
-         "bee.fish/code/web-request/tests/image-json.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/image-json.txt",
          request,
          true
       );
@@ -416,7 +416,7 @@ namespace BeeFishWeb
       ok = ok && testFile(
          parser,
          "POST with hello world sample",
-         "bee.fish/code/web-request/tests/post-json.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/post-json.txt",
          request,
          true
       );
@@ -430,7 +430,7 @@ namespace BeeFishWeb
       ok = ok && testFile(
          parser2,
          "POST to settings",
-         "bee.fish/code/web-request/tests/post-settings.txt",
+         WWW_ROOT_DIRECTORY "/code/web-request/tests/post-settings.txt",
          request2,
          true
       );

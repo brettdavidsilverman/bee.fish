@@ -620,7 +620,7 @@ assert(ok);
       ok &= testFile(
          parser,
          "JSON with buffered image",
-         "bee.fish/code/json/tests/stream.json",
+         WWW_ROOT_DIRECTORY "/code/json/tests/stream.json",
          jsonImage,
          true
       );

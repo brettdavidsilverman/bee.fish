@@ -16,10 +16,7 @@ using namespace BeeFishHTTPS;
 
 void start(
    boost::asio::io_context& io_context,
-   const BString& host,
-   int port,
-   const BString& databaseFile,
-   const BString& transactionFile
+   Server& server
 );
 
 std::mutex _wait;
@@ -58,12 +55,16 @@ int main(int argc, const char* argv[])
       int portArg;
       if ((portArg = hasArg(argc, argv, "-port")) >= 0)
       {
-            port = std::atoi(argv[portArg + 1]);
+          if (argc > portArg + 1)
+          {
+             const char* arg = argv[portArg + 1];
+             char* p;
+             long converted = strtol(arg, &p, 10);
+             if (p)
+                port = converted;
+          }
       }
      
-         
-      std::cout << "Host: " << HOST << ":" << port << endl;
-      
       initializeLogs();
       
       std::cout << "Setting up App Factories" << std::endl;
@@ -74,18 +75,32 @@ int main(int argc, const char* argv[])
       appFactories.add<JSONApp>();
       appFactories.add<NotFoundApp>();
       boost::asio::io_context io_context(_threadCount);
+      
+      std::cout << "Starting on port " << port << "..." << endl;
+
+  
+      BeeFishHTTPS::Server
+      server
+      (
+         HOST,
+         databaseFile,
+         transactionFile,
+         io_context,
+         port,
+         _threadCount
+      );
+      
       _wait.lock();
       
       std::thread startThread(
          start, 
          std::ref(io_context),
-         HOST,
-         port,
-         databaseFile,
-         transactionFile
+         std::ref(server)
       );
       
       _wait.lock();
+      
+      bool ok = true;
       
       bool test = false;
       if (hasArg(argc, argv, "-test") >= 0)
@@ -93,12 +108,15 @@ int main(int argc, const char* argv[])
           test = true;
       }
       
-      bool ok = true;
+      
       if (test) {
          ok = BeeFishHTTPS::test(port);
          io_context.stop();
             
       }
+      
+      std::cout << "Started " << server.origin() << " 😊" << endl;
+   
       
       startThread.join();
       
@@ -124,29 +142,15 @@ int main(int argc, const char* argv[])
 
 void start(
    boost::asio::io_context& io_context,
-   const BString& host,
-   int port,
-   const BString& databaseFile,
-   const BString& transactionFile
+   Server& server
 )
 {
-   std::cout << "Starting on port " << port << "..." << endl;
-
-   BeeFishHTTPS::Server
-      server
-      (
-         host,
-         databaseFile,
-         transactionFile,
-         io_context,
-         port
-      );
-
-   std::cout << "Started " << server.origin() << " 😊" << endl;
       
    _wait.unlock();
    
    io_context.run();
+   
+   server.join();
 }
 
 #else

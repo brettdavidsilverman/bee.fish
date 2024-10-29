@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <memory>
 
-#include "../config.h"
+#include "../Config.hpp"
 #include "../parser/parser.h"
 #include "../parser/test.h"
 #include "Script.hpp"

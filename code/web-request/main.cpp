@@ -1,7 +1,7 @@
 #include <iostream>
 #include <filesystem>
 
-#include "../config.h"
+#include "../Config.hpp"
 #include "../parser/parser.h"
 #include "../parser/test.h"
 #include "version.h"
