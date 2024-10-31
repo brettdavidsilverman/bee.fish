@@ -100,8 +100,7 @@ namespace BeeFishBString {
 
       inline friend BStream& operator << (BStream& out, std::string value)
       {
-         const Data data(value);
-         out.write(data);
+         out.write(value);
          return out;
       }
 

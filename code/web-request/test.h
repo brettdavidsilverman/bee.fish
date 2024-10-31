@@ -290,8 +290,8 @@ namespace BeeFishWeb
       BeeFishWeb::WebRequest postWebRequest2;
       BString body;
       postWebRequest2.setOnData(
-         [&body](const BeeFishBString::Data& data) {
-            body = BString((const char*)data._data, data.size());
+         [&body](const std::string& data) {
+            body = data;
          }
       );
 
@@ -379,7 +379,7 @@ namespace BeeFishWeb
       bool ok = true;
         
       BeeFishBString::BStream::OnBuffer onimage =
-         [](const BeeFishBString::Data& buffer) {
+         [](const std::string& buffer) {
          };
 
       BeeFishWeb::WebRequest request;

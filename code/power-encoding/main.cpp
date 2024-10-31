@@ -43,8 +43,7 @@ int main(int argc, const char* argv[])
       if (line.size() == 0)
          break;
       
-      Data data = Data::fromBase64(line);
-      BitStream stream = BitStream::fromData(data);
+      BitStream stream = BitStream::fromData(line);
       
       BString string;
       stream >> string;

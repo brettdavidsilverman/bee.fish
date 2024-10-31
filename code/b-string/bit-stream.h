@@ -11,7 +11,6 @@
 
 #include "../power-encoding/power-encoding.h"
 #include "b-string.h"
-#include "data.h"
 #include "char.h"
 
 namespace BeeFishBString {
@@ -50,10 +49,10 @@ namespace BeeFishBString {
          }
       }
 
-      BitStream(const Data& data)
+      BitStream(const std::string& data)
       {
          // [0,1,2,3,4,5,6,7]
-         const Byte* _data = data._data;
+         const Byte* _data = (const Byte*)data.data();
          const size_t _size = data.size();
 
          reserve(_size * 8);
@@ -91,12 +90,12 @@ namespace BeeFishBString {
     
       }
 
-      static BitStream fromData(const Data& data)
+      static BitStream fromData(const std::string& data)
       {
          return BitStream(data);
       }
       
-      Data toData() const
+      std::string toData() const
       {
          std::vector<Byte> bytes;
          int count = 0;
@@ -128,7 +127,7 @@ namespace BeeFishBString {
             bytes.push_back(byte);
          }
 
-         Data copy = Data(bytes.data(), bytes.size(), true);
+         std::string copy((const char*)bytes.data(), bytes.size());
 
          return copy;
       }

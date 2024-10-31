@@ -227,7 +227,7 @@ namespace BeeFishHTTPS {
                   _bytesTransferred  /
                   pageSize;
 
-                  BeeFishDatabase::Data data =
+                  std::string data =
                      _bookmark[pageIndex].getData();
                   
                   length = data.size();

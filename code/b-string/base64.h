@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "data.h"
+#include "b-string.h"
 
 using namespace BeeFishBString;
 
@@ -56,8 +56,8 @@ namespace BeeFishBase64
    }
    
    inline BString
-   encode(const Data& data) {
-      return encode((const Byte*)(&(data.data()[0])), data.size());
+   encode(const std::string& data) {
+      return encode((const Byte*)(data.data()), data.size());
    }
 
    
@@ -131,17 +131,19 @@ namespace BeeFishBase64
 
 namespace BeeFishBString
 {
-   inline BString Data::toBase64() const
+   inline BString toBase64(const std::string& data)
    {
-      return BeeFishBase64::encode(*this);
+      return BeeFishBase64::encode(data);
    }
 
-   inline Data Data::fromBase64
+   inline std::string fromBase64
    (const BString& base64)
    {
       std::vector<Byte> bytes =
           BeeFishBase64::decode(base64);
-      Data data(bytes.data(), bytes.size(), true);
+          
+      std::string data((const char*)bytes.data(), bytes.size());
+      
       return data;
    }
 }

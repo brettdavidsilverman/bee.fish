@@ -236,17 +236,17 @@ namespace BeeFishId
             throw logic_error("Id::createKey");
 
          // get the data
-         BeeFishBString::Data data = stream.toData();
+         std::string data = stream.toData();
 
-         return data.toBase64();
+         return toBase64(data);
       }
       
       static Id decodeKey(const BString& key) {
    
       
          // extract the raw data
-         BeeFishBString::Data raw =
-            BeeFishBString::Data::fromBase64(key);
+         std::string raw =
+            fromBase64(key);
 
          // extract the timestamp
          // from the key

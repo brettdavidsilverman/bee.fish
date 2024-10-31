@@ -102,25 +102,26 @@ namespace BeeFishDatabase
 
             cout << "\tGet/Set Data size() " << flush;
 
-            Data testHello = next.getData();
+            std::string
+               testHello = next.getData();
 
             success = testHello.size() == strlen("world");
             outputSuccess(success);
 
             cout << "\tGet/Set Data str(): " << flush;
-            std::string testHelloStr = testHello.str();
+            std::string testHelloStr = testHello;
             success = (testHelloStr == "world");
             outputSuccess(success);
       }      
 
-      Data testNext1 = start["Hello"].getData();
+      std::string testNext1 = start["Hello"].getData();
       cout << "\t" << "Hello 1: " << testNext1.size() ;
-      std::string world1 = testNext1.str();
+      std::string world1 = testNext1;
       success = success && (world1 == "world");
       outputSuccess(success);
 
-      Data testNext2 = next.getData();
-      std::string world2 = testNext2.str();
+      std::string testNext2 = next.getData();
+      std::string world2 = testNext2;
       cout << "\t" << "Hello 2: " << testNext2.size() ;
       success = success && (world2 == "world");
       outputSuccess(success);

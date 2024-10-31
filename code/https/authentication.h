@@ -11,6 +11,7 @@ using namespace BeeFishDatabase;
 using namespace BeeFishPowerEncoding;
 using namespace BeeFishHTTPS;
 using namespace BeeFishWeb;
+using namespace BeeFishMisc;
 
 namespace BeeFishHTTPS {
 
@@ -67,6 +68,7 @@ namespace BeeFishHTTPS {
    public:
       virtual void logon(const BString& secret)
       {
+          
 
          if (!_ipAddress.size())
             throw runtime_error("Missing ip-address");
@@ -80,7 +82,7 @@ namespace BeeFishHTTPS {
          // Save the secret
          // and set the user data path
          BString md5Secret =
-            BeeFishBString::Data(secret).md5();
+            md5(secret);
 
          _userData = _path
             ["Secrets"]
@@ -90,9 +92,11 @@ namespace BeeFishHTTPS {
          // (Note, we use toHex, not toBase64 due to
          // cookie encoding rules)
          _sessionId =
-            BeeFishBString::Data::fromRandom(
-               SESSION_ID_SIZE
-            ).toHex();
+            toHex(
+               createRandom(
+                  SESSION_ID_SIZE
+               )
+            );
 
          // get the session data
          _sessionData = _path

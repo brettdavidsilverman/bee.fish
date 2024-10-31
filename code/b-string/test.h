@@ -273,7 +273,7 @@ namespace BeeFishBString
 
       BitStream stream2;
       stream2 << bstring;
-      Data data = stream2.toData();
+      std::string data = stream2.toData();
       stream2.reset();
       BitStream stream2Compare = BitStream::fromData(data);
       
@@ -298,9 +298,8 @@ namespace BeeFishBString
       
       BStream stream;
       BString value;
-      stream._onbuffer = [&value](const Data& buffer) {
-         std::string string((const char*)buffer._data, buffer.size());
-         value = string;
+      stream._onbuffer = [&value](const std::string& buffer) {
+         value = buffer;
       };
 
       stream << "Hello World";
@@ -385,25 +384,32 @@ namespace BeeFishBString
       
       bool ok = true;
       
-      Data start = "Hello World";
-      BString hex = start.toHex();
-      cout << "Hello World hex: " << hex << endl;
+      std::string start = "Hello World";
+      BString hex = toHex(start);
+      
       ok &= testResult(
          "From Data to hex",
-         (hex.size())
+         (hex.size() == 22)
+      );
+      
+      std::string endData = fromHex(hex);
+      
+      ok &= testResult(
+         "From hex to data",
+         (endData == start)
       );
       
 #ifdef SERVER
       const int SESSION_ID_SIZE = 32;
       
-      Data random =
-         Data::fromRandom(
+      std::string random =
+         createRandom(
             SESSION_ID_SIZE
          );
         
-      BString randomHex = random.toHex();
+      BString randomHex = toHex(random);
       
-      cout << "Random hex: " << randomHex << endl;
+      cout << "\tRandom hex: " << randomHex << endl;
       
       ok &= testResult(
          "Random hex",
@@ -417,8 +423,6 @@ namespace BeeFishBString
       return ok;
    }
    
-   inline Data testCopyData();
-
    inline bool testData()
    {
       cout << "Data" << endl;
@@ -427,31 +431,18 @@ namespace BeeFishBString
      
      
       unsigned long ulong = 101;
-      Data ulongData(ulong);
+      std::string ulongData((char*)&ulong, sizeof ulong);
       unsigned long ulongCompare =
-         (unsigned long)ulongData;
+         *(unsigned long*)ulongData.data();
       ok &= testResult(
          "From unsigned long to data and back",
          ulongCompare == ulong
       );
       
-      // BString "ᛒᚢᛞᛖ"
-      BString bstring = "Hello World";
-      BitStream stream;
-      stream << bstring;
-
-      Data dataFromBString = bstring.toData();
-
-      BString bstring2 = BString::fromData(dataFromBString);
-
-      ok &= testResult(
-         "From b-string to data and back",
-         bstring == bstring2
-      );
       
-      Data dataStart = "Hello World";
-      BString base64 = dataStart.toBase64();
-      Data dataEnd = Data::fromBase64(base64);
+      std::string dataStart = "Hello World";
+      BString base64 = toBase64(dataStart);
+      BString dataEnd = fromBase64(base64);
       ok &= testResult(
          "From data to base64 and back",
          (dataStart == dataEnd)
@@ -459,40 +450,20 @@ namespace BeeFishBString
    
    #ifdef SERVER
       std::string stringMd5 = "Hello World";
-      Data md5data = stringMd5;
-      BString md5hash = md5data.md5();
-
+      BString md5hash = md5(stringMd5);
+      cerr << "MD5 " << md5hash << endl;
       ok &= testResult(
          "Compare md5 hash",
          (md5hash == "b10a8db164e0754105b7a99be72e3fe5")
       );
    #endif
-   
-      Data copy = testCopyData();
-      char buffer[copy.size()];
-      memset(buffer, 0, sizeof(buffer));
-      memcpy(buffer, copy.data(), copy.size());
-      std::string string = buffer;
-      cout << "STRING: " << string << endl;
-      ok &= testResult(
-         "Test Copy Data",
-         string == "Hello World"
-      );
       
       cout << endl;
       
       return ok;
    }
    
-   inline Data testCopyData() {
-      Data data = Data::create();
-      const char* string = "Hello World";
-      memcpy(data.data(), string, strlen(string));
-      Data data2;
-      data2 = data;
-      return data2;
-   }
-
+   
    inline bool testEncodeURI()
    {
       cout << "Encode URI" << endl;

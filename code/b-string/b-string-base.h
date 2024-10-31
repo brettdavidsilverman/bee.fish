@@ -37,7 +37,6 @@ namespace BeeFishBString
    typedef std::string BStringBase;
 
    class BString;
-   class Data;
    
    // A string of variable length characters.
    // Can be created from wide string format,
@@ -69,14 +68,6 @@ namespace BeeFishBString
       virtual ~BString() {
 
       }
-
-      // defined in misc.h
-      Data toData() const;
-
-      // defined in misc.h
-      static BString fromData(const Data &source);
-
-      
      
 #ifdef SERVER
       // from path

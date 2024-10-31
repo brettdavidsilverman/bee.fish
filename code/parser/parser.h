@@ -205,33 +205,12 @@ namespace BeeFishParser
       virtual optional<bool> read(const char* str) {
          return read(std::string(str));
       }
-
-      virtual optional<bool> read(const BeeFishBString::Data& data, size_t size = 0)
-      {
-
-         if (size == 0)
-            size = data.size();
-
-         const Byte* _data = data._data;
-
-         for ( size_t i = 0;
-               i < size && _result == nullopt;
-               ++i )
-         {
-            uint8_t byte = _data[i];
-            if (!match(byte))
-               return false;
-         }
-
-         if (_result == true)
-            success();
-         else if (_result == false)
-            fail();
-            
-         return _result;
       
+      virtual optional<bool> read(const char* str, size_t length) {
+         return read(std::string(str, length));
       }
 
+      
       virtual optional<bool> read(const BeeFishBString::BString& string)
       {
 

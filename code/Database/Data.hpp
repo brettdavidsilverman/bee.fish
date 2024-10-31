@@ -22,7 +22,7 @@
 using namespace BeeFishPowerEncoding;
 
 
-namespace BeeFishDatabaseX {
+namespace BeeFishDatabase {
 
    typedef uint8_t Byte;
 
@@ -223,28 +223,13 @@ namespace BeeFishDatabaseX {
       string sha3() const;
       
 
-      inline static BeeFishBString::Data fromRandom(
+      inline static std::string fromRandom(
          size_t byteCount
       )
       {
-         unsigned char buffer[byteCount];
-
-         int rc = RAND_bytes(
-            buffer,
-            byteCount
-         );
-      
-         // unsigned long err = ERR_get_error();
-
-         if (rc != 1)
-         {
-            // RAND_bytes failed
-            throw runtime_error("Random bytes failed");
-         
-         }
-      
-         return BeeFishBString::Data(buffer, byteCount, true);
+         return createRandom(byteCount);
       }
+         
 #endif
 
       friend ostream& operator <<

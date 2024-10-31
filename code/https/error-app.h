@@ -5,7 +5,6 @@
 #include "session.h"
 #include "app.h"
 #include "authentication.h"
-#include "storage.h"
 #include "../json/json-parser.h"
 #include "../Script/Script.hpp"
 #include "../web-request/web-request.h"

@@ -7,64 +7,31 @@
 #include <iomanip>
 #include <ctype.h>
 #ifdef SERVER
+#include <openssl/evp.h>
+#include <openssl/sha.h>
 #include <openssl/md5.h>
+#include <openssl/rand.h>
+#include <openssl/err.h>
 #endif
 
 #include "../power-encoding/power-encoding.h"
 #include "b-string.h"
 #include "char.h"
-#include "data.h"
 #include "base64.h"
 #include "bit-stream.h"
 
-namespace BeeFishBString
+namespace BeeFishMisc
 {
-   
-   
-#ifdef SERVER
-   inline BString Data::md5() const
-   {
-      
-      Byte result[MD5_DIGEST_LENGTH];
-      memset(result, 0, MD5_DIGEST_LENGTH);
-         
-      MD5(
-         _data,
-         size(),
-         result
-      );
-
-
-      Data digest(result, MD5_DIGEST_LENGTH);
-
-      return digest.toHex();
-         
-   }
-   
-   inline BString Data::sha3() const
-   {
-      uint32_t digest_length = SHA512_DIGEST_LENGTH;
-      const EVP_MD* algorithm = EVP_sha3_512();
-      uint8_t* digest = static_cast<uint8_t*>(OPENSSL_malloc(digest_length));
-      EVP_MD_CTX* context = EVP_MD_CTX_new();
-      EVP_DigestInit_ex(context, algorithm, nullptr);
-      EVP_DigestUpdate(context, c_str(), size());
-      EVP_DigestFinal_ex(context, digest, &digest_length);
-      EVP_MD_CTX_destroy(context);
-      Data dataDigest(digest, SHA512_DIGEST_LENGTH);
-      BString output = dataDigest.toHex();
-      OPENSSL_free(digest);
-      return output;
-   }
-#endif
-
-   inline BString Data::toHex() const
+   inline BString toHex(const std::string& data)
    {
       static const char digits[] = "0123456789abcdef";
 
       BString hex;
-
-      for (size_t i = 0; i < size(); ++i) {
+      
+      const Byte* _data =
+         (const Byte*)data.data();
+      
+      for (size_t i = 0; i < data.size(); ++i) {
          hex += digits[_data[i] / 16];
          hex += digits[_data[i] % 16];
       }
@@ -72,64 +39,78 @@ namespace BeeFishBString
       return hex;
       
    }
-
-/*  
-   // BString from data
-   inline BString::BString(const Data &source)
+   
+   inline std::string fromHex(const BString& hex)
    {
-      size_t characterCount = source.size() / sizeof(Char);
-      reserve(characterCount);
-      Char* chars = (Char*)(source.data());
-      for (size_t i = 0; i < characterCount; ++i) {
-         BStringBase::push_back(chars[i]);
-      }
-   }
-*/
-/*
-   // Declared in character.h
-   inline BString Char::bstr() const {
-      BString string;
-      for (auto bit : (*this)) {
-         if (bit)
-            string.push_back('1');
-         else
-            string.push_back('0');
-      }
-      return string;
-   }
-*/
-   // Data from BString
-   inline Data::Data(const BString& source) : Data::Data(source.toData())
-   {
-   }
-
-   inline Data::operator BString() const {
-      return BString::fromData(*this);
-   }
-
-   inline Data BString::toData() const
-   {
-      BitStream stream;
-
-      stream << *this;
-
-      Data data = stream.toData();
-
-      return data;
-   }
-
-   inline BString BString::fromData(const Data &source)
-   {
-
-      BitStream stream = BitStream::fromData(source);
+      std::string result(hex.length() / 2, '\0');
       
-      BString bstring;
-      stream >> bstring;
+      for (size_t i = 0; i < hex.length(); i += 2)
+      {
+         std::string byteString = hex.substr(i, 2);
+         char byte = (char) strtol(byteString.c_str(), NULL, 16);
+         result[i / 2] = byte;
+      }
 
-      return bstring;
+      return result;
+   }
+
+#ifdef SERVER
+   inline BString md5(const std::string& data)
+   {
+      
+      std::string result(MD5_DIGEST_LENGTH, '\0');
+         
+      MD5(
+         (const Byte*)data.data(),
+         data.size(),
+         (Byte*)result.data()
+      );
+      
+      return toHex(result);
+         
    }
    
+   inline BString sha3(const std::string& data)
+   {
+      uint32_t digest_length = SHA512_DIGEST_LENGTH;
+      const EVP_MD* algorithm = EVP_sha3_512();
+      uint8_t* digest = static_cast<uint8_t*>(OPENSSL_malloc(digest_length));
+      EVP_MD_CTX* context = EVP_MD_CTX_new();
+      EVP_DigestInit_ex(context, algorithm, nullptr);
+      EVP_DigestUpdate(context, data.data(), data.size());
+      EVP_DigestFinal_ex(context, digest, &digest_length);
+      EVP_MD_CTX_destroy(context);
+      std::string dataDigest((char *)digest, SHA512_DIGEST_LENGTH);
+      BString output = toHex(dataDigest);
+      OPENSSL_free(digest);
+      return output;
+   }
    
+   inline static std::string createRandom(
+      size_t byteCount
+   )
+   {
+      std::string buffer(byteCount, '\0');
+
+      int rc = RAND_bytes(
+         (Byte*) buffer.data(),
+         byteCount
+      );
+      
+      if (rc != 1)
+      {
+         // RAND_bytes failed
+         throw runtime_error("Random bytes failed");
+         
+      }
+      
+      return buffer;
+   }
+   
+#endif
+
+   
+
 }
 
 #endif

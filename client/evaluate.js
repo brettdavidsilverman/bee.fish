@@ -285,7 +285,7 @@ function HTML(url, parent=document.body) {
    {
       var json = evaluate(url);
       var element = createElement(json, parent);
-      return element;
+      return Promise.resolve(element);
    }
    else
    {
@@ -315,7 +315,6 @@ function HTML(url, parent=document.body) {
    {
       for (var tag in json) {
              
-         
          var element =
            document.createElement(tag);
 

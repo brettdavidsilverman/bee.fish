@@ -275,7 +275,7 @@ namespace BeeFishJSON {
             new StringCharacters();
          
          _stringCharacters->_onbuffer =
-            [this](const BeeFishBString::Data& buffer) {
+            [this](const std::string& buffer) {
                _value = _stringCharacters->value();
                if (this->_onbuffer) {
                   this->_onbuffer(buffer);

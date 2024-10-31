@@ -8,7 +8,6 @@
 #include <ctype.h>
 #include "../power-encoding/power-encoding.h"
 #include "b-string-base.h"
-#include "data.h"
 #include "base64.h"
 #include "misc.h"
 #include "bit-stream.h"

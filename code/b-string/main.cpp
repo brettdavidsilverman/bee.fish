@@ -45,12 +45,10 @@ int main(int argc, const char* argv[]) {
      
       if (line == "")
          break;
-      
-      Data data(line);
      
       cout << line << endl;
 #ifdef SERVER
-      cout << data.sha3() << endl;
+      cout << sha3(line) << endl;
 #endif
 
    }
