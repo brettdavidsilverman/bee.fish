@@ -288,26 +288,8 @@ namespace BeeFishDatabase {
       void getData(BString& destination)
       {
          destination = getData();
-         return;
-         
-         const std::string data = getData();
-         
-         if (data.size())
-            destination = BString(
-               data.data(),
-               data.size()
-            );
-         else
-            destination = "";
       }
 
-      
-/*
-      void setData(const std::string& value) {
-         Data source(value);
-         setData(source);
-      }
-*/
       void setData(const std::string& value) {
 
          Database::ScopedFileLock lock(_database);

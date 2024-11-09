@@ -11,7 +11,6 @@ namespace BeeFishDatabase
    {
    protected:
       Path _properties;
-      Path _objects;
       Path _originPath;
       BString _origin;
    public:
@@ -37,9 +36,6 @@ namespace BeeFishDatabase
          _properties =
             _originPath[PROPERTIES];
             
-         _objects =
-            _originPath[OBJECTS];
-            
          
            
       }
@@ -47,11 +43,6 @@ namespace BeeFishDatabase
       const BString& getOrigin() const
       {
          return _origin;
-      }
-      
-      Path objects() const
-      {
-         return _objects;
       }
       
       Path properties() const

@@ -61,12 +61,7 @@ namespace BeeFishDatabase {
       {
          return index();
       }
-      
-      Path objects()
-      {
-         return database().objects();
-      }
-      
+     
       Path properties()
       {
          return database().properties();
