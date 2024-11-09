@@ -185,7 +185,7 @@ namespace BeeFishDatabase {
                   + 1;
             }
 
-            path._setData<Index>(position);
+            path.setData<Index>(position);
             
          }
          
@@ -193,7 +193,7 @@ namespace BeeFishDatabase {
             [BY_OBJECT]
             [id]
             [position]
-            ._setData<Index>(keyPathIndex);
+            .setData<Index>(keyPathIndex);
             
          return position;
       }

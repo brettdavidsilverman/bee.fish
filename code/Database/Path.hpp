@@ -339,7 +339,7 @@ namespace BeeFishDatabase {
       }
   
       template<typename T>
-      void _setData(const T& source)
+      void setData(const T& source)
       {
          const char* bytes = (const char*)&source;
          std::string data(bytes, sizeof(T));

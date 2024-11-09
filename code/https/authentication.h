@@ -108,7 +108,7 @@ namespace BeeFishHTTPS {
 
          // Save the secret path
          _sessionData["User Data Path"]
-            ._setData<Index>(
+            .setData<Index>(
                _userData._index
             );
 
@@ -117,7 +117,7 @@ namespace BeeFishHTTPS {
          time_t lastAuthentication = epoch_seconds();
 
          _sessionData["Last Authentication"]
-            ._setData<time_t>(lastAuthentication);
+            .setData<time_t>(lastAuthentication);
             
          _authenticated = true;
 
@@ -160,7 +160,7 @@ namespace BeeFishHTTPS {
                
                _sessionData
                   ["Last Authentication"]
-                  ._getData<time_t>(lastTime);
+                  .getData<time_t>(lastTime);
                   
                // 1 hour duration
                if ( (epoch_seconds() - lastTime) 
@@ -169,13 +169,13 @@ namespace BeeFishHTTPS {
                   _authenticated = true;
                
                   _sessionData["User Data Path"]
-                     ._getData<Index>(
+                     .getData<Index>(
                         _userData._index
                      );
                      
                   _sessionData
                      ["Last Authentication"]
-                     ._setData<time_t>(epoch_seconds());
+                     .setData<time_t>(epoch_seconds());
                }
             }
          }

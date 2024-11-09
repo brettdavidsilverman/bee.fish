@@ -132,7 +132,7 @@ namespace BeeFishDatabase
 
       for (Size i = min; i <= max; ++i)
       {
-         data[i]._setData<Size>(i);
+         data[i].setData<Size>(i);
       }
       
       
@@ -221,7 +221,7 @@ namespace BeeFishDatabase
 
          Path data = start["getset"];
          Size count = -1;
-         data._setData<Size>(22);
+         data.setData<Size>(22);
          data.getData<Size>(count);
          success =
             (count == 22);
