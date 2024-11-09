@@ -332,10 +332,10 @@ namespace BeeFishHTTPS {
       
    };
 
-   optional<JSONPath> parseURL(JSONDatabase& database, BString& error, const BString& clientIP, const BString& method, const BString& uri, const BString& args) {
+   optional<JSONPath> parseURL(Path userData, BString& error, const BString& clientIP, const BString& method, const BString& uri, const BString& args) {
       Debug debug;
       
-      Path path = database.origin()[URLS];
+      Path path = userData[URLS];
       
       
       BString segment;

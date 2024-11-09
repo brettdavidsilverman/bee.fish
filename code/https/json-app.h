@@ -48,11 +48,10 @@ namespace BeeFishHTTPS {
          _serve = App::SERVE_JSON;
          _contentLength = -1;
          
-         JSONDatabase* database =
-            session()->database();
-            
          BString error;
    
+         Path userData =
+            Authentication::userData();
          const BString& clientIPAddress = 
             session()->ipAddress();
          const BString& method =
@@ -64,7 +63,7 @@ namespace BeeFishHTTPS {
          
          optional<Path> jsonPath =
             parseURL(
-               *database,
+               userData,
                error,
                clientIPAddress,
                method,

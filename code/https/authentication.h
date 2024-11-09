@@ -53,7 +53,7 @@ namespace BeeFishHTTPS {
          BString sessionId
       ) :
          _database(database),
-         _path(_database),
+         _path(_database.origin()),
          _sessionData(_path),
          _userData(_path),
          _ipAddress(ipAddress),

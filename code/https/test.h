@@ -19,7 +19,7 @@ namespace BeeFishHTTPS {
    using namespace std::filesystem;
 
    inline bool testParseURL(const BString& origin);
-   inline bool testURLQuery(JSONDatabase& database, const BString& uri, const BString& queryStr, bool expectedResult, const BString& expectedValue = "");
+   inline bool testURLQuery(Path userData, const BString& uri, const BString& queryStr, bool expectedResult, const BString& expectedValue = "");
    inline bool testLogon(const BString& origin);
    inline bool testAllFiles(const BString& origin, string directory);
    inline bool testFile(const BString& origin, string directory, string file, bool expect = true);
@@ -56,9 +56,9 @@ namespace BeeFishHTTPS {
       
       JSONDatabase db(origin);
       
-      Path start = db.origin()[URLS]["name"];
-      start.clear();
-      JSONPathParser json(start);
+      Path userData = db.origin()["test"];
+      userData.clear();
+      JSONPathParser json(userData[URLS]["name"]);
       std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\", \"middle\": [\"David\", \"PK\"]}}");
       json.read(stream);
       json.eof();
@@ -69,13 +69,13 @@ namespace BeeFishHTTPS {
       if (success)
       {
        
-         success &= testURLQuery(db, "name", "this.name.first", true, "\"Bee\"");
-         success &= testURLQuery(db, "name", "this[\"name\"][\"first\"]", true, "\"Bee\"");
-         success &= testURLQuery(db, "name", "this[\"name\"].first", true, "\"Bee\"");
-         success &= testURLQuery(db, "name", "this.name[\"first\"]", true, "\"Bee\"");
-         success &= testURLQuery(db, "name", "this.nameb", false, "Invalid property 'nameb'. Expected one of\r\n   'name'");
-         success &= testURLQuery(db, "name", "this.name.middle[0]", true, "\"David\"");
-         success &= testURLQuery(db, "name", "this.name.middle[2]", false, "Invalid index 2. Expected index range is [0, 1]");
+         success &= testURLQuery(userData, "name", "this.name.first", true, "\"Bee\"");
+         success &= testURLQuery(userData, "name", "this[\"name\"][\"first\"]", true, "\"Bee\"");
+         success &= testURLQuery(userData, "name", "this[\"name\"].first", true, "\"Bee\"");
+         success &= testURLQuery(userData, "name", "this.name[\"first\"]", true, "\"Bee\"");
+         success &= testURLQuery(userData, "name", "this.nameb", false, "Invalid property 'nameb'. Expected one of\r\n   'name'");
+         success &= testURLQuery(userData, "name", "this.name.middle[0]", true, "\"David\"");
+         success &= testURLQuery(userData, "name", "this.name.middle[2]", false, "Invalid index 2. Expected index range is [0, 1]");
          outputSuccess(success);
       }
       
@@ -84,14 +84,14 @@ namespace BeeFishHTTPS {
    }
    
 
-   bool testURLQuery(JSONDatabase& database, const BString& url, const BString& queryStr, bool expectedResult, const BString& expectedValue)
+   bool testURLQuery(Path userData, const BString& url, const BString& queryStr, bool expectedResult, const BString& expectedValue)
    {
       cout << "\t" << "Testing query " << queryStr << flush;
      
       BString error;
 
       optional<JSONPath> object = parseURL(
-         database,
+         userData,
          error,
          "127.0.0.1",
          "GET",

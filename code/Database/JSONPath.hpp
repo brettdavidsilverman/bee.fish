@@ -11,14 +11,7 @@ namespace BeeFishDatabase {
    using namespace BeeFishScript;
    using namespace BeeFishJSON;
 
-   /*
-   db[OBJECTS][objectId][position] = keyIndex //[type][value]
-   db[PROPERTIES][key][VALUE][type][value][objectId]
-   db[PROPERTIES][key][POSITION][objectId] = position;
-   //db[PROPERTIES][objectId][position] = keyIndex
-   */
-   
-   
+
    
    class JSONPath :
       public MinMaxPath
