@@ -222,7 +222,7 @@ namespace BeeFishDatabase
          Path data = start["getset"];
          Size count = -1;
          data._setData<Size>(22);
-         data._getData<Size>(count);
+         data.getData<Size>(count);
          success =
             (count == 22);
 

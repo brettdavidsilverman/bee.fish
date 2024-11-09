@@ -172,7 +172,7 @@ namespace BeeFishDatabase {
          Index position;
          
          if (path.hasData())
-            path._getData(position);
+            path.getData(position);
          else {
                
             MinMaxPath object = (*this)[Type::OBJECT];
@@ -209,7 +209,7 @@ namespace BeeFishDatabase {
          path = path[position];
          
          Index keyIndex = 0;
-         path._getData<Index>(keyIndex);
+         path.getData<Index>(keyIndex);
          BString key;
          Path keyPath(database(), keyIndex);
          keyPath.getData(key);

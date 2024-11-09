@@ -274,7 +274,7 @@ namespace BeeFishDatabase {
       
       
       template<typename T>
-      void _getData(T& destination)
+      void getData(T& destination)
       {
          std::string data = getData();
          destination = *(T*)data.data();
