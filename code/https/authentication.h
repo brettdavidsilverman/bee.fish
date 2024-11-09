@@ -22,13 +22,14 @@ namespace BeeFishHTTPS {
    private:
       JSONDatabase& _database;
       bool _authenticated = false;
-      Path _path;
+      Path _originPath;
       Path _sessionData;
       Path _userData;
       
    protected:
       BString _ipAddress;
       BString _sessionId;
+      BString _userId;
       
    public:
       
@@ -42,6 +43,9 @@ namespace BeeFishHTTPS {
    
       inline static const size_t
          SESSION_ID_SIZE = 32;
+         
+      inline static const size_t
+         USER_ID_SIZE = 32;
   
    public:
       // Implemented in session.h
@@ -53,9 +57,9 @@ namespace BeeFishHTTPS {
          BString sessionId
       ) :
          _database(database),
-         _path(_database.origin()),
-         _sessionData(_path),
-         _userData(_path),
+         _originPath(_database.origin()),
+         _sessionData(_originPath),
+         _userData(_originPath),
          _ipAddress(ipAddress),
          _sessionId(sessionId)
       {
@@ -77,16 +81,34 @@ namespace BeeFishHTTPS {
             throw runtime_error("Missing secret");
                         
          _authenticated = false;
-
          
          // Save the secret
-         // and set the user data path
          BString md5Secret =
             md5(secret);
 
-         _userData = _path
+         Path secrets = _originPath
             ["Secrets"]
             [md5Secret];
+            
+         // Get or set the userId
+         if (secrets.hasData())
+            _userId = secrets.getData();
+         else
+         {
+            _userId =
+               toHex(
+                  createRandom(
+                     USER_ID_SIZE
+                  )
+               );
+               
+            secrets.setData(_userId);
+            
+         }
+         
+         // Set the user data path
+         _userData =
+            _originPath["Users"][_userId];
                   
          // Create the session id
          // (Note, we use toHex, not toBase64 due to
@@ -99,18 +121,15 @@ namespace BeeFishHTTPS {
             );
 
          // get the session data
-         _sessionData = _path
+         _sessionData = _originPath
                ["IP Addresses"]
                [_ipAddress]
                ["Sessions"]
                [_sessionId];
-               
-
-         // Save the secret path
-         _sessionData["User Data Path"]
-            .setData<Index>(
-               _userData._index
-            );
+            
+         // Save the user id
+         _sessionData["User Id"]
+            .setData(_userId);
 
             
          // Save last authenticated
@@ -131,6 +150,8 @@ namespace BeeFishHTTPS {
          }
          
          _sessionId.clear();
+         _userId.clear();
+         
          _authenticated = false;
 
       }
@@ -145,7 +166,7 @@ namespace BeeFishHTTPS {
               _sessionId.size() )
          {
 
-            _sessionData = _path
+            _sessionData = _originPath
                ["IP Addresses"]
                [_ipAddress]
                ["Sessions"]
@@ -168,14 +189,19 @@ namespace BeeFishHTTPS {
                {
                   _authenticated = true;
                
-                  _sessionData["User Data Path"]
-                     .getData<Index>(
-                        _userData._index
-                     );
-                     
                   _sessionData
                      ["Last Authentication"]
                      .setData<time_t>(epoch_seconds());
+                     
+                  _userId =
+                     _sessionData["User Id"]
+                     .getData();
+            
+                  // Set the user data path
+                  _userData =
+                     _originPath["Users"]
+                     [_userId];
+                  
                }
             }
          }
@@ -209,6 +235,7 @@ namespace BeeFishHTTPS {
             object["timeout"] = 
                BeeFishScript::Integer(LOGON_TIMEOUT);
             object["sessionId"] = sessionId();
+            object["userId"] = userId();
          }
          else
             object["timeout"] =
@@ -233,6 +260,11 @@ namespace BeeFishHTTPS {
       BString& sessionId()
       {
          return _sessionId;
+      }
+      
+      const BString& userId() const
+      {
+         return _userId;
       }
 
    };
