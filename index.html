@@ -3,7 +3,7 @@
    <head>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <title>bee.fish</title>
+      <title id="title">bee.fish</title>
       <script src="/head.js"></script>
       <script src="/error.js"></script>
       <script src="/client/stream/stream.js"></script>
@@ -21,9 +21,9 @@
       <div>
          <form onsubmit="return false;">
             <div style="text-align:left;">
-               <label for="urlInput">Path</label>
+               <label for="pathInput">Path</label>
             </div>
-            <input type="text" id="urlInput"/>
+            <input type="text" id="pathInput"/>
             <button id="fetchButton" onclick="loadJSON()">Fetch</button>
             <br/>
          </form>
@@ -43,19 +43,15 @@
                />            </div>
             <textarea id="jsonEditor"></textarea>
             <button id="saveButton">Save</button>
-         
          </form>
          
       </div>
-      <br />
-      <button id="goButton">Go</button>
-      <br />
-      <pre id="result">
-      </pre>
-      <div id="html">
-      </div>
-      <br />
-      <a id="goLink"></a>
+      <h2>
+         <a id="goLink" href="/go.html">App Link</a>
+      </h2>
+      <h2>
+         <a id="dataLink" href="/">Data Link</a>
+      </h2>
       <br />
       <br />
       <a href="/client/logon/" id="logon">Logon/Logoff</a>
@@ -63,55 +59,33 @@
       <a href="/client/">Javascript client library</a>
       <br />
       <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
-      <script>authenticate();
+      <script>
 
 const defaultURL = 
    "Type the path of your document";
    var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
-var urlInput = document.getElementById("urlInput");
+var pathInput = document.getElementById("pathInput");
 var result = document.getElementById("result");
-var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");
-var goButton = document.getElementById("goButton");var goLink = document.getElementById("goLink");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");
+var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");var goLink = document.getElementById("goLink");
+var dataLink = document.getElementById("dataLink");
+var header = document.getElementById("h1");
+var title = document.getElementById("title");
 fetchButton.disabled = true;
 
-document.getElementById("h1").innerText =
-   punycode.toUnicode(window.location.hostname);
-   //window.location.hostname
-
-
-function getJSON()
-{
-   var json = jsonEditor.value;
-   
-   if (json == "")
-      return undefined;
-      
-   var f = new Function(
-      "return (" + json + ")"
+var origin =
+   punycode.toUnicode(
+      window.location.hostname
    );
-   json = f();
-   return json;
-}
 
-function switchFunctions(showFunctions)
-{
-
-   var json = getJSON();
+header.innerText = origin;
+title.innerText = origin;
    
-   if (showFunctions) {
-      json = displayFunctions(json);
-   }
-   else {
-      json = hideFunctions(json);
-      json = JSON.stringify(json, null, "   ");
-   }
-   jsonEditor.value = json;
-}
+authenticate();
 
 function loadJSON() {
-   var url = urlInput.value;
+   var url = pathInput.value;
    
    if (url == defaultURL ||
        url == "")
@@ -120,109 +94,86 @@ function loadJSON() {
    }
       
    fetchButton.disabled = true;
- 
+   
+   sessionStorage.setItem("path", url);
+   
    var promise =
-   fetchJSON(encodeURI(url)).
-   then(
-      function(json) {
-         setLink();
-         if (json == undefined) {
-            jsonEditor.value = "undefined";
-            return undefined;
+   fetch(url).
+      then(
+         function (response) {
+            status = response.status;
+            return response.json();
          }
-         
-         if (json.error) {
-            Error(json.error, loadJSON);
+      ).
+      then(
+         function (json) {
+            if (status != "200") {
+               if (json.error)
+                  throw json.error;
+               throw json;
+            }
+            return json;
          }
+      ).
+      then(
+         function(json) {
+            if (json == undefined) {
+               jsonEditor.value = "undefined";
+               return undefined;
+            }
          
-         jsonEditor.value =
-            JSON.stringify(json, null, "   ");
+            if (json.error) {
+               Error(json.error, loadJSON);
+            }
+         
+            jsonEditor.value =
+               JSON.stringify(json, null, "   ");
             
-         fetchButton.disabled = false;
-         saveButton.disabled = false;
-         switchFunctions(
-             functionCheckbox.checked
-         );
-         return json;
-      }
-   )
-   .catch(
-      function (error) {
-         fetchButton.disabled = false;
-         Error(error, loadJSON);
-      }
-   );
+            fetchButton.disabled = false;
+            saveButton.disabled = false;
+            switchFunctions(
+               functionCheckbox.checked
+            );
+            
+            return json;
+         }
+      )
+      .catch(
+         function (error) {
+            fetchButton.disabled = false;
+            Error(error, loadJSON);
+         }
+      );
    
    return promise;
       
 }
 
-function setLink()
-{
-   var url = urlInput.value;
-   
-   if (url == defaultURL) {
-      goLink.style.visibility = "hidden";
-      return;
-   }
- 
-   goLink.style.visibility = "inline";
-   
-   goLink.href = 
-       "https://bee.fish/?" +
-            url + "#go";
-            
-   goLink.innerText = "Go link for " + url;
-      
-}
 
-function Go() {
-
-   var json = getJSON();
+if (!pathInput.value)
+   pathInput.value = defaultURL;
    
-   json = evaluate(json);
-   
-   result.innerText =
-      hideFunctions(json);
- 
-}
-
-if (!urlInput.value)
-   urlInput.value = defaultURL;
-   
-urlInput.onfocus = 
+pathInput.onfocus = 
    function() {
-      if (urlInput.value == defaultURL)
-         urlInput.value = "";
+      if (pathInput.value == defaultURL)
+         pathInput.value = "";
       fetchButton.disabled = false;
    };
    
    
-urlInput.onblur =
+pathInput.onblur =
    function() {
-      if (urlInput.value == "" ||
-          urlInput.value == defaultURL)
+      if (pathInput.value == "" ||
+          pathInput.value == defaultURL)
       {
          fetchButton.disabled = true;
-         urlInput.value = defaultURL;
+         pathInput.value = defaultURL;
       }
       else {
           fetchButton.disabled = false;
-          setLink();
+          setLinks();
       }
    }
-   
-goButton.onclick =
-   function() {
-      Go();
-   }
-   
-goLink.onclick =
-   function() {
-      document.location.hash = "#go";
-      Go();
-   }
-   
 
 saveButton.onclick =
    function() {
@@ -230,6 +181,7 @@ saveButton.onclick =
       var json;
    
       try {
+         sessionStorage.setItem("json", jsonEditor.value);
          json = formatJSON(jsonEditor.value);
       }
       catch (error) {
@@ -237,7 +189,7 @@ saveButton.onclick =
          return;
       }
       postJSON(
-         urlInput.value,
+         pathInput.value,
          json
       ).
       then(
@@ -256,39 +208,58 @@ saveButton.onclick =
 fetchButton.onclick =
    function() {
 
-      var search = "?" + encodeURIComponent(urlInput.value);
-      if (document.location.search != 
-           search)
-      {
-         document.location.search = search;
-         return;
-      }
       loadJSON();
 
    }
-   
-if (document.location.search) {
-    
-   // fill out form from search
-   var url = decodeURIComponent(
-      document.location.search.substr(1)
+   
+
+function switchFunctions(showFunctions)
+{
+
+   var json = getJSON();
+   
+   if (showFunctions) {
+      json = displayFunctions(json);
+   }
+   else {
+      json = hideFunctions(json);
+      json = JSON.stringify(json, null, "   ");
+   }
+   jsonEditor.value = json;
+}
+
+function getJSON()
+{
+   var json = jsonEditor.value;
+   
+   if (json == "")
+      return undefined;
+      
+   var f = new Function(
+      "return (" + json + ")"
    );
+   json = f();
+   return json;
+}
+function setLinks() {
+   goLink.href = "/go.html?" + pathInput.value;
+   dataLink.href = "/" + pathInput.value;
+   
+}
+if (sessionStorage.getItem("path")) {
 
-   urlInput.value =
-      url;
+   pathInput.value =
+      sessionStorage.getItem("path");
+      
    fetchButton.disabled = false;
-}else
-   fetchButton.disabled = true;
+}
 
-loadJSON().
-   then(
-      function(json) {
-         if (json) {
-            if (document.location.hash == "#go")
-               Go();
-         }
-      }
-   );
+if (sessionStorage.getItem("json")) {
+
+   jsonEditor.value =
+      sessionStorage.getItem("json");
+}setLinks();
+
       </script>
 
    </body>

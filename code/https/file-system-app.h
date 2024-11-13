@@ -176,17 +176,23 @@ namespace BeeFishHTTPS {
 
       virtual void handleResponse()
       {
-   
          _status = 200;
          WebRequest* request = _session->request();
-
          const BString& requestPath = request->path();
-         
+
          // Get the file path from the request path
          try
          {
-            
-            _filePath = getFilePath(requestPath);
+            //if (authenticate())
+            {
+               _filePath =
+                  getFilePath(requestPath);
+            }
+           // else
+            {
+              // redirect("/client/logon/index.html", false, requestPath);
+           //    return;
+            }
             
             // Make sure file path is under
             // file system root
@@ -200,7 +206,8 @@ namespace BeeFishHTTPS {
             _status = -1;
             _statusText = "Not Found";
          }
-               
+  
+         
          // Redirect to add trailing slashes
          // to directories
          if ( redirectDirectories(
@@ -210,6 +217,7 @@ namespace BeeFishHTTPS {
          {
             return;
          }
+            
          
          string contentType = "text/plain; charset=utf-8";
          string cacheControl = _defaultCacheControl;

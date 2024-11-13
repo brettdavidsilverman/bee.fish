@@ -17,7 +17,9 @@ namespace BeeFishHTTPS {
    {
    protected:
       inline static vector<BString>
-         _privileged{
+      
+         _privileged
+         {
             "/",
             "/authenticate",
             "/index.html",

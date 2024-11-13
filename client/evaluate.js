@@ -70,25 +70,12 @@ function fetchJSON(url) {
 
    var status;
    
-   var parameters = {
-      method: "GET",
-      credentials: "include"
-   }
-   
    var promise =
-      fetch(
-          url,
-          parameters
-      ).
+      fetch(url).
       then(
          function (response) {
             status = response.status;
-            return response.text();
-         }
-      ).
-      then(
-         function (text) {
-            return JSON.parse(text);
+            return response.json();
          }
       ).
       then(
@@ -111,7 +98,6 @@ function postJSON(url, json) {
 
    var parameters = {
       method: "POST",
-      credentials: "include",
       body: JSON.stringify(json)
    }
   
@@ -123,12 +109,7 @@ function postJSON(url, json) {
       then(
          function (response) {
             status = response.status;
-            return response.text();
-         }
-      ).
-      then(
-         function (text) {
-            return JSON.parse(text);
+            return response.json();
          }
       ).
       then(
@@ -313,6 +294,16 @@ function HTML(url, parent=document.body) {
    
    function createElement(json, parent)
    {
+      if (Array.isArray(json))
+      {
+         for (var i = 0; i < json.length; ++i)
+         {
+            var obj = json[i];
+            createElement(obj, parent);
+         }
+         return parent;
+      }
+      
       for (var tag in json) {
              
          var element =

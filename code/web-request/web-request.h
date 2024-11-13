@@ -277,6 +277,7 @@ namespace BeeFishWeb {
          BString _method;
          URL*    _url = nullptr;
          BString _version;
+      private:
          BString _fullURL;
       public:
          FirstLine() : Match()
@@ -324,8 +325,8 @@ namespace BeeFishWeb {
             return *_url;
          }
 
-         const BString& fullURL() const {
-            return _fullURL;
+         const BString fullURL() const {
+            return _fullURL.decodeURI();
          }
 
       };

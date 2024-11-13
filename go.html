@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title id="title">bee.fish</title>
+      <script src="/head.js"></script>
+      <script src="/error.js"></script>
+      <script src="/client/stream/stream.js"></script>
+      <script src="/client/power-encoding/power-encoding.js"></script>
+      <script src="/client/id/id.js"></script>
+      <script src="/client/evaluate.js"></script>      <script src="/client/logon/authentication.js"></script>
+      <script src="/client/punycode.js"></script>
+      <link rel="stylesheet" type="text/css" href="style.css"/>
+   </head>
+   <body>
+      <script>
+var origin =
+   punycode.toUnicode(
+      window.location.hostname
+   );
+
+var title =
+   document.getElementById("title");
+
+title.innerText = origin;
+
+Go();
+
+function Go() {
+    
+   var path =
+      document.location.origin +
+      "/" +
+      decodeURI(
+         document.location.search.substr(1)
+      );
+
+   authenticate().
+   then(
+      function() {
+         return fetch(path);
+      }
+   ).
+   then(
+      function(response) {
+         return response.text()
+      }
+   ).
+   then(
+      function(text) {
+         // document.write(text);
+         return JSON.parse(text);
+      }
+   ).
+   then(
+      function(json) {
+         json = evaluate(json);
+      }
+   );
+}
+      </script>
+
+   </body>
+
+</html>
