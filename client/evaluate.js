@@ -3,8 +3,8 @@ function evaluate(json, parent=json)
 
    if (Array.isArray(json)) {
       var array = json;
-      for (var i = 0; i < array.length; i++) {
-         array[i] = evaluate(array[i], json);
+      for (var i in array) {
+         array[i] = evaluate(array[i], parent);
       }
       return array;
    }
