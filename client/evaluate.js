@@ -265,8 +265,8 @@ function HTML(url, parent=document.body) {
    if (typeof url == "object")
    {
       var json = evaluate(url);
-      var element = createElement(json, parent);
-      return Promise.resolve(element);
+      createElement(json, parent);
+      return Promise.resolve();
    }
    else
    {
@@ -301,31 +301,32 @@ function HTML(url, parent=document.body) {
             var obj = json[i];
             createElement(obj, parent);
          }
-         return parent;
+         
+         return;
       }
       
-      for (var tag in json) {
-             
-         var element =
-           document.createElement(tag);
+      var tag = Object.keys(json)[0];
+         
+      var element =
+         document.createElement(tag);
 
-         for (attribute in json[tag])
-         {
-            if (attribute == "children") {
-               var children = json[tag].children;
-               for (var index in children) {
-                  var child = children[index];
-                  createElement(child, element);
-               }
-            }
-            else {
-               element[attribute] = json[tag][attribute];
+      for (attribute in json[tag])
+      {
+            
+         if (attribute == "children") {
+            var children = json[tag].children;
+            for (var index in children) {
+               var child = children[index];
+               createElement(child, element);
             }
          }
-            
-         parent.appendChild(element);
-      
+         else {
+            element[attribute] = json[tag][attribute];
+         }
       }
+            
+      parent.appendChild(element);
+      
    }
    
 }
