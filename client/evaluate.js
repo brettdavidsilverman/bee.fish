@@ -296,36 +296,40 @@ function HTML(url, parent=document.body) {
    {
       if (Array.isArray(json))
       {
-         for (var i = 0; i < json.length; ++i)
+         for (var index in json)
          {
-            var obj = json[i];
+            var obj = json[index];
             createElement(obj, parent);
          }
          
          return;
       }
       
-      var tag = Object.keys(json)[0];
-         
-      var element =
-         document.createElement(tag);
+      for (var tag in json) {
 
-      for (attribute in json[tag])
-      {
-            
-         if (attribute == "children") {
-            var children = json[tag].children;
-            for (var index in children) {
-               var child = children[index];
-               createElement(child, element);
+         var element =
+            document.createElement(tag);
+
+         for (attribute in json[tag])
+         {
+            if (attribute == "children") {
+               var children = json[tag].children;
+               for (var index in children) {
+                  var child = children[index];
+                  createElement(child, element);
+               }
+            }
+            else {
+               var value = json[tag][attribute];
+               if (value)
+                  element[attribute] = value;
             }
          }
-         else {
-            element[attribute] = json[tag][attribute];
-         }
+         
+         parent.appendChild(element);
       }
             
-      parent.appendChild(element);
+      
       
    }
    
