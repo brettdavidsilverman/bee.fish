@@ -296,7 +296,9 @@ function HTML(url, parent=document.body) {
    {
       if (Array.isArray(json))
       {
-         for (var index in json)
+         for (var index = 0;
+              index < json.length; 
+              ++index)
          {
             var obj = json[index];
             createElement(obj, parent);
@@ -313,11 +315,10 @@ function HTML(url, parent=document.body) {
          for (attribute in json[tag])
          {
             if (attribute == "children") {
+               
                var children = json[tag].children;
-               for (var index in children) {
-                  var child = children[index];
-                  createElement(child, element);
-               }
+               createElement(children, element);
+               
             }
             else {
                var value = json[tag][attribute];

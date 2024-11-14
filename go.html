@@ -36,12 +36,7 @@ function Go() {
          document.location.search.substr(1)
       );
 
-   authenticate().
-   then(
-      function() {
-         return fetch(path);
-      }
-   ).
+   fetch(path).
    then(
       function(response) {
          return response.text()

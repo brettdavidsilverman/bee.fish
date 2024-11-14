@@ -100,8 +100,6 @@ int main(int argc, const char* argv[])
       
       _wait.lock();
       
-      bool ok = true;
-      
       bool test = false;
       if (hasArg(argc, argv, "-test") >= 0)
       {
@@ -110,20 +108,24 @@ int main(int argc, const char* argv[])
       
       
       if (test) {
-         ok = BeeFishHTTPS::test(port);
+         bool ok = BeeFishHTTPS::test(port);
+         
          io_context.stop();
+         startThread.join();
+         
+         if (ok)
+            return 0;
             
+         return 1;
       }
       
+      
       std::cout << "Started " << server.origin() << " 😊" << endl;
-   
       
       startThread.join();
       
-      if (ok)
-         return 0;
       
-      return 1;
+      return 0;
       
    }
    catch (std::exception& e)

@@ -223,7 +223,7 @@ namespace BeeFishHTTPS {
          "-H \"Content-Type: application/json; charset=utf-8\" " <<
          "-H Expect: " <<
          "-T " << directory << "/" << file
-         << " -s -k";
+         << " -s -k > /dev/null";
 
 
       string command = stream.str();

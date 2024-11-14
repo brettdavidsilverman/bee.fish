@@ -36,40 +36,23 @@ namespace BeeFishHTTPS {
          ResponseHeaders headers(_session);
          App* app = nullptr;
 
-         try {
-            
-            
-            for ( auto factory : appFactories )
-            {
-
-               app = factory->create(
-                  _session,
-                  headers
-               );
-          
-               app->handleResponse();
-            
-               if (app->status() != -1)
-                  break;
-  
-               delete app;
-            
-               app = nullptr;
-
-            }
-         }
-         catch (std::exception& exception)
+         for ( auto factory : appFactories )
          {
+
+            app = factory->create(
+               _session,
+               headers
+            );
+          
+            app->handleResponse();
             
-            App* errorApp = new ErrorApp(_session, headers, app, exception);
+            if (app->status() != -1)
+               break;
+  
+            delete app;
             
-            errorApp->handleResponse();
-            
-            if (app)
-               delete app;
-               
-            app = errorApp;
-            
+            app = nullptr;
+
          }
 
          if (app)
@@ -84,9 +67,10 @@ namespace BeeFishHTTPS {
                   << endl;
             }
                  
-          
             _contentLength = app->contentLength();
-            
+
+
+
             if (_contentLength == -1) {
                headers.erase("content-length");
                headers.replace(
@@ -124,38 +108,11 @@ namespace BeeFishHTTPS {
       
       // Defined in session.h
       void closeOrRestart();
-      /*
-      void end() 
-      {
-          
-         bool end = !_app ||
-            ( _app->bytesTransferred() ==
-             (Size) _app->contentLength() ) ||
-             _app->contentLength() == -1;
-            
-         if ( true)
-         {
-            if (_app)
-            {
-               delete _app;
-               _app = nullptr;
-            }
-            
-            closeOrRestart();
-
-         }
-      }
-         */
-     
+      
      
       // Defined in response-stream.h
       void write(App* app);
-      /*
-      App* app()
-      {
-         return _app;
-      }
-      */
+      
 
    };
    

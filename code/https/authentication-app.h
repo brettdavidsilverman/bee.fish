@@ -54,94 +54,88 @@ namespace BeeFishHTTPS {
       }
 
       virtual void handleResponse() {
+#warning Authentication app
 
+         _status = -1;
+         
          WebRequest* request = _session->request();
          
-         if (request->result() != true) {
-            _status = -1;
+         if (request->result() != true)
+         {
             return;
          }
          
          BString path = request->path();
-         
-         if (path != "/authenticate") {
-            _status = -1;
-            return;
-         }
-         
          BString webMethod = request->method();
          
-         BeeFishMisc::optional<BString> method;
-         BeeFishMisc::optional<BString> secret;
+         if (path == "/authenticate")
+         {
+            BeeFishMisc::optional<BString> method;
+            BeeFishMisc::optional<BString> secret;
 
-         if (webMethod == "GET")
-         {
-            method = "getStatus";
-         }
-         else if (webMethod == "POST")
-         {
-            WebRequest* request = new WebRequest(true);
-            ScriptParser parser(*request);
-            
-            if (parseWebRequest(parser) &&
-                request->hasJSON())
+            if (webMethod == "GET")
             {
+               method = "getStatus";
+            }
+            else if (webMethod == "POST")
+            {
+               WebRequest* request = new WebRequest(true);
+               ScriptParser parser(*request);
+            
+               if (parseWebRequest(parser) &&
+                   request->hasJSON())
+               {
 
-               BeeFishScript::ObjectPointer object =
-                  parser.json();
+                  BeeFishScript::ObjectPointer object =
+                     parser.json();
 
-               if (object->contains("method")) {
-                  method = (BString&)(*object)["method"];
+                  if (object->contains("method")) {
+                     method = (BString&)(*object)["method"];
+                  }
+
+                  if (object->contains("secret"))
+                     secret = (BString&)(*object)["secret"];
+
                }
-
-               if (object->contains("secret"))
-                  secret = (BString&)(*object)["secret"];
-
+               delete request;
             }
-            delete request;
-         }
+         
+            if ( method.has_value() )
+            {
 
-         if ( method.has_value() )
-         {
-
-            _status = 200;
-            
-            if ( method.value() == "getStatus" )
-            {
-               authenticate();
-            }
-            else if ( method.value() == "logon" && secret.has_value() )
-            {
-               logon(
-                  secret.value()
-               );
-            }
-            else if ( method.value() == "logoff" )
-            {
-               logoff();
+               if ( method.value() == "getStatus" )
+               {
+                  authenticate();
+                  _status = 200;
+               }
+               else if ( method.value() == "logon" && secret.has_value() )
+               {
+                  logon(
+                     secret.value()
+                  );
+                  _status = 200;
+               }
+               else if ( method.value() == "logoff" )
+               {
+                  logoff();
+                  _status = 200;
+               }
+               else
+               {
+                  return;
+               }
             }
             else
             {
-               _status = -1;
                return;
             }
          }
          else
          {
-            _status = -1;
-            return;
+            authenticate();
          }
-      /*
-         
-         BString origin;
-         
-         origin = session()->origin();
-
-         _responseHeaders.replace(
-            "access-control-allow-origin",
-            origin
-         );
-*/
+        
+      
          _responseHeaders.replace(
             "vary",
             "origin"
@@ -158,8 +152,7 @@ namespace BeeFishHTTPS {
             "keep-alive"
          );
 
-         
-         
+      
          if (authenticated())
          {
             _responseHeaders.emplace(
@@ -194,24 +187,25 @@ namespace BeeFishHTTPS {
             _serve = SERVE_FILE;
             _filePath = getFilePath("/client/logon/index.html");
             return;
+         }
+         
+         if (_status != -1) 
+         {
+            _responseHeaders.replace(
+               "content-type",
+               "application/json; charset=utf-8"
+            );
+         
+            BeeFishScript::Object output;
+
+            Authentication
+               ::write(output);
             
+            _serve = App::SERVE_CONTENT;
+
+            _content = output.str();
          }
 
-         _responseHeaders.replace(
-            "content-type",
-            "application/json; charset=utf-8"
-         );
-         
-         BeeFishScript::Object output;
-
-         Authentication
-            ::write(output);
-            
-         _serve = App::SERVE_CONTENT;
-
-         _content = output.str();
-         _status = 200;
-         
       }
       
       bool isPrivileged(const BString& path, const BString& webMethod)

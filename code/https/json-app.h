@@ -29,12 +29,15 @@ namespace BeeFishHTTPS {
       virtual void handleResponse()
       override
       {
+         
+         authenticate();
 
          if (!authenticated())
          {
-            //throw std::runtime_error("Not authenticated");
-            return;
+            
+            throw std::runtime_error("Not authenticated");
          }
+         
          
          _responseHeaders.replace(
             "content-type",
@@ -74,6 +77,7 @@ namespace BeeFishHTTPS {
          if (jsonPath.has_value())
          {
             _bookmark = jsonPath.value();
+
             if (method == "GET") {
                _serve = App::SERVE_JSON;
                _status = 200;
@@ -131,14 +135,9 @@ namespace BeeFishHTTPS {
       {
          return "JSON app";
       }
-/*
-      virtual void write(ostream& stream)
-      {
-         App::write(stream);
-         JSONPath path(_bookmark);
-         stream << path;
-      }
-      */
+
+      
+      
    };
 
    

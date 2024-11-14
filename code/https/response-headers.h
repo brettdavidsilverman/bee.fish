@@ -33,9 +33,15 @@ namespace BeeFishHTTPS {
       BString operator[] (string key) const
       {
          BString value;
-         for (auto search = find(key); search != end(); ++search)
-            value = search->second;
-            
+         
+         for (auto search = begin();
+              search != end();
+              ++search)
+         {
+            if (search->first == key)
+               value = search->second;
+         }
+         
          return value;
       }
       

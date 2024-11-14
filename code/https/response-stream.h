@@ -87,8 +87,98 @@ namespace BeeFishHTTPS {
       
       void writeContent(App* app)
       {
-         app->write(*this);
          
+         
+         if (app->serve() == App::SERVE_JSON)
+         {
+            JSONPath path(app->_bookmark);
+            *this << path;
+            flush();
+            return;
+         }
+         
+         Size bytesTransferred = 0;
+         Size pageSize = getPageSize();
+         ssize_t _contentLength = app->contentLength();
+         Size length = _contentLength;
+         std::string buffer(pageSize, '\0');
+         
+         while ((ssize_t)bytesTransferred < _contentLength)
+         {
+            if ((_contentLength - bytesTransferred) 
+                  > pageSize)
+               length = pageSize;
+            else
+               length = _contentLength - bytesTransferred;
+                     
+            if (!length)
+               break;
+               
+            switch (app->serve())
+            {
+               case App::SERVE_DATA:
+               {
+            
+                  Size pageIndex =
+                     bytesTransferred  /
+                     pageSize;
+
+                  std::string data =
+                     app->_bookmark[pageIndex].getData();
+                  
+                  length = data.size();
+
+                  memcpy(buffer.data(), data.data(), length);
+                  
+                  break;
+               }
+               case App::SERVE_CONTENT:
+               {
+                 
+                  memcpy(
+                     buffer.data(),
+                     (const Byte*)
+                     (
+                        app->_content.data()
+                        + bytesTransferred 
+                     ),
+                     length
+                  );
+                  break;
+               }
+               case App::SERVE_FILE:
+               {
+                  ifstream input(app->_filePath);
+                     
+                  input.seekg(
+                     bytesTransferred
+                  );
+                  
+                  input.read(
+                     buffer.data(),
+                     length
+                  );
+                  
+                  input.close();
+               
+                  break;
+               }
+               default:
+               {
+                  throw std::logic_error("Invalid Serve enum value");
+               }
+            }
+             
+            write(
+               buffer.data(),
+               length
+            );
+         
+            bytesTransferred += length;
+             
+         }
+      
+          
          flush();
       }
       
@@ -101,24 +191,7 @@ namespace BeeFishHTTPS {
       {
          return _writingHeaders;
       }
-      /*
-      const ResponseHeaders&
-      responseHeaders()
-      {
-         const ResponseHeaders& headers =
-            
-          return headers;
-      }
-     
-     
-      App* app()
-      {
-         return
-            _session->
-            response()->
-            app();
-      }
-   */
+      
       void setChunkedEncoding(App* app)
       {
          const ResponseHeaders& headers =
@@ -127,16 +200,19 @@ namespace BeeFishHTTPS {
          _chunkedEncoding =
             ( headers["transfer-encoding"]
               == "chunked" );
-            
+              
       }
      
       virtual void flush()
       {
+
          std::ostream::flush();
           
+         
          if (chunkedEncoding() && 
              !writingHeaders())
          {
+            
             std::stringstream stream;
             stream << std::hex << std::uppercase << _count << std::dec << "\r\n";
             std::string str = stream.str();
