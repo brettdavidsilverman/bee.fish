@@ -14,20 +14,16 @@
       <link rel="stylesheet" type="text/css" href="style.css"/>
    </head>
    <body>
+
+      <a id="logoff">Logoff/Change secret</a>
+      <h1 id="hostnameHeader"></h1>
+    
       <script>
-var origin =
-   punycode.toUnicode(
-      window.location.hostname
-   );
+setup();
 
-var title =
-   document.getElementById("title");
+go();
 
-title.innerText = origin;
-
-Go();
-
-function Go() {
+function go() {
     
    var path =
       document.location.origin +
@@ -53,6 +49,29 @@ function Go() {
          json = evaluate(json);
       }
    );
+}
+
+function setup() {   var hostname =
+      punycode.toUnicode(
+         document.location.hostname
+      );
+
+   var title =
+      document.getElementById("title");
+
+   var hostnameHeader =
+      document.getElementById("hostnameHeader");
+      
+   title.innerText = hostname;
+   hostnameHeader.innerText = hostname;
+   
+   
+   var logoff =
+      document.getElementById("logoff");
+   
+   logoff.href = 
+      "/client/logon/?redirect=" +
+      encodeURIComponent(document.location.href);
 }
       </script>
 
