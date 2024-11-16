@@ -170,9 +170,9 @@ pathInput.onblur =
          pathInput.value = defaultURL;
       }
       else {
-          fetchButton.disabled = false;
-          setLinks();
+         fetchButton.disabled = false;
       }
+      setLinks();
    }
 
 saveButton.onclick =
@@ -242,9 +242,16 @@ function getJSON()
    return json;
 }
 function setLinks() {
-   goLink.href = "/go.html?" + pathInput.value;
-   dataLink.href = "/" + pathInput.value;
-   
+   if (pathInput.value == "" ||
+       pathInput.value == defaultURL)
+   {
+      goLink.href = "";
+      dataLink.href = "";
+   }
+   else {
+      goLink.href = "/go.html?" + pathInput.value;
+      dataLink.href = "/" + pathInput.value;
+   }
 }
 if (sessionStorage.getItem("path")) {
 

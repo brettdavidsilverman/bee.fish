@@ -72,6 +72,11 @@ namespace BeeFishDatabase {
          return _filename;
       }
       
+      int fileNumber() const
+      {
+         return _fileNumber;
+      }
+      
       
       Size seek
       (
