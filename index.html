@@ -72,7 +72,6 @@ var jsonEditor = document.getElementById("jsonEditor");var html = document.getE
 var dataLink = document.getElementById("dataLink");
 var header = document.getElementById("h1");
 var title = document.getElementById("title");
-fetchButton.disabled = true;
 
 var origin =
    punycode.toUnicode(
@@ -81,7 +80,9 @@ var origin =
 
 header.innerText = origin;
 title.innerText = origin;
-   
+
+fetchButton.disabled = true;
+
 authenticate();
 
 function loadJSON() {
@@ -95,7 +96,7 @@ function loadJSON() {
       
    fetchButton.disabled = true;
    
-   sessionStorage.setItem("path", url);
+   localStorage.setItem("path", url);
    
    var promise =
    fetch(url).
@@ -181,7 +182,7 @@ saveButton.onclick =
       var json;
    
       try {
-         sessionStorage.setItem("json", jsonEditor.value);
+         localStorage.setItem("json", jsonEditor.value);
          json = formatJSON(jsonEditor.value);
       }
       catch (error) {
@@ -253,18 +254,18 @@ function setLinks() {
       dataLink.href = "/" + pathInput.value;
    }
 }
-if (sessionStorage.getItem("path")) {
+if (localStorage.getItem("path")) {
 
    pathInput.value =
-      sessionStorage.getItem("path");
+      localStorage.getItem("path");
       
    fetchButton.disabled = false;
 }
 
-if (sessionStorage.getItem("json")) {
+if (localStorage.getItem("json")) {
 
    jsonEditor.value =
-      sessionStorage.getItem("json");
+      localStorage.getItem("json");
 }setLinks();
 
       </script>

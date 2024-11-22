@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" style="height:100%;">
+   <head>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title id="title">Procedure</title>
+      <script src="/head.js"></script>
+      <script src="/error.js"></script>
+      <script src="/client/stream/stream.js"></script>
+      <script src="/client/power-encoding/power-encoding.js"></script>
+      <script src="/client/id/id.js"></script>
+      <script src="/client/evaluate.js"></script>      <script src="/client/logon/authentication.js"></script>
+      <script src="/client/punycode.js"></script>
+      <script src="/client/coordinates/script.js"></script>
+      <script src="/client/movable/script.js"></script>
+ 
+      <link rel="stylesheet" type="text/css" href="style.css"/>
+      <script>
+
+      </script>
+      <style>
+body {
+   border: 1px solid;
+   margin: 0px;
+   padding: 10px;
+   height: 100%;
+   width: 100%;
+}
+
+input {
+   position: relative;
+   left: auto;
+   width: calc(100% - 50px);
+   border: 1px solid;
+}
+
+form {
+    width: 200px;
+    background-color: lightblue;
+    position: absolute;
+    background-image: url('move.png');
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+    background-position: right 2px top 2px;
+}
+
+textarea {
+   left: 5px;
+   width: calc(100% - 10px);
+   margin: auto;
+   height: 100px;
+}
+
+button {
+   position: absolute;
+   right: -5px;
+   bottom: -5px;
+   width: 40px;}
+
+
+      </style>
+   </head>
+   <body>
+      <h1 id="h1">Procedure</h1>
+      <form class="movable" id="Procedure 1" onsubmit="return false;">
+        
+        <label contenteditable="true">Procedure 1</label>
+        
+         <br/>
+         
+         <select onchange="onProcedureTypeChange(this, ['Procedure 1 functionDiv', 'Procedure 1 inputDiv', 'Procedure 1 gotoDiv'])">
+            <option value="Procedure 1 functionDiv" selected="selected">Function</option>
+            <option value="Procedure 1 gotoDiv">Go to</option>
+            <option value="Procedure 1 inputDiv">Input</option>
+         </select>
+  
+         <div id="Procedure 1 functionDiv" style="display:block;">
+            <textarea id="Procedure 1 function"></textarea>
+         </div>
+         
+         <div id="Procedure 1 gotoDiv" style="display:none;">
+            <svg >
+               <rect width="100" 
+                     height="100" 
+                     x="10" 
+                     y="10" 
+                     rx="20"
+                     ry="20"
+                     fill="pink" />
+            </svg>
+         
+         </div>
+         
+         
+         <div id="Procedure 1 inputDiv" style="display:none;">
+            <label contentEditable="true">Label</label>
+            <br/>
+               <select onchange="onInputTypeChange(this, 'Procedure 1 input')">
+                  <option value="button">Button</option>
+                  <option value="checkbox">Check box</option>
+                  <option value="color">Color</option>
+                  <option value="date">Date</option>
+                  <option value="datetime-local">Date time</option>
+                  <option value="email">Email</option>
+                  <option value="file">File</option>
+                  <option value="image">Image</option>
+                  <option value="month">Month</option>
+                  <option value="number">Number</option>
+                  <option value="password">Password</option>
+                  <option value="radio">Radio</option>
+                  <option value="range">Range</option>
+                  <option value="reset">Reset</option>
+                  <option value="search">Search</option>
+                  <option value="submit">Submit</option>
+                  <option value="tel">Telephone</option>
+                  <option value="text" selected="selected">Text</option>
+                  <option value="time">Time</option>
+                  <option value="url">URL</option>
+                  <option value="week">Week</option>
+               </select>
+               <br/>
+               <input id="Procedure 1 input" type="text"></input>
+            
+         </div>
+         
+         <button>Go</button>
+      </form>
+      <script>
+var procedures =
+{
+   "Procedure 1": {
+      "function": "alert('hello world')",
+      "topLeft": {
+         "x": 50,
+         "y": 50
+      }
+   }
+      
+}
+
+function createProcedure(label) {
+
+   var procedure =
+      procedures[label];
+      
+  /*
+   var json = {
+      "div": {
+        "id": "div1",
+        "innerText": "🛑",
+        "children": [
+           {
+              "div": {
+                 "id": "div2",
+                 "innerText": "Hello 🌎"
+              }
+           }
+        ]
+      }
+   }
+   json = evaluate(json);
+   */
+   
+   var json = {
+      "form": {
+         "id": makeId(label),
+         "className": "movable",
+         "style": {
+            "position": "absolute",
+            "top": procedure.topLeft.y + "px",
+            "left": procedure.topLeft.x + "px"
+         },
+         "children": [
+            {
+               "label": {
+                  "id": makeId(label, "label"),
+                  "contentEditable": "true",
+                  "innerText": label
+               }
+            },
+            {
+               "br": {}
+            },
+            {
+               "select": {
+                  "children": [
+                     {
+                        "option": {
+                            "value": makeId(label, "functionDiv"),
+                            "selected": true,
+                            "innerText": "Function"
+                         }
+                     },
+                     {
+                        "option": {
+                            "value": makeId(label, "gotoDiv"),
+                            "innerText": "Goto"
+                         }
+                     },
+                     {
+                        "option": {
+                            "value": makeId(label, "inputDiv"),
+                            "innerText": "Input"
+                         }
+                     }
+                  ],
+                  "onchange":
+function(event) {
+   onProcedureTypeChange(
+      this,
+      [
+         makeId(label, "functionDiv"),
+         makeId(label, "gotoDiv"),
+         makeId(label, "inputDiv")
+      ]
+   );
+}
+    
+               }
+            },
+            {
+               "div": {
+                  "id": makeId(label, "functionDiv"),
+                  "style": {
+                     "display": "block"
+                  },
+                  "children": [
+                     {
+                        "textarea": {
+                           "id": makeId(label, "function")
+                        }
+                     }
+                  ]
+               }
+            },
+            {
+               "div": {
+                  "id": makeId(label, "gotoDiv"),
+                  "style": {
+                     "display": "none"
+                  },
+                  "children": [
+                     {
+                        "svg": {
+                           "id": makeId(label, "svg"),
+                           "children": [
+                              {
+                                 "rect": {
+                                    "attributes" : {
+                                       "width": "100",
+                                       "height": "100",
+                                       "x": "0",
+                                       "y": "0",
+                                       "rx": "20",
+                                       "ry": "20",
+                                       "fill": "pink"
+                                    }
+                                 }
+                              }
+                           ]
+                        }
+                     }
+                  ]
+               }
+            },
+            {
+               "div": {
+                  "id": makeId(label, "inputDiv"),
+                  "style": {
+                     "display": "none"
+                  },
+                  "children": [
+                     {"br":{}},
+                     {
+                        "input": {
+                           "id": makeId(label, "input")
+                        }
+                     }
+                  ]
+               }
+            }
+            
+         ]
+         
+      }
+   };
+   /*
+   document.write("<pre>");
+   document.write(JSON.stringify(json, null, "   "));
+   document.write("</pre>");
+   */
+   HTML(json, document.body);
+   
+   
+}
+
+function makeId(label, id) {
+    
+   var _id = label + (id ? " " + id : "");
+
+   _id = _id.replaceAll(" ", "_");
+  
+   return _id;}
+   
+
+function onInputTypeChange(select, inputId) {
+   var input = document.getElementById(inputId);
+   input.type = select.value
+}
+
+function onProcedureTypeChange(select, divIds) {
+   // Hide all
+   for (var i = 0; i < divIds.length; ++i) {
+      var id = divIds[i];
+      var div = document.getElementById(id);
+      div.style.display = "none";
+   }
+   
+   // Display selected
+   var selected = select.value;
+   var div = document.getElementById(selected);
+   
+   div.style.display = "block";
+   
+}
+
+function onNewProcedure(event) {
+   var label = "Procedure ";
+   var count = 1;
+   while (procedures[label + count])
+      ++count;
+      
+   label += count;
+   
+   while (true) {
+      label = prompt("New procedure", label);
+      if (!label)
+         return;
+         
+      if (procedures[label])
+         alert(label + " already exists");
+      else
+         break;
+         
+   };
+   
+   var point = coordinates.getCoordinates(event);
+   
+   procedures[label] = {
+      "function": "function() {\r\n.  alert('hello');\r\n}",
+      "topLeft": {
+         "x": point.x - 100,
+         "y": point.y
+      }
+   };
+   
+   createProcedure(label);
+   
+}
+
+document.body.onclick =
+   function (event) {
+      if (event.target == document.body) {
+         onNewProcedure(event);
+         //var e = document.getElementById(makeId("Procedure 2"));
+         //alert(e);
+      }
+   }
+
+document.getElementById("Procedure 1").
+   addEventListener(
+      "moving",
+      function (event) {
+         procedures["Procedure 1"].topLeft =
+            event.point;
+      },
+      false
+   );
+
+      </script>
+      
+      
+      <script>
+var header = document.getElementById("h1");
+var title = document.getElementById("title");
+
+var origin =
+   punycode.toUnicode(
+      window.location.hostname
+   );
+
+header.innerText = "Procedure " + origin;
+title.innerText = origin;
+
+      </script>
+   </body>
+
+</html>

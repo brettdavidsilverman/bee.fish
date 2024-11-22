@@ -104,6 +104,13 @@ namespace BeeFishHTTPS {
                }
             },
             {
+               ".png",
+               {
+                  "image/png",
+                  "public, max-age=31536000, immutable"
+               }
+            },
+            {
                ".gif",
                {
                   "image/gif",

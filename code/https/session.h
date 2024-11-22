@@ -634,7 +634,10 @@ namespace BeeFishHTTPS {
    ) :
       ResponseHeadersBase(
          {
-            { "access-control-allow-origin", session->origin() }
+            { "access-control-allow-origin", session->origin() },
+           // { "vary", "origin" },
+            { "access-control-allow-credentials", "true" },
+            { "connection", "keep-alive" }
          }
       )
    {

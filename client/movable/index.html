@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+       <script>
+window.onerror = function(message, source, line) {
+    alert(source + "\n" + message + "\n" + line);
+}
+
+function properties(obj) {
+     var ps = [];
+     for (var p in obj) {
+         ps.push(p);
+     }
+     ps.sort();
+     document.write(ps.join("<br \>"));
+}
+       </script>
+       <script src="../coordinates/script.js"></script>
+       <script src="script.js"></script>
+       <link rel="stylesheet" type="text/css" href="style.css" />
+       <style>
+
+#outer {
+    background-color: blue;
+    position: relative;
+    left: 50px;
+    top: 50px;
+    width: 200px;
+    height: 200px;
+}
+
+#inner {
+    background-color: red;
+    position: absolute;
+    left: 75px;
+    top: 75px;
+    width: 50px;
+    height: 50px;
+}
+
+#moveIframe {
+   width: 50px;
+   height: 50px;
+   background-color: grey;
+}
+
+       </style>
+    </head>
+    <body>
+       <h1>Movable</h1>
+       <div>
+          Move the blue or red square by dragging
+          Add the class "movable" to elements you wish to be movable
+       </div>
+       <div id="outer" class="movable" onclick="alert(1)">
+           <div id="inner" class="movable" onclick="alert(2)"></div>
+       </div>
+<!--
+       <div id="top">
+       
+          <div id="moveIframe" class="movable">+</div>
+          
+          <iframe id="iframe" src="../statement/index.html"></iframe>
+          
+       </div>
+
+       <script>
+var moveIframe = document.getElementById("moveIframe");
+var iframe = document.getElementById("iframe");
+
+moveIframe.addEventListener("moving", onmove);
+
+function onmove(event) {
+   iframe.style.position = "absolute";
+   iframe.style.left = (event.point.x + moveIframe.clientWidth) + "px";
+   iframe.style.top = (event.point.y + moveIframe.clientHeight) + "px";
+}
+       </script>
+-->
+    </body>
+</html>

@@ -54,7 +54,6 @@ namespace BeeFishHTTPS {
       }
 
       virtual void handleResponse() {
-#warning Authentication app
 
          _status = -1;
          
@@ -135,24 +134,6 @@ namespace BeeFishHTTPS {
             authenticate();
          }
         
-      
-         _responseHeaders.replace(
-            "vary",
-            "origin"
-         );
-
-         _responseHeaders.replace(
-            "access-control-allow-credentials",
-            "true"
-         );
-         
-         
-         _responseHeaders.replace(
-            "connection",
-            "keep-alive"
-         );
-
-      
          if (authenticated())
          {
             _responseHeaders.emplace(

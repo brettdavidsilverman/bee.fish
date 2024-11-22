@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+       <script>
+window.onerror = function(message, source, line) {
+    alert(message + "\n" + line);
+}
+
+function properties(obj) {
+     var ps = [];
+     for (var p in obj) {
+         ps.push(p);
+     }
+     ps.sort();
+     document.write(ps.join("<br \>"));
+}
+       </script>
+       <script src="script.js"></script>
+       <link rel="stylesheet" type="text/css" href="style.css" />
+       <style>
+
+#div {
+    background-color: blue;
+    position: relative;
+    left: 50px;
+    top: 50px;
+    width: 200px;
+    height: 200px;
+}
+
+
+       </style>
+    </head>
+    <body>
+       <h1>Coordinates</h1>
+Creates a Point constructor
+Creates a getCoordinates function that gets a point x and y document coordinates for all mouse and touch events.
+       <div id="div" onclick="displayCoordinates(event)">
+          Click or tap me
+       </div>
+       <script>
+function displayCoordinates(event) {
+   var point = coordinates.getCoordinates(event);
+   var display = JSON.stringify(point);
+   alert(display);
+}
+       </script>
+    </body>
+</html>

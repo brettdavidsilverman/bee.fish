@@ -14,6 +14,7 @@ function evaluate(json, parent=json)
 
       var string = json;
  
+ 
       if (string.startsWith("{") &&
           string.endsWith("}"))
       {
@@ -31,31 +32,32 @@ function evaluate(json, parent=json)
 
          if (evaluated == undefined)
             evaluated = string;
-
          return evaluated;
       }
-      else
+      else {
          return string;
+      }
       break;
    case "object":
+      var object = {}
       for (property in json)
       {
          var newProperty =
             evaluate(property, json);
-            
+  
+
          if (newProperty == undefined)
             newProperty = property;
             
          var newValue =
             evaluate(json[property], json);
-            
-         json[newProperty] =
+ 
+         object[newProperty] =
             newValue;
-            
-         if (property != newProperty)
-            json[property] = undefined;
+
       }
-      return json;
+
+      return object;
       break;
     
    default:
@@ -259,17 +261,23 @@ function formatJSON(jsonText){
    return json;
 }
 
-function HTML(url, parent=document.body) {
+function HTML(json, parent=document.body) {
    
-
-   if (typeof url == "object")
+   const namespaces = {
+      "svg": "http://www.w3.org/2000/svg",
+      "rect": "http://www.w3.org/2000/svg"
+   }
+   
+   if (typeof json == "object")
    {
-      var json = evaluate(url);
-      createElement(json, parent);
-      return Promise.resolve();
+      json = evaluate(json);
+      createElements(json, parent);
+      return Promise.resolve(parent);
    }
    else
    {
+      var url = json;
+      
       url = evaluate(url);
       
       var promise =
@@ -279,8 +287,8 @@ function HTML(url, parent=document.body) {
             {
                 json = evaluate(json);
                 
-                var element = createElement(json, parent);
-                return element;
+                createElements(json, parent);
+                return parent;
             }
          ).
          catch(
@@ -292,8 +300,9 @@ function HTML(url, parent=document.body) {
       return promise;
    }
    
-   function createElement(json, parent)
+   function createElements(json, parent)
    {
+
       if (Array.isArray(json))
       {
          for (var index = 0;
@@ -301,36 +310,63 @@ function HTML(url, parent=document.body) {
               ++index)
          {
             var obj = json[index];
-            createElement(obj, parent);
+            
+            createElements(obj, parent);
          }
          
-         return;
+         return parent;
       }
-      
+
+
       for (var tag in json) {
 
-         var element =
-            document.createElement(tag);
-
-         for (attribute in json[tag])
+         var element;
+         
+         if (namespaces[tag])
+            element =
+               document.createElementNS(
+                  namespaces[tag],
+                  tag
+               );
+         else
+            element =
+               document.createElement(tag);
+        
+         parent.appendChild(element);
+         setAttributes(element, json[tag]);
+         
+      }
+      
+      return parent;
+         
+      
+      function setAttributes(element, json) {
+        
+         for (attribute in json)
          {
+            var value = json[attribute];
+            
             if (attribute == "children") {
-               
-               var children = json[tag].children;
-               createElement(children, element);
-               
+               var children = value;
+               createElements(children, element);
+            }
+            else if (attribute == "attributes")
+            {
+               var attributes = value;
+               for (var attrib in attributes) {
+                  element.setAttribute(attrib, attributes[attrib]);
+               }
             }
             else {
-               var value = json[tag][attribute];
-               if (value)
+               if (typeof value == "object")
+                  setAttributes(element[attribute], value);
+               else
                   element[attribute] = value;
             }
          }
          
-         parent.appendChild(element);
+         
       }
-            
-      
       
    }
    
