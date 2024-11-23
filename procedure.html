@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en" style="height:100%;">
    <head>
       <meta charset="utf-8"/>
@@ -77,12 +76,18 @@ select {
    width: calc(100% - 60px);
 }
 
-.svg {
+.gotoSVG {
    clear: both;
    padding: 0px;
    padding-top: 10px;
    width: calc(100% - 10px);
    
+}
+
+.gotoSelect {
+    position: absolute;
+    right: 5px;
+    top: 125px;
 }
 
 #svg {
@@ -171,7 +176,7 @@ select {
 var procedures =
 {
    "Procedure 1": {
-      "function": "function() \r\n   alert('hello world');\r\n}",
+      "function": "function() { \r\n   alert('hello world');\r\n}",
       "topLeft": {
          "x": "50",
          "y": "100"
@@ -331,7 +336,7 @@ function(event) {
             {
                "div": {
                   "id": makeId(label, "gotoDiv"),
-                  "className": "svg",
+                  "className": "gotoSVG",
                   "style": {
                      "display": procedure.goto ? "block" : "none",
                   },
@@ -340,24 +345,77 @@ function(event) {
                         "svg": {
                            "id": makeId(label, "svg"),
                            "attributes": {
-                              "width": "100",
-                              "height": "100"
+                              "width": "300",
+                              "height": "150"
                            },
                            "children": [
                               {
-                                 "rect": {
-                                    "attributes" : {
-                                       "width": "100",
-                                       "height": "100",
-                                       "x": "0",
-                                       "y": "0",
-                                       "rx": "20",
-                                       "ry": "20",
-                                       "fill": "pink"
+                                 "g": {
+                                    "attributes": {
+                                       "transform": "rotate(45, 50, 50) translate(40, 0)"
+                                    },
+                                    "children" : [
+                                       {
+                                          "rect": {
+                                             "attributes" : {
+                                                "width": "100",
+                                                "height": "100",
+                                                "x": "0",
+                                                "y": "0",
+                                                "rx": "0",
+                                                "ry": "0",
+                                                "fill": "pink",
+                                                "stroke": "black"
+                                             }
+                                          }
+                                       }
+                                    ]
+                                 }
+                              },
+                              {
+                                 "line": {
+                                    "attributes": {
+                                       "x1": "147",
+                                       "y1": "78",
+                                       "x2": "200",
+                                       "y2": "78",
+                                       "stroke": "black"
                                     }
                                  }
                               }
                            ]
+                        }
+                     },
+                     {
+                        "select": {
+                           "className": "gotoSelect",
+                           "children": [
+                              createOption("On false", undefined, true)
+                           ],
+                           "onfocus":
+function(event) {
+   var select = this;
+   select.innerHTML = "";
+   for (var _label in procedures) {
+      if (_label != label &&
+          _label != "routes")
+         select.add(
+            new Option(
+               _label,
+               makeId(_label),
+               false,
+               _label == procedures[label]["goto"]
+            )
+         );
+   }
+},
+                           "onchange":
+function(event) {
+   var procedure = procedures[label];
+   delete procedure.function;
+   delete procedure.input;
+   procedure.goto = this.value;
+}
                         }
                      }
                   ]
@@ -604,15 +662,11 @@ function onNewProcedure(event) {
    
 }
 
-document.body.onclick =
+document.getElementById("svg").onclick =
    function (event) {
-      if (event.target == document.body) {
-         connectFrom = null;
-         connectTo = null;
-         onNewProcedure(event);
-         //var e = document.getElementById(makeId("Procedure 2"));
-         //alert(e);
-      }
+      connectFrom = null;
+      connectTo = null;
+      onNewProcedure(event);
    }
 
 createProcedures();
