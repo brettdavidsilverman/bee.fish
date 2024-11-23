@@ -27,15 +27,9 @@ body {
    width: 100%;
 }
 
-input {
-   position: relative;
-   left: auto;
-   width: calc(100% - 50px);
-   border: 1px solid;
-}
 
 form {
-    width: 200px;
+    width: 250px;
     background-color: lightblue;
     position: absolute;
     background-image: url('move.png');
@@ -44,12 +38,24 @@ form {
     background-position: right 2px top 2px;
 }
 
-textarea {
+textarea, input {
    left: 5px;
-   width: calc(100% - 10px);
+   right: 5px;
    margin: auto;
+   padding: auto;
+   margin-top: 5px;
+   width: calc(100% - 10px);
+}
+
+textarea {
    height: 100px;
 }
+
+input {
+   border: 1px solid;
+}
+select {
+   margin-top: 5px;}
 
 button {
    position: absolute;
@@ -57,11 +63,19 @@ button {
    bottom: -5px;
    width: 40px;}
 
+.svg {
+   clear: both;
+   padding: 0px;
+   padding-top: 10px;
+   width: calc(100% - 10px);
+   
+}
+
 
       </style>
    </head>
    <body>
-      <h1 id="h1">Procedure</h1>
+      <h1 id="h1">Procedure</h1><!--
       <form class="movable" id="Procedure 1" onsubmit="return false;">
         
         <label contenteditable="true">Procedure 1</label>
@@ -122,44 +136,57 @@ button {
                <input id="Procedure 1 input" type="text"></input>
             
          </div>
-         
+         <br/>
          <button>Go</button>
       </form>
+      -->
       <script>
 var procedures =
 {
    "Procedure 1": {
-      "function": "alert('hello world')",
+      "function": "function() {\r\n   alert('hello world');\r\n}",
       "topLeft": {
-         "x": 50,
-         "y": 50
+         "x": "50",
+         "y": "100"
       }
-   }
+   },
+   "Procedure 2": {
+      "input": "range",
+      "topLeft": {
+         "x": "50",
+         "y": "350"
+      }
+   },
+   "Procedure 3": {
+      "goto": makeId("Procedure 1"),
+      "topLeft": {
+         "x": "50",
+         "y": "500"
+      }
+   },
+   "routes": [
+      {
+         "from" : makeId("Procedure 1"),
+         "to": makeId("Procedure 2")
+      },
+      {
+         "from" : makeId("Procedure 3"),
+         "to": makeId("Procedure 3")
+      }
+   ]
       
 }
+function createProcedures() {
+   for (var label in procedures) {
+      if (label != "routes")
+         createProcedureHTML(label);
+   }
+}
 
-function createProcedure(label) {
+function createProcedureHTML(label) {
 
    var procedure =
       procedures[label];
-      
-  /*
-   var json = {
-      "div": {
-        "id": "div1",
-        "innerText": "🛑",
-        "children": [
-           {
-              "div": {
-                 "id": "div2",
-                 "innerText": "Hello 🌎"
-              }
-           }
-        ]
-      }
-   }
-   json = evaluate(json);
-   */
    
    var json = {
       "form": {
@@ -170,6 +197,14 @@ function createProcedure(label) {
             "top": procedure.topLeft.y + "px",
             "left": procedure.topLeft.x + "px"
          },
+         "onmoving":
+function (event) {
+   procedure.topLeft = event.point;
+},
+         "onsubmit":
+function() {
+   return false;
+},
          "children": [
             {
                "label": {
@@ -183,26 +218,13 @@ function createProcedure(label) {
             },
             {
                "select": {
+                  "style": {
+                     "float": "left"
+                  },
                   "children": [
-                     {
-                        "option": {
-                            "value": makeId(label, "functionDiv"),
-                            "selected": true,
-                            "innerText": "Function"
-                         }
-                     },
-                     {
-                        "option": {
-                            "value": makeId(label, "gotoDiv"),
-                            "innerText": "Goto"
-                         }
-                     },
-                     {
-                        "option": {
-                            "value": makeId(label, "inputDiv"),
-                            "innerText": "Input"
-                         }
-                     }
+                     createOption("Function", makeId(label, "functionDiv"), procedure.function != undefined),
+                     createOption("Goto", makeId(label, "gotoDiv"), procedure.goto != undefined),
+                     createOption("Input", makeId(label, "inputDiv"), procedure.input != undefined)
                   ],
                   "onchange":
 function(event) {
@@ -218,16 +240,24 @@ function(event) {
     
                }
             },
+            
             {
                "div": {
                   "id": makeId(label, "functionDiv"),
                   "style": {
-                     "display": "block"
+                     "display": procedure["function"] ? "block" : "none"
                   },
                   "children": [
                      {
                         "textarea": {
-                           "id": makeId(label, "function")
+                           "id": makeId(label, "function"),
+                           "innerHTML": procedure.function,
+                           "onblur":
+function(event) {
+   procedure.function = this.innerHTML;
+   delete procedure.input;
+   delete procedure.goto;
+}
                         }
                      }
                   ]
@@ -236,13 +266,18 @@ function(event) {
             {
                "div": {
                   "id": makeId(label, "gotoDiv"),
+                  "className": "svg",
                   "style": {
-                     "display": "none"
+                     "display": procedure["goto"] ? "block" : "none",
                   },
                   "children": [
                      {
                         "svg": {
                            "id": makeId(label, "svg"),
+                           "attributes": {
+                              "width": "100",
+                              "height": "100"
+                           },
                            "children": [
                               {
                                  "rect": {
@@ -267,16 +302,60 @@ function(event) {
                "div": {
                   "id": makeId(label, "inputDiv"),
                   "style": {
-                     "display": "none"
+                     "display": procedure["input"] ? "block" : "none"
                   },
                   "children": [
-                     {"br":{}},
+                     {
+                        "select": {
+                           "onchange":
+function (event) {
+   var inputId = makeId(label, "input");
+   var input = document.getElementById(inputId);
+   
+   input.type = this.value;
+   input.value = "";
+   procedure.input = input.type;
+   delete procedure.function;
+   delete procedure.goto;
+},
+                           "children": [
+                              createOption("Button", "button", procedure["input"] == "button"),
+                              createOption("Check box", "checkbox", procedure["input"] == "checkbox"),
+                              createOption("Color", "color", procedure["input"] == "color"),
+                              createOption("Date", "date", procedure["input"] == "date"),
+                              createOption("Date time", "datetime-local", procedure["input"] == "datetime-local"),
+                              createOption("Email", "email", procedure["input"] == "email"),
+                              createOption("File", "file", procedure["input"] == "file"),
+                              createOption("Image", "image", procedure["input"] == "image"),
+                              createOption("Month", "month", procedure["input"] == "month"),
+                              createOption("Number", "number", procedure["input"] == "number"),
+                              createOption("Password", "password", procedure["input"] == "password"),
+                              createOption("Radio", "radio", procedure["input"] == "radio"),
+                              createOption("Range", "range", procedure["input"] == "range"),
+                              createOption("Reset", "reset", procedure["input"] == "reset"),
+                              createOption("Search", "search", procedure["input"] == "search"),
+                              createOption("Submit", "submit", procedure["input"] == "submit"),
+                              createOption("Telephone", "tel", procedure["input"] == "tel"),
+                              createOption("Text", "text", procedure["input"] == "text"),
+                              createOption("Time", "time", procedure["input"] == "button"),
+                              createOption("URL", "url", procedure["input"] == "time"),
+                              createOption("Week", "week", procedure["input"] == "week"),
+                           ]
+                        }
+                     },
                      {
                         "input": {
-                           "id": makeId(label, "input")
+                           "id": makeId(label, "input"),
+                           "type": procedure.input
                         }
                      }
                   ]
+               }
+            },
+            {"br":{}},
+            {
+               "button": {
+                  "innerText": "Go"
                }
             }
             
@@ -301,12 +380,17 @@ function makeId(label, id) {
    _id = _id.replaceAll(" ", "_");
   
    return _id;}
-   
 
-function onInputTypeChange(select, inputId) {
-   var input = document.getElementById(inputId);
-   input.type = select.value
+function createOption(label, value, selected=undefined) {
+   return {
+      "option": {
+         "value": value,
+         "innerText": label,
+         "selected": selected ? "true" : undefined
+      }
+   }
 }
+   
 
 function onProcedureTypeChange(select, divIds) {
    // Hide all
@@ -347,14 +431,14 @@ function onNewProcedure(event) {
    var point = coordinates.getCoordinates(event);
    
    procedures[label] = {
-      "function": "function() {\r\n.  alert('hello');\r\n}",
+      "function": "function() {\r\n   alert('hello');\r\n}",
       "topLeft": {
          "x": point.x - 100,
          "y": point.y
       }
    };
    
-   createProcedure(label);
+   createProcedureHTML(label);
    
 }
 
@@ -366,17 +450,8 @@ document.body.onclick =
          //alert(e);
       }
    }
-
-document.getElementById("Procedure 1").
-   addEventListener(
-      "moving",
-      function (event) {
-         procedures["Procedure 1"].topLeft =
-            event.point;
-      },
-      false
-   );
 
+createProcedures();
       </script>
       
       

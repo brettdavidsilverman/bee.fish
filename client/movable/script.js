@@ -98,6 +98,9 @@ movable.onmoving = function(event) {
    movingEvent.point = new coordinates.Point(x, y);
    
    // dispatch the event
+   if (movable.moving.onmoving)
+      movable.moving.onmoving(movingEvent);
+      
    movable.moving.dispatchEvent(movingEvent);
 }
 
