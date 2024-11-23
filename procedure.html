@@ -1,4 +1,4 @@
-<html lang="en" style="height:100%;">
+<html lang="en">
    <head>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -18,8 +18,7 @@
 body {
    border: 1px solid;
    margin: 0px;
-   height: 100%;
-   width: 100%;
+   padding: 0px;
 }
 
 
@@ -176,24 +175,24 @@ select {
 var procedures =
 {
    "Procedure 1": {
-      "function": "function() { \r\n   alert('hello world');\r\n}",
+      "function": "function() {\r\n   alert('hello world');\r\n}",
       "topLeft": {
-         "x": "50",
-         "y": "100"
+         "x": 50,
+         "y": 100
       }
    },
    "Procedure 2": {
       "input": "range",
       "topLeft": {
-         "x": "50",
-         "y": "350"
+         "x": 50,
+         "y": 350
       }
    },
    "Procedure 3": {
       "goto": "Procedure 1",
       "topLeft": {
-         "x": "50",
-         "y": "500"
+         "x": 50,
+         "y": 500
       }
    },
    "routes": [
@@ -207,51 +206,7 @@ var procedures =
 
 var connectFrom;
 var connectTo;
-   function createProcedures() {
-   for (var label in procedures) {
-      if (label != "routes")
-         createProcedureHTML(label);
-   }
-   createRoutes();
-}
-
-function createRoutes() {
-   var svg = document.getElementById("svg");
-   svg.innerHTML = "";
-   
-   if (!procedures.routes)
-      procedures.routes = [];
-      
-   for (var index = 0;
-        index < procedures.routes.length;
-        ++index)
-   {
-      var route = procedures.routes[index];
-      createRoute(route);
-   }
-}
-
-function createRoute(route) {
-    
-   var svg = document.getElementById("svg");
-   
-   var from = document.getElementById(makeId(route.from));
-   var to = document.getElementById(makeId(route.to));
-   var fromRect = from.getBoundingClientRect();
-   var toRect = to.getBoundingClientRect();
-   
-   var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-   
-   line.setAttribute("x1", fromRect.x + fromRect.width / 2);
-   line.setAttribute("y1", fromRect.y + fromRect.height);
-   line.setAttribute("x2", toRect.x + toRect.width / 2);
-   line.setAttribute("y2", toRect.y);
-   line.setAttribute("stroke", "blue");
-   
-   svg.appendChild(line);
-   
-}
-
+   
 function createProcedureHTML(label) {
 
    var procedure =
@@ -269,7 +224,7 @@ function createProcedureHTML(label) {
          "onmoving":
 function (event) {
    procedure.topLeft = event.point;
-   createRoutes();
+   window.onresize();
 },
          "onsubmit":
 function() {
@@ -489,6 +444,7 @@ function(event) {
       connectFrom =
          document.getElementById(fromId);
       connectTo = null;
+      alert("Click connect on a downstream procedure");
    }
    else if (!connectTo) {
        var toId = makeId(label);
@@ -501,14 +457,37 @@ function(event) {
       if (connectFrom != connectTo) {
           
          if (!procedures.routes)
-            procedure.routes = [];
+            procedures.routes = [];
             
-         procedures.routes.push(
+         var routes = procedures.routes;
+         
+         // Check if this route already exists
+         var exists = false;
+         for (var index = 0;
+              index < routes.length;
+              ++index)
+         {
+            
+            var route = routes[index];
+            if (route.from == connectFrom.id &&
+                route.to == connectTo.id)
             {
-               from: connectFrom.id,
-               to: connectTo.id
+               if (confirm("This route exists. Delete it?"))
+               {
+                  routes.splice(index, 1);
+               }
+               exists = true;
             }
-         );
+         }
+         
+         if (!exists)
+            routes.push(
+               {
+                  from: connectFrom.id,
+                  to: connectTo.id
+               }
+            );
+            
          createRoutes();
       }
       connectFrom = null;
@@ -661,15 +640,88 @@ function onNewProcedure(event) {
    createProcedureHTML(label);
    
 }
+function createProcedures() {
+   for (var label in procedures) {
+      if (label != "routes")
+         createProcedureHTML(label);
+   }
+   createRoutes();
+}
+
+function createRoutes() {
+   var svg = document.getElementById("svg");
+   svg.innerHTML = "";
+   
+   if (!procedures.routes)
+      procedures.routes = [];
+      
+   for (var index = 0;
+        index < procedures.routes.length;
+        ++index)
+   {
+      var route = procedures.routes[index];
+      createRoute(route);
+   }
+}
+
+function createRoute(route) {
+    
+   var svg = document.getElementById("svg");
+   
+   var from = document.getElementById(makeId(route.from));
+   var to = document.getElementById(makeId(route.to));
+   var fromRect = from.getBoundingClientRect();
+   var toRect = to.getBoundingClientRect();
+   
+   var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+   var _from = procedures[route.from].topLeft;
+   var _to = procedures[route.to].topLeft;
+
+   line.setAttribute("x1", _from.x + fromRect.width / 2);
+   line.setAttribute("y1", _from.y + fromRect.height);
+   line.setAttribute("x2", _to.x + toRect.width / 2);
+   line.setAttribute("y2", _to.y);
+   line.setAttribute("stroke", "blue");
+   
+   svg.appendChild(line);
+   
+}
 
 document.getElementById("svg").onclick =
    function (event) {
       connectFrom = null;
       connectTo = null;
       onNewProcedure(event);
+   }
+window.onresize =
+   function(event) {
+      var maxWidth = 0;
+      var maxHeight = 0;
+      for (var label in procedures) {
+         if (label != "routes") {
+            var form = document.getElementById(makeId(label));
+            var rect = form.getBoundingClientRect();
+            var topLeft = procedures[label].topLeft;
+            if (topLeft.x + rect.width > maxWidth)
+               maxWidth = topLeft.x + rect.width;
+               
+            if (topLeft.y + rect.height > maxHeight)
+               maxHeight = topLeft.y + rect.height;
+         }
+      }
+      document.body.style.width = maxWidth * 2 + "px";
+      document.body.style.height = maxHeight * 2 + "px";
+
+      var svg = document.getElementById("svg");
+      
+      svg.style.width = document.body.style.width;
+      svg.style.height = document.body.style.height;
+      
+      createRoutes();
    }
-
+   
 createProcedures();
+window.onresize();
       </script>
       
       
