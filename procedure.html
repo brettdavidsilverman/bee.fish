@@ -15,14 +15,10 @@
       <script src="/client/movable/script.js"></script>
  
       <link rel="stylesheet" type="text/css" href="style.css"/>
-      <script>
-
-      </script>
       <style>
 body {
    border: 1px solid;
    margin: 0px;
-   padding: 10px;
    height: 100%;
    width: 100%;
 }
@@ -30,12 +26,23 @@ body {
 
 form {
     width: 250px;
-    background-color: lightblue;
     position: absolute;
     background-image: url('move.png');
     background-repeat: no-repeat;
     background-size: 30px 30px;
     background-position: right 2px top 2px;
+}
+
+.ready {
+   background-color: lightblue;
+}
+
+.error {
+   background-color: pink;
+}
+
+.complete {
+   background-color: lightgreen;
 }
 
 textarea, input {
@@ -44,7 +51,8 @@ textarea, input {
    margin: auto;
    padding: auto;
    margin-top: 5px;
-   width: calc(100% - 10px);
+   margin-bottom: 5px;
+   width: calc(100% - 5px);
 }
 
 textarea {
@@ -57,11 +65,17 @@ input {
 select {
    margin-top: 5px;}
 
-button {
+.go, .connect {
    position: absolute;
    right: -5px;
    bottom: -5px;
    width: 40px;}
+
+.connect {
+   left: 0px;
+   right: auto;
+   width: calc(100% - 60px);
+}
 
 .svg {
    clear: both;
@@ -71,11 +85,24 @@ button {
    
 }
 
+#svg {
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   width: 100%;
+   margin: 0px;
+   padding: 0px;
+   height: 100%;
+   border: 1px solid red;
+}
+
 
       </style>
    </head>
    <body>
-      <h1 id="h1">Procedure</h1><!--
+      <h1 id="h1">Procedure</h1>
+      <svg id="svg">
+      </svg><!--
       <form class="movable" id="Procedure 1" onsubmit="return false;">
         
         <label contenteditable="true">Procedure 1</label>
@@ -144,7 +171,7 @@ button {
 var procedures =
 {
    "Procedure 1": {
-      "function": "function() {\r\n   alert('hello world');\r\n}",
+      "function": "function() \r\n   alert('hello world');\r\n}",
       "topLeft": {
          "x": "50",
          "y": "100"
@@ -158,7 +185,7 @@ var procedures =
       }
    },
    "Procedure 3": {
-      "goto": makeId("Procedure 1"),
+      "goto": "Procedure 1",
       "topLeft": {
          "x": "50",
          "y": "500"
@@ -166,28 +193,65 @@ var procedures =
    },
    "routes": [
       {
-         "from" : makeId("Procedure 1"),
-         "to": makeId("Procedure 2")
-      },
-      {
-         "from" : makeId("Procedure 3"),
-         "to": makeId("Procedure 3")
+         "from": "Procedure 1",
+         "to": "Procedure 2"
       }
    ]
       
 }
-function createProcedures() {
+
+var connectFrom;
+var connectTo;
+   function createProcedures() {
    for (var label in procedures) {
       if (label != "routes")
          createProcedureHTML(label);
    }
+   createRoutes();
+}
+
+function createRoutes() {
+   var svg = document.getElementById("svg");
+   svg.innerHTML = "";
+   
+   if (!procedures.routes)
+      procedures.routes = [];
+      
+   for (var index = 0;
+        index < procedures.routes.length;
+        ++index)
+   {
+      var route = procedures.routes[index];
+      createRoute(route);
+   }
+}
+
+function createRoute(route) {
+    
+   var svg = document.getElementById("svg");
+   
+   var from = document.getElementById(makeId(route.from));
+   var to = document.getElementById(makeId(route.to));
+   var fromRect = from.getBoundingClientRect();
+   var toRect = to.getBoundingClientRect();
+   
+   var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+   
+   line.setAttribute("x1", fromRect.x + fromRect.width / 2);
+   line.setAttribute("y1", fromRect.y + fromRect.height);
+   line.setAttribute("x2", toRect.x + toRect.width / 2);
+   line.setAttribute("y2", toRect.y);
+   line.setAttribute("stroke", "blue");
+   
+   svg.appendChild(line);
+   
 }
 
 function createProcedureHTML(label) {
 
    var procedure =
       procedures[label];
-   
+      
    var json = {
       "form": {
          "id": makeId(label),
@@ -200,6 +264,7 @@ function createProcedureHTML(label) {
          "onmoving":
 function (event) {
    procedure.topLeft = event.point;
+   createRoutes();
 },
          "onsubmit":
 function() {
@@ -252,11 +317,11 @@ function(event) {
                         "textarea": {
                            "id": makeId(label, "function"),
                            "innerHTML": procedure.function,
-                           "onblur":
+                           "onchange":
 function(event) {
-   procedure.function = this.innerHTML;
-   delete procedure.input;
-   delete procedure.goto;
+   procedure.function = this.value;
+   delete procedure.f;
+   return true;
 }
                         }
                      }
@@ -268,7 +333,7 @@ function(event) {
                   "id": makeId(label, "gotoDiv"),
                   "className": "svg",
                   "style": {
-                     "display": procedure["goto"] ? "block" : "none",
+                     "display": procedure.goto ? "block" : "none",
                   },
                   "children": [
                      {
@@ -315,6 +380,7 @@ function (event) {
    input.type = this.value;
    input.value = "";
    procedure.input = input.type;
+   delete procedure.value;
    delete procedure.function;
    delete procedure.goto;
 },
@@ -346,7 +412,8 @@ function (event) {
                      {
                         "input": {
                            "id": makeId(label, "input"),
-                           "type": procedure.input
+                           "type": procedure.input,
+                           "value": procedure.value
                         }
                      }
                   ]
@@ -355,7 +422,72 @@ function (event) {
             {"br":{}},
             {
                "button": {
-                  "innerText": "Go"
+                  "className": "connect",
+                  "innerText": "connect",
+                  "onclick":
+function(event) {
+   if (!connectFrom) {
+      var fromId = makeId(label);
+      connectFrom =
+         document.getElementById(fromId);
+      connectTo = null;
+   }
+   else if (!connectTo) {
+       var toId = makeId(label);
+       connectTo =
+          document.getElementById(toId);
+   }
+   
+   
+   if (connectFrom && connectTo) {
+      if (connectFrom != connectTo) {
+          
+         if (!procedures.routes)
+            procedure.routes = [];
+            
+         procedures.routes.push(
+            {
+               from: connectFrom.id,
+               to: connectTo.id
+            }
+         );
+         createRoutes();
+      }
+      connectFrom = null;
+      connectTo = null;
+   }
+}
+               }
+            },
+            {
+               "button": {
+                  "className": "go",
+                  "innerText": "Go",
+                  "onclick":
+function (event) {
+   var procedure = procedures[label];
+   var form = document.getElementById(makeId(label));
+   
+   form.classList.remove("error");
+   form.classList.remove("ready");
+   form.classList.remove("complete");
+   
+   if (procedure.function) {
+      if (!procedure.f) {
+         compileFunction(label);
+      }
+      if (procedure.f) {
+         procedure.f();
+         form.classList.add("complete");
+      }
+   }
+   else if (procedure.input) {
+      var inputId = makeId(label, "input");
+      var input = document.getElementById(inputId);
+      procedure.value = input.value;
+      form.classList.add("complete");
+   }
+}
                }
             }
             
@@ -377,7 +509,7 @@ function makeId(label, id) {
     
    var _id = label + (id ? " " + id : "");
 
-   _id = _id.replaceAll(" ", "_");
+   //_id = _id.replaceAll(" ", "_");
   
    return _id;}
 
@@ -389,6 +521,36 @@ function createOption(label, value, selected=undefined) {
          "selected": selected ? "true" : undefined
       }
    }
+}
+
+function compileFunction(label)
+{
+   var procedure = procedures[label];
+   
+   delete procedure.f;
+   delete procedure.input;
+   delete procedure.goto;
+   
+   var form = document.getElementById(makeId(label));
+   
+   form.classList.remove("error");
+   form.classList.remove("ready");
+   form.classList.remove("complete");
+      
+   try {
+      var f = new Function("return " + procedure.function);
+      procedure.f = f();
+      form.classList.add("ready");
+      return true;
+   }
+   catch (error)
+   {
+      Error(error, compileFunction);
+      form.classList.add("error");
+      return false;
+   }
+   
+   
 }
    
 
@@ -445,6 +607,8 @@ function onNewProcedure(event) {
 document.body.onclick =
    function (event) {
       if (event.target == document.body) {
+         connectFrom = null;
+         connectTo = null;
          onNewProcedure(event);
          //var e = document.getElementById(makeId("Procedure 2"));
          //alert(e);

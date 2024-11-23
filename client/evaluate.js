@@ -265,7 +265,8 @@ function HTML(json, parent=document.body) {
    
    const namespaces = {
       "svg": "http://www.w3.org/2000/svg",
-      "rect": "http://www.w3.org/2000/svg"
+      "rect": "http://www.w3.org/2000/svg",
+      "line": "http://www.w3.org/2000/svg"
    }
    
    if (typeof json == "object")
