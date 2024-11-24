@@ -63,16 +63,22 @@ input {
 select {
    margin-top: 5px;}
 
-.go, .connect {
+.go, .connect, .delete {
    position: absolute;
    right: -5px;
    bottom: -5px;
    width: 40px;}
 
 .connect {
+   left: 60px;
+   right: auto;
+   width: auto;
+}
+
+.delete {
    left: 0px;
    right: auto;
-   width: calc(100% - 60px);
+   width: auto;
 }
 
 .gotoSVG {
@@ -286,6 +292,46 @@ function(event) {
       connectFrom = null;
       connectTo = null;
    }
+}
+               }
+            },
+            {
+               "button": {
+                  "className": "delete",
+                  "innerText": "Delete",
+                  "onclick":
+function (event) {
+   if (!confirm("Delete " + label + "?"))
+      return false;
+      
+   var form = document.getElementById(label);
+   form.remove();
+   delete procedures[label];
+   
+   if (!procedures.routes)
+      procedures.routes = [];
+      
+   var routes = procedures.routes;
+   
+   for (var index = 0;
+        index < routes.length;
+        )
+   {
+      var route = routes[index];
+      if (route.from == label ||
+          route.to == label)
+      {
+         routes.splice(index, 1);
+      }
+      else
+         ++index;
+      
+   }
+   
+   createRoutes();
+   
+   return true;
+   
 }
                }
             },
