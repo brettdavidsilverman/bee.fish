@@ -142,7 +142,7 @@ var procedures =
 var connectFrom;
 var connectTo;
    
-function createProcedureHTML(label) {
+function createProcedure(label) {
 
    var procedure =
       procedures[label];
@@ -170,7 +170,29 @@ function() {
                "label": {
                   "id": makeId(label, "label"),
                   "contentEditable": "true",
-                  "innerText": label
+                  "innerText": label,
+                  "onblur":
+function (event) {
+   var _label =
+      document.getElementById(
+         makeId(label, "label")
+      );
+      
+   var newLabel =
+      _label.innerText;
+   
+   if (newLabel == label)
+      return;
+      
+   var test = document.getElementById(newLabel);
+   if (test) {
+      alert(newLabel + " already exists");
+      _label.innerText = label;
+      return;
+   }
+   
+   changeLabel(label, newLabel);
+}
                }
             },
             {
@@ -275,10 +297,7 @@ function(event) {
 function (event) {
    var procedure = procedures[label];
    var form = document.getElementById(makeId(label));
-   
-   form.classList.remove("error");
-   form.classList.remove("ready");
-   form.classList.remove("complete");
+      setFormClass(label);
    
    if (procedure.function) {
       if (!procedure.f) {
@@ -286,14 +305,14 @@ function (event) {
       }
       if (procedure.f) {
          procedure.f();
-         form.classList.add("complete");
+         setFormClass(label, "complete");
       }
    }
    else if (procedure.input) {
       var inputId = makeId(label, "input");
       var input = document.getElementById(inputId);
       procedure.value = input.value;
-      form.classList.add("complete");
+      setFormClass(label, "complete");
    }
 }
                }
@@ -326,6 +345,10 @@ function (event) {
                   "textarea": {
                      "id": makeId(label, "function"),
                      "innerHTML": procedure.function,
+                     "oninput":
+function(event) {
+   setFormClass(label, "ready");
+},
                      "onchange":
 function(event) {
    procedure.function = this.value;
@@ -462,11 +485,7 @@ function (event) {
    delete procedure.function;
    delete procedure.goto;
    
-   var form = document.getElementById(makeId(label));
-   form.classList.remove("error");
-   //form.classList.remove("ready");
-   form.classList.remove("complete");
-   form.classList.add("ready");
+   setFormClass(label, "ready");
 },
                      "children": [
                         createOption("Button", "button", procedure["input"] == "button"),
@@ -506,7 +525,8 @@ function (event) {
       
       return inputDiv;
    }
-
+   
+   
 }
 
 function makeId(label, id) {
@@ -516,6 +536,16 @@ function makeId(label, id) {
    //_id = _id.replaceAll(" ", "_");
   
    return _id;}
+
+function setFormClass(label, className) {
+   var form = document.getElementById(makeId(label));
+   form.classList.remove("error");
+   form.classList.remove("ready");
+   form.classList.remove("complete");
+   if (className)
+      form.classList.add(className);
+}
+
 
 function createOption(label, value, selected=undefined) {
    return {
@@ -535,22 +565,20 @@ function compileFunction(label)
    delete procedure.input;
    delete procedure.goto;
    
-   var form = document.getElementById(makeId(label));
-   
-   form.classList.remove("error");
-   form.classList.remove("ready");
-   form.classList.remove("complete");
-      
-   try {
-      var f = new Function("return " + procedure.function);
-      procedure.f = f();
-      form.classList.add("ready");
-      return true;
+   try {
+      var func = new Function("return " + procedure.function);
+      var f = func();
+      if (typeof f == "function") {
+         procedure.f = f;
+         setFormClass(label, "ready");
+         return true;
+      }
+      throw "Text must be a function";
    }
    catch (error)
    {
       Error(error, compileFunction);
-      form.classList.add("error");
+      setFormClass(label, "error");
       return false;
    }
    
@@ -604,13 +632,13 @@ function onNewProcedure(event) {
       }
    };
    
-   createProcedureHTML(label);
+   createProcedure(label);
    
 }
 function createProcedures() {
    for (var label in procedures) {
       if (label != "routes")
-         createProcedureHTML(label);
+         createProcedure(label);
    }
    createRoutes();
 }
@@ -629,6 +657,9 @@ function createRoutes() {
       var route = procedures.routes[index];
       createRoute(route);
    }
+   
+   
+   
 }
 
 function createRoute(route) {
@@ -652,6 +683,35 @@ function createRoute(route) {
    
    svg.appendChild(line);
    
+}
+
+function changeLabel(oldLabel, newLabel) {
+   var oldForm = document.getElementById(oldLabel);
+   oldForm.remove();
+   var oldProcedure = procedures[oldLabel];
+   delete procedures[oldLabel];
+   procedures[newLabel] = oldProcedure;
+   
+   
+   // re route
+   if (!procedures.routes)
+      procedures.routes = [];
+      
+   var routes = procedures.routes;
+   
+   for (var index = 0;
+        index < routes.length;
+        ++index)
+   {
+      var route = routes[index];
+      if (route.from == oldLabel)
+         route.from = newLabel;
+      if (route.to == oldLabel)
+         route.to = newLabel;
+   }
+   
+   createProcedure(newLabel);
+   createRoutes();
 }
 
 document.getElementById("svg").onclick =
