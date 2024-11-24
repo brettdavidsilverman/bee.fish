@@ -106,72 +106,7 @@ select {
    <body>
       <h1 id="h1">Procedure</h1>
       <svg id="svg">
-      </svg><!--
-      <form class="movable" id="Procedure 1" onsubmit="return false;">
-        
-        <label contenteditable="true">Procedure 1</label>
-        
-         <br/>
-         
-         <select onchange="onProcedureTypeChange(this, ['Procedure 1 functionDiv', 'Procedure 1 inputDiv', 'Procedure 1 gotoDiv'])">
-            <option value="Procedure 1 functionDiv" selected="selected">Function</option>
-            <option value="Procedure 1 gotoDiv">Go to</option>
-            <option value="Procedure 1 inputDiv">Input</option>
-         </select>
-  
-         <div id="Procedure 1 functionDiv" style="display:block;">
-            <textarea id="Procedure 1 function"></textarea>
-         </div>
-         
-         <div id="Procedure 1 gotoDiv" style="display:none;">
-            <svg >
-               <rect width="100" 
-                     height="100" 
-                     x="10" 
-                     y="10" 
-                     rx="20"
-                     ry="20"
-                     fill="pink" />
-            </svg>
-         
-         </div>
-         
-         
-         <div id="Procedure 1 inputDiv" style="display:none;">
-            <label contentEditable="true">Label</label>
-            <br/>
-               <select onchange="onInputTypeChange(this, 'Procedure 1 input')">
-                  <option value="button">Button</option>
-                  <option value="checkbox">Check box</option>
-                  <option value="color">Color</option>
-                  <option value="date">Date</option>
-                  <option value="datetime-local">Date time</option>
-                  <option value="email">Email</option>
-                  <option value="file">File</option>
-                  <option value="image">Image</option>
-                  <option value="month">Month</option>
-                  <option value="number">Number</option>
-                  <option value="password">Password</option>
-                  <option value="radio">Radio</option>
-                  <option value="range">Range</option>
-                  <option value="reset">Reset</option>
-                  <option value="search">Search</option>
-                  <option value="submit">Submit</option>
-                  <option value="tel">Telephone</option>
-                  <option value="text" selected="selected">Text</option>
-                  <option value="time">Time</option>
-                  <option value="url">URL</option>
-                  <option value="week">Week</option>
-               </select>
-               <br/>
-               <input id="Procedure 1 input" type="text"></input>
-            
-         </div>
-         <br/>
-         <button>Go</button>
-      </form>
-      -->
-      <script>
+      </svg>      <script>
 var procedures =
 {
    "Procedure 1": {
@@ -265,173 +200,9 @@ function(event) {
     
                }
             },
-            
-            {
-               "div": {
-                  "id": makeId(label, "functionDiv"),
-                  "style": {
-                     "display": procedure["function"] ? "block" : "none"
-                  },
-                  "children": [
-                     {
-                        "textarea": {
-                           "id": makeId(label, "function"),
-                           "innerHTML": procedure.function,
-                           "onchange":
-function(event) {
-   procedure.function = this.value;
-   delete procedure.f;
-   return true;
-}
-                        }
-                     }
-                  ]
-               }
-            },
-            {
-               "div": {
-                  "id": makeId(label, "gotoDiv"),
-                  "className": "gotoSVG",
-                  "style": {
-                     "display": procedure.goto ? "block" : "none",
-                  },
-                  "children": [
-                     {
-                        "svg": {
-                           "id": makeId(label, "svg"),
-                           "attributes": {
-                              "width": "300",
-                              "height": "150"
-                           },
-                           "children": [
-                              {
-                                 "g": {
-                                    "attributes": {
-                                       "transform": "rotate(45, 50, 50) translate(40, 0)"
-                                    },
-                                    "children" : [
-                                       {
-                                          "rect": {
-                                             "attributes" : {
-                                                "width": "100",
-                                                "height": "100",
-                                                "x": "0",
-                                                "y": "0",
-                                                "rx": "0",
-                                                "ry": "0",
-                                                "fill": "pink",
-                                                "stroke": "black"
-                                             }
-                                          }
-                                       }
-                                    ]
-                                 }
-                              },
-                              {
-                                 "line": {
-                                    "attributes": {
-                                       "x1": "147",
-                                       "y1": "78",
-                                       "x2": "200",
-                                       "y2": "78",
-                                       "stroke": "black"
-                                    }
-                                 }
-                              }
-                           ]
-                        }
-                     },
-                     {
-                        "select": {
-                           "className": "gotoSelect",
-                           "children": [
-                              createOption("On false", undefined, true)
-                           ],
-                           "onfocus":
-function(event) {
-   var select = this;
-   select.innerHTML = "";
-   for (var _label in procedures) {
-      if (_label != label &&
-          _label != "routes")
-         select.add(
-            new Option(
-               _label,
-               makeId(_label),
-               false,
-               _label == procedures[label]["goto"]
-            )
-         );
-   }
-},
-                           "onchange":
-function(event) {
-   var procedure = procedures[label];
-   delete procedure.function;
-   delete procedure.input;
-   procedure.goto = this.value;
-}
-                        }
-                     }
-                  ]
-               }
-            },
-            {
-               "div": {
-                  "id": makeId(label, "inputDiv"),
-                  "style": {
-                     "display": procedure["input"] ? "block" : "none"
-                  },
-                  "children": [
-                     {
-                        "select": {
-                           "onchange":
-function (event) {
-   var inputId = makeId(label, "input");
-   var input = document.getElementById(inputId);
-   
-   input.type = this.value;
-   input.value = "";
-   procedure.input = input.type;
-   delete procedure.value;
-   delete procedure.function;
-   delete procedure.goto;
-},
-                           "children": [
-                              createOption("Button", "button", procedure["input"] == "button"),
-                              createOption("Check box", "checkbox", procedure["input"] == "checkbox"),
-                              createOption("Color", "color", procedure["input"] == "color"),
-                              createOption("Date", "date", procedure["input"] == "date"),
-                              createOption("Date time", "datetime-local", procedure["input"] == "datetime-local"),
-                              createOption("Email", "email", procedure["input"] == "email"),
-                              createOption("File", "file", procedure["input"] == "file"),
-                              createOption("Image", "image", procedure["input"] == "image"),
-                              createOption("Month", "month", procedure["input"] == "month"),
-                              createOption("Number", "number", procedure["input"] == "number"),
-                              createOption("Password", "password", procedure["input"] == "password"),
-                              createOption("Radio", "radio", procedure["input"] == "radio"),
-                              createOption("Range", "range", procedure["input"] == "range"),
-                              createOption("Reset", "reset", procedure["input"] == "reset"),
-                              createOption("Search", "search", procedure["input"] == "search"),
-                              createOption("Submit", "submit", procedure["input"] == "submit"),
-                              createOption("Telephone", "tel", procedure["input"] == "tel"),
-                              createOption("Text", "text", procedure["input"] == "text"),
-                              createOption("Time", "time", procedure["input"] == "button"),
-                              createOption("URL", "url", procedure["input"] == "time"),
-                              createOption("Week", "week", procedure["input"] == "week"),
-                           ]
-                        }
-                     },
-                     {
-                        "input": {
-                           "id": makeId(label, "input"),
-                           "type": procedure.input,
-                           "value": procedure.value
-                        }
-                     }
-                  ]
-               }
-            },
+            createFunctionDiv(),
+            createGotoDiv(),
+            createInputDiv(),
             {"br":{}},
             {
                "button": {
@@ -539,7 +310,203 @@ function (event) {
    */
    HTML(json, document.body);
    
+      // Create the function div json
+   function createFunctionDiv()
+   {
+
+      var functionDiv =
+      {
+         "div": {
+            "id": makeId(label, "functionDiv"),
+            "style": {
+               "display": procedure.function ? "block" : "none"
+            },
+            "children": [
+               {
+                  "textarea": {
+                     "id": makeId(label, "function"),
+                     "innerHTML": procedure.function,
+                     "onchange":
+function(event) {
+   procedure.function = this.value;
+   delete procedure.f;
+   return true;
+}
+                  }
+               }
+            ]
+         }
+      };
+      
+      return functionDiv;
+     
+   }
    
+   // Create the goto div json
+   function createGotoDiv()
+   {
+      var gotoDiv =
+      {
+         "div": {
+            "id": makeId(label, "gotoDiv"),
+            "className": "gotoSVG",
+            "style": {
+               "display": procedure.goto ? "block" : "none",
+            },
+            "children": [
+               {
+                  "svg": {
+                     "id": makeId(label, "svg"),
+                     "attributes": {
+                        "width": "300",
+                        "height": "150"
+                     },
+                     "children": [
+                        {
+                           "g": {
+                              "attributes": {
+                                 "transform": "rotate(45, 50, 50) translate(40, 0)"
+                              },
+                              "children" : [
+                                 {
+                                    "rect": {
+                                       "attributes" : {
+                                          "width": "100",
+                                          "height": "100",
+                                          "x": "0",
+                                          "y": "0",
+                                          "rx": "0",
+                                          "ry": "0",
+                                          "fill": "pink",
+                                          "stroke": "black"
+                                       }
+                                    }
+                                 }
+                              ]
+                           }
+                        },
+                        {
+                           "line": {
+                              "attributes": {
+                                 "x1": "147",
+                                 "y1": "78",
+                                 "x2": "200",
+                                 "y2": "78",
+                                 "stroke": "black"
+                              }
+                           }
+                        }
+                     ]
+                  }
+               },
+               {
+                  "select": {
+                     "className": "gotoSelect",
+                     "children": [
+                        createOption("Select goto", undefined, true)
+                     ],
+                     "onfocus":
+function(event) {
+   var select = this;
+   select.innerHTML = "";
+   for (var _label in procedures) {
+      if (_label != label &&
+          _label != "routes")
+         select.add(
+            new Option(
+               _label,
+               makeId(_label),
+               false,
+               _label == procedures[label]["goto"]
+            )
+         );
+   }
+},
+                     "onchange":
+function(event) {
+   var procedure = procedures[label];
+   delete procedure.function;
+   delete procedure.input;
+   procedure.goto = this.value;
+}
+                  }
+               }
+            ]
+         }
+      };
+      
+      return gotoDiv;
+   }
+   
+   
+   // Create the input div json
+   function createInputDiv() {
+      var inputDiv = {
+         "div": {
+            "id": makeId(label, "inputDiv"),
+            "style": {
+               "display": procedure["input"] ? "block" : "none"
+            },
+            "children": [
+               {
+                  "select": {
+                     "onchange":
+function (event) {
+   var inputId = makeId(label, "input");
+   var input = document.getElementById(inputId);
+   
+   input.type = this.value;
+   input.value = "";
+   procedure.input = input.type;
+   delete procedure.value;
+   delete procedure.function;
+   delete procedure.goto;
+   
+   var form = document.getElementById(makeId(label));
+   form.classList.remove("error");
+   //form.classList.remove("ready");
+   form.classList.remove("complete");
+   form.classList.add("ready");
+},
+                     "children": [
+                        createOption("Button", "button", procedure["input"] == "button"),
+                        createOption("Check box", "checkbox", procedure["input"] == "checkbox"),
+                        createOption("Color", "color", procedure["input"] == "color"),
+                        createOption("Date", "date", procedure["input"] == "date"),
+                        createOption("Date time", "datetime-local", procedure["input"] == "datetime-local"),
+                        createOption("Email", "email", procedure["input"] == "email"),
+                        createOption("File", "file", procedure["input"] == "file"),
+                        createOption("Image", "image", procedure["input"] == "image"),
+                        createOption("Month", "month", procedure["input"] == "month"),
+                        createOption("Number", "number", procedure["input"] == "number"),
+                        createOption("Password", "password", procedure["input"] == "password"),
+                        createOption("Radio", "radio", procedure["input"] == "radio"),
+                        createOption("Range", "range", procedure["input"] == "range"),
+                        createOption("Reset", "reset", procedure["input"] == "reset"),
+                        createOption("Search", "search", procedure["input"] == "search"),
+                        createOption("Submit", "submit", procedure["input"] == "submit"),
+                        createOption("Telephone", "tel", procedure["input"] == "tel"),
+                        createOption("Text", "text", procedure["input"] == "text"),
+                        createOption("Time", "time", procedure["input"] == "button"),
+                        createOption("URL", "url", procedure["input"] == "time"),
+                        createOption("Week", "week", procedure["input"] == "week"),
+                     ]
+                  }
+               },
+               {
+                  "input": {
+                     "id": makeId(label, "input"),
+                     "type": procedure.input,
+                     "value": procedure.value
+                  }
+               }
+            ]
+         }
+      };
+      
+      return inputDiv;
+   }
+
 }
 
 function makeId(label, id) {
@@ -632,7 +599,7 @@ function onNewProcedure(event) {
    procedures[label] = {
       "function": "function() {\r\n   alert('hello');\r\n}",
       "topLeft": {
-         "x": point.x - 100,
+         "x": point.x - 125,
          "y": point.y
       }
    };
@@ -709,6 +676,7 @@ window.onresize =
                maxHeight = topLeft.y + rect.height;
          }
       }
+
       document.body.style.width = maxWidth * 2 + "px";
       document.body.style.height = maxHeight * 2 + "px";
 
