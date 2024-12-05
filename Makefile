@@ -7,10 +7,13 @@ all:
 all:	https
 all:	start
 
-https:
+build:
+	- mkdir build
+
+https:	build
 	cd code/https && make $(DEBUG) test PORT=$(PORT)
 
-test:
+test:	build
 	cd code/https && make $(DEBUG) test PORT=$(PORT)
 
 clean:
