@@ -25,6 +25,7 @@ body {
 form {
     width: 250px;
     position: absolute;
+    padding: 5px;
     background-image: url('move.png');
     background-repeat: no-repeat;
     background-size: 30px 30px;
@@ -44,48 +45,55 @@ form {
 }
 
 textarea, input {
-   left: 5px;
-   right: 5px;
-   margin: auto;
-   padding: auto;
    margin-top: 5px;
-   margin-bottom: 5px;
    width: calc(100% - 5px);
+   border: inset 2px;
+
 }
+
+select {
+   margin-top: 5px;
+}
+
 
 textarea {
    height: 100px;
 }
 
-input {
-   border: 1px solid;
-}
-select {
-   margin-top: 5px;}
+.buttons {
+ 
+   padding: 5px;
+
+}
 
 .go, .connect, .delete {
-   position: absolute;
-   right: -5px;
-   bottom: -5px;
+   
    width: 40px;}
+
+.go {
+   right: 0px;
+}
 
 .connect {
    left: 60px;
-   right: auto;
    width: auto;
 }
 
 .delete {
    left: 0px;
-   right: auto;
    width: auto;
 }
 
-.branchSVG {
+.connecting {
+   background-color: pink;
+}
+
+.branch {
    clear: both;
    padding: 0px;
    padding-top: 10px;
    width: calc(100% - 10px);
+   position: relative;
    
 }
 
@@ -93,6 +101,29 @@ select {
     position: absolute;
     right: 5px;
     top: 125px;
+}
+
+.branchSVG {
+   position: absolute;
+   z-index: -1;
+   top: 10px;
+}
+
+.branchTextArea {
+   position: absolute;
+   top: 3px;
+   opacity: 0.8;
+}
+
+.inputs {
+   width: calc(100% - 30px);
+}
+
+.inputs span {
+   color: blue;
+   border: 1px solid blue;
+   margin: 2px;
+   padding: 0px 2px 0px 2px;
 }
 
 #svg {
@@ -103,7 +134,7 @@ select {
    margin: 0px;
    padding: 0px;
    height: 100%;
-   border: 1px solid red;
+   border: 1px solid red;
 }
 
 
@@ -115,7 +146,7 @@ select {
       </svg>      <script>
 var processes =
 {
-   "Start": {
+   "Maximum": {
       "type": "input",
       "input": "number",
       "topLeft": {
@@ -123,43 +154,60 @@ var processes =
          "y": 100
       }
    },
-   "Increment": {
-      "type": "function",
-      "function": "function(count) {\r\n   return ++count;\r\n}",
+   "Count": {
+      "type": "variable",
+      "initial": 1,
       "topLeft": {
-         "x": 50,
-         "y": 250
+         "x": 400,
+         "y": 100
       }
    },
    "Branch": {
       "type": "branch",
-      "goto": "Increment",
-      "function": "function(count) {\r\n   return count < start;\r\n}",
+      "goto": "Exit",
+      "function": "function(maximum, count) {\r\n   return count >= maximum;\r\n}",
       "topLeft": {
-         "x": 50,
-         "y": 500
+         "x": 200,
+         "y": 400
       }
    },
+   "Increment": {
+      "type": "function",
+      "function": "function(count) {\r\n   return ++count;\r\n}",
+      "topLeft": {
+         "x": 200,
+         "y": 700
+      }
+   },
+
    "Exit": {
       "type": "output",
       "function": "function(count) {\r\n   return count;\r\n}",
       "topLeft": {
-         "x": 50,
-         "y": 800
+         "x": 200,
+         "y": 1000
       }
    },
    "routes": [
       {
-         "from": "Start",
-         "to": "Increment"
+         "from": "Maximum",
+         "to": "Branch",
+         "label": "maximum"
       },
       {
-         "from": "Increment",
-         "to": "Branch"
+         "from": "Count",
+         "to": "Branch",
+         "label": "count"
       },
       {
          "from": "Branch",
-         "to": "Exit"
+         "to": "Increment",
+         "label": "count"
+      },
+      {
+         "from": "Increment",
+         "to": "Branch",
+         "label": "count"
       }
       
    ]
@@ -168,7 +216,7 @@ var processes =
 
 var connectFrom;
 var connectTo;
-   
+var connectButton;
 function createProcess(label) {
 
    var process =
@@ -194,6 +242,11 @@ function() {
 },
          "children": [
             {
+               "div": {
+                  "id": makeId(label, "inputsDiv"),
+                  "className": "inputs",
+                  "children": createInputLabels(label)
+               },
                "label": {
                   "id": makeId(label, "label"),
                   "contentEditable": "true",
@@ -234,7 +287,8 @@ function (event) {
                      createOption("Function", "function", process.type == "function"),
                      createOption("Branch", "branch", process.type == "branch"),
                      createOption("Input", "input", process.type == "input"),
-                     createOption("Output", "output", process.type == "output")
+                     createOption("Output", "output", process.type == "output"),
+                     createOption("Variable", "variable", process.type == "variable")
                   ],
                   "onchange":
 function(event) {
@@ -247,19 +301,31 @@ function(event) {
             createBranchDiv(),
             createInputDiv(),
             createOutputDiv(),
+            createVariableDiv(),
             {"br":{}},
             {
-               "button": {
-                  "className": "connect",
-                  "innerText": "connect",
-                  "onclick":
+               "div": {
+                  "className": "buttons",
+                  "children": [
+                     {
+                        "button": {
+                           "id": makeId(label, "connectButton"),
+                           "className": "connect",
+                           "innerText": "connect",
+                           "onclick":
 function(event) {
+   var buttonId = makeId(label, "connectButton");
+   var button = document.getElementById(buttonId);
+   
+   
    if (!connectFrom) {
       var fromId = makeId(label);
       connectFrom =
-         document.getElementById(fromId);
+         document.getElementById(fromId);
       connectTo = null;
-      alert("Click connect on a downstream process");
+      connectButton = button;
+      connectButton.classList.add("connecting");
+      alert("Click connect on a process");
    }
    else if (!connectTo) {
        var toId = makeId(label);
@@ -295,27 +361,55 @@ function(event) {
             }
          }
          
-         if (!exists)
-            routes.push(
-               {
-                  from: connectFrom.id,
-                  to: connectTo.id
-               }
-            );
-            
+         if (!exists) {
+            var connectionLabel =
+               prompt("Connection label?", connectFrom.id);
+               
+            if (connectionLabel) {
+               routes.push(
+                  {
+                     from: connectFrom.id,
+                     to: connectTo.id,
+                     label: connectionLabel
+                  }
+               );
+               
+            }
+         }
+         
+         // Update the input labels
+         var inputsDivId = makeId(connectTo.id, "inputsDiv");
+
+         var inputsDiv = document.getElementById(
+            inputsDivId
+         );
+         
+         inputsDiv.innerHTML = "";
+         
+         var inputLabels = createInputLabels(connectTo.id);
+         
+         for (var i = 0;
+              i < inputLabels.length;
+              ++i)
+         { 
+            HTML(inputLabels[i], inputsDiv);
+         }
          createRoutes();
       }
+      if (connectButton)
+         connectButton.classList.remove("connecting");
       connectFrom = null;
       connectTo = null;
+      connectButton = null;
    }
 }
-               }
-            },
-            {
-               "button": {
-                  "className": "delete",
-                  "innerText": "Delete",
-                  "onclick":
+                     }
+                  },
+                  {
+                     "button": {
+                        "className": "delete",
+                        "innerText": "Delete",
+                        "onclick":
 function (event) {
    if (!confirm("Delete " + label + "?"))
       return false;
@@ -349,13 +443,13 @@ function (event) {
    return true;
    
 }
-               }
-            },
-            {
-               "button": {
-                  "className": "go",
-                  "innerText": "Go",
-                  "onclick":
+                     }
+                  },
+                  {
+                     "button": {
+                        "className": "go",
+                        "innerText": "Go",
+                        "onclick":
 function (event) {
    var process = processes[label];
    var form = document.getElementById(makeId(label));
@@ -377,11 +471,12 @@ function (event) {
       setFormClass(label, "complete");
    }
 }
+                        }
+                     }
+                  ]
                }
             }
-            
          ]
-         
       }
    };
    /*
@@ -434,7 +529,7 @@ function(event) {
       {
          "div": {
             "id": makeId(label, "branchDiv"),
-            "className": "branchSVG",
+            "className": "branch",
             "style": {
                "display": process.type == "branch" ? "block" : "none",
             },
@@ -446,11 +541,12 @@ function(event) {
                         "width": "300",
                         "height": "150"
                      },
+                     "className": "branchSVG",
                      "children": [
                         {
                            "g": {
                               "attributes": {
-                                 "transform": "rotate(45, 50, 50) translate(40, 0)"
+                                 "transform": "rotate(45, 50, 50) translate(70, 00) scale(0.5, 0.5)"
                               },
                               "children" : [
                                  {
@@ -462,26 +558,33 @@ function(event) {
                                           "y": "0",
                                           "rx": "0",
                                           "ry": "0",
-                                          "fill": "pink",
+                                          "fill": "red",
                                           "stroke": "black"
                                        }
                                     }
                                  }
                               ]
                            }
-                        },
-                        {
-                           "line": {
-                              "attributes": {
-                                 "x1": "147",
-                                 "y1": "78",
-                                 "x2": "200",
-                                 "y2": "78",
-                                 "stroke": "black"
-                              }
-                           }
                         }
+                        
                      ]
+                  }
+               },
+               {
+                  "textarea": {
+                     "id": makeId(label, "function"),
+                     "className": "branchTextArea",
+                     "innerHTML": process.function,
+                     "oninput":
+function(event) {
+   setFormClass(label, "ready");
+},
+                     "onchange":
+function(event) {
+   process.function = this.value;
+   delete process.f;
+   return true;
+}
                   }
                },
                {
@@ -638,6 +741,83 @@ function(event) {
      
    }
    
+   // Create the variable div json
+   function createVariableDiv()
+   {
+
+      var variableDiv =
+      {
+         "div": {
+            "id": makeId(label, "variableDiv"),
+            "style": {
+               "display": process.type == "variable" ? "block" : "none"
+            },
+            "children": [
+               {
+                  "textarea": {
+                     "id": makeId(label, "function"),
+                     "innerHTML": JSON.stringify(process.initial, null, "   "),
+                     "oninput":
+function(event) {
+   setFormClass(label, "ready");
+},
+                     "onchange":
+function(event) {
+   process.initial = JSON.parse(this.value);
+   return true;
+}
+                  }
+               }
+            ]
+         }
+      };
+      
+      return variableDiv;
+     
+   }
+   
+   function createInputLabels(label) {
+      var inputs = [];
+      var existing = [];
+      
+      if (!processes.routes)
+         processes.routes = [];
+         
+      var routes = processes.routes;
+      for (var i = 0; i < routes.length; ++i)
+      {
+         var route = routes[i];
+         if (route.to == label) {
+            if (!existing.includes(route.label))
+            {
+               inputs.push(
+                  {
+                     "span": {
+                        "id": makeId(label, route.label),
+                        "innerText": route.label,
+                        "onclick":
+function (event) {
+   var span = event.target;
+   var inputLabel = span.innerText;
+   if (confirm("Delete all connections to " +
+               inputLabel))
+   {
+   }
+   
+   return false;
+   
+}
+                     }
+                  }
+               );
+               existing.push(route.label);
+            }
+         }
+      }
+      
+      return inputs;
+   }
+   
    function onProcessTypeChange(select) {
 
       var allDivs = [
@@ -755,6 +935,8 @@ function onNewProcess(event) {
    
    createProcess(label);
    
+   return true;
+   
 }
 function createProcesses() {
    for (var label in processes) {
@@ -788,7 +970,7 @@ function createRoute(route) {
    var svg = document.getElementById("svg");
    
    var from = document.getElementById(makeId(route.from));
-   var to = document.getElementById(makeId(route.to));
+   var to = document.getElementById(makeId(route.to, route.label));
    var fromRect = from.getBoundingClientRect();
    var toRect = to.getBoundingClientRect();
    
@@ -798,8 +980,8 @@ function createRoute(route) {
 
    line.setAttribute("x1", _from.x + fromRect.width / 2);
    line.setAttribute("y1", _from.y + fromRect.height);
-   line.setAttribute("x2", _to.x + toRect.width / 2);
-   line.setAttribute("y2", _to.y);
+   line.setAttribute("x2", toRect.x + toRect.width / 2);
+   line.setAttribute("y2", toRect.y);
    line.setAttribute("stroke", "blue");
    
    svg.appendChild(line);
@@ -814,7 +996,7 @@ function changeLabel(oldLabel, newLabel) {
    processes[newLabel] = oldProcess;
    
    
-   // re route
+   // reroute routes
    if (!processes.routes)
       processes.routes = [];
       
@@ -831,15 +1013,41 @@ function changeLabel(oldLabel, newLabel) {
          route.to = newLabel;
    }
    
+   // reroute gotos
+   for (var label in processes)
+   {
+      var process = processes[label];
+      if (process.type == "branch")
+      {
+         if (process.goto == oldLabel)
+         {
+            process.goto = newLabel;
+         }
+         document.getElementById(label).
+            remove();
+         createProcess(label);
+         
+      }
+   }
+   
    createProcess(newLabel);
    createRoutes();
 }
 
 document.getElementById("svg").onclick =
    function (event) {
-      connectFrom = null;
-      connectTo = null;
-      onNewProcess(event);
+      if (connectFrom || connectTo)
+      {
+         connectFrom = null;
+         connectTo = null;
+         if (connectButton)
+            connectButton.classList.
+               remove("connecting");
+         connectButton = null;
+         return false;
+      }
+      
+      return onNewProcess(event);
    }
 window.onresize =
    function(event) {
