@@ -71,12 +71,12 @@ textarea {
 
 }
 
-
+/*
 div {
     border: 1px solid red;
 }
 
-
+*/
 .go, .connect, .delete {
    position: absolute;}
 
@@ -130,7 +130,7 @@ div {
 }
 
 .inputs {
-   width: calc(100% - 30px);
+   width: calc(100% - 35px);
 }
 
 .inputs span {

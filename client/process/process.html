@@ -29,23 +29,28 @@
       <form id="urlForm" onsubmit="return false;">
          <label for="urlInput">Fetch process url</label>
          <input type="text" id="urlInput"></input>
-         <button id="fetchURLButton" onclick="fetchURL()">Fetch</button>
-         <button id="saveURLButton" onclick="saveURL()">Save</button>
+         <button id="fetchButton" onclick="fetchProcesses()">Fetch</button>
+         <button id="saveButton" onclick="saveProcesses()">Save</button>
       </form>
       
       <script>
 var processes;
 var url = document.getElementById("urlInput");
+var fetchButton = document.getElementById("fetchButton");
+var saveButton = document.getElementById("saveButton");
+
 var value = localStorage.getItem("process.html.url");
 if (value)
    url.value = value;
    
-function fetchURL() {
+function fetchProcesses() {
    
    if (!url.value) {
       alert("Please enter a path to a process");
       return Promise.reject("Missing url");
    }
+   
+   fetchButton.disabled = true;
    
    return fetchJSON(url.value).
    then(
@@ -53,23 +58,31 @@ function fetchURL() {
          processes = procs;
          createProcesses();
          localStorage.setItem("process.html.url", url.value);
-         
-         alert("Fetched " + url.value);
+         fetchButton.disabled = false;
       }
    ).
    catch(
       function(error) {
-         Error(error, fetchURL);
+         fetchButton.disabled = false;
+         if (confirm(error + ". Create default?"))
+            createProcesses();
       }
    );
 }
 
-function saveURL() {
+function saveProcesses() {
    var url = document.getElementById("urlInput").value;
+   saveButton.disabled = true;
+   
    processes.save(url).
    then(
       function() {
-         alert("Saved");
+         saveButton.disabled = false;
+      }
+   ).
+   catch(
+      function(error) {
+         Error(error, saveProcesses);
       }
    );
 }
@@ -156,7 +169,7 @@ processes =
 setupProcessEditor();
 
 if (url.value)
-   fetchURL();
+   fetchProcesses();
 else
    createProcesses();
 
