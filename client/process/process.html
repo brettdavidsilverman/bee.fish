@@ -61,27 +61,33 @@ textarea {
 }
 
 .buttons {
+   position: relative;
  
-   padding: 5px;
+   
 
 }
 
+/*
+div {
+    border: 1px solid red;
+}
+*/
+
 .go, .connect, .delete {
-   
-   width: 40px;}
+}
 
 .go {
-   right: 0px;
+   
+   right: 5px;
+   width: 40px;
 }
 
 .connect {
    left: 60px;
-   width: auto;
 }
 
 .delete {
-   left: 0px;
-   width: auto;
+   left: 5px;
 }
 
 .connecting {
@@ -254,7 +260,7 @@ function() {
                "div": {
                   "id": makeId(label, "inputsDiv"),
                   "className": "inputs",
-                  "children": createInputLabels(label)
+                  "children": createInputLabelsJSON(label)
                },
                "label": {
                   "id": makeId(label, "label"),
@@ -348,7 +354,7 @@ function (event) {
    if (!confirm("Delete " + label + "?"))
       return false;
       
-   var form = document.getElementById(label);
+   var form = document.getElementById(makeId(label));
    form.remove();
    delete processes[label];
    
@@ -710,10 +716,9 @@ function(event) {
      
    }
    
-   function createInputLabels(label) {
+   function createInputLabelsJSON(label)
+   {
       var inputLabels = [];
-      var existing = [];
-      
       var process = processes[label];
       
       if (!process.inputs)
@@ -732,11 +737,11 @@ function(event) {
 function (event) {
    var span = event.target;
    var inputLabel = span.innerText;
+   var refresh = false;
    
    if (connectFrom) {
-      if (!confirm("Connect " + connectFrom.id + " to " + label + "." + inputLabel + "?"))
-         return false;
-      var connectTo = document.getElementById(label);
+      
+      var connectTo = document.getElementById(makeId(label));
       if (connectFrom != connectTo) {
           
          if (!processes.routes)
@@ -764,47 +769,75 @@ function (event) {
          }
          
          if (!exists) {
-
-            routes.push(
-               {
-                  from: connectFrom.id,
-                  to: connectTo.id,
-                  label: inputLabel
-               }
-            );
-               
+            if (confirm("Connect " + connectFrom.id + " to " + label + "." + inputLabel + "?"))
+            {
+               routes.push(
+                  {
+                     from: connectFrom.id,
+                     to: connectTo.id,
+                     label: inputLabel
+                  }
+               );
+            }
          }
          
-         // Update the input labels
-         var inputsDivId = makeId(connectTo.id, "inputsDiv");
-
-         var inputsDiv = document.getElementById(
-            inputsDivId
-         );
-         
-         inputsDiv.innerHTML = "";
-         
-         var inputLabels = createInputLabels(connectTo.id);
-         
-         for (var i = 0;
-              i < inputLabels.length;
-              ++i)
-         { 
-            HTML(inputLabels[i], inputsDiv);
-         }
-         createRoutes();
+         refresh = true;
       }
-      if (connectButton)
-         connectButton.classList.remove("connecting");
-      connectFrom = null;
-      connectButton = null;
+      
+      
    }
-   else if (confirm("Delete all connections to " +
+   else if (confirm("Delete input " +
                inputLabel))
    {
+      var process = processes[label];
+      var i;
+      
+      if (!process.inputs)
+         process.inputs = [];
+         
+      // Delete this processes input
+      for (i = 0;
+           i < process.inputs.length;
+           ++i)
+      {
+         if (process.inputs[i] == inputLabel)
+         {
+            process.inputs.splice(i, 1);
+            break;
+         }
+      }
+      
+      // Remove any routes that use this input
+      if (!processes.routes)
+         processes.routes = [];
+         
+      // Delete this processes input
+      for (i = 0;
+           i < processes.routes.length;
+           ++i)
+      {
+         var route = processes.routes[i];
+         
+         if (route.to == label &&
+             route.label == inputLabel)
+         {
+            processes.routes.splice(i, 1);
+         }
+      }
+      
+      refresh = true;
    }
    
+   if (refresh) {
+      createInputLabels(label);
+      createRoutes();
+   }
+   
+   if (connectButton)
+      connectButton.classList.remove("connecting");
+         
    connectFrom = null;
+   connectButton = null;
    
    return false;
    
@@ -814,8 +847,63 @@ function (event) {
          );
   
       }
-
+      inputLabels.push(
+         {
+            "button": {
+               "id": makeId(label, "addInputButton"),
+               "innerText": "+",
+               "onclick":
+function(event) {
+   var inputLabel = prompt("Input label?");
+   
+   if (!inputLabel)
+      return false;
+      
+   var inputLabelId = makeId(label, inputLabel);
+   
+   while (document.getElementById(inputLabelId))
+   {
+      inputLabel = prompt("Input label exists?", inputLabel);
+      
+      if (!inputLabel)
+         return false;
+         
+      inputLabelId =
+         makeId(label, inputLabel);
+   }
+      
+   var process = processes[label];
+   if (!process.inputs)
+      process.inputs = [];
+      
+   process.inputs.push(inputLabel);
+   
+   createInputLabels(label);
+}
+            }
+         }
+      );
       return inputLabels;
+   }
+   
+   function createInputLabels(label) {
+      // Update the input labels
+      var inputsDivId = makeId(label, "inputsDiv");
+
+      var inputsDiv = document.getElementById(
+         inputsDivId
+      );
+         
+      inputsDiv.innerHTML = "";
+         
+      var inputLabels = createInputLabelsJSON(label);
+         
+      for (var i = 0;
+           i < inputLabels.length;
+           ++i)
+      { 
+         HTML(inputLabels[i], inputsDiv);
+      }
    }
    
    function onProcessTypeChange(select) {
@@ -843,8 +931,7 @@ function (event) {
       div.style.display = "block";
       
       createRoutes();
-   }
-
+   }
    
 }
 
@@ -990,7 +1077,7 @@ function createRoute(route) {
 }
 
 function changeLabel(oldLabel, newLabel) {
-   var oldForm = document.getElementById(oldLabel);
+   var oldForm = document.getElementById(makeId(oldLabel));
    oldForm.remove();
    var oldProcess = processes[oldLabel];
    delete processes[oldLabel];
@@ -1024,7 +1111,7 @@ function changeLabel(oldLabel, newLabel) {
          {
             process.goto = newLabel;
          }
-         document.getElementById(label).
+         document.getElementById(makeId(label)).
             remove();
          createProcess(label);
          
