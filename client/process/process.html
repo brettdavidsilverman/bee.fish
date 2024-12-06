@@ -164,6 +164,10 @@ var processes =
    },
    "Branch": {
       "type": "branch",
+      "inputs": [
+         "maximum",
+         "count"
+      ],
       "goto": "Exit",
       "function": "function(maximum, count) {\r\n   return count >= maximum;\r\n}",
       "topLeft": {
@@ -173,6 +177,9 @@ var processes =
    },
    "Increment": {
       "type": "function",
+      "inputs": [
+         "count"
+      ],
       "function": "function(count) {\r\n   return ++count;\r\n}",
       "topLeft": {
          "x": 200,
@@ -182,6 +189,9 @@ var processes =
 
    "Exit": {
       "type": "output",
+      "inputs": [
+         "count"
+      ],
       "function": "function(count) {\r\n   return count;\r\n}",
       "topLeft": {
          "x": 200,
@@ -215,7 +225,6 @@ var processes =
 }
 
 var connectFrom;
-var connectTo;
 var connectButton;
 function createProcess(label) {
 
@@ -318,90 +327,15 @@ function(event) {
    var button = document.getElementById(buttonId);
    
    
-   if (!connectFrom) {
-      var fromId = makeId(label);
-      connectFrom =
-         document.getElementById(fromId);
-      connectTo = null;
-      connectButton = button;
-      connectButton.classList.add("connecting");
-      alert("Click connect on a process");
-   }
-   else if (!connectTo) {
-       var toId = makeId(label);
-       connectTo =
-          document.getElementById(toId);
-   }
+   var fromId = makeId(label);
+   connectFrom =
+      document.getElementById(fromId);
+   connectButton = button;
+   connectButton.classList.add("connecting");
+    
+   alert("Click connect on a processes input");
    
-   
-   if (connectFrom && connectTo) {
-      if (connectFrom != connectTo) {
-          
-         if (!processes.routes)
-            processes.routes = [];
-            
-         var routes = processes.routes;
-         
-         // Check if this route already exists
-         var exists = false;
-         for (var index = 0;
-              index < routes.length;
-              ++index)
-         {
-            
-            var route = routes[index];
-            if (route.from == connectFrom.id &&
-                route.to == connectTo.id)
-            {
-               if (confirm("This route exists. Delete it?"))
-               {
-                  routes.splice(index, 1);
-               }
-               exists = true;
-            }
-         }
-         
-         if (!exists) {
-            var connectionLabel =
-               prompt("Connection label?", connectFrom.id);
-               
-            if (connectionLabel) {
-               routes.push(
-                  {
-                     from: connectFrom.id,
-                     to: connectTo.id,
-                     label: connectionLabel
-                  }
-               );
-               
-            }
-         }
-         
-         // Update the input labels
-         var inputsDivId = makeId(connectTo.id, "inputsDiv");
 
-         var inputsDiv = document.getElementById(
-            inputsDivId
-         );
-         
-         inputsDiv.innerHTML = "";
-         
-         var inputLabels = createInputLabels(connectTo.id);
-         
-         for (var i = 0;
-              i < inputLabels.length;
-              ++i)
-         { 
-            HTML(inputLabels[i], inputsDiv);
-         }
-         createRoutes();
-      }
-      if (connectButton)
-         connectButton.classList.remove("connecting");
-      connectFrom = null;
-      connectTo = null;
-      connectButton = null;
-   }
 }
                      }
                   },
@@ -777,45 +711,111 @@ function(event) {
    }
    
    function createInputLabels(label) {
-      var inputs = [];
+      var inputLabels = [];
       var existing = [];
       
-      if (!processes.routes)
-         processes.routes = [];
+      var process = processes[label];
+      
+      if (!process.inputs)
+         process.inputs = [];
          
-      var routes = processes.routes;
-      for (var i = 0; i < routes.length; ++i)
+      var inputs = process.inputs;
+      for (var i = 0; i < inputs.length; ++i)
       {
-         var route = routes[i];
-         if (route.to == label) {
-            if (!existing.includes(route.label))
+         var input = inputs[i];
+         inputLabels.push(
             {
-               inputs.push(
-                  {
-                     "span": {
-                        "id": makeId(label, route.label),
-                        "innerText": route.label,
-                        "onclick":
+               "span": {
+                  "id": makeId(label, input),
+                  "innerText": input,
+                  "onclick":
 function (event) {
    var span = event.target;
    var inputLabel = span.innerText;
-   if (confirm("Delete all connections to " +
+   
+   if (connectFrom) {
+      if (!confirm("Connect " + connectFrom.id + " to " + label + "." + inputLabel + "?"))
+         return false;
+      var connectTo = document.getElementById(label);
+      if (connectFrom != connectTo) {
+          
+         if (!processes.routes)
+            processes.routes = [];
+            
+         var routes = processes.routes;
+         
+         // Check if this route already exists
+         var exists = false;
+         for (var index = 0;
+              index < routes.length;
+              ++index)
+         {
+            
+            var route = routes[index];
+            if (route.from == connectFrom.id &&
+                route.to == connectTo.id)
+            {
+               if (confirm("This route exists. Delete it?"))
+               {
+                  routes.splice(index, 1);
+               }
+               exists = true;
+            }
+         }
+         
+         if (!exists) {
+
+            routes.push(
+               {
+                  from: connectFrom.id,
+                  to: connectTo.id,
+                  label: inputLabel
+               }
+            );
+               
+         }
+         
+         // Update the input labels
+         var inputsDivId = makeId(connectTo.id, "inputsDiv");
+
+         var inputsDiv = document.getElementById(
+            inputsDivId
+         );
+         
+         inputsDiv.innerHTML = "";
+         
+         var inputLabels = createInputLabels(connectTo.id);
+         
+         for (var i = 0;
+              i < inputLabels.length;
+              ++i)
+         { 
+            HTML(inputLabels[i], inputsDiv);
+         }
+         createRoutes();
+      }
+      if (connectButton)
+         connectButton.classList.remove("connecting");
+      connectFrom = null;
+      connectButton = null;
+   }
+   else if (confirm("Delete all connections to " +
                inputLabel))
    {
    }
    
+   connectFrom = null;
+   
    return false;
    
 }
-                     }
-                  }
-               );
-               existing.push(route.label);
+               }
             }
-         }
+         );
+  
       }
-      
-      return inputs;
+
+      return inputLabels;
    }
    
    function onProcessTypeChange(select) {
@@ -824,7 +824,8 @@ function (event) {
          makeId(label, "functionDiv"),
          makeId(label, "branchDiv"),
          makeId(label, "inputDiv"),
-         makeId(label, "outputDiv")
+         makeId(label, "outputDiv"),
+         makeId(label, "variableDiv")
       ];
       
       // Hide all
@@ -1036,10 +1037,9 @@ function changeLabel(oldLabel, newLabel) {
 
 document.getElementById("svg").onclick =
    function (event) {
-      if (connectFrom || connectTo)
+      if (connectFrom)
       {
          connectFrom = null;
-         connectTo = null;
          if (connectButton)
             connectButton.classList.
                remove("connecting");
