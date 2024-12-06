@@ -26,40 +26,46 @@
       <script src="/client/origin.js"></script>
       
 
-      <form id="processURLForm" onsubmit="return false;">
-         <label for="processURLInput">Fetch process url</label>
-         <input type="text" id="processURLInput"></input>
-         <button id="fetchURLButton" onclick="fetchProcess()">Fetch</button>
-         <button id="saveURLButton" onclick="saveProcess()">Save</button>
+      <form id="urlForm" onsubmit="return false;">
+         <label for="urlInput">Fetch process url</label>
+         <input type="text" id="urlInput"></input>
+         <button id="fetchURLButton" onclick="fetchURL()">Fetch</button>
+         <button id="saveURLButton" onclick="saveURL()">Save</button>
       </form>
       
       <script>
 var processes;
-
-function fetchProcess() {
-   var url = document.getElementById("processURLInput").value;
-   if (!url) {
+var url = document.getElementById("urlInput");
+var value = localStorage.getItem("process.html.url");
+if (value)
+   url.value = value;
+   
+function fetchURL() {
+   
+   if (!url.value) {
       alert("Please enter a path to a process");
       return Promise.reject("Missing url");
    }
    
-   return fetchJSON(url).
+   return fetchJSON(url.value).
    then(
-      function(process) {
-         processes = process;
+      function(procs) {
+         processes = procs;
          createProcesses();
-         alert("Fetched " + url);
+         localStorage.setItem("process.html.url", url.value);
+         
+         alert("Fetched " + url.value);
       }
    ).
    catch(
       function(error) {
-         Error(error);
+         Error(error, fetchURL);
       }
    );
 }
 
-function saveProcess() {
-   var url = document.getElementById("processURLInput").value;
+function saveURL() {
+   var url = document.getElementById("urlInput").value;
    processes.save(url).
    then(
       function() {
@@ -148,7 +154,11 @@ processes =
       
 }
 setupProcessEditor();
-createProcesses();
+
+if (url.value)
+   fetchURL();
+else
+   createProcesses();
 
 
       </script>

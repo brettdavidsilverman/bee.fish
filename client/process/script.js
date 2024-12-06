@@ -911,6 +911,12 @@ function setupProcessEditor()
    var svg = document.getElementById("processesSVG");
    var div = document.getElementById("processesDiv");
    
+   if (!div) {
+      div = document.createElement("div");
+      div.id = "processesDiv";
+      document.body.insertBefore(div, h1);
+   }
+   
    
    if (!svg) {
       svg = document.createElementNS(
@@ -922,14 +928,8 @@ function setupProcessEditor()
       document.body.insertBefore(svg, h1);
       
    }
-   if (!div) {
-      div = document.createElement("div");
-      div.id = "processesDiv";
-      document.body.insertBefore(div, h1);
-   }
    
-   
-   svg.onclick =
+   div.onclick =
    function (event) {
       if (connectFrom)
       {
