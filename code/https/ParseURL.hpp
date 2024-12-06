@@ -344,7 +344,7 @@ namespace BeeFishHTTPS {
       {
          if (segment.size())
          {
-            path = path[segment.decodeURI()];
+            path = path[segment.decodeURI().toLower()];
          }
       }
       

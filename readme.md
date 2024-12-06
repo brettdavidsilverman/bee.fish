@@ -1,8 +1,7 @@
 This builds and runs the bee.fish website
 
 cp SampleConfig.hpp ../Config.hpp
-
-sudo apt install build-essential
+cp SampleMakefile ../Makefile
 
 To install letsencrypt certificates
 
@@ -14,5 +13,7 @@ sudo chown bee /etc/letsencrypt -R
 
 sudo apt install libboost-all-dev
 sudo apt install libssl-dev
+sudo apt install lsof
+sudo apt install build-essential
 
-make
+sudo make

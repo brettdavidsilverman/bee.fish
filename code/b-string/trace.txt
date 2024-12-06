@@ -1,14 +1,14 @@
-==62278== Memcheck, a memory error detector
-==62278== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==62278== Using Valgrind-3.16.1 and LibVEX; rerun with -h for copyright info
-==62278== Command: ../../build/b-string -test
-==62278== Parent PID: 62276
-==62278== 
-==62278== 
-==62278== HEAP SUMMARY:
-==62278==     in use at exit: 0 bytes in 0 blocks
-==62278==   total heap usage: 148 allocs, 148 frees, 91,999 bytes allocated
-==62278== 
-==62278== All heap blocks were freed -- no leaks are possible
-==62278== 
-==62278== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==6215== Memcheck, a memory error detector
+==6215== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==6215== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==6215== Command: ../../build/b-string -test
+==6215== Parent PID: 6213
+==6215== 
+==6215== 
+==6215== HEAP SUMMARY:
+==6215==     in use at exit: 0 bytes in 0 blocks
+==6215==   total heap usage: 7,491 allocs, 7,491 frees, 738,106 bytes allocated
+==6215== 
+==6215== All heap blocks were freed -- no leaks are possible
+==6215== 
+==6215== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

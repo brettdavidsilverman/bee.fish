@@ -99,6 +99,7 @@ namespace BeeFishMisc
 */
 
 #ifdef SERVER
+/*
    inline BString md5(const std::string& data)
    {
       
@@ -113,7 +114,30 @@ namespace BeeFishMisc
       return toHex(result);
          
    }
-   
+*/
+
+   inline BString md5(const std::string& data)
+   {
+  
+      EVP_MD_CTX*   context = EVP_MD_CTX_new();
+      const EVP_MD* md = EVP_md5();
+      unsigned char md_value[EVP_MAX_MD_SIZE];
+      unsigned int  md_len;
+      BString        output;
+
+      EVP_DigestInit_ex2(context, md, NULL);
+      EVP_DigestUpdate(context, data.c_str(), data.length());
+      EVP_DigestFinal_ex(context, md_value, &md_len);
+      EVP_MD_CTX_free(context);
+
+      output.resize(md_len * 2);
+      for (unsigned int i = 0 ; i < md_len ; ++i)
+         std::sprintf(&output[i * 2], "%02x", md_value[i]);
+ 
+      return output;
+    
+   }
+
    inline BString sha3(const std::string& data)
    {
       uint32_t digest_length = SHA512_DIGEST_LENGTH;
