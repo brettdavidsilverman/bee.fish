@@ -113,8 +113,7 @@ function(event) {
    connectButton.classList.add("connecting");
     
    alert("Click connect on a processes input");
-   
-
+   
 }
                      }
                   },
@@ -153,7 +152,6 @@ function (event) {
    
    createRoutes();
    
-   return true;
    
 }
                      }
@@ -168,7 +166,7 @@ function (event) {
    var form = document.getElementById(makeId(label));
       setFormClass(label);
    
-   if (process.function) {
+   if (process.type == "function") {
       if (!process.f) {
          compileFunction(label);
       }
@@ -177,12 +175,13 @@ function (event) {
          setFormClass(label, "complete");
       }
    }
-   else if (process.input) {
+   else if (process.type == "input") {
       var inputId = makeId(label, "input");
       var input = document.getElementById(inputId);
       process.value = input.value;
       setFormClass(label, "complete");
    }
+  
 }
                         }
                      }
@@ -410,7 +409,11 @@ function (event) {
                   "input": {
                      "id": makeId(label, "input"),
                      "type": process.input,
-                     "value": process.value == undefined ? "" : process.value
+                     "value": process.value == undefined ? "" : process.value,
+                     "onchange":
+function(event) {
+   process.value = event.target.value;
+}
                   }
                }
             ]
@@ -478,7 +481,24 @@ function(event) {
 },
                      "onchange":
 function(event) {
-   process.initial = JSON.parse(this.value);
+    
+   if (!this.value) {
+      delete process.initial;
+   }
+   else {
+      var value;
+      try {
+         value = JSON.parse(this.value);
+      }
+      catch(error) {
+         Error(error, "variable.onchange");
+         setFormClass(label, "error");
+         return false;
+      }
+      process.initial = value;
+      setFormClass(label, "complete");
+   }
+   
    return true;
 }
                   }
@@ -911,12 +931,6 @@ function setupProcessEditor()
    var svg = document.getElementById("processesSVG");
    var div = document.getElementById("processesDiv");
    
-   if (!div) {
-      div = document.createElement("div");
-      div.id = "processesDiv";
-      document.body.insertBefore(div, h1);
-   }
-   
    
    if (!svg) {
       svg = document.createElementNS(
@@ -928,9 +942,17 @@ function setupProcessEditor()
       document.body.insertBefore(svg, h1);
       
    }
+   if (!div) {
+      div = document.createElement("div");
+      div.id = "processesDiv";
+      document.body.insertBefore(div, h1);
+   }
+   
+   
    
    div.onclick =
    function (event) {
+       
       if (connectFrom)
       {
          connectFrom = null;
@@ -941,7 +963,11 @@ function setupProcessEditor()
          return false;
       }
       
-      return onNewProcess(event);
+      if (event.target == div)
+         return onNewProcess(event);
+         
+      return false;
+      
    }}
 
 window.onresize =
