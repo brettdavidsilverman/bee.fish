@@ -250,7 +250,7 @@ function setLinks() {
       dataLink.href = "";
    }
    else {
-      goLink.href = "/go.html?" + pathInput.value;
+      goLink.href = "/go.html?" + encodeURIComponent(pathInput.value);
       dataLink.href = "/" + pathInput.value;
    }
 }

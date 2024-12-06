@@ -28,7 +28,7 @@ function go() {
    var path =
       document.location.origin +
       "/" +
-      decodeURI(
+      decodeURIComponent(
          document.location.search.substr(1)
       );
 
