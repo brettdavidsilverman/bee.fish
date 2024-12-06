@@ -2,7 +2,7 @@
    <head>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <title id="title">Procedure</title>
+      <title id="title">Process</title>
       <script src="/head.js"></script>
       <script src="/error.js"></script>
       <script src="/client/stream/stream.js"></script>
@@ -81,7 +81,7 @@ select {
    width: auto;
 }
 
-.gotoSVG {
+.branchSVG {
    clear: both;
    padding: 0px;
    padding-top: 10px;
@@ -89,7 +89,7 @@ select {
    
 }
 
-.gotoSelect {
+.branchGotoSelect {
     position: absolute;
     right: 5px;
     top: 125px;
@@ -110,37 +110,58 @@ select {
       </style>
    </head>
    <body>
-      <h1 id="h1">Procedure</h1>
+      <h1 id="h1">Process</h1>
       <svg id="svg">
       </svg>      <script>
-var procedures =
+var processes =
 {
-   "Procedure 1": {
-      "function": "function() {\r\n   alert('hello world');\r\n}",
+   "Start": {
+      "type": "input",
+      "input": "number",
       "topLeft": {
          "x": 50,
          "y": 100
       }
    },
-   "Procedure 2": {
-      "input": "range",
+   "Increment": {
+      "type": "function",
+      "function": "function(count) {\r\n   return ++count;\r\n}",
       "topLeft": {
          "x": 50,
-         "y": 350
+         "y": 250
       }
    },
-   "Procedure 3": {
-      "goto": "Procedure 1",
+   "Branch": {
+      "type": "branch",
+      "goto": "Increment",
+      "function": "function(count) {\r\n   return count < start;\r\n}",
       "topLeft": {
          "x": 50,
          "y": 500
       }
    },
+   "Exit": {
+      "type": "output",
+      "function": "function(count) {\r\n   return count;\r\n}",
+      "topLeft": {
+         "x": 50,
+         "y": 800
+      }
+   },
    "routes": [
       {
-         "from": "Procedure 1",
-         "to": "Procedure 2"
+         "from": "Start",
+         "to": "Increment"
+      },
+      {
+         "from": "Increment",
+         "to": "Branch"
+      },
+      {
+         "from": "Branch",
+         "to": "Exit"
       }
+      
    ]
       
 }
@@ -148,10 +169,10 @@ var procedures =
 var connectFrom;
 var connectTo;
    
-function createProcedure(label) {
+function createProcess(label) {
 
-   var procedure =
-      procedures[label];
+   var process =
+      processes[label];
       
    var json = {
       "form": {
@@ -159,12 +180,12 @@ function createProcedure(label) {
          "className": "movable",
          "style": {
             "position": "absolute",
-            "top": procedure.topLeft.y + "px",
-            "left": procedure.topLeft.x + "px"
+            "top": process.topLeft.y + "px",
+            "left": process.topLeft.x + "px"
          },
          "onmoving":
 function (event) {
-   procedure.topLeft = event.point;
+   process.topLeft = event.point;
    window.onresize();
 },
          "onsubmit":
@@ -210,27 +231,22 @@ function (event) {
                      "float": "left"
                   },
                   "children": [
-                     createOption("Function", makeId(label, "functionDiv"), procedure.function != undefined),
-                     createOption("Goto", makeId(label, "gotoDiv"), procedure.goto != undefined),
-                     createOption("Input", makeId(label, "inputDiv"), procedure.input != undefined)
+                     createOption("Function", "function", process.type == "function"),
+                     createOption("Branch", "branch", process.type == "branch"),
+                     createOption("Input", "input", process.type == "input"),
+                     createOption("Output", "output", process.type == "output")
                   ],
                   "onchange":
 function(event) {
-   onProcedureTypeChange(
-      this,
-      [
-         makeId(label, "functionDiv"),
-         makeId(label, "gotoDiv"),
-         makeId(label, "inputDiv")
-      ]
-   );
+   onProcessTypeChange(this);
 }
     
                }
             },
             createFunctionDiv(),
-            createGotoDiv(),
+            createBranchDiv(),
             createInputDiv(),
+            createOutputDiv(),
             {"br":{}},
             {
                "button": {
@@ -243,7 +259,7 @@ function(event) {
       connectFrom =
          document.getElementById(fromId);
       connectTo = null;
-      alert("Click connect on a downstream procedure");
+      alert("Click connect on a downstream process");
    }
    else if (!connectTo) {
        var toId = makeId(label);
@@ -255,10 +271,10 @@ function(event) {
    if (connectFrom && connectTo) {
       if (connectFrom != connectTo) {
           
-         if (!procedures.routes)
-            procedures.routes = [];
+         if (!processes.routes)
+            processes.routes = [];
             
-         var routes = procedures.routes;
+         var routes = processes.routes;
          
          // Check if this route already exists
          var exists = false;
@@ -306,12 +322,12 @@ function (event) {
       
    var form = document.getElementById(label);
    form.remove();
-   delete procedures[label];
+   delete processes[label];
    
-   if (!procedures.routes)
-      procedures.routes = [];
+   if (!processes.routes)
+      processes.routes = [];
       
-   var routes = procedures.routes;
+   var routes = processes.routes;
    
    for (var index = 0;
         index < routes.length;
@@ -341,23 +357,23 @@ function (event) {
                   "innerText": "Go",
                   "onclick":
 function (event) {
-   var procedure = procedures[label];
+   var process = processes[label];
    var form = document.getElementById(makeId(label));
       setFormClass(label);
    
-   if (procedure.function) {
-      if (!procedure.f) {
+   if (process.function) {
+      if (!process.f) {
          compileFunction(label);
       }
-      if (procedure.f) {
-         procedure.f();
+      if (process.f) {
+         process.f();
          setFormClass(label, "complete");
       }
    }
-   else if (procedure.input) {
+   else if (process.input) {
       var inputId = makeId(label, "input");
       var input = document.getElementById(inputId);
-      procedure.value = input.value;
+      process.value = input.value;
       setFormClass(label, "complete");
    }
 }
@@ -384,21 +400,21 @@ function (event) {
          "div": {
             "id": makeId(label, "functionDiv"),
             "style": {
-               "display": procedure.function ? "block" : "none"
+               "display": process.type == "function" ? "block" : "none"
             },
             "children": [
                {
                   "textarea": {
                      "id": makeId(label, "function"),
-                     "innerHTML": procedure.function,
+                     "innerHTML": process.function,
                      "oninput":
 function(event) {
    setFormClass(label, "ready");
 },
                      "onchange":
 function(event) {
-   procedure.function = this.value;
-   delete procedure.f;
+   process.function = this.value;
+   delete process.f;
    return true;
 }
                   }
@@ -411,16 +427,16 @@ function(event) {
      
    }
    
-   // Create the goto div json
-   function createGotoDiv()
+   // Create the branch div json
+   function createBranchDiv()
    {
-      var gotoDiv =
+      var branchDiv =
       {
          "div": {
-            "id": makeId(label, "gotoDiv"),
-            "className": "gotoSVG",
+            "id": makeId(label, "branchDiv"),
+            "className": "branchSVG",
             "style": {
-               "display": procedure.goto ? "block" : "none",
+               "display": process.type == "branch" ? "block" : "none",
             },
             "children": [
                {
@@ -470,15 +486,16 @@ function(event) {
                },
                {
                   "select": {
-                     "className": "gotoSelect",
+                     "id": makeId(label, "branchGotoSelect"),
+                     "className": "branchGotoSelect",
                      "children": [
-                        createOption("Select goto", undefined, true)
+                        createBranchOptions()
                      ],
                      "onfocus":
 function(event) {
    var select = this;
    select.innerHTML = "";
-   for (var _label in procedures) {
+   for (var _label in processes) {
       if (_label != label &&
           _label != "routes")
          select.add(
@@ -486,17 +503,15 @@ function(event) {
                _label,
                makeId(_label),
                false,
-               _label == procedures[label]["goto"]
+               _label == processes[label]["goto"]
             )
          );
    }
 },
                      "onchange":
 function(event) {
-   var procedure = procedures[label];
-   delete procedure.function;
-   delete procedure.input;
-   procedure.goto = this.value;
+   var process = processes[label];
+   process.goto = this.value;
 }
                   }
                }
@@ -504,7 +519,24 @@ function(event) {
          }
       };
       
-      return gotoDiv;
+      return branchDiv;
+      
+      function createBranchOptions() {
+         var options = [];
+         options.push(
+            createOption("Select goto", undefined)
+         );
+         
+         for (var label in processes) {
+            if (label != "routes") {
+               options.push(
+                  createOption(label, label, process.goto == label)
+               );
+            }
+         }
+         
+         return options;
+      }
    }
    
    
@@ -514,7 +546,7 @@ function(event) {
          "div": {
             "id": makeId(label, "inputDiv"),
             "style": {
-               "display": procedure["input"] ? "block" : "none"
+               "display": process.type == "input" ? "block" : "none"
             },
             "children": [
                {
@@ -526,43 +558,41 @@ function (event) {
    
    input.type = this.value;
    input.value = "";
-   procedure.input = input.type;
-   delete procedure.value;
-   delete procedure.function;
-   delete procedure.goto;
-   
+   process.input = input.type;
+   delete process.value;
+
    setFormClass(label, "ready");
 },
                      "children": [
-                        createOption("Button", "button", procedure["input"] == "button"),
-                        createOption("Check box", "checkbox", procedure["input"] == "checkbox"),
-                        createOption("Color", "color", procedure["input"] == "color"),
-                        createOption("Date", "date", procedure["input"] == "date"),
-                        createOption("Date time", "datetime-local", procedure["input"] == "datetime-local"),
-                        createOption("Email", "email", procedure["input"] == "email"),
-                        createOption("File", "file", procedure["input"] == "file"),
-                        createOption("Image", "image", procedure["input"] == "image"),
-                        createOption("Month", "month", procedure["input"] == "month"),
-                        createOption("Number", "number", procedure["input"] == "number"),
-                        createOption("Password", "password", procedure["input"] == "password"),
-                        createOption("Radio", "radio", procedure["input"] == "radio"),
-                        createOption("Range", "range", procedure["input"] == "range"),
-                        createOption("Reset", "reset", procedure["input"] == "reset"),
-                        createOption("Search", "search", procedure["input"] == "search"),
-                        createOption("Submit", "submit", procedure["input"] == "submit"),
-                        createOption("Telephone", "tel", procedure["input"] == "tel"),
-                        createOption("Text", "text", procedure["input"] == "text"),
-                        createOption("Time", "time", procedure["input"] == "button"),
-                        createOption("URL", "url", procedure["input"] == "time"),
-                        createOption("Week", "week", procedure["input"] == "week"),
+                        createOption("Button", "button", process["input"] == "button"),
+                        createOption("Check box", "checkbox", process["input"] == "checkbox"),
+                        createOption("Color", "color", process["input"] == "color"),
+                        createOption("Date", "date", process["input"] == "date"),
+                        createOption("Date time", "datetime-local", process["input"] == "datetime-local"),
+                        createOption("Email", "email", process["input"] == "email"),
+                        createOption("File", "file", process["input"] == "file"),
+                        createOption("Image", "image", process["input"] == "image"),
+                        createOption("Month", "month", process["input"] == "month"),
+                        createOption("Number", "number", process["input"] == "number"),
+                        createOption("Password", "password", process["input"] == "password"),
+                        createOption("Radio", "radio", process["input"] == "radio"),
+                        createOption("Range", "range", process["input"] == "range"),
+                        createOption("Reset", "reset", process["input"] == "reset"),
+                        createOption("Search", "search", process["input"] == "search"),
+                        createOption("Submit", "submit", process["input"] == "submit"),
+                        createOption("Telephone", "tel", process["input"] == "tel"),
+                        createOption("Text", "text", process["input"] == "text"),
+                        createOption("Time", "time", process["input"] == "button"),
+                        createOption("URL", "url", process["input"] == "time"),
+                        createOption("Week", "week", process["input"] == "week"),
                      ]
                   }
                },
                {
                   "input": {
                      "id": makeId(label, "input"),
-                     "type": procedure.input,
-                     "value": procedure.value
+                     "type": process.input,
+                     "value": process.value == undefined ? "" : process.value
                   }
                }
             ]
@@ -572,6 +602,68 @@ function (event) {
       return inputDiv;
    }
    
+      // Create the function div json
+   function createOutputDiv()
+   {
+
+      var outputDiv =
+      {
+         "div": {
+            "id": makeId(label, "outputDiv"),
+            "style": {
+               "display": process.type == "output" ? "block" : "none"
+            },
+            "children": [
+               {
+                  "textarea": {
+                     "id": makeId(label, "output"),
+                     "innerHTML": process.function,
+                     "oninput":
+function(event) {
+   setFormClass(label, "ready");
+},
+                     "onchange":
+function(event) {
+   process.function = this.value;
+   delete process.f;
+   return true;
+}
+                  }
+               }
+            ]
+         }
+      };
+      
+      return outputDiv;
+     
+   }
+   
+   function onProcessTypeChange(select) {
+
+      var allDivs = [
+         makeId(label, "functionDiv"),
+         makeId(label, "branchDiv"),
+         makeId(label, "inputDiv"),
+         makeId(label, "outputDiv")
+      ];
+      
+      // Hide all
+      for (var i = 0; i < allDivs.length; ++i) {
+         var id = allDivs[i];
+         var div = document.getElementById(id);
+         div.style.display = "none";
+      }
+   
+      // Display selected
+      var selected = select.value;
+      var id = makeId(label, selected + "Div");
+      var div = document.getElementById(id);
+   
+      div.style.display = "block";
+      
+      createRoutes();
+   }
+
    
 }
 
@@ -605,17 +697,15 @@ function createOption(label, value, selected=undefined) {
 
 function compileFunction(label)
 {
-   var procedure = procedures[label];
+   var process = processes[label];
    
-   delete procedure.f;
-   delete procedure.input;
-   delete procedure.goto;
+   delete process.f;
    
    try {
-      var func = new Function("return " + procedure.function);
+      var func = new Function("return " + process.function);
       var f = func();
       if (typeof f == "function") {
-         procedure.f = f;
+         process.f = f;
          setFormClass(label, "ready");
          return true;
       }
@@ -632,36 +722,20 @@ function compileFunction(label)
 }
    
 
-function onProcedureTypeChange(select, divIds) {
-   // Hide all
-   for (var i = 0; i < divIds.length; ++i) {
-      var id = divIds[i];
-      var div = document.getElementById(id);
-      div.style.display = "none";
-   }
-   
-   // Display selected
-   var selected = select.value;
-   var div = document.getElementById(selected);
-   
-   div.style.display = "block";
-   
-}
-
-function onNewProcedure(event) {
-   var label = "Procedure ";
+function onNewProcess(event) {
+   var label = "Process ";
    var count = 1;
-   while (procedures[label + count])
+   while (processes[label + count])
       ++count;
       
    label += count;
    
    while (true) {
-      label = prompt("New procedure", label);
+      label = prompt("New process", label);
       if (!label)
          return;
          
-      if (procedures[label])
+      if (processes[label])
          alert(label + " already exists");
       else
          break;
@@ -670,7 +744,8 @@ function onNewProcedure(event) {
    
    var point = coordinates.getCoordinates(event);
    
-   procedures[label] = {
+   processes[label] = {
+      "type": "function",
       "function": "function() {\r\n   alert('hello');\r\n}",
       "topLeft": {
          "x": point.x - 125,
@@ -678,13 +753,13 @@ function onNewProcedure(event) {
       }
    };
    
-   createProcedure(label);
+   createProcess(label);
    
 }
-function createProcedures() {
-   for (var label in procedures) {
+function createProcesses() {
+   for (var label in processes) {
       if (label != "routes")
-         createProcedure(label);
+         createProcess(label);
    }
    createRoutes();
 }
@@ -693,14 +768,14 @@ function createRoutes() {
    var svg = document.getElementById("svg");
    svg.innerHTML = "";
    
-   if (!procedures.routes)
-      procedures.routes = [];
+   if (!processes.routes)
+      processes.routes = [];
       
    for (var index = 0;
-        index < procedures.routes.length;
+        index < processes.routes.length;
         ++index)
    {
-      var route = procedures.routes[index];
+      var route = processes.routes[index];
       createRoute(route);
    }
    
@@ -718,8 +793,8 @@ function createRoute(route) {
    var toRect = to.getBoundingClientRect();
    
    var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-   var _from = procedures[route.from].topLeft;
-   var _to = procedures[route.to].topLeft;
+   var _from = processes[route.from].topLeft;
+   var _to = processes[route.to].topLeft;
 
    line.setAttribute("x1", _from.x + fromRect.width / 2);
    line.setAttribute("y1", _from.y + fromRect.height);
@@ -734,16 +809,16 @@ function createRoute(route) {
 function changeLabel(oldLabel, newLabel) {
    var oldForm = document.getElementById(oldLabel);
    oldForm.remove();
-   var oldProcedure = procedures[oldLabel];
-   delete procedures[oldLabel];
-   procedures[newLabel] = oldProcedure;
+   var oldProcess = processes[oldLabel];
+   delete processes[oldLabel];
+   processes[newLabel] = oldProcess;
    
    
    // re route
-   if (!procedures.routes)
-      procedures.routes = [];
+   if (!processes.routes)
+      processes.routes = [];
       
-   var routes = procedures.routes;
+   var routes = processes.routes;
    
    for (var index = 0;
         index < routes.length;
@@ -756,7 +831,7 @@ function changeLabel(oldLabel, newLabel) {
          route.to = newLabel;
    }
    
-   createProcedure(newLabel);
+   createProcess(newLabel);
    createRoutes();
 }
 
@@ -764,17 +839,17 @@ document.getElementById("svg").onclick =
    function (event) {
       connectFrom = null;
       connectTo = null;
-      onNewProcedure(event);
+      onNewProcess(event);
    }
 window.onresize =
    function(event) {
       var maxWidth = 0;
       var maxHeight = 0;
-      for (var label in procedures) {
+      for (var label in processes) {
          if (label != "routes") {
             var form = document.getElementById(makeId(label));
             var rect = form.getBoundingClientRect();
-            var topLeft = procedures[label].topLeft;
+            var topLeft = processes[label].topLeft;
             if (topLeft.x + rect.width > maxWidth)
                maxWidth = topLeft.x + rect.width;
                
@@ -794,7 +869,7 @@ window.onresize =
       createRoutes();
    }
    
-createProcedures();
+createProcesses();
 window.onresize();
       </script>
       
@@ -808,7 +883,7 @@ var origin =
       window.location.hostname
    );
 
-header.innerText = "Procedure " + origin;
+header.innerText = "Process " + origin;
 title.innerText = origin;
 
       </script>
