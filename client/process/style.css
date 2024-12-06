@@ -1,0 +1,131 @@
+body {
+   border: 1px solid;
+   margin: 0px;
+   padding: 0px;
+}
+
+
+form {
+    width: 250px;
+    position: absolute;
+    padding: 5px;
+    background-image: url('move.png');
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+    background-position: right 2px top 2px;
+}
+
+.ready {
+   background-color: lightblue;
+}
+
+.error {
+   background-color: pink;
+}
+
+.complete {
+   background-color: lightgreen;
+}
+
+textarea, input {
+   margin-top: 5px;
+   width: 100%;
+   border: inset 2px;
+
+}
+
+select {
+   margin-top: 5px;
+}
+
+
+textarea {
+   height: 100px;
+}
+
+.buttons {
+   position: relative;
+   height: 20px;
+   
+
+}
+
+/*
+div {
+    border: 1px solid red;
+}
+*/
+
+.go, .connect, .delete {
+   position: absolute;}
+
+.go {
+   
+   right: 0px;
+   width: 40px;
+}
+
+.connect {
+   left: 60px;
+}
+
+.delete {
+   left: 0px;
+}
+
+.connecting {
+   background-color: pink;
+}
+
+.branch {
+   clear: both;
+   padding: 0px;
+   margin: 0px;
+   padding: 0px;
+   width: 100%;
+   position: relative;
+   
+}
+
+.branchGotoSelect {
+    position: absolute;
+    right: 5px;
+    bottom: 20px;
+}
+
+.branchSVG {
+   position: absolute;
+   z-index: -1;
+   top: 10px;
+}
+
+.branchTextArea {
+   position: absolute;
+   left: 0px;
+   width: calc(100% - 5px);
+   top: 3px;
+   
+   opacity: 0.8;
+}
+
+.inputs {
+   width: calc(100% - 30px);
+}
+
+.inputs span {
+   color: blue;
+   border: 1px solid blue;
+   margin: 2px;
+   padding: 0px 2px 0px 2px;
+}
+
+#svg {
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   width: 100%;
+   margin: 0px;
+   padding: 0px;
+   height: 100%;
+   border: 1px solid red;
+}

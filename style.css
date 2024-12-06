@@ -53,14 +53,9 @@ input, textarea {
 }
 
 
-textarea {
+textarea {
    height: 120px;
 }
-
-button {
-   margina: 5px;
-}
-
 
 label {
    font-weight: bold;
