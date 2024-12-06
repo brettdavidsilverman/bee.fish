@@ -16,8 +16,9 @@
    <body>
 
       <a id="logoff">Logoff/Change secret</a>
-      <h1 id="hostnameHeader"></h1>
-    
+      <h1 id="h1"></h1>
+      <script src="/client/origin.js"></script>
+      
       <script>
 setup();
 
@@ -51,21 +52,7 @@ function go() {
    );
 }
 
-function setup() {   var hostname =
-      punycode.toUnicode(
-         document.location.hostname
-      );
-
-   var title =
-      document.getElementById("title");
-
-   var hostnameHeader =
-      document.getElementById("hostnameHeader");
-      
-   title.innerText = hostname;
-   hostnameHeader.innerText = hostname;
-   
-   
+function setup() {   
    var logoff =
       document.getElementById("logoff");
    
@@ -74,7 +61,7 @@ function setup() {   var hostname =
       encodeURIComponent(document.location.href);
 }
       </script>
-
+      
    </body>
 
 </html>

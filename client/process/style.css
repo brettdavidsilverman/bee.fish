@@ -4,15 +4,27 @@ body {
    padding: 0px;
 }
 
-
+#processesDiv {
+   position: absolute;
+   margin: 0px;
+   padding: 0px;
+   left: 0px;
+   top: 0px;
+}
 form {
     width: 250px;
     position: absolute;
     padding: 5px;
+    opacity: 0.8;
     background-image: url('move.png');
     background-repeat: no-repeat;
     background-size: 30px 30px;
     background-position: right 2px top 2px;
+}
+
+h1 {
+   position: absolute;
+   top: 10px;
 }
 
 .ready {
@@ -25,6 +37,19 @@ form {
 
 .complete {
    background-color: lightgreen;
+}
+
+#processURLForm {
+   margin: 10px;
+   width: 200px;
+   position: absolute;
+   top: 100px;
+   background-color: pink;
+   background-image: none;
+}
+
+#processURLButton {
+
 }
 
 textarea, input {
@@ -50,11 +75,11 @@ textarea {
 
 }
 
-/*
+
 div {
     border: 1px solid red;
 }
-*/
+
 
 .go, .connect, .delete {
    position: absolute;}

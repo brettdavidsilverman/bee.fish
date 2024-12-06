@@ -127,6 +127,11 @@ function postJSON(url, json) {
    return promise;
 }
 
+Object.prototype.save =
+   function(url) {
+      return postJSON(url, this);
+   }
+
 function hideFunctions(json)
 {
 
