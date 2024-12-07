@@ -74,7 +74,7 @@ function saveProcesses() {
    var url = document.getElementById("urlInput").value;
    saveButton.disabled = true;
    
-   processes.save(url).
+   postJSON(url, processes).
    then(
       function() {
          saveButton.disabled = false;
@@ -83,6 +83,7 @@ function saveProcesses() {
    catch(
       function(error) {
          Error(error, saveProcesses);
+         saveButton.disabled = false;
       }
    );
 }
