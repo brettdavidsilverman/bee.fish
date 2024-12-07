@@ -109,7 +109,6 @@ int main(int argc, const char* argv[])
       
       if (test) {
          bool ok = BeeFishHTTPS::test(port);
-         
          io_context.stop();
          startThread.join();
          

@@ -111,7 +111,7 @@ function(event) {
       
    connectButton = button;
    connectButton.classList.add("connecting");
-    
+   
    alert("Click connect on a processes input");
    
 }
@@ -533,7 +533,7 @@ function (event) {
    var span = event.target;
    var inputLabel = span.innerText;
    var refresh = false;
-   
+ 
    if (connectFrom) {
       
       var connectTo = document.getElementById(makeId(label));
@@ -952,7 +952,9 @@ function setupProcessEditor()
    
    div.onclick =
    function (event) {
-       
+      if (event.target != div)
+         return false;
+         
       if (connectFrom)
       {
          connectFrom = null;
@@ -963,15 +965,15 @@ function setupProcessEditor()
          return false;
       }
       
-      if (event.target == div)
-         return onNewProcess(event);
-         
-      return false;
+      
+      return onNewProcess(event);
       
    }}
 
 window.onresize =
    function(event) {
+      if (!processes)
+         return;
       var maxWidth = 0;
       var maxHeight = 0;
       for (var label in processes) {
