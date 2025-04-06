@@ -4,7 +4,7 @@
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <title id="title">dev.bee.fish</title>
-      <script src="https://bee.fish/client/head.js?v=2"></script>      <script src="https://bee.fish/client/authentication/authentication.js?v=28"></script>
+      <script src="https://bee.fish/client/head.js?v=3"></script>      <script src="https://bee.fish/client/authentication/authentication.js?v=34"></script>
       <script src="https://bee.fish/client/authentication/sha512.js"></script>
       <link rel="stylesheet" type="text/css" href="style.css"/>
       <script>
@@ -27,7 +27,12 @@
       <button id="getData" onclick="getData();">Get data</button>
       <br />
       <button onclick="logoff();">Logoff</button>
+      <br />
+      <label for="progress"><div id="progressLabel"></div></label>
+      <progress id="progress" value="0" max="100"></progress>
+
       <script>
+
 var authentication =
    new Authentication("https://bee.fish");
    
@@ -35,7 +40,9 @@ authentication.onHandleLogon =
    () => {};
    
 var logon = document.getElementById("logon");
-var uploadFile = document.getElementById("uploadFile");
+var uploadFile = document.getElementById("uploadFile");var progress = document.getElementById("progress");
+var progressLabel = document.getElementById("progressLabel");
+
 
 var getDataButton = document.getElementById("getData");
 
@@ -143,55 +150,63 @@ function displayExpires() {
  
 }
 
-displayExpires();
-
 
    function writeFile(event) {
       const file = event.target.files[0];
-      const stream = file.stream();
-      // usefull for displaying progress
-      const expectedSize = file.size;
-     
-      const reader = stream.getReader();
-      var decoder = new TextDecoder();
-      var entire = "";
-      reader.read().then(
-         function pump({done, value}) {
-            
-            const str =
-               decoder.decode(value);
-
-            entire += str;
-            
-            if (done) {
-               // Do something with last chunk of data then exit reader
-               return;
-            }
-      
-            // Otherwise do something here to process current chunk
-
-            // Read some more, and call this function again
-           return reader.read().then(pump);
-        }
-     )
+      event.target.value = null;
+      authentication.postFile(
+         "https://bee.fish/my",
+         file
+      )
      .then(
-        () => {
-           var json = JSON.parse(entire);
-           document.write(json);
+        (ok) => {
+           alert(ok);
         }
      )
      .catch(
         (error) => { alert(error) }
-     )
-     .finally(
-        () => { alert("Success") }
      );
-     
    }
    
-  // alert(self.crypto.randomUUID());
+   //alert(self.crypto.randomUUID());
+   
+function updateStatus(status) {
+
+   if (!status) {
+      authentication.getSessionStatus()
+      .then(
+         (status) => {
+            updateStatus(status);
+         }
+      )
+      .catch(
+         (error) => {
+            window.clearInterval(intervalId);
+            displayError(error, updateStatus);
+         }
+      );
+      return;
+   }
+   
+   progress.value = status.percentage;
+  
+   progressLabel.innerText = status.label;
+   uploading = !status.done;
+   
+   displayExpires();
+}
       
-      </script>
+var intervalId =
+   window.setInterval(
+      function() {
+         updateStatus();
+      },
+      1000 * 5
+   );
+      
+updateStatus();
+
+        </script>
 
    </body>
 
