@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title id="title">dev.bee.fish</title>
+      <script src="https://bee.fish/client/head.js?v=2"></script>      <script src="https://bee.fish/client/authentication/authentication.js?v=28"></script>
+      <script src="https://bee.fish/client/authentication/sha512.js"></script>
+      <link rel="stylesheet" type="text/css" href="style.css"/>
+      <script>
+
+      </script>
+   </head>
+   <body>
+      <h1 id="h1">Test</h1>
+      <div id="expires"></div>
+      <label for="logon">
+         Logon
+         <input type="file" id="logon" accept="image/*" style="display:none;"></input>
+      </label>
+      <br />
+      <label for="uploadFile">
+         Upload file
+         <input type="file" id="uploadFile" accept=".json" style="display:none;" onchange="writeFile(event);"></input>
+      </label>
+      <br />
+      <button id="getData" onclick="getData();">Get data</button>
+      <br />
+      <button onclick="logoff();">Logoff</button>
+      <script>
+var authentication =
+   new Authentication("https://bee.fish");
+   
+authentication.onHandleLogon =
+   () => {};
+   
+var logon = document.getElementById("logon");
+var uploadFile = document.getElementById("uploadFile");
+
+var getDataButton = document.getElementById("getData");
+
+function getData(event) {
+   //if (authentication.authenticated) {
+      getDataButton.disabled = true;
+      return authentication.fetch(
+         "https://bee.fish/my/meta/view/approvals/0/submitter/displayName"
+       //  "https://bee.fish/server/json/JSON.php"
+      )
+      .then(
+         (response) => {
+            return response.text();
+         }
+      )
+      .then(
+         (text) => {
+            alert(text);
+         }
+      )
+      .catch(
+         (error) => {
+            displayError("🚨" + error, getData);
+         }
+      )
+      .finally(
+         () => {
+            getDataButton.disabled = false;
+            displayExpires();
+         }
+      );
+//   }
+//   else
+//      alert("Please logon");
+}
+
+logon.onchange = (event) => {
+    
+   authentication
+   .getFileHash(logon.files[0])
+   .then(
+       (secret) => {
+          event.target.value = null;
+          return authentication.logon(
+             "brettdavidsilverman@gmail.com",
+             secret
+          );
+       }
+   )
+   .then(
+      (response) => {
+         if (authentication.authenticated) {
+            alert("Logged on");
+            //return getData();
+         }
+         else
+            throw "Invalid email/secret";
+      }
+   )
+   .catch(
+       (error) => {
+          displayError(error, "logon");
+       }
+   )
+   .finally(
+       () => {
+           displayExpires();
+       }
+   )
+   
+}
+
+function logoff() {
+   authentication.logoff()
+   .then(
+       (ok) => {
+          alert("Logged off");
+       }
+   )
+   .catch(
+       (error) => {
+          displayError(error, logoff);
+       }
+   )
+   .finally(
+       () => {
+           displayExpires();
+       }
+   )
+}
+
+function displayExpires() {
+   var div = document.getElementById("expires");
+   
+   var credentials =
+      authentication.getCredentials();
+      
+   if (credentials) {
+      var expires = credentials.expires;
+      div.innerText = new Date(expires);
+   }
+   else
+      div.innerText = "No credentials";
+   
+ 
+}
+
+displayExpires();
+
+
+   function writeFile(event) {
+      const file = event.target.files[0];
+      const stream = file.stream();
+      // usefull for displaying progress
+      const expectedSize = file.size;
+     
+      const reader = stream.getReader();
+      var decoder = new TextDecoder();
+      var entire = "";
+      reader.read().then(
+         function pump({done, value}) {
+            
+            const str =
+               decoder.decode(value);
+
+            entire += str;
+            
+            if (done) {
+               // Do something with last chunk of data then exit reader
+               return;
+            }
+      
+            // Otherwise do something here to process current chunk
+
+            // Read some more, and call this function again
+           return reader.read().then(pump);
+        }
+     )
+     .then(
+        () => {
+           var json = JSON.parse(entire);
+           document.write(json);
+        }
+     )
+     .catch(
+        (error) => { alert(error) }
+     )
+     .finally(
+        () => { alert("Success") }
+     );
+     
+   }
+   
+  // alert(self.crypto.randomUUID());
+      
+      </script>
+
+   </body>
+
+</html>
