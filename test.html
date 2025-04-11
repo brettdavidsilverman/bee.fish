@@ -28,8 +28,7 @@
       <br />
       <button onclick="logoff();">Logoff</button>
       <br />
-      <label for="progress"><div id="progressLabel"></div></label>
-      <progress id="progress" value="0" max="100"></progress>
+      <iframe src="https://bee.fish/api.php" id="iframe"></iframe>
 
       <script>
 
@@ -40,10 +39,41 @@ authentication.onHandleLogon =
    () => {};
    
 var logon = document.getElementById("logon");
-var uploadFile = document.getElementById("uploadFile");var progress = document.getElementById("progress");
-var progressLabel = document.getElementById("progressLabel");
+var uploadFile = document.getElementById("uploadFile");var iframe = document.getElementById("iframe");
 
 
+function writeFile(event) {
+   const file = event.target.files[0];
+   iframe.contentWindow.postMessage(
+      {
+         command: "postFile",
+         path: "/my",
+         file: file
+      },
+      "https://bee.fish"
+   );
+      
+   event.target.value = null;
+      
+}
+
+iframe.onload = function()
+{
+   setCredentials();
+}
+
+function setCredentials() {
+   iframe.contentWindow.postMessage(
+      {
+         command: "setCredentials",
+         credentials:
+            authentication
+            .getCredentials()
+      },
+      "https://bee.fish"
+   );
+}
+   
 var getDataButton = document.getElementById("getData");
 
 function getData(event) {
@@ -95,6 +125,7 @@ logon.onchange = (event) => {
    .then(
       (response) => {
          if (authentication.authenticated) {
+            setCredentials();
             alert("Logged on");
             //return getData();
          }
@@ -119,6 +150,7 @@ function logoff() {
    authentication.logoff()
    .then(
        (ok) => {
+          setCredentials();
           alert("Logged off");
        }
    )
@@ -150,61 +182,11 @@ function displayExpires() {
  
 }
 
-
-   function writeFile(event) {
-      const file = event.target.files[0];
-      event.target.value = null;
-      authentication.postFile(
-         "https://bee.fish/my",
-         file
-      )
-     .then(
-        (ok) => {
-           alert(ok);
-        }
-     )
-     .catch(
-        (error) => { alert(error) }
-     );
-   }
+displayExpires();
    
+
    //alert(self.crypto.randomUUID());
    
-function updateStatus(status) {
-
-   if (!status) {
-      authentication.getSessionStatus()
-      .then(
-         (status) => {
-            updateStatus(status);
-         }
-      )
-      .catch(
-         (error) => {
-            window.clearInterval(intervalId);
-            displayError(error, updateStatus);
-         }
-      );
-      return;
-   }
-   
-   progress.value = status.percentage;
-  
-   progressLabel.innerText = status.label;
-   uploading = !status.done;
-   
-   displayExpires();
-}
-      
-var intervalId =
-   window.setInterval(
-      function() {
-         updateStatus();
-      },
-      1000 * 5
-   );
-      
-updateStatus();
 
         </script>
 
