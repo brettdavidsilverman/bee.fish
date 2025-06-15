@@ -1,195 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="utf-8"/>
-      <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <title id="title">dev.bee.fish</title>
-      <script src="https://bee.fish/client/head.js?v=3"></script>      <script src="https://bee.fish/client/authentication/authentication.js?v=34"></script>
-      <script src="https://bee.fish/client/authentication/sha512.js"></script>
-      <link rel="stylesheet" type="text/css" href="style.css"/>
-      <script>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title id="title">dev.bee.fish</title>
+        <script src="https://bee.fish/client/head.js?v=3"></script>        <script src="https://bee.fish/client/authentication/authentication.js?v=34"></script>
+        <script src="https://bee.fish/client/authentication/sha512.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+        <script>
 
-      </script>
-   </head>
-   <body>
-      <h1 id="h1">Test</h1>
-      <div id="expires"></div>
-      <label for="logon">
-         Logon
-         <input type="file" id="logon" accept="image/*" style="display:none;"></input>
-      </label>
-      <br />
-      <label for="uploadFile">
-         Upload file
-         <input type="file" id="uploadFile" accept=".json" style="display:none;" onchange="writeFile(event);"></input>
-      </label>
-      <br />
-      <button id="getData" onclick="getData();">Get data</button>
-      <br />
-      <button onclick="logoff();">Logoff</button>
-      <br />
-      <iframe src="https://bee.fish/api.php" id="iframe"></iframe>
-
-      <script>
-
+        </script>
+    </head>
+    <body>
+        <h1 id="h1">Test</h1>
+        <div id="expires"></div>
+        <label for="logon">
+            Logon
+            <input type="file" id="logon" accept="image/*" style="display:none;"></input>
+        </label>
+        <br />
+        <label for="uploadFile">
+            Upload file
+            <input type="file" id="uploadFile" accept=".json" style="display:none;" onchange="writeFile(event);"></input>
+        </label>
+        <br />
+        <button id="getData" onclick="getData();">Get data</button>
+        <br />
+        <button id="cancel" onclick="cancel();">Cancel</button>
+        
+        <br />
+        <button onclick="logoff();">Logoff</button>
+        <br />
+        <iframe src="https://bee.fish/api.php" id="iframe"></iframe>
+        <script>
+var progress = document.getElementById("progress");
+var progressLabel = document.getElementById("progressLabel");
 var authentication =
-   new Authentication("https://bee.fish");
-   
+    new Authentication("https://bee.fish");
+    
 authentication.onHandleLogon =
-   () => {};
-   
+    () => {};
+
 var logon = document.getElementById("logon");
 var uploadFile = document.getElementById("uploadFile");var iframe = document.getElementById("iframe");
 
 
 function writeFile(event) {
-   const file = event.target.files[0];
+    const file = event.target.files[0];
+  
    iframe.contentWindow.postMessage(
-      {
-         command: "postFile",
-         path: "/my",
-         file: file
-      },
-      "https://bee.fish"
-   );
-      
-   event.target.value = null;
-      
+        {
+            command: "postFile",
+            path: "/my",
+            file: file
+        },
+        "https://bee.fish"
+    );
+        
+    event.target.value = null;
+        
 }
 
 iframe.onload = function()
 {
-   setCredentials();
+    setCredentials();
 }
 
 function setCredentials() {
-   iframe.contentWindow.postMessage(
-      {
-         command: "setCredentials",
-         credentials:
-            authentication
-            .getCredentials()
-      },
-      "https://bee.fish"
-   );
+    iframe.contentWindow.postMessage(
+        {
+            command: "setCredentials",
+            credentials:
+                authentication
+                .getCredentials()
+        },
+        "https://bee.fish"
+    );
 }
-   
+    
 var getDataButton = document.getElementById("getData");
 
 function getData(event) {
-   //if (authentication.authenticated) {
-      getDataButton.disabled = true;
-      return authentication.fetch(
-         "https://bee.fish/my/meta/view/approvals/0/submitter/displayName"
-       //  "https://bee.fish/server/json/JSON.php"
-      )
-      .then(
-         (response) => {
-            return response.text();
-         }
-      )
-      .then(
-         (text) => {
-            alert(text);
-         }
-      )
-      .catch(
-         (error) => {
-            displayError("🚨" + error, getData);
-         }
-      )
-      .finally(
-         () => {
-            getDataButton.disabled = false;
-            displayExpires();
-         }
-      );
-//   }
-//   else
-//      alert("Please logon");
+    //if (authentication.authenticated) {
+        getDataButton.disabled = true;
+        return authentication.fetch(
+            "https://bee.fish/my"
+         //  "https://bee.fish/server/json/JSON.php"
+        )
+        .then(
+            (response) => {
+                return response.text();
+            }
+        )
+        .then(
+            (text) => {
+                alert(text);
+            }
+        )
+        .catch(
+            (error) => {
+                displayError("🚨" + error, getData);
+            }
+        )
+        .finally(
+            () => {
+                getDataButton.disabled = false;
+                displayExpires();
+            }
+        );
+//    }
+//    else
+//        alert("Please logon");
 }
 
 logon.onchange = (event) => {
-    
-   authentication
-   .getFileHash(logon.files[0])
-   .then(
-       (secret) => {
-          event.target.value = null;
-          return authentication.logon(
-             "brettdavidsilverman@gmail.com",
-             secret
-          );
-       }
-   )
-   .then(
-      (response) => {
-         if (authentication.authenticated) {
-            setCredentials();
-            alert("Logged on");
-            //return getData();
+     
+    authentication
+    .getFileHash(logon.files[0])
+    .then(
+         (secret) => {
+             event.target.value = null;
+             return authentication.logon(
+                 "brettdavidsilverman@gmail.com",
+                 secret
+             );
          }
-         else
-            throw "Invalid email/secret";
-      }
-   )
-   .catch(
-       (error) => {
-          displayError(error, "logon");
-       }
-   )
-   .finally(
-       () => {
-           displayExpires();
-       }
-   )
-   
+    )
+    .then(
+        (response) => {
+            if (authentication.authenticated) {
+                setCredentials();
+
+                alert("Logged on");
+                
+                //return getData();
+            }
+            else
+                throw "Invalid email/secret";
+        }
+    )
+    .catch(
+         (error) => {
+             displayError(error, "logon");
+         }
+    )
+    .finally(
+         () => {
+              displayExpires();
+         }
+    )
+    
 }
 
 function logoff() {
-   authentication.logoff()
-   .then(
-       (ok) => {
-          setCredentials();
-          alert("Logged off");
-       }
-   )
-   .catch(
-       (error) => {
-          displayError(error, logoff);
-       }
-   )
-   .finally(
-       () => {
-           displayExpires();
-       }
-   )
+    authentication.logoff()
+    .then(
+         (ok) => {
+             setCredentials();
+             alert("Logged off");
+         }
+    )
+    .catch(
+         (error) => {
+             displayError(error, logoff);
+         }
+    )
+    .finally(
+         () => {
+              displayExpires();
+         }
+    )
 }
 
 function displayExpires() {
-   var div = document.getElementById("expires");
-   
-   var credentials =
-      authentication.getCredentials();
-      
-   if (credentials) {
-      var expires = credentials.expires;
-      div.innerText = new Date(expires);
-   }
-   else
-      div.innerText = "No credentials";
-   
+    var div = document.getElementById("expires");
+    
+    var credentials =
+        authentication.getCredentials();
+        
+    if (credentials) {
+        var expires = credentials.expires;
+        div.innerText = new Date(expires);
+    }
+    else
+        div.innerText = "No credentials";
+    
  
 }
 
+function cancel() {
+     iframe.contentWindow.postMessage(
+        {
+            command: "cancel"
+        },
+        "https://bee.fish"
+     );
+}
+
 displayExpires();
-   
+  
+    //alert(self.crypto.randomUUID());
+    
 
-   //alert(self.crypto.randomUUID());
-   
+          </script>
 
-        </script>
-
-   </body>
+    </body>
 
 </html>
