@@ -132,12 +132,20 @@ namespace BeeFishHTTPS {
                }
             },
             {
+               ".hpp",
+               {
+                  "text/plain; charset=utf-8",
+                  _defaultCacheControl
+               }
+            },
+            {
                ".cpp",
                {
                   "text/plain; charset=utf-8",
                   _defaultCacheControl
                }
             },
+            
             {
                ".c",
                {

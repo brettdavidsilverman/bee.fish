@@ -101,7 +101,7 @@ namespace BeeFishHTTPS {
             my_password_callback
          );
    
-         std::cout << "Setting up certificates..." << std::endl;
+         std::cout << "Setting up certificates..." << CERT_FILE << std::endl;
 
          _context.use_certificate_chain_file(CERT_FILE);
    

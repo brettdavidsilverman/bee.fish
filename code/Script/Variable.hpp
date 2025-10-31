@@ -137,7 +137,7 @@ namespace BeeFishScript {
                throw std::logic_error("JSON::Variable::Value::copy constructor");
             }
          }
-
+         
          ~Value() {
          }
 
@@ -302,6 +302,14 @@ namespace BeeFishScript {
          this->~Variable();
          _type = source._type;
          new (&_value) Value(source._type, source._value);
+         return *this;
+      }
+      
+      virtual Variable& operator = (const Null value) {
+
+         this->~Variable();
+         _type = Type::NULL_;
+         new (&_value) Value();
          return *this;
       }
 

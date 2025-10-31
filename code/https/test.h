@@ -193,6 +193,8 @@ namespace BeeFishHTTPS {
 
       string command = stream.str();
 
+      cout << "\t" << command << endl;
+      
       success = (system(command.c_str()) == 0);
       
       outputSuccess(success);

@@ -11,13 +11,13 @@ build:
 	- mkdir build
 
 https:	build
-	cd code/https && make $(DEBUG) test PORT=$(PORT)
+	cd code && make $(DEBUG) test PORT=$(PORT)
 
 test:	build
 	cd code/https && make $(DEBUG) test PORT=$(PORT)
 
 clean:
-	cd code/https && make clean
+	cd code && make clean
 
 stop:
 	cd code/https && ./stop.sh $(PORT)

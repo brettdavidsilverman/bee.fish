@@ -126,7 +126,7 @@ namespace BeeFishPowerEncoding
 
          if (bit)
             ++_count;
-         else
+         else if (_count > 0)
             --_count;
 
          return bit;
