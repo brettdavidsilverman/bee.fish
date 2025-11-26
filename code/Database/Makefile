@@ -6,7 +6,7 @@ OUTPUT = $(BUILD)/Database
 LARGE = ../../../large.json
 
 $(OUTPUT):	$(DEPS)
-	$(CC) $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -lstdc++fs -lrt
+	$(CC) $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -lstdc++fs 
 
 all:	$(OUTPUT)
 
@@ -16,14 +16,14 @@ $(BUILD)/json:
 time:	CFLAGS += -DTIME -Ofast
 time:	$(OUTPUT)
 
-run_time:	$(OUTPUT)
+run_time:	time
 	time $(OUTPUT) -large
 	
 trace:	$(OUTPUT)
 	strace -c $(OUTPUT) -large
 	
 debug:	DEBUG = debug
-debug:	CFLAGS += -g -rdynamic -DTIME
+debug:	CFLAGS += -g -rdynamic -DTIME -DDEBUG
 debug:	$(OUTPUT)
 
 run_debug:	debug

@@ -9,7 +9,7 @@ sudo certbot certonly --manual --preferred-challenges dns -d "bee.fish" -d "*.be
 
 sudo certbot certonly --manual --preferred-challenges dns -d "dev.bee.fish" -d "*.dev.bee.fish"
 
-sudo chown bee /etc/letsencrypt -R
+sudo chown <username> /etc/letsencrypt -R
 
 sudo apt install libboost-all-dev
 sudo apt install libssl-dev

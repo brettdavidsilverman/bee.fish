@@ -87,7 +87,7 @@ namespace BeeFishDatabase {
 
          ssize_t result =
             lseek(
-               _fileNumber,
+               fileNumber(),
                offset,
                origin
             );

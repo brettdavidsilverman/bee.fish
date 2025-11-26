@@ -29,316 +29,311 @@ using namespace std::literals;
 
 
 namespace BeeFishDatabase {
-   
-   using namespace BeeFishMisc;
-   
-   // Store [left, right] branch elements.
-   // A zero is stored if the branch
-   // hasnt been visited yet.
-   class Database : public LockFile
-   {
-   
-   public:
-      typedef PowerEncoding Encoding;
+    
+    using namespace BeeFishMisc;
+    
+    // Store [left, right] branch elements.
+    // A zero is stored if the branch
+    // hasnt been visited yet.
+    class Database : public LockFile
+    {
+    
+    public:
+        typedef PowerEncoding Encoding;
 
-   public:
+    public:
 
-      Size                 _pageSize = 0;
-   public:
+        Size                      _pageSize = 0;
+    public:
 
-      struct ScopedFileLock{
+        struct ScopedFileLock{
 
-         Database* _database;
+            Database* _database;
 
-         ScopedFileLock(Database* database) {
-            _database = database;
-            _database->lock();
-         }
-         
-         ~ScopedFileLock() {
-            _database->unlock();
-         }
+            ScopedFileLock(Database* database) {
+                _database = database;
+                _database->lock();
+            }
+            
+            ~ScopedFileLock() {
+                _database->unlock();
+            }
 
-      };
+        };
 
-   public:
-      Database(
-         string filePath = "",
-         const Size pageSize = getPageSize()
-      ) :
-         LockFile(
-            filePath
-         ),
-         _pageSize(pageSize)
-      {
+    public:
+        Database(
+            string filePath = "",
+            const Size pageSize = getPageSize()
+        ) :
+            LockFile(
+                filePath
+            ),
+            _pageSize(pageSize)
+        {
 #ifdef DEBUG_
-         Debug debug;
-         debug << now() << " "
-               << "Database(\""
-               << escape(_filename)
-               << "\")"
-               << "\r\n";#endif
-      }
+            cerr << now() << " "
+                << "Database()" << endl
+                << (*this)
+                << endl;#endif
+        }
 
-      virtual ~Database()
-      {
+        virtual ~Database()
+        {
 #ifdef DEBUG_
-         Debug debug;
-
-         debug << now() << " "
-               << "~Database(\""
-               << escape(_filename)
-               << "\")"
-               << "\r\n";
+            cerr << now() << " "
+                    << "~Database()" << endl
+                    << (*this)
+                    << endl;
 #endif
-      }
-      
-   public:
+        }
+        
+    public:
 
-      Size pageSize() const {
-         return _pageSize;
-      }
-
-
-      inline Index getNextIndex()
-      {
-
-         ScopedFileLock lock(this);
-
-         Branch branch;
-         Index index = size();
-
-         if (index == 0) {
-            index = sizeof(Branch);
-         }
-
-         seek(index);
-
-         write(&branch, sizeof(branch));
-
-         assert(size() == index + sizeof(Branch));
-
-         return index;
-      }
- 
-      inline Index allocate(const std::string& data)
-      {
-
-         
-         ScopedFileLock lock(this);
-
-         Index dataIndex = size();
-
-         Size dataSize = data.size();
-         write(&dataSize, sizeof(Size));
-         write(data.data(), dataSize);
+        Size pageSize() const {
+            return _pageSize;
+        }
 
 
-         assert(size() == dataIndex + sizeof(Size) + data.size());
+        inline Index getNextIndex()
+        {
 
-         return dataIndex;
-            
-      }
-      
-      inline Branch getBranch(Index index)
-      {
-         
-         if (size() == 0) 
-         {
             ScopedFileLock lock(this);
-            if (size() == 0) {
-               Branch branch;
-               seek(0);
-               write(&branch, sizeof(Branch));
+
+            Branch branch;
+            Index index = size();
+
+            if (index == 0) {
+                index = sizeof(Branch);
             }
-         }
 
-         assert(size() >= index + sizeof(Branch));
+            seek(index);
 
-         Branch branch;
-         seek(index);
-         read(&branch, sizeof(Branch));
-         
-         return branch;
-      }
+            write(&branch, sizeof(branch));
 
+            assert(size() == index + sizeof(Branch));
 
-      inline void setBranch(Index index, const Branch& branch)
-      {
+            return index;
+        }
+ 
+        inline Index allocate(const std::string& data)
+        {
 
-         seek(index);
-         write(&branch, sizeof(Branch));
-
-
-      }
-      
-
-      // Waits till lock on branch is released
-      // Sets the lock on the branch to true
-      // Returns the latest version of the branch.
-      inline Branch lockBranch(Index lockIndex) 
-      {
-
-         lock();
-
-         Branch branch = getBranch(lockIndex);
-
-         // Wait until branch is unlocked
-         while (branch._locked) {
-            // Unlock the process lock
-            unlock();
             
-            // Wait until branch is unlocked
-            while (branch._locked) {
+            ScopedFileLock lock(this);
 
-               // Sleep to avoid spin wait
-               BeeFishMisc::sleep(0.01);
+            Index dataIndex = size();
 
-               // Refresh the branch
-               branch = getBranch(lockIndex);
+            Size dataSize = data.size();
+            write(&dataSize, sizeof(Size));
+            write(data.data(), dataSize);
 
+
+            assert(size() == dataIndex + sizeof(Size) + data.size());
+
+            return dataIndex;
+                
+        }
+        
+        inline Branch getBranch(Index index)
+        {
+            
+            if (size() == 0) 
+            {
+                ScopedFileLock lock(this);
+                if (size() == 0) {
+                    Branch branch;
+                    seek(0);
+                    write(&branch, sizeof(Branch));
+                }
             }
 
-            // Regain exclusive lock
+            assert(size() >= index + sizeof(Branch));
+
+            Branch branch;
+            seek(index);
+            read(&branch, sizeof(Branch));
+            
+            return branch;
+        }
+
+
+        inline void setBranch(Index index, const Branch& branch)
+        {
+
+            seek(index);
+            write(&branch, sizeof(Branch));
+
+
+        }
+        
+
+        // Waits till lock on branch is released
+        // Sets the lock on the branch to true
+        // Returns the latest version of the branch.
+        inline Branch lockBranch(Index lockIndex) 
+        {
+
             lock();
 
-            // Get the refreshed branch
-            branch = getBranch(lockIndex);
-         }
+            Branch branch = getBranch(lockIndex);
 
-         // Because we have an exclusive lock
-         // and have rereshed the branch
-         // The branch must have been unlocked
-         // by another process
-         assert(!branch._locked);
+            // Wait until branch is unlocked
+            while (branch._locked) {
+                // Unlock the process lock
+                unlock();
+                
+                // Wait until branch is unlocked
+                while (branch._locked) {
 
-         // Set the branch locked flag
-         branch._locked = true;
-         setBranch(lockIndex, branch);
+                    // Sleep to avoid spin wait
+                    BeeFishMisc::sleep(0.01);
 
-         // Release the process lock
-         unlock();
-         
-         // Return the lated version of branch
-         return branch;
-      }
+                    // Refresh the branch
+                    branch = getBranch(lockIndex);
 
-      inline void unlockBranch(Index lockIndex) 
-      {
-         ScopedFileLock lock(this);
+                }
 
-         Branch branch = getBranch(lockIndex);
+                // Regain exclusive lock
+                lock();
 
-         if (branch._locked) {
-            branch._locked = false;
-            setBranch(lockIndex, branch);
-         }
-      }
-      
-      inline std::string getData(Index dataIndex)
-      {
-         if (dataIndex == 0)
-            return "";
-
-
-         seek(dataIndex);
-         Size size;
-
-         read(&size, sizeof(Size));
-         std::string buffer(size, '\0');
-         read(buffer.data(), size);
-
-         return buffer;
-      }
-
-      
-      inline void setData(Index dataIndex, const std::string& source)
-      {
-         seek(dataIndex);
-         Size size = source.size();
-         write(&size, sizeof(Size));
-         write(source.data(), size);
-         
-      }
- 
-      
-      string version() const {
-         return DATABASE_VERSION;
-      }
-
-      
-      virtual void stripe(ostream& out) {
-
-         std::queue<Index> queue;
-         queue.push(0);
-
-         while (queue.size()) 
-         {
-            Index index = queue.front();
-            queue.pop();
-
-            Branch branch = getBranch(index);
-
-            out << index << '\t'
-                << branch._left << '\t'
-                << branch._right
-                << endl;
-
-            if (branch._left)
-               queue.push(branch._left);
-
-            if (branch._right)
-               queue.push(branch._right);
-
-         }
-      }
-      
-      virtual void unlockAll() {
-
-         std::queue<Index> queue;
-         queue.push(0);
-
-         while (queue.size()) 
-         {
-            Index index = queue.front();
-            queue.pop();
-
-            Branch branch = getBranch(index);
-
-            if (branch._locked)
-            {
-               cout << "Unlocking " << index << endl;
-               branch._locked = false;
-               setBranch(index, branch);
-               
+                // Get the refreshed branch
+                branch = getBranch(lockIndex);
             }
 
-            if (branch._left)
-               queue.push(branch._left);
+            // Because we have an exclusive lock
+            // and have rereshed the branch
+            // The branch must have been unlocked
+            // by another process
+            assert(!branch._locked);
 
-            if (branch._right)
-               queue.push(branch._right);
+            // Set the branch locked flag
+            branch._locked = true;
+            setBranch(lockIndex, branch);
 
-         }
-      }
+            // Release the process lock
+            unlock();
+            
+            // Return the lated version of branch
+            return branch;
+        }
 
-      friend ostream& operator <<
-      (ostream& out, const Database& db)
-      {
+        inline void unlockBranch(Index lockIndex) 
+        {
+            ScopedFileLock lock(this);
 
-         out << "Database: "
-             << db.version() << endl
-             << "Filename: "
-             << db._filename << endl
-             << "Branch size: "
-             << sizeof(Branch) << endl
-             << "Size: "
-             << db.size() << endl;
-          
-         return out;
-      }
+            Branch branch = getBranch(lockIndex);
 
-   };
+            if (branch._locked) {
+                branch._locked = false;
+                setBranch(lockIndex, branch);
+            }
+        }
+        
+        inline std::string getData(Index dataIndex)
+        {
+            if (dataIndex == 0)
+                return "";
+
+
+            seek(dataIndex);
+            Size size;
+
+            read(&size, sizeof(Size));
+            std::string buffer(size, '\0');
+            read(buffer.data(), size);
+
+            return buffer;
+        }
+
+        
+        inline void setData(Index dataIndex, const std::string& source)
+        {
+            seek(dataIndex);
+            Size size = source.size();
+            write(&size, sizeof(Size));
+            write(source.data(), size);
+            
+        }
+ 
+        
+        string version() const {
+            return DATABASE_VERSION;
+        }
+
+        
+        virtual void stripe(ostream& out) {
+
+            std::queue<Index> queue;
+            queue.push(0);
+
+            while (queue.size()) 
+            {
+                Index index = queue.front();
+                queue.pop();
+
+                Branch branch = getBranch(index);
+
+                out << index << '\t'
+                     << branch._left << '\t'
+                     << branch._right
+                     << endl;
+
+                if (branch._left)
+                    queue.push(branch._left);
+
+                if (branch._right)
+                    queue.push(branch._right);
+
+            }
+        }
+        
+        virtual void unlockAll() {
+
+            std::queue<Index> queue;
+            queue.push(0);
+
+            while (queue.size()) 
+            {
+                Index index = queue.front();
+                queue.pop();
+
+                Branch branch = getBranch(index);
+
+                if (branch._locked)
+                {
+                    cout << "Unlocking " << index << endl;
+                    branch._locked = false;
+                    setBranch(index, branch);
+                    
+                }
+
+                if (branch._left)
+                    queue.push(branch._left);
+
+                if (branch._right)
+                    queue.push(branch._right);
+
+            }
+        }
+
+        friend ostream& operator <<
+        (ostream& out, const Database& db)
+        {
+
+            out << "Database: "
+                 << db.version() << endl
+                 << "Filename: "
+                 << db._filename << endl
+                 << "Branch size: "
+                 << sizeof(Branch) << endl
+                 << "Size: "
+                 << db.size() << endl;
+             
+            return out;
+        }
+
+    };
 
 }
 

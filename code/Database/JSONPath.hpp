@@ -28,6 +28,12 @@ namespace BeeFishDatabase {
       {
       }
       
+      JSONPath(JSONDatabase& database) :
+         MinMaxPath(Path(database))
+      {
+         
+      }
+      
       JSONPath(JSONDatabase& database, const Path& start) :
          MinMaxPath(start)
       {
