@@ -41,33 +41,41 @@ namespace BeeFishQuery {
         }
     };
     
-    class And : public BeeFishParser::Character
+    class And : public BeeFishParser::Or
     {
     public:
-        And() : BeeFishParser::Character("+")
+        And() : BeeFishParser::Or(
+            new BeeFishParser::Character("+"),
+            new BeeFishParser::CIWord("and ")
+        )
         {
         }
         
     };
     
-    class Or : public BeeFishParser:: Character 
+    class Or : public BeeFishParser::Or
     {
     public:
-        Or() : BeeFishParser::Character("|")
+        Or() : BeeFishParser::Or(
+            new BeeFishParser::Character("|"),
+            new BeeFishParser::CIWord("or ")
+        )
         {
         }
         
     };
     
-    class Not : public BeeFishParser:: Character
+    class Not : public BeeFishParser::Or
     {
     public:
-        Not() : BeeFishParser::Character("-")
+        Not() : BeeFishParser::Or(
+            new BeeFishParser::Character("-"),
+            new BeeFishParser::CIWord("not ")
+        )
         {
         }
         
     };
-    
     
     
     class Character : public BeeFishParser::Not
@@ -81,16 +89,28 @@ namespace BeeFishQuery {
                 new BeeFishParser::Character("\n"),
                 new BeeFishParser::Character("("),
                 new BeeFishParser::Character(")"),
-                new BeeFishParser::Character("+"),
-                new BeeFishParser::Character("|"),
-                new BeeFishParser::Character("-")
+                new BeeFishQuery::And(),
+                new BeeFishQuery::Or(),
+                new BeeFishQuery::Not()
             )
         )
         {
         }
     };
     
+    class Token : public BeeFishParser::And
+    {
+    public:
+        Token() : BeeFishParser::And(
+            new Repeat<BeeFishQuery::Character>(),
+            new Blankspaces()
+        )
+        {
+        }
+        
+    };
     
+    /*
     class Token : public Repeat<BeeFishQuery::Character>
     {
     public:
@@ -100,12 +120,11 @@ namespace BeeFishQuery {
         
     };
             
-    
+    */
     class AndWord : public BeeFishParser::And 
     {
     public:
         AndWord() : BeeFishParser::And(
-            new Blankspaces(),
             new BeeFishQuery::And(),
             new Token()
         )

@@ -45,10 +45,22 @@ namespace BeeFishParser {
             return false;
          }
          
-         return !matched;
+         return matched;
         
       }
       
+      virtual void eof(Parser* parser)
+      override
+      {
+          setup(parser);
+          if (_item->result() == nullopt) {
+              _item->eof(parser);
+              if (_item->result() == true)
+                 fail();
+              else
+                 success();
+          }
+      }
 
    };
    

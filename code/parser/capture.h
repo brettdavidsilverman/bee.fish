@@ -49,10 +49,7 @@ namespace BeeFishParser {
          const Char& character
       )
       {
-         if (!_parser)
-            setup(parser);
-
-         bool matched = matchCharacter(character);
+         bool matched = Match::match(parser, character);
          
          if (matched)
             _value += character;

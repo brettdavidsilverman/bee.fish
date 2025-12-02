@@ -111,7 +111,6 @@ namespace BeeFishParser {
          }
          else  {
             matched = _match->match(_parser, character);
-            setResult(_match->result());
          }
 
          return matched;

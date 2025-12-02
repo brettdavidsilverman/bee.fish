@@ -162,25 +162,69 @@ namespace BeeFishQuery {
         );
         
         ok &= testMatchDelete(
-            "Test token and",
+            "Test token +",
              new Capture(new BeeFishQuery::Token()),
             "+",
             false
         );
+        
+        ok &= testMatchDelete(
+            "Test token and ",
+             new Capture(new BeeFishQuery::Token()),
+            "and ",
+            false
+        );
+        
+        ok &= testMatchDelete(
+            "Test token andother",
+             new Capture(new BeeFishQuery::Token()),
+            "andother",
+            true,
+            "andother"
+        );
     
         ok &= testMatchDelete(
-            "Test token or",
+            "Test token |",
              new Capture(new BeeFishQuery::Token()),
             "|",
             false
         );
         
+        ok &= testMatchDelete(
+            "Test token or ",
+             new Capture(new BeeFishQuery::Token()),
+            "or ",
+            false
+        );
         
         ok &= testMatchDelete(
-            "Test token not",
+            "Test token oranother",
+             new Capture(new BeeFishQuery::Token()),
+            "oranother",
+            true,
+            "oranother"
+        );
+        
+        ok &= testMatchDelete(
+            "Test token -",
              new Capture(new BeeFishQuery::Token()),
             "-",
             false
+        );
+        
+        ok &= testMatchDelete(
+            "Test token not ",
+             new Capture(new BeeFishQuery::Token()),
+            "not ",
+            false
+        );
+        
+        ok &= testMatchDelete(
+            "Test token notother",
+             new Capture(new BeeFishQuery::Token()),
+            "notother",
+            true,
+            "notother"
         );
 
         ok &= testMatchDelete(
@@ -253,7 +297,7 @@ namespace BeeFishQuery {
             new Capture(new AndWordList()),
             "+hello +world",
             true,
-            "+hello +world"
+            "+hello+world"
         );
         
         ok &= testMatchDelete(

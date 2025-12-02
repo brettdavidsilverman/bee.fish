@@ -70,6 +70,7 @@ namespace BeeFishParser
                 }
               
                 _item = createItem();
+                
 
 			}
 			else if (_item->result() == false)
