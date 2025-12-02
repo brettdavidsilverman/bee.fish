@@ -56,7 +56,7 @@ namespace BeeFishDatabase
          return false;
          
       JSONDatabase db("test");
-      Path start(db);
+      Path start(db.origin());
       
 
       cout << "\tSimple path [] " << flush;
@@ -542,7 +542,7 @@ namespace BeeFishDatabase
 
       bool success = true;
       JSONDatabase database("test");
-      Path root = database;
+      JSONPath root = database.origin();
       cout << "\tTest data: " << std::flush;
       {
       
@@ -599,7 +599,7 @@ namespace BeeFishDatabase
       cout << "Test arrays \"[1,[]]\"" << endl;
       if (success)
       {
-         Path path = root["array"];
+         JSONPath path = root["array"];
          JSONPathParser parser(path);
          parser.read("[1,[]]");
          parser.eof();
@@ -622,15 +622,16 @@ namespace BeeFishDatabase
       }
       
       if (success) {
-         cout << "\tItem 0: ";
+         cout << "\tItem 0:" << endl;
          MinMaxPath path = root["array"][Type::ARRAY];
          
          Size test = MinMaxPath(path).min<Size>();
          success = success &&
-            testResult("Item 0 index", test == 0);
+            testResult("\tItem 0 index", test == 0);
+            
          success = success && 
-            path.contains(test);
-         BeeFishMisc::outputSuccess(success);
+            testResult("\tItem contains 0", path.contains(test));
+         
       }
       
       if (success) {
@@ -645,6 +646,7 @@ namespace BeeFishDatabase
          Path path = root["array"][Type::ARRAY][0][Type::INTEGER];
          BString value;
          path.getData(value);
+cout << "VALUE: " << value << endl;
          success = (value == "1");
          BeeFishMisc::outputSuccess(success);
       }
@@ -715,7 +717,7 @@ namespace BeeFishDatabase
       cout << "Test Array 2 Path \"[[]]\" " << endl;
  
       JSONDatabase database("test");
-      Path path = Path(database)["array"];
+      Path path = Path(database.origin())["array"];
       JSONPathParser parser(path);
       parser.read("[[]]");
       parser.eof();
@@ -771,7 +773,7 @@ namespace BeeFishDatabase
       cout << "Test Sub Array 2 Path: ";
       
       JSONDatabase database("test");
-      Path path = database;
+      Path path = database.origin();
       JSONPathParser parser(path);
       parser.read("[[1]]");
       bool success = true;
@@ -873,7 +875,7 @@ namespace BeeFishDatabase
          
       for (auto file : files) {
          if (success)
-            success = testFile(tempDB, file, true);
+            success = testFile(tempDB.origin(), file, true);
          else
             break;
       }

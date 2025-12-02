@@ -249,6 +249,14 @@ namespace BeeFishQuery {
         );
         
         ok &= testMatchDelete(
+            "Expression +hello +world",
+            new Capture(new AndWordList()),
+            "+hello +world",
+            true,
+            "+hello +world"
+        );
+        
+        ok &= testMatchDelete(
             "Expression +hello+world",
             new Capture(new AndWordList()),
             "+hello+world",

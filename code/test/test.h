@@ -35,6 +35,8 @@ namespace BeeFishTest
    {
       bool ok = true;
       
+      cout << "Opening file " << file << endl;
+      
      // file = string(HOME_DIR) + "/" + string(file);
 
       if (!exists(file)) {
@@ -115,15 +117,19 @@ namespace BeeFishTest
       {
          cout << "FAIL. Expected "
               << expectedResult
-              << " Got  "
-              << match->result()
-              << " With error "
-              << parser.getError()
-              << endl;
+              << " Got "
+              << match->result();
+              
+         if (parser.getError().length())
+             cout
+                 << " With error "
+                 << parser.getError();
+              
+         cout << endl;
 
-         cout << "\tTested   " << text << endl;
-         cout << "\tExpected " << expected << endl;
-         cout << "\tCaptured " << value << endl;
+         cout << "\tTested   '" << text << "'" << endl;
+         cout << "\tExpected '" << expected << "'" << endl;
+         cout << "\tCaptured '" << value << "'" << endl;
       }
       
       return ok;

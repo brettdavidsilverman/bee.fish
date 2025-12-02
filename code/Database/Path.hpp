@@ -104,9 +104,10 @@ namespace BeeFishDatabase {
             throw std::runtime_error("Read past end of file");
          }
          
+         
          if (bit)
             ++PowerEncoding::_count;
-         else
+         else if (PowerEncoding::_count > 0)
             --PowerEncoding::_count;
 
          return bit;

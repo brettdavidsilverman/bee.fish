@@ -232,7 +232,7 @@ namespace BeeFishId
          
          write(stream);
 
-         if (stream._count != 0)
+         if (stream.count() != 0)
             throw logic_error("Id::createKey");
 
          // get the data
@@ -278,7 +278,7 @@ namespace BeeFishId
            
          }
          
-         if (!read || stream._count != 0)
+         if (!read || stream.count() != 0)
             throw runtime_error("Invalid key");
 
          Id id(name, milliseconds, increment);

@@ -14,7 +14,6 @@ namespace BeeFishParser {
       }
 
       Not(Match* match)
-        // : Match(match)
       {
          _item = match;
       }
@@ -37,12 +36,16 @@ namespace BeeFishParser {
             _item->match(_parser, character);
          
          
-         if (_item->result() == false)
+         if (_item->result() == false) {
             success();
-         else if (_item->result() == true)
+            return true;
+         }
+         else if (_item->result() == true) {
             fail();
+            return false;
+         }
          
-         return !matched;
+         return matched;
         
       }
       

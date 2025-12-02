@@ -13,7 +13,7 @@ namespace BeeFishPowerEncoding
 {
    class PowerEncoding
    {
-   public:
+   protected:
       long int _count {0};
 
    public:
@@ -85,7 +85,7 @@ namespace BeeFishPowerEncoding
          return remainder;
       }
 
-      virtual long int count() const {
+      long int count() const {
          return _count;
       }
 

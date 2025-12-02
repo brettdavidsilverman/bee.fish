@@ -53,11 +53,18 @@ int main(int argc, const char* argv[])
    }
    
    string filename = DATA_DIR "/test.data";
-   JSONDatabase database("Database::main", filename);
+   Database database(filename);
    cout << database << endl;
    
-   Path root(database.origin());
-   JSONPathParser json(root);
+   Path root(database);
+   
+   bool read =
+      (hasArg(argc, argv, "-read") != -1);
+   
+   if (read)
+   {
+      cout << "Read" << endl;
+   }
    
    bool large =
       (hasArg(argc, argv, "-large") != -1);
@@ -85,19 +92,21 @@ int main(int argc, const char* argv[])
    
    if (large)
    {
-      string largeFilename = WWW_ROOT_DIRECTORY "/large.json";
-      cout << "Inputting large " << largeFilename << endl;
-      ifstream file(largeFilename);
+      JSONPathParser json(root);
+      ifstream file("/home/bee/bee.fish/large.json");
       json.read(file);
    }
-   else if (input)
+
+   if (input)
    {
+      JSONPathParser json(root);
       json.read(cin);
    }
    
    if (output)
    {
-      cout << json << endl;
+      JSONPath path(root);
+      cout << path << endl;
    }
 
    cout << database << endl;

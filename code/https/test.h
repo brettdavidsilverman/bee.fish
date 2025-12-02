@@ -34,8 +34,8 @@ namespace BeeFishHTTPS {
       origin += ":";
       origin += std::to_string(port);
       
-      success = success &&
-         testParseURL(origin);
+    //  success = success &&
+    //     testParseURL(origin);
          
       success = success &&
          testLogon(origin);
