@@ -1,0 +1,6 @@
+#ifndef BEE_FISH_QUERY__VERSION_H
+#define BEE_FISH_QUERY__VERSION_H
+
+#define BEE_FISH_QUERY_VERSION "0.0.0"
+
+#endif
