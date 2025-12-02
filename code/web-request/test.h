@@ -148,14 +148,13 @@ namespace BeeFishWeb
       
       bool ok = true;
       
-      
       BeeFishWeb::WebRequest requestHeadersOnly;
       ok = ok && testFile(
          "WebRequest with only headers",
          WWW_ROOT_DIRECTORY "/code/web-request/tests/request.txt",
          requestHeadersOnly,
          true
-      );
+      );
       
       ok = ok && testResult(
          "WebRequest get",
@@ -320,7 +319,7 @@ namespace BeeFishWeb
          true
       );
 
-      postWebRequest2.flush();
+      postWebRequest3.flush();
 
 
       return ok;

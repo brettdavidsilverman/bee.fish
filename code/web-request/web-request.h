@@ -360,13 +360,14 @@ namespace BeeFishWeb {
                _headers,
                [this, parser](Match* match) 
                {
+                   
                   if ( _firstLine->_method == "POST")
                   {
+        
                      // Currently we only handle json or image/jpeg
                      if (_headers->contains("content-length") ) {
+                        
                         if (_headers->at("content-length") == "0") {
-                           _result = true;
-                           success();
                            return true;
                         }
                      }

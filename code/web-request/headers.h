@@ -35,7 +35,10 @@ namespace BeeFishWeb {
          public:
             HeaderValueCharacter() : Match(
                new Not(
-                  new NewLine()
+                  new Or(
+                     new Character("\r"),
+                     new Character("\n")
+                  )
                )
             )
             {
@@ -116,7 +119,7 @@ namespace BeeFishWeb {
                lowerName,
                header->_value
             );
-
+            
             Repeat::matchedItem(header);
          }
    

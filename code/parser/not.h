@@ -45,7 +45,7 @@ namespace BeeFishParser {
             return false;
          }
          
-         return matched;
+         return !matched;
         
       }
       

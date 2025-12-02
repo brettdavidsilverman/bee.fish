@@ -32,6 +32,16 @@ namespace BeeFishParser
 		   if (_item)
               delete _item;
 		}
+        
+        virtual bool isOptional() const 
+        override
+        {
+            
+            if (_minimum == 0)
+                return true;
+                
+            return false;
+        }
 
 		virtual bool matchCharacter(const Char &character)
 		{
@@ -62,9 +72,7 @@ namespace BeeFishParser
                 _item = createItem();
 
 			}
-			else if (
-				(_item->result() == false) ||
-				(!matched))
+			else if (_item->result() == false)
 			{
                 matched = false;
 				if (_matchedCount >= _minimum)
@@ -99,6 +107,15 @@ namespace BeeFishParser
                
             return item;
 		}
+        
+        virtual void setup(Parser* parser) {
+            
+            if (_item)
+                _item->setup(parser);
+                
+            Match::setup(parser);
+            
+        }
         
         virtual void eof(Parser* parser) {
 
