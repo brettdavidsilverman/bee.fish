@@ -12,6 +12,7 @@ all:	$(BUILD)
 	cd Database && make $(DEBUG) test
 	cd Script && make $(DEBUG) test
 	cd web-request && make $(DEBUG) test
+	cd query && make $(DEBUG) test
 	cd https && make $(DEBUG) test
 	
 $(BUILD):

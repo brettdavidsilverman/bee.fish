@@ -285,29 +285,20 @@ namespace BeeFishQuery {
         
         
         ok &= testMatchDelete(
-            "Expression +hello",
-            new Capture(new AndWord()),
-            "+hello",
+            "Expression token1 + token2",
+            new Capture(new Expression()),
+            "token1 + token2",
             true,
-            "+hello"
+            "token1 + token2"
         );
         
         ok &= testMatchDelete(
-            "Expression +hello +world",
-            new Capture(new AndWordList()),
-            "+hello +world",
+            "Expression token1+token2",
+            new Capture(new Expression()),
+            "token1+token2",
             true,
-            "+hello+world"
+            "token1+token2"
         );
-        
-        ok &= testMatchDelete(
-            "Expression +hello+world",
-            new Capture(new AndWordList()),
-            "+hello+world",
-            true,
-            "+hello+world"
-        );
-        
         return ok;
         
         ok &= testMatchDelete(

@@ -11,7 +11,7 @@ test:	$(OUTPUT)
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
 debug:	$(OUTPUT)
-
+debug:	test
 
 run:	$(OUTPUT)
 	$(OUTPUT)

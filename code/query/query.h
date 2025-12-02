@@ -102,6 +102,7 @@ namespace BeeFishQuery {
     {
     public:
         Token() : BeeFishParser::And(
+            new Blankspaces(),
             new Repeat<BeeFishQuery::Character>(),
             new Blankspaces()
         )
@@ -125,6 +126,7 @@ namespace BeeFishQuery {
     {
     public:
         AndWord() : BeeFishParser::And(
+            new Token(),
             new BeeFishQuery::And(),
             new Token()
         )
@@ -132,41 +134,34 @@ namespace BeeFishQuery {
         }
     };
     
-    class AndWordList : public Repeat<AndWord>
-    {
-    public:
-        AndWordList() : Repeat()
-        {
-        }
-    
-    };
     
     class Expression : public BeeFishParser::And
     {
     public:
         Expression() : BeeFishParser::And(
-            new BeeFishParser::Character("("),
+           // new BeeFishParser::Character("("),
             new BeeFishParser::Or(
                 // Word
-                new BeeFishQuery::Token(),
+                //new BeeFishQuery::And(),
                 
                 // Not operator
                 new BeeFishParser::And(
                     new BeeFishQuery::Not(),
-                    new Optional(new Blankspaces()),
-                    new LoadOnDemand<Expression>()
+                    new Token()
                 ),
                 
                 // And operator
-                new Repeat<AndWord>(),
+                new BeeFishParser::And(
+                    new Token(),
+                    new BeeFishQuery::And(),
+                    new Token()
+                ),
                 
                 // Or operator
                 new BeeFishParser::And(
-                    new LoadOnDemand<Expression>(),
-                    new Optional(new Blankspaces()),
+                    new Token(),
                     new BeeFishQuery::Or(),
-                    new Optional(new Blankspaces()),
-                    new LoadOnDemand<Expression>()
+                    new Token()
                 ),
                 
                 // Sub expressions
@@ -177,8 +172,8 @@ namespace BeeFishQuery {
                 )
                         
                 
-            ),
-            new BeeFishParser::Character(")")
+            )
+           // new BeeFishParser::Character(")")
         )
             
         {
