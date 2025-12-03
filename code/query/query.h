@@ -188,11 +188,20 @@ namespace BeeFishQuery {
                     new Token()
                 )
             },
+            
             {
                 // not (expression)
                 new BeeFishParser::And(
                     new BeeFishQuery::Not(),
                     new LoadOnDemand<Expression>()
+                )
+            },
+            
+            {
+                // not (expression)
+                new BeeFishParser::And(
+                    new BeeFishQuery::Not(),
+                    new Bracketed<Expression>()
                 )
             },
             {
@@ -229,16 +238,32 @@ namespace BeeFishQuery {
                 
             },
             
-            
             {
                 // (expression) and expression
+                new BeeFishParser::And(
+                    new Bracketed<Expression>(),
+                    new BeeFishQuery::And(),
+                    new LoadOnDemand<Expression>()
+                ),
+
+                // (expression) or expression
+                new BeeFishParser::And(
+                    new Bracketed<Expression>(),
+                    new BeeFishQuery::Or(),
+                    new LoadOnDemand<Expression>()
+                )
+                
+                
+            },
+            {
+                // (expression) and (expression)
                 new BeeFishParser::And(
                     new Bracketed<Expression>(),
                     new BeeFishQuery::And(),
                     new Bracketed<Expression>()
                 ),
 
-                // (expression) or expression
+                // (expression) or (expression)
                 new BeeFishParser::And(
                     new Bracketed<Expression>(),
                     new BeeFishQuery::Or(),

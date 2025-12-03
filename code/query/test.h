@@ -354,11 +354,12 @@ namespace BeeFishQuery {
         testmatch(" ( token ) ");
         testmatch("not (token1)");
         testmatch("not(token1)");
+        testmatch("not (token1 or token2)");
         testmatch("(token1 or token2)");
         testmatch("not (token1 or token2)");
         testmatch("(token1 and token2)");
         testmatch("token1 and not token2");
-        testmatch("token1 and not (token2 or token3)");
+        testmatch("(token1 or token2) and not (token2 or token3)");
         testmatch("token1 and (token2 or token3)");
         testmatch("(token1 and token2) or token3");
         testmatch("(token1 and token2) or (token3 and token4)");
