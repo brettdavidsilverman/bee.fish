@@ -341,6 +341,19 @@ namespace BeeFishQuery {
             return ok;
         };
         
+        /*
+        Expression expression;
+        Parser parser(expression);
+
+        if (parser.read("token1 and token2"))
+            ok = true;
+        else
+            ok = false;
+            
+        assert(ok);
+        
+        return ok;
+        */
         testmatch("token1 + token2");
         testmatch("token1+token2");
         testmatch("token1 and token2");
@@ -354,6 +367,7 @@ namespace BeeFishQuery {
         testmatch("not(token1)");
         testmatch("(token1 or token2)");
         testmatch("not (token1 or token2)");
+        testmatch("(token1 and token2)");
         
         return ok;
         

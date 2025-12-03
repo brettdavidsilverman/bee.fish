@@ -13,7 +13,7 @@ $(BUILD):
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
 	
-test:	$(OUTPUT)
+test:	all
 	$(OUTPUT) -test
 
 debug:	CFLAGS += -g -D DEBUG
@@ -21,14 +21,14 @@ debug:	DEBUG = debug
 debug:	all
 
 
-run:	$(OUTPUT)
+run:	all
 	$(OUTPUT)
 	
 run_debug:	debug
-run_debug:	$(OUTPUT)
+run_debug:	all
 	gdb --args $(OUTPUT) -test
 	
-trace:	$(OUTPUT)
+trace:	all
 	rm -f trace.txt
 	valgrind  --log-file="trace.txt" --track-origins=yes --leak-check=yes $(OUTPUT) -test
 	cat trace.txt

@@ -32,23 +32,17 @@ namespace BeeFishParser
 		   if (_item)
               delete _item;
 		}
-        /*
-        virtual bool isOptional() const 
-        override
-        {
-            
-            if (_minimum == 0)
-                return true;
-                
-            return false;
-        }
-*/
+
 		virtual bool matchCharacter(const Char &character)
 		{
 
-			if (_item == nullptr)
+			if (_item == nullptr) {
 				_item = createItem();
-
+            }
+            
+            if (!_item->_parser)
+                _item->setup(_parser);
+    
 			bool matched =
 				_item->match(_parser, character);
 
@@ -103,8 +97,7 @@ namespace BeeFishParser
 		virtual T* createItem() {
 			T* item = new T();
             
-            if (_parser)
-                item->setup(_parser);
+            
                
             return item;
 		}

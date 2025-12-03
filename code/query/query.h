@@ -154,57 +154,66 @@ namespace BeeFishQuery {
         
     };
     
-    
-    class Expression : public BeeFishParser::And
+    template<typename T>
+    class Bracketed : public BeeFishParser::And
     {
     public:
-        Expression() : BeeFishParser::And(
+        Bracketed() : BeeFishParser::And(
+            new BeeFishParser::Character("("),
+            new LoadOnDemand<T>(),
+            new BeeFishParser::Character(")")
+        )
+        {
+        }
+    };
+        
+    class Expression : public OrderOfPrecedence
+    {
+        
+    public:
+        Expression() : //BeeFishParser::And(
           //  new BeeFishParser::Character('('),
-            new BeeFishParser::OrderOfPrecedence(
+             BeeFishParser::OrderOfPrecedence(
 
-                // Not (expression)
+                // not (expression)
                 new BeeFishParser::And(
                     new BeeFishQuery::Not(),
                     new LoadOnDemand<Expression>()
                 ),
                 
-                // token1 and token2
-                new BeeFishParser::And(
-                    new Token(),
-                    new BeeFishQuery::And(),
-                    new Token()
-                ),
-                /*
-                // expression1 and expression2
-                new BeeFishParser::And(
-                    new LoadOnDemand<Expression>(),
-                    new BeeFishQuery::And(),
-                    new LoadOnDemand<Expression>()
-                ),
-                */
-                // token1 or token2
+                // expression1 or expression2
                 new BeeFishParser::And(
                     new Token(),
                     new BeeFishQuery::Or(),
-                    new Token()
+                    new LoadOnDemand<Expression>()
+                ),
+                
+                // expression1 and expression2
+                new BeeFishParser::And(
+                    new Token(),
+                    new BeeFishQuery::And(),
+                    new LoadOnDemand<Expression>()
                 ),
             
                 // (expression)
-                new BeeFishParser::And(
-                    new BeeFishParser::Character("("),
-                    new LoadOnDemand<Expression>(),
-                    new BeeFishParser::Character(")")
-                ),
-                        
-            
+                new Bracketed<Expression>(),
+                
                 // token
                 new Token()
                 
             )
           //  new BeeFishParser::Character(")")
-        )
+        
         {
+
         }
+        
+        virtual bool match(Parser* parser, const Char& character)
+        {
+
+            return OrderOfPrecedence::match(parser, character);
+        }
+        
         /*
         virtual void  eof(Parser* parser) override {
             

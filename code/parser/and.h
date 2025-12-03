@@ -39,8 +39,7 @@ namespace BeeFishParser {
          _parser = parser;
          
          for (auto item : _inputs) {
-            //if (!item->isLoadOnDemand())
-                item->setup(parser);
+            item->setup(parser);
          }
          _iterator = 0;
          
@@ -58,7 +57,6 @@ namespace BeeFishParser {
          while ( !matched &&
                  _result == nullopt )
          {
-
             Match* item = _inputs[_iterator];
 
             matched =
@@ -75,7 +73,6 @@ namespace BeeFishParser {
             }
             else if (item->_result == false) {
                   fail();
-              //    matched = false;
             }
             
          }

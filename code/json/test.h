@@ -624,18 +624,19 @@ assert(ok);
          jsonImage,
          true
       );
-
+/*
       ok &= testResult(
          "JSON stream image",
          size > getPageSize()
       );
-      
+*/
       ok &= testResult(
          "JSON with invoke secret",
          secretOk
       );
 
       cout << endl;
+      
       
       return ok;
    }

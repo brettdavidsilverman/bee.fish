@@ -67,7 +67,7 @@ namespace BeeFishParser {
          if (_parser)
             return;
             
-         if (_match)
+         if (_match && !_match->_parser)
             _match->setup(parser);
             
          _parser = parser;

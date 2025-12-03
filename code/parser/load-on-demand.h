@@ -18,34 +18,40 @@ namespace BeeFishParser
 
 		virtual ~LoadOnDemand() {
 		}
-        /*
-        virtual bool match(Parser* parser, const Char& character)
-        override
-        {
-
-            if(_match && !_match->_parser)
-                _match->setup(parser);
-                
-            return Match::match(parser, character);
-        }
-
-*/
+        
         virtual bool isLoadOnDemand() const 
         {
             return true;
         }
       
 		virtual void setup(Parser* parser)
+        override
 		{
+            if (_parser)
+               return;
+               
 			_parser = parser;
-
-            if (!_match) {
-	           _match = new T();
-            }
-
+            
+            
 		}
         
-        
+        virtual bool match(
+            Parser* parser,
+            const Char& character
+        )
+      
+        {
+
+            if (!_match) {
+
+	           _match = new T();
+               _match->setup(_parser);
+               
+            }
+            
+            
+            return _match->match(_parser, character);
+        }
 
 	};
 

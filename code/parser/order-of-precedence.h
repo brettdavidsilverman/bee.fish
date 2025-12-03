@@ -40,42 +40,6 @@ namespace BeeFishParser {
             return true;
             
         }
-        
-        /*
-        
-        virtual void eof(Parser* parser)
-        override
-        {
-            setup(parser);
-            
-            if (result() != nullopt)
-                return;
-                
-            _item = nullptr;
-            
-            for ( auto item : _inputs )
-            {
-cerr << "OrderOfPrecedence::EOF" << endl;
-
-                if (item->result() == nullopt)
-                    item->eof(parser);
-                    
-                if (item->result() == true)
-                {
-
-                    _item = item;
-                    success();
-                    return;
-                }
-            }
-
-            fail();
-                
-            Match::eof(parser);
-                
-        }
-        
-*/
 
     };
 

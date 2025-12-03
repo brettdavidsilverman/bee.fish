@@ -79,6 +79,7 @@ namespace BeeFishJSON
         }
         
         void streamValue(const BString& key, BeeFishBString::BStream::OnBuffer onbuffer) {
+
             OnKey onkey =
                 [onbuffer] (const BString& key, JSON& json) {
                     json._string->_onbuffer = onbuffer;

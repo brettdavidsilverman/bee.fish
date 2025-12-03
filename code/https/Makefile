@@ -7,11 +7,16 @@ PORT=443
 
 all:	install
 
-$(OUTPUT): $(DEPS)
+
+
+$(OUTPUT): $(BUILD)
+$(OUTPUT):	$(DEPS)
 	@echo "Linking server"
 	$(CC) main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lpthread -latomic
 #	sudo setcap cap_net_bind_service=ep $(OUTPUT)
 	
+$(BUILD):
+		mkdir $(BUILD)
 
 install:	test
 	./start.sh $(PORT)
