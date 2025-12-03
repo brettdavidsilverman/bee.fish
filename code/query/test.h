@@ -162,6 +162,22 @@ namespace BeeFishQuery {
         );
         
         ok &= testMatchDelete(
+            "Test small token 1",
+             new Capture(new BeeFishQuery::Token()),
+            "b",
+            true,
+            "b"
+        );
+        
+        ok &= testMatchDelete(
+            "Test small token 2",
+             new Capture(new BeeFishQuery::Token()),
+            "a",
+            true,
+            "a"
+        );
+        
+        ok &= testMatchDelete(
             "Test token +",
              new Capture(new BeeFishQuery::Token()),
             "+",
@@ -169,9 +185,9 @@ namespace BeeFishQuery {
         );
         
         ok &= testMatchDelete(
-            "Test token and ",
+            "Test token and",
              new Capture(new BeeFishQuery::Token()),
-            "and ",
+            "and",
             false
         );
         
@@ -191,9 +207,9 @@ namespace BeeFishQuery {
         );
         
         ok &= testMatchDelete(
-            "Test token or ",
+            "Test token or",
              new Capture(new BeeFishQuery::Token()),
-            "or ",
+            "or",
             false
         );
         
@@ -213,9 +229,9 @@ namespace BeeFishQuery {
         );
         
         ok &= testMatchDelete(
-            "Test token not ",
+            "Test token not",
              new Capture(new BeeFishQuery::Token()),
-            "not ",
+            "not",
             false
         );
         
@@ -273,6 +289,31 @@ namespace BeeFishQuery {
            "-"
         );
         
+        ok &= testMatchDelete(
+           "Operator and",
+            new Capture(new BeeFishQuery::And()),
+           "and",
+           true,
+           "and"
+        );
+
+        ok &= testMatchDelete(
+           "Operator or",
+            new Capture(new BeeFishQuery::Or()),
+           "or",
+           true,
+           "or"
+        );
+        
+        
+        ok &= testMatchDelete(
+           "Operator not",
+            new Capture(new BeeFishQuery::Not()),
+           "not",
+           true,
+           "not"
+        );
+        
         BeeFishMisc::outputSuccess(ok);
         
         return ok;
@@ -282,74 +323,40 @@ namespace BeeFishQuery {
     {
         cout << "Test expressions" << endl;
         bool ok = true;
+        BString query;
         
+        auto testmatch =
+        [&ok](const BString& query) {
+            
+            if (!ok)
+                return false;
+            
+            ok &= testMatchDelete(
+                query,
+                new Capture(new Expression()),
+                query,
+                true,
+                query
+            );
+            return ok;
+        };
         
-        ok &= testMatchDelete(
-            "Expression token1 + token2",
-            new Capture(new Expression()),
-            "token1 + token2",
-            true,
-            "token1 + token2"
-        );
+        testmatch("token1 + token2");
+        testmatch("token1+token2");
+        testmatch("token1 and token2");
+        testmatch("token1 | token2");
+        testmatch("token1|token2");
+        testmatch("token1 or token2");
+        testmatch("not token");
+        testmatch("( token )");
+        testmatch("(token)");
+        testmatch("not (token1)");
+        testmatch("not(token1)");
+        testmatch("(token1 or token2)");
+        testmatch("not (token1 or token2)");
         
-        ok &= testMatchDelete(
-            "Expression token1+token2",
-            new Capture(new Expression()),
-            "token1+token2",
-            true,
-            "token1+token2"
-        );
         return ok;
         
-        ok &= testMatchDelete(
-           "Expression (hello)",
-            new Capture(new Expression()),
-           "(hello)",
-           true,
-           "(hello)"
-        );
-        
-        ok &= testMatchDelete(
-           "Expression ((hello))",
-            new Capture(new Expression()),
-           "((hello))",
-           true,
-           "((hello))"
-        );
-        
-        ok &= testMatchDelete(
-           "Expression (-hello)",
-            new Capture(new Expression()),
-           "(-hello)",
-           true,
-           "(-hello)"
-        );
-        
-
-        ok &= testMatchDelete(
-           "Expression (-(hello))",
-            new Capture(new Expression()),
-           "(-(hello))",
-           true,
-           "(-(hello))"
-        );
-        
-        
-        ok &= testMatchDelete(
-           "Expression (+hello+goodbye)",
-            new Capture(new Expression()),
-           "(+hello+goodbye)",
-           true,
-           "(+hello+goodbye)"
-        );
-        
-        ok &= testMatchDelete(
-           "Operator complex and",
-            new Capture(new Expression()),
-           "(hello + goodbye + world)",
-           true,
-           "(hello + goodbye + world)"
-        );
         
         BeeFishMisc::outputSuccess(ok);
         

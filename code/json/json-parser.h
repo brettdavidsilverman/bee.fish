@@ -55,7 +55,7 @@ namespace BeeFishJSON
         virtual void eof()
         override
         {
-            
+
             if (_json->result() == nullopt)
             {
                 _json->eof(this);
@@ -110,6 +110,7 @@ namespace BeeFishJSON
         virtual void onobjectvalue(Object* object, ObjectKey* key, JSON* value)
         {
             if (_onvalues.count(key->value()) > 0) {
+
                 JSONParser::OnValue onvalue =
                     _onvalues[key->value()];
                      

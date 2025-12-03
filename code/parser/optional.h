@@ -31,6 +31,7 @@ namespace BeeFishParser {
    
       virtual bool matchCharacter(const Char& character)
       {
+         _matched = false;
          
          bool matched =
             _match->match(_parser, character);

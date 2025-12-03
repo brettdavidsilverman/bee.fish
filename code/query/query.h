@@ -41,37 +41,46 @@ namespace BeeFishQuery {
         }
     };
     
-    class And : public BeeFishParser::Or
+    class Operator : public BeeFishParser::And
     {
     public:
-        And() : BeeFishParser::Or(
-            new BeeFishParser::Character("+"),
-            new BeeFishParser::CIWord("and ")
+        Operator(
+            const BString& word,
+            const BString& letter
+        ) : BeeFishParser::And(
+            new BeeFishParser::Or(
+                new BeeFishParser::Character(letter),
+                new BeeFishParser::CIWord(word)
+            ),
+            new Blankspaces()
         )
         {
         }
         
     };
     
-    class Or : public BeeFishParser::Or
+    class And : public Operator
     {
     public:
-        Or() : BeeFishParser::Or(
-            new BeeFishParser::Character("|"),
-            new BeeFishParser::CIWord("or ")
-        )
+        And() : Operator("and", "+")
         {
         }
         
     };
     
-    class Not : public BeeFishParser::Or
+    class Or : public Operator
     {
     public:
-        Not() : BeeFishParser::Or(
-            new BeeFishParser::Character("-"),
-            new BeeFishParser::CIWord("not ")
-        )
+        Or() : Operator("or", "|")
+        {
+        }
+        
+    };
+    
+    class Not : public Operator
+    {
+    public:
+        Not() : Operator("not", "-")
         {
         }
         
@@ -89,49 +98,60 @@ namespace BeeFishQuery {
                 new BeeFishParser::Character("\n"),
                 new BeeFishParser::Character("("),
                 new BeeFishParser::Character(")"),
-                new BeeFishQuery::And(),
-                new BeeFishQuery::Or(),
-                new BeeFishQuery::Not()
+                new BeeFishParser::Character("+"),
+                new BeeFishParser::Character("|"),
+                new BeeFishParser::Character("-")
+
             )
         )
         {
         }
     };
     
-    class Token : public BeeFishParser::And
+    class Token : public BeeFishParser::Capture
     {
     public:
-        Token() : BeeFishParser::And(
-            new Blankspaces(),
-            new Repeat<BeeFishQuery::Character>(),
-            new Blankspaces()
+        Token() : BeeFishParser::Capture(
+        
+            new BeeFishParser::And(
+                new Blankspaces(),
+                new Repeat<BeeFishQuery::Character>(),
+                new Blankspaces()
+            )
         )
         {
         }
         
-    };
-    
-    /*
-    class Token : public Repeat<BeeFishQuery::Character>
-    {
-    public:
-        Token() : Repeat()
+        virtual void fail()
+        override
         {
+            const BString& val = value().trim();
+            if (val.length() &&
+                val != "and" &&
+                val != "or" &&
+                val != "not")
+            {
+                Capture::success();
+            }
+            else
+                Capture::fail();
         }
         
-    };
-            
-    */
-    class AndWord : public BeeFishParser::And 
-    {
-    public:
-        AndWord() : BeeFishParser::And(
-            new Token(),
-            new BeeFishQuery::And(),
-            new Token()
-        )
+        virtual void success()
+        override
         {
+            const BString& val = value().trim();
+            if (!val.length() ||
+                val == "and" ||
+                val == "or" ||
+                val == "not")
+            {
+                Capture::fail();
+            }
+            else
+                Capture::success();
         }
+        
     };
     
     
@@ -139,43 +159,50 @@ namespace BeeFishQuery {
     {
     public:
         Expression() : BeeFishParser::And(
-           // new BeeFishParser::Character("("),
-            new BeeFishParser::Or(
-                // Word
-                //new BeeFishQuery::And(),
-                
-                // Not operator
+          //  new BeeFishParser::Character('('),
+            new BeeFishParser::OrderOfPrecedence(
+
+                // Not (expression)
                 new BeeFishParser::And(
                     new BeeFishQuery::Not(),
-                    new Token()
+                    new LoadOnDemand<Expression>()
                 ),
                 
-                // And operator
+                // token1 and token2
                 new BeeFishParser::And(
                     new Token(),
                     new BeeFishQuery::And(),
                     new Token()
                 ),
-                
-                // Or operator
+                /*
+                // expression1 and expression2
+                new BeeFishParser::And(
+                    new LoadOnDemand<Expression>(),
+                    new BeeFishQuery::And(),
+                    new LoadOnDemand<Expression>()
+                ),
+                */
+                // token1 or token2
                 new BeeFishParser::And(
                     new Token(),
                     new BeeFishQuery::Or(),
                     new Token()
                 ),
-                
-                // Sub expressions
+            
+                // (expression)
                 new BeeFishParser::And(
                     new BeeFishParser::Character("("),
                     new LoadOnDemand<Expression>(),
                     new BeeFishParser::Character(")")
-                )
+                ),
                         
+            
+                // token
+                new Token()
                 
             )
-           // new BeeFishParser::Character(")")
+          //  new BeeFishParser::Character(")")
         )
-            
         {
         }
         /*

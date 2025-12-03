@@ -31,7 +31,7 @@ run_time:
 
 trace:	$(OUTPUT)
 	rm -f trace.txt
-	valgrind  --log-file="trace.txt" --track-origins=yes --leak-check=yes $(OUTPUT) -test
+	valgrind  --log-file="trace.txt" --track-origins=yes --leak-check=yes -s $(OUTPUT) -test
 	cat trace.txt
 
 clean:

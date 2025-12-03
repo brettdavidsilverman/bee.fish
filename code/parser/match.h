@@ -175,6 +175,12 @@ namespace BeeFishParser {
          return false;
       }
       
+      virtual bool isLoadOnDemand() const {
+         if (_match)
+            return _match->isLoadOnDemand();
+         return false;
+      }
+      
       // Defined in parser.h
       virtual const Char& character() const;
 

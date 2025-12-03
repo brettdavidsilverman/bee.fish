@@ -28,6 +28,7 @@
 #include "invoke.h"
 #include "blanks.h"
 #include "load-on-demand.h"
+#include "order-of-precedence.h"
 
 using namespace BeeFishBString;
 using namespace BeeFishScript;
@@ -271,7 +272,7 @@ namespace BeeFishParser
       }
       
       virtual void eof() {
-          
+
          if (result() == nullopt)
          {
          

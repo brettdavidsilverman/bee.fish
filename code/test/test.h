@@ -92,11 +92,7 @@ namespace BeeFishTest
       bool ok = true;
 
       parser.read(text);
-      
-      if (expectedResult != nullopt)
-      {
-         parser.eof();
-      }
+      parser.eof();
       
       BString value;
 

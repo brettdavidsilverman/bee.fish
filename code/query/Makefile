@@ -1,7 +1,15 @@
-OUTPUT=../../build/query
+BUILD=../../build
+OUTPUT=$(BUILD)/query
 CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=main.cpp query.h test.h version.h Makefile
 
+all:	$(BUILD)
+all:	$(OUTPUT)
+
+
+$(BUILD):
+		mkdir $(BUILD)
+		
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
 	
@@ -10,8 +18,8 @@ test:	$(OUTPUT)
 
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
-debug:	$(OUTPUT)
-debug:	test
+debug:	all
+
 
 run:	$(OUTPUT)
 	$(OUTPUT)

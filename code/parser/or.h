@@ -6,144 +6,152 @@
 
 namespace BeeFishParser {
 
-   class Or : public Match {
-   public:
-      vector<Match*> _inputs;
-      Match* _item = nullptr;
-      
-   public:
+    class Or : public Match {
+    public:
+        vector<Match*> _inputs;
+        Match* _item = nullptr;
+        
+    public:
 
-      template<typename ...T>
-      Or(T*... inputs) :
-         _inputs{inputs...}
-      {
-      }
-      
-      virtual ~Or()
-      {
-         for (auto match : _inputs) {
-            delete match;
-         }
-      }
-      
-      virtual bool matchCharacter(const Char& character)
-      {
-   
-         bool matched = false;
-         
-         for ( auto
-                 it  = _inputs.begin();
-                 it != _inputs.end();
-                ++it
-             )
-         {
-         
-            Match* item = *it;
+        template<typename ...T>
+        Or(T*... inputs) :
+            _inputs{inputs...}
+        {
+        }
+        
+        virtual ~Or()
+        {
+            for (auto match : _inputs) {
+                if (match)
+                    delete match;
+            }
+        }
+        
+        
+        virtual bool confirm(vector<Match*>::iterator& it) {
+            return true;
+        }
+        
+        virtual bool matchCharacter(const Char& character)
+        {
+    
+            bool matched = false;
             
-            if ( item->result() != nullopt )
-               continue;
-
-            if ( item->match(_parser, character) )
+            for ( auto
+                      it  = _inputs.begin();
+                      it != _inputs.end();
+                     ++it
+                 )
             {
-               matched = true;
+            
+                Match* item = *it;
+                
+                if (item->result() != nullopt)
+                    continue;
+
+                if ( item->match(_parser, character) )
+                {
+                    matched = true;
+                }
+                
+                if ( item->result() == true )
+                {
+                    if (confirm(it)) {
+                        _item = item;
+                        break;
+                    }
+                }
+
+            }
+         
+            if (_item)
+            {
+                success();
+            }
+            else if ( result() == nullopt && 
+                         !matched )
+            {
+                fail();
             }
             
-            if ( item->result() == true )
+            return matched;
+            
+        }
+        
+        virtual void eof(Parser* parser)
+        override
+        {
+            setup(parser);
+            
+            if (result() != nullopt)
+                return;
+                
+            _item = nullptr;
+            
+            for ( auto item : _inputs)
             {
-               _item = item;
-               break;
+
+                item->eof(parser);
+                    
+                if (item->result() == true)
+                {
+                    _item = item;
+                    success();
+                    return;
+                }
             }
 
-       
-         }
-       
-         if (_item)
-         {
-            success();
-         }
-         else if ( result() == nullopt && 
-                   !matched )
-         {
             fail();
-         }
-         
-         return matched;
-         
-      }
-      
-      virtual void eof(Parser* parser)
-      {
-         setup(parser);
-         
-         if (result() != nullopt)
-            return;
+                
+            Match::eof(parser);
+                
+        }
+
+        virtual void setup(Parser* parser) {
+            if (_parser)
+                return;
+                
+            _parser = parser;
             
-         _item = nullptr;
-         
-         for ( auto item : _inputs)
-         {
-         
-            if (item->result() == nullopt)
-               item->eof(parser);
-               
-            if (item->result() == true)
-            {
-               _item = item;
-               success();
-               return;
+            for (auto item : _inputs) {
+                if (item)
+                    item->setup(parser);
             }
-         }
-
-         fail();
-            
-         Match::eof(parser);
-            
-      }
-
-      virtual void setup(Parser* parser) {
-         if (_parser)
-            return;
-            
-         _parser = parser;
-         
-         for (auto item : _inputs)
-            item->setup(parser);
-            
-      }   
-      
-      virtual const BString& value() const
-      {
-         if (_item)
-            return _item->value();
-            
-         return Match::value();
-      }
-      
-      virtual BString& value()
-      {
-         if (_item)
-            return _item->value();
-            
-         return Match::value();
-      }
-      
-      virtual Match& item()
-      {
-         return *_item;
-      }
-      
-      virtual const Match& item() const
-      {
-         return *_item;
-      }
-      
-      virtual bool matched() const {
-         return
-            (_item &&
-            _item->result() == true);
-      }
-      
-   };
+        }    
+        
+        virtual const BString& value() const
+        {
+            if (_item)
+                return _item->value();
+                
+            return Match::value();
+        }
+        
+        virtual BString& value()
+        {
+            if (_item)
+                return _item->value();
+                
+            return Match::value();
+        }
+        
+        virtual Match& item()
+        {
+            return *_item;
+        }
+        
+        virtual const Match& item() const
+        {
+            return *_item;
+        }
+        
+        virtual bool matched() const {
+            return
+                (_item &&
+                _item->result() == true);
+        }
+        
+    };
 
 
 };

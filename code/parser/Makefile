@@ -1,6 +1,6 @@
 OUTPUT=../../build/parser
 CFLAGS=-std=c++17 -Wall -fmax-errors=1 -Ofast
-DEPS=main.cpp match.h and.h or.h not.h character.h blanks.h word.h ciword.h repeat.h optional.h load-on-demand.h test.h capture.h invoke.h parser.h version.h Makefile
+DEPS=main.cpp match.h and.h or.h not.h character.h blanks.h word.h ciword.h repeat.h optional.h load-on-demand.h test.h capture.h invoke.h order-of-precedence.h parser.h version.h Makefile
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
@@ -20,6 +20,11 @@ run_debug:	debug
 run_debug:	$(OUTPUT)
 	gdb --args $(OUTPUT) -test
 	
+trace:	$(OUTPUT)
+	rm -f trace.txt
+	valgrind --tool=memcheck --leak-check=full --track-origins=yes --log-file="trace.txt"  $(OUTPUT) -test
+	cat trace.txt
+
 clean:
 	rm -f $(OUTPUT)
 	rm -f *.o

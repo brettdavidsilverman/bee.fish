@@ -32,7 +32,7 @@ namespace BeeFishParser
 		   if (_item)
               delete _item;
 		}
-        
+        /*
         virtual bool isOptional() const 
         override
         {
@@ -42,7 +42,7 @@ namespace BeeFishParser
                 
             return false;
         }
-
+*/
 		virtual bool matchCharacter(const Char &character)
 		{
 

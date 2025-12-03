@@ -38,8 +38,10 @@ namespace BeeFishParser {
             
          _parser = parser;
          
-         for (auto item : _inputs)
-            item->setup(parser);
+         for (auto item : _inputs) {
+            //if (!item->isLoadOnDemand())
+                item->setup(parser);
+         }
          _iterator = 0;
          
       }     
@@ -72,9 +74,8 @@ namespace BeeFishParser {
                
             }
             else if (item->_result == false) {
-            
-               fail();
-               
+                  fail();
+              //    matched = false;
             }
             
          }

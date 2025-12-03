@@ -15,6 +15,7 @@ all:	$(BUILD)
 	cd query && make $(DEBUG) test
 	cd https && make $(DEBUG) test
 	
+
 $(BUILD):
 		mkdir $(BUILD)
 
@@ -25,4 +26,14 @@ debug:	CFLAGS += -g -D DEBUG
 debug:	all
 
 clean:
+	cd b-string && make clean
+	cd power-encoding && make clean
+	cd Id && make clean
+	cd parser && make clean
+	cd json && make clean
+	cd Database && make clean
+	cd Script && make clean
+	cd web-request && make clean
+	cd query && make clean
+	cd https && make clean
 	rm -f -r $(BUILD)

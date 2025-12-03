@@ -13,11 +13,28 @@ namespace BeeFishParser
 	public:
 		LoadOnDemand(void* params = nullptr) : Match(params)
 		{
+            
 		}
 
 		virtual ~LoadOnDemand() {
 		}
+        /*
+        virtual bool match(Parser* parser, const Char& character)
+        override
+        {
 
+            if(_match && !_match->_parser)
+                _match->setup(parser);
+                
+            return Match::match(parser, character);
+        }
+
+*/
+        virtual bool isLoadOnDemand() const 
+        {
+            return true;
+        }
+      
 		virtual void setup(Parser* parser)
 		{
 			_parser = parser;
@@ -25,6 +42,7 @@ namespace BeeFishParser
             if (!_match) {
 	           _match = new T();
             }
+
 		}
         
         

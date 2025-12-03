@@ -20,8 +20,12 @@ run:	$(OUTPUT)
 	$(OUTPUT)
 	
 run_debug:	debug
-run_debug:	$(OUTPUT)
 	gdb --args $(OUTPUT) -test
+	
+trace:	$(OUTPUT)
+	rm -f trace.txt
+	valgrind --tool=memcheck --leak-check=full --track-origins=yes --log-file="trace.txt"  $(OUTPUT) -test
+	cat trace.txt
 	
 
 clean:
