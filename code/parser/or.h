@@ -28,7 +28,7 @@ namespace BeeFishParser {
         }
         
         
-        virtual bool confirm(vector<Match*>::iterator& it) {
+        virtual bool confirm(Match* item) {
             return true;
         }
         
@@ -36,14 +36,14 @@ namespace BeeFishParser {
         {
     
             bool matched = false;
-            
+
             for ( auto
                       it  = _inputs.begin();
                       it != _inputs.end();
                      ++it
                  )
             {
-            
+                
                 Match* item = *it;
                 
                 if (item->result() != nullopt)
@@ -56,7 +56,7 @@ namespace BeeFishParser {
                 
                 if ( item->result() == true )
                 {
-                    if (confirm(it)) {
+                    if (confirm(item)) {
                         _item = item;
                         break;
                     }

@@ -9,37 +9,69 @@
 namespace BeeFishParser {
 
     class OrderOfPrecedence : public Or {
+        typedef vector<vector<Match*> > Input;
+        
+    public:
+        Input _input;
     public:
 
-        template<typename ...T>
-        OrderOfPrecedence(T*... inputs) : 
-            Or({inputs...})
+        OrderOfPrecedence(Input input) :
+            Or(),
+            _input(input)
         {
+            for (vector<Match*>& order : input) {
+                
+                for (auto item : order) {
+                    _inputs.push_back(item);
+                }
+            }
+
         }
         
-        virtual bool confirm(vector<Match*>::iterator& it)
+        ssize_t findGroupIndex(Match* match)
+        {
+            for (Size index = 0;
+                 index < _input.size();
+                ++index)
+            {
+                vector<Match*>& items = _input[index];
+                
+                for (Match* item : items) {
+                    if (item == match)
+                        return index;
+                }
+            }
+            
+            return -1;
+            
+        }
+        
+        virtual bool confirm(Match* match)
         override
         {
+            ssize_t groupIndex = findGroupIndex(match);
+            
             // Check that all higher
             // order of precedence
             // have no result so far
-            auto end = distance(_inputs.begin(), it) - 1;
-
-            for (ssize_t index = 0;
-                index < end;
-                ++index)
+            for (ssize_t index = groupIndex - 1;
+                index >= 0;
+                --index)
             {
-                Match* higher = _inputs[index];
+                vector<Match*>& items = _input[index];
                 
-                if (higher->result() == nullopt)
-                    return false;
+                for (Match* higher : items) {
+                    
+                    if (higher->result() == nullopt)
+                        return false;
+                }
             }
             
-            
-            
+
             return true;
             
         }
+        
 
     };
 

@@ -341,19 +341,7 @@ namespace BeeFishQuery {
             return ok;
         };
         
-        /*
-        Expression expression;
-        Parser parser(expression);
-
-        if (parser.read("token1 and token2"))
-            ok = true;
-        else
-            ok = false;
-            
-        assert(ok);
         
-        return ok;
-        */
         testmatch("token1 + token2");
         testmatch("token1+token2");
         testmatch("token1 and token2");
@@ -361,16 +349,20 @@ namespace BeeFishQuery {
         testmatch("token1|token2");
         testmatch("token1 or token2");
         testmatch("not token");
-        testmatch("( token )");
         testmatch("(token)");
+        testmatch("( token )");
+        testmatch(" ( token ) ");
         testmatch("not (token1)");
         testmatch("not(token1)");
         testmatch("(token1 or token2)");
         testmatch("not (token1 or token2)");
         testmatch("(token1 and token2)");
-        
-        return ok;
-        
+        testmatch("token1 and not token2");
+        testmatch("token1 and not (token2 or token3)");
+        testmatch("token1 and (token2 or token3)");
+        testmatch("(token1 and token2) or token3");
+        testmatch("(token1 and token2) or (token3 and token4)");
+        testmatch("(token1 or token2) and (token3 or token4)");
         
         BeeFishMisc::outputSuccess(ok);
         

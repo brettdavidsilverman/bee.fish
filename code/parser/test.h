@@ -772,6 +772,8 @@ namespace BeeFishParser {
         cout << "Testing order of precedence " << endl;
         bool ok = true;
         
+        
+        
         class Test : public OrderOfPrecedence
         {
         public:
@@ -780,10 +782,11 @@ namespace BeeFishParser {
             Match* _last;
         public:
             Test() : OrderOfPrecedence(
-                _first = new Word("onetwo"),
-                _second = new Word("onethree"),
-                _last= new Word("one")
-            )
+            {
+                {_first = new Word("onetwo")},
+                {_second = new Word("onethree")},
+                {_last= new Word("one")}
+            })
             {
             }
         

@@ -159,69 +159,115 @@ namespace BeeFishQuery {
     {
     public:
         Bracketed() : BeeFishParser::And(
+           // new Blankspace(),
             new BeeFishParser::Character("("),
+            new Blankspaces(),
             new LoadOnDemand<T>(),
-            new BeeFishParser::Character(")")
+            new Blankspaces(),
+            new BeeFishParser::Character(")"),
+            new Blankspaces()
         )
         {
         }
     };
         
-    class Expression : public OrderOfPrecedence
+    class Expression : public BeeFishParser::And
     {
         
     public:
-        Expression() : //BeeFishParser::And(
-          //  new BeeFishParser::Character('('),
-             BeeFishParser::OrderOfPrecedence(
-
+        Expression()
+        : BeeFishParser::And(
+            new Blankspaces(),
+            new BeeFishParser::OrderOfPrecedence(
+                
+        {
+            {
+                // not token
+                new BeeFishParser::And(
+                    new BeeFishQuery::Not(),
+                    new Token()
+                )
+            },
+            {
                 // not (expression)
                 new BeeFishParser::And(
                     new BeeFishQuery::Not(),
                     new LoadOnDemand<Expression>()
-                ),
-                
-                // expression1 or expression2
-                new BeeFishParser::And(
-                    new Token(),
-                    new BeeFishQuery::Or(),
-                    new LoadOnDemand<Expression>()
-                ),
-                
-                // expression1 and expression2
+                )
+            },
+            {
+                // token and expression
                 new BeeFishParser::And(
                     new Token(),
                     new BeeFishQuery::And(),
                     new LoadOnDemand<Expression>()
                 ),
             
+                // token or expression
+                new BeeFishParser::And(
+                    new Token(),
+                    new BeeFishQuery::Or(),
+                    new LoadOnDemand<Expression>()
+                )
+                
+            },
+            {
+                // (expression) and token
+                new BeeFishParser::And(
+                    new Bracketed<Expression>(),
+                    new BeeFishQuery::And(),
+                    new Token()
+                ),
+
+                // (expression) or expression
+                new BeeFishParser::And(
+                    new Bracketed<Expression>(),
+                    new BeeFishQuery::Or(),
+                    new Token()
+                )
+                
+                
+            },
+            
+            
+            {
+                // (expression) and expression
+                new BeeFishParser::And(
+                    new Bracketed<Expression>(),
+                    new BeeFishQuery::And(),
+                    new Bracketed<Expression>()
+                ),
+
+                // (expression) or expression
+                new BeeFishParser::And(
+                    new Bracketed<Expression>(),
+                    new BeeFishQuery::Or(),
+                    new Bracketed<Expression>()
+                )
+                
+                
+            },
+
+       
+            {
                 // (expression)
                 new Bracketed<Expression>(),
-                
+            },
+            
+            {
                 // token
                 new Token()
-                
-            )
-          //  new BeeFishParser::Character(")")
+            }
+                 
+        }
         
+        )
+        )
         {
 
         }
-        
-        virtual bool match(Parser* parser, const Char& character)
-        {
+    
 
-            return OrderOfPrecedence::match(parser, character);
-        }
-        
-        /*
-        virtual void  eof(Parser* parser) override {
-            
-            if (result() != true)
-                fail();
-                
-        }
-        */
     };
     
 }

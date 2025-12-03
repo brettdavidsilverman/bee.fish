@@ -71,8 +71,8 @@ namespace BeeFishParser {
                }
                
             }
-            else if (item->_result == false) {
-                  fail();
+            else if (item->result() == false) {
+                fail();
             }
             
          }
