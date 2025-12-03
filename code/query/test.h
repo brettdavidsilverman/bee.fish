@@ -364,7 +364,7 @@ namespace BeeFishQuery {
         testmatch("(token1 and token2) or token3");
         testmatch("(token1 and token2) or (token3 and token4)");
         testmatch("(token1 or token2) and (token3 or token4)");
-        
+        testmatch("((token1 or token2))");
         BeeFishMisc::outputSuccess(ok);
         
         return ok;
