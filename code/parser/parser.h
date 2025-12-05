@@ -10,6 +10,7 @@
 #include <chrono>
 
 #include "version.h"
+#include "../Size.hpp"
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../b-string/b-string.h"
 #include "../Script/Variable.hpp"
@@ -42,14 +43,15 @@ namespace BeeFishParser
     {
         
     protected:
-        optional<bool> _result;
-        Match* _match;
-        size_t _charCount = 0;
-        ssize_t _dataBytes = -1;
-        BeeFishBString::UTF8Character _utf8 = "";
+
+        
+        Size _charCount = 0;
+        SSize _dataBytes = -1;
         String _error;
         
     public:
+        Match* _match;
+        Char _character = "";
         Char _lastCharacter = "";
         
     protected:
@@ -74,8 +76,8 @@ namespace BeeFishParser
         
         void setMatch(Match& match) {
             _match = &match;
-            _utf8.reset();
             _charCount = 0;
+            _dataBytes = -1;
         }        
 
         virtual ~Parser()
@@ -99,45 +101,6 @@ namespace BeeFishParser
                 ).count();
         }
 
-        virtual bool match(uint8_t byte) {
-
-            if (!_match->_parser)
-                _match->setup(this);
-                
-            ++_charCount;
-
-            
-            if (_dataBytes >= 0)
-            {
-                --_dataBytes;
-                _match->match(this, byte);
-            }
-            else  {
-
-                
-                
-                // valid or invalid, continue on
-                if (_utf8.match(byte) &&
-                     _utf8.result() != nullopt)
-                {
-                    _lastCharacter = _utf8.character();
-                    // utf8 character, perform match
-                    _match->match(this, _lastCharacter);
-                    // Reset the utf8 character
-                    _utf8.reset();
-                }
-
-            }            
-
-            
-            _result = _match->result();
-            
-            bool matched = (_result != false);
-                
-            return matched;
- 
-        }
-        
         virtual optional<bool>
         read(
             istream& input
@@ -149,25 +112,73 @@ namespace BeeFishParser
             unsigned long start = now();
 #endif
 
-            _result = nullopt;
-            /*
             if (!_match->_parser)
                 _match->setup(this);
                 
-*/
             int i = 0;
             uint8_t c;
-            while ((i = input.get()) != -1)
+            bool matched = true;
+            while (
+                    matched &&
+                    (
+                        (i = input.get()) != -1
+                    )
+                  )
             {
                 
-                c = i;
-#ifdef DEBUG
-                cout << c;
-#endif
-        
-                if (!match(c))
-                    return false;
+                c = (char)i;
+                
 
+                if (_dataBytes >= 0)
+                {
+    
+                    --_dataBytes;
+                    
+                    matched = _match->match(this, c);
+                    
+                    if (_dataBytes == 0)
+                    {
+                        _dataBytes = -1;
+                        success();
+                        return true;
+                    }
+                }
+                else {
+                    while (c < 0) {
+                    
+                        _character.push_back(c);
+                        
+                        if ((i = input.get()) == -1)
+                            break;
+                    
+                        c = (char)i;
+                    
+                    
+                    }
+                
+                    _character.push_back(c);
+                    ++_charCount;
+#ifdef DEBUG
+    cout << escape(_character);
+#endif
+                    _lastCharacter = _character;
+                    
+                    matched = _match->match(this, _character);
+                        
+                    _character.clear();
+                
+                }
+                
+                if (i == -1)
+                    break;
+                    
+                if (_match->result() != nullopt)
+                    break;
+                    
+                    
+            
+
+                                    
 #ifdef TIME
                 if (_charCount % 100000 == 0)
                 {
@@ -184,14 +195,15 @@ namespace BeeFishParser
                     start = now();
                 }
 #endif
-                if (result() != nullopt) {
-                    break;                
-                }
+
+                
+                    
             }
             
-            if (_result == true)
+
+            if (result() == true)
                 success();
-            else if (_result == false)
+            else if (result() == false)
                 fail();
 
             return result();
@@ -206,50 +218,31 @@ namespace BeeFishParser
         
         }
         
-        virtual optional<bool> read(const char* str) {
-            return read(std::string(str));
-        }
-        
-        virtual optional<bool> read(const char* str, size_t length) {
-            return read(std::string(str, length));
-        }
-
-        
         virtual optional<bool> read(const BeeFishBString::BString& string)
         {
 
-            size_t _size = string.size();
-
-            for (size_t i = 0; i < _size; ++i) {
-                char character = string[i];
-                if (!match(character))
-                    return false;
-            }
-
-            if (_result == true)
-                success();
-            else if (_result == false)
-                fail();
-                
-            return _result;
+            istringstream input(string);
+        
+            return read(input);
         
         }
+        
+        virtual optional<bool> read(const char* string) {
+            return read(BeeFishBString::BString(string));
+        }
+        
+        virtual optional<bool> read(const char* string, Size length) {
+            return read(BeeFishBString::BString(string, length));
+        }
+
+        
         
         virtual optional<bool> read(const char c)
         {
 
-            if (!match(c))
-            {
-                fail();
-                return false;
-            }
-            
-            if (_result == true)
-                success();
-            else if (_result == false)
-                fail();
-                
-            return _result;
+            BeeFishBString::BString bstring;
+            bstring.push_back(c);
+            return read(bstring);
         
         }
         
@@ -257,13 +250,13 @@ namespace BeeFishParser
         {
             if (_error.length())
                 return false;
-                
-            return _result;
+
+            return _match->result();
         }
         
         bool matched() const
         {
-            return _result == true;
+            return result() == true;
         }
         
         
@@ -275,7 +268,7 @@ namespace BeeFishParser
             return false;
         }
 
-        void setDataBytes(ssize_t dataBytes) {
+        void setDataBytes(SSize dataBytes) {
             _dataBytes = dataBytes;
         }
         
@@ -288,7 +281,6 @@ namespace BeeFishParser
                     _match->result() == nullopt)
                 {
                     _match->eof(this);
-                    _result = _match->result();
                 }
             
                 if (result() == false)
@@ -305,36 +297,35 @@ namespace BeeFishParser
 
         virtual void success()
         {
-            if (_result == nullopt)
-            {
-                _match->setResult(true);
-                _result = true;
-                _error.clear();
-            }
+            _match->setResult(true);
+            _error.clear();
         }
         
         virtual void fail() {
              
-            stringstream stream;
-            stream << "Invalid Content '" << escape(_lastCharacter) << "' at position "
-                     << _charCount;
-            fail(stream.str());
-        }
-        
-        virtual void fail(const BString& error)
-        {
             _match->setResult(false);
-            _result = false;
-            setError(error);
+            setError();
         }
-        
         
     public:
          
-        virtual void setError(const BString& error)
+        virtual void setError(BString error = "")
         {
             if (_error.length() == 0)
                 _error = error;
+                
+            if (_error.length() == 0) {
+                
+                stringstream stream;
+                
+                stream << "Invalid Content '" << escape(_lastCharacter) << "' at position "
+                     << _charCount
+                     << " from match "
+                     << typeid(*match()).name();
+                     
+                _error = stream.str();
+            
+            }
             
         }
         
@@ -365,31 +356,29 @@ namespace BeeFishParser
     
     // Declared in match.h
     const Char& Match::character() const {
-        return _parser->_lastCharacter;
+        return _parser->_character;
     }
                 
     // Declared in match.h
     void Match::fail()
     {
-        //_result = false;
         setResult(false);
         
         if (_match)
             _match->fail();
         
-        if (//this == _parser->_match ||
-            // match() == _parser->_match ||
-             match() == _parser->match())
+        if (match() == _parser->match())
         {
             _parser->fail();
         }
     }
-    
+    /*
     void Match::fail(const BString& error)
     {
         _parser->setError(error);
         fail();
     }
+    */
 }
 
 #endif

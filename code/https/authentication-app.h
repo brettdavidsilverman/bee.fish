@@ -61,14 +61,17 @@ namespace BeeFishHTTPS {
          
          if (request->result() != true)
          {
-            return;
+             request->eof(_session->parser());
+             if (request->result() != true)
+                 return;
          }
-         
+
          BString path = request->path();
          BString webMethod = request->method();
-         
+
          if (path == "/authenticate")
          {
+    
             BeeFishMisc::optional<BString> method;
             BeeFishMisc::optional<BString> secret;
 
@@ -78,25 +81,13 @@ namespace BeeFishHTTPS {
             }
             else if (webMethod == "POST")
             {
-               WebRequest* request = new WebRequest(true);
-               ScriptParser parser(*request);
-            
-               if (parseWebRequest(parser) &&
-                   request->hasJSON())
-               {
+               WebRequest request(true);
+               JSONParser parser(request);
+               parser.captureValue("method", method);
+               parser.captureValue("secret", secret);
 
-                  BeeFishScript::ObjectPointer object =
-                     parser.json();
+               parseWebRequest(parser);
 
-                  if (object->contains("method")) {
-                     method = (BString&)(*object)["method"];
-                  }
-
-                  if (object->contains("secret"))
-                     secret = (BString&)(*object)["secret"];
-
-               }
-               delete request;
             }
          
             if ( method.has_value() )

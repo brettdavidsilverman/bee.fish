@@ -109,8 +109,7 @@ namespace BeeFishParser {
             if (match->result() == nullopt)
                match->eof(parser);
             
-            if (match->result() != true && 
-                !match->isOptional())
+            if (match->result() != true)
             {
                fail();
                return;

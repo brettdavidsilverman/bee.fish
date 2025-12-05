@@ -54,7 +54,7 @@ namespace BeeFishParser {
       
    public:
   
-      bool matched() const
+      virtual bool matched() const
       {
          return (result() == true);
       }
@@ -130,8 +130,7 @@ namespace BeeFishParser {
       
       // Defined in parser.h
       virtual void fail();
-      virtual void fail(const BString& error);
-      
+    
       virtual optional<bool> result() const
       {
          if (_match)
@@ -190,7 +189,7 @@ namespace BeeFishParser {
           if (!_parser)
              setup(parser);
              
-          if (_match && result() == nullopt)
+          if (_match && _match->result() == nullopt)
           {
               _match->eof(_parser);
               if (_match->result() == true)

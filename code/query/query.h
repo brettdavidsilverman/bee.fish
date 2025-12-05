@@ -14,12 +14,12 @@
 #include "../parser/parser.h"
 #include "../Script/Variable.hpp"
 
-using namespace BeeFishBString;
-using namespace BeeFishScript;
-using namespace BeeFishParser;
 
 namespace BeeFishQuery {
-    
+    using namespace BeeFishBString;
+    using namespace BeeFishScript;
+    using namespace BeeFishParser;
+
     class Blankspace : public Or
     {
     public:

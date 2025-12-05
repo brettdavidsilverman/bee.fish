@@ -82,8 +82,10 @@ namespace BeeFishHTTPS {
          }
          
          BString error = stream.str();
-
-         fail(error);
+         
+         _parser->setError(error);
+         
+         fail();
         
          return false;
       }
@@ -129,7 +131,9 @@ namespace BeeFishHTTPS {
         
          BString error = stream.str();
          
-         fail(error);
+         _parser->setError(error);
+         
+         fail();
 
          return false;
       }
@@ -161,13 +165,13 @@ namespace BeeFishHTTPS {
       
    };
   
-   class Alpha : public Or
+   class Alpha : public BeeFishParser::Or
    {
    public:
       Alpha() : Or(
          new Range('a', 'z'),
          new Range('A', 'Z'),
-         new Character('_')
+         new BeeFishParser::Character('_')
       )
       {
       }
@@ -181,13 +185,13 @@ namespace BeeFishHTTPS {
       }
    };
    
-   class AlphaNumeric : public Not
+   class AlphaNumeric : public BeeFishParser::Not
    {
    public:
       AlphaNumeric() : Not(
-         new Or(
-            new Character('.'),
-            new Character('[')
+         new BeeFishParser::Or(
+            new BeeFishParser::Character('.'),
+            new BeeFishParser::Character('[')
          )
       )
       {
@@ -207,7 +211,7 @@ namespace BeeFishHTTPS {
       {
          setMatch(
             new Capture(
-               new And(
+               new BeeFishParser::And(
                   new Repeat<AlphaNumeric>(0)
                )
             )
@@ -233,21 +237,21 @@ namespace BeeFishHTTPS {
       PropertyPath(JSONPath* start) :
          _start(start)
       {
-         _match = new Or(
-            new And(
-               new Character('['),
+         _match = new BeeFishParser::Or(
+            new BeeFishParser::And(
+               new BeeFishParser::Character('['),
                _arrayIndex =
                   new ArrayIndexPath(_start),
-               new Character(']')
+               new BeeFishParser::Character(']')
             ),
-            new And(
-               new Character('['),
+            new BeeFishParser::And(
+               new BeeFishParser::Character('['),
                _quotedIdentifier =
                   new QuotedIdentifier(_start),
-               new Character(']')
+               new BeeFishParser::Character(']')
             ),
-            new And(
-               new Character('.'),
+            new BeeFishParser::And(
+               new BeeFishParser::Character('.'),
                _identifier =
                   new Identifier(_start)
             )
@@ -300,7 +304,7 @@ namespace BeeFishHTTPS {
          _start(start)
       {
          _match =
-            new And(
+            new BeeFishParser::And(
                _wordThis = new Word("this"),
                _propertyPaths =
                   new PropertyPaths(_start)

@@ -9,46 +9,64 @@
 #include "content-length.h"
 #include "headers.h"
 
-using namespace BeeFishParser;
-      
+
 namespace BeeFishWeb {
 
+    using namespace BeeFishJSON;
+    using namespace BeeFishParser;
+      
     class Body :
         public Match,
         public BeeFishBString::BStream
     {
     protected:
-        BeeFishWeb::ContentLength* _contentLengthBody = nullptr;
-        BeeFishJSON::JSON* _json = nullptr;
         bool _parseJSON;
+        BeeFishWeb::ContentLength* _contentLengthBody = nullptr;
+        JSON* _json = nullptr;
     public:
         Body(bool parseJSON = true) : Match() {
             _parseJSON = parseJSON;
+            
         }
 
         virtual void setup(Parser* parser, Headers*  headers) {
-            if (_parser)
-               return;
-              
-             if (!_parseJSON &&
-                 headers->contains("content-length") ) {
+            
+            Match* content = nullptr;
+            
+            if (!_parseJSON &&
+                headers->contains("content-length") )
+            {
+
                 std::string contentLengthString = (*headers)["content-length"].str();
                 size_t contentLength = atol(contentLengthString.c_str());
                 if (contentLength > 0) {
                     _contentLengthBody = new ContentLength(contentLength);
                     parser->setDataBytes(contentLength);
-                    _match = _contentLengthBody;
+                    content = _contentLengthBody;
                 }
             }
             else {
                 _json = new BeeFishJSON::JSON();
-                _match = _json;
+                
+                BeeFishParser::And* _and =
+                    new BeeFishParser::And(
+                        _json,
+                        new Optional(
+                            new NewLine()
+                        )
+                    );
+                    
+                content = _and;
             }
-
+            
+            
+            _match = content;
+            
             Match::setup(parser);
 
         }
-
+        
+        
         virtual ~Body() {
         }
 
@@ -58,9 +76,9 @@ namespace BeeFishWeb {
         
         BeeFishJSON::JSON* json()
         {
-           return _json;
+            return _json;
         }
-
+        
         virtual bool matchCharacter(const Char& character) {
 
             if (Match::matchCharacter(character)) {
@@ -72,15 +90,6 @@ namespace BeeFishWeb {
             return false;
         }
         
-        virtual void eof(Parser* parser)
-        override
-        {
-           Match::setup(parser);
-           
-           if (_match->result() == nullopt)
-              _match->eof(parser);
-        }
-
 
     };  
 }

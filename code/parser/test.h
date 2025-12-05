@@ -435,9 +435,23 @@ namespace BeeFishParser {
         ok &= testMatch("Simple 'not' match", testNot, "abc", true);
         delete testNot;
         
-        Match* testNotNoMatch = new Not(new ABC());
-        ok &= testMatch("Simple 'not' no match", testNotNoMatch, "ABC", false);
-        delete testNotNoMatch;
+        {
+            Match* test = new Not(new ABC());
+            Parser parser(test);
+            parser.read("A");
+            parser.eof();
+            ok &= testResult("Read not first", parser.result() == true && test->result() == true);
+            assert(ok);
+        }
+        
+        {
+            Match* test = new Not(new ABC());
+            Parser parser(test);
+            parser.read("ABC");
+            parser.eof();
+            ok &= testResult("Read all", parser.result() == false && test->result() == false);
+            assert(ok);
+        }
         
         class Notatoz : public Not {
         public:

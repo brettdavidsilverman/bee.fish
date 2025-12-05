@@ -26,7 +26,7 @@ namespace BeeFishTest
 
 #ifdef SERVER
    inline bool testFile(
-      BeeFishJSON::JSONParser& parser,
+      Parser& parser,
       string label,
       path file,
       BeeFishParser::Match& match,
@@ -59,6 +59,7 @@ namespace BeeFishTest
       if (!ok) {
          cout << "Expected: " << expectedResult << endl;
          cout << "Got: " << match.result() << endl;
+         cout << "Error: " << parser.getError() << endl;
       }
       
       input.close();

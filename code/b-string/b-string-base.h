@@ -114,7 +114,7 @@ namespace BeeFishBString
       {
          BStringBase::push_back(c);
       }
-      
+/*
       void push_back(uint8_t byte, UTF8Character& utf8)
       {
          if (utf8.match(byte))
@@ -131,7 +131,7 @@ namespace BeeFishBString
             throw std::runtime_error("Invalid utf-8 character");
          }
       }
-
+*/
       BString &operator+=(const BString &rhs)
       {
          std::string::operator += (rhs);
@@ -352,20 +352,19 @@ namespace BeeFishBString
          char character;
          const BString& encoded = *this;
          int i, ii, len = length();
-         UTF8Character utf8;
-
+    
          for (i=0; i < len; i++) {
             if (encoded[i] != '%') {
                //if((*this)[i] == '+')
                //   decoded.push_back(' ');
                //else
-               decoded.push_back(encoded[i], utf8);
+               decoded.push_back(encoded[i]);
             }
             else {
                std::string part = encoded.substr(i + 1, 2);
                sscanf(part.c_str(), "%x", &ii);
                character = static_cast<char>(ii);
-               decoded.push_back(character, utf8);
+               decoded.push_back(character);
                i = i + 2;
             }
          }

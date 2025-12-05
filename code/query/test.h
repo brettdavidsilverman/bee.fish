@@ -7,11 +7,12 @@
 
 #include "../test/test.h"
 
-using namespace std;
-using namespace BeeFishTest;
 
 namespace BeeFishQuery {
-    
+
+    using namespace std;
+    using namespace BeeFishTest;
+
     bool testBlankspaces();
     bool testCharacters();
     bool testTokens();

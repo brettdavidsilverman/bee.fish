@@ -5,7 +5,7 @@
 
 #include "log.h"
 
-#include "../Database/File.hpp"
+#include "../Database/Database.hpp"
 
 #include "version.h"
 

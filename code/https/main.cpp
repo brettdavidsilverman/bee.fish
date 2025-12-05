@@ -9,6 +9,7 @@
 
 #include <linux/limits.h>
 
+#include "https.h"
 #include "test.h"
 
 using namespace BeeFishDatabase;

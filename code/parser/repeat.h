@@ -32,7 +32,7 @@ namespace BeeFishParser
 		   if (_item)
               delete _item;
 		}
-
+        
 		virtual bool matchCharacter(const Char &character)
 		{
 
@@ -40,9 +40,7 @@ namespace BeeFishParser
 				_item = createItem();
             }
             
-            if (!_item->_parser)
-                _item->setup(_parser);
-    
+
 			bool matched =
 				_item->match(_parser, character);
 
@@ -97,8 +95,8 @@ namespace BeeFishParser
 		virtual T* createItem() {
 			T* item = new T();
             
-            
-               
+            item->setup(_parser);
+    
             return item;
 		}
         
@@ -132,6 +130,8 @@ namespace BeeFishParser
               fail();
 
         }
+        
+        
        
 	};
 

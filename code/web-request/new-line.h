@@ -11,18 +11,17 @@ using namespace BeeFishParser;
       
 namespace BeeFishWeb {
 
-      class NewLine : public Or {
-      public:
-         NewLine() :
+    class NewLine : public Or {
+    public:
+        NewLine() :
             Or(
-                  new Word("\r\n"),
-                  new Word("\n")
+                new Word("\r\n"),
+                new Word("\n")
             )
-         {
+        {
 
-         }
-      };
-      
+        }
+    };
 
 }
 

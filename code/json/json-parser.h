@@ -22,51 +22,35 @@ namespace BeeFishJSON
         OnKeys _onkeys = {};
         OnValues _onvalues {};
 
-        Match* _json;
         bool _delete;
     public:
          
         JSONParser(Match& match) :
-            Parser(match),
-            _json(&match)
+            Parser(match)
         {
             _delete = false;
         }
         
         JSONParser(Match* match) :
-            Parser(*match),
-            _json(match)
+            Parser(*match)
         {
              _delete = false;
         }
         
         JSONParser() :
-            Parser(_json = new JSON())
+            Parser(_match = new JSON())
         {
             _delete = true;
         }
         
         virtual ~JSONParser()
         {
-            if (_delete)
-                delete _json;
+            if (_delete) {
+                delete _match;
+                _match = nullptr;
+            }
         }
         
-        virtual void eof()
-        override
-        {
-
-            if (_json->result() == nullopt)
-            {
-                _json->eof(this);
-                
-                if (_json->result() == true)
-                    success();
-                else
-                    fail();
-            }
-                
-        }
         
         void captureValue(const BString& key, optional<BString>& value) {
             _onvalues[key] = 
@@ -77,6 +61,7 @@ namespace BeeFishJSON
                         value = json.value();
                 };
         }
+        
         
         void streamValue(const BString& key, BeeFishBString::BStream::OnBuffer onbuffer) {
 
@@ -141,7 +126,7 @@ namespace BeeFishJSON
         }
         
         virtual bool matched() const {
-            return _json->result() == true;
+            return _match->result() == true;
         }
         
 

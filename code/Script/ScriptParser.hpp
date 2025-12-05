@@ -63,7 +63,6 @@ namespace BeeFishScript
       ScriptParser(Match& match) :
          JSONParser(match)
       {
-         _result = BeeFishMisc::nullopt;
       }
       
       virtual ~ScriptParser()

@@ -4,65 +4,62 @@
 #include <map>
 #include <vector>
 #include <typeinfo>
+#include "../query/query.h"
 #include "../parser/parser.h"
 #include "../json/json-parser.h"
 #include "new-line.h"
 
-using namespace BeeFishParser;
-      
+
 namespace BeeFishWeb {
 
-      class Header : public Match
-      {
-      protected:
+    using namespace BeeFishParser;
+    using namespace BeeFishQuery;
 
-         class HeaderNameCharacter : public Not {
-         public:
+    class Header : public Match
+    {
+    protected:
+
+        class HeaderNameCharacter : public BeeFishParser::Not {
+        public:
             HeaderNameCharacter() : Not(
-               new Or(
-                  new BeeFishParser::
-                     Character(':'),
-                  new BlankChar(),
-                  new NewLine()
-               )
+                new BeeFishParser::Or(
+                    new BeeFishParser::Character(":"),
+                    new NewLine()
+                )
             )
             {
 
             }
-         };
-
-         class HeaderValueCharacter : public Match {
-         public:
-            HeaderValueCharacter() : Match(
-               new Not(
-                  new Or(
-                     new Character("\r"),
-                     new Character("\n")
-                  )
-               )
+        };
+        
+        
+        class HeaderValueCharacter : public BeeFishParser::Not {
+        public:
+            HeaderValueCharacter() : Not(
+                new BeeFishParser::Or(
+                    new BeeFishParser::Character("\r"),
+                    new BeeFishParser::Character("\n")
+                )
             )
             {
 
             }
-         };
+        };
 
-      public:
-         BString _name;
-         BString _value;
+
+    public:
+        BString _name;
+        BString _value;
          
-      public:
-         Header() : Match()
-         {
+    public:
+        Header() : Match()
+        {
             Match* colon =
-               new And(
-                  new Optional(
-                     new Blanks
-                  ),
-                  new BeeFishParser::
-                     Character(':'),
-                  new Optional(
-                     new Blanks()
-                  )
+                new BeeFishParser::And(
+                    new Blankspaces(),
+                    new BeeFishParser::
+                        Character(':'),
+                    new Blankspaces()
                );
 
             Match*
@@ -73,7 +70,7 @@ namespace BeeFishWeb {
                headerValue =
                   new Repeat<HeaderValueCharacter>();
 
-            _match = new And(
+            _match = new BeeFishParser::And(
                new Capture(
                   headerName,
                   this->_name
@@ -86,76 +83,75 @@ namespace BeeFishWeb {
                new NewLine()
             );
             
-         }
+            
+        }
          
-         virtual ~Header()
-         {
-         }
-      };
-
-
-      class Headers :
-         public Repeat<Header>,
-         public std::map<BString, BString>
-      {
-      public:
+         
         
-         Headers() :
-            Repeat<Header>()
-         {
-         }
+    };
 
-         virtual ~Headers()
-         {
-         }
+    class Headers :
+        public Repeat<Header>,
+        public std::map<BString, BString>
+    {
+    public:
+        
+        Headers() : Repeat<Header>()
+        {
+        }
+
+        virtual ~Headers()
+        {
+        }
          
-         virtual void matchedItem(Header* header)
-         {
+        virtual void matchedItem(Header* header)
+        override
+        {
 
             BString lowerName =
-               header->_name.toLower();
+                header->_name.toLower();
          
             emplace(
-               lowerName,
-               header->_value
+                lowerName,
+                header->_value
             );
             
             Repeat::matchedItem(header);
-         }
+        }
    
-         bool contains(const BString& name) const
-         {
+        bool contains(const BString& name) const
+        {
             return count(name) > 0;
-         }
+        }
          
-         bool contains(const char* name) const
-         {
+        bool contains(const char* name) const
+        {
             BString bstrName(name);
             return contains(bstrName);
-         }
+        }
 
-         BString operator[] (
+        BString operator[] (
             const BString& name
-         ) const
-         {
+        ) const
+        {
             const BString emptyHeader;
 
             if (contains(name))
-               return map<BString, BString>::at(name);
+                return map<BString, BString>::at(name);
             else
-               return emptyHeader;
-         }
+                return emptyHeader;
+        }
    
-         friend ostream& operator <<
-         (ostream& out, Headers& headers)
-         {
+        friend ostream& operator <<
+        (ostream& out, Headers& headers)
+        {
             for (auto it = headers.begin();
                       it != headers.end();
                     ++it)
             {
-               BString header = it->first;
-               BString value = it->second;
-               out
+                BString header = it->first;
+                BString value = it->second;
+                out
                   << header
                   << '\t'
                   << value
@@ -163,11 +159,14 @@ namespace BeeFishWeb {
             }
       
             return out;
-         }
-   
-   
+        }
+         
+        
+        
    
       };
+      
+    
 
 }
 

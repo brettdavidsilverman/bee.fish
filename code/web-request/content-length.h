@@ -28,12 +28,16 @@ namespace BeeFishWeb {
          
          ++_contentCount;
 
-//         if ( _contentCount > _contentLength )
-//            return false;
+         if ( _contentCount > _contentLength)
+         {
+             fail();
+             return false;
+         }
          
-         if (_contentCount == _contentLength)
-            _result = true;
-
+         if (_contentCount == _contentLength) {
+            success();
+         }
+         
          return true;
       }
       

@@ -8,7 +8,6 @@ PORT=443
 all:	install
 
 
-
 $(OUTPUT): $(BUILD)
 $(OUTPUT):	$(DEPS)
 	@echo "Linking server"
@@ -18,7 +17,7 @@ $(OUTPUT):	$(DEPS)
 $(BUILD):
 		mkdir $(BUILD)
 
-install:	test
+install:	$(OUTPUT)
 	./start.sh $(PORT)
 	
 test:	$(OUTPUT)
@@ -33,11 +32,10 @@ stop:
 	
 	
 debug:	DEBUG=debug
-debug:	CFLAGS += -g -DDEBUG
+debug:	CFLAGS += -g -D DEBUG
 debug:	$(OUTPUT)
 debug:	PORT=8000
-debug:	test
-debug:	install
+debug:	$(OUTPUT)
 
 
 run_debug:	DEBUG=debug
