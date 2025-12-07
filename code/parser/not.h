@@ -32,15 +32,15 @@ namespace BeeFishParser {
         override
         {
             
-          //  bool matched =
+            bool matched =
                 _item->match(_parser, character);
             
             
-            if (_item->result() == false) {
+            if (!matched || _item->result() == false) {
                 success();
                 return true;
             }
-            else if (_item->result() == true) {
+            else if ( _item->result() == true) {
                 fail();
                 return false;
             }
@@ -52,14 +52,16 @@ namespace BeeFishParser {
         virtual void eof(Parser* parser)
         override
         {
-             setup(parser);
-             if (_item->result() == nullopt) {
-                  _item->eof(parser);
-                  if (_item->result() == true)
-                      fail();
-                  else
-                      success();
-             }
+            setup(parser);
+            
+                
+            if (_item->result() == nullopt)
+                _item->eof(parser);
+            
+            if (_item->result() == true)
+                fail();
+            else
+                success();
         }
         
         virtual optional<bool> result() const

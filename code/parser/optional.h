@@ -6,65 +6,72 @@
 
 namespace BeeFishParser {
 
-   using namespace std;
+    using namespace std;
 
-   class Optional : public Match {
-   protected:
-      bool _matched = false;
+    class Optional : public Match {
+    public:
+        bool _matched = false;
 
-   public:
-      Optional() : Match() {
-      }
+    public:
+        Optional() : Match() {
+        }
 
-      Optional(Match* match) : Match(match)
-      {
-      }
+        Optional(Match* match) : Match(match)
+        {
+        }
 
-      virtual ~Optional() {
-      }
-      
-      virtual bool isOptional() const
-      override
-      {
-         return true;
-      }
-   
-      virtual bool matchCharacter(const Char& character)
-      {
-         _matched = false;
-         
-         bool matched =
-            _match->match(_parser, character);
-         
-         bool succeeded = false;
-         
-         if (_match->_result == true)
-         {
-         
-            _matched = true;
-            succeeded = true;
-            
-         } 
-         else if (_match->_result == false)
-         {
+        virtual ~Optional() {
+        }
+        
+        virtual bool isOptional() const
+        override
+        {
+            return true;
+        }
+    
+        virtual bool matchCharacter(const Char& character)
+        {
             _matched = false;
-            succeeded = true;
-         }
+            
+            bool matched =
+                _match->match(_parser, character);
+            
+            bool succeeded = false;
+            
+            if (_match->result() == true)
+            {
+            
+                _matched = true;
+                succeeded = true;
+                
+            } 
+            else if (_match->result() == false)
+            {
+                _matched = false;
+                succeeded = true;
+            }
 
-         if (succeeded)
+            if (succeeded)
+                success();
+
+            return matched;
+        }
+        
+        virtual void eof(Parser* parser)
+        {
+            setup(parser);
+             
+            if ( _match->result() = nullopt )
+            {
+                _match->eof(parser);
+            }
+            
             success();
 
-         return matched;
-      }
-      
-      virtual void eof(Parser* parser)
-      {
-         
-         if (result() == nullopt) {
-            success();
-         }
-      }
-   };
+        }
+        
+
+    };
 
 
 }

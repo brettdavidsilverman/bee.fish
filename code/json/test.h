@@ -93,6 +93,16 @@ namespace BeeFishJSON
 
       ok &= testMatchDelete("False a", new Capture(new JSON()), "a");
       
+      ok &= testMatchDelete("Empty", new Capture(new JSON()), "", false, "");
+      
+      ok &= testMatchDelete("Blank", new Capture(new JSON()), " ", false, "");
+      
+      ok &= testMatchDelete("New line \\r", new Capture(new JSON()), "\r", false, "");
+      
+      ok &= testMatchDelete("New line \\n", new Capture(new JSON()), "\n", false, "");
+      
+      
+      
       cout << endl;
       
       return ok;

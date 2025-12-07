@@ -3,7 +3,7 @@
 
 #include "b-string.h"
 #include "../power-encoding/power-encoding.h"
-#include "../test/test-result.h"
+#include "../test/test.h"
 
 using namespace BeeFishTest;
 

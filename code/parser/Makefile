@@ -22,7 +22,7 @@ run_debug:	$(OUTPUT)
 	
 trace:	$(OUTPUT)
 	rm -f trace.txt
-	valgrind --tool=memcheck --leak-check=full --track-origins=yes --log-file="trace.txt"  $(OUTPUT) -test
+	valgrind --tool=memcheck -s --leak-check=full --track-origins=yes --log-file="trace.txt"  $(OUTPUT) -test
 	cat trace.txt
 
 clean:

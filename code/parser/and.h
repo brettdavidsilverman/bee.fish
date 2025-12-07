@@ -99,11 +99,15 @@ namespace BeeFishParser {
          if (!_parser)
             setup(parser);
             
+
          if (result() != nullopt)
             return;
-            
+     
+   
+   
          for (size_t index = _iterator; index < _inputs.size(); ++index)
          {
+
             Match* match = (*this)[index];
             
             if (match->result() == nullopt)
@@ -115,7 +119,7 @@ namespace BeeFishParser {
                return;
             }
          }
-         
+    
          success();
       }
       
@@ -124,7 +128,6 @@ namespace BeeFishParser {
          return _inputs[index];
       }
       
-
       
    };
 

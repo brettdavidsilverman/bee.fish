@@ -132,7 +132,7 @@ namespace BeeFishDatabase {
          const BeeFishBString::BString& value
       )
       {
-         return setItem(key, BeeFishMisc::nullopt, value.toData());
+         return setItem(key, BeeFishMisc::nullopt, value);
       }
 
       virtual BeeFishMisc::optional<BString> getContentType(Path path) {

@@ -22,33 +22,27 @@ namespace BeeFishJSON
         OnKeys _onkeys = {};
         OnValues _onvalues {};
 
-        bool _delete;
+        
     public:
          
         JSONParser(Match& match) :
             Parser(match)
         {
-            _delete = false;
         }
         
         JSONParser(Match* match) :
             Parser(*match)
         {
-             _delete = false;
         }
         
         JSONParser() :
-            Parser(_match = new JSON())
+            Parser(new JSON())
         {
-            _delete = true;
+            _deleteMatch = true;
         }
         
         virtual ~JSONParser()
         {
-            if (_delete) {
-                delete _match;
-                _match = nullptr;
-            }
         }
         
         
@@ -124,17 +118,19 @@ namespace BeeFishJSON
         virtual void onvalue(JSON* json) {
             
         }
-        
+        /*
         virtual bool matched() const {
             return _match->result() == true;
         }
-        
+        */
 
     };
 
     // Declared in json.h
     void JSON::success()
     {
+        
+    
         if (_parser->isJSONParser()) {
             jsonParser()->onvalue(this);
         }

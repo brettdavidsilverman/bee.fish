@@ -72,7 +72,7 @@ namespace BeeFishId
          return stream.str();
       }
 
-      BString epochMilliseconds() {
+      BString epochMilliseconds() const {
          return Timestamp::formatEpochMilliseconds(
             _milliseconds
          );
@@ -146,7 +146,7 @@ namespace BeeFishId
       {
          return decodeKey(key);
       }
-      
+      /*
       friend ostream& operator <<
       (
          ostream& out, const Id& id
@@ -159,7 +159,7 @@ namespace BeeFishId
          
          return out;
       }
-     
+     */
       friend PowerEncoding& operator <<
       ( 
          PowerEncoding& stream,
@@ -191,7 +191,7 @@ namespace BeeFishId
          return _name;
       }
       
-      std::string toString()
+      std::string toString() const
       {
 
          BeeFishScript::Object output;
@@ -288,7 +288,14 @@ namespace BeeFishId
       }
       
 
-   };
+    };
+   
+    ostream& operator << (ostream& output, const Id& id)
+    {
+        output << id.toString();
+        
+        return output;
+    }
 
 }
 

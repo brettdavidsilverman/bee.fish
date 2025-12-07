@@ -118,8 +118,6 @@ namespace BeeFishJSON
                 _items
             );
             
-          
-            
         }
         /*
         virtual void setup(Parser* parser)

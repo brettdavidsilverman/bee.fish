@@ -10,8 +10,6 @@
 #include "../b-string/b-string.h"
 #include "../json/json-parser.h"
 
-#include "test-result.h"
-
 #include "../Miscellaneous/Miscellaneous.hpp"
 
 namespace BeeFishTest
@@ -24,6 +22,11 @@ namespace BeeFishTest
    using namespace BeeFishParser;
    using namespace BeeFishMisc;
 
+   inline bool testResult(
+      string label,
+      bool ok
+   );
+   
 #ifdef SERVER
    inline bool testFile(
       Parser& parser,
@@ -46,8 +49,10 @@ namespace BeeFishTest
 
       // open the sample session file
       ifstream input(file);
-      parser.read(input);
       
+      parser.setMatch(match, false);
+      parser.read(input);
+    
       if (expectedResult != nullopt)
          parser.eof();
       
@@ -183,6 +188,17 @@ namespace BeeFishTest
 
       return success;
    }
+   
+   inline bool testResult(
+      string label,
+      bool ok
+   )
+   {
+      cout << '\t' << label << ": ";
+      BeeFishMisc::outputSuccess(ok);
+      return ok;
+   }
+   
 }
 
 #endif

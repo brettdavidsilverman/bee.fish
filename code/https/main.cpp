@@ -71,8 +71,10 @@ int main(int argc, const char* argv[])
       std::cout << "Setting up App Factories" << std::endl;
 
       appFactories.add<AuthenticationApp>();
-      //appFactories.add<StorageApp>();
       appFactories.add<FileSystemApp>();
+    
+      appFactories.add<StorageApp>();
+      
       appFactories.add<JSONApp>();
       appFactories.add<NotFoundApp>();
       boost::asio::io_context io_context(_threadCount);

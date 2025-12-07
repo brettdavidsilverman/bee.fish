@@ -26,9 +26,14 @@ namespace BeeFishHTTPS {
 
 
       virtual void handleResponse() {
-         
+          
+         authenticate();
+
          if (!authenticated())
-            return;
+         {
+            throw std::runtime_error("Not authenticated");
+         }
+         
 
          WebRequest* request = _session->request();
 
@@ -45,7 +50,9 @@ namespace BeeFishHTTPS {
 
          if (query.contains("id")) {
 
-            BString queryID = query["id"].decodeURI();
+            BString queryID = query["id"];
+            
+cerr << "QUERY**********" << queryID << "*" << endl;
 
             // Test for correct Id
             try {
@@ -56,9 +63,10 @@ namespace BeeFishHTTPS {
             }
 
          }
-
+        
+         
          if (query.contains("key")) {
-            key = query["key"].decodeURI();
+            key = query["key"];
          }
 
          path = request->path();
@@ -106,9 +114,9 @@ namespace BeeFishHTTPS {
             if ( _contentLength == 0 )
                deleteData();
             else {
-               _bookmark["Content length"]._setData(_contentLength);
+               _bookmark["Content length"].setData(_contentLength);
                _bookmark["Content type"].setData(contentType);
-               _bookmark["Page count"]._setData(pageIndex);
+               _bookmark["Page count"].setData(pageIndex);
             }
 
             returnJSON = true;
@@ -123,7 +131,7 @@ namespace BeeFishHTTPS {
 
             if (contentType.length()) {
                _status = 200;
-                _bookmark["Content length"]._setData(_contentLength);
+                _bookmark["Content length"].setData(_contentLength);
                _serve = App::SERVE_DATA;
                returnJSON = false;
             }

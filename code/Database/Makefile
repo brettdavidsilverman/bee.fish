@@ -6,7 +6,8 @@ OUTPUT = $(BUILD)/Database
 LARGE = ../../../large.json
 
 $(OUTPUT):	$(DEPS)
-	$(CC) $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -lstdc++fs -lrt
+	$(CC) $(CFLAGS) main.cpp -o $(OUTPUT) -lpthread -lstdc++fs 
+#-lrt
 
 all:	$(OUTPUT)
 
@@ -20,8 +21,10 @@ run_time:	$(OUTPUT)
 	time $(OUTPUT) -large
 	
 trace:	$(OUTPUT)
-	strace -c $(OUTPUT) -large
-	
+	rm -f trace.txt
+	- valgrind --tool=memcheck -s --leak-check=full --track-origins=yes --log-file="trace.txt"  $(OUTPUT) -test
+	cat trace.txt
+
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -rdynamic -DTIME
 debug:	$(OUTPUT)

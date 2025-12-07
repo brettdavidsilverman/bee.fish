@@ -3,15 +3,6 @@
 
 namespace BeeFishTest
 {
-   inline bool testResult(
-      string label,
-      bool ok
-   )
-   {
-      cout << '\t' << label << ":\t";
-      BeeFishMisc::outputSuccess(ok);
-      return ok;
-   }
    
    /*
    inline int hasArg(

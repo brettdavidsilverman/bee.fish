@@ -51,13 +51,16 @@ namespace BeeFishParser
         
     public:
         Match* _match;
+        Match* _byteMatch = nullptr;
         Char _character = "";
         Char _lastCharacter = "";
+        bool _deleteMatch = false;
         
     protected:
                  
         Parser() : _match(nullptr)
         {
+
         }
         
     public:
@@ -65,7 +68,7 @@ namespace BeeFishParser
         Parser(Match* match) :
             _match(match)
         {
-            _match->setup(this);
+
         }
 
         Parser(Match& match) :
@@ -74,15 +77,22 @@ namespace BeeFishParser
         }
         
         
-        void setMatch(Match& match) {
+        void setMatch(Match& match, bool deleteMatch) {
+            if (_match && _deleteMatch)
+                delete _match;
             _match = &match;
             _charCount = 0;
             _dataBytes = -1;
+            
+            _deleteMatch = deleteMatch;
         }        
 
         virtual ~Parser()
         {
-
+            if (_deleteMatch) {
+                delete _match;
+                _match = nullptr;
+            }
         }
         
         Match* getMatch() {
@@ -134,7 +144,7 @@ namespace BeeFishParser
     
                     --_dataBytes;
                     
-                    matched = _match->match(this, c);
+                    matched = _byteMatch->match(c);
                     
                     if (_dataBytes == 0)
                     {
@@ -172,7 +182,7 @@ namespace BeeFishParser
                 if (i == -1)
                     break;
                     
-                if (_match->result() != nullopt)
+                if (result() != nullopt)
                     break;
                     
                     
@@ -199,8 +209,14 @@ namespace BeeFishParser
                 
                     
             }
-            
+/*
+            if (i == -1 && _match->result() == nullopt)
+                _match->eof(this);
 
+cerr << "PARSER I: " << -1 << endl;
+cerr << "PARSER RESULT: " << result() << endl;
+cerr << "MATCH RESULT: " << _match->result() << endl;
+*/
             if (result() == true)
                 success();
             else if (result() == false)
@@ -268,8 +284,9 @@ namespace BeeFishParser
             return false;
         }
 
-        void setDataBytes(SSize dataBytes) {
+        void setDataBytes(Match* byteMatch, SSize dataBytes) {
             _dataBytes = dataBytes;
+            _byteMatch = byteMatch;
         }
         
         virtual void eof() {
@@ -337,7 +354,10 @@ namespace BeeFishParser
         
         virtual Match* match()
         {
-            return _match->match();
+            if (_match)
+                return _match->match();
+                
+            return nullptr;
         }
     };
     
@@ -367,7 +387,7 @@ namespace BeeFishParser
         if (_match)
             _match->fail();
         
-        if (match() == _parser->match())
+        if (_parser && match() == _parser->match())
         {
             _parser->fail();
         }

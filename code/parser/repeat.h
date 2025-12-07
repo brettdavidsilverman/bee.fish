@@ -9,7 +9,7 @@ namespace BeeFishParser
 	template<class T>
 	class Repeat : public Match
 	{
-	protected:
+	public:
 		T* _item = nullptr;
 
 	public:
@@ -109,6 +109,18 @@ namespace BeeFishParser
             
         }
         
+        virtual optional<bool> result() const
+        override
+        {
+            if (_result != nullopt)
+                return _result;
+                
+            if (_item)
+                return _item->result();
+                
+            return Match::result();
+        }
+        
         virtual void eof(Parser* parser) {
 
            setup(parser);
@@ -128,6 +140,7 @@ namespace BeeFishParser
            }
            else
               fail();
+              
 
         }
         

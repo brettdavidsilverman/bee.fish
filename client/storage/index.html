@@ -82,7 +82,8 @@ setStorage("remoteStorage");
          <label for="storageURL">Storage URL (remote)</label><br>
          <input type="text" id="storageURL">
          <script>
-document.getElementById("storageURL").value = document.location;            
+         
+document.getElementById("storageURL").value = document.location;
          </script>
       </form>
 
@@ -115,9 +116,10 @@ function changeId(newId)
 {
    document.getElementById("setKey").value = "";
    url = "?id=" + btoa(newId);
+
    key = Id.fromKey(newId);
-   document.getElementById("link").href = url;
-   document.getElementById("storageURL").value = url;
+   document.getElementById("link").href =
+       document.getElementById("storageURL").value + url;
    
 }
          </script>

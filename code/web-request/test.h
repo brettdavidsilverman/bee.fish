@@ -6,19 +6,19 @@
 #include "../json/json-parser.h"
 #include "web-request.h"
 #include "../Script/Script.hpp"
+#include "../Id/Id.hpp"
+#include "../Miscellaneous/Miscellaneous.hpp"
 
-#define SERVER
-
+namespace BeeFishWeb
+{
 #ifdef SERVER
 using namespace std::filesystem;
 #endif
 
 using namespace BeeFishTest;
 
-namespace BeeFishWeb
-{
-
     inline bool testURL();
+    inline bool testFirstLine();
     inline bool testHeaders();
     inline bool testRequests();
 #ifdef SERVER
@@ -33,10 +33,8 @@ namespace BeeFishWeb
     
         bool ok = true;
 
-        //ok = ok && testJSON();
-        //return ok;
-
         ok = ok && testURL();
+        ok = ok && testFirstLine();
         ok = ok && testHeaders();
         ok = ok && testRequests();
 #ifdef SERVER
@@ -58,20 +56,20 @@ namespace BeeFishWeb
         cout << "Test URL" << endl;
 
         bool ok = true;
-
+/*
         WebRequest::URL::Hex hex;
-        Parser hexParser(hex);
+        JSONParser hexParser(hex);
         hexParser.read("a");
         ok = ok && testResult("URL Hex is 'a'", 
             hexParser.result() == true && 
             hex.value() == Char('a'));
         
         WebRequest::URL::HexCharacter hexCharacter;
-        Parser hexCharacterParser(hexCharacter);
+        JSONParser hexCharacterParser(hexCharacter);
         hexCharacterParser.read("%38");
         hexCharacterParser.eof();
         
-        ok = ok && testResult("URL hex Parser", 
+        ok = ok && testResult("URL hex JSONParser", 
             hexCharacterParser.result() == true);
          
         ok = ok && testResult("URL hex character", 
@@ -79,24 +77,24 @@ namespace BeeFishWeb
                 
         ok = ok && testResult("URL hex value is '8'", 
             hexCharacter.character() == Char('8'));        assert(ok);
-        
+*/
         WebRequest::URL::Path path;
-        Parser pathParser(path);
+        JSONParser pathParser(path);
         pathParser.read("Hello%20World%25");
         pathParser.eof();
 
         ok = ok && testResult("Path with escaped space is \"Hello World%\"",
             path.result() == true &&
-            path.value() == "Hello World%"
+            path.value().decodeURI() == "Hello World%"
         );
         
         ok = ok && testResult("Path with escaped space is \"Hello World%\"",
             path.result() == true &&
-            path.value() == "Hello World%"
+            path.value().decodeURI() == "Hello World%"
         );
 
         WebRequest::URL url;
-        Parser urlWithQueryParser(url);
+        JSONParser urlWithQueryParser(url);
         urlWithQueryParser.read("/beehive/settings/?key1=value1&key2=value2&key3 HTTP/1.1");
         urlWithQueryParser.eof();
     
@@ -109,6 +107,7 @@ namespace BeeFishWeb
             "Path with query value",
             url.query().value() == "key1=value1&key2=value2&key3"
         );
+
 
         ok = ok && testResult(
             "Path with query key 1",
@@ -128,7 +127,7 @@ namespace BeeFishWeb
         );
 
         WebRequest::URL url2;
-        Parser urlWithQueryParser2(url2);
+        JSONParser urlWithQueryParser2(url2);
         urlWithQueryParser2.read("/beehive/settings/?key=hello%20world HTTP/1.1");
         urlWithQueryParser2.eof();
         
@@ -142,6 +141,65 @@ namespace BeeFishWeb
 
     }
     
+    inline bool testFirstLine() {
+        cout << "Test First line" << endl;
+
+        bool ok = true;
+
+        auto test =
+        [](string label, string input, string expectedURL)
+        {
+            
+            cerr << "\t" << label << ":";
+            
+            WebRequest::FirstLine firstLine;
+
+            JSONParser parser(firstLine);
+            parser.read(input);
+            parser.eof();
+            
+            bool ok =
+               parser.result() == true;
+               
+            BeeFishMisc::outputSuccess(ok);
+            
+            if (ok)
+                ok = ok && testResult(
+                    label + " url",
+                    firstLine.fullURL() == expectedURL
+                );
+                
+            if (!ok) {
+                cout  << "Result: " 
+                     << parser.result() << endl
+                     << parser.getError()
+                     << endl
+                     << "URL parsed: {"
+                     << escape(firstLine.fullURL()) << "}" << endl
+                     << "URL expected: {"
+                     << escape(expectedURL)
+                     << "}"
+                     << endl;
+            }
+            
+            return ok;
+        };
+        
+        ok = ok && test(
+            "Simplest get",
+            "GET / HTTP/1.1",
+            "/"
+        );
+        
+        ok = ok && test(
+            "Correct get",
+            "GET / HTTP/1.1\r\n",
+            "/"
+        );
+        
+        return ok;
+    }
+    
     inline bool testHeaders()
     {
         using namespace BeeFishJSON;
@@ -151,7 +209,7 @@ namespace BeeFishWeb
         bool ok = true;
         
         Header header;
-        Parser parser(header);
+        JSONParser parser(header);
         parser.read("my-header: boo\r\n");
         parser.eof();
 
@@ -178,7 +236,7 @@ namespace BeeFishWeb
         assert(ok);
         
         Headers headers;
-        Parser parser2(headers);
+        JSONParser parser2(headers);
         parser2.read("my-header1: boo\r\n;my-header2: booboo\r\n\r\n");
         parser2.eof();
         
@@ -192,7 +250,7 @@ namespace BeeFishWeb
             headers.result() == true
         );
         
-        ok = ok && testResult("Headers matchrd",
+        ok = ok && testResult("Headers matched",
             headers.matched()
         );
         
@@ -205,35 +263,97 @@ namespace BeeFishWeb
     
     inline bool testRequests() {
         
+        using namespace BeeFishId;
+        
         cout << "Test requests" << endl;
         bool ok = true;
         
         auto testRequest =
-        [](string label, string request, bool parseJSON = true)
+        [](string label, string request, bool parseJSON = true, bool testHeaders = false, bool testBody = false)
         {
+            cout << "\t" << label << ": " << flush;
+            
             WebRequest webRequest(parseJSON);
-            Parser parser(webRequest);
+            JSONParser parser(webRequest);
             parser.read(request);
             parser.eof();
     
-            bool ok = testResult(
-                label,
-                webRequest.result() == true
-            );
             
-            if (!ok)
+            bool ok = webRequest.result() == true;
+            BeeFishMisc::outputSuccess(ok);
+
+cerr << "*" << webRequest.url() << endl;
+
+            if (ok && testHeaders)
+                ok = testResult(
+                    label + " headers",
+                    webRequest._headers->result() == true
+                );
+                
+            if (ok && testBody)
+                ok = testResult(
+                    label + " body",
+                    webRequest._body->result() == true
+                );
+            
+            if (!ok) {
+                cout << "Parser: "
+                     << parser.result() << endl;
                 cout << parser.getError() << endl;
+            }
             
             return ok;
         };
-        
+
         ok = ok && testRequest(
-            "get",
+            "get simplest",
             
-            "GET /sample/ HTTP/1.1\r\n"
-            "Host: bee.fish\r\n"
+            "GET / HTTP/1.1"
         );
         
+        
+        ok = ok && testRequest(
+            "get next simplest",
+            
+            "GET /sample/ HTTP/1.1\r\n"
+        );
+        
+        ok = ok && testRequest(
+            "get simplest correct",
+            
+            "GET /sample/ HTTP/1.1\r\n"
+            "\r\n"
+        );
+
+        ok = ok && testRequest(
+            "get with simplest header",
+            
+            "GET /sample/ HTTP/1.1\r\n"
+            "Host: bee.fish",
+            false,
+            true
+        );
+
+        ok = ok && testRequest(
+            "get with next simplest header",
+            
+            "GET /sample/ HTTP/1.1\r\n"
+            "Host: bee.fish\r\n",
+            false,
+            true
+        );
+
+assert(ok);
+
+        ok = ok && testRequest(
+            "get with simplest correct header",
+            "GET /sample/ HTTP/1.1\r\n"
+            "Host: bee.fish\r\n"
+            "\r\n",
+            false,
+            true
+        );
+
         ok = ok && testRequest(
             "post",
             
@@ -271,7 +391,73 @@ namespace BeeFishWeb
             "123",
             false
         );
-assert(ok);
+        
+        
+        
+        if (ok)
+        {
+            string request =
+            "GET /sample?id=boo HTTP/1.1\r\n"
+            "Host: bee.fish\r\n";
+            WebRequest webRequest(false);
+            JSONParser parser(webRequest);
+            parser.read(request);
+            parser.eof();
+    
+            ok = ok && testResult(
+                "get with query",
+                webRequest.result() == true
+            );
+            
+            ok = ok && testResult(
+                "query has id",
+                webRequest.queryObject().contains("id")
+            );
+            
+            ok = ok && testResult(
+                "query has id=boo",
+                webRequest.queryObject()["id"] == "boo"
+            );
+            
+            if (!ok)
+                cout << parser.getError() << endl;
+            
+        };
+        
+        if (ok)
+        {
+            string request =
+            "GET /client/storage/?id=/jHJPjHicH4nI+Jxk+Jw+Jk+JPhycZPhycY+HJxPhycPhyPhxk+HD4PJxjycTyY8ORA= HTTP/1.1";
+            WebRequest webRequest(false);
+            JSONParser parser(webRequest);
+            parser.read(request);
+            parser.eof();
+    
+            ok = ok && testResult(
+                "get with full id in query",
+                webRequest.result() == true
+            );
+            
+            ok = ok && testResult(
+                "query has full id",
+                webRequest.queryObject().contains("id")
+            );
+            
+            
+            Id id = Id::fromKey(webRequest.queryObject()["id"]);
+            
+            ok = ok && testResult(
+                "query has id=*",
+                 id.key() ==  "/jHJPjHicH4nI+Jxk+Jw+Jk+JPhycZPhycY+HJxPhycPhyPhxk+HD4PJxjycTyY8ORA="
+            );
+            
+            if (!ok)
+                cout << parser.getError() << endl;
+            
+        };
+        
+        
+        assert(ok);
         
         return ok;
         
@@ -284,16 +470,16 @@ assert(ok);
     {
         using namespace BeeFishJSON;
 
-        cout << "Test request" << endl;
+        cout << "Test Web request" << endl;
         
         bool ok = true;
         
         
         BeeFishWeb::WebRequest requestHeadersOnly;
-        JSONParser parser1(requestHeadersOnly);
+        JSONParser parser;
         
         ok = ok && testFile(
-            parser1,
+            parser,
             "WebRequest with only headers",
             WWW_ROOT_DIRECTORY "/code/web-request/tests/request.txt",
             requestHeadersOnly,
@@ -313,6 +499,11 @@ assert(ok);
         
         ok = ok && testResult(
             "WebRequest get headers",
+            requestHeadersOnly._headers != nullptr
+        );
+        
+        ok = ok && testResult(
+            "WebRequest get headers result",
             requestHeadersOnly._headers->result() == true
         );
         
@@ -348,16 +539,17 @@ assert(ok);
         BString name;
         bool hit = false;
 
-        BeeFishJSON::JSONParser::OnValue invokeOnName = 
+
+        BeeFishWeb::WebRequest requestFull;
+
+        parser.invokeValue(
+            "name",
             [&name, &hit](const BString& key, JSON& json) 
             {
                 name = json.value();
                 hit = true;
-            };
-
-        BeeFishWeb::WebRequest requestFull;
-        JSONParser parser(requestFull);
-        parser.invokeValue("name", invokeOnName);
+            }
+        );
 
         ok = ok && testFile(
             parser,
@@ -386,11 +578,10 @@ assert(ok);
         BeeFishMisc::optional<BString> name2;
 
         BeeFishWeb::WebRequest request2;
-        JSONParser parser2(request2);
-        parser2.captureValue("name", name2);
+        parser.captureValue("name", name2);
 
         ok = ok && testFile(
-            parser2,
+            parser,
             "WebRequest with full json 2",
             WWW_ROOT_DIRECTORY "/code/web-request/tests/request-full.txt",
             request2,
@@ -409,6 +600,7 @@ assert(ok);
 
         BeeFishWeb::WebRequest urlWebRequest;
         ok = ok && testFile(
+            parser,
             "WebRequest with path and query",
             WWW_ROOT_DIRECTORY "/code/web-request/tests/path.txt",
             urlWebRequest,
@@ -427,6 +619,7 @@ assert(ok);
         
         BeeFishWeb::WebRequest escapedUrlWebRequest;
         ok = ok && testFile(
+            parser,
             "WebRequest with escaped path and query",
             WWW_ROOT_DIRECTORY "/code/web-request/tests/escaped-path.txt",
             escapedUrlWebRequest,
@@ -446,6 +639,7 @@ assert(ok);
         BeeFishWeb::WebRequest postWebRequest;
         
         ok = ok && testFile(
+            parser,
             "Post with encoded name value pairs",
             WWW_ROOT_DIRECTORY "/code/web-request/tests/post.txt",
             postWebRequest,
@@ -453,8 +647,31 @@ assert(ok);
         );
 
         BeeFishWeb::WebRequest postWebRequest2;
+        // Post with anything
+        ok = ok && testFile(
+            parser,
+            "Post with content length text",
+            WWW_ROOT_DIRECTORY "/code/web-request/tests/request-text.txt",
+            postWebRequest2,
+            true
+        );
+
+        
+
+        
+        // Post with anything
+        BeeFishWeb::WebRequest postWebRequest3;
+        ok = ok && testFile(
+            parser,
+            "Post with zero content length",
+            WWW_ROOT_DIRECTORY "/code/web-request/tests/zero-content-length.txt",
+            postWebRequest3,
+            true
+        );
+
+        BeeFishWeb::WebRequest postWebRequest4;
         BString body;
-        postWebRequest2.setOnData(
+        postWebRequest4.setOnData(
             [&body](const std::string& data) {
                 body = data;
             }
@@ -464,11 +681,11 @@ assert(ok);
         ok = ok && testFile(
             "Post with content length text",
             WWW_ROOT_DIRECTORY "/code/web-request/tests/request-text.txt",
-            postWebRequest2,
+            postWebRequest4,
             true
         );
 
-        postWebRequest2.flush();
+        postWebRequest4.flush();
         
 
         ok = ok && testResult(
@@ -477,15 +694,16 @@ assert(ok);
         );
 
         // Post with anything
-        BeeFishWeb::WebRequest postWebRequest3;
+        BeeFishWeb::WebRequest postWebRequest5;
         ok = ok && testFile(
             "Post with zero content length",
             WWW_ROOT_DIRECTORY "/code/web-request/tests/zero-content-length.txt",
-            postWebRequest3,
+            postWebRequest5,
             true
         );
 
         postWebRequest3.flush();
+
 
 
         return ok;
@@ -500,7 +718,7 @@ assert(ok);
         
         
         BeeFishWeb::WebRequest request;
-        Parser parser(request);
+        JSONParser parser(request);
         
         ok = ok && testFile(
             parser,

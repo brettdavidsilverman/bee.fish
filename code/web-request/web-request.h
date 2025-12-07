@@ -28,7 +28,7 @@ namespace BeeFishWeb {
         class URL : public Match
         {
         public:
-
+/*
             class Hex : public Capture {
             public:
                 Hex() : Capture(
@@ -82,34 +82,42 @@ namespace BeeFishWeb {
                 }
 
             };
-
-            class PathCharacter : public BeeFishParser::Or {
+*/
+            class PathCharacter : public BeeFishParser::Not {
             public:
-                PathCharacter() : Or (
+                PathCharacter() : Not(
+                    new BeeFishParser::Or(
+                        new BeeFishParser::Character(' '),
+                        new BeeFishParser::Character('?')
+                    )
+                    /*
+                    
                     new Range('0', '9'),
                     new Range('a', 'z'),
                     new Range('A', 'Z'),
                     new BeeFishParser::Character('+'),
                     new BeeFishParser::Character('.'),
-                    //new BeeFishParser::Character('='),
-                    //new BeeFishParser::Character('&'),
+                    new BeeFishParser::Character('='),
+                  //  new BeeFishParser::Character('?'),
+                    new BeeFishParser::Character('&'),
                     new BeeFishParser::Character('-'),
                     new BeeFishParser::Character('_'),
                     new BeeFishParser::Character('['),
                     new BeeFishParser::Character(']'),
                     new BeeFishParser::Character('/'),
                     new HexCharacter()
+                    */
                 )
                 {
 
                 }
-                
+                /*
                 virtual const Char& character() const
                 override
                 {
                     return item().character();
                 }
-
+*/
 
             };
 
@@ -134,24 +142,75 @@ namespace BeeFishWeb {
             };
 
             class Query;
+            
+            class KeyCharacter : public BeeFishParser::Not {
+            public:
+                KeyCharacter() : Not(
+                    new BeeFishParser::Or(
+                        new BeeFishParser::Character('='),
+                        new BeeFishParser::Character('&'),
+                        new BeeFishParser::Character(' ')
+                    )
+                )
+                {
+
+                }
+            };
+            
+            class Key : public Repeat<KeyCharacter>
+            {
+            public:
+                Key() : Repeat<KeyCharacter>()
+                {
+                }
+            };
+            
+            class ValueCharacter : public BeeFishParser::Not {
+            public:
+                ValueCharacter() : Not(
+                    new BeeFishParser::Or(
+                        new BeeFishParser::Character('&'),
+                        new BeeFishParser::Character(' ')
+                    )
+                )
+                {
+
+                }
+            };
+            
+            class Value : public Repeat<ValueCharacter>
+            {
+            public:
+                Value() : Repeat<ValueCharacter>()
+                {
+                }
+            };
+            
+            
 
             class KeyValuePair : public BeeFishParser::And {
             public:
                 friend class Query;
 
             protected:
-                Path* _key;
-                Path* _value;
+                BString _key;
+                BString _value;
 
             public:
                 KeyValuePair() : And ()
                 {
                     _inputs = {
-                        _key = new Path(),
+                        new Capture(
+                            new Key(),
+                            _key
+                        ),
                         new Optional(
                             new And(
                                 new BeeFishParser::Character('='),
-                                _value = new Path()    
+                                new Capture(
+                                    new Value(),
+                                   _value
+                                )
                             )
                         ),
                         new Optional(
@@ -160,6 +219,7 @@ namespace BeeFishWeb {
                     };
 
                 }
+                
 
             };
 
@@ -169,17 +229,14 @@ namespace BeeFishWeb {
             {
             protected:
                 BString _value;
-
             public:
                 Query() : Repeat<KeyValuePair>() { 
                     
                 }
 
                 virtual void matchedItem(KeyValuePair* item) {
-                    BString key = item->_key->value();
-                    BString value = "";
-                    if (item->_value->matched())
-                        value = item->_value->value();
+                    BString key = item->_key.decodeURI();
+                    BString value = item->_value.decodeURI();
                     (*this)[key] = value;
                     Repeat<KeyValuePair>::matchedItem(item);
                 }
@@ -198,6 +255,13 @@ namespace BeeFishWeb {
 
                 virtual bool contains(const BString& test) {
                     return count(test) > 0;
+                }
+                
+                virtual void success() 
+                override
+                {
+                    cerr << "{" << _value << "}";
+                    Repeat<KeyValuePair>::success();
                 }
                 
             };         
@@ -241,7 +305,8 @@ namespace BeeFishWeb {
             {
                 return (*_query);
             }
-
+            
+            
         };
  
         class FirstLine : public Match
@@ -270,13 +335,14 @@ namespace BeeFishWeb {
                 {
 
                 }
-
+                
             };
 
         public:
             BString _method;
             URL*     _url = nullptr;
             BString _version;
+            NewLine* _newLine;
         private:
             BString _fullURL;
         public:
@@ -295,9 +361,15 @@ namespace BeeFishWeb {
                     return;
                     
                 _match = new BeeFishParser::And(
-                    new Capture(
-                        new Method(),
-                        _method
+                    new Invoke(
+                        new Capture(
+                            new Method(),
+                            _method
+                        ),
+                        [this](Match* match) {
+                            _method = _method.toUpper();
+                            return true;
+                        }
                     ),
                     new Blankspaces(1),
                     new Capture(
@@ -309,13 +381,14 @@ namespace BeeFishWeb {
                         new Version(),
                         _version
                     ),
-                    new NewLine()
+                    new Optional(
+                        _newLine = new NewLine()
+                    )
                 );
                 
                 Match::setup(parser);
                 
             }
-            
             
             const URL& url() const {
                 return *_url;
@@ -326,16 +399,17 @@ namespace BeeFishWeb {
             }
 
             const BString fullURL() const {
-                return _fullURL.decodeURI();
+                return _fullURL;
             }
 
         };
 
-        FirstLine*              _firstLine = nullptr;
-        BeeFishWeb::Headers* _headers    = nullptr;
-        Body*                     _body = nullptr;
-        BStream::OnBuffer     _ondata = nullptr;
-        bool                      _parseJSON = true;
+        FirstLine*           _firstLine = nullptr;
+        BeeFishWeb::Headers* _headers   = nullptr;
+        Body*                _body      = nullptr;
+        Optional*            _optionalBody = nullptr;
+        BStream::OnBuffer    _ondata    = nullptr;
+        bool                 _parseJSON = true;
     public:
 
         WebRequest(bool parseJSON = true) :
@@ -343,65 +417,45 @@ namespace BeeFishWeb {
             _parseJSON(parseJSON)
             
         {
-        }
-
-        virtual void setup(Parser* parser) {
+                          
+            _firstLine = new FirstLine();
+            _headers   = new Headers();
+            _body      = new Body( _parseJSON);
             
-            if (_parser)
-                return;
-              
-            _firstLine  = new FirstLine();
-            _headers    = new Headers();
-            _body       = nullptr;
+            
+            auto onheaders =
+            [this](Match* match) 
+            {
 
+                if (method() == "POST") {
+                    _body->setup(_headers);
+                }
+                
+                return true;
+            };
+            
+    
             _match = new BeeFishParser::And(
                 _firstLine,
-                new Invoke(
-                    new BeeFishParser::And(
+                new Optional(
+                    new NewLine()
+                ),
+                new Optional(
+                    new Invoke(
                         _headers,
-                        new Optional(
-                            new NewLine()
-                        )
-                    ),
-                    [this, parser](Match* match) 
-                    {
-                        BeeFishParser::And* _and = 
-                                (BeeFishParser::And*)_match;
-                                
-                        if ( _firstLine->_method == "POST")
-                        {
-          
-                            // Currently we only handle json or image/jpeg
-                            if (_headers->contains("content-length") ) {
-                                
-                                if (_headers->at("content-length") == "0") {
-                                    return true;
-                                }
-                            }
-                        
-                            _body = new Body(_parseJSON);
-                            _body->setup(parser, _headers);
-                            _body->setOnBuffer(_ondata);
-                            _and->push_back(_body);
-                            
-                        }
-                        
-                        _and->push_back(
-                            new Optional(
-                                new NewLine()
-                            )
-                        );
-                        
-                        return true;
-                    }
+                        onheaders
+                    )
                 ),
                 new Optional(
                     new NewLine()
+                ),
+                _optionalBody = new Optional(
+                    _body
                 )
             );
             
 
-            Match::setup(parser);
+
           
         }
      
@@ -409,42 +463,26 @@ namespace BeeFishWeb {
         {
         }
         
-        virtual optional<bool> result() {
-            if (_body)
-                return _body->result();
-            return Match::result();
-        }
         
-        virtual bool match(Parser* parser, const Char& character) 
-        override
+        
+        virtual void setOnData(BStream::OnBuffer ondata)
         {
-            bool matched;
-            if (_body) {
-                matched = _body->match(parser, character);
-            }
-            else
-                matched = _match->match(parser, character);
-                
-            return matched;
-            
-        }
-
-        virtual void setOnData(BStream::OnBuffer ondata) {
             _ondata = ondata;
-            if (_body)
-                _body->setOnBuffer(_ondata);
+            _body->setOnBuffer(ondata);
         }
 
-        virtual void flush() {
-            if (_body)
-                _body->flush();
-        }
         
+        
+        virtual void flush()
+        {
+            if (_body)
+               _body->flush();
+        }
         
 
         virtual bool hasJSON()
         {
-            return _body && _body->hasJSON();
+            return _optionalBody->_matched && _body->hasJSON();
         }
 
         virtual BeeFishJSON::JSON& json()

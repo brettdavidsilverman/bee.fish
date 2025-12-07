@@ -8,43 +8,59 @@
 #include "../json/json-parser.h"
 
 using namespace BeeFishParser;
-      
+        
 namespace BeeFishWeb {
 
-   class ContentLength : public Match
-   {
-   public:
-      size_t       _contentCount;
-      const size_t _contentLength;
-   public:
+    class ContentLength : public Match
+    {
+    public:
+        Size _contentCount = 0;
+        Size _contentLength = 0;
+    public:
 
-      ContentLength(size_t contentLength) :
-         _contentCount(0),
-         _contentLength(contentLength)
-      {
-      }
+        ContentLength() :
+            _contentCount(0)
+        {
+        }
 
-      virtual bool matchCharacter(const Char& character) {
-         
-         ++_contentCount;
+        virtual bool match(Byte b) {
+            
+            if (++_contentCount == _contentLength) {
+                success();
+            }
+            
+            return true;
+        }
+        
+        virtual void eof(Parser* parser)
+        override
+        {
+             if (_contentCount != _contentLength)
+                  fail();
+        }
+        
+        virtual void setup(Headers* headers)
+        {
+            if (headers->contains("content-length")) {
+                     
+                std::string contentLengthString = 
+                    (*headers)["content-length"].str();
+                          
+                _contentLength =
+                    atol(contentLengthString.c_str());
+                    
+                _parser->setDataBytes(this, _contentLength);
+          
+            }
+            
+            if (_contentLength == 0)
+                success();
+        }
+        
+        
 
-         if ( _contentCount > _contentLength)
-         {
-             fail();
-             return false;
-         }
-         
-         if (_contentCount == _contentLength) {
-            success();
-         }
-         
-         return true;
-      }
-      
-      
-
-   };
-   
+    };
+    
 
 };
 

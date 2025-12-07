@@ -441,6 +441,7 @@ namespace BeeFishParser {
             parser.read("A");
             parser.eof();
             ok &= testResult("Read not first", parser.result() == true && test->result() == true);
+            delete test;
             assert(ok);
         }
         
@@ -450,6 +451,7 @@ namespace BeeFishParser {
             parser.read("ABC");
             parser.eof();
             ok &= testResult("Read all", parser.result() == false && test->result() == false);
+            delete test;
             assert(ok);
         }
         

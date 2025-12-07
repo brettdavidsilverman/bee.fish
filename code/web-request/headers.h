@@ -24,7 +24,8 @@ namespace BeeFishWeb {
             HeaderNameCharacter() : Not(
                 new BeeFishParser::Or(
                     new BeeFishParser::Character(":"),
-                    new NewLine()
+                    new BeeFishParser::Character("\r"),
+                    new BeeFishParser::Character("\n")
                 )
             )
             {
@@ -64,28 +65,35 @@ namespace BeeFishWeb {
 
             Match*
                headerName =
-                  new Repeat<HeaderNameCharacter>();
+                  new Repeat<HeaderNameCharacter>(1);
             
             Match*
                headerValue =
                   new Repeat<HeaderValueCharacter>();
 
             _match = new BeeFishParser::And(
-               new Capture(
-                  headerName,
-                  this->_name
-               ),
-               colon,
-               new Capture(
-                  headerValue,
-                  this->_value
-               ),
-               new NewLine()
+                new Capture(
+                    headerName,
+                    this->_name
+                ),
+                
+                colon,
+                
+                new Capture(
+                    headerValue,
+                    this->_value
+                ),
+                
+                new Optional(
+                    new NewLine()
+                )
+                
             );
             
             
         }
-         
+        
+        
          
         
     };
@@ -104,6 +112,8 @@ namespace BeeFishWeb {
         {
         }
          
+        
+        
         virtual void matchedItem(Header* header)
         override
         {
@@ -164,7 +174,7 @@ namespace BeeFishWeb {
         
         
    
-      };
+    };
       
     
 
