@@ -150,11 +150,7 @@ namespace BeeFishParser {
         
         virtual void setResult(optional<bool> newResult)
         {
-            if (_match)
-                 _match->setResult(newResult);
-                
             _result = newResult;
-            
         }
 
         
@@ -198,7 +194,7 @@ namespace BeeFishParser {
              if (!_parser)
                  setup(parser);
                  
-             if (_match && _match->result() == nullopt)
+             if (_match) // && _match->result() == nullopt)
              {
                   _match->eof(_parser);
                   if (_match->result() == true)

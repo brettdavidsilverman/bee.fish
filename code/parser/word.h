@@ -7,68 +7,77 @@
 
 namespace BeeFishParser {
 
-   using namespace std;
-            
-   class Word : public Match {
-   protected:
-   
-      BString _word;
-      BString::const_iterator _index;
-   
-      virtual bool matchChar(const Char& character)
-      {
-         Size countMatches = 0;
-         for (auto c : character)
-         {
-            if (c != (*_index))
-               return false;
-               
-            countMatches++;
-            
-            if (++_index == _word.cend())
-               break;
-         }
-         
-         return countMatches == character.size();
-      }
-   
-   public:
-
-      Word(BString word) :
-         Match(),
-         _word(word)
-      {
-         _index = _word.cbegin();
-         _result = nullopt;
-      }
-     
-      virtual bool matchCharacter(const Char& character)
-      {
-         
-         bool matched = matchChar(character);
-         
-         if (matched)
-         {
-            if (_index == _word.end())
+    using namespace std;
+                
+    class Word : public Match {
+    protected:
+    
+        BString _word;
+        BString::const_iterator _index;
+    
+        virtual bool matchChar(const Char& character)
+        {
+            Size countMatches = 0;
+            for (auto c : character)
             {
-               success();
+                if (c != (*_index))
+                    return false;
+                    
+                countMatches++;
+                
+                if (++_index == _word.cend())
+                    break;
+            }
+            
+            return countMatches == character.size();
+        }
+    
+    public:
+
+        Word(BString word) :
+            Match(),
+            _word(word)
+        {
+            _index = _word.cbegin();
+            _result = nullopt;
+        }
+      
+        virtual bool matchCharacter(const Char& character)
+        {
+            
+            bool matched = matchChar(character);
+            
+            if (matched)
+            {
+                if (_index == _word.end())
+                {
+                    success();
+                }
+            
+            }
+            else
+            {
+                fail();
             }
          
-         }
-         else
-         {
-            fail();
-         }
-       
-         return matched;
-      }
-   
-      const BString& word() const
-      {
-         return _word;
-      }
-   
-   };
+            return matched;
+        }
+        
+        virtual void eof(Parser* parser)
+        {
+            setup(parser);
+            if (_index == _word.end())
+                success();
+            else
+                fail();
+        }
+    
+        const BString& word() const
+        {
+            return _word;
+        }
+    
+    };
 
 
 };

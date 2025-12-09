@@ -282,8 +282,6 @@ using namespace BeeFishTest;
             bool ok = webRequest.result() == true;
             BeeFishMisc::outputSuccess(ok);
 
-cerr << "*" << webRequest.url() << endl;
-
             if (ok && testHeaders)
                 ok = testResult(
                     label + " headers",
@@ -299,6 +297,19 @@ cerr << "*" << webRequest.url() << endl;
             if (!ok) {
                 cout << "Parser: "
                      << parser.result() << endl;
+                     
+                cout << "Headers: ";
+                
+                if (webRequest._headers) {
+                     cout << "1:" << webRequest._headers->result() << endl;
+                     
+                     webRequest._headers->eof(&parser);
+                     
+                     cout << "2: " << webRequest._headers->result() << endl;
+                }
+                else
+                     cout << " null ptr" << endl;
+                     
                 cout << parser.getError() << endl;
             }
             
@@ -360,7 +371,10 @@ assert(ok);
             "POST /sample/ HTTP/1.1\r\n"
             "Host: bee.fish\r\n"
             "\r\n"
-            "{}"
+            "{}",
+            true,
+            true,
+            true
         );
         
         ok = ok && testRequest(
@@ -369,7 +383,10 @@ assert(ok);
             "POST /sample/ HTTP/1.1\r\n"
             "Host: bee.fish\r\n"
             "\r\n"
-            "{}\r\n"
+            "{}\r\n",
+            true,
+            true,
+            true
         );
 
         ok = ok && testRequest(
@@ -378,7 +395,10 @@ assert(ok);
             "POST /sample/ HTTP/1.1\r\n"
             "Host: bee.fish\r\n"
             "\r\n"
-            "{\"method\":\"logon\",\"name\":\"Brett\",\"secret\":\"XATG4YZdKVn145VtbCZNl0DcNu/uh/UtnbebTOsSkfUHemzptLOb8lTYmo6JnhLhovGtgXXO1KSeXYIyRfsTtw==\"}"
+            "{\"method\":\"logon\",\"name\":\"Brett\",\"secret\":\"XATG4YZdKVn145VtbCZNl0DcNu/uh/UtnbebTOsSkfUHemzptLOb8lTYmo6JnhLhovGtgXXO1KSeXYIyRfsTtw==\"}",
+            true,
+            true,
+            true
         );
         
         ok = ok && testRequest(
@@ -386,10 +406,12 @@ assert(ok);
             
             "POST /sample/ HTTP/1.1\r\n"
             "Host: bee.fish\r\n"
-            "Content-length: 3\r\n"
+            "Content-length: 4\r\n"
             "\r\n"
-            "123",
-            false
+            "1234",
+            true,
+            true,
+            true
         );
         
         

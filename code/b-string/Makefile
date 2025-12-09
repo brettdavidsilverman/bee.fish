@@ -1,17 +1,20 @@
 BUILD  = ../../build
 OUTPUT = $(BUILD)/b-string
 CFLAGS = -std=c++17 -Wall -fmax-errors=1 -Ofast
-DEPS= char.h b-string.h bit-stream.h base64.h misc.h b-string-base.h stream.h test.h main.cpp Makefile
+DEPS   = char.h b-string.h bit-stream.h base64.h misc.h b-string-base.h stream.h test.h main.cpp Makefile
+
+all:	$(OUTPUT)
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lssl -lcrypto
 	
-test:	$(OUTPUT)
+test:	TEST = test
+test:	all
 	$(OUTPUT) -test
 
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
-debug:	$(OUTPUT)
+debug:	all
 
 clean:
 	rm -f $(OUTPUT)

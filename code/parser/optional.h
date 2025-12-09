@@ -11,7 +11,7 @@ namespace BeeFishParser {
     class Optional : public Match {
     public:
         bool _matched = false;
-
+        
     public:
         Optional() : Match() {
         }
@@ -61,7 +61,7 @@ namespace BeeFishParser {
         {
             setup(parser);
              
-            if ( _match->result() = nullopt )
+           // if ( _match->result() = nullopt )
             {
                 _match->eof(parser);
             }
@@ -69,7 +69,26 @@ namespace BeeFishParser {
             success();
 
         }
-        
+        /*
+        virtual optional<bool> result() const
+        override
+        {
+            if ( _match->result() == false)
+                return true;
+            
+            if (_match->result() == true)
+                return true;
+                
+            return _result;
+        }
+        */
+        /*
+        virtual void setResult(optional<bool> result)
+        override
+        {
+            _result = result;
+        }
+        */
 
     };
 

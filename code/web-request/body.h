@@ -57,14 +57,6 @@ namespace BeeFishWeb {
             
         }
         
-        virtual void eof(Parser* parser)
-        override
-        {
-cerr << "BODY EOF JSON RESULT: " << _json->result() << endl;
-
-            Match::eof(parser);
-        }
-        
         virtual bool hasJSON() const {
             return _json && _json->matched();            
         }

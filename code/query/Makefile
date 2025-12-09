@@ -3,7 +3,6 @@ OUTPUT=$(BUILD)/query
 CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=main.cpp query.h test.h version.h Makefile
 
-all:	$(BUILD)
 all:	$(OUTPUT)
 
 

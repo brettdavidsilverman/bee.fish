@@ -110,8 +110,7 @@ namespace BeeFishParser {
 
             Match* match = (*this)[index];
             
-            if (match->result() == nullopt)
-               match->eof(parser);
+            match->eof(parser);
             
             if (match->result() != true)
             {
