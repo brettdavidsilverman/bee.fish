@@ -7,59 +7,57 @@
 #include <map>
 #include <sstream>
 #include <functional>
-
-using namespace std;
+#include "match.h"
 
 namespace BeeFishParser {
+    
+using namespace std;
 
-   
-   
-   class Invoke : public Match
-   {
-   public:
-   
-      typedef std::function<bool(Match*)> Function;
-      Function _function = nullptr;
+    class Invoke : public Match
+    {
+    public:
+    
+        typedef std::function<bool(Match*)> Function;
+        Function _function = nullptr;
 
-   public:
-   
-      Invoke() {
-      }
+    public:
+    
+        Invoke(Match* match) : Match(match) {
 
-      Invoke(Match* match) : Match(match) {
+        }
 
-      }
+        Invoke(
+            Match* match,
+            Function func
+        ) :
+            Match(match),
+            _function(func)
+        {
+        }
 
-      Invoke(
-         Match* match,
-         Function func
-      ) :
-         Match(match),
-         _function(func)
-      {
-      }
+        virtual ~Invoke() {
+        }
 
-      virtual ~Invoke() {
-      }
+        virtual void success()
+        override
+        {
 
-      virtual void success()
-      override
-      {
-         if (_function) {
-            if (!_function(_match))
-            {
-               fail();
-               return;
+            if (_function) {
+                if (!_function(_match))
+                {
+                    fail();
+                    return;
+                }
             }
-         }
-         
-         Match::success();
-         
-      }
-      
-      
-      
-   };
+            
+            Match::success();
+            
+        }
+        
+        
+        
+    };
+
 
 
 

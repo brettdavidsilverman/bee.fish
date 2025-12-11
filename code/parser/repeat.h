@@ -33,9 +33,17 @@ namespace BeeFishParser
               delete _item;
 		}
         
-		virtual bool matchCharacter(const Char &character)
+		virtual bool match(
+            Parser* parser,
+            const Char &character
+        )
 		{
 
+            setup(parser);
+            
+            if (_result != nullopt)
+                return false;
+                
 			if (_item == nullptr) {
 				_item = createItem();
             }
@@ -46,6 +54,7 @@ namespace BeeFishParser
 
 			if (_item->result() == true)
 			{
+                //matched = true;
 
 				matchedItem(_item);
 
@@ -67,7 +76,7 @@ namespace BeeFishParser
 			}
 			else if (_item->result() == false)
 			{
-                matched = false;
+               // matched = false;
 				if (_matchedCount >= _minimum)
 				{
 					success();
@@ -118,31 +127,40 @@ namespace BeeFishParser
             if (_item)
                 return _item->result();
                 
+            
             return Match::result();
         }
         
         virtual void eof(Parser* parser) {
 
-           setup(parser);
-           
-          if (_item) // && _item->result() == nullopt)
-           {
-              _item->eof(parser);
-              if (_item->result() == true)
-                 ++_matchedCount;
-           }
+            setup(parser);
+            
+            if (result() != nullopt)
+                return;
+                
+            if (_item && _item->result() == nullopt)
+            {
+                _item->eof(parser);
               
-           if (_matchedCount >= _minimum &&
+                if (_item->result() == true) {
+                    matchedItem(_item);
+                    _item = nullptr;
+                }
+                
+            }
+              
+            if (_matchedCount >= _minimum &&
                (_matchedCount <= _maximum ||
                 _maximum == 0))
-           {
-              success();
-           }
-           else
-              fail();
+            {
+                success();
+            }
+            else
+                fail();
               
 
         }
+        
         
         
        

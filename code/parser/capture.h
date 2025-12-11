@@ -11,66 +11,76 @@
 using namespace std;
 
 namespace BeeFishParser {
-   
-   class Capture : public Match
-   {
-   public:
-      BString _value;
+    
+    class Capture : public Match
+    {
+    public:
+        BString _value;
 
-   public:
-      Capture() :
-         Match()
-      {
-      }
-      
-      Capture(Match* match) :
-         Match(match)
-      {
-      }
-      
-      Capture(Match* match, BString& captured)
-      {
-         _match = new Invoke(
-            new Capture(match),
-            [&captured, this](Match* match)
-            {
-               captured = match->value();
-               return true;
-            }
-         );
-               
-      }
-      
-      virtual ~Capture() {
-      }      
-      
-      virtual bool match(
-         Parser* parser,
-         const Char& character
-      )
-      {
-         bool matched = Match::match(parser, character);
-         
-         if (matched)
-            _value += character;
+    public:
+        Capture() :
+            Match()
+        {
+        }
         
-         return matched;
-      }
-      
-      virtual const BString& value() const
-      override
-      {
-         return _value;
-      }
-      
-      virtual BString& value()
-      override
-      {
-         return _value;
-      }
-      
-      
-   };
+        Capture(Match* match) :
+            Match(match)
+        {
+        }
+        
+        Capture(Match* match, BString& captured)
+        {
+            _match = new Invoke(
+                new Capture(match),
+                [&captured, this](Match* match)
+                {
+                    captured = match->value();
+                    return true;
+                }
+            );
+                    
+        }
+        
+        virtual ~Capture() {
+        }        
+        
+        virtual bool match(
+            Parser* parser,
+            const Char& character
+        )
+        {
+             setup(parser);
+             
+             if (result() != nullopt)
+                 return false;
+             
+             bool matched = _match->match(parser, character);
+            
+             if (matched)
+                 _value += character;
+          
+             if (_match->result() == true)
+                 success();
+             else if (_match->result() == false)
+                 fail();
+                 
+             return matched;
+        }
+        
+        virtual const BString& value() const
+        override
+        {
+            return _value;
+        }
+        
+        virtual BString& value()
+        override
+        {
+            return _value;
+        }
+        
+        
+    };
 
 }
 

@@ -4,7 +4,6 @@
 #include <map>
 #include <vector>
 #include <typeinfo>
-#include "../query/query.h"
 #include "../parser/parser.h"
 #include "../json/json-parser.h"
 #include "new-line.h"
@@ -13,8 +12,7 @@
 namespace BeeFishWeb {
 
     using namespace BeeFishParser;
-    using namespace BeeFishQuery;
-
+    
     class Header : public Match
     {
     protected:
@@ -24,8 +22,7 @@ namespace BeeFishWeb {
             HeaderNameCharacter() : Not(
                 new BeeFishParser::Or(
                     new BeeFishParser::Character(":"),
-                    new BeeFishParser::Character("\r"),
-                    new BeeFishParser::Character("\n")
+                    new NewLine()
                 )
             )
             {
@@ -41,6 +38,7 @@ namespace BeeFishWeb {
                     new BeeFishParser::Character("\r"),
                     new BeeFishParser::Character("\n")
                 )
+                
             )
             {
 

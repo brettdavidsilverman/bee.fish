@@ -7,9 +7,11 @@
 #include "../parser/parser.h"
 #include "../json/json-parser.h"
 
-using namespace BeeFishParser;
+
         
 namespace BeeFishWeb {
+
+    using namespace BeeFishParser;
 
     class ContentLength : public Match
     {

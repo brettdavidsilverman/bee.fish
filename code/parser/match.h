@@ -87,10 +87,19 @@ namespace BeeFishParser {
         {
             if (!_parser)
                 setup(parser);
-
+                
+if (result() != nullopt)
+    return false;
+                
+            bool matched = false;
             
-            bool matched = matchCharacter(character);
-            
+            if (!_match) {
+                matched = true;
+            }
+            else  {
+                matched = _match->match(_parser, character);
+            }
+    
             if (result() == true)
                 success();
             else if (result() == false) {
@@ -99,7 +108,7 @@ namespace BeeFishParser {
             
             return matched;
         }
-        
+        /*
         virtual bool matchCharacter(const Char& character)  {
             
             if (!_parser)
@@ -116,6 +125,7 @@ namespace BeeFishParser {
 
             return matched;
         };
+        */
         
         virtual bool match(Byte b)
         {
@@ -127,6 +137,11 @@ namespace BeeFishParser {
             setResult(true);
         }
         
+        virtual void fail()
+        {
+            setResult(false);
+        }
+        
         virtual Match* match()
         {
              if (_match)
@@ -134,9 +149,6 @@ namespace BeeFishParser {
              return this;
         }
         
-        // Defined in parser.h
-        virtual void fail();
-     
         virtual optional<bool> result() const
         {
              if (_result != nullopt)
@@ -150,7 +162,8 @@ namespace BeeFishParser {
         
         virtual void setResult(optional<bool> newResult)
         {
-            _result = newResult;
+            if (_result == nullopt)
+                _result = newResult;
         }
 
         
@@ -191,17 +204,25 @@ namespace BeeFishParser {
         virtual void eof(Parser* parser) 
         {
 
-             if (!_parser)
-                 setup(parser);
+            if (!_parser)
+                setup(parser);
                  
-             if (_match) // && _match->result() == nullopt)
-             {
-                  _match->eof(_parser);
-                  if (_match->result() == true)
-                      success();
-                  else
-                      fail();
-             }
+            if (result() != nullopt)
+                return;
+            
+            if (_match )
+            {
+                if (_match->result() == nullopt)
+                    _match->eof(_parser);
+                    
+                if (_match->result() == true)
+                    success();
+                else
+                    fail();
+                
+            }
+            else
+                fail();
           
         }
         
@@ -216,7 +237,6 @@ namespace BeeFishParser {
       
     
     };
-
 
 
 }

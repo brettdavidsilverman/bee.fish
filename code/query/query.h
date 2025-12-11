@@ -12,12 +12,11 @@
 #include "version.h"
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../parser/parser.h"
-#include "../Script/Variable.hpp"
-
+#include "../b-string/b-string.h"
 
 namespace BeeFishQuery {
+    
     using namespace BeeFishBString;
-    using namespace BeeFishScript;
     using namespace BeeFishParser;
 
     class Blankspace : public Or
@@ -86,80 +85,99 @@ namespace BeeFishQuery {
         
     };
     
-    
-    class Character : public BeeFishParser::Not
+    class Seperator : public BeeFishParser::Or
     {
     public:
-        Character() : BeeFishParser::Not(
-            new BeeFishParser::Or(
-                new BeeFishParser::Character(" "),
-                new BeeFishParser::Character("\t"),
-                new BeeFishParser::Character("\r"),
-                new BeeFishParser::Character("\n"),
-                new BeeFishParser::Character("("),
-                new BeeFishParser::Character(")"),
-                new BeeFishParser::Character("+"),
-                new BeeFishParser::Character("|"),
-                new BeeFishParser::Character("-")
-
-            )
-        )
-        {
-        }
-    };
-    
-    class Token : public BeeFishParser::Capture
-    {
-    public:
-        Token() : BeeFishParser::Capture(
-        
+        Seperator() : BeeFishParser::Or(
+            new BeeFishParser::Character(" "),
+            new BeeFishParser::Character("\t"),
+            new BeeFishParser::Character("\r"),
+            new BeeFishParser::Character("\n"),
+            new BeeFishParser::Character("+"),
+            new BeeFishParser::Character("|"),
+            new BeeFishParser::Character("-"),
+            new BeeFishParser::Character("("),
+            new BeeFishParser::Character(")"),
+            
             new BeeFishParser::And(
-                new Blankspaces(),
-                new Repeat<BeeFishQuery::Character>(),
-                new Blankspaces()
+                
+                new BeeFishParser::Or(
+                    new BeeFishParser::CIWord(" and"),
+                    new BeeFishParser::CIWord(" or"),
+                    new BeeFishParser::CIWord(" not")
+                ),
+                
+                new BeeFishParser::Or(
+                    new BeeFishParser::Character(" "),
+                    new BeeFishParser::Not(
+                        new BeeFishParser::Character("(")
+                    )
+                )
             )
+            
+             
         )
         {
         }
         
-        virtual void fail()
-        override
+    };
+    
+    class TokenCharacter : public BeeFishParser::Not
+    {
+    public:
+        TokenCharacter() :
+            BeeFishParser::Not(
+                new Seperator()
+            )
+            
         {
-            const BString& val = value().trim();
-            if (val.length() &&
-                val != "and" &&
-                val != "or" &&
-                val != "not")
-            {
-                Capture::success();
-            }
-            else
-                Capture::fail();
         }
+    };
+    
+    class TokenCharacters : public Capture
+    {
+    public:
+        TokenCharacters(): Capture(
+            new Repeat<TokenCharacter>(1)
+        )
+        {
+        }
+
+    
+    };
+    
+    class Token : public BeeFishParser::Match
+    {
+       
+    public:
+        Token() : BeeFishParser::Match()
+        {
+            _match = new BeeFishParser::And(
+                new Blankspaces(),
+                new Invoke(
+                    new TokenCharacters(),
+                    [](Match* match) {
+                        cout << "*" << match->value() << "*" << endl;
+                      //  assert(false);
+                        return true;
+                    }
+                ),
+                new Blankspaces()
+            );
+        }
+
         
-        virtual void success()
-        override
-        {
-            const BString& val = value().trim();
-            if (!val.length() ||
-                val == "and" ||
-                val == "or" ||
-                val == "not")
-            {
-                Capture::fail();
-            }
-            else
-                Capture::success();
-        }
+
         
     };
+    
     
     template<typename T>
     class Bracketed : public BeeFishParser::And
     {
     public:
         Bracketed() : BeeFishParser::And(
-           // new Blankspace(),
+            new Blankspaces(),
             new BeeFishParser::Character("("),
             new Blankspaces(),
             new LoadOnDemand<T>(),
@@ -190,7 +208,7 @@ namespace BeeFishQuery {
             },
             
             {
-                // not (expression)
+                // not expression
                 new BeeFishParser::And(
                     new BeeFishQuery::Not(),
                     new LoadOnDemand<Expression>()
@@ -237,7 +255,7 @@ namespace BeeFishQuery {
                 
                 
             },
-            
+
             {
                 // (expression) and expression
                 new BeeFishParser::And(
@@ -273,12 +291,13 @@ namespace BeeFishQuery {
                 
             },
 
-       
+            
             {
                 // (expression)
                 new Bracketed<Expression>(),
             },
             
+
             {
                 // token
                 new Token()

@@ -6,41 +6,32 @@
 namespace BeeFishParser {
 
     class Not : public Match {
-    protected:
-        Match* _item;
     public:
 
-        Not() : Match() {
-        }
-
-        Not(Match* match)
+        Not(Match* match) :
+            Match(match)
         {
-            _item = match;
         }
         
-        virtual ~Not() {
-            delete _item;
-        }
-        
-        virtual void setup(Parser* parser)
-        {
-            _parser = parser;
-            _item->setup(parser);
-        }
 
-        virtual bool matchCharacter(const Char& character)
+        virtual bool match(Parser* parser, const Char& character)
         override
         {
+            setup(parser);
+            
+            if (_result == true)
+                return true;
+                
+            if (_result == false)
+                return false;
             
             bool matched =
-                _item->match(_parser, character);
+                _match->match(parser, character);
             
-            
-            if (!matched || _item->result() == false) {
+            if (!matched || _match->result() == false) {
                 success();
-                return true;
             }
-            else if ( _item->result() == true) {
+            else if ( _match->result() == true) {
                 fail();
                 return false;
             }
@@ -53,12 +44,15 @@ namespace BeeFishParser {
         override
         {
             setup(parser);
+
+            if (result() != nullopt)
+                return;
             
-                
-            _item->eof(parser);
+            _match->eof(parser);
             
-            if (_item->result() == true)
+            if (_match->result() == true) {
                 fail();
+            }
             else
                 success();
         }
@@ -66,12 +60,17 @@ namespace BeeFishParser {
         virtual optional<bool> result() const
         override
         {
-            if (_item->result() == true)
-                return false;
-            else if (_item->result() == false)
-                return true;
+            if (_result != nullopt)
+                return _result;
                 
-            return _result;
+            if (_match) {
+                if (_match->result() == true)
+                    return false;
+                else if (_match->result() == false)
+                    return true;
+            }
+            
+            return nullopt;
         }
         
 

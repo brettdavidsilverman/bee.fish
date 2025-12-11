@@ -42,8 +42,12 @@ namespace BeeFishParser {
             _result = nullopt;
         }
       
-        virtual bool matchCharacter(const Char& character)
+        virtual bool match(Parser* parser, const Char& character)
         {
+            setup(parser);
+            
+            if (result() != nullopt)
+                return false;
             
             bool matched = matchChar(character);
             
@@ -66,6 +70,10 @@ namespace BeeFishParser {
         virtual void eof(Parser* parser)
         {
             setup(parser);
+            
+            if (result() != nullopt)
+                return;
+                
             if (_index == _word.end())
                 success();
             else

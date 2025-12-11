@@ -3,10 +3,10 @@
 
 #include "../parser/parser.h"
 
-using namespace BeeFishParser;
+
 namespace BeeFishJSON
 {
-   
+   using namespace BeeFishParser;
    class BlankSpaceCharacter : public Or {
    public:
       BlankSpaceCharacter() : Or(

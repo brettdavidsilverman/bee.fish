@@ -32,9 +32,15 @@ namespace BeeFishParser {
             return true;
         }
         
-        virtual bool matchCharacter(const Char& character)
+        virtual bool match(Parser* parser, const Char& character)
+        override
         {
     
+            setup(parser);
+            
+            if (result() != nullopt)
+                return false;
+            
             bool matched = false;
 
             for ( auto
@@ -46,9 +52,9 @@ namespace BeeFishParser {
                 
                 Match* item = *it;
                 
-                if (item->result() != nullopt)
+                if (item->result() == false)
                     continue;
-
+                    
                 if ( item->match(_parser, character) )
                 {
                     matched = true;
@@ -56,6 +62,7 @@ namespace BeeFishParser {
                 
                 if ( item->result() == true )
                 {
+                    
                     if (confirm(item)) {
                         _item = item;
                         break;
@@ -103,7 +110,6 @@ namespace BeeFishParser {
 
             fail();
                 
-            Match::eof(parser);
                 
         }
 

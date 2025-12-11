@@ -18,9 +18,13 @@ namespace BeeFishParser {
 		{
 		}
 
-		virtual bool matchCharacter(const Char& character)
+		virtual bool match(
+            Parser* parser,
+            const Char& character
+        )
 		{
-				
+            setup(parser);
+            
 			bool matched =
 				(_minimum <= character) &&
 				(_maximum >= character);

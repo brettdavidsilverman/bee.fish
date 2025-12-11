@@ -7,16 +7,20 @@
 #include "../parser/parser.h"
 #include "../json/json-parser.h"
 
-using namespace BeeFishParser;
-      
+
 namespace BeeFishWeb {
 
+    using namespace BeeFishParser;
+      
     class NewLine : public Or {
     public:
         NewLine() :
             Or(
-                new Word("\r\n"),
-                new Word("\n")
+                new And(
+                    new Character("\r"),
+                    new Character("\n")
+                ),
+                new Character("\n")
             )
         {
 

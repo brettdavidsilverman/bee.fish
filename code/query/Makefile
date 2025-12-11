@@ -3,6 +3,8 @@ OUTPUT=$(BUILD)/query
 CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=main.cpp query.h test.h version.h Makefile
 
+all:
+all:	$(BUILD)
 all:	$(OUTPUT)
 
 
@@ -24,7 +26,6 @@ run:	all
 	$(OUTPUT)
 	
 run_debug:	debug
-run_debug:	all
 	gdb --args $(OUTPUT) -test
 	
 trace:	all

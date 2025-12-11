@@ -3,97 +3,9 @@
 #include "query.h"
 #include "test.h"
 
-using namespace std;
-using namespace BeeFishMisc;
-using namespace BeeFishParser;
-    
-namespace Test {
-    
-    class Number : public Match
-    {
-    public:
-        Number() : Match()
-        {
-            _match = _number;
-        }
-        
-        virtual ~Number()
-        {
-        }
-        
-    public:
-      
-        Match* _plus =
-            new Character('+');
-            
-        Match* _minus = 
-            new Character('-');
-            
-        Match* _sign = new Capture(
-            new Or(
-                _plus,
-                _minus
-            )
-        );
-        
-        class IntegerCharacter :
-            public Range
-        {
-        public:
-            IntegerCharacter() : Range('0', '9') {
-
-            }
-        };
-
-        Capture* _integer =
-            new Capture(
-                new Repeat<IntegerCharacter>(1)
-            );
-        
-        And* _number = new And(
-            new Optional(_sign),
-            _integer
-        );
-        
-        virtual void write(
-            ostream& out,
-            size_t tabIndex = 0
-        ) const
-        {
-            if (result() == false)
-            {
-                out << "{\"error\": \"Failed on; character " << this->character() << "\"}" << endl;
-                return;
-            }
-
-            if (_sign->matched())
-                out << _sign->value();
-                
-            out << _integer->value();
-            
-      }
-      
-
-    };
-    
-    std::ostream& operator <<
-    (
-        std::ostream& output,
-        const Number& number
-    )
-    {
-        number.write(output);
-        
-        return output;
-    }
-    
-         
-}
-    
-    
 int main(int argc, const char* argv[]) {
     
-    using namespace Test;
+    using namespace BeeFishQuery;
     
     cout << "bee.fish.query"
               << endl
@@ -117,16 +29,23 @@ int main(int argc, const char* argv[]) {
     string line;
     do 
     {
-        cout << "Number: ";
+        cout << "Expression: " << flush;
         
-        Test::Number number;
+        try {
+             Expression expression;
+       // Capture capture(expression);
         
-        cin >> number;
+            cin >> expression;
         
-        if (number.matched())
-            cout << number << endl;
-        else
-            break;
+            if (expression.matched())
+                cout << "Ok" << endl;
+            else
+                break;
+        }
+        catch (runtime_error& error)
+        {
+            cout << "Error " << error.what() << endl;
+        }
             
     }
     while (!cin.eof());

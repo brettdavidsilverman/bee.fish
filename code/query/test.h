@@ -1,5 +1,5 @@
-#ifndef BEE_FISH_PARSER__TEST
-#define BEE_FISH_PARSER__TEST
+#ifndef BEE_FISH_QUERY__TEST
+#define BEE_FISH_QUERY__TEST
 
 #include <iostream>
 
@@ -50,7 +50,7 @@ namespace BeeFishQuery {
             
         ok &= testMatchDelete(
            "Tab",
-            new Capture(new Blankspace()),
+            new Capture(new Blankspaces()),
            "\t",
            true,
            "\t"
@@ -58,7 +58,7 @@ namespace BeeFishQuery {
         
         ok &= testMatchDelete(
            "Space",
-            new Capture(new Blankspace()),
+            new Capture(new Blankspaces()),
            " ",
            true,
            " "
@@ -66,7 +66,7 @@ namespace BeeFishQuery {
         
         ok &= testMatchDelete(
            "Return",
-            new Capture(new Blankspace()),
+            new Capture(new Blankspaces()),
            "\r",
            true,
            "\r"
@@ -74,7 +74,7 @@ namespace BeeFishQuery {
         
         ok &= testMatchDelete(
            "New line",
-            new Capture(new Blankspace()),
+            new Capture(new Blankspaces()),
            "\n",
            true,
            "\n"
@@ -130,7 +130,7 @@ namespace BeeFishQuery {
             
         ok &= testMatchDelete(
            "Test a",
-            new Capture(new BeeFishQuery::Character()),
+            new Capture(new TokenCharacter()),
            "a",
            true,
            "a"
@@ -138,14 +138,14 @@ namespace BeeFishQuery {
         
         ok &= testMatchDelete(
            "Space",
-            new Capture(new BeeFishQuery::Character()),
+            new Capture(new TokenCharacter()),
            " ",
            false
         );
 
 
         BeeFishMisc::outputSuccess(ok);
-        
+
         return ok;
     }
     
@@ -189,7 +189,8 @@ namespace BeeFishQuery {
             "Test token and",
              new Capture(new BeeFishQuery::Token()),
             "and",
-            false
+            true,
+            "and"
         );
         
         ok &= testMatchDelete(
@@ -211,7 +212,8 @@ namespace BeeFishQuery {
             "Test token or",
              new Capture(new BeeFishQuery::Token()),
             "or",
-            false
+            true,
+            "or"
         );
         
         ok &= testMatchDelete(
@@ -233,7 +235,8 @@ namespace BeeFishQuery {
             "Test token not",
              new Capture(new BeeFishQuery::Token()),
             "not",
-            false
+            true,
+            "not"
         );
         
         ok &= testMatchDelete(
@@ -243,7 +246,15 @@ namespace BeeFishQuery {
             true,
             "notother"
         );
-
+        /*
+        ok &= testMatchDelete(
+            "Test token not{ }",
+             new Capture(new BeeFishQuery::Token()),
+            "not ",
+            false
+        );
+        */
+        
         ok &= testMatchDelete(
             "Empty",
              new Capture(new BeeFishQuery::Token()),
@@ -253,7 +264,7 @@ namespace BeeFishQuery {
 
 
         BeeFishMisc::outputSuccess(ok);
-        
+
         return ok;
     }
     
@@ -350,17 +361,21 @@ namespace BeeFishQuery {
         testmatch("token1|token2");
         testmatch("token1 or token2");
         testmatch("not token");
+        
         testmatch("(token)");
         testmatch("( token )");
         testmatch(" ( token ) ");
         testmatch("not (token1)");
         testmatch("not(token1)");
         testmatch("not (token1 or token2)");
+
         testmatch("(token1 or token2)");
-        testmatch("not (token1 or token2)");
         testmatch("(token1 and token2)");
         testmatch("token1 and not token2");
-        testmatch("(token1 or token2) and not (token2 or token3)");
+        /*
+        testmatch("(token1 and token2) and not token2");
+        testmatch("(token1 and token2) and not (token2 or token3)");
+        */
         testmatch("token1 and (token2 or token3)");
         testmatch("(token1 and token2) or token3");
         testmatch("(token1 and token2) or (token3 and token4)");

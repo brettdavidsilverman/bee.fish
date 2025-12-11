@@ -11,7 +11,8 @@ namespace BeeFishParser
 	{
 
 	public:
-		LoadOnDemand(void* params = nullptr) : Match(params)
+		LoadOnDemand(void* params = nullptr) :
+            Match()
 		{
             
 		}
@@ -39,7 +40,7 @@ namespace BeeFishParser
             Parser* parser,
             const Char& character
         )
-      
+        override
         {
 
             if (!_match) {
@@ -50,7 +51,7 @@ namespace BeeFishParser
             }
             
             
-            return _match->match(_parser, character);
+            return Match::match(_parser, character);
         }
 
 	};

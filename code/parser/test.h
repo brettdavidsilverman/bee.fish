@@ -27,6 +27,8 @@ namespace BeeFishParser {
 
     bool testNot();
     bool testOptional();
+    bool testBlankspaces();
+    
     bool testBString(); 
     bool testCapture();
     bool testInvoke();
@@ -43,7 +45,6 @@ namespace BeeFishParser {
         ok &= testBasics();
 
         ok &= testCharacter();
-        
         ok &= testRange();
         ok &= testWord();
         ok &= testCaseInsensitiveWord();
@@ -52,13 +53,17 @@ namespace BeeFishParser {
         ok &= testRepeat();
         ok &= testNot();
         ok &= testOptional();
+        ok &= testBlankspaces();
+
         ok &= testBString();
+
         ok &= testCapture();
+
         ok &= testInvoke();
         ok &= testLoadOnDemand();
         ok &= testOrderOfPrecedence();
         ok &= testMisc();
-
+assert(ok);
         if (ok)
             cout << "SUCCESS";
         else
@@ -76,9 +81,9 @@ namespace BeeFishParser {
     {
         cout << "Test Basics" << endl;
         
-        class CharA : public Character {
+        class CharA : public BeeFishParser::Character {
         public:
-            CharA() : Character('a') {
+            CharA() : BeeFishParser::Character('a') {
 
             }
         };
@@ -86,15 +91,19 @@ namespace BeeFishParser {
         Match* a = new CharA();
         
         Parser parser(a);
+        parser.read("a");
+        parser.eof();
         
         bool ok =
-            parser.read("a") &&
-            (parser.result() == true);
-
+            (parser.result() == true) &&
+            (a->result() == true);
+            
         delete a;
 
+        cout << "\tBasic character:";
+        
         BeeFishMisc::outputSuccess(ok);
-        assert(ok);
+    
         return ok;
     }
     
@@ -104,7 +113,7 @@ namespace BeeFishParser {
         
         cout << "Test Characters" << endl;
         
-        class CharA : public Character
+        class CharA : public BeeFishParser::Character
         {
         public:
             CharA() : Character('A')
@@ -116,12 +125,12 @@ namespace BeeFishParser {
         Match* characterMatch = new Capture(new CharA());
         ok &= testMatch("Character match", characterMatch, "A", true, "A");
         delete characterMatch;
-        
+
         Match* characterNoMatch = new Capture(new CharA());
         ok &= testMatch("Character no match", characterNoMatch, "B");
         delete characterNoMatch;
         
-        Match* any = new Capture(new Character());
+        Match* any = new Capture(new BeeFishParser::Character());
         ok &= testMatch("Character any", any, "a", true, "a");
         delete any;
         
@@ -314,30 +323,26 @@ namespace BeeFishParser {
         
         class BrettOrSilverman : public Or {
         public:
-            BrettOrSilverman() : Or() {
+            BrettOrSilverman() : Or
+            (
+                new Word("Brett"),
+                new Word("Silverman")
+            )
+            {
 
             }
 
-            void setup(Parser* parser) {
-                _inputs = {
-                    new Word("Brett"),
-                    new Word("Silverman")
-                };
-                Or::setup(parser);
-            }
         };
 
         Match* or1 = new Capture(new BrettOrSilverman());
         Match* or2 = new Capture(new BrettOrSilverman());
         Match* or3 = new Capture(new BrettOrSilverman());
         
-        ok &= testMatch("Or first", or1, "Brett", true, "Brett");
-        ok &= testMatch("Or second", or2, "Silverman", true, "Silverman");
-        ok &= testMatch("Or fail", or3, "Dale");
+        ok &= testMatchDelete("Or first", or1, "Brett", true, "Brett");
+        ok &= testMatchDelete("Or second", or2, "Silverman", true, "Silverman");
+        ok &= testMatchDelete("Or fail", or3, "Dale");
 
-        delete or1;
-        delete or2;
-        delete or3;
+
         
         return ok;
     }
@@ -423,12 +428,20 @@ namespace BeeFishParser {
         
         bool ok = true;
         
-        class ABC : public Word {
+        class ABC : public BeeFishParser::And{
         public:
-            ABC() : Word("ABC")
+            ABC() : And(
+                new BeeFishParser::Character("A"),
+                new BeeFishParser::Character("B"),
+                new BeeFishParser::Character("C")
+            )
             {
-
             }
+            /*
+            virtual void fail() {
+                assert(false);
+            }
+            */
         };
 
         Match* testNot = new Not(new ABC());
@@ -440,10 +453,21 @@ namespace BeeFishParser {
             Parser parser(test);
             parser.read("A");
             parser.eof();
-            ok &= testResult("Read not first", parser.result() == true && test->result() == true);
+            ok &= testResult("one character ", parser.result() == true && test->result() == true);
             delete test;
             assert(ok);
         }
+        
+        {
+            Match* test = new Not(new ABC());
+            Parser parser(test);
+            parser.read("abc");
+            parser.eof();
+            ok &= testResult("All characters", parser.result() == true && test->result() == true);
+            delete test;
+            assert(ok);
+        }
+        
         
         {
             Match* test = new Not(new ABC());
@@ -465,14 +489,135 @@ namespace BeeFishParser {
         };
 
         Match* _not1 = new Capture(new Notatoz());
-        ok &= testMatch("Not range match", _not1, "A", true);
-        delete _not1;
+        ok &= testMatchDelete("Not range match", _not1, "A", true);
         
         Match* _not2 = new Capture(new Notatoz());
-        ok &= testMatch("Not range no match", _not2, "a");
- 
-        delete _not2;
+        ok &= testMatchDelete("Not range no match", _not2, "a");
+
+
+        class Blankspace : public Or
+        {
+        public:
+            Blankspace() : Or(
+                new Character(' '),
+                new Character('\t')
+            )
+            {
+            }
+        };
         
+        class Blankspaces : public Repeat<Blankspace>
+        {
+        public:
+            Blankspaces(Size minimum = 0) :
+                Repeat(minimum)
+            {
+            }
+        };
+        
+        class Punctuation : public Or {
+        public:
+            Punctuation() : Or(
+                new And(
+                    new CIWord(" and ")
+                )
+            )
+            {
+            }
+        };
+        
+        class _Character : public Not {
+        public:
+            _Character() : Not(
+                new Or(
+                    new Punctuation(),
+                    new Blankspace()
+                )
+            )
+            {
+
+            }
+        };
+        
+        Match* _char1 = new Capture(new _Character());
+        ok &= testMatchDelete("Character space", _char1, " ", false);
+        
+        Match* _char2 = new Capture(new _Character());
+        ok &= testMatchDelete("Character b", _char2, "b", true, "b");
+        
+        Match* _char3 = new Capture(new _Character());
+        ok &= testMatchDelete("Character a", _char3, "a", true, "a");
+        
+                
+        class _Token : public Capture{
+        public:
+            _Token() :Capture(
+                new Or(
+                    new Punctuation(),
+                    new Repeat<_Character>(1)
+                )
+            )
+            {
+            }
+            
+            
+        };
+        
+        Match* _token1 = new Capture(new _Token());
+        ok &= testMatchDelete("Token space", _token1, " ", false);
+        
+        Match* _token2 = new Capture(new _Token());
+        ok &= testMatchDelete("Token b", _token2, "b", true, "b");
+        
+        Match* _token3 = new Capture(new _Token());
+        ok &= testMatchDelete("Token a", _token3, "a", true, "a");
+      
+        Match* _token4 = new Capture(new _Token());
+        ok &= testMatchDelete("Token and", _token4, "and", true);
+      
+        Match* _token5 = new Capture(new _Token());
+        ok &= testMatchDelete("Token { }and{ }", _token5, " and ", true, " and ");
+        
+        _Token* token6 = new _Token();
+        Match* _token6 = new Capture(token6);
+        ok &= testMatch("Token andtoo", _token6, "andtoo", true, "andtoo");
+      
+        ok &= testResult("Token value", token6->value() == "andtoo");
+        
+        delete _token6;
+        
+        class _Tokens :
+            public Repeat<_Token>,
+            public vector<BString>
+        {
+        public:
+            _Tokens() : Repeat(1)
+            {
+            }
+            
+            virtual void matchedItem(_Token* token)
+            override
+            {
+                BString value = token->value().trim();
+                
+                push_back(value);
+                cout << "*" << value << "*" << endl;
+                Repeat::matchedItem(token);
+            }
+        };
+        
+        Match* _tokens1 = new Capture(new _Tokens());
+        ok &= testMatchDelete("Words hello", _tokens1, "hello", true, "hello");
+        
+        Match* _tokens2 = new Capture(new _Tokens());
+        ok &= testMatchDelete("Words hello and world", _tokens2, "hello and world", true);
+    
+        Match* _tokens3 = new Capture(new _Tokens());
+        ok &= testMatchDelete("Words hello world", _tokens3, "hello world", true);
+        
+        Match* _tokens4 = new Capture(new _Tokens());
+        ok &= testMatchDelete("Words hello and world and goodbye", _tokens4, "hello and world and goodbye", true);
+
         return ok;
     }
 
@@ -509,6 +654,87 @@ namespace BeeFishParser {
         
     }
 
+    inline bool testBlankspaces()
+    {
+        cout << "Test Blankspacespaces" << endl;
+        bool ok = true;
+            
+        ok &= testMatchDelete(
+           "Tab",
+            new Capture(new Blankspaces()),
+           "\t",
+           true,
+           "\t"
+        );
+        
+        ok &= testMatchDelete(
+           "Space",
+            new Capture(new Blankspaces()),
+           " ",
+           true,
+           " "
+        );
+        
+        ok &= testMatchDelete(
+           "Return",
+            new Capture(new Blankspaces(1)),
+           "\r",
+           false,
+           ""
+        );
+        
+        ok &= testMatchDelete(
+           "New line",
+            new Capture(new Blankspaces(1)),
+           "\n",
+           false,
+           ""
+        );
+        
+        ok &= testMatchDelete(
+           "Mixture",
+            new Capture(new Blankspaces()),
+           " \t ",
+           true,
+           " \t "
+        );
+        
+        ok &= testMatchDelete(
+           "Spaces",
+            new Capture(new Blankspaces()),
+           "   ",
+           true,
+           "   "
+        );
+        
+        class Test : public BeeFishParser::And
+        {
+        public:
+            Test() : BeeFishParser::And(
+                new Blankspaces(0),
+                new BeeFishParser::Character("+")
+                
+            )
+            {
+            }
+        };
+
+        ok &= testMatchDelete(
+            "Repeat",
+            new Capture(
+                new Repeat<Test>()
+            ),
+            "+ +",
+            true,
+            "+ +"
+        );
+
+        BeeFishMisc::outputSuccess(ok);
+        
+        return ok;
+    }
+    
+    
     inline bool testBString()
     {
         cout << "Test BString" << endl;
@@ -592,28 +818,13 @@ namespace BeeFishParser {
             BString _value;
             And* _and;
             
-            _Capture() :
-                 _name(""),
-                 _value("")
+            _Capture()
             {
-            }
-            
-            virtual void setup(Parser* parser)
-            {
-                 
-                if (_parser)
-                    return;
-                    
-                _parser = parser;
-                
                 _match = _and = new And(
                     new Capture(new Name(), _name),
                     new Character(' '),
                     new Capture(new Value(), _value)
                 );
-                
-                _match->setup(parser);
-                
             }
             
             

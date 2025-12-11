@@ -56,29 +56,8 @@ using namespace BeeFishTest;
         cout << "Test URL" << endl;
 
         bool ok = true;
-/*
-        WebRequest::URL::Hex hex;
-        JSONParser hexParser(hex);
-        hexParser.read("a");
-        ok = ok && testResult("URL Hex is 'a'", 
-            hexParser.result() == true && 
-            hex.value() == Char('a'));
-        
-        WebRequest::URL::HexCharacter hexCharacter;
-        JSONParser hexCharacterParser(hexCharacter);
-        hexCharacterParser.read("%38");
-        hexCharacterParser.eof();
-        
-        ok = ok && testResult("URL hex JSONParser", 
-            hexCharacterParser.result() == true);
-         
-        ok = ok && testResult("URL hex character", 
-            hexCharacter.result() == true);
-                
-        ok = ok && testResult("URL hex value is '8'", 
-            hexCharacter.character() == Char('8'));        assert(ok);
-*/
-        WebRequest::URL::Path path;
+
+        BeeFishWeb::URL::Path path;
         JSONParser pathParser(path);
         pathParser.read("Hello%20World%25");
         pathParser.eof();
@@ -93,7 +72,7 @@ using namespace BeeFishTest;
             path.value().decodeURI() == "Hello World%"
         );
 
-        WebRequest::URL url;
+        BeeFishWeb::URL url;
         JSONParser urlWithQueryParser(url);
         urlWithQueryParser.read("/beehive/settings/?key1=value1&key2=value2&key3 HTTP/1.1");
         urlWithQueryParser.eof();
@@ -126,7 +105,7 @@ using namespace BeeFishTest;
             url.query()["key3"].length() == 0
         );
 
-        WebRequest::URL url2;
+        BeeFishWeb::URL url2;
         JSONParser urlWithQueryParser2(url2);
         urlWithQueryParser2.read("/beehive/settings/?key=hello%20world HTTP/1.1");
         urlWithQueryParser2.eof();
@@ -300,13 +279,8 @@ using namespace BeeFishTest;
                      
                 cout << "Headers: ";
                 
-                if (webRequest._headers) {
-                     cout << "1:" << webRequest._headers->result() << endl;
-                     
-                     webRequest._headers->eof(&parser);
-                     
-                     cout << "2: " << webRequest._headers->result() << endl;
-                }
+                if (webRequest._headers) 
+                     cout << webRequest._headers->result() << endl;
                 else
                      cout << " null ptr" << endl;
                      
