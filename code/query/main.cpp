@@ -32,13 +32,20 @@ int main(int argc, const char* argv[]) {
         cout << "Expression: " << flush;
         
         try {
-             Expression expression;
-       // Capture capture(expression);
+             
+            Expression expression;
+            Character terminator(";");
+            BeeFishParser::And statement(expression, terminator);
+             
+            Capture capture(statement);
         
             cin >> expression;
         
             if (expression.matched())
+            {
                 cout << "Ok" << endl;
+                cout << capture.value() << endl;
+            }
             else
                 break;
         }

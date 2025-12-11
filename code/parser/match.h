@@ -29,6 +29,7 @@ namespace BeeFishParser {
         optional<bool> _result = nullopt;
         Match* _match = nullptr;
         Parser* _parser = nullptr;
+        bool _delete = true;
         
     public:
     
@@ -44,10 +45,16 @@ namespace BeeFishParser {
             if (_match)
                  _parser = _match->_parser;
         }
+        
+        Match(Match& match) :
+            Match(&match)
+        {
+            _delete = false;
+        }
 
         virtual ~Match()
         {
-            if (_match)
+            if (_match && _delete)
                 delete _match;
 
             --matchInstanceCount();

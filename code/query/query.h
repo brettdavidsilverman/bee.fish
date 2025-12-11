@@ -98,7 +98,7 @@ namespace BeeFishQuery {
             new BeeFishParser::Character("-"),
             new BeeFishParser::Character("("),
             new BeeFishParser::Character(")"),
-            
+            new BeeFishParser::Character(";"),
             new BeeFishParser::And(
                 
                 new BeeFishParser::Or(
@@ -148,25 +148,36 @@ namespace BeeFishQuery {
     
     class Token : public BeeFishParser::Match
     {
-       
+    protected:
+        TokenCharacters* _tokenCharacters;
+        
     public:
         Token() : BeeFishParser::Match()
         {
             _match = new BeeFishParser::And(
                 new Blankspaces(),
-                new Invoke(
+                _tokenCharacters = 
                     new TokenCharacters(),
-                    [](Match* match) {
-                        cout << "*" << match->value() << "*" << endl;
-                      //  assert(false);
-                        return true;
-                    }
-                ),
                 new Blankspaces()
             );
         }
 
+        virtual void success() {
+            cout << "*" << value() << "*";
+            Match::success();
+        }
         
+        virtual const BString& value() const
+        override
+        {
+            return _tokenCharacters->value();
+        }
+        
+        virtual BString& value()
+        override
+        {
+            return _tokenCharacters->value();
+        }
 
         
     };

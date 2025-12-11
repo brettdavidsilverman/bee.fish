@@ -28,6 +28,11 @@ namespace BeeFishParser {
         {
         }
         
+        Capture(Match& match) :
+            Match(match)
+        {
+        }
+        
         Capture(Match* match, BString& captured)
         {
             _match = new Invoke(

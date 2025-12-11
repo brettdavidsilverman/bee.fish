@@ -16,19 +16,29 @@ namespace BeeFishParser {
     public:
 
         template<typename ...T>
-        And(T*... inputs) :
+        And(T* ... inputs) :
             _inputs{inputs...}
         {
              _iterator = 0;
         }
+        
+        And(Match& left, Match& right)
+        {
+            _iterator = 0;
+            _inputs.push_back(&left);
+            _inputs.push_back(&right);
+            _delete = false;
+        }
       
         virtual ~And()
         {
-            for (auto it : _inputs)
-            {
-                Match* match = it;
-                if (match)
-                   delete match;
+            if (_delete) {
+                for (auto it : _inputs)
+                {
+                    Match* match = it;
+                    if (match)
+                       delete match;
+                }
             }
         }
 
