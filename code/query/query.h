@@ -23,10 +23,10 @@ namespace BeeFishQuery {
     {
     public:
         Blankspace() : Or(
-            new BeeFishParser::Character(" "),
-            new BeeFishParser::Character("\t"),
-            new BeeFishParser::Character("\r"),
-            new BeeFishParser::Character("\n")
+            new Character(" "),
+            new Character("\t"),
+            new Character("\r"),
+            new Character("\n")
         )
         {
         }
@@ -47,8 +47,9 @@ namespace BeeFishQuery {
             const BString& word,
             const BString& letter
         ) : BeeFishParser::And(
+            new Blankspaces(),
             new BeeFishParser::Or(
-                new BeeFishParser::Character(letter),
+                new Character(letter),
                 new BeeFishParser::CIWord(word)
             ),
             new Blankspaces()
@@ -89,33 +90,16 @@ namespace BeeFishQuery {
     {
     public:
         Seperator() : BeeFishParser::Or(
-            new BeeFishParser::Character(" "),
-            new BeeFishParser::Character("\t"),
-            new BeeFishParser::Character("\r"),
-            new BeeFishParser::Character("\n"),
-            new BeeFishParser::Character("+"),
-            new BeeFishParser::Character("|"),
-            new BeeFishParser::Character("-"),
-            new BeeFishParser::Character("("),
-            new BeeFishParser::Character(")"),
-            new BeeFishParser::Character(";"),
-            new BeeFishParser::And(
-                
-                new BeeFishParser::Or(
-                    new BeeFishParser::CIWord(" and"),
-                    new BeeFishParser::CIWord(" or"),
-                    new BeeFishParser::CIWord(" not")
-                ),
-                
-                new BeeFishParser::Or(
-                    new BeeFishParser::Character(" "),
-                    new BeeFishParser::Not(
-                        new BeeFishParser::Character("(")
-                    )
-                )
-            )
-            
-             
+            new Character(" "),
+            new Character("\t"),
+            new Character("\r"),
+            new Character("\n"),
+            new Character("+"),
+            new Character("|"),
+            new Character("-"),
+            new Character("("),
+            new Character(")"),
+            new Character(";")
         )
         {
         }
@@ -129,59 +113,45 @@ namespace BeeFishQuery {
             BeeFishParser::Not(
                 new Seperator()
             )
-            
         {
         }
     };
     
-    class TokenCharacters : public Capture
+    class Token : public BeeFishParser::And
     {
+    protected:
+        BString _value;
+        
     public:
-        TokenCharacters(): Capture(
-            new Repeat<TokenCharacter>(1)
+        Token(): And(
+            new Blankspaces(),
+            new Capture(
+                new Repeat<TokenCharacter>(1),
+                _value
+            ),
+            new Blankspaces()
         )
         {
         }
-
-    
-    };
-    
-    class Token : public BeeFishParser::Match
-    {
-    protected:
-        TokenCharacters* _tokenCharacters;
         
-    public:
-        Token() : BeeFishParser::Match()
-        {
-            _match = new BeeFishParser::And(
-                new Blankspaces(),
-                _tokenCharacters = 
-                    new TokenCharacters(),
-                new Blankspaces()
-            );
-        }
-
         virtual void success() {
-            cout << "*" << value() << "*";
-            Match::success();
+    cout << "*" << value() << "*";
+            And::success();
         }
         
-        virtual const BString& value() const
+        const BString& value() const
         override
         {
-            return _tokenCharacters->value();
+            return _value;
         }
         
-        virtual BString& value()
+        BString& value()
         override
         {
-            return _tokenCharacters->value();
+            return _value;
         }
-
-        
-    };
     
+    };
     
     template<typename T>
     class Bracketed : public BeeFishParser::And
@@ -189,17 +159,17 @@ namespace BeeFishQuery {
     public:
         Bracketed() : BeeFishParser::And(
             new Blankspaces(),
-            new BeeFishParser::Character("("),
+            new Character("("),
             new Blankspaces(),
             new LoadOnDemand<T>(),
             new Blankspaces(),
-            new BeeFishParser::Character(")"),
+            new Character(")"),
             new Blankspaces()
         )
         {
         }
     };
-        
+    
     class Expression : public BeeFishParser::And
     {
         
@@ -211,108 +181,43 @@ namespace BeeFishQuery {
                 
         {
             {
-                // not token
-                new BeeFishParser::And(
-                    new BeeFishQuery::Not(),
-                    new Token()
-                )
-            },
-            
-            {
                 // not expression
                 new BeeFishParser::And(
                     new BeeFishQuery::Not(),
                     new LoadOnDemand<Expression>()
                 )
             },
-            
             {
-                // not (expression)
+                // (expression) and expression
                 new BeeFishParser::And(
-                    new BeeFishQuery::Not(),
-                    new Bracketed<Expression>()
+                    new Bracketed<Expression>(),
+                    new BeeFishParser::Or(
+                        new BeeFishQuery::And(),
+                        new BeeFishQuery::Or()
+                    ),
+                    new LoadOnDemand<Expression>()
                 )
             },
             {
                 // token and expression
                 new BeeFishParser::And(
                     new Token(),
-                    new BeeFishQuery::And(),
-                    new LoadOnDemand<Expression>()
-                ),
-            
-                // token or expression
-                new BeeFishParser::And(
-                    new Token(),
-                    new BeeFishQuery::Or(),
+                    new BeeFishParser::Or(
+                        new BeeFishQuery::And(),
+                        new BeeFishQuery::Or()
+                    ),
                     new LoadOnDemand<Expression>()
                 )
-                
             },
-            {
-                // (expression) and token
-                new BeeFishParser::And(
-                    new Bracketed<Expression>(),
-                    new BeeFishQuery::And(),
-                    new Token()
-                ),
-
-                // (expression) or expression
-                new BeeFishParser::And(
-                    new Bracketed<Expression>(),
-                    new BeeFishQuery::Or(),
-                    new Token()
-                )
-                
-                
-            },
-
-            {
-                // (expression) and expression
-                new BeeFishParser::And(
-                    new Bracketed<Expression>(),
-                    new BeeFishQuery::And(),
-                    new LoadOnDemand<Expression>()
-                ),
-
-                // (expression) or expression
-                new BeeFishParser::And(
-                    new Bracketed<Expression>(),
-                    new BeeFishQuery::Or(),
-                    new LoadOnDemand<Expression>()
-                )
-                
-                
-            },
-            {
-                // (expression) and (expression)
-                new BeeFishParser::And(
-                    new Bracketed<Expression>(),
-                    new BeeFishQuery::And(),
-                    new Bracketed<Expression>()
-                ),
-
-                // (expression) or (expression)
-                new BeeFishParser::And(
-                    new Bracketed<Expression>(),
-                    new BeeFishQuery::Or(),
-                    new Bracketed<Expression>()
-                )
-                
-                
-            },
-
-            
             {
                 // (expression)
                 new Bracketed<Expression>(),
             },
-            
-
             {
                 // token
                 new Token()
             }
+            
                  
         }
         
@@ -324,6 +229,29 @@ namespace BeeFishQuery {
     
 
     };
+
+
+    class Statement : public BeeFishParser::Match
+    {
+    public:
+            
+        Capture& expression = *(
+            new Capture(
+                new Expression()
+            )
+        );
+        
+    public:
+        Statement() : BeeFishParser::Match()
+        {
+            _match = new BeeFishParser::And(
+                &expression,
+                new Blankspaces(),
+                new Character(";")
+            );
+        }
+    };
+    
     
 }
 

@@ -66,14 +66,15 @@ namespace BeeFishWeb {
             return _json;
         }
         
-        virtual bool matchCharacter(const Char& character) {
+        virtual bool match(Parser* parser, const Char& character) {
 
-            if (Match::matchCharacter(character)) {
+            if (Match::match(parser, character)) {
                 for (auto c : character)
                    BeeFishBString::BStream::push_back((Byte)c);
                 return true;
             }
 
+            
             return false;
         }
 

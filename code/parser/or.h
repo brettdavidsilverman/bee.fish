@@ -55,7 +55,8 @@ namespace BeeFishParser {
                 if (item->result() == false)
                     continue;
                     
-                if ( item->match(_parser, character) )
+                if ( item->result() == nullopt &&
+                     item->match(_parser, character) )
                 {
                     matched = true;
                 }
@@ -90,8 +91,10 @@ namespace BeeFishParser {
         {
             setup(parser);
             
+            
             if (result() != nullopt)
                 return;
+
                 
             _item = nullptr;
             

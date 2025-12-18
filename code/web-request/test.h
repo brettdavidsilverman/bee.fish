@@ -74,35 +74,39 @@ using namespace BeeFishTest;
 
         BeeFishWeb::URL url;
         JSONParser urlWithQueryParser(url);
-        urlWithQueryParser.read("/beehive/settings/?key1=value1&key2=value2&key3 HTTP/1.1");
-        urlWithQueryParser.eof();
-    
+        
+        if (ok) {
+            cout << "Path with three keys" << endl;
+            urlWithQueryParser.read("/beehive/settings/?key1=value1&key2=value2&key3");
+            urlWithQueryParser.eof();
+        }
+            
         ok = ok && testResult(
-            "Path with query",
-            url.query().result() == true
+            "Path with search",
+            url.search().result() == true
         );
 
         ok = ok && testResult(
-            "Path with query value",
-            url.query().value() == "key1=value1&key2=value2&key3"
-        );
-
-
-        ok = ok && testResult(
-            "Path with query key 1",
-            url.query()["key1"] == "value1"
-        );
-
-        ok = ok && testResult(
-            "Path with query key 2",
-            url.query()["key2"] == "value2"
+            "Path with search value",
+            url.search().value() == "key1=value1&key2=value2&key3"
         );
 
 
         ok = ok && testResult(
-            "Path with query key 3",
-            url.query().contains("key3") && 
-            url.query()["key3"].length() == 0
+            "Path with search key 1",
+            url.search()["key1"] == "value1"
+        );
+
+        ok = ok && testResult(
+            "Path with search key 2",
+            url.search()["key2"] == "value2"
+        );
+
+
+        ok = ok && testResult(
+            "Path with search key 3",
+            url.search().contains("key3") && 
+            url.search()["key3"].length() == 0
         );
 
         BeeFishWeb::URL url2;
@@ -111,8 +115,18 @@ using namespace BeeFishTest;
         urlWithQueryParser2.eof();
         
         ok = ok && testResult(
-            "Path with escaped query",
-            url2.query()["key"] == "hello world"
+            "Path with escaped search",
+            url2.search()["key"] == "hello world"
+        );
+        
+        BeeFishWeb::URL url3;
+        JSONParser urlWithQueryParser3(url3);
+        urlWithQueryParser3.read("/beehive/settings?key=hello%20world HTTP/1.1");
+        urlWithQueryParser3.eof();
+        
+        ok = ok && testResult(
+            "Path with escaped search and no slash",
+            url3.search()["key"] == "hello world"
         );
 
         return ok;
@@ -174,6 +188,12 @@ using namespace BeeFishTest;
             "Correct get",
             "GET / HTTP/1.1\r\n",
             "/"
+        );
+        
+        ok = ok && test(
+            "Correct get with full path",
+            "GET /test/test?key=value&key2= HTTP/1.1\r\n",
+            "/test/test?key=value&key2="
         );
         
         return ok;
@@ -250,7 +270,7 @@ using namespace BeeFishTest;
         auto testRequest =
         [](string label, string request, bool parseJSON = true, bool testHeaders = false, bool testBody = false)
         {
-            cout << "\t" << label << ": " << flush;
+            cout << "\t" << label << ":" << endl;
             
             WebRequest webRequest(parseJSON);
             JSONParser parser(webRequest);
@@ -327,17 +347,16 @@ using namespace BeeFishTest;
             false,
             true
         );
-
-assert(ok);
-
+        
         ok = ok && testRequest(
             "get with simplest correct header",
-            "GET /sample/ HTTP/1.1\r\n"
+            "GET /sample/?key= HTTP/1.1\r\n"
             "Host: bee.fish\r\n"
             "\r\n",
             false,
             true
         );
+
 
         ok = ok && testRequest(
             "post",
@@ -394,25 +413,26 @@ assert(ok);
         {
             string request =
             "GET /sample?id=boo HTTP/1.1\r\n"
-            "Host: bee.fish\r\n";
+            "Host: bee.fish\r\n"
+            "\r\n";
             WebRequest webRequest(false);
             JSONParser parser(webRequest);
             parser.read(request);
             parser.eof();
     
             ok = ok && testResult(
-                "get with query",
+                "get with search",
                 webRequest.result() == true
             );
             
             ok = ok && testResult(
-                "query has id",
-                webRequest.queryObject().contains("id")
+                "search has id",
+                webRequest.searchObject().contains("id")
             );
             
             ok = ok && testResult(
-                "query has id=boo",
-                webRequest.queryObject()["id"] == "boo"
+                "search has id=boo",
+                webRequest.searchObject()["id"] == "boo"
             );
             
             if (!ok)
@@ -430,20 +450,20 @@ assert(ok);
             parser.eof();
     
             ok = ok && testResult(
-                "get with full id in query",
+                "get with full id in search",
                 webRequest.result() == true
             );
             
             ok = ok && testResult(
-                "query has full id",
-                webRequest.queryObject().contains("id")
+                "search has full id",
+                webRequest.searchObject().contains("id")
             );
             
             
-            Id id = Id::fromKey(webRequest.queryObject()["id"]);
+            Id id = Id::fromKey(webRequest.searchObject()["id"]);
             
             ok = ok && testResult(
-                "query has id=*",
+                "search has id=*",
                  id.key() ==  "/jHJPjHicH4nI+Jxk+Jw+Jk+JPhycZPhycY+HJxPhycPhyPhxk+HD4PJxjycTyY8ORA="
             );
             
@@ -452,6 +472,45 @@ assert(ok);
             
         };
         
+        if (ok)
+        {
+            string request =
+            "GET /sample?search HTTP/1.1\r\n"
+            "Host: bee.fish\r\n"
+            "\r\n";
+            WebRequest webRequest(false);
+            JSONParser parser(webRequest);
+            parser.read(request);
+            parser.eof();
+            
+    
+            ok = ok && testResult(
+                "get with search",
+                webRequest.result() == true
+            );
+            
+            ok = ok && testResult(
+                "search is search",
+                webRequest.search() == "search"
+            );
+            
+            ok = ok && testResult(
+                "search has search",
+                webRequest.searchObject().contains("search")
+            );
+            
+            ok = ok && testResult(
+                "search is empty",
+                webRequest.searchObject()["search"] == ""
+            );
+            
+            
+            if (!ok)
+                cout << parser.getError() << endl;
+            
+        };
+        
+        assert(ok);
         
         assert(ok);
         
@@ -597,7 +656,7 @@ assert(ok);
         BeeFishWeb::WebRequest urlWebRequest;
         ok = ok && testFile(
             parser,
-            "WebRequest with path and query",
+            "WebRequest with path and search",
             WWW_ROOT_DIRECTORY "/code/web-request/tests/path.txt",
             urlWebRequest,
             true
@@ -609,14 +668,14 @@ assert(ok);
         );
         
         ok = ok && testResult(
-            "WebRequest query is query",
-            urlWebRequest.query() == "query"
+            "WebRequest search is search",
+            urlWebRequest.search() == "search"
         );
         
         BeeFishWeb::WebRequest escapedUrlWebRequest;
         ok = ok && testFile(
             parser,
-            "WebRequest with escaped path and query",
+            "WebRequest with escaped path and search",
             WWW_ROOT_DIRECTORY "/code/web-request/tests/escaped-path.txt",
             escapedUrlWebRequest,
             true
@@ -628,8 +687,8 @@ assert(ok);
         );
         
         ok = ok && testResult(
-            "WebRequest escaped query is query<space>query",
-            escapedUrlWebRequest.query() == "query%20query"
+            "WebRequest escaped search is search<space>search",
+            escapedUrlWebRequest.search() == "search%20query"
         );
 
         BeeFishWeb::WebRequest postWebRequest;

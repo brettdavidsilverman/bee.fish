@@ -45,9 +45,10 @@ namespace BeeFishParser {
         {
             setup(parser);
 
+
             if (result() != nullopt)
                 return;
-            
+
             _match->eof(parser);
             
             if (_match->result() == true) {

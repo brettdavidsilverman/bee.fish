@@ -254,18 +254,18 @@ namespace BeeFishWeb {
             return url().path();
         }
         
-        const URL::Query& queryObject() const
+        const URL::Search& searchObject() const
         {
-            return url().query();
+            return url().search();
         }
 
-        URL::Query& queryObject()
+        URL::Search& searchObject()
         {
-            return url().query();
+            return url().search();
         }
 
-        const BString& query() const {
-            return url().query().value();
+        const BString& search() const {
+            return url().search().value();
         }
         
         const BString& version() const

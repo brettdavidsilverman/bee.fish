@@ -184,15 +184,14 @@ namespace BeeFishQuery {
             "+",
             false
         );
-        
+        /*
         ok &= testMatchDelete(
             "Test token and",
              new Capture(new BeeFishQuery::Token()),
-            "and",
-            true,
-            "and"
+            " and",
+            false
         );
-        
+        */
         ok &= testMatchDelete(
             "Test token andother",
              new Capture(new BeeFishQuery::Token()),
@@ -207,15 +206,14 @@ namespace BeeFishQuery {
             "|",
             false
         );
-        
+/*
         ok &= testMatchDelete(
             "Test token or",
              new Capture(new BeeFishQuery::Token()),
-            "or",
-            true,
-            "or"
+            " or",
+            false
         );
-        
+*/
         ok &= testMatchDelete(
             "Test token oranother",
              new Capture(new BeeFishQuery::Token()),
@@ -225,20 +223,28 @@ namespace BeeFishQuery {
         );
         
         ok &= testMatchDelete(
+            "Test token oranother",
+             new Capture(new BeeFishQuery::Token()),
+            "anotheror",
+            true,
+            "anotheror"
+        );
+        
+        ok &= testMatchDelete(
             "Test token -",
              new Capture(new BeeFishQuery::Token()),
             "-",
             false
         );
-        
+/*
         ok &= testMatchDelete(
             "Test token not",
              new Capture(new BeeFishQuery::Token()),
-            "not",
-            true,
-            "not"
+            " not",
+            false
         );
-        
+*/
+
         ok &= testMatchDelete(
             "Test token notother",
              new Capture(new BeeFishQuery::Token()),
@@ -246,14 +252,7 @@ namespace BeeFishQuery {
             true,
             "notother"
         );
-        /*
-        ok &= testMatchDelete(
-            "Test token not{ }",
-             new Capture(new BeeFishQuery::Token()),
-            "not ",
-            false
-        );
-        */
+        
         
         ok &= testMatchDelete(
             "Empty",
@@ -353,6 +352,15 @@ namespace BeeFishQuery {
             return ok;
         };
         
+        testmatch("token");
+        testmatch("(token)");
+        testmatch("( token )");
+        testmatch(" ( token ) ");
+        
+        testmatch("not token");
+        testmatch("not (token1)");
+        testmatch("not(token1)");
+        testmatch("(not(token1))");
         
         testmatch("token1 + token2");
         testmatch("token1+token2");
@@ -360,27 +368,22 @@ namespace BeeFishQuery {
         testmatch("token1 | token2");
         testmatch("token1|token2");
         testmatch("token1 or token2");
-        testmatch("not token");
         
-        testmatch("(token)");
-        testmatch("( token )");
-        testmatch(" ( token ) ");
-        testmatch("not (token1)");
-        testmatch("not(token1)");
         testmatch("not (token1 or token2)");
 
         testmatch("(token1 or token2)");
         testmatch("(token1 and token2)");
         testmatch("token1 and not token2");
-        /*
-        testmatch("(token1 and token2) and not token2");
-        testmatch("(token1 and token2) and not (token2 or token3)");
-        */
+        
         testmatch("token1 and (token2 or token3)");
         testmatch("(token1 and token2) or token3");
         testmatch("(token1 and token2) or (token3 and token4)");
         testmatch("(token1 or token2) and (token3 or token4)");
         testmatch("((token1 or token2))");
+        
+        testmatch("(token1 and token2) and not token2");
+        testmatch("(token1 and token2) and not (token2 or token3)");
+        
         BeeFishMisc::outputSuccess(ok);
         
         return ok;

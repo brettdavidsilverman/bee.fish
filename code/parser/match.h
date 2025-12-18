@@ -46,15 +46,9 @@ namespace BeeFishParser {
                  _parser = _match->_parser;
         }
         
-        Match(Match& match) :
-            Match(&match)
-        {
-            _delete = false;
-        }
-
         virtual ~Match()
         {
-            if (_match && _delete)
+            if (_match)
                 delete _match;
 
             --matchInstanceCount();
@@ -82,7 +76,7 @@ namespace BeeFishParser {
 
             if (_parser == nullptr)
                 throw std::logic_error("Match::setup _parser is not defined.");
-            
+
           
         }
 
@@ -95,8 +89,8 @@ namespace BeeFishParser {
             if (!_parser)
                 setup(parser);
                 
-if (result() != nullopt)
-    return false;
+            if (result() != nullopt)
+                return false;
                 
             bool matched = false;
             
@@ -115,24 +109,6 @@ if (result() != nullopt)
             
             return matched;
         }
-        /*
-        virtual bool matchCharacter(const Char& character)  {
-            
-            if (!_parser)
-                throw std::logic_error("Match::matchCharacter not setup");
-
-            bool matched = false;
-
-            if (!_match) {
-                matched = true;
-            }
-            else  {
-                matched = _match->match(_parser, character);
-            }
-
-            return matched;
-        };
-        */
         
         virtual bool match(Byte b)
         {
@@ -141,11 +117,13 @@ if (result() != nullopt)
         
         virtual void success()
         {
+//assert(_result == nullopt);
             setResult(true);
         }
         
         virtual void fail()
         {
+//assert(_result == nullopt);
             setResult(false);
         }
         
@@ -213,22 +191,21 @@ if (result() != nullopt)
 
             if (!_parser)
                 setup(parser);
-                 
-            if (result() != nullopt)
-                return;
-            
+                
             if (_match )
             {
                 if (_match->result() == nullopt)
                     _match->eof(_parser);
                     
-                if (_match->result() == true)
-                    success();
-                else
-                    fail();
+                if (_result == nullopt) {
+                    if (_match->result() == true)
+                         success();
+                    else
+                         fail();
+                }
                 
             }
-            else
+            else if (_result == nullopt)
                 fail();
           
         }

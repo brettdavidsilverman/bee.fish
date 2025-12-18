@@ -22,23 +22,13 @@ namespace BeeFishParser {
              _iterator = 0;
         }
         
-        And(Match& left, Match& right)
-        {
-            _iterator = 0;
-            _inputs.push_back(&left);
-            _inputs.push_back(&right);
-            _delete = false;
-        }
-      
         virtual ~And()
         {
-            if (_delete) {
-                for (auto it : _inputs)
-                {
-                    Match* match = it;
-                    if (match)
-                       delete match;
-                }
+            for (auto it : _inputs)
+            {
+                Match* match = it;
+                if (match)
+                    delete match;
             }
         }
 
@@ -116,17 +106,16 @@ namespace BeeFishParser {
 
         }
     
-        virtual void eof(Parser* parser) {
+        virtual void eof(Parser* parser)
+        override
+        {
           
             if (!_parser)
                 setup(parser);
-            
 
             if (result() != nullopt)
                 return;
-     
-   
-   
+
             for (size_t index = _iterator; index < _inputs.size(); ++index)
             {
 

@@ -40,7 +40,7 @@ namespace BeeFishWeb {
             }
         };
 
-        class Query;
+        class Search;
             
         class KeyCharacter : public Not {
         public:
@@ -89,7 +89,7 @@ namespace BeeFishWeb {
 
         class KeyValuePair : public And {
         public:
-            friend class Query;
+            friend class Search;
 
         protected:
             BString _key;
@@ -104,12 +104,12 @@ namespace BeeFishWeb {
                         _key
                     ),
                     new Optional(
-                        new And(
-                            new Character('='),
-                            new Capture(
-                                new Value(),
-                                _value
-                            )
+                        new Character('=')
+                    ),
+                    new Optional(
+                        new Capture(
+                            new Value(),
+                            _value
                         )
                     ),
                     new Optional(
@@ -122,14 +122,14 @@ namespace BeeFishWeb {
 
         };
 
-        class Query : 
+        class Search : 
             public Repeat<KeyValuePair>,
             public std::map<BString, BString>
         {
         protected:
             BString _value;
         public:
-            Query() : Repeat<KeyValuePair>() { 
+            Search() : Repeat<KeyValuePair>() { 
                     
             }
 
@@ -140,11 +140,11 @@ namespace BeeFishWeb {
                 Repeat<KeyValuePair>::matchedItem(item);
             }
             
-            virtual bool matchCharacter(const Char& character)
+            virtual bool match(Parser* parser, const Char& character)
             override
             {
                 bool matched =
-                    Repeat::matchCharacter(character);
+                    Repeat::match(parser, character);
                     
                 if (matched)
                     _value += character;
@@ -168,7 +168,8 @@ namespace BeeFishWeb {
 
     public:
         Path* _path = nullptr;
-        Query* _query = nullptr;
+        Search* _search = nullptr;
+        BeeFishQuery::Statement* _statement = nullptr;
     public:
             
         URL() : Match()
@@ -176,18 +177,29 @@ namespace BeeFishWeb {
               
                 
             _path = new Path();
-                    
-            Match* query =
+            _search = new Search();
+            _statement = new BeeFishQuery::Statement();
+            
+            _match = new And(
+                _path,
                 new Optional(
                     new And(
                         new Character('?'),
-                        _query = new Query()
+                        _search
+                        /*
+                        new OrderOfPrecedence(
+                            {
+                                {
+                                    _search
+                                },
+                                {
+                                    _statement
+                                }
+                            }
+                        )
+                        */
                     )
-                );
-                    
-            _match = new And(
-                _path,
-                query
+                )
             );
 
         }
@@ -197,14 +209,14 @@ namespace BeeFishWeb {
             return _path->value();
         }
             
-        const Query& query() const
+        const Search& search() const
         {
-            return (*_query);
+            return (*_search);
         }
             
-        Query& query()
+        Search& search()
         {
-            return (*_query);
+            return (*_search);
         }
             
             

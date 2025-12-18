@@ -24,7 +24,7 @@ namespace BeeFishParser
         {
             return true;
         }
-      
+
 		virtual void setup(Parser* parser)
         override
 		{
@@ -35,7 +35,7 @@ namespace BeeFishParser
             
             
 		}
-        
+
         virtual bool match(
             Parser* parser,
             const Char& character
@@ -51,7 +51,7 @@ namespace BeeFishParser
             }
             
             
-            return Match::match(_parser, character);
+            return _match->match(_parser, character);
         }
 
 	};

@@ -29,22 +29,20 @@ int main(int argc, const char* argv[]) {
     string line;
     do 
     {
-        cout << "Expression: " << flush;
+        cout << "Expression: ";
         
         try {
              
-            Expression expression;
-            Character terminator(";");
-            BeeFishParser::And statement(expression, terminator);
-             
-            Capture capture(statement);
+            Statement statement;
+            cin >> statement;
         
-            cin >> expression;
-        
-            if (expression.matched())
+            if (statement.matched())
             {
+                if (statement.expression.value().trim() == "exit")
+                    break;
+                    
                 cout << "Ok" << endl;
-                cout << capture.value() << endl;
+                cout << statement.expression.value() << endl;
             }
             else
                 break;

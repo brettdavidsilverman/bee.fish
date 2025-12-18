@@ -62,10 +62,10 @@ namespace BeeFishParser {
         virtual void eof(Parser* parser)
         {
             setup(parser);
-            
-            if (result() != nullopt)
-                return;
-                
+/*
+if (result() != nullopt)
+    return;
+*/
             _match->eof(parser);
             
             success();

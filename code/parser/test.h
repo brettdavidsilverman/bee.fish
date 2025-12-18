@@ -254,11 +254,15 @@ assert(ok);
             }
 
             virtual void setup(Parser* parser) {
+                if (_parser)
+                    return;
+            
                 _inputs = {
                     new CharA(),
                     new CharB(),
                     new CharC()
                 };
+                
                 And::setup(parser);
 
 
@@ -518,9 +522,7 @@ assert(ok);
         class Punctuation : public Or {
         public:
             Punctuation() : Or(
-                new And(
-                    new CIWord(" and ")
-                )
+                new Character(" ")
             )
             {
             }
@@ -529,10 +531,7 @@ assert(ok);
         class _Character : public Not {
         public:
             _Character() : Not(
-                new Or(
-                    new Punctuation(),
-                    new Blankspace()
-                )
+                new Punctuation()
             )
             {
 
@@ -547,17 +546,33 @@ assert(ok);
         
         Match* _char3 = new Capture(new _Character());
         ok &= testMatchDelete("Character a", _char3, "a", true, "a");
+   
+        Match* _char4 = new Capture(new _Character());
+        ok &= testMatchDelete("Character { }and{ }", _char4, " and ", false);
         
                 
-        class _Token : public Capture{
+        class _Token : public And
+        {
         public:
-            _Token() :Capture(
-                new Or(
-                    new Punctuation(),
-                    new Repeat<_Character>(1)
+            BString _value;
+            
+        public:
+            _Token() : And(
+                new Capture(
+                    new Repeat<_Character>(1),
+                    _value
+                ),
+                new Optional(
+                    new Punctuation()
                 )
             )
             {
+            }
+            
+            virtual void success()
+            override
+            {
+                And::success();
             }
             
             
@@ -575,14 +590,11 @@ assert(ok);
         Match* _token4 = new Capture(new _Token());
         ok &= testMatchDelete("Token and", _token4, "and", true);
       
-        Match* _token5 = new Capture(new _Token());
-        ok &= testMatchDelete("Token { }and{ }", _token5, " and ", true, " and ");
-        
         _Token* token6 = new _Token();
         Match* _token6 = new Capture(token6);
         ok &= testMatch("Token andtoo", _token6, "andtoo", true, "andtoo");
       
-        ok &= testResult("Token value", token6->value() == "andtoo");
+        ok &= testResult("Token value", token6->_value == "andtoo");
         
         delete _token6;
         
@@ -598,10 +610,9 @@ assert(ok);
             virtual void matchedItem(_Token* token)
             override
             {
-                BString value = token->value().trim();
+                BString value = token->_value;
                 
                 push_back(value);
-                cout << "*" << value << "*" << endl;
                 Repeat::matchedItem(token);
             }
         };
@@ -615,8 +626,14 @@ assert(ok);
         Match* _tokens3 = new Capture(new _Tokens());
         ok &= testMatchDelete("Words hello world", _tokens3, "hello world", true);
         
-        Match* _tokens4 = new Capture(new _Tokens());
-        ok &= testMatchDelete("Words hello and world and goodbye", _tokens4, "hello and world and goodbye", true);
+        _Tokens* tokens;
+        Match* _tokens4 = new Capture(tokens = new _Tokens());
+        ok &= testMatch("Words hello and world and goodbye", _tokens4, "hello and world and goodbye", true);
+
+        ok &= testResult("Token count", tokens->size() == 5);
+        ok = ok && testResult("Token [0] is hello", (*tokens)[0] == "hello");
+        ok = ok && testResult("Token [3] is and", (*tokens)[3] == "and");
+        delete _tokens4;
 
         return ok;
     }
