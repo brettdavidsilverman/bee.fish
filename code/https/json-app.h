@@ -108,10 +108,10 @@ namespace BeeFishHTTPS {
                   _statusText = "JSONPathParser error";
                }
                else {
-                  _content = "\"Ok\"";
+                  _content = "\"ok\"";
                   _serve = App::SERVE_CONTENT;
                   _status = 200;
-                  _statusText = "Ok";
+                  _statusText = "ok";
                }
             }
          }

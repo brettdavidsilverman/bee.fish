@@ -507,11 +507,11 @@ using namespace BeeFishTest;
             );
             
             
-            Id id = Id::fromKey(fromBase64(webRequest.searchObject()["id"]));
+            Id id = Id::fromKey(webRequest.searchObject()["id"]);
             
             ok = ok && testResult(
                 "search has id=*",
-                 id.key() ==  fromBase64("/jHJPjHicH4nI+Jxk+Jw+Jk+JPhycZPhycY+HJxPhycPhyPhxk+HD4PJxjycTyY8ORA=")
+                 id.key() ==  "/jHJPjHicH4nI+Jxk+Jw+Jk+JPhycZPhycY+HJxPhycPhyPhxk+HD4PJxjycTyY8ORA="
             );
             
             if (!ok)

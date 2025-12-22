@@ -66,6 +66,8 @@ namespace BeeFishHTTPS {
          if (search.contains("key")) {
             key = search["key"];
          }
+         
+         const BString& method = request->method();
 
          path = request->path();
 
@@ -76,10 +78,10 @@ namespace BeeFishHTTPS {
          else if (id.has_value()) {
             _bookmark = _bookmark[id.value()];
          }
-         else
-             return;
-
-         const BString& method = request->method();
+         else if (method != "DELETE")
+            return;
+        
+         
          SSize contentLength = 0;
          
          if (method == "POST")

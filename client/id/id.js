@@ -253,22 +253,24 @@ class Id {
     load(input) {
 
         var self = this;
-
+console.log("ID load: " + this.key);
         var promise = storage.getItem(this)
             .then(
                 function(value) {
+
                     return JSON.parse(value);
                 }
             )
             .then(
                 function(json) {
             
-                    if (json == undefined)
+                    if (json == null)
                         return null;
 
                     if (input == undefined)
                         input  = {};
-                        
+
+
                     if (typeof json === "object") {
                         Object.assign(input, json);
                     }

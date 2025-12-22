@@ -44,7 +44,7 @@ int main(int argc, const char* argv[]) {
                 break;
             }
                     
-            cout << "Ok" << endl;
+            cout << "ok" << endl;
             cout << statement.expression.value() << endl;
         
         }

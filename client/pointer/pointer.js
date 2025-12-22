@@ -62,12 +62,16 @@ class Pointer extends Id
          var object = Pointer.map.get(this.key);
          this.object = object;
          this.got = true;
-         return Promise.resolve(this.object);
+         return this.object;
       }
 
+      
       var id = Id.fromKey(this.key);
       
-      this.object = await id.load(input)
+      this.object = await id.load(input);
+      
+      console.log("Pointer object: " + this.onject);
+      
       this.got = true;
       
       Pointer.map.set(this.key, this.object);

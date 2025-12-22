@@ -8,7 +8,7 @@ class ChildPointer extends Pointer {
 
       function getPointer(input) {
          if (input && input.key)
-            return input.key;
+            return {key : input.key};
          else if (input && input.pointer)
             return input.pointer;
          else

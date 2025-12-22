@@ -133,8 +133,8 @@ namespace BeeFishWeb {
             }
 
             virtual void matchedItem(KeyValuePair* item) {
-                BString key = item->_key.unescape().decodeURI();
-                BString value = item->_value.unescape().decodeURI();
+                BString key = item->_key.decodeURI();
+                BString value = item->_value.decodeURI();
                 (*this)[key] = value;
                 Repeat<KeyValuePair>::matchedItem(item);
             }

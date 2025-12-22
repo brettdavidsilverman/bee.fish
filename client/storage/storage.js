@@ -154,17 +154,8 @@ class RemoteStorage
     clear()
     {
         var params = {}
-        params.method = "POST";
+        params.method = "DELETE";
         params.credentials = "include";
-        params.headers = new Headers([
-            ["Content-Type", "application/json; charset=utf-8"]
-        ]);     
-        params.body =
-            JSON.stringify(
-                {
-                    method: "clear"
-                }
-            );
 
         var promise = fetch(this.url, params)
             .then(function(response) {
@@ -173,7 +164,7 @@ class RemoteStorage
             .then(function(json) {
                 if (json.response != "ok")
                     throw json;
-                return json;
+                return true;
             })
             .catch(function(error) {
                 throw new Error(

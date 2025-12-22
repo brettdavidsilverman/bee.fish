@@ -29,7 +29,7 @@ namespace BeeFishHTTPS {
       } _serve = SERVE_CONTENT;
 
       int _status = -1;
-      string _statusText = "Ok";
+string _statusText = "ok";
       ResponseHeaders& _responseHeaders;
       std::string _content;
       Path _bookmark;

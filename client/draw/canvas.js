@@ -307,7 +307,7 @@ class Canvas extends UserInput {
         
         this.scrollToTop();
 
-        //this.children.resize(this);
+       // this.children.resize(this);
 
     }
     
@@ -372,6 +372,7 @@ class Canvas extends UserInput {
                 dimensions
             );
         
+        
         if (!parent)
             parent = this;
 
@@ -422,8 +423,6 @@ class Canvas extends UserInput {
         parent.save();
 
         this._points = null;
-        
-        this.draw();
         
         
     }
@@ -538,7 +537,7 @@ class Canvas extends UserInput {
         
         if (key)
         {
-            console.log("Fetching canvas");
+            console.log("Loading canvas");
             var id = Id.fromKey(key);
             canvas = await id.load();
         }
@@ -550,6 +549,7 @@ class Canvas extends UserInput {
             canvas.save();
             storage.setItem("Canvas", canvas.key);
         }
+        
         
         return canvas;
 
