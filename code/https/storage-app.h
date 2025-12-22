@@ -45,18 +45,16 @@ namespace BeeFishHTTPS {
          BString contentType;
          bool returnJSON = true;
 
-         // Extract id from the query
-         BeeFishWeb::WebRequest::URL::Query& query = request->queryObject();
+         // Extract id from the search
+         BeeFishWeb::URL::Search& search = request->searchObject();
 
-         if (query.contains("id")) {
+         if (search.contains("id")) {
 
-            BString queryID = query["id"];
+            BString searchID = search["id"];
             
-cerr << "QUERY**********" << queryID << "*" << endl;
-
             // Test for correct Id
             try {
-               id = Id::fromKey(queryID);
+               id = Id::fromKey(searchID);
             }
             catch (...) {
                id = BeeFishMisc::nullopt;
@@ -65,8 +63,8 @@ cerr << "QUERY**********" << queryID << "*" << endl;
          }
         
          
-         if (query.contains("key")) {
-            key = query["key"];
+         if (search.contains("key")) {
+            key = search["key"];
          }
 
          path = request->path();
@@ -82,7 +80,8 @@ cerr << "QUERY**********" << queryID << "*" << endl;
              return;
 
          const BString& method = request->method();
-
+         SSize contentLength = 0;
+         
          if (method == "POST")
          {
 
@@ -92,29 +91,31 @@ cerr << "QUERY**********" << queryID << "*" << endl;
                contentType = "application/json; charset=utf-8";
 
             Size pageIndex = 0;
-            ssize_t _contentLength = 0;
+            
 
             WebRequest postRequest(false);
-
+            BeeFishParser::Parser parser(postRequest);
+            
             postRequest.setOnData(
-               [&pageIndex, &_contentLength, this](const std::string& data) {
-                  _contentLength += data.size();
+               [&pageIndex, &contentLength, this](const std::string& data) {
+                  contentLength += data.size();
                   _bookmark[pageIndex++].setData(data);
                }
             );
 
-            BeeFishScript::ScriptParser parser(postRequest);
+            
 
             if (!parseWebRequest(parser)) {
                throw std::runtime_error("Invalid input post to storage-app.h");
             }
-
+            
             postRequest.flush();
 
-            if ( _contentLength == 0 )
+            
+            if ( contentLength == 0 )
                deleteData();
             else {
-               _bookmark["Content length"].setData(_contentLength);
+               _bookmark["Content length"].setData(contentLength);
                _bookmark["Content type"].setData(contentType);
                _bookmark["Page count"].setData(pageIndex);
             }
@@ -129,9 +130,10 @@ cerr << "QUERY**********" << queryID << "*" << endl;
             if (_bookmark["Content length"].hasData())
                _bookmark["Content type"].getData(contentType);
 
+
             if (contentType.length()) {
                _status = 200;
-                _bookmark["Content length"].setData(_contentLength);
+                _bookmark["Content length"].getData(_contentLength);
                _serve = App::SERVE_DATA;
                returnJSON = false;
             }

@@ -1,0 +1,72 @@
+#ifndef BEE_FISH_WEB__CONTENT_LENGTH_H
+#define BEE_FISH_WEB__CONTENT_LENGTH_H
+
+#include <map>
+#include <vector>
+#include <typeinfo>
+#include "../parser/parser.h"
+#include "../json/json-parser.h"
+
+
+
+namespace BeeFishWeb {
+
+using namespace BeeFishParser;
+
+class ContentLength :
+    public Match,
+    public BeeFishBString::BStream
+{
+public:
+    Size _contentCount = 0;
+    Size _contentLength = 0;
+public:
+
+    ContentLength() :
+        _contentCount(0)
+    {
+    }
+
+    virtual bool match(Byte b) {
+
+        
+       if (++_contentCount == _contentLength) {
+            success();
+        }
+        
+        if (_contentCount > _contentLength)
+            return false;
+
+        BeeFishBString::BStream::push_back(b);
+        
+        return true;
+    }
+
+    virtual void eof(Parser* parser)
+    override
+    {
+
+cerr << endl << "CONTENT LENGTH EOF" << endl;
+ 
+        flush();
+        if (_contentCount != _contentLength)
+            Match::fail();
+    }
+
+    virtual void setup(Size contentLength, BStream::OnBuffer ondata)
+    {
+
+        _contentLength = contentLength;
+        BStream::setOnBuffer(ondata);
+        _parser->setDataBytes(this, _contentLength);
+    
+    }
+
+
+
+};
+
+
+};
+
+#endif

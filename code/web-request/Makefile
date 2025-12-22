@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -std=c++17 -fmax-errors=1
 BUILD = ../../build
 OUTPUT=$(BUILD)/web-request
-DEPS=main.cpp content-length.h body.h new-line.h headers.h url.h web-request.h version.h test.h Makefile
+DEPS=main.cpp body.h new-line.h headers.h url.h web-request.h version.h test.h Makefile
 
 $(OUTPUT): $(DEPS)
 	@echo "Linking Web Request"

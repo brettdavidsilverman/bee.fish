@@ -36,16 +36,17 @@ int main(int argc, const char* argv[]) {
             Statement statement;
             cin >> statement;
         
-            if (statement.matched())
+            if (statement
+                .expression
+                .value()
+                .trim() == "exit")
             {
-                if (statement.expression.value().trim() == "exit")
-                    break;
-                    
-                cout << "Ok" << endl;
-                cout << statement.expression.value() << endl;
-            }
-            else
                 break;
+            }
+                    
+            cout << "Ok" << endl;
+            cout << statement.expression.value() << endl;
+        
         }
         catch (runtime_error& error)
         {

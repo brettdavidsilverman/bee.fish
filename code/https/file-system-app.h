@@ -410,7 +410,7 @@ namespace BeeFishHTTPS {
             {
                BString newPath =
                   path + BString("/") +
-                  request.query();
+                  request.search();
                   
                redirect(newPath, true);
                

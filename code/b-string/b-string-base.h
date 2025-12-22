@@ -21,8 +21,6 @@
 #include "../power-encoding/power-encoding.h"
 #include "char.h"
 
-#include "utf-8.h"
-
 #ifdef SERVER
 using namespace std::filesystem;
 #endif

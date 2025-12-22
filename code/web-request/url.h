@@ -4,9 +4,8 @@
 #include <map>
 #include <vector>
 #include <typeinfo>
+#include "../parser/parser.h"
 #include "../query/query.h"
-#include "new-line.h"
-
 
 namespace BeeFishWeb {
 

@@ -34,7 +34,7 @@ namespace BeeFishHTTPS {
       std::string _content;
       Path _bookmark;
       path   _filePath;
-      ssize_t _contentLength = 0;
+      SSize _contentLength = 0;
       Size _bytesTransferred = 0;
    public:
       App(

@@ -128,6 +128,17 @@ using namespace BeeFishTest;
             "Path with escaped search and no slash",
             url3.search()["key"] == "hello world"
         );
+        
+        BeeFishWeb::URL url4;
+        JSONParser urlWithQueryParser4(url4);
+        urlWithQueryParser4.read("/beehive?key HTTP/1.1");
+        urlWithQueryParser4.eof();
+        
+        ok = ok && testResult(
+            "Path with short search",
+            url4.search().contains("key") &&
+            url4.search()["key"] == ""
+        );
 
         return ok;
 
@@ -231,8 +242,7 @@ using namespace BeeFishTest;
         ok = ok && testResult("Header value boo",
             header._value == "boo"
         );
-        
-        assert(ok);
+    
         
         Headers headers;
         JSONParser parser2(headers);
@@ -356,6 +366,15 @@ using namespace BeeFishTest;
             false,
             true
         );
+        
+        ok = ok && testRequest(
+            "get with simplest incorrect header",
+            "GET /sample/?key HTTP/1.1\r\n"
+            "Host: bee.fish\r\n"
+            "\r\n",
+            false,
+            true
+        );
 
 
         ok = ok && testRequest(
@@ -369,6 +388,7 @@ using namespace BeeFishTest;
             true,
             true
         );
+        
         
         ok = ok && testRequest(
             "post with trailing blanks",
@@ -509,10 +529,7 @@ using namespace BeeFishTest;
                 cout << parser.getError() << endl;
             
         };
-        
-        assert(ok);
-        
-        assert(ok);
+    
         
         return ok;
         
@@ -653,7 +670,7 @@ using namespace BeeFishTest;
             name2 == BString("Brett")
         );
 
-        BeeFishWeb::WebRequest urlWebRequest;
+        BeeFishWeb::WebRequest urlWebRequest(false);
         ok = ok && testFile(
             parser,
             "WebRequest with path and search",
@@ -668,8 +685,8 @@ using namespace BeeFishTest;
         );
         
         ok = ok && testResult(
-            "WebRequest search is search",
-            urlWebRequest.search() == "search"
+            "WebRequest search is query",
+            urlWebRequest.search().contains("query")
         );
         
         BeeFishWeb::WebRequest escapedUrlWebRequest;
@@ -687,8 +704,8 @@ using namespace BeeFishTest;
         );
         
         ok = ok && testResult(
-            "WebRequest escaped search is search<space>search",
-            escapedUrlWebRequest.search() == "search%20query"
+            "WebRequest escaped search is query<space>query",
+            escapedUrlWebRequest.search() == "query%20query"
         );
 
         BeeFishWeb::WebRequest postWebRequest;
@@ -721,7 +738,7 @@ using namespace BeeFishTest;
             "Post with zero content length",
             WWW_ROOT_DIRECTORY "/code/web-request/tests/zero-content-length.txt",
             postWebRequest3,
-            true
+            nullopt
         );
 
         BeeFishWeb::WebRequest postWebRequest4;
@@ -757,7 +774,7 @@ using namespace BeeFishTest;
             true
         );
 
-        postWebRequest3.flush();
+        postWebRequest5.flush();
 
 
 

@@ -86,7 +86,7 @@ namespace BeeFishParser
              _dataBytes = -1;
              
              _deleteMatch = deleteMatch;
-        }        
+        }
 
         virtual ~Parser()
         {
@@ -171,7 +171,7 @@ namespace BeeFishParser
                      _character.push_back(c);
                      ++_charCount;
 #ifdef DEBUG
-    cout << escape(_character);
+    cout << _character;
 #endif
                      _lastCharacter = _character;
                      
@@ -291,7 +291,7 @@ cerr << "MATCH RESULT: " << _match->result() << endl;
         
        
         virtual void eof() {
-           
+
             if (result() != nullopt)
                 return;
 
@@ -307,7 +307,7 @@ cerr << "MATCH RESULT: " << _match->result() << endl;
                 success();
             }
        
-       }
+        }
 
         virtual void success()
         {
@@ -365,7 +365,7 @@ cerr << "MATCH RESULT: " << _match->result() << endl;
         return _parser->_character;
     }
     
-        ostream& operator << (ostream& out, const Match& match)
+    ostream& operator << (ostream& out, const Match& match)
     {
         match.write(out);
         return out;

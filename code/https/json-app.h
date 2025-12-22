@@ -61,8 +61,8 @@ namespace BeeFishHTTPS {
             request()->method();
          const BString& url =
             request()->path();
-         const BString& query =
-            request()->query();
+         const BString& search =
+            request()->search();
          
          optional<Path> jsonPath =
             parseURL(
@@ -71,7 +71,7 @@ namespace BeeFishHTTPS {
                clientIPAddress,
                method,
                url,
-               query
+               search
             );
          
          if (jsonPath.has_value())

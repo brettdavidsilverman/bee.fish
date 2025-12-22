@@ -1,0 +1,31 @@
+==1946563== Memcheck, a memory error detector
+==1946563== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==1946563== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==1946563== Command: ../../build/query
+==1946563== Parent PID: 1946562
+==1946563== 
+==1946563== 
+==1946563== Process terminating with default action of signal 2 (SIGINT)
+==1946563==    at 0x4C7729D: read (read.c:26)
+==1946563==    by 0x4C0116D: _IO_file_underflow@@GLIBC_2.2.5 (fileops.c:516)
+==1946563==    by 0x4C02151: _IO_default_uflow (genops.c:362)
+==1946563==    by 0x496D5E0: __gnu_cxx::stdio_sync_filebuf<char, std::char_traits<char> >::uflow() (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.30)
+==1946563==    by 0x497B8CD: std::istream::get() (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.30)
+==1946563==    by 0x120F23: BeeFishParser::Parser::read(std::istream&) (in /home/brettdavidsilverman/bee.fish/dev.bee.fish/build/query)
+==1946563==    by 0x11A0FB: BeeFishParser::operator>>(std::istream&, BeeFishParser::Match&) (in /home/brettdavidsilverman/bee.fish/dev.bee.fish/build/query)
+==1946563==    by 0x11A46F: main (in /home/brettdavidsilverman/bee.fish/dev.bee.fish/build/query)
+==1946563== 
+==1946563== HEAP SUMMARY:
+==1946563==     in use at exit: 85,904 bytes in 130 blocks
+==1946563==   total heap usage: 6,353 allocs, 6,223 frees, 485,156 bytes allocated
+==1946563== 
+==1946563== LEAK SUMMARY:
+==1946563==    definitely lost: 0 bytes in 0 blocks
+==1946563==    indirectly lost: 0 bytes in 0 blocks
+==1946563==      possibly lost: 0 bytes in 0 blocks
+==1946563==    still reachable: 85,904 bytes in 130 blocks
+==1946563==         suppressed: 0 bytes in 0 blocks
+==1946563== Reachable blocks (those to which a pointer was found) are not shown.
+==1946563== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==1946563== 
+==1946563== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
