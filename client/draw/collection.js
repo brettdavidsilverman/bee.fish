@@ -95,7 +95,7 @@ class Collection extends Array {
       );
 
       var items = pointers.map (
-         item => item.fetch()
+         item => item.load()
       );
       
       var fetched = await Promise.all(items);

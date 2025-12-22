@@ -51,7 +51,7 @@ class Pointer extends Id
       }
    }
 
-   getItem(input)
+   async load(input)
    {
       if (this.got)
       {
@@ -66,22 +66,15 @@ class Pointer extends Id
       }
 
       var id = Id.fromKey(this.key);
-      var self = this;
-
-      var promise = id.getItem(input)
-      .then(
-         function(object) {
-            self.object = object;
-            self.got = true;
       
-            Pointer.map.set(self.key, self.object);
-            return object;
-         }
-      )
+      this.object = await id.load(input)
+      this.got = true;
+      
+      Pointer.map.set(this.key, this.object);
 
-      console.log("Fetch:" + Pointer.map.size);
+      console.log("Pointer.load:" + Pointer.map.size);
 
-      return promise;
+      return this.object;
    }
 
    toJSON()

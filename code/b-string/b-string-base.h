@@ -421,8 +421,14 @@ namespace BeeFishBString
          return wstring_to_utf8(str);
       }
 
-      BString escape() {
+      BString escape() const
+      {
          return BeeFishMisc::escape(this->str());
+      }
+      
+      BString unescape() const
+      {
+         return BeeFishMisc::unescape(this->str());
       }
       
 

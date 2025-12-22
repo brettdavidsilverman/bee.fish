@@ -4,18 +4,14 @@
       <script src="/head.js"></script>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <!--
-      <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.7/base64.min.js"></script>
-      
-      <script src="../base64.min.js"></script>
-      -->
-      <script src="../fetch.js"></script>
       <script src="../stream/stream.js"></script>
       <script src="../power-encoding/power-encoding.js"></script>
+      <script src="String.js"></script>
       <script src="id.js"></script>
-      <link rel="stylesheet" type="text/css" href="/style.css" />
+      <script src="../pointer/pointer.js"></script>
+      <script src="../storage/storage.js"></script>
       <link rel="stylesheet" type="text/css" href="../style.css" />
-      
+      <link rel="stylesheet" type="text/css" href="/style.css" />
       <title>Id</title>
    </head>
    <body>
@@ -40,11 +36,11 @@ var id = new Id();
 // Write out its default string
 document.writeln(id);
 
-// Write out its string encoded key
-document.writeln(btoa(id.key));
-
 // Create a new id from old key
 var id2 = Id.fromKey(id.key);
+
+// Write out its default string
+document.writeln(id2);
 
          </script>
       </pre>
@@ -57,11 +53,6 @@ var id2 = Id.fromKey(id.key);
          <textarea id="key" rows="3" cols="40"></textarea>
          <br />
          <button onclick="loadDataFromKey()" type="button">Ok</button>
-         <br />
-         <label for="base64">Base 64</label>
-         <textarea id="base64" rows="3" cols="40"></textarea>
-         <br />
-         <button onclick="loadDataFromBase64()" type="button">Ok</button>
          <br />
          <label for="name">Name</label>
          <input type="text" id="name"></input>
@@ -94,9 +85,7 @@ function loadKey()
       
    document.getElementById("key").value =
       id.key;
-      
-   document.getElementById("base64").value =
-      btoa(id.key);
+
 }
 
 function loadDataFromKey()
@@ -109,15 +98,6 @@ function loadDataFromKey()
    
 }
 
-function loadDataFromBase64()
-{
-   var key = atob(document.getElementById("base64").value);
-   
-   id = new Id({key});
-
-   loadData(id);
-   
-}
 
 function loadData(id) {
     
@@ -133,8 +113,6 @@ function loadData(id) {
    document.getElementById("increment").value =
       id.increment;
       
-   document.getElementById("base64").value =
-      btoa(id.key);
       
    
 }
@@ -239,7 +217,7 @@ var a = new A();
 var key = a.key;
 
 document.writeln(
-   btoa(key)
+   key
 );
 
 document.writeln();
@@ -253,7 +231,7 @@ a2 = new A(
 );
 
 document.writeln(
-   btoa(a2.key)
+   a2.key
 );
 
 document.writeln();
@@ -264,25 +242,25 @@ document.writeln(
 
          </script>
       </pre>
-<!--
+
       <h2>Load/Save</h2>
-      <p>Here we show how it load and save
+      <p>Here we show how to load and save
       our custom class.</p>
-      <pre id="getItem">
+      <pre id="save">
          <script>
 var a = new A({data:"Hello World"});
 
-a.setItem().then(
+a.save().then(
    function(key) {
-      writeln("getItem", key);
-      var id = new Id({key});
-      return id.getItem();
+      writeln("save", key);
+      var id = Id.fromKey(key);
+      return id.load();
    }
 )
 .then(
    function(b) {
       writeln(
-         "getItem",
+         "save",
          b.constructor.name  + " says " + b.data
       )
    }
@@ -293,6 +271,5 @@ a.setItem().then(
    }
 );
          </script></pre>
--->
    </body>
 </html>

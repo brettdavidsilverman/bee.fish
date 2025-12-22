@@ -3,7 +3,7 @@ class RemoteStorage
     constructor(input) {
         Object.assign(this, input);
         if (this.url == undefined)
-            this.url = document.location;
+            this.url = document.location.origin + "/storage";
     }
     
     query(key) {
@@ -12,7 +12,7 @@ class RemoteStorage
 
         if (key instanceof Id) {
             var id = key;
-            query = "?id=" + btoa(id.key)
+            query = "?id=" + id.key
         }
         else {
             query = "?key=" + encodeURI(key);
@@ -34,7 +34,9 @@ class RemoteStorage
         params.body = value;
         var status;
         
-        var promise = fetch(this.url + this.query(key), params)
+        var url = this.url + this.query(key);
+
+        var promise = fetch(url, params)
             .then(
                 function(response) {
                     status = response.status;
@@ -55,9 +57,9 @@ class RemoteStorage
                     
                     if (json.response != "ok")
                         throw json;
-                    
+
                     if (json.id) {
-                        var id = Id.fromKey(atob(json.id));
+                        var id = Id.fromKey(json.id);
                         return id;
                     }
 

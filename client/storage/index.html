@@ -2,21 +2,18 @@
 <html lang="en">
    <head>
       <script src="/head.js"></script>
-<!--
-      <script src="../fetch.js"></script>
--->      
       <script src="../logon/authentication.js"></script>
       <script src="../console/console.js"></script>
       <script src="../stream/stream.js"></script>
       <script src="../power-encoding/power-encoding.js"></script>
+      <script src="../id/String.js"></script>
       <script src="../id/id.js"></script>
       <script src="../pointer/pointer.js"></script>
       <script src="storage.js"></script>
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <link rel="stylesheet" type="text/css" href="/style.css" />
       <link rel="stylesheet" type="text/css" href="../style.css" />
-
+      <link rel="stylesheet" type="text/css" href="/style.css" />
       <title>Storage</title>
       <style>
 script {
@@ -83,7 +80,8 @@ setStorage("remoteStorage");
          <input type="text" id="storageURL">
          <script>
          
-document.getElementById("storageURL").value = document.location;
+document.getElementById("storageURL").value =
+    document.location.origin + "/storage";
          </script>
       </form>
 
@@ -115,9 +113,8 @@ function changeKey(newKey)
 function changeId(newId)
 {
    document.getElementById("setKey").value = "";
-   url = "?id=" + btoa(newId);
-
-   key = Id.fromKey(newId);
+   url = "?id=" + newId.key;
+   key = newId;
    document.getElementById("link").href =
        document.getElementById("storageURL").value + url;
    
@@ -128,13 +125,14 @@ function changeId(newId)
       <script>
 window.onload = function() {
    var id = new Id();
-   var key = null;
    document.getElementById("setId").value = id.key;
-   changeId(id.key);
+   changeId(id);
 }
       </script>
       
       <h2>3. Set storage value</h2>
+      
+      <form>
          Value:
          <br />
          <label for="setIsNull">Is Null</label>

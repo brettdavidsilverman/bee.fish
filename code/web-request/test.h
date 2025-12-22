@@ -139,6 +139,33 @@ using namespace BeeFishTest;
             url4.search().contains("key") &&
             url4.search()["key"] == ""
         );
+        
+        {
+            BeeFishWeb::WebRequest::FirstLine line;
+            JSONParser parser(line);
+            parser.read("GET /beehive?key=%26 HTTP/1.1\r\n");
+            parser.eof();
+        
+            ok = ok && testResult(
+                "Path with &",
+                line.matched()
+            );
+            
+            ok = ok && testResult(
+                "Path with key",
+                line.url().search().contains("key")
+            );
+            
+            ok = ok && testResult(
+                "Path key is &",
+                line.url().search()["key"] == "&"
+            );
+            
+            cerr << "*" << line.url().search()["key"] << "*" << endl;
+            assert(ok);
+        }
+        
+        assert(ok);
 
         return ok;
 
@@ -480,11 +507,11 @@ using namespace BeeFishTest;
             );
             
             
-            Id id = Id::fromKey(webRequest.searchObject()["id"]);
+            Id id = Id::fromKey(fromBase64(webRequest.searchObject()["id"]));
             
             ok = ok && testResult(
                 "search has id=*",
-                 id.key() ==  "/jHJPjHicH4nI+Jxk+Jw+Jk+JPhycZPhycY+HJxPhycPhyPhxk+HD4PJxjycTyY8ORA="
+                 id.key() ==  fromBase64("/jHJPjHicH4nI+Jxk+Jw+Jk+JPhycZPhycY+HJxPhycPhyPhxk+HD4PJxjycTyY8ORA=")
             );
             
             if (!ok)

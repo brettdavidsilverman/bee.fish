@@ -91,11 +91,11 @@ document.writeln(
          <script>
 var object1;
 var object2;
-object.setItem()
+object.save()
 .then(
    function(key) {
       var pointer = new Pointer({key});
-      return pointer.getItem();
+      return pointer.load();
    }
 )
 .then(
@@ -103,7 +103,7 @@ object.setItem()
       writeln("get", "Got " + obj.name);
       object1 = obj;
       var pointer = new Pointer({key: obj.key});
-      return pointer.getItem();
+      return pointer.load();
    }
 )
 .then(
@@ -114,7 +114,7 @@ object.setItem()
 
       pointer = new Pointer({key: pointer.key});
 
-      return pointer.getItem();
+      return pointer.load();
    }
 )
 .then(

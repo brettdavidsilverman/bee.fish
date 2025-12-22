@@ -20,8 +20,8 @@ class ChildPointer extends Pointer {
       return this.key
    }
 
-   async fetch() {
-      var item = await super.fetch();
+   async load() {
+      var item = await super.load();
       if (item)
          item.parent = this.parent;
       return item;
