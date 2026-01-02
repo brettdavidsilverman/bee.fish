@@ -5,7 +5,6 @@
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <script src="../console/console.js"></script>
-      <script src="../fetch.js"></script>
       <script src="../stream/stream.js"></script>
       <script src="../power-encoding/power-encoding.js"></script>
       <script src="../storage/storage.js"></script>
@@ -88,48 +87,27 @@ document.writeln(
       
       <h2>Get pointer</h2>
       <pre id="get">
-         <script>
-var object1;
-var object2;
-object.save()
-.then(
-   function(key) {
-      var pointer = new Pointer({key});
-      return pointer.load();
-   }
-)
-.then(
-   function(obj) {
-      writeln("get", "Got " + obj.name);
-      object1 = obj;
-      var pointer = new Pointer({key: obj.key});
-      return pointer.load();
-   }
-)
-.then(
-   function(obj) {
-      writeln("get", "Got "  + obj.name);
-      object2 = obj;
-      writeln("get", "Compare " + String(object1 === object2))
+         <script type="module">
+var object = new A();
+var key = await object.save();
+var pointer = new Pointer({key});
+var object1 = await pointer.load();
+writeln("get", "Got " + object1.name);
+var pointer = new Pointer({key: object1.key});
+var object2 = await pointer.load();
 
-      pointer = new Pointer({key: pointer.key});
+writeln("get", "Got "  + object2.name);
 
-      return pointer.load();
-   }
-)
-.then(
-   function(object)  {
-      writeln("get", object.name);
-      pointer.release();
-      writeln("get", "");
-      writeln("get", "");
-   }
-)
-.catch(
-   function(error) {
-      alert(error);
-   }
-);
+writeln("get", "Compare " + String(object1 === object2))
+
+pointer = new Pointer({key: pointer.key});
+
+var object = await pointer.load();
+writeln("get", object.name);
+pointer.release();
+object = await pointer.load();
+writeln("get", object);
+writeln("get", "Compare keys :" + (object.key === pointer.key));
          </script></pre>
    </body>
 </html>

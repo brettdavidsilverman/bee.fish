@@ -7,7 +7,6 @@ Matrix.prototype.toJSON =
        }
        catch (error)
        {
-          console.log("Resetting matrix");
           return new Matrix().toString();
        }
    }

@@ -10,11 +10,13 @@
 #include "authentication.h"
 #include "app.h"
 
+
+#define DISABLE_CACHE
+
+namespace BeeFishHTTPS {
 using namespace std;
 using namespace std::filesystem;
 using namespace BeeFishWeb;
-
-namespace BeeFishHTTPS {
 
    class FileSystemApp : public App {
    

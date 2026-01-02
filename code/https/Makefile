@@ -21,6 +21,7 @@ install:	$(OUTPUT)
 test:	$(OUTPUT)
 	./stop.sh $(PORT)
 	$(OUTPUT) -port $(PORT) -test
+	./start.sh $(PORT)
 
 start:	$(OUTPUT)
 	./start.sh $(PORT)

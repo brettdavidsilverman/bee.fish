@@ -356,11 +356,9 @@ class Canvas extends UserInput {
             return;
         }
         
-        var self = this;
-
         // Convert points to canvas coordinates
         var points = this._points.map(
-            point => self.screenToCanvas(point)
+            point => this.screenToCanvas(point)
         )
 
         // Get the dimensions
@@ -386,6 +384,7 @@ class Canvas extends UserInput {
                 points
             }
         );
+        
 
 
         // Find children inside parent that
@@ -414,13 +413,15 @@ class Canvas extends UserInput {
                 );
             }
         );
-        
+
         // Add the new line inside the parent.
         parent.children.push(line);
-                
+
         // Save and draw.
-        line.save();
-        parent.save();
+        var promise1 = line.save();
+        var promise2 = parent.save();
+
+//        var results = await Promise.all([promise1, promise2]);
 
         this._points = null;
         
@@ -442,7 +443,6 @@ class Canvas extends UserInput {
             this.selection.editing = false;
             this.selection.selected = false;
             this.selection = null;
-            console.log("Blur");
         }
           
         if (hit && hit != this.selection) {
@@ -537,14 +537,12 @@ class Canvas extends UserInput {
         
         if (key)
         {
-            console.log("Loading canvas");
             var id = Id.fromKey(key);
             canvas = await id.load();
         }
         
         if (canvas == undefined)
         {
-            console.log("Creating new canvas");
             canvas = new Canvas();
             canvas.save();
             storage.setItem("Canvas", canvas.key);

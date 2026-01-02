@@ -216,22 +216,15 @@ class Id {
         return new Id(json);
     }    
 
-    save() {
-        var value = JSON.stringify(this, null, "    ");
-
+    async save() {
+        var value = JSON.stringify(this.toJSON(), null, "    ");
         
-        var self = this;
-        var promise = storage.setItem(
+        await storage.setItem(
             this,
             value
-        )
-        .then(
-            function() {
-                return self.key;
-            }
-        )
+        );
 
-        return promise;
+        return this.key
 
     }
     
@@ -250,40 +243,22 @@ class Id {
         return promise;
     }
 
-    load(input) {
-
-        var self = this;
-console.log("ID load: " + this.key);
-        var promise = storage.getItem(this)
-            .then(
-                function(value) {
-
-                    return JSON.parse(value);
-                }
-            )
-            .then(
-                function(json) {
-            
-                    if (json == null)
-                        return null;
-
-                    if (input == undefined)
-                        input  = {};
+    async load() {
 
 
-                    if (typeof json === "object") {
-                        Object.assign(input, json);
-                    }
-                    else
-                        input = json;
+        var value = await storage.getItem(this);
+        
+        var json = JSON.parse(value);
+        
+        if (json === null)
+            return null;
                         
-                    var Type = Id.getType(self.name);
-                    var object = new Type(input);
-                    return object;                    
-                }
-            );
+        var Type = Id.getType(this.name);
+        var object = new Type(json);
+        
 
-        return promise;
+
+        return object;
 
     }
     

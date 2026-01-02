@@ -278,14 +278,12 @@ class Item extends Id {
 
    show() {
       Pointer.map.set(this.key, this);
-      console.log("Show:" + Pointer.map.size);
       this.visible = true;
    }
 
    async hide() {
       this.visible = false;
       this.release();
-      console.log("Hide:" + Pointer.map.size);
    }
 
    async remove() {
