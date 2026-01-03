@@ -6,13 +6,14 @@ class Pointer extends Id
         super(getSuperInput(input));
 
         function getSuperInput(input) {
+            if (input.id)
+                return input.id;
+                
             if (input.key) {
                 var id = Id.fromKey(input.key);
                 return id;
             }
 
-            if (input.id)
-                return input.id;
 
             return null;
         }

@@ -34,10 +34,6 @@ class Line extends Item {
         }
     }
     
-    toString() {
-        return JSON.stringify(this.toJSON(), null, "    ");
-    }
-    
     async draw(context) {
         
         var draw = await super.draw(context);

@@ -1,29 +1,29 @@
 class ChildPointer extends Pointer {
-   parent;
+    parent;
 
-   constructor(input) {
-      super(getPointer(input));
+    constructor(input) {
+        super(getPointer(input));
 
-      this.parent = input.parent;
+        this.parent = input.parent;
 
-      function getPointer(input) {
-         if (input && input.key)
-            return {key : input.key};
-         else if (input && input.pointer)
-            return input.pointer;
-         else
-            return input;
-      }
-   }
+        function getPointer(input) {
+            if (input && input.pointer)
+                return input.pointer;
+            else if (input && input.key) 
+                return {key : input.key};
+            else
+                return input;
+        }
+    }
 
-   toJSON() {
-      return this.key
-   }
+    toJSON() {
+        return this.key
+    }
 
-   async load() {
-      var item = await super.load();
-      if (item)
-         item.parent = this.parent;
-      return item;
-   }
+    async load() {
+        var item = await super.load();
+        if (item)
+            item.parent = this.parent;
+        return item;
+    }
 }

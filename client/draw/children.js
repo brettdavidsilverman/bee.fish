@@ -139,8 +139,7 @@ class Children extends Collection {
         }
         else if (item instanceof Id) {
 
-// childPointer = new ChildPointer({parent: this.parent, pointer: {object: item}});
-            childPointer = new ChildPointer({parent: this.parent, object: item});
+            childPointer = new ChildPointer({parent: this.parent, pointer: {id: item, object: item}});
         }
         else if (typeof item == "string") {
             childPointer = new ChildPointer({parent: this.parent, pointer: {key: item}});

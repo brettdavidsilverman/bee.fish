@@ -421,11 +421,11 @@ class Canvas extends UserInput {
         var promise1 = line.save();
         var promise2 = parent.save();
 
-//        var results = await Promise.all([promise1, promise2]);
+      //  var results = await Promise.all([promise1, promise2]);
 
         this._points = null;
         
-        
+        this.draw();
     }
 
     async longPress(point) {

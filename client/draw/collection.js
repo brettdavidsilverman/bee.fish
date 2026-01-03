@@ -1,6 +1,5 @@
 class Collection extends Array {
 
-    id;
     parent;
 
     constructor(input) {
@@ -31,14 +30,9 @@ class Collection extends Array {
     }
 
     push(item) {
-console.log("Push item " + item);
         var pointer = this.getPointer(item);
         if (pointer != undefined) {
-            
-
-console.log("Push pointer.key " + pointer.key);
             return super.push(pointer);
-
         }
         
     }
@@ -81,7 +75,6 @@ console.log("Push pointer.key " + pointer.key);
 
     toJSON() {
         return {
-            id: this.id,
             keys: this.keys
         }
     }
