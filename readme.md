@@ -1,6 +1,7 @@
 This builds and runs the bee.fish website
 
 cp SampleConfig.hpp ../Config.hpp
+
 cp SampleMakefile ../Makefile
 
 To install letsencrypt certificates
