@@ -19,8 +19,8 @@ class DeleteTool extends ToolboxItem {
    async click(point) {
       if (confirm("Delete " + this.selection + "?")) {
          var parent = this.selection.parent;
-         await this.selection.remove();
-         await parent.save();
+         this.selection.remove();
+         parent.save();
          this.selection = null;
          this.toolbox.parent.draw();
          this.toolbox.remove();

@@ -291,14 +291,14 @@ class Item extends Id {
       var self = this;
 
       // Recursively remove our children
-      await this.children.removeAll();
+      this.children.removeAll();
       
       this.parent.children.remove(this);
 
       this.release();
 
       // Remove ourself
-      return await super.remove();
+      super.remove();
       
    }
 
@@ -309,7 +309,6 @@ class Item extends Id {
       this.outputConnectors.release();
       this.children.release();
       Pointer.map.delete(this.key);
-      console.log("Release:" + Pointer.map.size);
       super.release();
 
    }
