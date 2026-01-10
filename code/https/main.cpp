@@ -72,9 +72,7 @@ int main(int argc, const char* argv[])
 
       appFactories.add<AuthenticationApp>();
       appFactories.add<FileSystemApp>();
-    
       appFactories.add<StorageApp>();
-      
       appFactories.add<JSONApp>();
       appFactories.add<NotFoundApp>();
       boost::asio::io_context io_context(_threadCount);
