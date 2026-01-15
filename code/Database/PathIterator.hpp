@@ -126,9 +126,27 @@ namespace BeeFishDatabase {
         {
          
         }
-      
-
+    
+        virtual bool canGoLeft(const Branch& branch) const
+        override
+        {
+            return MinMaxPath::canGoLeft(branch);
+        }
         
+        virtual bool canGoRight(const Branch& branch) const
+        {
+            return MinMaxPath::canGoRight(branch);
+        }
+        
+        virtual void goLeft(Index index, Stack& stack)
+        {
+            MinMaxPath::goLeft(index, stack);
+        }
+        
+        virtual void goRight(Index index, Stack& stack)
+        {
+            MinMaxPath::goRight(index, stack);
+        }
 
     
     };
