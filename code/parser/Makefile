@@ -1,6 +1,6 @@
 BUILD=../../build
 OUTPUT=$(BUILD)/parser
-CFLAGS=-std=c++17 -Wall -fmax-errors=1 -Ofast
+CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=main.cpp match.h and.h or.h not.h character.h blankspaces.h word.h ciword.h repeat.h optional.h load-on-demand.h test.h capture.h invoke.h order-of-precedence.h parser.h version.h Makefile $(BUILD)/b-string
 
 $(OUTPUT): $(DEPS)

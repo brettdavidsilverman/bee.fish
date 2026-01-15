@@ -211,11 +211,11 @@ namespace BeeFishParser {
         }
         
         
-        virtual void write(ostream& out) const {
+        virtual void write(ostream& out, Size tabIndex = 0) const {
             out << this->value();
         }
         
-        friend ostream& operator << (ostream& out, const Match& number);
+        friend ostream& operator << (ostream& out, const Match& match);
       
         friend istream& operator >> (istream& in, Match& number);
       

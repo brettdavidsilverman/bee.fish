@@ -39,6 +39,10 @@ namespace BeeFishQuery {
     
     class Operator : public BeeFishParser::And
     {
+    protected:
+        const BString _word;
+        const BString _letter;
+        
     public:
         Operator(
             const BString& word,
@@ -50,8 +54,26 @@ namespace BeeFishQuery {
                 new BeeFishParser::CIWord(word)
             ),
             new Blankspaces()
+        ),
+            _word(word),
+            _letter(letter)
+        {
+        }
+        
+        friend ostream& operator <<
+        (
+            ostream& output,
+            const Operator& _operator
         )
         {
+            _operator.write(output);
+            return output;
+        }
+        
+        virtual void write(ostream& output, Size tabs = 0)
+        const
+        {
+            output << _word;
         }
         
     };
@@ -103,10 +125,10 @@ namespace BeeFishQuery {
         
     };
     
-    class TokenCharacter : public BeeFishParser::Not
+    class WordCharacter : public BeeFishParser::Not
     {
     public:
-        TokenCharacter() :
+        WordCharacter() :
             BeeFishParser::Not(
                 new Seperator()
             )
@@ -114,16 +136,16 @@ namespace BeeFishQuery {
         }
     };
     
-    class Token : public BeeFishParser::And
+    class Word : public BeeFishParser::And
     {
     protected:
         BString _value;
         
     public:
-        Token(): And(
+        Word(): And(
             new Blankspaces(),
             new Capture(
-                new Repeat<TokenCharacter>(1),
+                new Repeat<WordCharacter>(1),
                 _value
             ),
             new Blankspaces()
@@ -131,10 +153,6 @@ namespace BeeFishQuery {
         {
         }
         
-        virtual void success() {
-    cout << "*" << value() << "*";
-            And::success();
-        }
         
         const BString& value() const
         override
@@ -150,78 +168,207 @@ namespace BeeFishQuery {
     
     };
     
-    template<typename T>
-    class Bracketed : public BeeFishParser::And
+    class AndOr : public BeeFishParser::Or
     {
     public:
-        Bracketed() : BeeFishParser::And(
-            new Blankspaces(),
-            new Character("("),
-            new Blankspaces(),
-            new LoadOnDemand<T>(),
-            new Blankspaces(),
-            new Character(")"),
-            new Blankspaces()
+        AndOr() : Or(
+            new BeeFishQuery::And(),
+            new BeeFishQuery::Or()
         )
         {
         }
+        
+        virtual void write(ostream& output, Size tabs = 0)
+        const
+        {
+            output << (*_item);
+        }
+        
+        friend ostream& operator <<
+        (
+            ostream& output,
+            const AndOr& andOr
+        )
+        {
+            andOr.write(output);
+            return output;
+        }
+        
     };
     
-    class Expression : public BeeFishParser::And
+    
+    
+    class Expression : public BeeFishParser::Match
     {
+    public:
+        class BracketedExpression : public BeeFishParser::And
+        {
+        protected:
+            LoadOnDemand<Expression>* _item;
+        
+        public:
+            BracketedExpression() : BeeFishParser::And(
+                new Blankspaces(),
+                new Character("("),
+                new Blankspaces(),
+                _item = new LoadOnDemand<Expression>(),
+                new Blankspaces(),
+                new Character(")"),
+                new Blankspaces()
+            )
+            {
+            }
+        
+            const Expression* item() const {
+                return _item->item();
+            }
+            
+            virtual void write(ostream& output, Size tabs = 0)
+            const
+            {
+                output << "(" << *(item()) << ")";
+            }
+        
+            friend ostream& operator <<
+            (
+                ostream& output,
+                const BracketedExpression& bracketedExpression
+            )
+            {
+                bracketedExpression.write(output);
+                return output;
+            }
+            
+        };
+        
+    protected:
+        OrderOfPrecedence::Item* _notExpression = nullptr;
+        OrderOfPrecedence::Item* _bracketedExpressionAndExpression = nullptr;
+        OrderOfPrecedence::Item* _wordAndExpression = nullptr;
+        OrderOfPrecedence::Item* _bracketedExpression = nullptr;
+        OrderOfPrecedence::Item* _word = nullptr;
+        
+        LoadOnDemand<Expression>* _loadOnDemandExpression1 = nullptr;
+        LoadOnDemand<Expression>* _loadOnDemandExpression2 = nullptr;
+        LoadOnDemand<Expression>* _loadOnDemandExpression3 = nullptr;
+        
+        BracketedExpression* _bracketedExpression1 = nullptr;
+        BracketedExpression* _bracketedExpression2 = nullptr;
+        
+        AndOr* _andOr1 = nullptr;
+        AndOr* _andOr2 = nullptr;
+        
+        BeeFishQuery::Word* _word1 = nullptr;
+        BeeFishQuery::Word* _word2 = nullptr;
         
     public:
-        Expression()
-        : BeeFishParser::And(
+        Expression() {
+            _match = new BeeFishParser::And(
             new Blankspaces(),
             new BeeFishParser::OrderOfPrecedence(
                 
         {
             {
                 // not expression
-                new BeeFishParser::And(
-                    new BeeFishQuery::Not(),
-                    new LoadOnDemand<Expression>()
+                _notExpression = new OrderOfPrecedence::Item(
+                    new BeeFishParser::And(
+                        new BeeFishQuery::Not(),
+                        _loadOnDemandExpression1 =
+                            new LoadOnDemand<Expression>()
+                    )
                 )
             },
             {
-                // (expression) and expression
-                new BeeFishParser::And(
-                    new Bracketed<Expression>(),
-                    new BeeFishParser::Or(
-                        new BeeFishQuery::And(),
-                        new BeeFishQuery::Or()
-                    ),
-                    new LoadOnDemand<Expression>()
+                // (expression) and/or expression
+               _bracketedExpressionAndExpression =
+               new OrderOfPrecedence::Item(
+                    new BeeFishParser::And(
+                        _bracketedExpression1 =
+                            new BracketedExpression(),
+                        _andOr1 = new AndOr(),
+                        _loadOnDemandExpression2 =
+                            new LoadOnDemand<Expression>()
+                    )
                 )
             },
             {
-                // token and expression
-                new BeeFishParser::And(
-                    new Token(),
-                    new BeeFishParser::Or(
-                        new BeeFishQuery::And(),
-                        new BeeFishQuery::Or()
-                    ),
-                    new LoadOnDemand<Expression>()
+                // word and/or expression
+                _wordAndExpression =
+                new OrderOfPrecedence::Item(
+                    new BeeFishParser::And(
+                        _word1 = new BeeFishQuery::Word(),
+                        _andOr2 = new AndOr(),
+                        _loadOnDemandExpression3 =
+                            new LoadOnDemand<Expression>()
+                    )
                 )
             },
             {
                 // (expression)
-                new Bracketed<Expression>(),
+                _bracketedExpression =
+                new OrderOfPrecedence::Item(
+                    _bracketedExpression2 = new BracketedExpression()
+                ),
             },
             {
-                // token
-                new Token()
+                // word
+                _word = new OrderOfPrecedence::Item(
+                    _word2 = new BeeFishQuery::Word()
+                )
             }
             
                  
         }
         
         )
-        )
+        );
+        
+        }
+        
+        virtual void write(ostream& output, Size tabs = 0) const
         {
-
+    
+            if (_notExpression->matched())
+            {
+                output
+                << "not "
+                << *(_loadOnDemandExpression1->item());
+            }
+            else if (_bracketedExpressionAndExpression->matched())
+            {
+                    
+                output 
+                << *(_bracketedExpression1)
+                << " "
+                << *(_andOr1)
+                << " "
+                << *(_loadOnDemandExpression2->item());
+                
+            }
+            else if (_wordAndExpression->matched())
+            {
+                output
+                << *_word1
+                << " "
+                << *(_andOr2)
+                << " "
+                << *(_loadOnDemandExpression3->item());
+            }
+            else if (_bracketedExpression->matched())
+            {
+                output
+                << *_bracketedExpression2;
+            }
+            else if (_word->matched())
+                output << *_word2;
+                
+        }
+        
+        friend ostream& operator << (ostream& output, const Expression& expression)
+        {
+            expression.write(output);
+            
+            return output;
         }
     
 
@@ -231,21 +378,33 @@ namespace BeeFishQuery {
     class Statement : public BeeFishParser::Match
     {
     public:
-            
-        Capture& expression = *(
-            new Capture(
-                new Expression()
-            )
-        );
         
+        Capture* _capture;
+        Expression* _expression;
+    
     public:
         Statement() : BeeFishParser::Match()
         {
             _match = new BeeFishParser::And(
-                &expression,
+                _capture = new Capture(
+                    _expression =
+                        new Expression()
+                ),
                 new Blankspaces(),
                 new Character(";")
             );
+        }
+        
+        virtual BString& value() 
+        override
+        {
+            return _capture->value();
+        }
+        
+        virtual const BString& value() const
+        override
+        {
+            return _capture->value();
         }
     };
     

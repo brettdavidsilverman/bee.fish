@@ -7,6 +7,9 @@
 namespace BeeFishParser {
 
     class Or : public Match {
+    protected:
+        bool _deleteInputs = true;
+        
     public:
         vector<Match*> _inputs;
         Match* _item = nullptr;
@@ -21,12 +24,26 @@ namespace BeeFishParser {
         
         virtual ~Or()
         {
-            for (auto match : _inputs) {
-                if (match)
-                    delete match;
+            if (_deleteInputs)
+            {
+                for (auto match : _inputs) {
+                    if (match)
+                        delete match;
+                }
             }
         }
         
+        virtual optional<bool> result() const
+        override
+        {
+            if (_result != nullopt)
+                return _result;
+                
+            if (_item)
+                return true;
+                
+            return nullopt;
+        }
         
         virtual bool confirm(Match* item) {
             return true;
@@ -75,6 +92,8 @@ namespace BeeFishParser {
             if (_item)
             {
                 success();
+//cerr << "OOfPre::this: " << this << ":" << result() << endl;
+
             }
             else if ( result() == nullopt && 
                          !matched )

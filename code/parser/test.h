@@ -1021,17 +1021,25 @@ assert(ok);
         class Test : public OrderOfPrecedence
         {
         public:
-            Match* _first;
-            Match* _second;
-            Match* _last;
+            Item* _first;
+            Item* _second;
+            Item* _last;
         public:
             Test() : OrderOfPrecedence(
             {
-                {_first = new Word("onetwo")},
-                {_second = new Word("onethree")},
-                {_last= new Word("one")}
+                {_first = new Item(new Word("onetwo"))},
+                {_second = new Item(new Word("onethree"))},
+                {_last = new Item(new Word("one"))}
             })
             {
+            }
+        public:
+            virtual void success()
+            override
+            {
+               // cerr << "TestOrderOfPrecedence::success" << endl;
+                OrderOfPrecedence::success();
+                
             }
         
             
@@ -1044,7 +1052,7 @@ assert(ok);
         ok &= testResult("\tfirst", !test->_first->matched());
         ok &= testResult("\tsecond", !test->_second->matched());
         ok &= testResult("\tlast", test->_last->matched());
-        ok &= testResult("\titem", test->_item == test->_last);
+        ok &= testResult("\titem", test->_item == test->_last->_match);
                 
         delete test;
         
@@ -1054,8 +1062,8 @@ assert(ok);
 
         ok &= testResult("\tfirst", test->_first->matched());
         ok &= testResult("\tsecond", !test->_second->matched());
-        ok &= testResult("\tlast", test->_last->matched());
-        ok &= testResult("\titem", test->_item == test->_first);
+        ok &= testResult("\tlast", !test->_last->matched());
+        ok &= testResult("\titem", test->_item == test->_first->_match);
                 
         delete test;
         

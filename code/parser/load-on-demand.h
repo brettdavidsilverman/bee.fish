@@ -53,6 +53,11 @@ namespace BeeFishParser
             
             return _match->match(_parser, character);
         }
+        
+        const T* item() const
+        {
+            return (T*)_match;
+        }
 
 	};
 

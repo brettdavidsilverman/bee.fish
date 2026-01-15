@@ -23,7 +23,7 @@ run:	$(OUTPUT)
 	$(OUTPUT)
 	
 run_debug:	debug
-	gdb --args $(OUTPUT) -test
+	gdb --args $(OUTPUT)
 	
 trace:	$(OUTPUT)
 	rm -f trace.txt
