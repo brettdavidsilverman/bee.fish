@@ -167,7 +167,7 @@ namespace BeeFishDatabase {
             if (branch._left == 0)
             {
                branch._left =
-                  _database->getNextIndex();
+                  _database->getNextIndex(_index);
                setBranch(branch);
             }
             _database->unlock();
@@ -197,7 +197,7 @@ namespace BeeFishDatabase {
             if (branch._right == 0)
             {
                branch._right =
-                  _database->getNextIndex();
+                  _database->getNextIndex(_index);
                setBranch(branch);
             }
             _database->unlock();
@@ -413,6 +413,11 @@ namespace BeeFishDatabase {
       bool operator == (const Path& rhs)
       {
          return (_index == rhs._index);
+      }
+      
+      bool operator != (const Path& rhs)
+      {
+         return (_index != rhs._index);
       }
    
       operator bool ()
