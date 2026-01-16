@@ -20,7 +20,7 @@ namespace BeeFishDatabase {
       
       
    public:
-      typedef Index Id;
+      typedef Path Id;
       
       using MinMaxPath::contains;
       
@@ -52,7 +52,7 @@ namespace BeeFishDatabase {
       
       Id id()
       {
-         return index();
+         return *this;
       }
      
       Path properties()

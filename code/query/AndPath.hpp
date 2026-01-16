@@ -1,13 +1,14 @@
-#ifndef BEE_FISH__DATABASE__AND_PATH_HPP
-#define BEE_FISH__DATABASE__AND_PATH_HPP
+#ifndef BEE_FISH__QUERY__AND_PATH_HPP
+#define BEE_FISH__QUERY__AND_PATH_HPP
 
-#include "Iterable.hpp"
+#include "../Database/Iterable.hpp"
 
 
-namespace BeeFishDatabase {
+namespace BeeFishQuery {
 
 using namespace std;
 using namespace BeeFishPowerEncoding;
+using namespace BeeFishDatabase;
 
     template<typename T>
     class AndPath :
@@ -58,16 +59,46 @@ using namespace BeeFishPowerEncoding;
         virtual void goLeft(const Branch& branch)
         override
         {
-            _a->goLeft(branch);
-            _b->goLeft(branch);
+            Branch branchA = _a->getBranch();
+            Branch branchB = _b->getBranch();
+            
+            _a->goLeft(branchA);
+            _b->goLeft(branchB);
     
         }
         
         virtual void goRight(const Branch& branch)
         override
         {
-            _a->goRight(branch);
-            _b->goRight(branch);
+            Branch branchA = _a->getBranch();
+            Branch branchB = _b->getBranch();
+            
+            _a->goRight(branchA);
+            _b->goRight(branchB);
+        }
+        
+        virtual bool isDeadEnd(const Branch& branch) const
+        override
+        {
+            Branch branchA = _a->getBranch();
+            Branch branchB = _b->getBranch();
+            
+            bool isDeadEnd =
+            not (
+                    (
+                        _a->canGoLeft(branchA) and
+                        _b->canGoLeft(branchB)
+                    ) or
+                    (
+                        _a->canGoRight(branchA) and
+                        _b->canGoRight(branchB)
+                    )
+                );
+                
+            assert(isDeadEnd);
+            
+            return isDeadEnd;
+                
         }
 
     

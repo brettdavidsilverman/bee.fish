@@ -1,13 +1,14 @@
-#ifndef BEE_FISH__DATABASE__OR_PATH_HPP
-#define BEE_FISH__DATABASE__OR_PATH_HPP
+#ifndef BEE_FISH__QUERY__OR_PATH_HPP
+#define BEE_FISH__QUERY__OR_PATH_HPP
 
-#include "Iterable.hpp"
+#include "../Database/Iterable.hpp"
 
 
-namespace BeeFishDatabase {
+namespace BeeFishQuery {
 
 using namespace std;
 using namespace BeeFishPowerEncoding;
+using namespace BeeFishDatabase;
 
     template<typename T>
     class OrPath :

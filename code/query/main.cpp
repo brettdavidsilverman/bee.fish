@@ -19,6 +19,10 @@ int main(int argc, const char* argv[]) {
     if (hasArg(argc, argv, "-test") >= 0)
     {
         cout << "Testing query..." << endl << endl;
+        
+        if (!BeeFishQuery::testAndPath())
+            return 1;
+            
         if (!BeeFishQuery::test())
             return 1;
                 

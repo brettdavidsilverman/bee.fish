@@ -229,7 +229,7 @@ namespace BeeFishDatabase {
       
       Path operator [] (const Path& key)
       {
-         return Path::operator[](key._index);
+         return Path::operator[](key.index());
       }
 
      
@@ -410,17 +410,17 @@ namespace BeeFishDatabase {
       
       
 
-      bool operator == (const Path& rhs)
+      bool operator == (const Path& rhs) const
       {
          return (_index == rhs._index);
       }
       
-      bool operator != (const Path& rhs)
+      bool operator != (const Path& rhs) const
       {
          return (_index != rhs._index);
       }
    
-      operator bool ()
+      operator bool () const
       {
          return (_index > Branch::Root);
       }
@@ -435,11 +435,16 @@ namespace BeeFishDatabase {
          Branch branch =
             getBranch();
             
+         return isDeadEnd(branch);
+      }
+      
+      virtual bool isDeadEnd(const Branch& branch) const
+      {
          return branch.isDeadEnd();
       }
       
       template<typename T>
-      bool contains(const T& object)
+      bool contains(const T& object) const
       {
          Contains check(_database, _index);
          
@@ -449,9 +454,14 @@ namespace BeeFishDatabase {
          return contains;
       }
       
-      bool contains(const char* value)
+      bool contains(const char* value) const
       {
           return contains(BString(value));
+      }
+      
+      bool contains(const Path& key) const
+      {
+          return contains(key.index());
       }
       
       Database& database()

@@ -962,7 +962,7 @@ cout << "VALUE: " << value << endl;
         
         bool success = true;
         
-        Database db("test");
+        Database db;
     
         Iterable<BString> path(db);
         

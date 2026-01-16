@@ -68,7 +68,7 @@ namespace BeeFishDatabase {
             Branch branch =
                 getBranch(index);
 
-            while (!branch.isDeadEnd())
+            while (!isDeadEnd(branch))
             {
                 bool bit = stack.last()._bit;
 
@@ -80,16 +80,17 @@ namespace BeeFishDatabase {
                 else if (bit == 1) {
                     index = branch._right;
                 }
-                else
-                    assert(false);
 
                 branch = getBranch(index);
 
                 if (canGoLeft(branch)) {
+//cerr << "0";
                     bit = 0;
                     goLeft(branch);
+                    
                 }
                 else if (canGoRight(branch)) {
+//cerr << "1";
                     bit = 1;
                     goRight(branch);
                 }
@@ -108,35 +109,20 @@ namespace BeeFishDatabase {
                     break;
 
             }
+            
+
         }
 
-        virtual bool canGoLeft(const Branch& branch) const
-        {
-            return (bool)branch._left;
-        }
-        
-        virtual bool canGoRight(const Branch& branch) const
-        {
-            return (bool)branch._right;
-        }
-        
-        virtual void goLeft(const Branch& branch)
-        {
-        }
-        
-        virtual void goRight(const Branch& branch)
-        {
-        }
         
         void max(
             Index index,
             Stack& stack
-        ) const
+        )
         {
             Branch branch =
                 getBranch(index);
 
-            while (!branch.isDeadEnd())
+            while (!isDeadEnd(branch))
             {
                 bool bit = stack.last()._bit;
                 index = 0;
@@ -154,11 +140,17 @@ namespace BeeFishDatabase {
                 
                 bit = 0;
 
-                if (branch._right)
+                if (canGoRight(branch)) {
                     bit = 1;
-                else if (branch._left)
+                    goRight(branch);
+                }
+                else if (canGoLeft(branch)) {
                     bit = 0;
-
+                    goLeft(branch);
+                }
+                else
+                    break;
+                    
                 stack.push_back(
                     StackValue(
                         index,
@@ -171,6 +163,27 @@ namespace BeeFishDatabase {
                 
             }
         }
+        
+        virtual bool canGoLeft(const Branch& branch) const
+        {
+            return (bool)branch._left;
+        }
+        
+        virtual bool canGoRight(const Branch& branch) const
+        {
+            return (bool)branch._right;
+        }
+        
+        virtual void goLeft(const Branch& branch)
+        {
+           // _index = branch._left;
+        }
+        
+        virtual void goRight(const Branch& branch)
+        {
+           // _index = branch._right;
+        }
+        
         
         void latest(
             Index index,
@@ -251,14 +264,15 @@ namespace BeeFishDatabase {
         template<typename T>
         T max(
             Stack& stack
-        ) const
+        )
         {
             if (stack.size() == 0)
                 stack.push_back(StackValue(_index, 1));
 
             max(_index, stack);
             T maximum;
-            stack >> maximum;
+            if (stack._count == 0)
+                 stack >> maximum;
             return maximum;
         }
         
@@ -285,7 +299,7 @@ namespace BeeFishDatabase {
         }
 
         template<typename T>
-        T max() const 
+        T max()
         {
             Stack stack(*this);
             T maximum = max<T>(stack);
@@ -359,6 +373,9 @@ namespace BeeFishDatabase {
             // this right
             min(index, stack);
 
+            if (stack._count != 0)
+                return false;
+                
             // Get this value
             stack.reset();
             stack >> value;

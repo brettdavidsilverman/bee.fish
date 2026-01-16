@@ -11,6 +11,9 @@
 #include "version.h"
 #include "../parser/parser.h"
 #include "../Database/Database.hpp"
+#include "NotPath.hpp"
+#include "AndPath.hpp"
+#include "OrPath.hpp"
 
 namespace BeeFishQuery {
     

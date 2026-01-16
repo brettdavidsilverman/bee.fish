@@ -1,7 +1,7 @@
 BUILD=../../build
 OUTPUT=$(BUILD)/query
 CFLAGS=-std=c++17 -Wall -fmax-errors=1
-DEPS=main.cpp query.hpp test.hpp version.h Makefile $(BUILD)/Database
+DEPS=main.cpp query.hpp NotPath.hpp AndPath.hpp OrPath.hpp test.hpp version.h Makefile $(BUILD)/Database
 
 $(OUTPUT): $(DEPS) $(BUILD)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
@@ -25,7 +25,7 @@ run:	$(OUTPUT)
 	$(OUTPUT)
 	
 run_debug:	debug
-	gdb --args $(OUTPUT)
+	gdb --args $(OUTPUT) -test
 	
 trace:	$(OUTPUT)
 	rm -f trace.txt

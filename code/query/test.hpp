@@ -18,6 +18,7 @@ namespace BeeFishQuery {
     bool testWords();
     bool testOperators();
     bool testExpressions();
+    bool testAndPath();
     
     inline bool test() 
     {
@@ -29,6 +30,7 @@ namespace BeeFishQuery {
         ok &= testWords();
         ok &= testOperators();
         ok &= testExpressions();
+        ok &= testAndPath();
         
         if (ok)
             cout << "SUCCESS";
@@ -402,6 +404,44 @@ namespace BeeFishQuery {
         
         testmatch("(word1 and word2) and not word2");
         testmatch("(word1 and word2) and not (word3 or word4)");
+        
+        BeeFishMisc::outputSuccess(ok);
+        
+        return ok;
+        
+    }
+    
+    inline bool testAndPath()
+    {
+        cout << "Test And Path" << endl;
+        
+        bool ok = true;
+        
+        Database db;
+        Words words(db);
+        
+        words["one"]["one"];
+        words["one"]["two"];
+        words["one"]["three"];
+        words["two"]["one"];
+        words["two"]["three"];
+        
+        AndPath<BString> andPath(
+            new Iterable<BString>(words["one"]),
+            new Iterable<BString>(words["two"])
+        );
+        
+        vector<BString> array;
+        
+        for (auto word : andPath)
+        {
+            cerr << "WORD: " << word << endl;
+            array.push_back(word);
+        }
+        
+        ok = ok && array.size() == 2;
+        ok = ok && array[0] == "one";
+        ok = ok && array[1] == "three";
         
         BeeFishMisc::outputSuccess(ok);
         

@@ -1,6 +1,6 @@
 BUILD=../../build
 CC=g++
-DEPS=$(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp Data.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Version.hpp Path.hpp Stack.hpp MinMaxPath.hpp Iterable.hpp Makefile AndPath.hpp OrPath.hpp JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp
+DEPS=$(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp Data.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Version.hpp Path.hpp Stack.hpp MinMaxPath.hpp Iterable.hpp Makefile JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp
 OUTPUT=$(BUILD)/Database
 LARGE=$(BUILD)/../large.json
 
