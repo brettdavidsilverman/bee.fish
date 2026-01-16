@@ -40,7 +40,6 @@ using namespace BeeFishPowerEncoding;
             Branch branchB = _b->getBranch();
             
             return
-                Iterable<T>::canGoLeft(branch) and
                 _a->canGoLeft(branchA) and
                 _b->canGoLeft(branchB);
         }
@@ -52,7 +51,6 @@ using namespace BeeFishPowerEncoding;
             Branch branchB = _b->getBranch();
             
             return
-                Iterable<T>::canGoRight(branch) and
                 _a->canGoRight(branchA) and
                 _b->canGoRight(branchB);
         }
@@ -62,7 +60,7 @@ using namespace BeeFishPowerEncoding;
         {
             _a->goLeft(branch);
             _b->goLeft(branch);
-            Iterable<T>::goLeft(branch);
+    
         }
         
         virtual void goRight(const Branch& branch)
@@ -70,7 +68,6 @@ using namespace BeeFishPowerEncoding;
         {
             _a->goRight(branch);
             _b->goRight(branch);
-            Iterable<T>::goRight(branch);
         }
 
     

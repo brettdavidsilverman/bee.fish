@@ -51,7 +51,6 @@ using namespace BeeFishPowerEncoding;
                 _path->canGoLeft(branch))
             {
                  _path->goLeft(branch);
-                 Iterable<T>::goLeft(branch);
             }
             else
                 _ended = true;
@@ -66,7 +65,6 @@ using namespace BeeFishPowerEncoding;
                 _path->canGoRight(branch))
             {
                  _path->goRight(branch);
-                 Iterable<T>::goRight(branch);
             }
             else
                 _ended = true;

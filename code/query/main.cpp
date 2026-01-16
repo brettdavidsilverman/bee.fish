@@ -28,7 +28,7 @@ int main(int argc, const char* argv[]) {
     
     string line;
     Database db;
-    Iterable<BString> words(db);
+    Words words(db);
     
     do 
     {
@@ -63,6 +63,10 @@ int main(int argc, const char* argv[]) {
     }
     while (!cin.eof());
   
+    for (auto word : words) {
+        cout << word << endl;
+    }
+    
     cout << "Bye" << endl;
       
     return 0;
