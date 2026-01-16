@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "query.h"
+#include "query.hpp"
 
 #include "../test/test.h"
 
@@ -335,20 +335,37 @@ namespace BeeFishQuery {
         cout << "Test expressions" << endl;
         bool ok = true;
         BString query;
-        
+        Database db;
+        Words words(db);
         auto testmatch =
-        [&ok](const BString& query) {
+        [&ok, &words](const BString& query) {
+            
+            
             
             if (!ok)
                 return false;
-            
-            ok &= testMatchDelete(
+                
+            Expression* expression =
+                new Expression();
+                
+            Capture* capture =
+                new Capture(expression);
+                
+            ok &= testMatch(
                 query,
-                new Capture(new Expression()),
+                capture,
                 query,
                 true,
                 query
             );
+            
+            Iterable<BString>* path =
+                expression->getPath<BString>(words);
+                
+            delete path;
+            
+            delete capture;
+            
             return ok;
         };
         
@@ -376,7 +393,9 @@ namespace BeeFishQuery {
         testmatch("word1 and not word2");
         
         testmatch("word1 and (word2 or word3)");
+        
         testmatch("(word1 and word2) or word3");
+        
         testmatch("(word1 and word2) or (word3 and word4)");
         testmatch("(word1 or word2) and (word3 or word4)");
         testmatch("((word1 or word2))");

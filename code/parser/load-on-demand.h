@@ -45,13 +45,22 @@ namespace BeeFishParser
 
             if (!_match) {
 
-	           _match = new T();
+	           _match = createItem();
                _match->setup(_parser);
                
             }
             
             
             return _match->match(_parser, character);
+        }
+        
+        virtual T* createItem() {
+            return new T();
+        }
+        
+        T* item()
+        {
+            return (T*)_match;
         }
         
         const T* item() const

@@ -1,0 +1,14 @@
+==763141== Memcheck, a memory error detector
+==763141== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==763141== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==763141== Command: ../../build/query -test
+==763141== Parent PID: 763140
+==763141== 
+==763141== 
+==763141== HEAP SUMMARY:
+==763141==     in use at exit: 0 bytes in 0 blocks
+==763141==   total heap usage: 41,647 allocs, 41,647 frees, 2,862,132 bytes allocated
+==763141== 
+==763141== All heap blocks were freed -- no leaks are possible
+==763141== 
+==763141== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

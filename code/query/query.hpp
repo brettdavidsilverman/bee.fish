@@ -1,5 +1,5 @@
-#ifndef BEE_FISH_QUERY_H
-#define BEE_FISH_QUERY_H
+#ifndef BEE_FISH_QUERY_HPP
+#define BEE_FISH_QUERY_HPP
 
 #include <string>
 #include <vector>
@@ -10,12 +10,15 @@
 
 #include "version.h"
 #include "../parser/parser.h"
+#include "../Database/Database.hpp"
 
 namespace BeeFishQuery {
     
     using namespace BeeFishBString;
     using namespace BeeFishParser;
 
+    typedef Iterable<BString> Words;
+    
     class Blankspace : public Or
     {
     public:
@@ -165,15 +168,31 @@ namespace BeeFishQuery {
         {
             return _value;
         }
+        
+        template<typename T>
+        Iterable<T>*
+        getPath(
+            Words& words
+        )
+        {
+            return new Iterable<T>(
+                words[value()]
+            );
+        }
+        
     
     };
     
     class AndOr : public BeeFishParser::Or
     {
+    protected:
+        BeeFishQuery::And* _and;
+        BeeFishQuery::Or* _or;
+        
     public:
         AndOr() : Or(
-            new BeeFishQuery::And(),
-            new BeeFishQuery::Or()
+            _and = new BeeFishQuery::And(),
+            _or = new BeeFishQuery::Or()
         )
         {
         }
@@ -194,24 +213,50 @@ namespace BeeFishQuery {
             return output;
         }
         
+        template<typename T>
+        Iterable<T>*
+        getPath(
+            Iterable<T>* a, 
+            Iterable<T>* b
+        )
+        {
+            if (_and->matched())
+                return new AndPath(a, b);
+            else
+                return new OrPath(a, b);
+        }
+        
     };
     
-    
+
     
     class Expression : public BeeFishParser::Match
     {
     public:
+        
+        class LoadOnDemandExpression :
+            public LoadOnDemand<Expression>
+        {
+                
+        public:
+
+            LoadOnDemandExpression()
+            {
+            }
+            
+        };
+        
         class BracketedExpression : public BeeFishParser::And
         {
         protected:
             LoadOnDemand<Expression>* _item;
-        
+                
         public:
             BracketedExpression() : BeeFishParser::And(
                 new Blankspaces(),
                 new Character("("),
                 new Blankspaces(),
-                _item = new LoadOnDemand<Expression>(),
+                _item = new LoadOnDemandExpression(),
                 new Blankspaces(),
                 new Character(")"),
                 new Blankspaces()
@@ -219,6 +264,10 @@ namespace BeeFishQuery {
             {
             }
         
+            Expression* item() {
+                return _item->item();
+            }
+            
             const Expression* item() const {
                 return _item->item();
             }
@@ -242,15 +291,16 @@ namespace BeeFishQuery {
         };
         
     protected:
+
         OrderOfPrecedence::Item* _notExpression = nullptr;
         OrderOfPrecedence::Item* _bracketedExpressionAndExpression = nullptr;
         OrderOfPrecedence::Item* _wordAndExpression = nullptr;
         OrderOfPrecedence::Item* _bracketedExpression = nullptr;
         OrderOfPrecedence::Item* _word = nullptr;
         
-        LoadOnDemand<Expression>* _loadOnDemandExpression1 = nullptr;
-        LoadOnDemand<Expression>* _loadOnDemandExpression2 = nullptr;
-        LoadOnDemand<Expression>* _loadOnDemandExpression3 = nullptr;
+        LoadOnDemandExpression* _loadOnDemandExpression1 = nullptr;
+        LoadOnDemandExpression* _loadOnDemandExpression2 = nullptr;
+        LoadOnDemandExpression* _loadOnDemandExpression3 = nullptr;
         
         BracketedExpression* _bracketedExpression1 = nullptr;
         BracketedExpression* _bracketedExpression2 = nullptr;
@@ -262,7 +312,9 @@ namespace BeeFishQuery {
         BeeFishQuery::Word* _word2 = nullptr;
         
     public:
-        Expression() {
+        
+        Expression()
+        {
             _match = new BeeFishParser::And(
             new Blankspaces(),
             new BeeFishParser::OrderOfPrecedence(
@@ -274,7 +326,7 @@ namespace BeeFishQuery {
                     new BeeFishParser::And(
                         new BeeFishQuery::Not(),
                         _loadOnDemandExpression1 =
-                            new LoadOnDemand<Expression>()
+                            new LoadOnDemandExpression()
                     )
                 )
             },
@@ -287,7 +339,7 @@ namespace BeeFishQuery {
                             new BracketedExpression(),
                         _andOr1 = new AndOr(),
                         _loadOnDemandExpression2 =
-                            new LoadOnDemand<Expression>()
+                            new LoadOnDemandExpression()
                     )
                 )
             },
@@ -299,7 +351,7 @@ namespace BeeFishQuery {
                         _word1 = new BeeFishQuery::Word(),
                         _andOr2 = new AndOr(),
                         _loadOnDemandExpression3 =
-                            new LoadOnDemand<Expression>()
+                            new LoadOnDemandExpression()
                     )
                 )
             },
@@ -324,6 +376,7 @@ namespace BeeFishQuery {
         );
         
         }
+        
         
         virtual void write(ostream& output, Size tabs = 0) const
         {
@@ -370,6 +423,93 @@ namespace BeeFishQuery {
             
             return output;
         }
+        
+        template<typename T>
+        Iterable<T>* getPath(Words words)
+        {
+
+            if (_notExpression->matched())
+            {
+                Expression* expression = 
+                    _loadOnDemandExpression1
+                    ->item();
+                    
+                Iterable<T>* path = 
+                    expression
+                    ->getPath<T>(words);
+                    
+                return new NotPath<T>(path);
+                
+            }
+            else if (_bracketedExpressionAndExpression->matched())
+            {
+                
+                Expression* expressionA =
+                    _bracketedExpression1->item();
+                Expression* expressionB =
+                    _loadOnDemandExpression2
+                    ->item();
+                    
+                return
+                    _andOr1->getPath<T>(
+                        expressionA->getPath<T>(words),
+                        expressionB->getPath<T>(words)
+                    );
+                    
+                    /*
+                output 
+                << *(_bracketedExpression1)
+                << " "
+                << *(_andOr1)
+                << " "
+                << *(_loadOnDemandExpression2->item());
+                */
+                
+            }
+            else if (_wordAndExpression->matched())
+            {
+                Iterable<T>* wordPath =
+                    _word1->getPath<T>(words);
+                    
+                Expression* expression =
+                    _loadOnDemandExpression3->item();
+                    
+                return
+                    _andOr2->getPath<T>(
+                        wordPath,
+                        expression->getPath<T>(words)
+                    );
+                    /*
+                output
+                << *_word1
+                << " "
+                << *(_andOr2)
+                << " "
+                << *(_loadOnDemandExpression3->item());
+                */
+            }
+            else if (_bracketedExpression->matched())
+            {
+                Expression* expression =
+                    _bracketedExpression2->item();
+                    
+                return expression->getPath<T>(words);
+                
+                    /*
+                output
+                << *_bracketedExpression2;
+                */
+            }
+            else if (_word->matched()) {
+                return
+                    _word2->getPath<T>(words);
+                    /*
+                output << *_word2;
+                */
+            }
+            
+            assert(false);
+        }
     
 
     };
@@ -405,6 +545,12 @@ namespace BeeFishQuery {
         override
         {
             return _capture->value();
+        }
+        
+        template<typename T>
+        Iterable<T>* getPath(Words words)
+        {
+            return _expression->getPath<T>(words);
         }
     };
     

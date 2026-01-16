@@ -964,7 +964,7 @@ cout << "VALUE: " << value << endl;
         
         Database db("test");
     
-        JoinPath<BString> path(db);
+        Iterable<BString> path(db);
         
         path["hello"];
         path["world"];

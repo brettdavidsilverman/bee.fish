@@ -1,7 +1,7 @@
 BUILD=../../build
 OUTPUT=$(BUILD)/query
 CFLAGS=-std=c++17 -Wall -fmax-errors=1
-DEPS=main.cpp query.h test.h version.h Makefile
+DEPS=main.cpp query.hpp test.hpp version.h Makefile
 
 $(OUTPUT): $(DEPS) $(BUILD)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
@@ -27,7 +27,7 @@ run_debug:	debug
 	
 trace:	$(OUTPUT)
 	rm -f trace.txt
-	valgrind  -s --log-file="trace.txt" --track-origins=yes --leak-check=yes $(OUTPUT)
+	valgrind  -s --log-file="trace.txt" --track-origins=yes --leak-check=yes $(OUTPUT) -test
 	cat trace.txt
 	
 clean:

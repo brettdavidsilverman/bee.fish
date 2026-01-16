@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
-#include "query.h"
-#include "test.h"
+#include "query.hpp"
+#include "test.hpp"
 
 int main(int argc, const char* argv[]) {
     
@@ -27,6 +27,9 @@ int main(int argc, const char* argv[]) {
     
     
     string line;
+    Database db;
+    Iterable<BString> words(db);
+    
     do 
     {
         cout << "Expression: ";
@@ -41,8 +44,15 @@ int main(int argc, const char* argv[]) {
                 break;
             }
                     
-            cout << "ok" << endl;
             cout << *(statement._expression) << endl;
+            
+            Iterable<BString>* path =
+                statement._expression
+                ->getPath<BString>(words);
+                
+            delete path;
+            
+            cout << "ok" << endl;
         
         }
         catch (runtime_error& error)

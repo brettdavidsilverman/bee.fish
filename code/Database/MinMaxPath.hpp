@@ -85,13 +85,24 @@ namespace BeeFishDatabase {
 
                 branch = getBranch(index);
 
-                if (canGoLeft(branch))
-                    goLeft(index, stack);
-                else if (canGoRight(branch))
-                    goRight(index, stack);
+                if (canGoLeft(branch)) {
+                    bit = 0;
+                    goLeft(branch);
+                }
+                else if (canGoRight(branch)) {
+                    bit = 1;
+                    goRight(branch);
+                }
                 else {
                     break;
                 }
+                
+                stack.push_back(
+                    StackValue(
+                        index,
+                        bit
+                    )
+                );
                 
                 if (stack._count == 0)
                     break;
@@ -109,24 +120,12 @@ namespace BeeFishDatabase {
             return (bool)branch._right;
         }
         
-        virtual void goLeft(Index index, Stack& stack)
+        virtual void goLeft(const Branch& branch)
         {
-            stack.push_back(
-                StackValue(
-                    index,
-                    0
-                )
-            );
         }
         
-        virtual void goRight(Index index, Stack& stack)
+        virtual void goRight(const Branch& branch)
         {
-            stack.push_back(
-                StackValue(
-                    index,
-                    1
-                )
-            );
         }
         
         void max(

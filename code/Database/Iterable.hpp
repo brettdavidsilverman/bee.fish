@@ -1,13 +1,11 @@
-#ifndef BEE_FISH__DATABASE__PATH_ITERATOR_HPP
-#define BEE_FISH__DATABASE__PATH_ITERATOR_HPP
+#ifndef BEE_FISH__DATABASE__ITERABLE_HPP
+#define BEE_FISH__DATABASE__ITERABLE_HPP
 
-#include "Path.hpp"
+#include "MinMaxPath.hpp"
 #include "Stack.hpp"
 #include <iostream>
 #include <iterator> // Required for std::iterator_traits (C++17 and earlier)
 #include <cstddef>  // Required for std::ptrdiff_t
-
-
 
 
 using namespace std;
@@ -16,9 +14,42 @@ using namespace BeeFishPowerEncoding;
 namespace BeeFishDatabase {
     
     template<typename T>
-    class JoinPath :
+    class Iterable :
         public MinMaxPath
     {
+
+    
+    public:
+
+
+        Iterable(const Path& source) :
+            MinMaxPath(source)
+         
+        {
+        }
+    
+        virtual bool canGoLeft(const Branch& branch) const
+        override
+        {
+            return MinMaxPath::canGoLeft(branch);
+        }
+        
+        virtual bool canGoRight(const Branch& branch) const
+        {
+            return MinMaxPath::canGoRight(branch);
+        }
+        
+        virtual void goLeft(const Branch& branch)
+        {
+            MinMaxPath::goLeft(branch);
+        }
+        
+        virtual void goRight(const Branch& branch)
+        {
+            MinMaxPath::goRight(branch);
+        }
+        
+
     public:
         class PathIterator {
         public:
@@ -30,7 +61,7 @@ namespace BeeFishDatabase {
             using reference         = const T&;
 
             // Constructor
-            PathIterator(JoinPath* path, bool isEnd = false) :
+            PathIterator(Iterable* path, bool isEnd = false) :
                 _path(path),
                 _stack(*path)
             {
@@ -80,7 +111,7 @@ namespace BeeFishDatabase {
             }
 
         protected:
-            JoinPath* _path; // The underlying pointer that the iterator wraps
+            Iterable* _path; // The underlying pointer that the iterator wraps
             T _item;
             Stack _stack;
             bool _isEnd = false;
@@ -88,67 +119,15 @@ namespace BeeFishDatabase {
         
     
 
-    // Container methods to get iterators
-    PathIterator begin() {
-        return PathIterator(this);
-    }
-    
-    // Points one past the last element
-    PathIterator end() { 
-        return PathIterator(this, true);
-    }
-    
-   
-   
-    public:
-
-        JoinPath( Database* database = nullptr,
-            Index index = Branch::Root ) :
-            MinMaxPath(database, index)
-        {
-        }
-
-        JoinPath( Database& database,
-            Index index = Branch::Root ) :
-            MinMaxPath(database, index)
-        {
-        }
-
-        JoinPath( const Path& source,
-              Index index) :
-              MinMaxPath(source, index)
-        {
-        }
-   
-        JoinPath(const Path& source) :
-            MinMaxPath(source)
-         
-        {
-         
+        // Container methods to get iterators
+        PathIterator begin() {
+            return PathIterator(this);
         }
     
-        virtual bool canGoLeft(const Branch& branch) const
-        override
-        {
-            return MinMaxPath::canGoLeft(branch);
+        // Points one past the last element
+        PathIterator end() { 
+            return PathIterator(this, true);
         }
-        
-        virtual bool canGoRight(const Branch& branch) const
-        {
-            return MinMaxPath::canGoRight(branch);
-        }
-        
-        virtual void goLeft(Index index, Stack& stack)
-        {
-            MinMaxPath::goLeft(index, stack);
-        }
-        
-        virtual void goRight(Index index, Stack& stack)
-        {
-            MinMaxPath::goRight(index, stack);
-        }
-
-    
     };
 
 }
