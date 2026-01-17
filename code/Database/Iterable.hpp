@@ -28,30 +28,16 @@ namespace BeeFishDatabase {
         {
         }
     
-        virtual bool canGoLeft(const Branch& branch) const
-        override
-        {
-            return MinMaxPath::canGoLeft(branch);
-        }
-        
-        virtual bool canGoRight(const Branch& branch) const
-        {
-            return MinMaxPath::canGoRight(branch);
-        }
-        
-        virtual void goLeft(const Branch& branch)
-        {
-            MinMaxPath::goLeft(branch);
-        }
-        
-        virtual void goRight(const Branch& branch)
-        {
-            MinMaxPath::goRight(branch);
-        }
         
 
     public:
         class PathIterator {
+        protected:
+            Iterable* _path = nullptr; // The underlying pointer that the iterator wraps
+            T _item;
+            Stack _stack;
+            bool _isEnd = true;
+            
         public:
             // Iterator traits (required for STL compatibility in C++17 and earlier)
             using iterator_category = std::forward_iterator_tag;
@@ -61,16 +47,16 @@ namespace BeeFishDatabase {
             using reference         = const T&;
 
             // Constructor
-            PathIterator(Iterable* path, bool isEnd = false) :
-                _path(path),
-                _stack(*path)
-            {
-                _isEnd = isEnd || _path->isDeadEnd();
-                if (!_isEnd)
-                    _item = _path->min<T>(_stack);
+            PathIterator() {
             }
             
-
+            PathIterator(Iterable* path) :
+                _path(path)
+            {
+                _isEnd = !_path->next<T>(_stack, _item);
+            }
+            
+            
             // Dereference operator (*)
             reference operator*() const
             {
@@ -85,7 +71,12 @@ namespace BeeFishDatabase {
 
             // Prefix increment operator (++)
             PathIterator& operator++() {
-                _isEnd = !_path->next<T>(_stack, _item);
+                assert(!_isEnd);
+                _isEnd = not
+                    _path->next<T>(
+                        _stack,
+                        _item
+                    );
                 return *this;
             }
 
@@ -96,25 +87,23 @@ namespace BeeFishDatabase {
                 return tmp;
             }
 
-            // Comparison operators (== and !=)
-            friend bool operator== (const PathIterator& a, const PathIterator& b)
+            friend bool operator == (
+                const PathIterator& a,
+                const PathIterator& b
+            )
             {
-                return  (*(a._path) == *(b._path) &&
-                        a._isEnd == b._isEnd &&
-                        a._stack == b._stack);
+                return  (a._isEnd == b._isEnd);
             }
-            friend bool operator!= (const PathIterator& a, const PathIterator& b)
+            
+            friend bool operator != (
+                const PathIterator& a,
+                const PathIterator& b
+            )
             { 
-                return (*(a._path) != *(b._path) ||
-                        a._isEnd != b._isEnd ||
-                        a._stack != b._stack);
+                return (a._isEnd != b._isEnd);
             }
 
-        protected:
-            Iterable* _path; // The underlying pointer that the iterator wraps
-            T _item;
-            Stack _stack;
-            bool _isEnd = false;
+        
         };
         
     
@@ -126,8 +115,10 @@ namespace BeeFishDatabase {
     
         // Points one past the last element
         PathIterator end() { 
-            return PathIterator(this, true);
+            PathIterator iterator;
+            return iterator;
         }
+        
     };
 
 }

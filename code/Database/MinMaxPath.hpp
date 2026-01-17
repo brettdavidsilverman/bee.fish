@@ -58,311 +58,191 @@ namespace BeeFishDatabase {
             return (*this)[BString(key)];
         }
 
+        template<typename T>
+        T min()
+        {
+            T value;
+            if (not min(value)) 
+            {
+                throw runtime_error("No minimum");
+            }
+            
+            return value;
+        }
+        
+        template<typename T>
+        bool min(T& value)
+        {
+            Stack stack;
+            MinMaxPath path(*this);
+            
+            if (path.min(stack, _index))
+            {
+                stack.reset();
+                stack >> value;
+                return true;
+            }
+
+            return false;
+        }
+        
+        template<typename T>
+        T max()
+        {
+            T value;
+            if (not max(value)) 
+            {
+                throw runtime_error("No maximum");
+            }
+            
+            return value;
+        }
+        
+        template<typename T>
+        bool max(T& value)
+        {
+            Stack stack;
+            MinMaxPath path(*this);
+            
+            if (path.max(stack, _index)) {
+                stack.reset();
+                stack >> value;
+                return true;
+            }
+            
+            return false;
+        }
+        
+        
     protected:
 
-        virtual void min(
-            Index index,
-            Stack& stack
+        
+        
+        bool min(
+            Stack& stack,
+            Index index
         )
         {
-            Branch branch =
-                getBranch(index);
-
-            while (!isDeadEnd(branch))
+            _index = index;
+            
+            while (!isDeadEnd())
             {
-                bool bit = stack.last()._bit;
-
-                index = 0;
-
-                if (bit == 0) {
-                    index = branch._left;
-                }
-                else if (bit == 1) {
-                    index = branch._right;
-                }
-
-                branch = getBranch(index);
-
-                if (canGoLeft(branch)) {
-//cerr << "0";
+                bool bit;
+                
+                if (canGoLeft()) {
                     bit = 0;
-                    goLeft(branch);
+                    goLeft();
                     
                 }
-                else if (canGoRight(branch)) {
-//cerr << "1";
+                else if (canGoRight()) {
                     bit = 1;
-                    goRight(branch);
+                    goRight();
                 }
                 else {
                     break;
                 }
                 
-                stack.push_back(
-                    StackValue(
-                        index,
-                        bit
-                    )
-                );
+                stack.push_back(bit);
                 
-                if (stack._count == 0)
-                    break;
+                if (stack.count() == 0)
+                    return true;
 
             }
             
-
+            
+            return (stack.count() == 0);
+            
         }
 
         
-        void max(
-            Index index,
-            Stack& stack
+        bool max(
+            Stack& stack,
+            Index index
         )
         {
-            Branch branch =
-                getBranch(index);
-
-            while (!isDeadEnd(branch))
+            _index = index;
+            bool bit;
+            while (!isDeadEnd())
             {
-                bool bit = stack.last()._bit;
-                index = 0;
-
-                if (bit == 0) {
-                    index = branch._left;
-                }
-                else if (bit == 1) {
-                    index = branch._right;
-                }
-                else
-                    assert(false);
-
-                branch = getBranch(index);
                 
-                bit = 0;
-
-                if (canGoRight(branch)) {
+                
+                if (canGoRight()) {
                     bit = 1;
-                    goRight(branch);
+                    goRight();
                 }
-                else if (canGoLeft(branch)) {
+                else if (canGoLeft()) {
                     bit = 0;
-                    goLeft(branch);
+                    goLeft();
                 }
                 else
                     break;
                     
                 stack.push_back(
-                    StackValue(
-                        index,
-                        bit
-                    )
+                    bit
                 );
 
                 if (stack.count() == 0)
-                    break;
+                    return true;
                 
             }
-        }
-        
-        virtual bool canGoLeft(const Branch& branch) const
-        {
-            return (bool)branch._left;
-        }
-        
-        virtual bool canGoRight(const Branch& branch) const
-        {
-            return (bool)branch._right;
-        }
-        
-        virtual void goLeft(const Branch& branch)
-        {
-           // _index = branch._left;
-        }
-        
-        virtual void goRight(const Branch& branch)
-        {
-           // _index = branch._right;
+            
+            return (stack.count() == 0);
         }
         
         
-        void latest(
-            Index index,
-            Stack& stack
-        ) const
-        {
-            Branch branch =
-                getBranch(index);
-
-            while (!branch.isDeadEnd())
-            {
-                bool bit = stack.last()._bit;
-                index = 0;
-
-                if (bit == 0) {
-                    index = branch._left;
-                }
-                else if (bit == 1) {
-                    index = branch._right;
-                }
-                else
-                    assert(false);
-
-                branch = getBranch(index);
-                
-                if (branch._left && branch._right)
-                {
-                    if (branch._right > branch._left) {
-                        bit = 1;
-                    }
-                    else {
-                        bit = 0;
-                    }
-                }
-                else if (branch._right) {
-                    bit = 1;
-                }
-                else if (branch._left) {
-                    bit = 0;
-                }
-                else
-                    assert(false);
-
-
-                branch = getBranch(index);
-                
-                stack.push_back(
-                    StackValue(
-                        index,
-                        bit
-                    )
-                );
-
-                if (stack.count() == 0)
-                    break;
-                
-            }
-        }
+        
         
 
     public:
-
-        template<typename T>
-        T min(
-            Stack& stack
-        )
-        {
-            if (stack.size() == 0)
-                stack.push_back(StackValue(_index, 1));
-
-            min(_index, stack);
-            T minimum = T();
-            if (stack._count == 0)
-                stack >> minimum;
-            return minimum;
-        }
-
-        template<typename T>
-        T max(
-            Stack& stack
-        )
-        {
-            if (stack.size() == 0)
-                stack.push_back(StackValue(_index, 1));
-
-            max(_index, stack);
-            T maximum;
-            if (stack._count == 0)
-                 stack >> maximum;
-            return maximum;
-        }
-        
-        template<typename T>
-        T latest(
-            Stack& stack
-        ) const
-        {
-            if (stack.size() == 0)
-                stack.push_back(StackValue(_index, 1));
-
-            latest(_index, stack);
-            T _latest;
-            stack >> _latest;
-            return _latest;
-        }
-
-        template<typename T>
-        T min()
-        {
-            Stack stack(*this);
-            T minimum = min<T>(stack);
-            return minimum;
-        }
-
-        template<typename T>
-        T max()
-        {
-            Stack stack(*this);
-            T maximum = max<T>(stack);
-            return maximum;
-        }
-        
-        template<typename T>
-        T latest() const 
-        {
-            Stack stack(*this);
-            T _latest = latest<T>(stack);
-            return _latest;
-        }
-
         template<typename T>
         bool next(Stack& stack, T& value) {
 
             // Algorithm:
+            // from minimum branch
             // Up the tree until first
             // right with a left
 
             // Take that right, then
-            // follow using min algo
-
-            if (isDeadEnd())
-                return false;
+            // follow next minimum
 
             if (stack.size() == 0)
             {
-                value = min<T>(stack);
+                if (isDeadEnd())
+                    return false;
+                    
+                if (min(stack, _index))
+                {
+                    stack.reset();
+                    stack >> value;
+                }
                 return true;
             }
             
-            StackValue entry;
-            Index index;
-            Branch branch;
-            bool bit;
+    
+    
+           // bool bit;
             bool found = false;
 
             // Up the tree until first right
             // that hasn't been taken yet
+            bool bit;
             
             while(stack.size())
             {
-                entry = stack.last();
-                bit = entry._bit;
-                index = entry._index;
-                branch = getBranch(index);
-
-                if (
-                    branch._left &&
-                    branch._right &&
-                    bit == 0 )
+                bit = stack.last();
+                
+                stack.pop_back();
+                goUp();
+                
+                if (canGoRight() &&
+                     bit == 0)
                 {
-                    stack[stack.size() - 1]._bit = 1;
-                    stack._count+=2;
+                    goRight();
+                    stack.push_back(1);
                     found = true;
                     break;
                 }
             
-                
-                stack.pop_back();
-
             }
 
             if (!found) {
@@ -371,28 +251,18 @@ namespace BeeFishDatabase {
 
             // Follow the next min from
             // this right
-            min(index, stack);
+            min(stack, _index);
 
-            if (stack._count != 0)
+            if (stack.count() != 0)
                 return false;
-                
+
             // Get this value
             stack.reset();
             stack >> value;
-
+            
             return true;
 
         }
-
-        template<typename T>
-        T value() const
-        {
-            if (isDeadEnd())
-                return T();
-                
-            return latest<T>();
-        }
-
         
     };
 

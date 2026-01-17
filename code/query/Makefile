@@ -3,16 +3,16 @@ OUTPUT=$(BUILD)/query
 CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=main.cpp query.hpp NotPath.hpp AndPath.hpp OrPath.hpp test.hpp version.h Makefile $(BUILD)/Database
 
-$(OUTPUT): $(DEPS) $(BUILD)
+$(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
-
-
+	
 $(BUILD):
 		mkdir $(BUILD)
-		
-$(BUILD)/Database:
-	cd ../Database && make $(DEBUG)
-	
+
+#$(BUILD)/Database:
+#	make -C ../Database $(DEBUG) $(TEST)
+
+test:	TEST=test
 test:	$(OUTPUT)
 	$(OUTPUT) -test
 

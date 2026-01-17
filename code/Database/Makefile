@@ -1,8 +1,8 @@
 BUILD=../../build
-CC=g++
-DEPS=$(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp Data.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Version.hpp Path.hpp Stack.hpp MinMaxPath.hpp Iterable.hpp Makefile JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp
 OUTPUT=$(BUILD)/Database
-LARGE=$(BUILD)/../large.json
+CFLAGS=-std=c++17 -Wall -fmax-errors=1
+DEPS=$(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp Data.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Version.hpp Path.hpp Stack.hpp MinMaxPath.hpp Iterable.hpp Makefile JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp
+DEATHS=$(BUILD)/../deaths.json
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)

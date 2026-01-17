@@ -3,52 +3,21 @@
 
 #include "Path.hpp"
 
+
+namespace BeeFishDatabase {
 using namespace std;
 using namespace BeeFishPowerEncoding;
 
-namespace BeeFishDatabase {
-     
-    struct StackValue {
-    public:
-        Index _index = 0;
-        bool _bit = false;
-        
-        StackValue() {
-        }
-        
-        StackValue(Index index, bool bit) :
-             _index(index),
-             _bit(bit)
-        {
-        }
-        
-        StackValue(const StackValue& source) :
-             _index(source._index),
-             _bit(source._bit)
-        {
-        }
-        
-        bool operator == (const StackValue& value) const
-        {
-            return (_index == value._index &&
-                    _bit == value._bit);
-        }
-        
-
-    };
-
     class Stack :
         public PowerEncoding,
-        public vector<StackValue>
+        public vector<bool>
     {
-    public:
+    private:
         Size _index = 0;
         long int _count = 0;
         
     public:
-        const Path& _start;
-
-        Stack(const Path& start) : _start(start)
+        Stack()
         {
         }
       
@@ -57,7 +26,7 @@ namespace BeeFishDatabase {
 
         virtual bool peekBit() const
         {
-            return (*this)[_index]._bit;
+            return (*this)[_index];
         }
 
         virtual bool readBit()
@@ -67,12 +36,12 @@ namespace BeeFishDatabase {
             bool value = peekBit();
 
             PowerEncoding::readBit();
-
+/*
             if (value)
                 ++_count;
             else if (_count > 0)
                 --_count;
-
+*/
             ++_index;
 
             return value;
@@ -82,10 +51,12 @@ namespace BeeFishDatabase {
         override
         {
             PowerEncoding::writeBit(bit);
+/*
             if (bit)
                 ++_count;
             else if (_count > 0)
                 --_count;
+*/
         }
 
         void reset()
@@ -100,41 +71,18 @@ namespace BeeFishDatabase {
         }
         
 
-        friend ostream& operator << (ostream& out, const Stack& stack) 
-        {
-
-            out << "StackStart: Index: " << stack._start.index()  << ", Count " << stack._count << endl;
-            Index index = 0;
-
-            for (auto value : stack)
-            {
-                Branch branch = stack._start.getBranch(value._index);
-                out << index++
-                     << ":[" << value._index << "]"
-                     << "{" 
-                        << branch._left << ", " << branch._right 
-                     << "}"
-                     << "[" << value._bit << "]"
-                     <<  endl;
-
-            }
-
-            return out;
-        }
+        
 
         Variable getVariable() const
         {
-            Variable var = BeeFishScript::Object{
-                {"start", (BeeFishScript::Number)_start.index()}
-            };
-
+            Variable var = BeeFishScript::Object{};
+            
             BeeFishScript::Array array;
 
-            for (auto value : *this)
+            for (auto bit : *this)
             {
                 Variable entry = BeeFishScript::Object{
-                    {"index", BeeFishScript::Integer(value._index)},
-                    {"bit", BeeFishScript::Integer(value._bit ? 1 : 0)}
+                    {"bit", BeeFishScript::Integer(bit ? 1 : 0)}
                 };
 
                 array.push_back(entry);
@@ -146,42 +94,39 @@ namespace BeeFishDatabase {
 
         }
  
-        StackValue last() const {
-            size_t size = vector<StackValue>::size();
+        bool last() const {
+            size_t size = vector<bool>::size();
             assert(size);
             return (*this)[size - 1];
         }
+        
+        
 
-        virtual void push_back(const StackValue& value)
+        virtual void push_back(bool bit)
         {
-            if (value._bit)
+            if (bit)
                 ++_count;
             else if (_count > 0)
                 --_count;
                 
-            vector<StackValue>::push_back(
-                value
+            vector<bool>::push_back(
+                bit
             );
         }
         
         virtual void pop_back()
         {
-            StackValue value = last();
+            bool bit = last();
             
-            if (value._bit && _count > 0)
+            if (bit && _count > 0)
                 --_count;
-            else if (!value._bit)
+            else if (!bit)
                 ++_count;
                 
-            vector<StackValue>::pop_back();
+            vector<bool>::pop_back();
         }
-
-        Branch getLastBranch() const
-        {
-            StackValue entry = last();
-            return _start.getBranch(entry._index);
-        }
- 
+        
+        
 
     };
     

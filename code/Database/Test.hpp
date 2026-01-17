@@ -193,12 +193,14 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tTesting Data Path Min: " << flush;
             
-            Size minimum =
-                data.min<Size>();
+            Size minimum = 0;
+            
+            bool ok = data.min<Size>(minimum);
 
-            cout << minimum << flush;
+            if (ok)
+                 cout << minimum << flush;
 
-            success = (minimum == min);
+            success = ok && (minimum == min);
 
             outputSuccess(success);
             
@@ -207,10 +209,10 @@ namespace BeeFishDatabase
         }
 
         if (success) {
-            cout << "\tTesting Data Path Max: ";
+            cout << "\tTesting Data Path Max: " << flush;
 
-            Size maximum =
-                data.max<Size>();
+            Size maximum = 0;
+            data.max<Size>(maximum);
 
             success = (maximum == max);
 
@@ -290,17 +292,19 @@ namespace BeeFishDatabase
             MinMaxPath data = start["skip3"];
             data[0];
             data[1];
-            
+
             cout << "\t\tFirst: " << flush;
             
-            Stack stack(data);
+            Stack stack;
             int first = - 1;
+
             bool next =
                 data.next(stack, first);
-            
-            
-            success = (first == 0) && next;
 
+            success = (first == 0) &&
+                next && 
+                data.count() == 0;
+            
             outputSuccess(success);
 
             if (success) {
@@ -334,7 +338,8 @@ namespace BeeFishDatabase
             data["second"];
             data["third"];
 
-            Stack stack(data);
+            Stack stack;
+            
             vector<string> values;
             string value;
             while (data.next<string>(stack, value))
@@ -367,7 +372,7 @@ namespace BeeFishDatabase
             for (int i = 1; i <= 10; ++i)
                 data[i];
 
-            Stack stack(data);
+            Stack stack;
             int i;
             int check = 1;
             int last = data.max<int>();
@@ -392,7 +397,7 @@ namespace BeeFishDatabase
             data["one"];
             data["two"];
             data["three"];
-            Stack stack(data);
+            Stack stack;
             string key;
             string last;
             while (data.next(stack, key)) {
@@ -406,22 +411,6 @@ namespace BeeFishDatabase
             outputSuccess(success);
         }
 
-        if (success)
-        {
-            cout << "\tTesting string min,latest,value " << flush;
-
-            MinMaxPath data = start["skip7"];
-            data["one"];
-            data["two"];
-            data["three"];
-            string min = data.min<string>();
-            success &= (min == "one");
-            string latest = data.latest<string>();
-            success &= (latest == "three");
-            string value = data.value<string>();
-            success &= (value == latest);
-            outputSuccess(success);
-        }
 
         if (success)
         {
@@ -485,17 +474,16 @@ namespace BeeFishDatabase
             data[1][1];
             data[1][2];
             
-            Stack stack1(data);
+
             MinMaxPath test1 = data;
-            int min1 = test1.min<int>(stack1);
+            int min1 = test1.min<int>();
             
             success &= (min1 == 1);
             
             outputSuccess(success);
 
-            Stack stack2(data);
             MinMaxPath test2 = data;
-            int min2 = test2.min<int>(stack2);
+            int min2 = test2.min<int>();
 
             success &= (min2 == 1);
 
@@ -505,7 +493,7 @@ namespace BeeFishDatabase
     
             int key;
             int count = 0;
-            Stack stack(keys);
+            Stack stack;
             while (keys.next<int>(stack, key))
             {
                 ++count;
@@ -517,35 +505,6 @@ namespace BeeFishDatabase
     
         }
       
-        if (success)
-        {
-            cout << "\tTesting latest string 1" << flush;
-
-            MinMaxPath data = start["skip10.1"];
-            data["hello"];
-            data["hello world"];
-            std::string string = data.latest<std::string>();
-
-            success &= (string == "hello world");
-            outputSuccess(success);
-
-        }
-        
-        if (success)
-        {
-            cout << "\tTesting latest string 2" << flush;
-
-            MinMaxPath data = start["skip10.2"];
-            data["hello world"];
-            data["hello"];
-            
-            std::string string = data.latest<std::string>();
-
-            success &= (string == "hello");
-            outputSuccess(success);
-
-        }
-        
         
         outputSuccess(success);
 
@@ -710,7 +669,7 @@ cout << "VALUE: " << value << endl;
             cout << "\tInteger type" << endl;
             MinMaxPath path = root["integer"];
             
-            Stack stack(path);
+            Stack stack;
             success = path.contains(Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
@@ -756,7 +715,7 @@ cout << "VALUE: " << value << endl;
         
         if (success) {
             MinMaxPath maxPath = path;
-            Stack stack(maxPath);
+            Stack stack;
             Size max = maxPath.max<Size>();
             success &= testResult("\tmax == 0", max == 0);
             assert(success);

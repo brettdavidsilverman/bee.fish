@@ -17,8 +17,8 @@
 
 namespace BeeFishQuery {
     
-    using namespace BeeFishBString;
-    using namespace BeeFishParser;
+using namespace BeeFishBString;
+using namespace BeeFishParser;
 
     typedef Iterable<BString> Words;
     

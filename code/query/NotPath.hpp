@@ -3,7 +3,6 @@
 
 #include "../Database/Iterable.hpp"
 
-
 namespace BeeFishQuery {
 
 using namespace std;

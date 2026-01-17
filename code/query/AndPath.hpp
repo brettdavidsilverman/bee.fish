@@ -1,8 +1,7 @@
 #ifndef BEE_FISH__QUERY__AND_PATH_HPP
 #define BEE_FISH__QUERY__AND_PATH_HPP
 
-#include "../Database/Iterable.hpp"
-
+#include "../Database/Database.hpp"
 
 namespace BeeFishQuery {
 
@@ -12,7 +11,7 @@ using namespace BeeFishDatabase;
 
     template<typename T>
     class AndPath :
-        public Iterable<T>
+        public PathBase
     {
     protected:
         Iterable<T>* _a;
@@ -22,7 +21,6 @@ using namespace BeeFishDatabase;
 
         AndPath( Iterable<T>* a,
                  Iterable<T>* b) :
-            Iterable<T>(*a),
             _a(a),
             _b(b)
         {
@@ -34,7 +32,7 @@ using namespace BeeFishDatabase;
             delete _b;
         }
         
-        virtual bool canGoLeft(const Branch& branch) const
+        virtual bool canGoLeft() const
         override
         {
             Branch branchA = _a->getBranch();
@@ -45,7 +43,7 @@ using namespace BeeFishDatabase;
                 _b->canGoLeft(branchB);
         }
         
-        virtual bool canGoRight(const Branch& branch) const
+        virtual bool canGoRight() const
         override
         {
             Branch branchA = _a->getBranch();
@@ -56,7 +54,7 @@ using namespace BeeFishDatabase;
                 _b->canGoRight(branchB);
         }
         
-        virtual void goLeft(const Branch& branch)
+        virtual void goLeft()
         override
         {
             Branch branchA = _a->getBranch();
@@ -67,7 +65,7 @@ using namespace BeeFishDatabase;
     
         }
         
-        virtual void goRight(const Branch& branch)
+        virtual void goRight()
         override
         {
             Branch branchA = _a->getBranch();
@@ -77,7 +75,14 @@ using namespace BeeFishDatabase;
             _b->goRight(branchB);
         }
         
-        virtual bool isDeadEnd(const Branch& branch) const
+        virtual void goUp()
+        override
+        {
+            _a->goUp();
+            _b->goUp();
+        }
+        
+        virtual bool isDeadEnd() const
         override
         {
             Branch branchA = _a->getBranch();
@@ -95,8 +100,6 @@ using namespace BeeFishDatabase;
                     )
                 );
                 
-            assert(isDeadEnd);
-            
             return isDeadEnd;
                 
         }
