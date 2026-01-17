@@ -67,7 +67,7 @@ namespace BeeFishHTTPS {
          MinMaxPath object =
             properties[_path->id()];
             
-         Stack stack(object);
+         Stack stack;
          Index position;
          while (object.next(stack, position))
          {

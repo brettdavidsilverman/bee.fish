@@ -50,7 +50,7 @@ int main(int argc, const char* argv[]) {
                     
             cout << *(statement._expression) << endl;
             
-            Iterable<BString>* path =
+            JoinPathBase<BString>* path =
                 statement._expression
                 ->getPath<BString>(words);
                 

@@ -361,7 +361,7 @@ namespace BeeFishQuery {
                 query
             );
             
-            Iterable<BString>* path =
+            JoinPathBase<BString>* path =
                 expression->getPath<BString>(words);
                 
             delete path;
@@ -444,7 +444,7 @@ namespace BeeFishQuery {
         ok = ok && array[1] == "three";
         
         BeeFishMisc::outputSuccess(ok);
-        
+
         return ok;
         
     }

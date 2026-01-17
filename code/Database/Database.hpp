@@ -20,6 +20,7 @@
 #include "Data.hpp"
 #include "Path.hpp"
 #include "PathBase.hpp"
+#include "JoinPathBase.hpp"
 #include "MinMaxPath.hpp"
 #include "Iterable.hpp"
 #include "JSONDatabase.hpp"

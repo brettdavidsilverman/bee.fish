@@ -1,7 +1,7 @@
 #ifndef BEE_FISH__QUERY__NOT_PATH_HPP
 #define BEE_FISH__QUERY__NOT_PATH_HPP
 
-#include "../Database/Iterable.hpp"
+#include "../Database/Database.hpp"
 
 namespace BeeFishQuery {
 
@@ -11,15 +11,14 @@ using namespace BeeFishDatabase;
 
     template<typename T>
     class NotPath :
-        public Iterable<T>
+        public JoinPathBase<T>
     {
     protected:
-        Iterable<T>* _path;
+        JoinPathBase<T>* _path;
         bool _ended;
     public:
 
-        NotPath(Iterable<T>* path ) :
-            Iterable<T>(*path),
+        NotPath(JoinPathBase<T>* path) :
             _path(path)
         {
             _ended = _path->isDeadEnd();
@@ -30,27 +29,27 @@ using namespace BeeFishDatabase;
             delete _path;
         }
         
-        virtual bool canGoLeft(const Branch& branch) const
+        virtual bool canGoLeft() const
+        override
+        {
+            return 
+                not _path->canGoLeft();
+        }
+        
+        virtual bool canGoRight() const
         override
         {
             return
-                not _path->canGoLeft(branch);
+                not _path->canGoRight();
         }
         
-        virtual bool canGoRight(const Branch& branch) const
-        override
-        {
-            return
-                not _path->canGoRight(branch);
-        }
-        
-        virtual void goLeft(const Branch& branch)
+        virtual void goLeft()
         override
         {
             if (!_ended &&
-                _path->canGoLeft(branch))
+                _path->canGoLeft())
             {
-                 _path->goLeft(branch);
+                 _path->goLeft();
             }
             else
                 _ended = true;
@@ -58,16 +57,30 @@ using namespace BeeFishDatabase;
             
         }
         
-        virtual void goRight(const Branch& branch)
+        virtual void goRight()
         override
         {
             if (!_ended &&
-                _path->canGoRight(branch))
+                _path->canGoRight())
             {
-                 _path->goRight(branch);
+                 _path->goRight();
             }
             else
                 _ended = true;
+        }
+        
+        virtual void goUp()
+        override
+        {
+            assert(false);
+            _path->goUp();
+        }
+        
+        virtual bool isDeadEnd() {
+            return (
+                _path->canGoLeft() &&
+                _path->canGoRight()
+            );
         }
 
     

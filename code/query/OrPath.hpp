@@ -1,7 +1,7 @@
 #ifndef BEE_FISH__QUERY__OR_PATH_HPP
 #define BEE_FISH__QUERY__OR_PATH_HPP
 
-#include "../Database/Iterable.hpp"
+#include "../Database/Database.hpp"
 
 
 namespace BeeFishQuery {
@@ -12,19 +12,18 @@ using namespace BeeFishDatabase;
 
     template<typename T>
     class OrPath :
-        public Iterable<T>
+        public JoinPathBase<T>
     {
     protected:
-        Iterable<T>* _a;
-        Iterable<T>* _b;
+        JoinPathBase<T>* _a;
+        JoinPathBase<T>* _b;
         bool _aEnded;
         bool _bEnded;
         
     public:
 
-        OrPath(Iterable<T>* a,
-               Iterable<T>* b) :
-            Iterable<T>(*a),
+        OrPath(JoinPathBase<T>* a,
+               JoinPathBase<T>* b) :
             _a(a),
             _b(b)
         {
@@ -38,72 +37,68 @@ using namespace BeeFishDatabase;
         }
    
         
-        virtual bool canGoLeft(const Branch& branch) const
+        virtual bool canGoLeft() const
         override
         {
-            Branch branchA = _a->getBranch();
-            Branch branchB = _b->getBranch();
-            
             return
-                _a->canGoLeft(branchA) or
-                _b->canGoLeft(branchB);
+                _a->canGoLeft() or
+                _b->canGoLeft();
         }
         
-        virtual bool canGoRight(const Branch& branch) const
+        virtual bool canGoRight() const
         override
         {
-            Branch branchA = _a->getBranch();
-            Branch branchB = _b->getBranch();
-            
             return
-                _a->canGoRight(branchA) or
-                _b->canGoRight(branchB);
+                _a->canGoRight() or
+                _b->canGoRight();
         }
         
-        virtual void goLeft(const Branch& branch)
+        virtual void goLeft()
         override
         {
-            Branch branchA = _a->getBranch();
-            Branch branchB = _b->getBranch();
-            
-            
             if (!_aEnded &&
-                 _a->canGoLeft(branchA))
+                 _a->canGoLeft())
             {
-                _a->goLeft(branchA);
+                _a->goLeft();
             }
             else
                 _aEnded = true;
                 
             if (!_bEnded &&
-                _b->canGoLeft(branchB))
+                _b->canGoLeft())
             {
-                _b->goLeft(branchB);
+                _b->goLeft();
             }
             else
                 _bEnded = true;
                 
         }
         
-        virtual void goRight(const Branch& branch)
+        virtual void goRight()
         override
         {
             if (!_aEnded &&
-                 _a->canGoRight(branch))
+                 _a->canGoRight())
             {
-                _a->goRight(branch);
+                _a->goRight();
             }
             else
                 _aEnded = true;
                 
             if (!_bEnded &&
-                _b->canGoRight(branch))
+                _b->canGoRight())
             {
-                _b->goRight(branch);
+                _b->goRight();
             }
             else
                 _bEnded = true;
                 
+        }
+        
+        virtual void goUp()
+        override
+        {
+            assert(false);
         }
 
     

@@ -11,16 +11,16 @@ using namespace BeeFishDatabase;
 
     template<typename T>
     class AndPath :
-        public PathBase
+        public JoinPathBase<T>
     {
     protected:
-        Iterable<T>* _a;
-        Iterable<T>* _b;
+        JoinPathBase<T>* _a;
+        JoinPathBase<T>* _b;
         
     public:
 
-        AndPath( Iterable<T>* a,
-                 Iterable<T>* b) :
+        AndPath( JoinPathBase<T>* a,
+                 JoinPathBase<T>* b) :
             _a(a),
             _b(b)
         {
@@ -32,47 +32,36 @@ using namespace BeeFishDatabase;
             delete _b;
         }
         
+        
         virtual bool canGoLeft() const
         override
         {
-            Branch branchA = _a->getBranch();
-            Branch branchB = _b->getBranch();
-            
             return
-                _a->canGoLeft(branchA) and
-                _b->canGoLeft(branchB);
+                _a->canGoLeft() and
+                _b->canGoLeft();
         }
         
         virtual bool canGoRight() const
         override
         {
-            Branch branchA = _a->getBranch();
-            Branch branchB = _b->getBranch();
-            
             return
-                _a->canGoRight(branchA) and
-                _b->canGoRight(branchB);
+                _a->canGoRight() and
+                _b->canGoRight();
         }
         
         virtual void goLeft()
         override
         {
-            Branch branchA = _a->getBranch();
-            Branch branchB = _b->getBranch();
-            
-            _a->goLeft(branchA);
-            _b->goLeft(branchB);
+            _a->goLeft();
+            _b->goLeft();
     
         }
         
         virtual void goRight()
         override
         {
-            Branch branchA = _a->getBranch();
-            Branch branchB = _b->getBranch();
-            
-            _a->goRight(branchA);
-            _b->goRight(branchB);
+            _a->goRight();
+            _b->goRight();
         }
         
         virtual void goUp()
@@ -85,18 +74,15 @@ using namespace BeeFishDatabase;
         virtual bool isDeadEnd() const
         override
         {
-            Branch branchA = _a->getBranch();
-            Branch branchB = _b->getBranch();
-            
             bool isDeadEnd =
             not (
                     (
-                        _a->canGoLeft(branchA) and
-                        _b->canGoLeft(branchB)
+                        _a->canGoLeft() and
+                        _b->canGoLeft()
                     ) or
                     (
-                        _a->canGoRight(branchA) and
-                        _b->canGoRight(branchB)
+                        _a->canGoRight() and
+                        _b->canGoRight()
                     )
                 );
                 

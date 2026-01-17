@@ -173,7 +173,7 @@ using namespace BeeFishParser;
         }
         
         template<typename T>
-        Iterable<T>*
+        JoinPathBase<T>*
         getPath(
             Words& words
         )
@@ -217,10 +217,10 @@ using namespace BeeFishParser;
         }
         
         template<typename T>
-        Iterable<T>*
+        JoinPathBase<T>*
         getPath(
-            Iterable<T>* a, 
-            Iterable<T>* b
+            JoinPathBase<T>* a, 
+            JoinPathBase<T>* b
         )
         {
             if (_and->matched())
@@ -428,7 +428,7 @@ using namespace BeeFishParser;
         }
         
         template<typename T>
-        Iterable<T>* getPath(Words words)
+        JoinPathBase<T>* getPath(Words words)
         {
 
             if (_notExpression->matched())
@@ -437,7 +437,7 @@ using namespace BeeFishParser;
                     _loadOnDemandExpression1
                     ->item();
                     
-                Iterable<T>* path = 
+                JoinPathBase<T>* path = 
                     expression
                     ->getPath<T>(words);
                     
@@ -471,7 +471,7 @@ using namespace BeeFishParser;
             }
             else if (_wordAndExpression->matched())
             {
-                Iterable<T>* wordPath =
+                JoinPathBase<T>* wordPath =
                     _word1->getPath<T>(words);
                     
                 Expression* expression =

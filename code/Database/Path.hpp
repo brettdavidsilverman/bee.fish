@@ -27,7 +27,7 @@ namespace BeeFishDatabase {
     {
     public:
         Database*  _database  = nullptr;
-        Index      _index      = 0;
+        
         SSize      _lockIndex = -1;
 
     public:
@@ -35,32 +35,32 @@ namespace BeeFishDatabase {
         Path( Database* database = nullptr,
                 Index index = Branch::Root ) :
             PowerEncoding(),
-            _database(database),
-            _index(index)
+            _database(database)
         {
+            _index = index;
         }
 
         Path( Database& database,
                 Index index = Branch::Root ) :
             PowerEncoding(),
-            _database(&database),
-            _index(index)
+            _database(&database)
         {
+            _index = index;
         }
 
         Path(const Path& source) :
             PowerEncoding(),
-            _database(source._database),
-            _index(source._index)
+            _database(source._database)
         {
+            _index = source._index;
         }
         
         Path( const Path& source,
                 Index index) :
             PowerEncoding(),
-            _database(source._database),
-            _index(index)
+            _database(source._database)
         {
+            _index = index;
         }
 
         virtual ~Path()
@@ -143,8 +143,138 @@ namespace BeeFishDatabase {
             PowerEncoding::writeBit(bit);
           
         }
+    
+    public:
+        
+        template<typename T>
+        T min()
+        {
+            T value;
+            if (not min(value)) 
+            {
+                throw runtime_error("No minimum");
+            }
+            
+            return value;
+        }
+        
+        template<typename T>
+        bool min(T& value)
+        {
+            Stack stack;
+            Path path(*this, _index);
+            
+            if (path.min(stack, _index))
+            {
+                stack.reset();
+                stack >> value;
+                return true;
+            }
+
+            return false;
+        }
+        
+        template<typename T>
+        T max()
+        {
+            T value;
+            if (not max(value)) 
+            {
+                throw runtime_error("No maximum");
+            }
+            
+            return value;
+        }
+        
+        template<typename T>
+        bool max(T& value)
+        {
+            Stack stack;
+            Path path(*this, _index);
+            
+            if (path.max(stack, _index)) {
+                stack.reset();
+                stack >> value;
+                return true;
+            }
+            
+            return false;
+        }
         
     protected:
+        bool min(
+            Stack& stack,
+            Index index
+        )
+        {
+            _index = index;
+            bool bit;
+            
+            while (!isDeadEnd())
+            {
+                
+                
+                if (canGoLeft()) {
+                    bit = 0;
+                    goLeft();
+                    
+                }
+                else if (canGoRight()) {
+                    bit = 1;
+                    goRight();
+                }
+                else {
+                    break;
+                }
+                
+                stack.push_back(bit);
+                
+                if (stack.count() == 0)
+                    return true;
+
+            }
+            
+            
+            return (stack.count() == 0);
+            
+        }
+
+        
+        bool max(
+            Stack& stack,
+            Index index
+        )
+        {
+            _index = index;
+            bool bit;
+            while (!isDeadEnd())
+            {
+                
+                
+                if (canGoRight()) {
+                    bit = 1;
+                    goRight();
+                }
+                else if (canGoLeft()) {
+                    bit = 0;
+                    goLeft();
+                }
+                else
+                    break;
+                    
+                stack.push_back(
+                    bit
+                );
+
+                if (stack.count() == 0)
+                    return true;
+                
+            }
+            
+            return (stack.count() == 0);
+        }
+        
+    public:
 
         virtual void goLeft()
         {
