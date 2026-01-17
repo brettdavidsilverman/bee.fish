@@ -170,7 +170,7 @@ namespace BeeFishParser
                  
                      _character.push_back(c);
                      ++_charCount;
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(TIME)
     cout << _character;
 #endif
                      _lastCharacter = _character;

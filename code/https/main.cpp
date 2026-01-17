@@ -21,7 +21,7 @@ void start(
 );
 
 std::mutex _wait;
-const int _threadCount = 4;
+const int _threadCount = 10;
 
 int main(int argc, const char* argv[])
 

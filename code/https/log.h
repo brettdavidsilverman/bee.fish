@@ -22,10 +22,11 @@ inline void initializeLogs() {
    using namespace BeeFishMisc;
    
 #ifndef DEBUG
+   // Redirect log  to files
    clog.rdbuf(logfile().rdbuf());
-   cerr.rdbuf(errfile().rdbuf());
 #endif
 
+cerr.rdbuf(errfile().rdbuf());
    
 }
 #endif

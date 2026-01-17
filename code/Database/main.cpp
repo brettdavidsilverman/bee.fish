@@ -47,7 +47,7 @@ int main(int argc, const char* argv[])
         return 0;
     }
     
-    JSONDatabase database("test");
+    JSONDatabase database("test", DATABASE_FILENAME);
     
     cout << database << endl;
     
@@ -61,12 +61,12 @@ int main(int argc, const char* argv[])
         cout << "Read" << endl;
     }
     
-    bool large =
-        (hasArg(argc, argv, "-large") != -1);
+    bool loadDeaths =
+        (hasArg(argc, argv, "-deaths") != -1);
 
-    if (large)
+    if (loadDeaths)
     {
-        cout << "Input large.json" << endl;
+        cout << "Input deaths.json" << endl;
     }
 
     bool input =
@@ -85,12 +85,12 @@ int main(int argc, const char* argv[])
         cout << "Output" << endl;
     }
     
-    if (large)
+    if (loadDeaths)
     {
         JSONPathParser json(root);
-        cout << WWW_ROOT_DIRECTORY "/large.json" << endl;
+        cout << WWW_ROOT_DIRECTORY "/deaths.json" << endl;
         
-        ifstream file(WWW_ROOT_DIRECTORY "/large.json");
+        ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");
         
         json.read(file);
     }

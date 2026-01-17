@@ -22,6 +22,7 @@
 #include "LockFile.hpp"
 #include "Index.hpp"
 #include "Branch.hpp"
+#include "LeastRecentlyUsedCache.hpp"
 
 using namespace std;
 using namespace std::literals;
@@ -38,12 +39,17 @@ namespace BeeFishDatabase {
     class Database : public LockFile
     {
     
+    
     public:
         typedef PowerEncoding Encoding;
 
     public:
 
-        Size                      _pageSize = 0;
+        Size _pageSize = 0;
+        
+    protected:
+        LeastRecentlyUsedCache<Index, Branch>
+            _cache;
     public:
 
         struct ScopedFileLock{
@@ -64,12 +70,14 @@ namespace BeeFishDatabase {
     public:
         Database(
             string filePath = "",
-            const Size pageSize = getPageSize()
+            const Size pageSize = getPageSize(),
+            const Size cacheCapacity = 10000
         ) :
             LockFile(
                 filePath
             ),
-            _pageSize(pageSize)
+            _pageSize(pageSize),
+            _cache(cacheCapacity)
         {
 #ifdef DEBUG_
             Debug debug;
@@ -150,11 +158,20 @@ namespace BeeFishDatabase {
                 }
             }
 
-            Branch branch;
-            seek(index);
-            read(&branch, sizeof(Branch));
+            optional<Branch> branch =
+                _cache.get(index);
+                
+            if (branch == nullopt)
+            {
+                Branch branch;
+                seek(index);
+                read(&branch, sizeof(Branch));
+                _cache.put(index, branch);
+                return branch;
+            }
+
             
-            return branch;
+            return branch.value();
         }
 
 
@@ -163,8 +180,8 @@ namespace BeeFishDatabase {
 
             seek(index);
             write(&branch, sizeof(Branch));
-
-
+            _cache.put(index, branch);
+            
         }
         
 

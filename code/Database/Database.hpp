@@ -16,6 +16,7 @@
 #include "File.hpp"
 #include "Index.hpp"
 #include "Branch.hpp"
+#include "LeastRecentlyUsedCache.hpp"
 #include "DatabaseBase.hpp"
 #include "Data.hpp"
 #include "Path.hpp"

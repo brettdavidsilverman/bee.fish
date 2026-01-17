@@ -103,6 +103,9 @@ int main(int argc, const char* argv[]) {
               << endl
           << "Version: "
               << BEE_FISH_PARSER_VERSION
+              << endl
+          << "Match size: "
+              << sizeof(Match)
               << endl;
 
     if (hasArg(argc, argv, "-test") >= 0)

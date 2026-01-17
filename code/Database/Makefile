@@ -15,11 +15,14 @@ test:	TEST=test
 test:	$(OUTPUT)
 	$(OUTPUT) -test
 
-debug:	CFLAGS += -g -D DEBUG
+debug:	CFLAGS += -g -D DEBUG -Og
 debug:	DEBUG = debug
 debug:	$(OUTPUT)
 
-
+time:	CFLAGS += -D TIME -D DEBUG -Ofast
+time:	$(OUTPUT)
+	time --verbose $(OUTPUT) -deaths &
+	
 run:	$(OUTPUT)
 	$(OUTPUT) -input -output
 	
