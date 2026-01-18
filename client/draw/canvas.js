@@ -421,7 +421,7 @@ class Canvas extends UserInput {
         var promise1 = line.save();
         var promise2 = parent.save();
 
-      //  var results = await Promise.all([promise1, promise2]);
+       // var results = await Promise.all([promise1, promise2]);
 
         this._points = null;
         
@@ -537,12 +537,14 @@ class Canvas extends UserInput {
         
         if (key)
         {
+            console.log("Loading canvas");
             var id = Id.fromKey(key);
             canvas = await id.load();
         }
         
         if (canvas == undefined)
         {
+            console.log("Creating canvas");
             canvas = new Canvas();
             canvas.save();
             storage.setItem("Canvas", canvas.key);

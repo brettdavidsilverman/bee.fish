@@ -14,6 +14,69 @@ namespace BeeFishWeb {
     class URL : public Match
     {
     public:
+        
+        class Protocol : public OrderOfPrecedence {
+        public:
+            Protocol() : OrderOfPrecedence(
+                {
+                    {
+                        new Item(
+                            new CIWord("https")
+                        )
+                    },
+                    {
+                        new Item(
+                            new CIWord("http")
+                        )
+                    }
+                }
+            )
+            {
+            }
+        };
+        
+        class HostCharacter : public Not {
+        public:
+            HostCharacter() : Not(
+                new Or(
+                    new Character(' '),
+                    new Character('/'),
+                    new Character('?'),
+                    new Character(':')
+                )
+            )
+            {
+            }
+            
+        };
+        
+        class Host : public Capture {
+        public:
+            Host() : Capture(
+                new Repeat<HostCharacter>()
+            )
+            {
+            }
+        };
+        
+        class PortCharacter : public Range
+        {
+        public:
+            PortCharacter() : Range('0', '9')
+            {
+            }
+        };
+        
+        class Port : public Capture
+        {
+        public:
+            Port() : Capture(
+                new Repeat<PortCharacter>()
+            )
+            {
+            }
+        };
+        
 
         class PathCharacter : public Not {
         public:
@@ -166,6 +229,10 @@ namespace BeeFishWeb {
         };         
 
     public:
+        Capture* _origin = nullptr;
+        Protocol* _protocol = nullptr;
+        Host* _host = nullptr;
+        Port* _port = nullptr;
         Path* _path = nullptr;
         Search* _search = nullptr;
         BeeFishQuery::Statement* _statement = nullptr;
@@ -174,12 +241,29 @@ namespace BeeFishWeb {
         URL() : Match()
         {
               
-                
+            _protocol = new Protocol();
+            _host = new Host();
+            _port = new Port();
             _path = new Path();
             _search = new Search();
             _statement = new BeeFishQuery::Statement();
             
             _match = new And(
+                new Optional(
+                    _origin = new Capture(
+                        new And(
+                            _protocol,
+                            new Word("://"),
+                            _host,
+                            new Optional(
+                                new And(
+                                    new Character(':'),
+                                    _port
+                                )
+                            )
+                        )
+                    )
+                ),
                 _path,
                 new Optional(
                     new And(

@@ -247,8 +247,15 @@ class Id {
 
 
         var value = await storage.getItem(this);
+        var json;
         
-        var json = JSON.parse(value);
+        try {
+            json = JSON.parse(value);
+        }
+        catch(error) {
+alert("id.js: 256 here " + json);
+            throw new Error(error);
+        }
         
         if (json === null)
             return null;
