@@ -361,10 +361,12 @@ namespace BeeFishQuery {
                 query
             );
             
-            JoinPathBase<BString>* path =
-                expression->getPath<BString>(words);
+            if (expression->matched()) {
+                JoinPathBase<BString>* path =
+                    expression->getPath<BString>(words);
                 
-            delete path;
+                delete path;
+            }
             
             delete capture;
             

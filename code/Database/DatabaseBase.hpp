@@ -108,22 +108,29 @@ namespace BeeFishDatabase {
         }
 
 
-        inline Index getNextIndex(Index parent)
+        Index getNextIndex(Index parent)
         {
 
             ScopedFileLock lock(this);
 
             Branch branch;
             branch._parent = parent;
+            branch._left = 0;
+            branch._right = 0;
+            branch._dataIndex = 0;
+            branch._locked = false;
+
             Index index = size();
 
-            if (index == 0) {
-                index = sizeof(Branch);
-            }
+/*
+if (index == 0) {
+    index = sizeof(Branch);
+}
+*/
 
             seek(index);
 
-            write(&branch, sizeof(branch));
+            write(&branch, sizeof(Branch));
 
             return index;
         }
@@ -145,33 +152,37 @@ namespace BeeFishDatabase {
                 
         }
         
-        inline Branch getBranch(Index index)
+        Branch getBranch(Index index)
         {
+
+            Branch branch;
             
             if (size() == 0) 
             {
                 ScopedFileLock lock(this);
-                if (size() == 0) {
-                    Branch branch;
+                if (size() == 0)
+                {
                     seek(0);
                     write(&branch, sizeof(Branch));
                 }
             }
 
-            optional<Branch> branch =
+            optional<Branch> optionalBranch =
                 _cache.get(index);
                 
-            if (branch == nullopt)
+            if (optionalBranch == nullopt)
             {
-                Branch branch;
                 seek(index);
                 read(&branch, sizeof(Branch));
-                _cache.put(index, branch);
-                return branch;
             }
-
+            else
+                branch = optionalBranch.value();
+                
+            _cache.put(index, branch);
             
-            return branch.value();
+            return branch;
+
+
         }
 
 

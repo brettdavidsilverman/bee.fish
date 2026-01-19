@@ -132,8 +132,6 @@ namespace BeeFishParser {
         {
 
             Or::success();
-//cerr << "OrderOfPrecedence::success " << endl;
-
             for (Size index = 0;
                 index < _input.size();
                 ++index)
@@ -144,8 +142,6 @@ namespace BeeFishParser {
                     
                     if (item->_match == _item &&
                         item->result() == nullopt) {
-//cerr << "Item::success " << endl;
-
                         item->success();
                         return;
                     }
