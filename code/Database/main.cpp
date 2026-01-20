@@ -47,11 +47,21 @@ int main(int argc, const char* argv[])
         return 0;
     }
     
-    JSONDatabase database("test", DATABASE_FILENAME);
+    
+    int originArg =
+        hasArg(argc, argv, "-origin");
+    BString origin = ORIGIN;
+    if (originArg != -1 && argc > (originArg + 2))
+    {
+        origin = argv[originArg + 1];
+        cout << origin << endl;
+        assert(false);
+    }
+    
+    JSONDatabase database(origin, DATABASE_FILENAME);
+    Path root = database.root();
     
     cout << database << endl;
-    
-    Path root(database.origin());
     
     bool read =
         (hasArg(argc, argv, "-read") != -1);

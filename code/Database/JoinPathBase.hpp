@@ -2,6 +2,7 @@
 #define BEE_FISH__DATABASE__JOIN_PATH_BASE_HPP
 
 #include "PathBase.hpp"
+#include "Path.hpp"
 
 namespace BeeFishDatabase {
 
@@ -16,7 +17,7 @@ using namespace BeeFishDatabase;
         
     public:
 
-        JoinPathBase()
+        JoinPathBase() : PathBase(0)
         {
         }
         
@@ -24,13 +25,13 @@ using namespace BeeFishDatabase;
         {
         }
    
-        virtual PathIterator<T> begin() {
-            return PathIterator<T>(this);
+        virtual Path::PathIterator<T> begin() {
+            return Path::PathIterator<T>(this);
         }
     
         // Points one past the last element
-        PathIterator<T> end() { 
-            PathIterator<T> iterator;
+        Path::PathIterator<T> end() { 
+            Path::PathIterator<T> iterator;
             return iterator;
         }
         

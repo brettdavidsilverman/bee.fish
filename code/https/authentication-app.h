@@ -59,7 +59,7 @@ namespace BeeFishHTTPS {
          
          WebRequest* request = _session->request();
          
-         if (request->result() != true)
+         if (request->result() == nullopt)
          {
              request->eof(_session->parser());
              if (request->result() != true)

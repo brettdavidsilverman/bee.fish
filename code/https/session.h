@@ -81,10 +81,10 @@ namespace BeeFishHTTPS {
   
         virtual ~Session()
         {
-            clear();
-        
             if (_database)
                 delete _database;
+                
+            clear();
         }
         
         virtual void start()
@@ -206,9 +206,6 @@ namespace BeeFishHTTPS {
             if (_parser->result() == false)
             {
                 logException("handleRead", BString("Parser match error: ") + _parser->getError());
-#ifdef DEBUG_
-                dumpTempFile();
-#endif
                 delete this;
                 return;
             }
@@ -287,16 +284,13 @@ namespace BeeFishHTTPS {
                       << _request->method()    << ' '
                       << origin() << _request->fullURL()  << ' '
                       << std::endl;
-
-                if (_database == nullptr)
-                    _database =
-                        new JSONDatabase(
-                            origin(),
-                            _server->databaseFile()
-                        );
-                else
-                    _database->setOrigin(origin());
-                
+               
+                _database =
+                    new JSONDatabase(
+                        origin(),
+                        _server->databaseFile()
+                    );
+   
                 _response = new Response(
                     this
                 );
@@ -394,6 +388,8 @@ namespace BeeFishHTTPS {
             const BString& what
         )
         {
+            dumpTempFile();
+            
             BeeFishScript::Object error = {
                 {
                     "exception", BeeFishScript::Object {
@@ -406,7 +402,7 @@ namespace BeeFishHTTPS {
                 }
             };
             
-            cout << error << endl;
+            cerr << error << endl;
         }
 
         BString getPointerString() {
@@ -466,8 +462,7 @@ namespace BeeFishHTTPS {
             
             if (requestHeaders.contains("host")) {
                 BString host = requestHeaders["host"];
-                host = BString("https://") + host;
-                origin = host;
+                origin = BString("https://") + host;
             }
             else
                 origin = server()->origin();
@@ -587,12 +582,13 @@ namespace BeeFishHTTPS {
     inline Authentication::Authentication(
         Session* session
     ) : Authentication(
-             *( session->database() ),
-                session->ipAddress(),
-                session->
-                    request()->
-                    getCookie("sessionId")
-            )
+            session->origin(),
+            (* session->database() ),
+            session->ipAddress(),
+            session->
+                request()->
+                getCookie("sessionId")
+        )
     {
     }
 

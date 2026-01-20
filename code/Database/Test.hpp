@@ -61,7 +61,7 @@ namespace BeeFishDatabase
 
         cout << "Testing next index" << endl;
 
-        JSONDatabase db("test");
+        JSONDatabase db("https://test");
  
         Index index1 = db.getNextIndex(0);
         Index index2 = db.getNextIndex(0);
@@ -86,8 +86,9 @@ namespace BeeFishDatabase
         
         
             
-        JSONDatabase db("test");
-        Path start(db.origin());
+        JSONDatabase db("https://test");
+        
+        Path start(db.root());
         
 
         cout << "\tSimple path [] " << flush;
@@ -519,8 +520,9 @@ namespace BeeFishDatabase
         cout << endl << "Testing path 2" << endl;
 
         bool success = true;
-        JSONDatabase database("test");
-        JSONPath root = database.origin();
+        JSONDatabase database("https://test");
+        ;
+        JSONPath root = database.root();
         cout << "\tTest data: " << std::flush;
         {
         
@@ -694,8 +696,8 @@ cout << "VALUE: " << value << endl;
 
         cout << "Test Array 2 Path \"[[]]\" " << endl;
  
-        JSONDatabase database("test");
-        Path path = Path(database.origin())["array"];
+        JSONDatabase database("https://test");
+        Path path = database.root()["array"];
         JSONPathParser parser(path);
         parser.read("[[]]");
         parser.eof();
@@ -750,8 +752,8 @@ cout << "VALUE: " << value << endl;
 
         cout << "Test Sub Array 2 Path: ";
         
-        JSONDatabase database("test");
-        Path path = database.origin();
+        JSONDatabase database("https://test");
+        Path path = database.root();
         JSONPathParser parser(path);
         parser.read("[[1]]");
         bool success = true;
@@ -849,11 +851,11 @@ cout << "VALUE: " << value << endl;
         sort(files.begin(), files.end());
 
         // Test direct to database
-        JSONDatabase tempDB("temp");
+        JSONDatabase tempDB("https://test");
             
         for (auto file : files) {
             if (success)
-                success = testFile(tempDB.origin(), file, true);
+                success = testFile(tempDB.root(), file, true);
             else
                 break;
         }

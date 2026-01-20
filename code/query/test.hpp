@@ -425,8 +425,9 @@ namespace BeeFishQuery {
         words["one"]["one"];
         words["one"]["two"];
         words["one"]["three"];
-        words["two"]["one"];
+        words["two"]["two"];
         words["two"]["three"];
+        words["two"]["four"];
         
         AndPath<BString> andPath(
             new Iterable<BString>(words["one"]),
@@ -442,9 +443,9 @@ namespace BeeFishQuery {
         }
         
         ok = ok && array.size() == 2;
-        ok = ok && array[0] == "one";
-        ok = ok && array[1] == "three";
-        
+        ok = ok && array[0] == "three";
+        ok = ok && array[1] == "two";
+    
         BeeFishMisc::outputSuccess(ok);
 
         return ok;

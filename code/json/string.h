@@ -310,7 +310,6 @@ namespace BeeFishJSON {
                     if (this->_onbuffer) {
                         this->_onbuffer(buffer);
                     }
-                    
                 };
 
 

@@ -3,66 +3,75 @@
 
 
 #include "File.hpp"
+#include <mutex>
 
 namespace BeeFishDatabase
 {
-   class LockFile : public File
-   {
-   protected:
-      Size _lockCount = 0;
-   public:
-   
-      LockFile(const std::string& filename) :
-         File(filename)
-      {
-      }
-      
-      virtual ~LockFile()
-      {
-         assert(_lockCount == 0);
-      }
+    class LockFile : public File
+    {
+    protected:
+        Size _lockCount = 0;
+        inline static mutex _mutex;
+        
+    public:
+    
+        LockFile(const std::string& filename) :
+            File(filename)
+        {
+        }
+        
+        virtual ~LockFile()
+        {
+             assert(_lockCount == 0);
+        }
 
-      virtual void lock() {
+        virtual void lock() {
+            
+            if (_lockCount++ == 0)
+_mutex.lock();
+// flock(_fileNumber, LOCK_EX);
+        }
          
-         if (_lockCount++ == 0)
-            flock(_fileNumber, LOCK_EX);
-      }
-       
-      virtual void unlock() {
-         
-         if (--_lockCount == 0)
-            flock(_fileNumber, LOCK_UN);
-      }
+        virtual void unlock() {
+            
+        if (--_lockCount == 0)
+_mutex.unlock();
+ //              flock(_fileNumber, LOCK_UN);
+        }
+        
+        
+        
+        
 /*
-      virtual void lock(Index position, Size length)
-      {
-         struct flock data;
-         memset(&data, '\0', sizeof(data));
-         data.l_type = F_WRLCK;
-         data.l_whence = SEEK_SET;
-         data.l_start = position;
-         data.l_len = length;
+        virtual void lock(Index position, Size length)
+        {
+            struct flock data;
+            memset(&data, '\0', sizeof(data));
+            data.l_type = F_WRLCK;
+            data.l_whence = SEEK_SET;
+            data.l_start = position;
+            data.l_len = length;
 
-         fcntl(_fileNumber, F_SETLKW, &data);
-         
-      }
+            fcntl(_fileNumber, F_SETLKW, &data);
+            
+        }
 
-      virtual void unlock(Index position, Size length)
-      {
-         struct flock data;
-         memset(&data, '\0', sizeof(data));
-         data.l_type = F_UNLCK;
-         data.l_whence = SEEK_SET;
-         data.l_start = position;
-         data.l_len = length;
-         
-         fcntl(_fileNumber, F_SETLK, &data);
+        virtual void unlock(Index position, Size length)
+        {
+            struct flock data;
+            memset(&data, '\0', sizeof(data));
+            data.l_type = F_UNLCK;
+            data.l_whence = SEEK_SET;
+            data.l_start = position;
+            data.l_len = length;
+            
+            fcntl(_fileNumber, F_SETLK, &data);
 
-      }
+        }
 
 */
-   };
-   
+    };
+    
 }
 
 

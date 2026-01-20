@@ -7,57 +7,52 @@
 namespace BeeFishDatabase
 {
 
-   class JSONDatabase : public Database
-   {
-   protected:
-      Path _properties;
-      Path _originPath;
-      BString _origin;
-   public:
-      JSONDatabase(const BString& origin, const BString& filePath = "")
-         : Database(filePath)
-      {
-         setOrigin(origin);
-      }
-      
-      inline void setOrigin(const BString& origin)
-      {
-          
-         if (_origin == origin)
-            return;
+    class JSONDatabase : public Database
+    {
+    protected:
+        BString _origin;
+        Path _root;
+        Path _properties;
+        Path _words;
+        
+    public:
+        JSONDatabase(
+            const BString& origin,
+            const BString& filePath = ""
+        )
+            : Database(filePath),
+            _origin(origin)
+        {
+     
+            _root = Path(*this)[ORIGINS][_origin];
             
-         _origin = origin;
-         
-         Path root(*this);
-  
-         _originPath =
-            root[origin];
-            
-         _properties =
-            _originPath[PROPERTIES];
-            
-         
-           
-      }
-      
-      const BString& getOrigin() const
-      {
-         return _origin;
-      }
-      
-      Path properties() const
-      {
-         return _properties;
-      }
-      
-      Path origin() const
-      {
-         return _originPath;
-      }
-      
-      
-   };
-   
+            _properties = 
+                _root[PROPERTIES];
+                
+            _words =
+                _root[WORDS];
+                
+        }
+        
+        
+        Path properties() const
+        {
+            return _properties;
+        }
+        
+        Path words() const
+        {
+            return _words;
+        }
+        
+        virtual Path root() const
+        {
+            return _root;
+        }
+        
+        
+    };
+    
 }
 
 #endif

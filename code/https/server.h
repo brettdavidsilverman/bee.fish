@@ -76,11 +76,7 @@ namespace BeeFishHTTPS {
             ),
             _context(boost::asio::ssl::context::sslv23)
         {
-            _origin = hostName;
-            if (_port != 443) {
-                _origin += ":";
-                _origin += std::to_string(_port);
-            }
+            _origin = "https://" + hostName;
             
             std::cout << "Opening transaction file " << std::endl;
     
@@ -112,7 +108,8 @@ namespace BeeFishHTTPS {
             std::cout << "Setting up database..." << std::endl;
 
             _databaseFile = databaseFile;
-    
+            
+            
             std::cout << "Start accepting..." << std::endl;
 
             startAccept();

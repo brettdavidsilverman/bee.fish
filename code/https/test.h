@@ -30,10 +30,7 @@ namespace BeeFishHTTPS {
       
       Id id;
       
-      BString origin = HOST;
-      origin += ":";
-      origin += std::to_string(port);
-      
+      BString origin = ORIGIN;
 /*
       success = success &&
          testParseURL(origin);
@@ -58,7 +55,7 @@ namespace BeeFishHTTPS {
       
       JSONDatabase db(origin);
       
-      Path userData = db.origin()["test"];
+      Path userData = db.root()["test"];
       userData.clear();
       JSONPathParser json(userData[URLS]["name"]);
       std::stringstream stream("{\"name\":{\"first\":\"Bee\",\"last\":\"Silverman\", \"middle\": [\"David\", \"PK\"]}}");

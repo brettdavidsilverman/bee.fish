@@ -27,7 +27,6 @@ namespace BeeFishDatabase {
     {
     public:
         Database*  _database  = nullptr;
-        
         SSize      _lockIndex = -1;
 
     public:
@@ -35,32 +34,32 @@ namespace BeeFishDatabase {
         Path( Database* database = nullptr,
                 Index index = Branch::Root ) :
             PowerEncoding(),
+            PathBase(index),
             _database(database)
         {
-            _index = index;
         }
 
         Path( Database& database,
                 Index index = Branch::Root ) :
             PowerEncoding(),
+            PathBase(index),
             _database(&database)
         {
-            _index = index;
         }
 
         Path(const Path& source) :
             PowerEncoding(),
+            PathBase(source._index),
             _database(source._database)
         {
-            _index = source._index;
         }
         
         Path( const Path& source,
                 Index index) :
             PowerEncoding(),
+            PathBase(index),
             _database(source._database)
         {
-            _index = index;
         }
 
         virtual ~Path()
@@ -146,62 +145,9 @@ namespace BeeFishDatabase {
     
     public:
         
-        template<typename T>
-        T min()
-        {
-            T value;
-            if (not min(value)) 
-            {
-                throw runtime_error("No minimum");
-            }
-            
-            return value;
-        }
-        
-        template<typename T>
-        bool min(T& value)
-        {
-            Stack stack;
-            Path path(*this, _index);
-            
-            if (path.min(stack, _index))
-            {
-                stack.reset();
-                stack >> value;
-                return true;
-            }
-
-            return false;
-        }
-        
-        template<typename T>
-        T max()
-        {
-            T value;
-            if (not max(value)) 
-            {
-                throw runtime_error("No maximum");
-            }
-            
-            return value;
-        }
-        
-        template<typename T>
-        bool max(T& value)
-        {
-            Stack stack;
-            Path path(*this, _index);
-            
-            if (path.max(stack, _index)) {
-                stack.reset();
-                stack >> value;
-                return true;
-            }
-            
-            return false;
-        }
         
     protected:
+/*
         bool min(
             Stack& stack,
             Index index
@@ -273,7 +219,7 @@ namespace BeeFishDatabase {
             
             return (stack.count() == 0);
         }
-        
+*/
     public:
 
         virtual void goLeft()
@@ -306,7 +252,6 @@ namespace BeeFishDatabase {
 
             _index = branch._left;
             
-            --_count;
 
         }
         
@@ -338,7 +283,6 @@ namespace BeeFishDatabase {
             }
 
             _index = branch._right;
-            ++_count;
             
         }
         
@@ -377,7 +321,7 @@ namespace BeeFishDatabase {
         
     public:
         template<typename T>
-        Path operator [] (const T& key)
+        Path operator [] (const T& key) const
         {
 
             Path path(*this);
@@ -389,13 +333,13 @@ namespace BeeFishDatabase {
             return path;
         }
  
-        Path operator [] (const char* key)
+        Path operator [] (const char* key) const
         {
             BString _key(key);
             return Path::operator[](_key);
         }
         
-        Path operator [] (const Path& key)
+        Path operator [] (const Path& key) const
         {
             return Path::operator[](key.index());
         }
@@ -461,7 +405,7 @@ namespace BeeFishDatabase {
 
         void setData(const std::string& value) {
 
-            Database::ScopedFileLock lock(_database);
+            Database::ScopedFileLock lock(database());
             
             Branch branch = getBranch(_index);
 
@@ -544,7 +488,7 @@ namespace BeeFishDatabase {
 
         void deleteData()
         {
-            Database::ScopedFileLock lock(_database);
+            Database::ScopedFileLock lock(database());
 
             Branch branch = getBranch();
             
@@ -557,7 +501,7 @@ namespace BeeFishDatabase {
         
         virtual void clear()
         {
-            Database::ScopedFileLock lock(_database);
+            Database::ScopedFileLock lock(database());
 
             deleteData();
             
@@ -677,7 +621,7 @@ namespace BeeFishDatabase {
             return variable;
       
         }
-        
+    
     protected:
         
         static bool readBit(istream& in)

@@ -7,11 +7,11 @@ namespace BeeFishDatabase {
 
     class PathBase
     {
-    protected:
-        Index _index = 0;
     public:
-
-        PathBase() {
+        Index      _index = 0;
+        PathBase(Index index) :
+            _index(index)
+        {
         }
         
         
@@ -31,89 +31,19 @@ namespace BeeFishDatabase {
             );
         }
         
-        
-        
-    public:
-
-        bool min(
-            Stack& stack,
-            Index index
-        )
-        {
-            _index = index;
-            bool bit;
-            
-            while (!isDeadEnd())
-            {
-                
-                
-                if (canGoLeft()) {
-                    bit = 0;
-                    goLeft();
-                    
-                }
-                else if (canGoRight()) {
-                    bit = 1;
-                    goRight();
-                }
-                else {
-                    break;
-                }
-                
-                stack.push_back(bit);
-                
-                if (stack.count() == 0)
-                    return true;
-
-            }
-            
-            
-            return (stack.count() == 0);
-            
-        }
-
-        
-        bool max(
-            Stack& stack,
-            Index index
-        )
-        {
-            _index = index;
-            bool bit;
-            while (!isDeadEnd())
-            {
-                
-                
-                if (canGoRight()) {
-                    bit = 1;
-                    goRight();
-                }
-                else if (canGoLeft()) {
-                    bit = 0;
-                    goLeft();
-                }
-                else
-                    break;
-                    
-                stack.push_back(
-                    bit
-                );
-
-                if (stack.count() == 0)
-                    return true;
-                
-            }
-            
-            return (stack.count() == 0);
-        }
-        
-        
-        
-        
-
-    public:
         template<typename T>
-        bool next(Stack& stack, T& value) {
+        bool next(Stack& stack, T& item)
+        {
+            bool result = next(stack);
+            if (result)
+            {
+                stack.reset();
+                stack >> item;
+            }
+            return result;
+        }
+        
+        bool next(Stack& stack) {
 
             // Algorithm:
             // from minimum branch
@@ -128,12 +58,7 @@ namespace BeeFishDatabase {
                 if (isDeadEnd())
                     return false;
                     
-                if (min(stack, _index))
-                {
-                    stack.reset();
-                    stack >> value;
-                }
-                return true;
+                return min(stack, 0);
             }
             
     
@@ -169,19 +94,165 @@ namespace BeeFishDatabase {
 
             // Follow the next min from
             // this right
-            min(stack, _index);
+            return min(stack, 0);
 
-            if (stack.count() != 0)
-                return false;
-
-            // Get this value
-            stack.reset();
-            stack >> value;
-            
-            return true;
 
         }
+    public:
+        virtual bool min(
+            Stack& stack,
+            int marker
+        )
+        {
+#warning "debugging min"
+            assert(marker == 0);
+            
+            bool bit;
+            while (!isDeadEnd())
+            {
+                
+                
+                if (canGoLeft()) {
+                    bit = 0;
+                    goLeft();
+                    
+                }
+                else if (canGoRight()) {
+                    bit = 1;
+                    goRight();
+                }
+                else {
+                    if (stack.count() != 0)
+                        return next(stack);
     
+                    break;
+      //              stack.pop_back();
+      //              goUp();
+                }
+                
+                stack.push_back(bit);
+                
+                if (stack.count() == 0)
+                    return true;
+
+            }
+            
+
+            return (stack.count() == 0);
+            
+        }
+
+        
+        virtual bool max(
+            Stack& stack,
+            int marker
+        )
+        {
+            bool bit;
+            while (!isDeadEnd())
+            {
+                
+                
+                if (canGoRight()) {
+                    bit = 1;
+                    goRight();
+                }
+                else if (canGoLeft()) {
+                    bit = 0;
+                    goLeft();
+                }
+                else
+                    break;
+                    
+                stack.push_back(
+                    bit
+                );
+
+                if (stack.count() == 0)
+                    return true;
+                
+            }
+            
+            return (stack.count() == 0);
+        }
+        
+        
+    public:
+        template<typename T>
+        T min()
+        {
+            Stack stack;
+            Index start = _index;
+            bool result = min(stack, 0);
+            _index = start;
+            if (result)
+            {
+                T value;
+                stack.reset();
+                stack >> value;
+                _index = start;
+                return value;
+                
+            }
+            
+            throw runtime_error("No minimum");
+        }
+        
+        template<typename T>
+        bool min(T& value)
+        {
+            Stack stack;
+            Index start = _index;
+            bool result = min(stack, 0);
+            _index = start;
+            if (result)
+            {
+                stack.reset();
+                stack >> value;
+                return true;
+            }
+
+            return false;
+        }
+        
+        template<typename T>
+        T max()
+        {
+            Stack stack;
+            Index start = _index;
+            bool result = max(stack, 0);
+            _index = start;
+            if (result)
+            {
+                T value;
+                stack.reset();
+                stack >> value;
+                _index = start;
+                return value;
+                
+            }
+            
+            throw runtime_error("No maximum");
+        }
+        
+        template<typename T>
+        bool max(T& value)
+        {
+            Stack stack;
+            Index start = _index;
+            bool result = max(stack, 0);
+            _index = start;
+            if (result)
+            {
+                stack.reset();
+                stack >> value;
+                return true;
+            }
+
+            return false;
+        }
+        
+    public:
         template<typename T>
         class PathIterator {
         protected:
@@ -258,6 +329,12 @@ namespace BeeFishDatabase {
         
         };
         
+        
+        
+        
+    public:
+
+
     
     };
 

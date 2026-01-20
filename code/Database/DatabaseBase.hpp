@@ -54,15 +54,16 @@ namespace BeeFishDatabase {
 
         struct ScopedFileLock{
 
-            Database* _database;
+            Database& _database;
 
-            ScopedFileLock(Database* database) {
-                _database = database;
-                _database->lock();
+            ScopedFileLock(Database& database) :
+                _database(database)
+            {
+                _database.lock();
             }
             
             ~ScopedFileLock() {
-                _database->unlock();
+                _database.unlock();
             }
 
         };
@@ -111,7 +112,7 @@ namespace BeeFishDatabase {
         Index getNextIndex(Index parent)
         {
 
-            ScopedFileLock lock(this);
+            ScopedFileLock lock(*this);
 
             Branch branch;
             branch._parent = parent;
@@ -121,12 +122,6 @@ namespace BeeFishDatabase {
             branch._locked = false;
 
             Index index = size();
-
-/*
-if (index == 0) {
-    index = sizeof(Branch);
-}
-*/
 
             seek(index);
 
@@ -139,7 +134,7 @@ if (index == 0) {
         {
 
             
-            ScopedFileLock lock(this);
+            ScopedFileLock lock(*this);
 
             Index dataIndex = size();
 
@@ -159,7 +154,7 @@ if (index == 0) {
             
             if (size() == 0) 
             {
-                ScopedFileLock lock(this);
+                ScopedFileLock lock(*this);
                 if (size() == 0)
                 {
                     seek(0);
@@ -247,7 +242,7 @@ if (index == 0) {
 
         inline void unlockBranch(Index lockIndex) 
         {
-            ScopedFileLock lock(this);
+            ScopedFileLock lock(*this);
 
             Branch branch = getBranch(lockIndex);
 
