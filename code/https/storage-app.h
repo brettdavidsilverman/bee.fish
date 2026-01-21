@@ -219,7 +219,7 @@ namespace BeeFishHTTPS {
             for (size_t page = 0; page < pageCount; ++page)
                _bookmark[page].deleteData();
 
-            _bookmark["Page count"] = (size_t)0;
+            _bookmark["Page count"].setData((size_t)0);
          }
          _bookmark.clear();
  

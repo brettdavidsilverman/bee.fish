@@ -30,7 +30,7 @@ namespace BeeFishDatabase {
       }
       
       JSONPath(JSONDatabase& database, const Path& start) :
-         Path(start)
+         Path(database, start.index())
       {
          
       }

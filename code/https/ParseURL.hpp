@@ -64,7 +64,7 @@ namespace BeeFishHTTPS {
             _path->properties()
             [BY_OBJECT];
          
-         MinMaxPath object =
+         Path object =
             properties[_path->id()];
             
          Stack stack;
