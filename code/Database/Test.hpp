@@ -158,7 +158,7 @@ namespace BeeFishDatabase
         success = success && (world2 == "world");
         outputSuccess(success);
 
-        MinMaxPath data = start["data"];
+        Path data = start["data"];
         
         // Min / Max
 
@@ -313,7 +313,7 @@ assert(success);
 
         if (success) {
             cout << "\tTesting first ";
-            MinMaxPath data = start["skip"];
+            Path data = start["skip"];
             data["first"];
             success =
                 (data.min<string>() == "first");
@@ -324,7 +324,7 @@ assert(success);
         
         if (success) {
             cout << "\tTesting last ";
-            MinMaxPath data = start["skip2"];
+            Path data = start["skip2"];
             data["first"];
             data["zlast"];
             success =
@@ -338,7 +338,7 @@ assert(success);
             cout << "\tTesting int next" << endl;
 
 
-            MinMaxPath data = start["skip3"];
+            Path data = start["skip3"];
             data[0];
             data[1];
 
@@ -382,7 +382,7 @@ assert(success);
         if (success) {
             cout << "\tTesting three strings ";
 
-            MinMaxPath data = start["skip4"];
+            Path data = start["skip4"];
             data["first"];
             data["second"];
             data["third"];
@@ -417,7 +417,7 @@ assert(success);
         {
             cout << "\tTesting count" << flush;
 
-            MinMaxPath data = start["skip5"];
+            Path data = start["skip5"];
             for (int i = 1; i <= 10; ++i)
                 data[i];
 
@@ -442,7 +442,7 @@ assert(success);
         {
             cout << "\tTesting string next" << flush;
 
-            MinMaxPath data = start["skip6"];
+            Path data = start["skip6"];
             data["one"];
             data["two"];
             data["three"];
@@ -465,7 +465,7 @@ assert(success);
         {
             cout << "\tTesting size_t contains" << flush;
 
-            MinMaxPath data = start["skip8"];
+            Path data = start["skip8"];
             Size size = 1;
             data[size];
 
@@ -479,7 +479,7 @@ assert(success);
         {
             cout << "\tTesting size_t does not contain" << flush;
 
-            MinMaxPath data = start["skip9"];
+            Path data = start["skip9"];
             Size size = 1;
             data[size];
 
@@ -493,7 +493,7 @@ assert(success);
         {
             cout << "\tTesting string contains" << flush;
 
-            MinMaxPath data = start["skip8.1"];
+            Path data = start["skip8.1"];
             data["hello"];
 
             bool contains = data.contains("hello");
@@ -506,7 +506,7 @@ assert(success);
         {
             cout << "\tTesting string does not contain" << flush;
 
-            MinMaxPath data = start["skip9.1"];
+            Path data = start["skip9.1"];
             data["hello"];
 
             bool contains = data.contains("help");
@@ -524,21 +524,21 @@ assert(success);
             data[1][2];
             
 
-            MinMaxPath test1 = data;
+            Path test1 = data;
             int min1 = test1.min<int>();
             
             success &= (min1 == 1);
             
             outputSuccess(success);
 
-            MinMaxPath test2 = data;
+            Path test2 = data;
             int min2 = test2.min<int>();
 
             success &= (min2 == 1);
 
             outputSuccess(success);
 
-            MinMaxPath keys = data;
+            Path keys = data;
     
             int key;
             int count = 0;
@@ -590,7 +590,7 @@ assert(success);
         
         if (success)
         {
-            MinMaxPath path = root["string"];
+            Path path = root["string"];
             JSONPathParser parser(path);
             parser.read("\"Hello World\"");
             parser.eof();
@@ -604,7 +604,7 @@ assert(success);
         if (success) {
             
             cout << "\tIndexed string ";
-            MinMaxPath path = root["string"];
+            Path path = root["string"];
             
             success = success &&
                 path.contains(Type::STRING);
@@ -614,7 +614,7 @@ assert(success);
         
         if (success) {
             cout << "\tString value ";
-            MinMaxPath path = root["string"];
+            Path path = root["string"];
             path = path[Type::STRING];
             BString value;
             path.getData(value);
@@ -651,9 +651,9 @@ assert(success);
         
         if (success) {
             cout << "\tItem 0:" << endl;
-            MinMaxPath path = root["array"][Type::ARRAY];
+            Path path = root["array"][Type::ARRAY];
             
-            Size test = MinMaxPath(path).min<Size>();
+            Size test = Path(path).min<Size>();
             success = success &&
                 testResult("\tItem 0 index", test == 0);
                 
@@ -717,7 +717,7 @@ cout << "VALUE: " << value << endl;
         if (success)
         {
             cout << "\tInteger type" << endl;
-            MinMaxPath path = root["integer"];
+            Path path = root["integer"];
             
             Stack stack;
             success = path.contains(Type::INTEGER);
@@ -764,7 +764,7 @@ cout << "VALUE: " << value << endl;
         }
         
         if (success) {
-            MinMaxPath maxPath = path;
+            Path maxPath = path;
             Stack stack;
             Size max = maxPath.max<Size>();
             success &= testResult("\tmax == 0", max == 0);
@@ -833,7 +833,7 @@ cout << "VALUE: " << value << endl;
         
         if (success) {
             cout << "\tOuter Array max index: ";
-            MinMaxPath maxPath = path;
+            Path maxPath = path;
             Size max = maxPath.max<Size>();
             success = (max == 0);
             BeeFishMisc::outputSuccess(success);
@@ -852,7 +852,7 @@ cout << "VALUE: " << value << endl;
     
         if (success) {
             cout << "\tInner Array Max index: ";
-            MinMaxPath maxPath = path;
+            Path maxPath = path;
             if (path.isDeadEnd())
                 success = false;
             else {

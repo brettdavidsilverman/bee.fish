@@ -1,6 +1,7 @@
 #ifndef BEE_FISH_DATABASE_JSON_PATH_HPP
 #define BEE_FISH_DATABASE_JSON_PATH_HPP
 #include "../Database/DatabaseBase.hpp"
+#include "../Database/Path.hpp"
 #include "../json/json.h"
 #include "../json/json-parser.h"
 #include "JSONIndex.hpp"
@@ -14,7 +15,7 @@ namespace BeeFishDatabase {
 
    
    class JSONPath :
-      public MinMaxPath
+      public Path
    {
    protected:
       
@@ -22,14 +23,14 @@ namespace BeeFishDatabase {
    public:
       typedef Path Id;
       
-      using MinMaxPath::contains;
+      using Path::contains;
       
       JSONPath()
       {
       }
       
       JSONPath(JSONDatabase& database, const Path& start) :
-         MinMaxPath(start)
+         Path(start)
       {
          
       }
@@ -40,7 +41,7 @@ namespace BeeFishDatabase {
       }
       
       JSONPath(const JSONPath& source) :
-         MinMaxPath(source)
+         Path(source)
       {
            
       }
@@ -65,7 +66,7 @@ namespace BeeFishDatabase {
       JSONPath operator [] (const T& key)
       {
 
-         return MinMaxPath::operator[](key);
+         return Path::operator[](key);
       }
 
       JSONPath operator [] (const BString& key)
@@ -105,7 +106,7 @@ namespace BeeFishDatabase {
          if (!contains(Type::OBJECT))
             return false;
             
-         MinMaxPath path =
+         Path path =
             properties()[BY_KEY];
             
          if (!path.contains(key))
@@ -169,7 +170,7 @@ namespace BeeFishDatabase {
             path.getData(position);
          else {
                
-            MinMaxPath object = (*this)[Type::OBJECT];
+            Path object = (*this)[Type::OBJECT];
             
             if (object.isDeadEnd())
                position = 0;
@@ -259,7 +260,7 @@ namespace BeeFishDatabase {
          Type type = max<Type>();
          
          
-         MinMaxPath path =
+         Path path =
             Path(*this)[type];
             
          switch (type) {

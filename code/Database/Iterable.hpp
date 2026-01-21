@@ -1,7 +1,7 @@
 #ifndef BEE_FISH__DATABASE__ITERABLE_HPP
 #define BEE_FISH__DATABASE__ITERABLE_HPP
 
-#include "MinMaxPath.hpp"
+#include "Path.hpp"
 #include "Stack.hpp"
 #include <iostream>
 #include <iterator> // Required for std::iterator_traits (C++17 and earlier)

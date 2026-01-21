@@ -6,7 +6,6 @@
 #include <fcntl.h>
 
 #include "../power-encoding/power-encoding.h"
-#include "../Miscellaneous/Optional.hpp"
 #include "../Script/Variable.hpp"
 #include "Data.hpp"
 #include "File.hpp"
@@ -15,11 +14,11 @@
 #include "DatabaseBase.hpp"
 #include "PathBase.hpp"
 
+
+namespace BeeFishDatabase {
 using namespace std;
 using namespace BeeFishPowerEncoding;
 using namespace BeeFishBString;
-
-namespace BeeFishDatabase {
 
     class Path :
         public PowerEncoding,
@@ -33,7 +32,11 @@ namespace BeeFishDatabase {
         Index _savedIndex = 0;
         
     public:
-
+        
+        Path()
+        {
+        }
+/*
         Path( Database* database = nullptr,
                 Index index = Branch::Root ) :
             PowerEncoding(),
@@ -42,7 +45,7 @@ namespace BeeFishDatabase {
             _savedIndex(index)
         {
         }
-
+*/
         Path( Database& database,
                 Index index = Branch::Root ) :
             PowerEncoding(),

@@ -1,9 +1,6 @@
 #ifndef BEE_FISH__DATABASE__STACK_HPP
 #define BEE_FISH__DATABASE__STACK_HPP
 
-#include "Path.hpp"
-
-
 namespace BeeFishDatabase {
 using namespace std;
 using namespace BeeFishPowerEncoding;
