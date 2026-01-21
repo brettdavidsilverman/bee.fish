@@ -10,7 +10,6 @@ using namespace std;
 using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
 
-    template<typename T>
     class AndPath :
         public PathBase
     {
@@ -105,17 +104,7 @@ using namespace BeeFishDatabase;
                 
         }
         
-        // Container methods to get iterators
-        virtual PathBase::PathIterator<T> begin() {
-            return PathBase::PathIterator<T>(this);
-        }
-    
-        // Points one past the last element
-        Path::PathIterator<T> end() { 
-            PathBase::PathIterator<T> iterator;
-            return iterator;
-        }
-        
+
 
     
     };

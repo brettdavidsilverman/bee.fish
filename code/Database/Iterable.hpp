@@ -15,30 +15,69 @@ namespace BeeFishDatabase {
     
     template<typename T>
     class Iterable :
-        public Path
+        public PathBase
     {
-
+        PathBase& _path;
+        
     public:
 
-        Iterable(Path path) : 
-            Path(path)
-        {
-        }
-    
-        Iterable(Database& db) :
-            Path(Path(db))
+        Iterable(PathBase& path) : 
+            _path(path)
         {
         }
         
         virtual ~Iterable()
         {
         }
+        
+    
+        virtual bool canGoLeft() const 
+        override
+        {
+            return _path.canGoLeft();
+        }
+        
+        virtual bool canGoRight() const
+        override
+        {
+            return _path.canGoRight();
+        }
+        
+        
+        virtual void goLeft() 
+        override
+        {
+            _path.goLeft();
+        }
+        
+        virtual void goRight() 
+        override
+        {
+            _path.goRight();
+        }
+        
+        virtual void goUp()
+        override
+        {
+            _path.goUp();
+        }
+        
+        virtual void save() 
+        override
+        {
+            _path.save();
+        }
+        
+        virtual void restore()
+        {
+            _path.restore();
+        }
 
     public:
         
         // Container methods to get iterators
         virtual PathBase::PathIterator<T> begin() {
-            return PathBase::PathIterator<T>(this);
+            return PathBase::PathIterator<T>(&_path);
         }
     
         // Points one past the last element

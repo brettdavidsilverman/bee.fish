@@ -972,12 +972,13 @@ cout << "VALUE: " << value << endl;
         bool success = true;
         
         Database db;
-    
-        Iterable<BString> path(db);
+        Path root(db);
         
-        path["hello"];
-        path["world"];
-        path["brett"];
+        Iterable<BString> path(root);
+        
+        root["hello"];
+        root["world"];
+        root["brett"];
         
         
         if (success) {

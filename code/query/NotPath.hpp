@@ -10,7 +10,6 @@ using namespace std;
 using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
 
-    template<typename T>
     class NotPath :
         public PathBase
     {

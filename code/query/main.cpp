@@ -32,7 +32,7 @@ int main(int argc, const char* argv[]) {
     
     string line;
     Database db;
-    Words<Index> words(db);
+    Words words(db);
     
     do 
     {
@@ -52,7 +52,7 @@ int main(int argc, const char* argv[]) {
             
             PathBase* path =
                 statement._expression
-                ->getPath<Index>(words);
+                ->getPath(words);
                 
             delete path;
             
@@ -67,7 +67,9 @@ int main(int argc, const char* argv[]) {
     }
     while (!cin.eof());
   
-    for (auto word : words) {
+    Iterable<BString> iterable(words);
+    
+    for (auto word : iterable) {
         cout << word << endl;
     }
     

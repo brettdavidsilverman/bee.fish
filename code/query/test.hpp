@@ -340,7 +340,7 @@ namespace BeeFishQuery {
         bool ok = true;
         BString query;
         Database db;
-        Words<Index> words(db);
+        Words words(db);
         auto testmatch =
         [&ok, &words](const BString& query) {
             
@@ -365,7 +365,7 @@ namespace BeeFishQuery {
             
             if (expression->matched()) {
                  PathBase* path =
-                    expression->getPath<Index>(words);
+                    expression->getPath(words);
                 
                 delete path;
             }
@@ -422,7 +422,7 @@ namespace BeeFishQuery {
         bool ok  = true;
         
         Database db;
-        Words<Index> words(db);
+        Words words(db);
         
         words["one"][0];
         words["one"][1];
@@ -432,9 +432,12 @@ namespace BeeFishQuery {
         words["two"][3];
         words["two"][4];
         
-        AndPath<Index> andPath(
-            new Iterable<Index>(words["one"]),
-            new Iterable<Index>(words["two"])
+        Path one = words["one"];
+        Path two = words["two"];
+        
+        AndPath andPath(
+            new Iterable<Index>(one),
+            new Iterable<Index>(two)
         );
         
         
@@ -469,8 +472,9 @@ namespace BeeFishQuery {
         if (ok)
         {
             vector<Index> array;
-        
-            for (auto value : andPath)
+            Iterable<Index> iterable(andPath);
+            
+            for (auto value : iterable)
             {
                 cerr << "Value: " << value << endl;
                 array.push_back(value);
@@ -505,7 +509,16 @@ namespace BeeFishQuery {
         
         bool ok  = true;
         Database db;
-        Words<Index> words(db);
+        Path root(db);
+        Words words(root);
+        
+        words["one"][0];
+        words["one"][1];
+        words["one"][2];
+        words["one"][3];
+        words["two"][2];
+        words["two"][3];
+        words["two"][4];
         
         Expression expression;
         Parser parser(expression);
@@ -518,9 +531,21 @@ namespace BeeFishQuery {
         {
             PathBase* pathBase =
                 expression
-                .getPath<Index>(words);
+                .getPath(words);
                 
+            Iterable<Index> iterable(*pathBase);
+            std::vector<Index> values;
+            for (auto index : iterable)
+            {
+                values.push_back(index);
+            }
+            
             delete pathBase;
+            
+            ok = values.size() == 2 &&
+                 values[0] == 2 &&
+                 values[1] == 3;
+                 
         }
         
         BeeFishMisc::outputSuccess(ok);

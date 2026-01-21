@@ -11,9 +11,8 @@ using namespace std;
 using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
 
-    template<typename T>
     class OrPath :
-        public JoinPathBase<T>
+        public PathBase
     {
     protected:
         PathBase* _a;

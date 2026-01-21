@@ -20,14 +20,7 @@ namespace BeeFishQuery {
 using namespace BeeFishBString;
 using namespace BeeFishParser;
 
-    template <typename T>
-    class Words : public Iterable<T>
-    {
-    public:
-        Words(Path path) : Iterable<T>(path)
-        {
-        }
-    };
+    typedef Path Words;
     
     class Blankspace : public Or
     {
@@ -179,13 +172,12 @@ using namespace BeeFishParser;
             return _value;
         }
         
-        template<typename T>
         PathBase*
         getPath(
-            Words<T>& words
+            Words& words
         )
         {
-            return new Iterable<T>(
+            return new Path(
                 words[value()]
             );
         }
@@ -223,7 +215,6 @@ using namespace BeeFishParser;
             return output;
         }
         
-        template<typename T>
         PathBase*
         getPath(
             PathBase* a, 
@@ -231,9 +222,9 @@ using namespace BeeFishParser;
         )
         {
             if (_and->matched())
-                return new AndPath<T>(a, b);
+                return new AndPath(a, b);
             else
-                return new OrPath<T>(a, b);
+                return new OrPath(a, b);
         }
         
     };
@@ -550,8 +541,7 @@ using namespace BeeFishParser;
             return output;
         }
         
-        template<typename T>
-        PathBase* getPath(Words<T>& words)
+        PathBase* getPath(Words& words)
         {
 
             if (_notExpression->matched())
@@ -562,9 +552,9 @@ using namespace BeeFishParser;
                     
                 PathBase* path = 
                     expression
-                    ->getPath<T>(words);
+                    ->getPath(words);
                     
-                return new NotPath<T>(path);
+                return new NotPath(path);
                 
             }
             else if (_bracketedExpressionAndExpression->matched())
@@ -577,9 +567,9 @@ using namespace BeeFishParser;
                     ->item();
                     
                 return
-                    _andOr1->getPath<T>(
-                        expressionA->getPath<T>(words),
-                        expressionB->getPath<T>(words)
+                    _andOr1->getPath(
+                        expressionA->getPath(words),
+                        expressionB->getPath(words)
                     );
                     
                     /*
@@ -595,15 +585,15 @@ using namespace BeeFishParser;
             else if (_wordAndExpression->matched())
             {
                 PathBase* wordPath =
-                    _word1->getPath<T>(words);
+                    _word1->getPath(words);
                     
                 Expression* expression =
                     _loadOnDemandExpression3->item();
                     
                 return
-                    _andOr2->getPath<T>(
+                    _andOr2->getPath(
                         wordPath,
-                        expression->getPath<T>(words)
+                        expression->getPath(words)
                     );
                     /*
                 output
@@ -619,7 +609,7 @@ using namespace BeeFishParser;
                 Expression* expression =
                     _bracketedExpression2->item();
                     
-                return expression->getPath<T>(words);
+                return expression->getPath(words);
                 
                     /*
                 output
@@ -628,7 +618,7 @@ using namespace BeeFishParser;
             }
             else if (_word->matched()) {
                 return
-                    _word2->getPath<T>(words);
+                    _word2->getPath(words);
                     /*
                 output << *_word2;
                 */
@@ -673,10 +663,9 @@ using namespace BeeFishParser;
             return _capture->value();
         }
         
-        template<typename T>
-        Iterable<T>* getPath(Words<T>& words)
+        PathBase* getPath(Words& words)
         {
-            return _expression->getPath<T>(words);
+            return _expression->getPath(words);
         }
     };
     
