@@ -19,18 +19,20 @@ namespace BeeFishQuery {
     bool testOperators();
     bool testExpressions();
     bool testAndPath();
+    bool testQueryAndPath();
     
     inline bool test() 
     {
      
         bool ok = true;
         
-        ok &= testBlankspaces();
-        ok &= testCharacters();
-        ok &= testWords();
-        ok &= testOperators();
-        ok &= testExpressions();
-        ok &= testAndPath();
+        ok = ok && testBlankspaces();
+        ok = ok && testCharacters();
+        ok = ok && testWords();
+        ok = ok && testOperators();
+        ok = ok && testExpressions();
+        ok = ok && testAndPath();
+        ok = ok && testQueryAndPath();
         
         if (ok)
             cout << "SUCCESS";
@@ -362,7 +364,7 @@ namespace BeeFishQuery {
             );
             
             if (expression->matched()) {
-                JoinPathBase<Index>* path =
+                 PathBase* path =
                     expression->getPath<Index>(words);
                 
                 delete path;
@@ -450,7 +452,8 @@ namespace BeeFishQuery {
         if (ok) 
         {
             Stack stack;
-            bool result = andPath.min(stack, 0);
+            andPath.save();
+            bool result = andPath.goToMin(stack);
             
             ok = ok &&
                 testResult(
@@ -458,7 +461,7 @@ namespace BeeFishQuery {
                     result
                 );
                 
-            andPath.reset();
+            andPath.restore();
         }
         
             
@@ -494,6 +497,35 @@ namespace BeeFishQuery {
 
         return ok;
         
+    }
+    
+    inline bool testQueryAndPath()
+    {
+        cout << "Test Query And Path" << endl;
+        
+        bool ok  = true;
+        Database db;
+        Words<Index> words(db);
+        
+        Expression expression;
+        Parser parser(expression);
+        parser.read("one and two");
+        parser.eof();
+        
+        ok = expression.matched();
+        
+        if (ok)
+        {
+            PathBase* pathBase =
+                expression
+                .getPath<Index>(words);
+                
+            delete pathBase;
+        }
+        
+        BeeFishMisc::outputSuccess(ok);
+        
+        return ok;
     }
     
 }

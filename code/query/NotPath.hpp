@@ -2,6 +2,7 @@
 #define BEE_FISH__QUERY__NOT_PATH_HPP
 
 #include "../Database/Database.hpp"
+#include "JoinPathBase.hpp"
 
 namespace BeeFishQuery {
 
@@ -11,14 +12,14 @@ using namespace BeeFishDatabase;
 
     template<typename T>
     class NotPath :
-        public JoinPathBase<T>
+        public PathBase
     {
     protected:
-        JoinPathBase<T>* _path;
+        PathBase* _path;
         bool _ended;
     public:
 
-        NotPath(JoinPathBase<T>* path) :
+        NotPath(PathBase* path) :
             _path(path)
         {
             _ended = _path->isDeadEnd();
@@ -81,6 +82,16 @@ using namespace BeeFishDatabase;
                 _path->canGoLeft() &&
                 _path->canGoRight()
             );
+        }
+        
+        virtual void save()
+        {
+            _path->save();
+        }
+        
+        virtual void restore()
+        {
+            _path->restore();
         }
 
     

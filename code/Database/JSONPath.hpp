@@ -47,7 +47,8 @@ namespace BeeFishDatabase {
       
       JSONDatabase& database()
       {
-         return (JSONDatabase&)(*_database);
+         return (JSONDatabase&)
+             Path::database();
       }
       
       Id id()

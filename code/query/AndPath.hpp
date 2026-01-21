@@ -2,6 +2,7 @@
 #define BEE_FISH__QUERY__AND_PATH_HPP
 
 #include "../Database/Database.hpp"
+#include "JoinPathBase.hpp"
 
 namespace BeeFishQuery {
 
@@ -11,16 +12,16 @@ using namespace BeeFishDatabase;
 
     template<typename T>
     class AndPath :
-        public JoinPathBase<T>
+        public PathBase
     {
     protected:
-        JoinPathBase<T>* _a;
-        JoinPathBase<T>* _b;
+        PathBase* _a;
+        PathBase* _b;
         
     public:
 
-        AndPath( JoinPathBase<T>* a,
-                 JoinPathBase<T>* b) :
+        AndPath( PathBase* a,
+                 PathBase* b) :
             _a(a),
             _b(b)
         {
@@ -70,13 +71,21 @@ using namespace BeeFishDatabase;
             _a->goUp();
             _b->goUp();
         }
-        
-        virtual void reset() override
+
+        virtual void save()
+        override
         {
-            _a->reset();
-            _b->reset();
+            _a->save();
+            _b->save();
         }
         
+        virtual void restore()
+        override
+        {
+            _a->restore();
+            _b->restore();
+        }
+
         virtual bool isDeadEnd() const
         override
         {
@@ -94,6 +103,17 @@ using namespace BeeFishDatabase;
                 
             return isDeadEnd;
                 
+        }
+        
+        // Container methods to get iterators
+        virtual PathBase::PathIterator<T> begin() {
+            return PathBase::PathIterator<T>(this);
+        }
+    
+        // Points one past the last element
+        Path::PathIterator<T> end() { 
+            PathBase::PathIterator<T> iterator;
+            return iterator;
         }
         
 

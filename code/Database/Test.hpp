@@ -190,12 +190,58 @@ namespace BeeFishDatabase
             }
             outputSuccess(success);
         }
+        
+        Path bookmark = data;
+        
+        if (success) {
+            cout << "\tTesting Data Path goToMin 1: " << flush;
+            
+            Size minimum = -1;
+            Stack stack;
+            bool ok = data.goToMin(stack);
+
+   
+            if (ok) {
+                stack >> minimum;
+                cout << minimum << flush;
+            }
+
+            success = ok && (minimum == min);
+            
+            outputSuccess(success);
+            
+            assert(success);
+            
+            data = bookmark;
+            
+        }
+        
+        if (success) {
+            cout << "\tTesting Data Path goToMin 2: " << flush;
+    
+            Size minimum = -1;
+            Stack stack;
+            bool ok = data.goToMin(stack);
+
+   
+            if (ok) {
+                stack >> minimum;
+                cout << minimum << flush;
+            }
+
+            success = ok && (minimum == min);
+            
+            outputSuccess(success);
+            
+            assert(success);
+            data = bookmark;
+        }
 
         if (success) {
             cout << "\tTesting Data Path Min: " << flush;
             
-            Size minimum = 0;
-            
+            Size minimum = -1;
+            data.reset();
             bool ok = data.min<Size>(minimum);
 
             if (ok)
@@ -211,6 +257,7 @@ namespace BeeFishDatabase
 
         if (success) {
             cout << "\tTesting Data Path Max: " << flush;
+//data.reset();
 
             Size maximum = 0;
             data.max<Size>(maximum);
@@ -219,6 +266,7 @@ namespace BeeFishDatabase
 
             cout << maximum;
             outputSuccess(success);
+assert(success);
         }
 
         if (success) {

@@ -50,7 +50,7 @@ int main(int argc, const char* argv[]) {
                     
             cout << *(statement._expression) << endl;
             
-            JoinPathBase<Index>* path =
+            PathBase* path =
                 statement._expression
                 ->getPath<Index>(words);
                 

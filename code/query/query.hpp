@@ -180,7 +180,7 @@ using namespace BeeFishParser;
         }
         
         template<typename T>
-        JoinPathBase<T>*
+        PathBase*
         getPath(
             Words<T>& words
         )
@@ -224,16 +224,16 @@ using namespace BeeFishParser;
         }
         
         template<typename T>
-        JoinPathBase<T>*
+        PathBase*
         getPath(
-            JoinPathBase<T>* a, 
-            JoinPathBase<T>* b
+            PathBase* a, 
+            PathBase* b
         )
         {
             if (_and->matched())
-                return new AndPath(a, b);
+                return new AndPath<T>(a, b);
             else
-                return new OrPath(a, b);
+                return new OrPath<T>(a, b);
         }
         
     };
@@ -551,7 +551,7 @@ using namespace BeeFishParser;
         }
         
         template<typename T>
-        JoinPathBase<T>* getPath(Words<T>& words)
+        PathBase* getPath(Words<T>& words)
         {
 
             if (_notExpression->matched())
@@ -560,7 +560,7 @@ using namespace BeeFishParser;
                     _loadOnDemandExpression1
                     ->item();
                     
-                JoinPathBase<T>* path = 
+                PathBase* path = 
                     expression
                     ->getPath<T>(words);
                     
@@ -594,7 +594,7 @@ using namespace BeeFishParser;
             }
             else if (_wordAndExpression->matched())
             {
-                JoinPathBase<T>* wordPath =
+                PathBase* wordPath =
                     _word1->getPath<T>(words);
                     
                 Expression* expression =

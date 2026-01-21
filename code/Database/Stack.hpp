@@ -48,7 +48,7 @@ using namespace BeeFishPowerEncoding;
 ++_index;
         }
 
-        void reset()
+        virtual void reset()
         {
             _index = 0;
             PowerEncoding::reset();

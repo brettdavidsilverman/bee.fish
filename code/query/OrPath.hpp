@@ -3,6 +3,7 @@
 
 #include "../Database/Database.hpp"
 
+#include "JoinPathBase.hpp"
 
 namespace BeeFishQuery {
 
@@ -15,15 +16,15 @@ using namespace BeeFishDatabase;
         public JoinPathBase<T>
     {
     protected:
-        JoinPathBase<T>* _a;
-        JoinPathBase<T>* _b;
+        PathBase* _a;
+        PathBase* _b;
         bool _aEnded;
         bool _bEnded;
         
     public:
 
-        OrPath(JoinPathBase<T>* a,
-               JoinPathBase<T>* b) :
+        OrPath(PathBase* a,
+               PathBase* b) :
             _a(a),
             _b(b)
         {
@@ -100,7 +101,19 @@ using namespace BeeFishDatabase;
         {
             assert(false);
         }
-
+        
+        virtual void save()
+        {
+            _a->save();
+            _b->save();
+        }
+        
+        virtual void restore()
+        {
+            _a->restore();
+            _b->restore();
+        }
+        
     
     };
 

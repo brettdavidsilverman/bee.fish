@@ -25,40 +25,47 @@ namespace BeeFishDatabase {
         public PowerEncoding,
         public PathBase
     {
-    public:
+    private:
         Database*  _database  = nullptr;
-        SSize      _lockIndex = -1;
 
+        Index _index = 0;
+        SSize _lockIndex = -1;
+        Index _savedIndex = 0;
+        
     public:
 
         Path( Database* database = nullptr,
                 Index index = Branch::Root ) :
             PowerEncoding(),
-            PathBase(index),
-            _database(database)
+            _database(database),
+            _index(index),
+            _savedIndex(index)
         {
         }
 
         Path( Database& database,
                 Index index = Branch::Root ) :
             PowerEncoding(),
-            PathBase(index),
-            _database(&database)
+            _database(&database),
+            _index(index),
+            _savedIndex(index)
         {
         }
 
         Path(const Path& source) :
             PowerEncoding(),
-            PathBase(source._index),
-            _database(source._database)
+            _database(source._database),
+            _index(source._index),
+            _savedIndex(_index)
         {
         }
         
         Path( const Path& source,
                 Index index) :
             PowerEncoding(),
-            PathBase(index),
-            _database(source._database)
+            _database(source._database),
+            _index(index),
+            _savedIndex(index)
         {
         }
 
@@ -78,6 +85,7 @@ namespace BeeFishDatabase {
         {
             _database = rhs._database;
             _index = rhs._index;
+            _savedIndex = rhs._savedIndex;
             _lockIndex = -1;
 
             return *this;
@@ -142,92 +150,14 @@ namespace BeeFishDatabase {
             PowerEncoding::writeBit(bit);
           
         }
-    
+
     public:
         
-        
-    protected:
-/*
-        bool min(
-            Stack& stack,
-            Index index
-        )
+        virtual Index index() const
         {
-            _index = index;
-            bool bit;
-            
-            while (!isDeadEnd())
-            {
-                
-                
-                if (canGoLeft()) {
-                    bit = 0;
-                    goLeft();
-                    
-                }
-                else if (canGoRight()) {
-                    bit = 1;
-                    goRight();
-                }
-                else {
-                    break;
-                }
-                
-                stack.push_back(bit);
-                
-                if (stack.count() == 0)
-                    return true;
-
-            }
-            
-            
-            return (stack.count() == 0);
-            
+            return _index;
         }
-
         
-        bool max(
-            Stack& stack,
-            Index index
-        )
-        {
-            _index = index;
-            bool bit;
-            while (!isDeadEnd())
-            {
-                
-                
-                if (canGoRight()) {
-                    bit = 1;
-                    goRight();
-                }
-                else if (canGoLeft()) {
-                    bit = 0;
-                    goLeft();
-                }
-                else
-                    break;
-                    
-                stack.push_back(
-                    bit
-                );
-
-                if (stack.count() == 0)
-                    return true;
-                
-            }
-            
-            return (stack.count() == 0);
-        }
-*/
-    public:
-        
-        virtual void reset()
-        override
-        {
-            PowerEncoding::reset();
-            PathBase::reset();
-        }
 
         virtual void goLeft()
         {
@@ -324,7 +254,17 @@ namespace BeeFishDatabase {
             return (bool)branch._right;
         }
         
+        virtual void save()
+        override
+        {
+            _savedIndex = _index;
+        }
         
+        virtual void restore()
+        override
+        {
+            _index = _savedIndex;
+        }
         
     public:
         template<typename T>

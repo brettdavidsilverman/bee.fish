@@ -15,99 +15,37 @@ namespace BeeFishDatabase {
     
     template<typename T>
     class Iterable :
-        public JoinPathBase<T>
+        public Path
     {
 
-    protected:
-        Path _path;
-        
     public:
 
-
         Iterable(Path path) : 
-            _path(path)
+            Path(path)
         {
         }
     
         Iterable(Database& db) :
-            Iterable(Path(db))
+            Path(Path(db))
         {
         }
         
         virtual ~Iterable()
         {
         }
-        
-        template<typename Key>
-        Iterable<T> operator [] (const Key& key)
-        {
 
-            Path path(_path);
-
-            path << key;
-
-            path.unlock();
-
-            return path;
-        }
-        
-        Iterable<T> operator [] (const char* key)
-        {
-            return (*this)[BString(key)];
-        }
-        
-    protected:
-        
-        virtual bool canGoLeft() const
-        {
-            return _path.canGoLeft();
-        }
-        
-        virtual bool canGoRight() const
-        {
-            return _path.canGoRight();
-        }
-        
-        
-        virtual void goLeft()
-        {
-            _path.goLeft();
-        }
-        
-        virtual void goRight()
-        {
-            _path.goRight();
-        }
-        
-        virtual void goUp() 
-        {
-            _path.goUp();
-        }
-        
-        virtual bool isDeadEnd() const
-        {
-            return _path.isDeadEnd();
-        }
-        
-        virtual Index index() const
-        override
-        {
-            return _path.index();
-        }
-        
-        virtual void reset()
-        override
-        {
-            _path.reset();
-        }
-        
     public:
         
         // Container methods to get iterators
         virtual PathBase::PathIterator<T> begin() {
-            return PathBase::PathIterator<T>(&_path);
+            return PathBase::PathIterator<T>(this);
         }
     
+        // Points one past the last element
+        Path::PathIterator<T> end() { 
+            PathBase::PathIterator<T> iterator;
+            return iterator;
+        }
         
     };
 
