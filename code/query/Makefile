@@ -9,8 +9,8 @@ $(OUTPUT): $(DEPS)
 $(BUILD):
 		mkdir $(BUILD)
 
-#$(BUILD)/Database:
-#	make -C ../Database $(DEBUG) $(TEST)
+$(BUILD)/Database:
+	make -C ../Database $(DEBUG) $(TEST)
 
 test:	TEST=test
 test:	$(OUTPUT)
