@@ -89,6 +89,18 @@ namespace BeeFishDatabase {
             return _path.isDeadEnd();
         }
         
+        virtual Index index() const
+        override
+        {
+            return _path.index();
+        }
+        
+        virtual void reset()
+        override
+        {
+            _path.reset();
+        }
+        
     public:
         
         // Container methods to get iterators

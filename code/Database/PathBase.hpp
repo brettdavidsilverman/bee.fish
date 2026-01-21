@@ -8,9 +8,12 @@ namespace BeeFishDatabase {
     class PathBase
     {
     public:
-        Index      _index = 0;
+        Index _index = 0;
+        Index _start = 0;
+        
         PathBase(Index index) :
-            _index(index)
+            _index(index),
+            _start(index)
         {
         }
         
@@ -29,6 +32,16 @@ namespace BeeFishDatabase {
                 canGoLeft() or
                 canGoRight()
             );
+        }
+        
+        virtual Index index() const
+        {
+            return _index;
+        }
+        
+        virtual void reset()
+        {
+            _index = _start;
         }
         
         template<typename T>
@@ -104,9 +117,7 @@ namespace BeeFishDatabase {
             int marker
         )
         {
-#warning "debugging min"
-            assert(marker == 0);
-            
+
             bool bit;
             while (!isDeadEnd())
             {
@@ -122,10 +133,8 @@ namespace BeeFishDatabase {
                     goRight();
                 }
                 else {
-                    if (stack.count() != 0)
-                        return next(stack);
+                    return next(stack);
     
-                    break;
       //              stack.pop_back();
       //              goUp();
                 }
@@ -138,7 +147,7 @@ namespace BeeFishDatabase {
             }
             
 
-            return (stack.count() == 0);
+            return (stack.size() && stack.count() == 0);
             
         }
 
@@ -173,7 +182,7 @@ namespace BeeFishDatabase {
                 
             }
             
-            return (stack.count() == 0);
+            return (stack.size() && stack.count() == 0);
         }
         
         
@@ -182,15 +191,13 @@ namespace BeeFishDatabase {
         T min()
         {
             Stack stack;
-            Index start = _index;
             bool result = min(stack, 0);
-            _index = start;
+            reset();
             if (result)
             {
                 T value;
                 stack.reset();
                 stack >> value;
-                _index = start;
                 return value;
                 
             }
@@ -202,9 +209,8 @@ namespace BeeFishDatabase {
         bool min(T& value)
         {
             Stack stack;
-            Index start = _index;
             bool result = min(stack, 0);
-            _index = start;
+            reset();
             if (result)
             {
                 stack.reset();
@@ -219,15 +225,13 @@ namespace BeeFishDatabase {
         T max()
         {
             Stack stack;
-            Index start = _index;
             bool result = max(stack, 0);
-            _index = start;
+            reset();
             if (result)
             {
                 T value;
                 stack.reset();
                 stack >> value;
-                _index = start;
                 return value;
                 
             }
@@ -239,9 +243,8 @@ namespace BeeFishDatabase {
         bool max(T& value)
         {
             Stack stack;
-            Index start = _index;
             bool result = max(stack, 0);
-            _index = start;
+            reset();
             if (result)
             {
                 stack.reset();

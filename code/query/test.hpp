@@ -338,7 +338,7 @@ namespace BeeFishQuery {
         bool ok = true;
         BString query;
         Database db;
-        Words words(db);
+        Words<Index> words(db);
         auto testmatch =
         [&ok, &words](const BString& query) {
             
@@ -362,8 +362,8 @@ namespace BeeFishQuery {
             );
             
             if (expression->matched()) {
-                JoinPathBase<BString>* path =
-                    expression->getPath<BString>(words);
+                JoinPathBase<Index>* path =
+                    expression->getPath<Index>(words);
                 
                 delete path;
             }
@@ -417,35 +417,79 @@ namespace BeeFishQuery {
     {
         cout << "Test And Path" << endl;
         
-        bool ok = true;
+        bool ok  = true;
         
         Database db;
-        Words words(db);
+        Words<Index> words(db);
         
-        words["one"]["one"];
-        words["one"]["two"];
-        words["one"]["three"];
-        words["two"]["two"];
-        words["two"]["three"];
-        words["two"]["four"];
+        words["one"][0];
+        words["one"][1];
+        words["one"][2];
+        words["one"][3];
+        words["two"][2];
+        words["two"][3];
+        words["two"][4];
         
-        AndPath<BString> andPath(
-            new Iterable<BString>(words["one"]),
-            new Iterable<BString>(words["two"])
+        AndPath<Index> andPath(
+            new Iterable<Index>(words["one"]),
+            new Iterable<Index>(words["two"])
         );
         
-        vector<BString> array;
         
-        for (auto word : andPath)
+        if (ok) 
         {
-            cerr << "WORD: " << word << endl;
-            array.push_back(word);
+            int min = andPath.min<Index>();
+            
+            ok = ok &&
+                testResult(
+                    "AndPath Minimum", 
+                    min == 2
+                );
         }
         
-        ok = ok && array.size() == 2;
-        ok = ok && array[0] == "three";
-        ok = ok && array[1] == "two";
-    
+        if (ok) 
+        {
+            Stack stack;
+            bool result = andPath.min(stack, 0);
+            
+            ok = ok &&
+                testResult(
+                    "AndPath min with stack", 
+                    result
+                );
+                
+            andPath.reset();
+        }
+        
+            
+        
+        if (ok)
+        {
+            vector<Index> array;
+        
+            for (auto value : andPath)
+            {
+                cerr << "Value: " << value << endl;
+                array.push_back(value);
+            }
+        
+            ok = ok &&
+                testResult("AndPath result size",
+                    array.size() == 2
+                );
+
+            ok = ok &&
+                testResult("AndPath first result",
+                    array[0] == 2
+                );
+                
+            ok = ok &&
+                testResult("AndPath second result",
+                    array[1] == 3
+                );
+                
+        }
+        
         BeeFishMisc::outputSuccess(ok);
 
         return ok;

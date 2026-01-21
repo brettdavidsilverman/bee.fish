@@ -8,16 +8,22 @@
 #endif
 
 #ifndef PAGE_SIZE
-   #define PAGE_SIZE 4096
+    #define PAGE_SIZE 4096
 #endif
 
 #ifndef DOMAIN
-   #define DOMAIN "bee.fish"
+    #define DOMAIN "bee.fish"
 #endif
 
 #define DATABASE_FILENAME DATA_DIR "/" DOMAIN ".data"
 
-#define HOST "https://" DOMAIN
+#ifndef HOST
+    #define HOST DOMAIN
+#endif
+
+#ifndef ORIGIN
+    #define ORIGIN "https://" HOST
+#endif
 
 #define WWW_ROOT_DIRECTORY HOME_DIR "/" DOMAIN
 

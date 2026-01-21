@@ -32,7 +32,7 @@ int main(int argc, const char* argv[]) {
     
     string line;
     Database db;
-    Words words(db);
+    Words<Index> words(db);
     
     do 
     {
@@ -50,9 +50,9 @@ int main(int argc, const char* argv[]) {
                     
             cout << *(statement._expression) << endl;
             
-            JoinPathBase<BString>* path =
+            JoinPathBase<Index>* path =
                 statement._expression
-                ->getPath<BString>(words);
+                ->getPath<Index>(words);
                 
             delete path;
             

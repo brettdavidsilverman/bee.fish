@@ -71,6 +71,12 @@ using namespace BeeFishDatabase;
             _b->goUp();
         }
         
+        virtual void reset() override
+        {
+            _a->reset();
+            _b->reset();
+        }
+        
         virtual bool isDeadEnd() const
         override
         {
@@ -89,6 +95,7 @@ using namespace BeeFishDatabase;
             return isDeadEnd;
                 
         }
+        
 
     
     };

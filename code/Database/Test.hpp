@@ -930,20 +930,53 @@ cout << "VALUE: " << value << endl;
         path["hello"];
         path["world"];
         path["brett"];
-        vector<BString> values;
         
-        for (auto value : path)
-        {
-            values.push_back(value);
+        
+        if (success) {
+            cout << "\tPath min value 1: ";
+        
+            success = success && (path.min<BString>() == "brett");
+            outputSuccess(success);
         }
         
-        success = (values.size() == 3);
+        if (success) {
+            cout << "\tPath min value 2: ";
+            success = success && (path.min<BString>() == "brett");
+            outputSuccess(success);
+        }
         
-        success = success && (values[0] == "brett");
-        success = success && (values[1] == "hello");
-        success = success && (values[2] == "world");
+        if (success) {
+            cout << "\tPath max value 1: ";
         
-        outputSuccess(success);
+            success = success && (path.max<BString>() == "world");
+            outputSuccess(success);
+        }
+        
+        if (success) {
+            cout << "\tPath max value 2: ";
+            success = success && (path.max<BString>() == "world");
+            outputSuccess(success);
+        }
+        
+        
+        if (success)
+        {
+            cout << "\tIterable values: ";
+            vector<BString> values;
+        
+            for (auto value : path)
+            {
+                values.push_back(value);
+            }
+        
+            success = (values.size() == 3);
+                
+            success = success && (values[0] == "brett");
+            success = success && (values[1] == "hello");
+            success = success && (values[2] == "world");
+        
+            outputSuccess(success);
+        }
         
         return success;
         

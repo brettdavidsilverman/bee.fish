@@ -221,6 +221,13 @@ namespace BeeFishDatabase {
         }
 */
     public:
+        
+        virtual void reset()
+        override
+        {
+            PowerEncoding::reset();
+            PathBase::reset();
+        }
 
         virtual void goLeft()
         {
@@ -537,10 +544,6 @@ namespace BeeFishDatabase {
             return (_index > Branch::Root);
         }
         
-        Index index() const
-        {
-            return _index;
-        }
         
         virtual bool isDeadEnd() const
         {

@@ -20,7 +20,14 @@ namespace BeeFishQuery {
 using namespace BeeFishBString;
 using namespace BeeFishParser;
 
-    typedef Iterable<BString> Words;
+    template <typename T>
+    class Words : public Iterable<T>
+    {
+    public:
+        Words(Path path) : Iterable<T>(path)
+        {
+        }
+    };
     
     class Blankspace : public Or
     {
@@ -175,7 +182,7 @@ using namespace BeeFishParser;
         template<typename T>
         JoinPathBase<T>*
         getPath(
-            Words& words
+            Words<T>& words
         )
         {
             return new Iterable<T>(
@@ -294,7 +301,8 @@ using namespace BeeFishParser;
         };
         
     protected:
-
+        OrderOfPrecedence* _items = nullptr;
+        
         OrderOfPrecedence::Item* _notExpression = nullptr;
         OrderOfPrecedence::Item* _bracketedExpressionAndExpression = nullptr;
         OrderOfPrecedence::Item* _wordAndExpression = nullptr;
@@ -361,7 +369,7 @@ using namespace BeeFishParser;
         {
             _match = new BeeFishParser::And(
             new Blankspaces(),
-            new BeeFishParser::OrderOfPrecedence(
+            _items = new BeeFishParser::OrderOfPrecedence(
                 
         {
             {
@@ -543,7 +551,7 @@ using namespace BeeFishParser;
         }
         
         template<typename T>
-        JoinPathBase<T>* getPath(Words words)
+        JoinPathBase<T>* getPath(Words<T>& words)
         {
 
             if (_notExpression->matched())
@@ -666,7 +674,7 @@ using namespace BeeFishParser;
         }
         
         template<typename T>
-        Iterable<T>* getPath(Words words)
+        Iterable<T>* getPath(Words<T>& words)
         {
             return _expression->getPath<T>(words);
         }

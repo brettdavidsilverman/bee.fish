@@ -17,7 +17,7 @@ using namespace BeeFishDatabase;
         
     public:
 
-        JoinPathBase() : PathBase(0)
+        JoinPathBase(Index index = 0) : PathBase(index)
         {
         }
         

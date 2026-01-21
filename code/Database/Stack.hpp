@@ -14,8 +14,7 @@ using namespace BeeFishPowerEncoding;
     {
     private:
         Size _index = 0;
-        long int _count = 0;
-        
+
     public:
         Stack()
         {
@@ -124,6 +123,21 @@ using namespace BeeFishPowerEncoding;
                 ++_count;
                 
             vector<bool>::pop_back();
+        }
+        
+        friend ostream& operator << (
+            ostream& output,
+            const Stack& stack
+        )
+        {
+            for (auto const bit : stack)
+            {
+                output << bit;
+            }
+            
+            output << endl;
+            
+            return output;
         }
         
         
