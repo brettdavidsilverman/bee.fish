@@ -94,11 +94,9 @@ namespace BeeFishDatabase {
 
      }
      
-     virtual void setVariable(JSONPath path, const Type type, const BString& value)
+     virtual void setVariable(JSONPath start, const Type type, const BString& value)
      {
-         JSONPath start = path;
-         
-         path = path[type];
+         Path path = start.types()[type];
 
          switch (type)
          {

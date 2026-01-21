@@ -604,7 +604,7 @@ assert(success);
         if (success) {
             
             cout << "\tIndexed string ";
-            Path path = root["string"];
+            Path path = root["string"].types();
             
             success = success &&
                 path.contains(Type::STRING);
@@ -614,7 +614,7 @@ assert(success);
         
         if (success) {
             cout << "\tString value ";
-            Path path = root["string"];
+            Path path = root["string"].types();
             path = path[Type::STRING];
             BString value;
             path.getData(value);
@@ -623,7 +623,8 @@ assert(success);
             
             BeeFishMisc::outputSuccess(success);
         }
-        
+    
+    
         cout << "Test arrays \"[1,[]]\"" << endl;
         if (success)
         {
@@ -641,7 +642,7 @@ assert(success);
         if (success) {
             
             cout << "\tIndexed array ";
-            Path path = root["array"];
+            Path path = root["array"].types();
             success =
                 path.contains(Type::ARRAY);
                 
@@ -651,9 +652,10 @@ assert(success);
         
         if (success) {
             cout << "\tItem 0:" << endl;
-            Path path = root["array"][Type::ARRAY];
+            Path path = root["array"];
+            path = path[TYPES][Type::ARRAY];
             
-            Size test = Path(path).min<Size>();
+            Size test = path.min<Size>();
             success = success &&
                 testResult("\tItem 0 index", test == 0);
                 
@@ -664,14 +666,15 @@ assert(success);
         
         if (success) {
             cout << "\tType item 0 ";
-            Path path = root["array"][Type::ARRAY][0];
+            Path path = root["array"];
+            path = path[TYPES][Type::ARRAY][0][TYPES];
             success = path.contains(Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tValue item 0 ";
-            Path path = root["array"][Type::ARRAY][0][Type::INTEGER];
+            Path path = root["array"].types()[Type::ARRAY][0][TYPES][Type::INTEGER];
             BString value;
             path.getData(value);
 cout << "VALUE: " << value << endl;
@@ -681,7 +684,7 @@ cout << "VALUE: " << value << endl;
         
         if (success) {
             cout << "\tItem 1 ";
-            Path path = root["array"];
+            Path path = root["array"].types();
             path = path[Type::ARRAY];
             success = path.contains(1);
             BeeFishMisc::outputSuccess(success);
@@ -689,7 +692,7 @@ cout << "VALUE: " << value << endl;
         
         if (success) {
             cout << "\tType item 1 ";
-            Path path = root["array"][Type::ARRAY][1];
+            Path path = root["array"].types()[Type::ARRAY][1][TYPES];
             success = path.contains(Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
@@ -697,7 +700,7 @@ cout << "VALUE: " << value << endl;
         if (success) {
             cout << "\tValue item 1 ";
             Path path = root["array"];
-            success = path[Type::ARRAY][1][Type::ARRAY].isDeadEnd();
+            success = path[TYPES][Type::ARRAY][1][TYPES][Type::ARRAY].isDeadEnd();
             BeeFishMisc::outputSuccess(success);
         }
         
@@ -717,7 +720,7 @@ cout << "VALUE: " << value << endl;
         if (success)
         {
             cout << "\tInteger type" << endl;
-            Path path = root["integer"];
+            Path path = root["integer"].types();
             
             Stack stack;
             success = path.contains(Type::INTEGER);
@@ -755,11 +758,11 @@ cout << "VALUE: " << value << endl;
         BeeFishMisc::outputSuccess(success);
         
         if (success) {
-            success = path.contains(Type::ARRAY);
+            success = path[TYPES].contains(Type::ARRAY);
         }
         
         if (success) {
-            path = path[Type::ARRAY];
+            path = path[TYPES][Type::ARRAY];
             success = path.contains(0);
         }
         
@@ -781,7 +784,7 @@ cout << "VALUE: " << value << endl;
         }
         
         if (success) {
-            path = path[0];
+            path = path[0][TYPES];
             success = path.contains(Type::ARRAY);
         }
         
@@ -819,14 +822,14 @@ cout << "VALUE: " << value << endl;
         if (success) {
             cout << "\tOuter Array: ";
             
-            success = path.contains(Type::ARRAY);
+            success = path[TYPES].contains(Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         
         }
         
         if (success) {
             cout << "\tOuter Array first index: ";
-            path = path[Type::ARRAY];
+            path = path[TYPES][Type::ARRAY];
             success = path.contains(0);
             BeeFishMisc::outputSuccess(success);
         }
@@ -841,7 +844,7 @@ cout << "VALUE: " << value << endl;
         
         if (success) {
             cout << "\tInner Array: ";
-            path = path[0];
+            path = path[0][TYPES];
             success = path.contains(Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
@@ -864,7 +867,7 @@ cout << "VALUE: " << value << endl;
         
         if (success) {
             cout << "\tInner array contains number" << endl;
-            path = path[0];
+            path = path[0][TYPES];
             success = path.contains(Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }

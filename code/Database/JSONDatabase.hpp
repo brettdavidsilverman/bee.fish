@@ -29,8 +29,6 @@ namespace BeeFishDatabase
             _properties = 
                 _root[PROPERTIES];
                 
-            _words =
-                _root[WORDS];
                 
         }
         
@@ -40,10 +38,6 @@ namespace BeeFishDatabase
             return _properties;
         }
         
-        Path words() const
-        {
-            return _words;
-        }
         
         virtual Path root() const
         {
