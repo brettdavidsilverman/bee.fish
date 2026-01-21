@@ -35,12 +35,7 @@ using namespace BeeFishPowerEncoding;
             bool value = peekBit();
 
             PowerEncoding::readBit();
-/*
-            if (value)
-                ++_count;
-            else if (_count > 0)
-                --_count;
-*/
+            
             ++_index;
 
             return value;
@@ -50,18 +45,13 @@ using namespace BeeFishPowerEncoding;
         override
         {
             PowerEncoding::writeBit(bit);
-/*
-            if (bit)
-                ++_count;
-            else if (_count > 0)
-                --_count;
-*/
+++_index;
         }
 
         void reset()
         {
             _index = 0;
-            _count = 0;
+            PowerEncoding::reset();
         }
 
         long int count() const
