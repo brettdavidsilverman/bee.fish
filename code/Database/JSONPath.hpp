@@ -29,6 +29,12 @@ namespace BeeFishDatabase {
         {
         }
         
+        JSONPath(JSONDatabase& database, Index index) :
+            Path(database, index)
+        {
+            
+        }
+        
         JSONPath(JSONDatabase& database, const Path& start) :
             Path(database, start.index())
         {

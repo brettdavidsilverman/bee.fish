@@ -506,11 +506,8 @@ namespace BeeFishQuery {
     inline bool testQueryAndPath()
     {
         cout << "Test Query And Path" << endl;
-        
-        bool ok  = true;
-        Database db;
-        Path root(db);
-        Words words(root);
+        JSONDatabase db("http://test");
+        Words words(db.properties());
         
         words["one"][0];
         words["one"][1];
@@ -519,38 +516,68 @@ namespace BeeFishQuery {
         words["two"][2];
         words["two"][3];
         words["two"][4];
+            
+        bool ok  = true;
+        auto test =
+        [&db, &words](BString input, vector<int> check) {
+            
+            
         
-        Expression expression;
-        Parser parser(expression);
-        parser.read("one and two");
-        parser.eof();
+            Expression expression;
+            Parser parser(expression);
+            parser.read(input);
+            parser.eof();
         
-        ok = expression.matched();
+            bool ok = expression.matched();
         
-        if (ok)
-        {
-            PathBase* pathBase =
-                expression
-                .getPath(words);
-                
-            Iterable<Index> iterable(*pathBase);
-            std::vector<Index> values;
-            for (auto index : iterable)
+            if (ok)
             {
-                values.push_back(index);
-            }
+                PathBase* pathBase =
+                    expression
+                    .getPath(words);
+                
+                Iterable<int> iterable(*pathBase);
+                std::vector<int> values;
+                for (auto index : iterable)
+                {
+                    values.push_back(index);
+                }
+             
+                delete pathBase;
             
-            delete pathBase;
-            
-            ok = values.size() == 2 &&
-                 values[0] == 2 &&
-                 values[1] == 3;
-                 
-        }
+                ok = ( values.size() == check.size());
+                
+                if (ok)
+                {
+                    for (unsigned int i = 0; i < values.size(); ++i)
+                    {
+                        if (values[i] != check[i])
+                        {
+                            ok = false;
+                            break;
+                        }
+                    }
+                }
         
-        BeeFishMisc::outputSuccess(ok);
+                 
+            }
+        
+            BeeFishMisc::outputSuccess(ok);
+        
+            return ok;
+        };
+        
+        ok = ok && test("one", {0,1,2,3});
+        ok = ok && test("two", {2,3,4});
+        ok = ok && test("one and one", {0,1,2,3});
+        ok = ok && test("one and two", {2,3});
+        ok = ok && test("two and two", {2,3,4});
+        ok = ok && test("one and three", {});
+        ok = ok && test("one and three", {});
+        ok = ok && test("three", {});
         
         return ok;
+        
     }
     
 }

@@ -13,7 +13,6 @@ namespace BeeFishDatabase
         BString _origin;
         Path _root;
         Path _properties;
-        Path _words;
         
     public:
         JSONDatabase(

@@ -31,9 +31,20 @@ int main(int argc, const char* argv[]) {
     
     
     string line;
-    Database db;
-    Words words(db);
-    
+
+    JSONDatabase database(ORIGIN, DATABASE_FILENAME);
+    JSONPath root = database.root();
+
+    Words words(database.properties());
+
+    {
+        Iterable<BString> iterable(words);
+        for (auto word : iterable)
+        {
+            cout << word << endl;
+        }
+    }
+        
     do 
     {
         cout << "Expression: ";
@@ -54,6 +65,13 @@ int main(int argc, const char* argv[]) {
                 statement._expression
                 ->getPath(words);
                 
+            Iterable<Index> jsonMatches(*path);
+            for (auto index : jsonMatches)
+            {
+                JSONPath path(database, index);
+                cout << path << endl;
+            }
+            
             delete path;
             
             cout << "ok" << endl;
@@ -66,12 +84,7 @@ int main(int argc, const char* argv[]) {
             
     }
     while (!cin.eof());
-  
-    Iterable<BString> iterable(words);
-    
-    for (auto word : iterable) {
-        cout << word << endl;
-    }
+
     
     cout << "Bye" << endl;
       
