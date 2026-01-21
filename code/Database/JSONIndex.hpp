@@ -9,6 +9,7 @@ namespace BeeFishDatabase {
     inline static const Index ORIGINS = 0;
     inline static const Index PROPERTIES = 1;
     inline static const Index OBJECTS = 2;
+    inline static const Index WORDS = 3;
     
     // Within user data
     inline static const Index URLS = 0;

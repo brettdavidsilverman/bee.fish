@@ -13,6 +13,8 @@ namespace BeeFishDatabase
         BString _origin;
         Path _root;
         Path _properties;
+        Path _words;
+        Path _objects;
         
     public:
         JSONDatabase(
@@ -28,7 +30,11 @@ namespace BeeFishDatabase
             _properties = 
                 _root[PROPERTIES];
                 
+            _words =
+                _root[WORDS];
                 
+            _objects =
+                _root[OBJECTS];
         }
         
         
@@ -37,10 +43,15 @@ namespace BeeFishDatabase
             return _properties;
         }
         
-        
-        virtual Path root() const
+        Path words() const
         {
-            return _root;
+            return _words;
+        }
+        
+        
+        virtual Path objects() const
+        {
+            return _objects;
         }
         
         

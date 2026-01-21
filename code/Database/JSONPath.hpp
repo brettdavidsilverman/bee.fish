@@ -68,6 +68,11 @@ namespace BeeFishDatabase {
             return database().properties();
         }
         
+        Path words()
+        {
+            return database().words();
+        }
+        
         template<typename T>
         JSONPath operator [] (const T& key)
         {

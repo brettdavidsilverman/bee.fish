@@ -59,7 +59,7 @@ int main(int argc, const char* argv[])
     }
     
     JSONDatabase database(origin, DATABASE_FILENAME);
-    Path root = database.root();
+    Path root = database.objects();
     
     cout << database << endl;
     
