@@ -280,9 +280,9 @@ namespace BeeFishHTTPS {
                 // All input is now in
                 clog << now()
                       << ' '
-                      << ipAddress()             << ' '
-                      << _request->method()    << ' '
-                      << origin() << _request->fullURL()  << ' '
+                      << ipAddress()          << ' '
+                      << _request->method()   << ' '
+                      << _request->fullURL()  << ' '
                       << std::endl;
                
                 _database =
@@ -388,7 +388,6 @@ namespace BeeFishHTTPS {
             const BString& what
         )
         {
-            dumpTempFile();
             
             BeeFishScript::Object error = {
                 {
@@ -397,7 +396,8 @@ namespace BeeFishHTTPS {
                         {"what", what},
                         {"ipAddress", ipAddress()},
                         {"who", getPointerString()},
-                        {"when", Server::getDateTime()}
+                        {"when", Server::getDateTime()},
+                        {"origin", origin()}
                     }
                 }
             };
@@ -459,14 +459,19 @@ namespace BeeFishHTTPS {
                     _request->headers();
           
             BString origin;
-            
-            if (requestHeaders.contains("host")) {
+
+            if (requestHeaders.contains("origin")) {
+                origin = requestHeaders["origin"];
+            }
+            else if (requestHeaders.contains("host")) {
                 BString host = requestHeaders["host"];
                 origin = BString("https://") + host;
             }
-            else
+            else {
                 origin = server()->origin();
-                
+            }
+ 
+            
             return origin;
                 
         }
@@ -632,8 +637,10 @@ namespace BeeFishHTTPS {
         ResponseHeadersBase(
             {
                 { "access-control-allow-origin", session->origin() },
-              // { "vary", "origin" },
                 { "access-control-allow-credentials", "true" },
+                { "access-control-allow-methods", "GET, POST, DELETE, OPTIONS" },
+                { "access-control-allow-headers", "origin, content-type, x-auth-token, authorization" },
+                { "access-control-expose-headers", "x-auth-token" },
                 { "connection", "keep-alive" }
             }
         )

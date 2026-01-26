@@ -63,12 +63,32 @@ int main(int argc, const char* argv[])
     
     cout << database << endl;
     
-    bool read =
-        (hasArg(argc, argv, "-read") != -1);
+    bool propertiesArg =
+        (hasArg(argc, argv, "-properties") != -1);
     
-    if (read)
+    if (propertiesArg)
     {
-        cout << "Read" << endl;
+        cout << "Properties" << endl;
+        Path propertiesPath = database.properties();
+        Iterable<BString> properties(propertiesPath);
+        for (auto property : properties)
+        {
+            cout << property << endl;
+        }
+    }
+    
+    bool wordsArg =
+        (hasArg(argc, argv, "-words") != -1);
+    
+    if (wordsArg)
+    {
+        cout << "Words" << endl;
+        Path wordsPath = database.words();
+        Iterable<BString> words(wordsPath);
+        for (auto word : words)
+        {
+            cout << word << endl;
+        }
     }
     
     bool loadDeaths =
@@ -118,7 +138,6 @@ int main(int argc, const char* argv[])
     }
 
     cout << database << endl;
-    cout << "large.json 127411713" << endl;
 
     return 0;
 

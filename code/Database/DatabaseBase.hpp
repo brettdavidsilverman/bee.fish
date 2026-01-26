@@ -31,7 +31,7 @@ using namespace std::literals;
 
 namespace BeeFishDatabase {
     
-    using namespace BeeFishMisc;
+   // using namespace BeeFishMisc;
     
     // Store [left, right] branch elements.
     // A zero is stored if the branch
@@ -41,15 +41,16 @@ namespace BeeFishDatabase {
     
     
     public:
-        typedef PowerEncoding Encoding;
-
+        typedef LeastRecentlyUsedCache<Index, Branch> Cache;
+        typedef map<BString, Cache> Caches;
+        static Caches _caches;
+// typedef PowerEncoding Encoding;
+    
     public:
-
-        Size _pageSize = 0;
         
-    protected:
-        LeastRecentlyUsedCache<Index, Branch>
-            _cache;
+        
+        Size _pageSize = 0;
+
     public:
 
         struct ScopedFileLock{
@@ -71,14 +72,12 @@ namespace BeeFishDatabase {
     public:
         Database(
             string filePath = "",
-            const Size pageSize = getPageSize(),
-            const Size cacheCapacity = 10000
+            const Size pageSize = getPageSize()
         ) :
             LockFile(
                 filePath
             ),
-            _pageSize(pageSize),
-            _cache(cacheCapacity)
+            _pageSize(pageSize)
         {
 #ifdef DEBUG_
             Debug debug;
@@ -103,6 +102,14 @@ namespace BeeFishDatabase {
         }
         
     public:
+        
+        Cache& cache() {
+            if (_caches.find(filename()) == _caches.end())
+                _caches[filename()] = Cache(100000);
+                
+            return
+                _caches[filename()];
+        }
 
         Size pageSize() const {
             return _pageSize;
@@ -163,17 +170,18 @@ namespace BeeFishDatabase {
             }
 
             optional<Branch> optionalBranch =
-                _cache.get(index);
+                cache().get(index);
                 
             if (optionalBranch == nullopt)
             {
                 seek(index);
                 read(&branch, sizeof(Branch));
+                cache().put(index, branch);
             }
             else
                 branch = optionalBranch.value();
                 
-            _cache.put(index, branch);
+            
             
             return branch;
 
@@ -186,7 +194,7 @@ namespace BeeFishDatabase {
 
             seek(index);
             write(&branch, sizeof(Branch));
-            _cache.put(index, branch);
+            cache().put(index, branch);
             
         }
         
@@ -356,6 +364,8 @@ namespace BeeFishDatabase {
         }
 
     };
+    
+   inline Database::Caches Database::_caches;
 
 }
 

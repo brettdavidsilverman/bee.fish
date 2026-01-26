@@ -49,6 +49,7 @@ namespace BeeFishDatabase
                 {"parent", (BeeFishScript::Integer)_parent},
                 {"left", (BeeFishScript::Integer)_left},
                 {"right", (BeeFishScript::Integer)_right},
+                {"dataIndex", (BeeFishScript::Integer)_dataIndex},
                 {"locked", (BeeFishScript::Boolean)_locked}
             };
             return var;

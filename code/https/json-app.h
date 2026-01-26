@@ -117,12 +117,15 @@ namespace BeeFishHTTPS {
          }
          else
          {
+/*
             BeeFishScript::Object object
             {
                {"error", error}
             };
-            _content = object.str();
+*/
+            _content = "undefined";
             _serve = App::SERVE_CONTENT;
+
             _status = 404;
             _statusText = "Path error";
          }

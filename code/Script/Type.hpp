@@ -21,7 +21,7 @@ namespace BeeFishScript {
    
    
 
-   const char* ToChar (const Type& type)
+   std::string toChar (const Type& type)
    {
       switch (type)
       {
@@ -43,22 +43,25 @@ namespace BeeFishScript {
          case Type::STRING:
             return "string";
             break;
-         case Type::ARRAY:
-            return "array";
-            break;
          case Type::OBJECT:
             return "object";
+            break;
+         case Type::ARRAY:
+            return "array";
             break;
          case Type::UNKNOWN:
             return "UNKNOWN";
       }
 
-      return nullptr;
+      stringstream stream;
+      stream << (int)type;
+      
+      return stream.str();
    }
    
    ostream& operator << (ostream& out, const Type& type)
    {
-      out << ToChar(type);
+      out << toChar(type);
       return out;
    }
 

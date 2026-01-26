@@ -42,7 +42,8 @@ using namespace BeeFishPowerEncoding;
         override
         {
             PowerEncoding::writeBit(bit);
-++_index;
+           // ++_index;
+            push_back(bit);
         }
 
         virtual void reset()
@@ -50,13 +51,17 @@ using namespace BeeFishPowerEncoding;
             _index = 0;
             PowerEncoding::reset();
         }
+        
+        virtual void clear()
+        {
+            reset();
+            vector<bool>::clear();
+        }
 
         long int count() const
         {
             return _count;
         }
-        
-
         
 
         Variable getVariable() const
@@ -90,6 +95,7 @@ using namespace BeeFishPowerEncoding;
 
         virtual void push_back(bool bit)
         {
+            
             if (bit)
                 ++_count;
             else if (_count > 0)
@@ -98,6 +104,7 @@ using namespace BeeFishPowerEncoding;
             vector<bool>::push_back(
                 bit
             );
+           // ++_index;
         }
         
         virtual void pop_back()
@@ -110,6 +117,7 @@ using namespace BeeFishPowerEncoding;
                 ++_count;
                 
             vector<bool>::pop_back();
+           // --_index;
         }
         
         friend ostream& operator << (

@@ -58,7 +58,7 @@ int main(int argc, const char* argv[]) {
                 break;
             }
                     
-            cout << *(statement._expression) << endl;
+            //cout << *(statement._expression) << endl;
             
             PathBase* path =
                 statement._expression
@@ -67,8 +67,8 @@ int main(int argc, const char* argv[]) {
             Iterable<Index> jsonMatches(*path);
             for (auto index : jsonMatches)
             {
-               // JSONPath path(database, index);
-                cout << index << endl;
+                JSONPath path(database, index);
+                cout << path.toString() << endl;
             }
             
             delete path;

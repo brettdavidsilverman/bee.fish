@@ -131,7 +131,7 @@ namespace BeeFishHTTPS {
                 "content-type",
                 "text/plain; charset=utf-8"
             );
-            
+
             if (path != from)
             {
                  
@@ -147,7 +147,7 @@ namespace BeeFishHTTPS {
                     BString(";path=/;")
                 );
             }
-            
+
             _content = "redirecting...";
             
             _serve = App::SERVE_CONTENT;

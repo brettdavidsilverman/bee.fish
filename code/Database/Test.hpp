@@ -17,10 +17,14 @@ namespace BeeFishDatabase
     inline bool testPath2();
     inline bool testArray2Path();
     inline bool testSubArray2Path();
+    inline bool testComplexArrays();
     inline bool testAllFiles(string url, string directory);
     inline bool testFile(Path root, string file, bool expect);
     inline bool testIterator();
-
+    inline bool testClear();
+    inline bool testPathParent();
+    inline bool testJSONPathParent();
+    
     inline bool test()
     {
         bool success = true;
@@ -43,10 +47,22 @@ namespace BeeFishDatabase
             testSubArray2Path();
             
         success = success &&
+            testComplexArrays();
+            
+        success = success &&
             testAllFiles(HOST, TEST_DIRECTORY);
             
         success = success &&
             testIterator();
+            
+        success = success &&
+            testClear();
+            
+        success = success &&
+            testPathParent();
+            
+        success = success &&
+            testJSONPathParent();
             
         outputSuccess(success);
 
@@ -257,7 +273,7 @@ namespace BeeFishDatabase
 
         if (success) {
             cout << "\tTesting Data Path Max: " << flush;
-//data.reset();
+
 
             Size maximum = 0;
             data.max<Size>(maximum);
@@ -266,7 +282,6 @@ namespace BeeFishDatabase
 
             cout << maximum;
             outputSuccess(success);
-assert(success);
         }
 
         if (success) {
@@ -570,18 +585,19 @@ assert(success);
         bool success = true;
         JSONDatabase database("https://test");
 
-        JSONPath root = database.objects();
-        cout << "\tTest data: " << std::flush;
+        Path root = database.objects();
+        cout << "Test data" << std::endl;
         {
         
             BString str1 = "Hello 🤗";
             Path path = root["str"];
             path.setData(str1);
             Path path2 = root["str"];
+            assert(path == path2);
             BString str2;
             path2.getData(str2);
-        
-            success = testValue(str1,str2);
+    
+            success = testValue(str1, str1 == str2);
             BeeFishMisc::outputSuccess(success);
         }
         
@@ -592,9 +608,10 @@ assert(success);
         {
             Path path = root["string"];
             JSONPathParser parser(path);
+            cout << "\t\tParse string 2" << flush;
             parser.read("\"Hello World\"");
             parser.eof();
-            cout << "\t\tParse string " << flush;
+            
             success = success &&
                 parser.result() == true;
             BeeFishMisc::outputSuccess(success);
@@ -604,7 +621,7 @@ assert(success);
         if (success) {
             
             cout << "\tIndexed string ";
-            Path path = root["string"].types();
+            Path path = root["string"];
             
             success = success &&
                 path.contains(Type::STRING);
@@ -614,7 +631,7 @@ assert(success);
         
         if (success) {
             cout << "\tString value ";
-            Path path = root["string"].types();
+            Path path = root["string"];
             path = path[Type::STRING];
             BString value;
             path.getData(value);
@@ -636,13 +653,16 @@ assert(success);
             cout << "\tParse array ";
             success &&
                 parser.result() == true;
+if (success) {
+    cerr << path << endl;
+}
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             
             cout << "\tIndexed array ";
-            Path path = root["array"].types();
+            Path path = root["array"];
             success =
                 path.contains(Type::ARRAY);
                 
@@ -653,7 +673,7 @@ assert(success);
         if (success) {
             cout << "\tItem 0:" << endl;
             Path path = root["array"];
-            path = path[TYPES][Type::ARRAY];
+            path = path[Type::ARRAY];
             
             Size test = path.min<Size>();
             success = success &&
@@ -667,24 +687,23 @@ assert(success);
         if (success) {
             cout << "\tType item 0 ";
             Path path = root["array"];
-            path = path[TYPES][Type::ARRAY][0][TYPES];
+            path = path[Type::ARRAY][0];
             success = path.contains(Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tValue item 0 ";
-            Path path = root["array"].types()[Type::ARRAY][0][TYPES][Type::INTEGER];
+            Path path = root["array"][Type::ARRAY][Index(0)][Type::INTEGER];
             BString value;
             path.getData(value);
-cout << "VALUE: " << value << endl;
             success = (value == "1");
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tItem 1 ";
-            Path path = root["array"].types();
+            Path path = root["array"];
             path = path[Type::ARRAY];
             success = path.contains(1);
             BeeFishMisc::outputSuccess(success);
@@ -692,7 +711,7 @@ cout << "VALUE: " << value << endl;
         
         if (success) {
             cout << "\tType item 1 ";
-            Path path = root["array"].types()[Type::ARRAY][1][TYPES];
+            Path path = root["array"][Type::ARRAY][1];
             success = path.contains(Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
@@ -700,7 +719,7 @@ cout << "VALUE: " << value << endl;
         if (success) {
             cout << "\tValue item 1 ";
             Path path = root["array"];
-            success = path[TYPES][Type::ARRAY][1][TYPES][Type::ARRAY].isDeadEnd();
+            success = path[Type::ARRAY][1][Type::ARRAY].isDeadEnd();
             BeeFishMisc::outputSuccess(success);
         }
         
@@ -720,7 +739,7 @@ cout << "VALUE: " << value << endl;
         if (success)
         {
             cout << "\tInteger type" << endl;
-            Path path = root["integer"].types();
+            Path path = root["integer"];
             
             Stack stack;
             success = path.contains(Type::INTEGER);
@@ -742,6 +761,8 @@ cout << "VALUE: " << value << endl;
         return success;
     }
     
+        
+    
     inline bool testArray2Path()
     {
 
@@ -758,11 +779,11 @@ cout << "VALUE: " << value << endl;
         BeeFishMisc::outputSuccess(success);
         
         if (success) {
-            success = path[TYPES].contains(Type::ARRAY);
+            success = path.contains(Type::ARRAY);
         }
         
         if (success) {
-            path = path[TYPES][Type::ARRAY];
+            path = path[Type::ARRAY];
             success = path.contains(0);
         }
         
@@ -784,7 +805,7 @@ cout << "VALUE: " << value << endl;
         }
         
         if (success) {
-            path = path[0][TYPES];
+            path = path[0];
             success = path.contains(Type::ARRAY);
         }
         
@@ -814,6 +835,10 @@ cout << "VALUE: " << value << endl;
             parser.result() == true
         );
         
+        JSONPath test = path;
+        
+cerr << test << endl;
+
         if (success)
         {
              //success = path[ARRAY][0].contains(ARRAY);
@@ -822,14 +847,14 @@ cout << "VALUE: " << value << endl;
         if (success) {
             cout << "\tOuter Array: ";
             
-            success = path[TYPES].contains(Type::ARRAY);
+            success = path.contains(Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         
         }
         
         if (success) {
             cout << "\tOuter Array first index: ";
-            path = path[TYPES][Type::ARRAY];
+            path = path[Type::ARRAY];
             success = path.contains(0);
             BeeFishMisc::outputSuccess(success);
         }
@@ -844,7 +869,7 @@ cout << "VALUE: " << value << endl;
         
         if (success) {
             cout << "\tInner Array: ";
-            path = path[0][TYPES];
+            path = path[0];
             success = path.contains(Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
@@ -860,6 +885,7 @@ cout << "VALUE: " << value << endl;
                 success = false;
             else {
                 Size max = maxPath.max<Size>();
+cerr << "MAX:" << max << endl;
                 success = (max == 0);
             }
             BeeFishMisc::outputSuccess(success);
@@ -867,7 +893,7 @@ cout << "VALUE: " << value << endl;
         
         if (success) {
             cout << "\tInner array contains number" << endl;
-            path = path[0][TYPES];
+            path = path[0];
             success = path.contains(Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
@@ -883,6 +909,95 @@ cout << "VALUE: " << value << endl;
         
         BeeFishMisc::outputSuccess(success);
         
+        return success;
+    }
+    
+    inline bool testComplexArrays()
+    {
+            
+        cout << "Test complex arrays: ";
+        
+        auto test =
+        [](BString json) 
+        {
+        
+            cout << json << endl;
+            
+            JSONDatabase database("https://test");
+            JSONPath path = database.objects();
+            JSONPathParser parser(path);
+        
+            parser.read(json);
+            parser.eof();
+            bool success = true;
+        
+            success = testResult(
+                "\tparser result",
+                parser.result() == true
+            );
+            
+            if (success) {
+                stringstream stream;
+                stream << path;
+                success = success && 
+                    testResult(
+                        "\tCompare",
+                        stream.str() == json
+                    );
+                if (!success) {
+                    cout << stream.str();
+                }
+            }
+            
+            BeeFishMisc::outputSuccess(success);
+            
+            return success;
+        };
+        
+        bool success = true;
+        success = success && test(
+"[\r\n"
+"   1,\r\n"
+"   2,\r\n"
+"   [],\r\n"
+"   [\r\n"
+"      3,\r\n"
+"      4\r\n"
+"   ]\r\n"
+"]"
+        );
+        
+        success = success && test(
+"[{\r\n"
+"   \"a\": \"b\"\r\n"
+"}]"
+        );
+        
+        success = success && test(
+"{\r\n"
+"   \"a\": [1]\r\n"
+"}"
+        );
+        
+        success = success && test(
+"{\r\n"
+"   \"a\": \"b\",\r\n"
+"   \"c\": \"d\"\r\n"
+"}"
+        );
+        
+        success = success && test(
+"{\r\n"
+"   \"a\": {\r\n"
+"      \"a\": \"b\",\r\n"
+"      \"c\": \"d\"\r\n"
+"   }\r\n"
+"}"
+        );
+        
+        
+        BeeFishMisc::outputSuccess(success);
+assert(success);
         return success;
     }
     
@@ -1033,6 +1148,191 @@ cout << "VALUE: " << value << endl;
         return success;
         
     }
+    
+    inline bool testClear()
+    {
+
+        cout << "Test clear" << endl;
+        
+        bool success = true;
+ 
+        Database database;
+        Path path = database;
+        BString key = "hello";
+        path[key];
+        path["hell"];
+        
+        success = testValue(
+            "Path contains",
+            path.contains(key)
+        );
+        
+        path.clearValue(key);
+        success = success &&
+            testValue(
+                "Single Path cleared",
+                !path.contains(key)
+            );
+            
+        success = success &&
+            testValue(
+                "Single Path contains",
+                path.contains("hell")
+            );
+            
+        Index key1 = 0;
+        Index key2 = 1;
+        
+        Database database2;
+        Path path2 = database2;
+        path2[key1];
+        path2[key2];
+        path2.clearValue(key1);
+        success = success &&
+            testValue(
+                "Key 1 cleared",
+                !path2.contains(key1)
+            );
+            
+        success = success &&
+            testValue(
+                "Key 2 remains",
+                path2.contains(key2)
+            );
+
+        BeeFishMisc::outputSuccess(success);
+        
+        return success;
+    }
+    
+    inline bool testPathParent()
+    {
+
+        cout << "Test parent" << endl;
+        
+        bool success = true;
+ 
+        Database database;
+        Path path = database;
+        path = path["hello"]["world"];
+        
+        Stack stack;
+        path = path.parent(stack);
+        stack.reset();
+        
+    
+        BString world;
+        stack >> world;
+    
+        success = success &&
+            testValue(
+                "World",
+                world == "world"
+            );
+            
+        stack.clear();
+        
+        path = path.parent(stack);
+        stack.reset();
+        
+        BString hello;
+        stack >> hello;
+        
+        success = success &&
+            testValue(
+                "Hello",
+                hello == "hello"
+            );
+            
+        success = success &&
+            testValue(
+                "Path root",
+                path.index() == 0
+            );
+            
+        BString value;
+        path = path["hello"]["world"];
+        path = path.parent(value);
+        
+        success = success &&
+            testValue(
+                "World value",
+                value == "world"
+            );
+            
+        value.clear();
+        path = path.parent(value);
+        
+        success = success &&
+            testValue(
+                "Hello value",
+                value == "hello"
+            );
+            
+        success = success &&
+            testValue(
+                "Path value root",
+                path.index() == 0
+            );
+            
+        BeeFishMisc::outputSuccess(success);
+        
+        return success;
+    }
+    
+    inline bool testJSONPathParent()
+    {
+
+        cout << "Test JSON parent" << endl;
+        
+        bool success = true;
+ 
+        JSONDatabase database("https://test");
+        
+        JSONPath start = database.objects();
+        JSONPathParser parser1(start);
+        parser1.read("[1,2,3]");
+        JSONPath path = start[Index(0)];
+
+        BString key;
+        path = path.parent(key);
+
+        success = success &&
+            testValue(
+                "Key 1",
+                key == "0"
+            );
+            
+        success = success &&
+            testValue(
+                "Parent is root",
+                path == start
+            );
+            
+        JSONPathParser parser2(start);
+        parser2.read("{\"hello\":\"world\"}");
+        path = start["hello"];
+        key.clear();
+        path = path.parent(key);
+
+        success = success &&
+            testValue(
+                "Key hello",
+                key == "hello"
+            );
+            
+        success = success &&
+            testValue(
+                "Parent is root",
+                path == start
+            );
+            
+        
+        BeeFishMisc::outputSuccess(success);
+        
+        return success;
+    }
+    
     
 }
 

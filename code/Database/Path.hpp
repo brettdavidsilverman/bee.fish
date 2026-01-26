@@ -86,6 +86,7 @@ using namespace BeeFishBString;
 
         Path& operator=(const Path& rhs)
         {
+    
             _database = rhs._database;
             _index = rhs._index;
             _savedIndex = rhs._savedIndex;
@@ -271,6 +272,56 @@ using namespace BeeFishBString;
         
     public:
         template<typename T>
+        Path parent(T& value) {
+            Stack stack;
+            Path parent = Path::parent(stack);
+            stack >> value;
+            return parent;
+        }
+        
+        Path parent() {
+            Stack stack;
+            return parent(stack);
+        }
+        
+        Path parent(Stack& stack) {
+            Size count = 0;
+            Branch branch = getBranch();
+            Index index = Path::index();
+
+            do
+            {
+                
+
+                Branch parent = _database->getBranch(
+                    branch._parent
+                );
+                
+                if (index == parent._left)
+                {
+
+                    stack.push_back(0);
+                    ++count;
+                }
+                else if (index == parent._right)
+                {
+                    stack.push_back(1);
+                    --count;
+                }
+    
+                index = branch._parent;
+                
+                branch = parent;
+            }
+            while(count > 0);
+            
+            std::reverse(stack.begin(), stack.end());
+            
+            return Path(*this, index);
+        }
+        
+    public:
+        template<typename T>
         Path operator [] (const T& key) const
         {
 
@@ -357,7 +408,7 @@ using namespace BeeFishBString;
 
             Database::ScopedFileLock lock(database());
             
-            Branch branch = getBranch(_index);
+            Branch branch = getBranch();
 
             std::string current =
                 _database->getData(branch._dataIndex);
@@ -455,15 +506,98 @@ using namespace BeeFishBString;
 
             deleteData();
             
+            clearLeft();
+            clearRight();
+            
+        }
+        
+
+        template<typename T>
+        void clearValue(const T& value)
+        {
+            Database::ScopedFileLock lock(database());
+            
+            Stack stack;
+            stack << value;
+            
+            // Get the branches
+            Branch branch = getBranch();
+            Index index = Path::index();
+            Index lastIndex = index;
+            bool lastBit = true;
+            
+            for (auto bit : stack)
+            {
+                branch = _database->getBranch(
+                    index
+                );
+                
+                if (branch._left &&
+                    branch._right)
+                {
+                    lastIndex = index;
+                    lastBit = bit;
+                }
+                
+                if (bit == 0)
+                    index = branch._left;
+                else 
+                    index = branch._right;
+                    
+                    
+            }
+            
+            Path path(*this, lastIndex);
+            
+            if (lastBit == 0)
+                path.clearLeft();
+            else
+                path.clearRight();
+                
+            
+        }
+        
+    private:
+        
+        void clearLeft() {
+            Database::ScopedFileLock lock(database());
             
             Branch branch = getBranch();
-            
+            Index left = branch._left;
             branch._left = 0;
-            branch._right = 0;
-            
             setBranch(branch);
             
+            if (left)
+            {
+                Path path(*this, left);
+                path.deleteData();
+                if (path.canGoLeft())
+                    path.clearLeft();
+                else if (path.canGoRight())
+                    path.clearRight();
+                
+            }
+        }
+        
+        void clearRight() {
+            Database::ScopedFileLock lock(database());
+
+            Branch branch = getBranch();
+            Index right = branch._right;
+            branch._right = 0;
+            setBranch(branch);
             
+            if (right)
+            {
+                
+                Path path(*this, right);
+                path.deleteData();
+                if (path.canGoLeft())
+                    path.clearLeft();
+                else if (path.canGoRight())
+                    path.clearRight();
+                
+            }
         }
         
         

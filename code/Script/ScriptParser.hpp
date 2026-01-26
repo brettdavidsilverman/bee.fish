@@ -194,7 +194,7 @@ namespace BeeFishScript
          default:
             {
                std::stringstream stream;
-               stream << "Invalid variable type " << ToChar(json->type());
+               stream << "Invalid variable type " << toChar(json->type());
                
                throw std::logic_error(stream.str());
             }

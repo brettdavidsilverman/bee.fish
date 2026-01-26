@@ -11,7 +11,6 @@ namespace BeeFishDatabase
     {
     protected:
         Size _lockCount = 0;
-        inline static mutex _mutex;
         
     public:
     
@@ -27,16 +26,16 @@ namespace BeeFishDatabase
 
         virtual void lock() {
             
-            if (_lockCount++ == 0)
-_mutex.lock();
-// flock(_fileNumber, LOCK_EX);
+            if (_lockCount++ == 0) {
+                flock(_fileNumber, LOCK_EX);
+            }
         }
          
         virtual void unlock() {
             
-        if (--_lockCount == 0)
-_mutex.unlock();
- //              flock(_fileNumber, LOCK_UN);
+            if (--_lockCount == 0) {
+               flock(_fileNumber, LOCK_UN);
+            }
         }
         
         

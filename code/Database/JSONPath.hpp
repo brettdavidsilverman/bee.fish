@@ -21,204 +21,260 @@ namespace BeeFishDatabase {
         
         
     public:
-        typedef Path Id;
+        typedef Index Id;
         
         using Path::contains;
+        using Path::parent;
         
         JSONPath()
         {
         }
         
         JSONPath(JSONDatabase& database, Index index) :
-            Path(database, index)
+             Path(database, index)
         {
-            
+             
         }
         
         JSONPath(JSONDatabase& database, const Path& start) :
-            Path(database, start.index())
+             Path(database, start.index())
         {
-            
+             
         }
         
         JSONPath(Path start) :
-            JSONPath((JSONDatabase&)start.database(), start)
+             JSONPath((JSONDatabase&)start.database(), start)
         {
         }
         
         JSONPath(const JSONPath& source) :
-            Path(source)
+             Path(source)
         {
-              
+               
         }
         
         JSONDatabase& database()
         {
-            return (JSONDatabase&)
-                 Path::database();
+             return (JSONDatabase&)
+                  Path::database();
         }
         
         Id id()
         {
-            return *this;
+             return index();
         }
-      
+       
         Path properties()
         {
-            return database().properties();
+             return database().properties();
         }
         
         Path words()
         {
-            return database().words();
+             return database().words();
         }
-        
+        /*
         template<typename T>
         JSONPath operator [] (const T& key)
         {
 
-            return Path::operator[](key);
+             return Path::operator[](key);
+        }
+        
+        */
+        void clearValue(const BString& property)
+        {
+            
+            Index position =
+                 getObjectKeyPosition(property);
+                 
+            Path path =
+                 properties();
+                 
+            path = path[property];
+           
+            path.clearValue(id());
+            
+            Path objectProperties = getObjectPositions();
+            objectProperties.clearValue(position);
         }
 
         JSONPath operator [] (const BString& key)
         {
-            Index position =
-                getObjectKeyPosition(key);
-                
-            Path path(*this);
-          
-            path << TYPES
-                 << Type::OBJECT
-                 << position;
-                  
-            return path;
-             
+             Index position =
+                 getObjectKeyPosition(key);
+                 
+                    
+             return (*this)
+                 [Type::OBJECT]
+                 [position];
+              
         }
         
         JSONPath operator [] (const Index& index)
         {
-            Path path(*this);
-          
-            path << TYPES
-                 << Type::ARRAY
-                 << index;
-
-            return path;
-             
+             Path path(*this);
+             path << Type::ARRAY << index;
+             return JSONPath(path);
         }
         
-        JSONPath operator [] (Type type)
+        Path operator [] (Type type)
         {
-             Path path = *this;
-             path << TYPES
-                  << type;
-             return path;
+              Path path = *this;
+              path << type;
+              return path;
         }
+        
+        JSONPath parent(BString& key) {
+            JSONPath path = *this;
+
+            Size position = 0;
+            path = path.parent(position);
+            Type type;
+            path = path.parent(type);
+
+            if (type == Type::ARRAY)
+            {
+                stringstream stream;
+                stream << position;
+                key = stream.str();
+            }
+            else if (type == Type::OBJECT)
+            {
+                key = path.getObjectKey(position).value();
+            }
+    
+            return path;
+            
+        }
+        
+        BString toString() {
+            vector<BString> paths;
+            JSONPath path = *this;
+            JSONPath root = database().objects();
+            while (path != root)
+            {
+                BString key;
+                path = path.parent(key);
+                paths.push_back(key);
+            }
+            
+            std::reverse(paths.begin(), paths.end());
+            
+            BString string = database().origin();
+            for (auto key : paths)
+            {
+                string += "/" + key;
+            }
+            
+            return string;
+        }
+        
         
         bool contains(const BString& key)
         {
-            if (!types().contains(Type::OBJECT))
-                return false;
-                
-            Path path =
-                properties();
-                
-            if (!path.contains(key))
-            {
-                return false;
-            }
+             if (!contains(Type::OBJECT))
+                 return false;
+                 
+             Path path =
+                 properties();
+                 
+             if (!path.contains(key))
+             {
+                 return false;
+             }
  
-            path = path[key];
-          
-            
-            bool contains =
-                path.contains(id());
-            
-            return contains;
-            
+             path = path[key];
+           
+             
+             bool contains =
+                 path.contains(id());
+             
+             return contains;
+             
         }
         
         bool contains(const Index& index)
         {
-            if (!types().contains(Type::ARRAY))
-                return false;
-                
-            Path path = types()[Type::ARRAY];
-            
-            if (!path.contains(index))
-            {
-                return false;
-            }
-            
+             if (!contains(Type::ARRAY))
+                 return false;
+                 
+             Path path = (*this)[Type::ARRAY];
+             
+             if (!path.contains(index))
+             {
+                 return false;
+             }
+             
  
-            return true;
-            
+             return true;
+             
         }
         
         
         // properties[key][POSITION][objectId]
         Index getObjectKeyPosition(const BString& key)
         {
-            Id id = this->id();
-            Path keyPath = 
-                properties();
-                
-            if (!keyPath.contains(key))
-                keyPath[key].setData(key);
-                
-            
-            keyPath = keyPath[key];
-            
-            Index keyPathIndex =
-                keyPath.index();
-            
-            Path path = keyPath[id];
-                
-            Index position;
-            
-            if (path.hasData())
-                path.getData(position);
-            else {
-                    
-                Path object = types()[Type::OBJECT];
-                
-                if (object.isDeadEnd())
-                    position = 0;
-                else {
-                    position =
-                        object.max<Index>()
-                        + 1;
-                }
+             Id id = this->id();
+             Path keyPath = 
+                 properties();
+                 
+             if (!keyPath.contains(key))
+                 keyPath[key].setData(key);
+                 
+             
+             keyPath = keyPath[key];
+             
+             Index keyPathIndex =
+                 keyPath.index();
+             
+             Path path = keyPath[id];
+                 
+             Index position;
+             
+             if (path.hasData())
+                 path.getData(position);
+             else {
+                     
+                 Path object = (*this)[Type::OBJECT];
+                 
+                 if (object.isDeadEnd())
+                     position = 0;
+                 else {
+                     position =
+                          object.max<Index>()
+                          + 1;
+                 }
 
-                path.setData<Index>(position);
-                
-            }
-            
-            getObjectPositions()
-                [position]
-                .setData<Index>(keyPathIndex);
-                
-            return position;
+                 path.setData<Index>(position);
+                 
+             }
+             
+             getObjectPositions()
+                 [position]
+                 .setData<Index>(keyPathIndex);
+
+             return position;
         }
         
         // properties[key][POSITION][objectId]
         optional<BString> getObjectKey(Index position)
         {
-            Path path = getObjectPositions();
-            
-            if (!path.contains(position))
-                return nullopt;
-                
-            path = path[position];
-            
-            Index keyIndex = 0;
-            path.getData<Index>(keyIndex);
-            BString key;
-            Path keyPath(database(), keyIndex);
-            keyPath.getData(key);
-            
-            return key;
-          
+             Path path = getObjectPositions();
+             
+             if (!path.contains(position))
+                 return nullopt;
+                 
+             path = path[position];
+             
+             Index keyIndex = 0;
+             path.getData<Index>(keyIndex);
+             BString key;
+             Path keyPath(database(), keyIndex);
+             keyPath.getData(key);
+             
+             return key;
+           
         }
         
         //_properties[key][VALUE][type][value][objectId]
@@ -228,10 +284,15 @@ namespace BeeFishDatabase {
             return (*this)[BString(key)];
         }
         
-        friend ostream& operator << (ostream& out, JSONPath& json)
+        friend ostream& operator << (ostream& out, const JSONPath& json)
         {
-            json.write(out, 0);
+            JSONPath path(json);
             
+            if (path.isDeadEnd())
+                out << "undefined";
+                 
+            path.write(out, 0);
+             
             return out;
         }
         
@@ -243,168 +304,162 @@ namespace BeeFishDatabase {
         Path getObjectPositions()
         {
             Path path(*this);
-            return path[POSITIONS];
+            return path[Type::OBJECT];
         }
         
-        Path types()
-        {
+        Type type() const {
             Path path(*this);
-            return path[TYPES];
-        }
-        
-        Type type() {
-            return types().max<Type>();
+            return path.max<Type>();
         }
         
         
         virtual void clear()
         override
         {
-                    
-          // getObjectPositions().clear();
-                
-            Path::clear();
-            
+                     
+           // getObjectPositions().clear();
+                 
+             Path::clear();
+             
         }
         
         virtual void write(ostream& out, Size tabCount = 0)
         {
-            if (isDeadEnd())
-                return;
-         
-            Type type = JSONPath::type();
-            
-            
-            Path path =
-                types()[type];
-                
-            switch (type) {
-            case Type::UNDEFINED:
-                out << "undefined";
-                break;
-            case Type::NULL_:
-                out << "null";
-                break;
-            case Type::BOOLEAN:
-            case Type::INTEGER:
-            case Type::NUMBER:
-            {
-                BString value;
-                path.getData(value);
-                out << value;
-                break;
-            }
-            case Type::STRING:
-            {
-                BString string;
-                path.getData(string);
-                  
-                out << "\""
-                         << escape(string)
-                     << "\"";
-                
-                break;
-            }
-            case Type::ARRAY:
-            {
-                out << "[";
-                
-                Size count = 0;
-                
-                if (!path.isDeadEnd())
-                    count = path.max<Size>() + 1;
-                
-                if (count > 1) {
-                    out << "\r\n";
-                    out << tabs(tabCount + 1);
-                }
-
-                for (Size index = 0;
-                      index < count;
-                      ++index)
-                {
-                    JSONPath item = path[index];
-                        
-                    Size _tabCount = tabCount + 1;
-                            
-                    if (count == 1)
-                        _tabCount--;
-
-                    item.write(
-                        out,
-                        _tabCount
-                    );
-                        
-                    if (index < count - 1)
-                    {
-                        out << ",\r\n" << tabs(tabCount + 1);
-                    }
-                }
-
-                if (count > 1) {
-                    out << "\r\n";
-                    out << tabs(tabCount);
-                }
-                
-                out << "]";
-                    
-                break;
-            }
-            case Type::OBJECT:
-            {
-                Path objProps = getObjectPositions();
-                
-                if (objProps.isDeadEnd())
-                {
-                    out << "{}";
-                    break;
-                }
-                    
-                out << "{";
-                Size count = 0;
-                
-                
-                if (!path.isDeadEnd()) {
-                    
-                    out << "\r\n";
-                  
-                    optional<BString> key;
-                    count = path.max<Size>() + 1;
-
-                    for (Size position = 0; position < count; ++position) 
-                    {
-                        key = getObjectKey(position);
-
-                        if (key.has_value()) {
-                            out << tabs(tabCount + 1)
-                                 << "\""
-                                     << escape(key.value())
-                                 << "\": ";
-                             
-                            JSONPath value =
-                                path[position];
-                        
-                            value.write(out, tabCount + 1);
-                        
-                            if (position < count - 1)
-                                out << ",\r\n";
-                        }
-
-                    }
-                }
-                
-                if (count > 0) {
-                    out << "\r\n";
-                    out << tabs(tabCount);
-                }
-                
-                out  << "}";
-                break;
-            }
-            default:
-                throw std::logic_error("JSON::Variable::Value::copy constructor");
-            }
+             if (isDeadEnd())
+                 return;
+          
+             Type type = JSONPath::type();
              
+             Path path =
+                 (*this)[type];
+                 
+             switch (type) {
+             case Type::UNDEFINED:
+                 out << "undefined";
+                 break;
+             case Type::NULL_:
+                 out << "null";
+                 break;
+             case Type::BOOLEAN:
+             case Type::INTEGER:
+             case Type::NUMBER:
+             {
+                 BString value;
+                 path.getData(value);
+                 out << value;
+                 break;
+             }
+             case Type::STRING:
+             {
+                 BString string;
+                 path.getData(string);
+                    
+                 out << "\""
+                           << escape(string)
+                       << "\"";
+                 
+                 break;
+             }
+             case Type::ARRAY:
+             {
+                 out << "[";
+                 
+                 Size count = 0;
+                 
+                 if (!path.isDeadEnd())
+                     count = path.max<Size>() + 1;
+                 
+                 if (count > 1) {
+                     out << "\r\n";
+                     out << tabs(tabCount + 1);
+                 }
+
+                 for (Size index = 0;
+                        index < count;
+                        ++index)
+                 {
+                     JSONPath item = path[index];
+                          
+                     Size _tabCount = tabCount + 1;
+                              
+                     if (count == 1)
+                          _tabCount--;
+
+                     item.write(
+                          out,
+                          _tabCount
+                     );
+                          
+                     if (index < count - 1)
+                     {
+                          out << ",\r\n" << tabs(tabCount + 1);
+                     }
+                 }
+
+                 if (count > 1) {
+                     out << "\r\n";
+                     out << tabs(tabCount);
+                 }
+                 
+                 out << "]";
+                     
+                 break;
+             }
+             case Type::OBJECT:
+             {
+                 Path objProps = getObjectPositions();
+                 
+                 if (objProps.isDeadEnd())
+                 {
+                     out << "{}";
+                     break;
+                 }
+                     
+                 out << "{";
+                 Size count = 0;
+                 
+                 
+                 if (!path.isDeadEnd()) {
+                     
+                     out << "\r\n";
+                    
+                     optional<BString> key;
+                     count = path.max<Size>() + 1;
+
+                     for (Size position = 0; position < count; ++position) 
+                     {
+                          key = getObjectKey(position);
+
+                          if (key.has_value()) {
+                              out << tabs(tabCount + 1)
+                                    << "\""
+                                        << escape(key.value())
+                                    << "\": ";
+                               
+                              JSONPath value =
+                                  path[position];
+                          
+                              value.write(out, tabCount + 1);
+                          
+                              if (position < count - 1)
+                                  out << ",\r\n";
+                          }
+
+                     }
+                 }
+                 
+                 if (count > 0) {
+                     out << "\r\n";
+                     out << tabs(tabCount);
+                 }
+                 
+                 out  << "}";
+                 break;
+             }
+             default:
+                 throw std::logic_error("JSONPath::write");
+             }
+            
         }
         
     };

@@ -36,9 +36,9 @@ public:
         public:
             Method() : BeeFishParser::Or(
                     new Word("GET"),
-//                    new Word("PUT"),
                     new Word("POST"),
-                    new Word("DELETE")
+                    new Word("DELETE"),
+                    new Word("OPTIONS")
                 )
             {
 

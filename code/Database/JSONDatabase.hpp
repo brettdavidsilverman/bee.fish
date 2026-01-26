@@ -15,6 +15,7 @@ namespace BeeFishDatabase
         Path _properties;
         Path _words;
         Path _objects;
+        Path _authentication;
         
     public:
         JSONDatabase(
@@ -35,6 +36,9 @@ namespace BeeFishDatabase
                 
             _objects =
                 _root[OBJECTS];
+                
+            _authentication =
+                _root[AUTHENTICATION];
         }
         
         
@@ -52,6 +56,16 @@ namespace BeeFishDatabase
         virtual Path objects() const
         {
             return _objects;
+        }
+        
+        virtual Path root() const
+        {
+            return _authentication;
+        }
+        
+        const BString& origin() const
+        {
+            return _origin;
         }
         
         

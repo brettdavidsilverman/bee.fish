@@ -24,54 +24,66 @@ namespace BeeFishDatabase {
         >
         MapType;
             
-        ListType _cache_list;
-        MapType _cache_map;
-
+        ListType _list;
+        MapType _map;
+        std::mutex _mutex;
+        
     public:
-        LeastRecentlyUsedCache(Size capacity) : 
+        LeastRecentlyUsedCache(Size capacity = 100000) : 
             _capacity(capacity)
         {
+        }
+        
+        LeastRecentlyUsedCache& operator = (const LeastRecentlyUsedCache& source)
+        {
+            _capacity = source._capacity;
+            return *this;
         }
 
         optional<Value> get(Key key)
         {
-            if (_cache_map.find(key) == _cache_map.end()) {
+            std::scoped_lock lock(_mutex);
+            
+            if (_map.find(key) == _map.end()) {
                 return nullopt;
             }
        
             // Move the accessed item to the front (MRU)
-            _cache_list.splice(
-                _cache_list.begin(),
-                _cache_list,
-                _cache_map[key]
+            _list.splice(
+                _list.begin(),
+                _list,
+                _map[key]
             );
             
-            return _cache_map[key]->second;
+            return _map[key]->second;
         }
 
         void put(Key key, Value value) {
-            if (_cache_map.find(key) != _cache_map.end())
+
+            std::scoped_lock lock(_mutex);
+            
+            if (_map.find(key) != _map.end())
             {
                 // Key exists, update value and move to front
-                _cache_map[key]->second = value;
-                _cache_list.splice(
-                    _cache_list.begin(),
-                    _cache_list,
-                    _cache_map[key]
+                _map[key]->second = value;
+                _list.splice(
+                    _list.begin(),
+                    _list,
+                    _map[key]
                 );
             }
             else
             {
                 // New item, add to front
-                _cache_list.push_front({key, value});
-                _cache_map[key] = _cache_list.begin();
+                _list.push_front({key, value});
+                _map[key] = _list.begin();
 
                 // Evict the least recently used item if capacity is exceeded
-                if (_cache_list.size() > _capacity) {
+                if (_list.size() > _capacity) {
                     Key lru_key =
-                        _cache_list.back().first;
-                    _cache_list.pop_back();
-                    _cache_map.erase(lru_key);
+                        _list.back().first;
+                    _list.pop_back();
+                    _map.erase(lru_key);
                 }
             }
         }

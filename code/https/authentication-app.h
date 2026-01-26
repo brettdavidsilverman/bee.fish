@@ -131,7 +131,14 @@ namespace BeeFishHTTPS {
                "set-cookie",
                BString("sessionId=") +
                _sessionId +
-              BString(";path=/;max-age=3600;")
+              BString(";path=/;max-age=3600;secure=true;httponly=false;samesite=None;")
+/*
+            "secure" => true, // Recommended for production
+            "httponly" => false, // Recommended for security
+            "samesite" => "None" // Can be 'Strict', 'Lax', or 'None'
+*/
+        
+              
             );
          }
          else
