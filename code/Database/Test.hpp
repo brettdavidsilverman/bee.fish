@@ -671,30 +671,30 @@ if (success) {
         }
         
         if (success) {
-            cout << "\tItem 0:" << endl;
+            cout << "\tItem 1:" << endl;
             Path path = root["array"];
             path = path[Type::ARRAY];
             
             Size test = path.min<Size>();
             success = success &&
-                testResult("\tItem 0 index", test == 0);
+                testResult("\tItem 1 index", test == 1);
                 
             success = success && 
-                testResult("\tItem contains 0", path.contains(test));
+                testResult("\tItem contains 1", path.contains(test));
             
         }
         
         if (success) {
-            cout << "\tType item 0 ";
+            cout << "\tType item 1 ";
             Path path = root["array"];
-            path = path[Type::ARRAY][0];
+            path = path[Type::ARRAY][1];
             success = path.contains(Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
-            cout << "\tValue item 0 ";
-            Path path = root["array"][Type::ARRAY][Index(0)][Type::INTEGER];
+            cout << "\tValue item 1 ";
+            Path path = root["array"][Type::ARRAY][1][Type::INTEGER];
             BString value;
             path.getData(value);
             success = (value == "1");
@@ -702,24 +702,24 @@ if (success) {
         }
         
         if (success) {
-            cout << "\tItem 1 ";
+            cout << "\tItem 2 ";
             Path path = root["array"];
             path = path[Type::ARRAY];
-            success = path.contains(1);
+            success = path.contains(2);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
-            cout << "\tType item 1 ";
-            Path path = root["array"][Type::ARRAY][1];
+            cout << "\tType item 2 ";
+            Path path = root["array"][Type::ARRAY][2];
             success = path.contains(Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
-            cout << "\tValue item 1 ";
+            cout << "\tValue item 2 ";
             Path path = root["array"];
-            success = path[Type::ARRAY][1][Type::ARRAY].isDeadEnd();
+            success = path[Type::ARRAY][2][Type::ARRAY].isDeadEnd();
             BeeFishMisc::outputSuccess(success);
         }
         
@@ -784,17 +784,17 @@ if (success) {
         
         if (success) {
             path = path[Type::ARRAY];
-            success = path.contains(0);
+            success = path.contains(1);
         }
         
         if (success) {
             Path maxPath = path;
             Stack stack;
             Size max = maxPath.max<Size>();
-            success &= testResult("\tmax == 0", max == 0);
+            success &= testResult("\tmax == 1", max == 1);
             assert(success);
             
-            for (Size i = 0; i <= max; ++i)
+            for (Size i = 1; i <= max; ++i)
             {
                 if (!path.contains(i))
                 {
@@ -805,7 +805,7 @@ if (success) {
         }
         
         if (success) {
-            path = path[0];
+            path = path[1];
             success = path.contains(Type::ARRAY);
         }
         
@@ -855,21 +855,31 @@ cerr << test << endl;
         if (success) {
             cout << "\tOuter Array first index: ";
             path = path[Type::ARRAY];
-            success = path.contains(0);
+            success = path.contains(1);
             BeeFishMisc::outputSuccess(success);
         }
         
+
+        
         if (success) {
             cout << "\tOuter Array max index: ";
-            Path maxPath = path;
-            Size max = maxPath.max<Size>();
-            success = (max == 0);
+            Stack stack;
+            Index position;
+            while (path.next(stack, position))
+            {
+                cerr << "Position. " << position << endl;
+            }
+            
+            Index max = test[Type::ARRAY].max<Index>();
+            
+            success = (max == 1);
+
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tInner Array: ";
-            path = path[0];
+            path = path[1];
             success = path.contains(Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
@@ -886,14 +896,14 @@ cerr << test << endl;
             else {
                 Size max = maxPath.max<Size>();
 cerr << "MAX:" << max << endl;
-                success = (max == 0);
+                success = (max == 1);
             }
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tInner array contains number" << endl;
-            path = path[0];
+            path = path[1];
             success = path.contains(Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }

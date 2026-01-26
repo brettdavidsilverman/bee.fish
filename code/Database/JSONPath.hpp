@@ -128,7 +128,7 @@ namespace BeeFishDatabase {
         JSONPath parent(BString& key) {
             JSONPath path = *this;
 
-            Size position = 0;
+            Index position = 0;
             path = path.parent(position);
             Type type;
             path = path.parent(type);
@@ -296,7 +296,7 @@ namespace BeeFishDatabase {
             return out;
         }
         
-        BString tabs(Size tabCount) const
+        BString tabs(Index tabCount) const
         {
             return string(tabCount * TAB_SPACES, ' ');
         }
@@ -323,7 +323,7 @@ namespace BeeFishDatabase {
              
         }
         
-        virtual void write(ostream& out, Size tabCount = 0)
+        virtual void write(ostream& out, Index tabCount = 0)
         {
              if (isDeadEnd())
                  return;
@@ -364,23 +364,23 @@ namespace BeeFishDatabase {
              {
                  out << "[";
                  
-                 Size count = 0;
+                 Index count = 0;
                  
                  if (!path.isDeadEnd())
-                     count = path.max<Size>() + 1;
+                     count = path.max<Index>();
                  
                  if (count > 1) {
                      out << "\r\n";
                      out << tabs(tabCount + 1);
                  }
 
-                 for (Size index = 0;
-                        index < count;
+                 for (Index index = 1;
+                        index <= count;
                         ++index)
                  {
-                     JSONPath item = path[index];
+                     JSONPath item = (*this)[index];
                           
-                     Size _tabCount = tabCount + 1;
+                     Index _tabCount = tabCount + 1;
                               
                      if (count == 1)
                           _tabCount--;
@@ -390,7 +390,7 @@ namespace BeeFishDatabase {
                           _tabCount
                      );
                           
-                     if (index < count - 1)
+                     if (index < count)
                      {
                           out << ",\r\n" << tabs(tabCount + 1);
                      }
@@ -416,7 +416,7 @@ namespace BeeFishDatabase {
                  }
                      
                  out << "{";
-                 Size count = 0;
+                 Index count = 0;
                  
                  
                  if (!path.isDeadEnd()) {
@@ -424,9 +424,9 @@ namespace BeeFishDatabase {
                      out << "\r\n";
                     
                      optional<BString> key;
-                     count = path.max<Size>() + 1;
+                     count = path.max<Index>() + 1;
 
-                     for (Size position = 0; position < count; ++position) 
+                     for (Index position = 0; position < count; ++position) 
                      {
                           key = getObjectKey(position);
 

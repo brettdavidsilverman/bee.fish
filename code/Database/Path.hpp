@@ -193,7 +193,8 @@ using namespace BeeFishBString;
 
             _index = branch._left;
             
-
+            if (_count > 0)
+                --_count;
         }
         
         virtual void goRight()
@@ -224,7 +225,7 @@ using namespace BeeFishBString;
             }
 
             _index = branch._right;
-            
+            ++_count;
         }
         
         virtual void goUp()

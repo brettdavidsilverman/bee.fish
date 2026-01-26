@@ -97,7 +97,7 @@ namespace BeeFishDatabase {
                     // Loop through all remaining tokens
                     while (token != nullptr) 
                     {
-
+cerr << token << endl;
                         BString lower = 
                             BString(token).toLower();
 
@@ -118,7 +118,10 @@ namespace BeeFishDatabase {
                 }
                 
                 case Type::ARRAY:
+                    //push_back_container(true);
+                    break;
                 case Type::OBJECT:
+                    //push_back_container(false);
                     break;
                     
                 default:
@@ -149,10 +152,12 @@ namespace BeeFishDatabase {
         }
         
 
-        Size& topArrayIndex() {
-            return 
+        Index& topArrayIndex() {
+            Index& index = 
                 _arrayIndexStack
                 [_arrayIndexStack.size() - 1];
+
+            return index;
         }
           
         void push_back_path(JSONPath path)
@@ -171,7 +176,7 @@ namespace BeeFishDatabase {
         {
             _containerStack.push_back(isArrayContainer);
             if (isArrayContainer)
-                _arrayIndexStack.push_back(0);
+                _arrayIndexStack.push_back(1);
             
         }
         
@@ -215,7 +220,7 @@ namespace BeeFishDatabase {
                 JSONPath path = topPath();
                 if (topContainer() == true)
                 {
-                    Size& index = topArrayIndex();
+                    Index index = topArrayIndex();
                     path = path[index];
                 }
                 else
@@ -283,7 +288,7 @@ namespace BeeFishDatabase {
                 JSONPath path = topPath();
                 if (topContainer() == true)
                 {
-                    Index& index = topArrayIndex();
+                    Index index = topArrayIndex();
                     path = path[index];
                 }
                 else
@@ -303,9 +308,8 @@ namespace BeeFishDatabase {
         {
             
             JSONPath path = topPath();
-            Size& index = topArrayIndex();
+            Index& index = topArrayIndex();
             path = path[index++];
-            
             setVariable(path, json->type(), json->value());
             
 
