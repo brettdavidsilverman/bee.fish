@@ -18,9 +18,9 @@ namespace BeeFishDatabase {
     protected:
           
         vector<JSONPath> _pathStack;
-        vector<bool> _containerStack;
-        vector<Index> _arrayIndexStack;
+        vector<Index> _indexStack;
         vector<Path> _keyWordPathStack;
+        vector<Type> _typeStack;
         BString _key;
         
     public:
@@ -49,14 +49,14 @@ namespace BeeFishDatabase {
 
 #ifdef DEBUG
             assert(_pathStack.size() == 0);
-            assert(_containerStack.size() == 0);
-            assert(_arrayIndexStack.size() == 0);
+            assert(_indexStack.size() == 0);
             assert(_keyWordPathStack.size() == 0);
+            assert(_typeStack.size() == 0);
 #endif
 
         }
         
-     protected:
+     private:
 
         virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
@@ -132,18 +132,9 @@ cerr << token << endl;
         }
 
           
-    public:
-      
-          
         JSONPath& topPath() {
             return 
                 _pathStack[_pathStack.size() - 1];
-        }
-          
-        bool topContainer() {
-            return
-                _containerStack
-                [_containerStack.size() - 1];
         }
           
         Path& topKeyWordPath() {
@@ -152,45 +143,70 @@ cerr << token << endl;
         }
         
 
-        Index& topArrayIndex() {
+        Index& topIndex() {
             Index& index = 
-                _arrayIndexStack
-                [_arrayIndexStack.size() - 1];
+                _indexStack
+                [_indexStack.size() - 1];
 
             return index;
         }
+        
+        Type& topType() {
+            Type& type = 
+                _typeStack
+                [_typeStack.size() - 1];
+
+            return type;
+        }
           
-        void push_back_path(JSONPath path)
+        void push_back_path(Type type)
         {
+            JSONPath path;
+            
+            if (_pathStack.size() == 0)
+            {
+                path = *this;
+
+            }
+            else
+            {
+                path = topPath();
+                if (topType() == Type::OBJECT)
+                    path = path[_key];
+                else {
+                    Index index = topIndex();
+                    path = path[index];
+                }
+                
+            }
+            path[type];
             _pathStack.push_back(path);
+            _indexStack.push_back(1);
+            _typeStack.push_back(type);
         }
         
         void pop_back_path()
         {
             _pathStack.pop_back();
-
+            _indexStack.pop_back();
+            _typeStack.pop_back();
         }
           
-          
+/*
         void push_back_container(bool isArrayContainer)
         {
             _containerStack.push_back(isArrayContainer);
-            if (isArrayContainer)
-                _arrayIndexStack.push_back(1);
+            _indexStack.push_back(1);
             
         }
         
         void pop_back_container()
         {
-            bool isArrayContainer = topContainer();
-            if (isArrayContainer) {
-                _arrayIndexStack.pop_back();
-            }
-        
+            _indexStack.pop_back();
             _containerStack.pop_back();
         }
         
-
+*/
         void push_back_key_word_path(Path word)
         {
             _keyWordPathStack.push_back(word);
@@ -205,32 +221,8 @@ cerr << token << endl;
         virtual void onbeginobject(JSON* match) 
         override {
             
-            push_back_key_word_path(
-                Path()
-            );
-                
-            
-            if (_containerStack.size() == 0)
-            {
-                push_back_container(false);
-                push_back_path(*this);
-            }
-            else
-            {
-                JSONPath path = topPath();
-                if (topContainer() == true)
-                {
-                    Index index = topArrayIndex();
-                    path = path[index];
-                }
-                else
-                    path = path[_key];
-                    
-                push_back_container(false);
-                push_back_path(path);
-            }
-            
-                
+            push_back_path(Type::OBJECT);
+        
         }
           
         virtual void onobjectkey(ObjectKey* key)
@@ -238,10 +230,9 @@ cerr << token << endl;
         {
             _key = key->value();
             
-
-            _keyWordPathStack[
-                _keyWordPathStack.size() - 1
-            ] = words()[_key.toLower()];
+            push_back_key_word_path(
+                words()[_key.toLower()]
+            );
             
         }
         
@@ -252,9 +243,11 @@ cerr << token << endl;
 
             JSONPath path = topPath();
             path = path[_key];
-
+            ++topIndex();
             setVariable(path, value->type(), value->value());
         
+            pop_back_key_word_path();
+            
             JSONParser::onobjectvalue(object, key, value);
             
             
@@ -264,11 +257,8 @@ cerr << token << endl;
         virtual void onendobject(JSON* match)
         override
         {
-        
-            pop_back_key_word_path();
-            
+    
             pop_back_path();
-            pop_back_container();
     
         }
 
@@ -276,29 +266,7 @@ cerr << token << endl;
         override
         {
             
-            if (_containerStack.size() == 0)
-            {
-                push_back_container(true);
-                push_back_path(*this);
-            }
-            else
-            {
-                
-                
-                JSONPath path = topPath();
-                if (topContainer() == true)
-                {
-                    Index index = topArrayIndex();
-                    path = path[index];
-                }
-                else
-                    path = path[_key];
-                    
-                push_back_path(
-                    path
-                );
-                push_back_container(true);
-            }
+            push_back_path(Type::ARRAY);
     
                 
         }
@@ -308,7 +276,7 @@ cerr << token << endl;
         {
             
             JSONPath path = topPath();
-            Index& index = topArrayIndex();
+            Index& index = topIndex();
             path = path[index++];
             setVariable(path, json->type(), json->value());
             
@@ -320,8 +288,6 @@ cerr << token << endl;
         {
     
             pop_back_path();
-            pop_back_container();
-            
          
         }
 
@@ -330,7 +296,7 @@ cerr << token << endl;
         override
         {
 
-            if (_containerStack.size() == 0 )
+            if (_pathStack.size() == 0 )
             {
                 setVariable(
                     *this,

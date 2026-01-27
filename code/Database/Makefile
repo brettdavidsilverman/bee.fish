@@ -24,7 +24,7 @@ time:	$(OUTPUT)
 	time --verbose $(OUTPUT) -deaths
 	
 run:	$(OUTPUT)
-	$(OUTPUT) -input -output
+	$(OUTPUT) -input
 	
 run_debug:	debug
 	gdb --args $(OUTPUT) -test

@@ -113,8 +113,8 @@ namespace BeeFishDatabase {
         
         JSONPath operator [] (const Index& index)
         {
-             Path path(*this);
-             path << Type::ARRAY << index;
+             JSONPath path(*this);
+             path << path.type() << index;
              return JSONPath(path);
         }
         
