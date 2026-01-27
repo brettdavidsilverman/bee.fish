@@ -79,26 +79,12 @@ namespace BeeFishDatabase {
             ),
             _pageSize(pageSize)
         {
-#ifdef DEBUG_
-            Debug debug;
-            debug << now() << " "
-                    << "Database(\""
-                    << escape(_filename)
-                    << "\")"
-                    << "\r\n";#endif
+            //lock();
         }
 
         virtual ~Database()
         {
-#ifdef DEBUG_
-            Debug debug;
-
-            debug << now() << " "
-                    << "~Database(\""
-                    << escape(_filename)
-                    << "\")"
-                    << "\r\n";
-#endif
+            //unlock();
         }
         
     public:
@@ -169,14 +155,14 @@ namespace BeeFishDatabase {
                 }
             }
 
-            optional<Branch> optionalBranch =
+            optional<Branch> optionalBranch = nullopt;
                 cache().get(index);
                 
             if (optionalBranch == nullopt)
             {
                 seek(index);
                 read(&branch, sizeof(Branch));
-                cache().put(index, branch);
+               // cache().put(index, branch);
             }
             else
                 branch = optionalBranch.value();
@@ -194,7 +180,7 @@ namespace BeeFishDatabase {
 
             seek(index);
             write(&branch, sizeof(Branch));
-            cache().put(index, branch);
+           // cache().put(index, branch);
             
         }
         

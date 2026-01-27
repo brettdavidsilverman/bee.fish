@@ -26,6 +26,7 @@ namespace BeeFishDatabase
             _origin(origin)
         {
      
+    
             _root = Path(*this)[ORIGINS][_origin];
             
             _properties = 
@@ -40,6 +41,7 @@ namespace BeeFishDatabase
             _authentication =
                 _root[AUTHENTICATION];
         }
+        
         
         
         Path properties() const

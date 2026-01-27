@@ -97,7 +97,6 @@ namespace BeeFishDatabase {
                     // Loop through all remaining tokens
                     while (token != nullptr) 
                     {
-cerr << token << endl;
                         BString lower = 
                             BString(token).toLower();
 
@@ -105,6 +104,7 @@ cerr << token << endl;
                             words()[lower];
                             
                         word[id];
+                        
                         for (auto parentPath : _pathStack)
                         {
                             word[parentPath.id()];
@@ -247,7 +247,7 @@ cerr << token << endl;
             setVariable(path, value->type(), value->value());
         
             pop_back_key_word_path();
-            
+
             JSONParser::onobjectvalue(object, key, value);
             
             

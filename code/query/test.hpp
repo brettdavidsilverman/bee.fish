@@ -522,7 +522,8 @@ namespace BeeFishQuery {
         [&db, &words](BString input, vector<int> check) {
             
             
-        
+            cout << input << flush;
+            
             Expression expression;
             Parser parser(expression);
             parser.read(input);

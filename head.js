@@ -59,20 +59,3 @@ Object.prototype.toString = function() {
    return JSON.stringify(this, null, "   ");
 }
 
-class CheckError extends Error
-{   
-   constructor(label)
-   {
-      super("Check failed for " + label);
-      this.label = label;
-   }
-   
-}
-
-function CHECK(label, bool)
-{
-   if (bool == false)
-   {
-      throw new CheckError(label);
-   }
-}

@@ -22,6 +22,9 @@ namespace BeeFishJSON
     inline bool testKeyedSets();
     inline bool testArrays();
     inline bool testObjects();
+    inline bool testAllFiles(string directory);
+    inline bool testFile(Parser& parser, string file, bool expect);
+    
 #ifdef SERVER
     inline bool testStreams();
     
@@ -54,6 +57,8 @@ namespace BeeFishJSON
         ok = ok && testEmojis();
         ok = ok && testTypes();
         
+        ok = ok && testAllFiles(TEST_DIRECTORY);
+    
         if (ok)
             cout << "SUCCESS" << endl;
         else
@@ -634,9 +639,7 @@ assert(ok);
 
         ok &= testFile(
             parser,
-            "JSON with buffered image",
             WWW_ROOT_DIRECTORY "/code/json/tests/stream.json",
-            jsonImage,
             true
         );
 /*
@@ -655,6 +658,63 @@ assert(ok);
         
         return ok;
     }
+    
+    inline bool testAllFiles(string directory)
+    {
+        cout << "Testing all files in " << directory << endl;
+
+        bool success = true;
+        
+        vector<string> files;
+
+        for (const auto & entry : directory_iterator(directory))
+        {
+            files.push_back(entry.path());
+        }
+
+        sort(files.begin(), files.end());
+        
+        
+        // Test direct to database
+        for (auto file : files) {
+            JSON json;
+            JSONParser parser(json);
+        
+            if (success)
+                success = testFile(parser, file, true);
+            else
+                break;
+        }
+
+        outputSuccess(success);
+
+        return success;
+    }
+    
+    inline bool testFile(Parser& parser, string file, bool expect)
+    {
+        cout << "\t" << file << endl;
+        
+        string tempFile =
+            TEMP_DIRECTORY;
+
+        tempFile += "test.json";
+        remove(tempFile);
+        
+        ifstream inputFile(file);
+        
+        parser.read(inputFile);
+        parser.eof();
+        inputFile.close();
+        
+        bool success = (parser.matched());
+        
+        outputSuccess(success);
+        
+        return success;
+        
+    }
+    
 #endif
 
 

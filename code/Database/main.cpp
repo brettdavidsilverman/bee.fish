@@ -54,8 +54,6 @@ int main(int argc, const char* argv[])
     if (originArg != -1 && argc > (originArg + 2))
     {
         origin = argv[originArg + 1];
-        cout << origin << endl;
-        assert(false);
     }
     
     JSONDatabase database(origin, DATABASE_FILENAME);

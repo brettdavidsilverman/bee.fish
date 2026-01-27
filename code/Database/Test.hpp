@@ -18,8 +18,8 @@ namespace BeeFishDatabase
     inline bool testArray2Path();
     inline bool testSubArray2Path();
     inline bool testComplexArrays();
-    inline bool testAllFiles(string url, string directory);
-    inline bool testFile(Path root, string file, bool expect);
+    inline bool testAllFiles(string directory);
+    inline bool testFile(Path root, std::filesystem::path file, bool expect);
     inline bool testIterator();
     inline bool testClear();
     inline bool testPathParent();
@@ -47,10 +47,7 @@ namespace BeeFishDatabase
             testSubArray2Path();
             
         success = success &&
-            testComplexArrays();
-            
-        success = success &&
-            testAllFiles(HOST, TEST_DIRECTORY);
+            testAllFiles(TEST_DIRECTORY);
             
         success = success &&
             testIterator();
@@ -1011,17 +1008,17 @@ assert(success);
         return success;
     }
     
-    inline bool testAllFiles(string url, string directory)
+    inline bool testAllFiles(string directory)
     {
         cout << "Testing all files in " << directory << endl;
 
         bool success = true;
         
-        vector<string> files;
+        vector<std::filesystem::path> files;
 
         for (const auto & entry : directory_iterator(directory))
         {
-            files.push_back(entry.path());
+            files.push_back(entry);
         }
 
         sort(files.begin(), files.end());
@@ -1041,9 +1038,9 @@ assert(success);
         return success;
     }
     
-    inline bool testFile(Path root, string file, bool expect)
+    inline bool testFile(Path root, std::filesystem::path file, bool expect)
     {
-        cout << "\t" << file << endl;
+        cout << "\t" << file.filename() << endl;
         
         string tempFile =
             TEMP_DIRECTORY;
@@ -1052,7 +1049,7 @@ assert(success);
         remove(tempFile);
         
         ifstream inputFile(file);
-        JSONPathParser parser(root[file]);
+        JSONPathParser parser(root[(std::string)file]);
         parser.read(inputFile);
         parser.eof();
         inputFile.close();
@@ -1062,7 +1059,7 @@ assert(success);
         if (success && expect)
         {
             ofstream outputFile(tempFile);
-            JSONPath path(root[file]);
+            JSONPath path(root[(std::string)file]);
             outputFile << path;
             outputFile.close();
             

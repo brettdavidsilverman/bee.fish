@@ -24,13 +24,12 @@ namespace BeeFishHTTPS {
    inline bool testAllFiles(const BString& origin, string directory);
    inline bool testFile(const BString& origin, string directory, string file, bool expect = true);
    
-   inline bool test(int port) {
+   inline bool test(BString origin) {
       cout << "Testing HTTPS" << endl;
       bool success = true;
       
       Id id;
       
-      BString origin = ORIGIN;
 /*
       success = success &&
          testParseURL(origin);

@@ -1,71 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="utf-8"/>
-      <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <title id="title">bee.fish</title>
-      <script src="/head.js"></script>
-      <script src="/error.js"></script>
-      <script src="/client/stream/stream.js"></script>
-      <script src="/client/power-encoding/power-encoding.js"></script>
-      <script src="/client/id/id.js"></script>
-      <script src="/client/evaluate.js"></script>      <script src="/client/logon/authentication.js"></script>
-      <script src="/client/punycode.js"></script>
-      <link rel="stylesheet" type="text/css" href="style.css"/>
-      <script>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title id="title">bee.fish</title>
+        <script src="/head.js"></script>
+        <script src="/error.js"></script>
+        <script src="/client/stream/stream.js"></script>
+        <script src="/client/power-encoding/power-encoding.js"></script>
+        <script src="/client/id/id.js"></script>
+        <script src="/client/evaluate.js"></script>        <script src="/client/logon/authentication.js"></script>
+        <script src="/client/punycode.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+        <script>
 
-      </script>
-   </head>
-   <body>
-      <h1 id="h1">bee.fish</h1>
-      <div>
-         <form onsubmit="return false;">
-            <div style="text-align:left;">
-               <label for="pathInput">Path</label>
-            </div>
-            <input type="text" id="pathInput"/>
-            <button id="fetchButton" onclick="loadJSON()">Fetch</button>
+        </script>
+    </head>
+    <body>
+        <h1 id="h1">bee.fish</h1>
+        <div>
+            <form onsubmit="return false;">
+                <div style="text-align:left;">
+                    <label for="pathInput">Path</label>
+                </div>
+                <input type="text" id="pathInput"/>
+                <button id="fetchButton" onclick="loadJSON()">Fetch</button>
+                <br/>
+            </form>
             <br/>
-         </form>
-         <br/>
-         <form onsubmit="return false;">
-            <div style="text-align:left;">
-               <label for="jsonEditor">
-                  JSON Editor
-               </label>
-               <br/>
-               <label for="functionCheckbox">
-                  <i>f()</i>
-               </label>
-               <input type="checkbox"
-                      id="functionCheckbox"
-                      onclick="switchFunctions(this.checked)" 
-               />            </div>
-            <textarea id="jsonEditor"></textarea>
-            <button id="saveButton">Save</button>
-         </form>
-         
-      </div>
-      <h2>
-         <a id="goLink" href="/go.html">App Link</a>
-      </h2>
-      <h2>
-         <a id="dataLink" href="/">Data Link</a>
-      </h2>
-      <br />
-      <br />
-      <a href="/client/logon/" id="logon">Logon/Logoff</a>
-      <br />
-      <a href="/client/">Javascript client library</a>
-      <br />
-      <a href="/code/">Javascript server library</a>
-      <br />
-      <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
-      <script>
+            <form onsubmit="return false;">
+                <div style="text-align:left;">
+                    <label for="jsonEditor">
+                        JSON Editor
+                    </label>
+                    <br/>
+                    <label for="functionCheckbox">
+                        <i>f()</i>
+                    </label>
+                    <input type="checkbox"
+                             id="functionCheckbox"
+                             onclick="switchFunctions(this.checked)" 
+                    />                </div>
+                <textarea id="jsonEditor"></textarea>
+                <button id="saveButton">Save</button>
+            </form>
+            
+        </div>
+        <h2>
+            <a id="goLink" href="/go.html">App Link</a>
+        </h2>
+        <h2>
+            <a id="dataLink" href="/">Data Link</a>
+        </h2>
+        <br />
+        <br />
+        <a href="/client/logon/" id="logon">Logon/Logoff</a>
+        <br />
+        <a href="/client/">Javascript client library</a>
+        <br />
+        <a href="/code/">Javascript server library</a>
+        <br />
+        <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
+        <script>
 
 const defaultURL = 
-   "Type the path of your document";
-   var logon = document.getElementById("logon");
+    "Type the path of your document";
+    var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
 var pathInput = document.getElementById("pathInput");
@@ -76,9 +76,9 @@ var header = document.getElementById("h1");
 var title = document.getElementById("title");
 
 var origin =
-   punycode.toUnicode(
-      window.location.hostname
-   );
+    punycode.toUnicode(
+        window.location.hostname
+    );
 
 header.innerText = origin;
 title.innerText = origin;
@@ -88,190 +88,212 @@ fetchButton.disabled = true;
 authenticate();
 
 function loadJSON() {
-   var url = pathInput.value;
-   
-   if (url == defaultURL ||
-       url == "")
-   {
-      return Promise.resolve(undefined);
-   }
-      
-   fetchButton.disabled = true;
-   
-   localStorage.setItem("path", url);
-   
-   var promise =
-   fetch(url).
-      then(
-         function (response) {
-            status = response.status;
-            return response.json();
-         }
-      ).
-      then(
-         function (json) {
-            if (status != "200") {
-               if (json.error)
-                  throw json.error;
-               throw json;
+    var url = pathInput.value;
+    
+    if (url == defaultURL ||
+         url == "")
+    {
+        return Promise.resolve(undefined);
+    }
+        
+    fetchButton.disabled = true;
+    
+    localStorage.setItem("path", url);
+    var parameters = {
+        mode: "cors",
+        method: "GET",
+        credentials: "include"
+    }
+        
+    var promise =
+    fetch(url, parameters).
+        then(
+            function (response) {
+                status = response.status;
+                if (status == "200")
+                     return response.json();
+                else
+                     return response.text();
             }
-            return json;
-         }
-      ).
-      then(
-         function(json) {
-            if (json == undefined) {
-               jsonEditor.value = "undefined";
-               return undefined;
+        ).
+        then(
+            function (json) {
+                if (status != "200") {
+                    if (json == "undefined")
+                        return undefined;
+                    else
+                    {
+                        throw new Error(json, loadJSON)
+                    }
+                }
+                return json;
             }
-         
-            if (json.error) {
-               Error(json.error, loadJSON);
-            }
-         
-            jsonEditor.value =
-               JSON.stringify(json, null, "   ");
+        ).
+        then(
+            function(json) {
+                if (json == undefined) {
+                    jsonEditor.value = "undefined";
+                    return undefined;
+                }
             
-            fetchButton.disabled = false;
-            saveButton.disabled = false;
-            switchFunctions(
-               functionCheckbox.checked
-            );
+                if (json.error) {
+                    throw new Error(json.error, loadJSON);
+                }
             
-            return json;
-         }
-      )
-      .catch(
-         function (error) {
-            fetchButton.disabled = false;
-            Error(error, loadJSON);
-         }
-      );
-   
-   return promise;
-      
+                jsonEditor.value =
+                    JSON.stringify(json, null, "    ");
+                
+                
+                return json;
+            }
+        )
+        .catch(
+            function (error) {
+               // Error(error);
+            }
+        )
+        .finally(
+            function() {
+                fetchButton.disabled = false;
+                saveButton.disabled = false;
+                switchFunctions(
+                    functionCheckbox.checked
+                );
+            }
+        );
+    
+    return promise;
+        
 }
 
 
 if (!pathInput.value)
-   pathInput.value = defaultURL;
-   
+    pathInput.value = defaultURL;
+    
 pathInput.onfocus = 
-   function() {
-      if (pathInput.value == defaultURL)
-         pathInput.value = "";
-      fetchButton.disabled = false;
-   };
-   
-   
+    function() {
+        if (pathInput.value == defaultURL)
+            pathInput.value = "";
+        fetchButton.disabled = false;
+    };
+    
+    
 pathInput.onblur =
-   function() {
-      if (pathInput.value == "" ||
-          pathInput.value == defaultURL)
-      {
-         fetchButton.disabled = true;
-         pathInput.value = defaultURL;
-      }
-      else {
-         fetchButton.disabled = false;
-      }
-      setLinks();
-   }
+    function() {
+        if (pathInput.value == "" ||
+             pathInput.value == defaultURL)
+        {
+            fetchButton.disabled = true;
+            pathInput.value = defaultURL;
+        }
+        else {
+            fetchButton.disabled = false;
+        }
+        setLinks();
+    }
 
 saveButton.onclick =
-   function() {
+    function() {
+     
+        var json = jsonEditor.value;
     
-      var json;
-   
-      try {
-         localStorage.setItem("json", jsonEditor.value);
-         json = formatJSON(jsonEditor.value);
-      }
-      catch (error) {
-         Error(error, "saveButton.onclick");
-         return;
-      }
-      postJSON(
-         pathInput.value,
-         json
-      ).
-      then(
-         function (json) {
-            alert(json);
-         }
-      ).
-      catch(
-         function (error)
-         {
-            Error(error, "saveButton.onclick");
-         }
-      );
-   }
+        try {
+            //localStorage.setItem("json", jsonEditor.value);
+            var test = formatJSON(json);
+        }
+        catch (error) {
+            throw new Error(error, "saveButton.onclick");
+        }
+        
+        var parameters = {
+            mode: "cors",
+            method: "POST",
+            credentials: "include",
+            body: json
+        }
+        
+        
+        fetch(
+            pathInput.value,
+            parameters
+        ).
+        then(
+            function (response) {
+                return response.json();
+            }
+        ).
+        then(
+            function (json) {
+                alert(json);
+            }
+        ).
+        catch(
+            function (error)
+            {
+                Error(error, "saveButton.onclick");
+            }
+        );
+    }
 
 fetchButton.onclick =
-   function() {
+    function() {
 
-      loadJSON();
+        loadJSON();
 
-   }
-   
+    }
+    
 
 function switchFunctions(showFunctions)
 {
 
-   var json = getJSON();
-   
-   if (showFunctions) {
-      json = displayFunctions(json);
-   }
-   else {
-      json = hideFunctions(json);
-      json = JSON.stringify(json, null, "   ");
-   }
-   jsonEditor.value = json;
+    var json = getJSON();
+    
+    if (showFunctions) {
+        json = displayFunctions(json);
+    }
+    else {
+        json = hideFunctions(json);
+        json = JSON.stringify(json, null, "    ");
+    }
+    jsonEditor.value = json;
 }
 
 function getJSON()
 {
-   var json = jsonEditor.value;
-   
-   if (json == "")
-      return undefined;
-      
-   var f = new Function(
-      "return (" + json + ")"
-   );
-   json = f();
-   return json;
+    var json = jsonEditor.value;
+    
+    if (json == "")
+        return undefined;
+        
+    var f = new Function(
+        "return (" + json + ")"
+    );
+    json = f();
+    return json;
 }
 function setLinks() {
-   if (pathInput.value == "" ||
-       pathInput.value == defaultURL)
-   {
-      goLink.href = "";
-      dataLink.href = "";
-   }
-   else {
-      goLink.href = "/go.html?" + encodeURIComponent(pathInput.value);
-      dataLink.href = "/" + pathInput.value;
-   }
+    if (pathInput.value == "" ||
+         pathInput.value == defaultURL)
+    {
+        goLink.href = "";
+        dataLink.href = "";
+    }
+    else {
+        goLink.href = "/go.html?" + encodeURIComponent(pathInput.value);
+        dataLink.href = "/" + pathInput.value;
+    }
 }
 if (localStorage.getItem("path")) {
 
-   pathInput.value =
-      localStorage.getItem("path");
-      
-   fetchButton.disabled = false;
+    pathInput.value =
+        localStorage.getItem("path");
+        
+    fetchButton.disabled = false;
 }
+setLinks();
 
-if (localStorage.getItem("json")) {
+        </script>
 
-   jsonEditor.value =
-      localStorage.getItem("json");
-}setLinks();
-
-      </script>
-
-   </body>
+    </body>
 
 </html>
