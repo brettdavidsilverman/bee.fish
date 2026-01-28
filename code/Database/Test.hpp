@@ -19,7 +19,7 @@ namespace BeeFishDatabase
     inline bool testSubArray2Path();
     inline bool testComplexArrays();
     inline bool testAllFiles(string directory);
-    inline bool testFile(Path root, std::filesystem::path file, bool expect);
+    inline bool testFile(JSONPath root, std::filesystem::path file, bool expect);
     inline bool testIterator();
     inline bool testClear();
     inline bool testPathParent();
@@ -1038,7 +1038,7 @@ assert(success);
         return success;
     }
     
-    inline bool testFile(Path root, std::filesystem::path file, bool expect)
+inline bool testFile(JSONPath root, std::filesystem::path file, bool expect)
     {
         cout << "\t" << file.filename() << endl;
         
@@ -1049,7 +1049,7 @@ assert(success);
         remove(tempFile);
         
         ifstream inputFile(file);
-        JSONPathParser parser(root[(std::string)file]);
+        JSONPathParser parser(root[file.filename()]);
         parser.read(inputFile);
         parser.eof();
         inputFile.close();
@@ -1059,7 +1059,7 @@ assert(success);
         if (success && expect)
         {
             ofstream outputFile(tempFile);
-            JSONPath path(root[(std::string)file]);
+            JSONPath path(root[file.filename()]);
             outputFile << path;
             outputFile.close();
             

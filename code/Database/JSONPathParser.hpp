@@ -59,12 +59,14 @@ namespace BeeFishDatabase {
 
         virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
-            JSONPath::Id id = start.id();
+//JSONPath::Id id = start.id();
             JSONPath path = start[type];
 
-            //cout << start.toString() << endl;
+            cout << start.toString() << endl;
             
             Path words = JSONPath::words();
+            Path root = database().objects();
+            /*
             cerr << database().origin();
             for (auto key : _keyStack)
             {
@@ -75,11 +77,12 @@ namespace BeeFishDatabase {
             }
             
             cerr << endl;
+            */
             
             switch (type)
             {
                 case Type::UNDEFINED:
-                    path.clear();
+                    start.clear();
                     break;
                 case Type::NULL_:
                 case Type::BOOLEAN:
@@ -108,12 +111,22 @@ namespace BeeFishDatabase {
                         Path word = 
                             words[lower];
                             
-                        word[id];
                         
+/*
+                        word[id];
                         for (auto parentPath : _pathStack)
                         {
                             word[parentPath.id()];
                         }
+*/
+                        #warning use parent instead of stack
+                        JSONPath parentPath = start;
+                        while (parentPath != root && parentPath.index())
+                        {
+                            word[parentPath.id()];
+                            parentPath = parentPath.parent();
+                        }
+                
                         
                         token = strtok(nullptr, delims); 
 

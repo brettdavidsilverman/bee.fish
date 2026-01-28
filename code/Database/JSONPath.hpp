@@ -125,6 +125,11 @@ namespace BeeFishDatabase {
               return path;
         }
         
+        JSONPath parent() {
+            BString key;
+            return parent(key);
+        }
+        
         JSONPath parent(BString& key) {
             JSONPath path = *this;
 
