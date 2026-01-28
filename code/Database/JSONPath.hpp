@@ -149,20 +149,20 @@ namespace BeeFishDatabase {
         }
         
         BString toString() {
-            vector<BString> paths;
+            vector<BString> keys;
             JSONPath path = *this;
             JSONPath root = database().objects();
-            while (path != root)
+            while (path != root && path.index())
             {
                 BString key;
                 path = path.parent(key);
-                paths.push_back(key);
+                keys.push_back(key);
             }
             
-            std::reverse(paths.begin(), paths.end());
+            std::reverse(keys.begin(), keys.end());
             
             BString string = database().origin();
-            for (auto key : paths)
+            for (auto key : keys)
             {
                 string += "/" + key;
             }
@@ -239,7 +239,7 @@ namespace BeeFishDatabase {
                  Path object = (*this)[Type::OBJECT];
                  
                  if (object.isDeadEnd())
-                     position = 0;
+                     position = 1;
                  else {
                      position =
                           object.max<Index>()
@@ -424,9 +424,9 @@ namespace BeeFishDatabase {
                      out << "\r\n";
                     
                      optional<BString> key;
-                     count = path.max<Index>() + 1;
+                     count = path.max<Index>();
 
-                     for (Index position = 0; position < count; ++position) 
+                     for (Index position = 1; position <= count; ++position) 
                      {
                           key = getObjectKey(position);
 
@@ -441,7 +441,7 @@ namespace BeeFishDatabase {
                           
                               value.write(out, tabCount + 1);
                           
-                              if (position < count - 1)
+                              if (position < count)
                                   out << ",\r\n";
                           }
 

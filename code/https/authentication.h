@@ -15,6 +15,15 @@ using namespace BeeFishMisc;
 
 namespace BeeFishHTTPS {
 
+    // ROOT
+    inline const Index SECRETS = 0;
+    inline const Index USERS = 1;
+    inline const Index IP_ADDRESSES = 2;
+    
+    // SESSION
+    inline const Index USER_ID = 0;
+    inline const Index LAST_AUTHENTICATION = 1;
+    
     class Session;
     
     class Authentication
@@ -92,7 +101,7 @@ namespace BeeFishHTTPS {
                 md5(secret);
 
             Path secrets = _rootPath
-                ["Secrets"]
+                [SECRETS]
                 [md5Secret];
                 
             // Get or set the userId
@@ -113,7 +122,7 @@ namespace BeeFishHTTPS {
             
             // Set the user data path
             _userData =
-                _rootPath["Users"][_userId];
+                _rootPath[USERS][_userId];
                         
             // Create the session id
             // (Note, we use toHex, not toBase64 due to
@@ -127,20 +136,19 @@ namespace BeeFishHTTPS {
 
             // get the session data
             _sessionData = _rootPath
-                    ["IP Addresses"]
+                    [IP_ADDRESSES]
                     [_ipAddress]
-                    ["Sessions"]
                     [_sessionId];
                 
             // Save the user id
-            _sessionData["User Id"]
+            _sessionData[USER_ID]
                 .setData(_userId);
 
                 
             // Save last authenticated
             time_t lastAuthentication = epoch_seconds();
 
-            _sessionData["Last Authentication"]
+            _sessionData[LAST_AUTHENTICATION]
                 .setData<time_t>(lastAuthentication);
                 
             _authenticated = true;
@@ -172,20 +180,19 @@ namespace BeeFishHTTPS {
             {
 
                 _sessionData = _rootPath
-                    ["IP Addresses"]
+                    [IP_ADDRESSES]
                     [_ipAddress]
-                    ["Sessions"]
                     [_sessionId];
                     
                 if ( _sessionData
-                          ["Last Authentication"]
+                          [LAST_AUTHENTICATION]
                           .hasData() )
                 {
              
                     time_t lastTime = -1;
                     
                     _sessionData
-                        ["Last Authentication"]
+                        [LAST_AUTHENTICATION]
                         .getData<time_t>(lastTime);
                         
                     // 1 hour duration
@@ -195,16 +202,16 @@ namespace BeeFishHTTPS {
                         _authenticated = true;
                     
                         _sessionData
-                            ["Last Authentication"]
+                            [LAST_AUTHENTICATION]
                             .setData<time_t>(epoch_seconds());
                             
                         _userId =
-                            _sessionData["User Id"]
+                            _sessionData[USER_ID]
                             .getData();
                 
                         // Set the user data path
                         _userData =
-                            _rootPath["Users"]
+                            _rootPath[USERS]
                             [_userId];
                         
                     }

@@ -19,9 +19,8 @@ namespace BeeFishDatabase {
           
         vector<JSONPath> _pathStack;
         vector<Index> _indexStack;
-        vector<Path> _keyWordPathStack;
+        vector<BString> _keyStack;
         vector<Type> _typeStack;
-        BString _key;
         
     public:
         using JSONParser::read;
@@ -50,7 +49,7 @@ namespace BeeFishDatabase {
 #ifdef DEBUG
             assert(_pathStack.size() == 0);
             assert(_indexStack.size() == 0);
-            assert(_keyWordPathStack.size() == 0);
+            assert(_keyStack.size() == 0);
             assert(_typeStack.size() == 0);
 #endif
 
@@ -60,17 +59,23 @@ namespace BeeFishDatabase {
 
         virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
-            
+            JSONPath::Id id = start.id();
             JSONPath path = start[type];
 
-            JSONPath::Id id = start.id();
+            //cout << start.toString() << endl;
             
-            for (auto keyPath : _keyWordPathStack)
+            Path words = JSONPath::words();
+            cerr << database().origin();
+            for (auto key : _keyStack)
             {
+                cerr << "/" << key;
+                
+                Path keyPath = words[key.toLower()];
                 keyPath[id];
             }
             
-                     
+            cerr << endl;
+            
             switch (type)
             {
                 case Type::UNDEFINED:
@@ -93,7 +98,7 @@ namespace BeeFishDatabase {
 
                     // Get the first token
                     token = strtok(str, delims);
-     
+
                     // Loop through all remaining tokens
                     while (token != nullptr) 
                     {
@@ -101,7 +106,7 @@ namespace BeeFishDatabase {
                             BString(token).toLower();
 
                         Path word = 
-                            words()[lower];
+                            words[lower];
                             
                         word[id];
                         
@@ -128,7 +133,7 @@ namespace BeeFishDatabase {
                     throw std::logic_error("JSONPathParser::setVariable");
             }
 
-                      
+            
         }
 
           
@@ -137,9 +142,9 @@ namespace BeeFishDatabase {
                 _pathStack[_pathStack.size() - 1];
         }
           
-        Path& topKeyWordPath() {
+        BString& topKey() {
             return 
-                _keyWordPathStack[_keyWordPathStack.size() - 1];
+                _keyStack[_keyStack.size() - 1];
         }
         
 
@@ -171,8 +176,9 @@ namespace BeeFishDatabase {
             else
             {
                 path = topPath();
+                
                 if (topType() == Type::OBJECT)
-                    path = path[_key];
+                    path = path[topKey()];
                 else {
                     Index index = topIndex();
                     path = path[index];
@@ -184,43 +190,29 @@ namespace BeeFishDatabase {
             _indexStack.push_back(1);
             _typeStack.push_back(type);
         }
-        
+
         void pop_back_path()
         {
             _pathStack.pop_back();
             _indexStack.pop_back();
             _typeStack.pop_back();
         }
-          
-/*
-        void push_back_container(bool isArrayContainer)
+        
+        void push_back_key(BString& key)
         {
-            _containerStack.push_back(isArrayContainer);
-            _indexStack.push_back(1);
-            
+            _keyStack.push_back(key);
         }
         
-        void pop_back_container()
+        void pop_back_key()
         {
-            _indexStack.pop_back();
-            _containerStack.pop_back();
-        }
-        
-*/
-        void push_back_key_word_path(Path word)
-        {
-            _keyWordPathStack.push_back(word);
-        }
-        
-        void pop_back_key_word_path()
-        {
-            _keyWordPathStack.pop_back();
+            _keyStack.pop_back();
         }
         
 
         virtual void onbeginobject(JSON* match) 
         override {
             
+        
             push_back_path(Type::OBJECT);
         
         }
@@ -228,10 +220,8 @@ namespace BeeFishDatabase {
         virtual void onobjectkey(ObjectKey* key)
         override
         {
-            _key = key->value();
-            
-            push_back_key_word_path(
-                words()[_key.toLower()]
+            push_back_key(
+                key->value()
             );
             
         }
@@ -239,17 +229,16 @@ namespace BeeFishDatabase {
         virtual void onobjectvalue(BeeFishJSON::Object* object, ObjectKey* key, JSON* value)
         override
         {
-            _key = key->value();
 
             JSONPath path = topPath();
-            path = path[_key];
+            path = path[key->value()];
             ++topIndex();
             setVariable(path, value->type(), value->value());
         
-            pop_back_key_word_path();
+            pop_back_key();
 
             JSONParser::onobjectvalue(object, key, value);
-            
+
             
         }
           
