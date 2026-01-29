@@ -55,17 +55,20 @@ namespace BeeFishHTTPS {
    
          Path userData =
             Authentication::userData();
+            /*
          const BString& clientIPAddress = 
             session()->ipAddress();
+            */
          const BString& method =
             request()->method();
          const BString& url =
             request()->path();
+            /*
          const BString& search =
             request()->search();
-         
+         */
          JSONDatabase* database = _session->database();
-         
+         /*
          optional<Path> jsonPath =
             parseURL(
                userData,
@@ -75,10 +78,11 @@ namespace BeeFishHTTPS {
                url,
                search
             );
-         
-         if (jsonPath.has_value())
+         */
+      //   if (jsonPath.has_value())
          {
-            _bookmark = jsonPath.value();
+            _bookmark = database->origin()[url];
+            //jsonPath.value();
 
             if (method == "GET") {
                _serve = App::SERVE_JSON;
@@ -87,7 +91,7 @@ namespace BeeFishHTTPS {
             else if (method == "POST")
             {
                // Clear the bookmarks contents
-               _bookmark.clear();
+               //_bookmark.clear();
                
                // Stream posted file to
                // database
@@ -117,14 +121,9 @@ namespace BeeFishHTTPS {
                }
             }
          }
+         /*
          else
          {
-/*
-            BeeFishScript::Object object
-            {
-               {"error", error}
-            };
-*/
             _content = "undefined";
             _serve = App::SERVE_CONTENT;
 
@@ -132,7 +131,7 @@ namespace BeeFishHTTPS {
             _statusText = "Path error";
          }
          
-         
+         */
 
       }
       

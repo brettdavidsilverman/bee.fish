@@ -22,7 +22,7 @@ namespace BeeFishHTTPS {
    inline bool testURLQuery(Path userData, const BString& uri, const BString& queryStr, bool expectedResult, const BString& expectedValue = "");
    inline bool testLogon(const BString& origin);
    inline bool testAllFiles(const BString& origin, string directory);
-   inline bool testFile(const BString& origin, string directory, string file, bool expect = true);
+   inline bool testFile(const BString& origin, filesystem::path file, bool expect = true);
    
    inline bool test(BString origin) {
       cout << "Testing HTTPS" << endl;
@@ -144,11 +144,11 @@ namespace BeeFishHTTPS {
 
       bool success = true;
       
-      vector<string> files;
+      vector<filesystem::path> files;
 
       for (const auto & entry : directory_iterator(directory))
       {
-         files.push_back(entry.path().filename());
+         files.push_back(entry);
       }
 
       sort(files.begin(), files.end());
@@ -156,7 +156,7 @@ namespace BeeFishHTTPS {
       // Test via apache web server
       for (auto file : files) {
          if (success)
-            success = testFile(origin, directory, file, true);
+            success = testFile(origin, file, true);
          else
             break;
       }
@@ -200,10 +200,10 @@ namespace BeeFishHTTPS {
       return success;
    }
    
-   inline bool testFile(const BString& origin, string directory, string file, bool expect)
+   inline bool testFile(const BString& origin, filesystem::path file, bool expect)
    {
       cout << "\tTesting "
-           << file
+           << file.filename()
            << endl;
 
       string tempFile =
@@ -218,11 +218,11 @@ namespace BeeFishHTTPS {
       stream << 
          "curl -X POST " <<
          origin << "/" <<
-         file << " "
+         file.filename() << " "
          << "-c cookies -b cookies " <<
          "-H \"Content-Type: application/json; charset=utf-8\" " <<
          "-H Expect: " <<
-         "-T " << directory << "/" << file
+         "-T " << file
          << " -s -k > /dev/null";
 
 
@@ -235,7 +235,7 @@ namespace BeeFishHTTPS {
          stringstream stream1;
          stream1
             << "curl "
-            << origin  << "/" << file << " "
+            << origin  << "/" << file.filename() << " "
             << "-c cookies -b cookies "
             << " -s -k > "
             << tempFile;
@@ -245,7 +245,7 @@ namespace BeeFishHTTPS {
 
          // Compare the files
          success = success &&
-            compareFiles(tempFile, directory + "/" + file);
+            compareFiles(tempFile, file);
 
          
       }

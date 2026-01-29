@@ -62,7 +62,7 @@ namespace BeeFishDatabase {
         {
             JSONPath::Id id = start.id();
             
-
+            start[type];
             
             Path words = JSONPath::words();
             switch (type)
@@ -150,12 +150,10 @@ namespace BeeFishDatabase {
                 }
                 
                 case Type::ARRAY:
-                    //push_back_container(true);
-                    break;
                 case Type::OBJECT:
-                    //push_back_container(false);
+                    cout << start.toString() << endl;
                     break;
-                    
+
                 default:
                     throw std::logic_error("JSONPathParser::setVariable");
             }

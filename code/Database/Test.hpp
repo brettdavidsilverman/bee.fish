@@ -1041,7 +1041,7 @@ assert(success);
         return success;
     }
     
-inline bool testFile(JSONPath root, std::filesystem::path file, bool expect)
+    inline bool testFile(JSONPath root, std::filesystem::path file, bool expect)
     {
         cout << "\t" << file.filename() << endl;
         
@@ -1068,18 +1068,8 @@ inline bool testFile(JSONPath root, std::filesystem::path file, bool expect)
             
             // Compare the files
             success = success &&
-                compareFiles(tempFile, file);
-/*
-    if (!success) {
-        ifstream inputFile(tempFile);
-            
-        string line;
-        while (getline(inputFile, line))
-            cout << line << endl;
-                
-        inputFile.close();
-    }
-*/
+                compareFiles(file, tempFile);
+
             if (success)
                 remove(tempFile);
  
