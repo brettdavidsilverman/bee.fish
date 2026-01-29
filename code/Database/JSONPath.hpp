@@ -148,6 +148,10 @@ namespace BeeFishDatabase {
             else if (type == Type::OBJECT)
             {
                 key = path.getObjectKey(position).value();
+                if (key.isDigitsOnly())
+                {
+                    key = BString("\"") + key + BString("\"");
+                }
             }
     
             return path;
@@ -237,10 +241,6 @@ namespace BeeFishDatabase {
              Path keyPath = 
                  properties();
                  
-             if (!keyPath.contains(key))
-                 keyPath[key].setData(key);
-                 
-             
              keyPath = keyPath[key];
              
              Index keyPathIndex =
@@ -289,7 +289,7 @@ namespace BeeFishDatabase {
              path.getData<Index>(keyIndex);
              BString key;
              Path keyPath(database(), keyIndex);
-             keyPath.getData(key);
+             keyPath.parent(key);
              
              return key;
            
@@ -331,19 +331,18 @@ namespace BeeFishDatabase {
         }
         
         
-        JSONPath clear()
+        void deleteKey(const BString& key)
         {
-                     
-            Stack stack;
-            BString key;
-            JSONPath parent =
-                    JSONPath::parent(key);
-                    
-            // Remove us and
-            // our key
-            parent.clearValue(key);
+            Index position = getObjectKeyPosition(key);
+            getObjectPositions().clearValue(position);
             
-            return parent;
+            Id id = this->id();
+
+            Path keyPath = properties()[key];
+            keyPath.clearValue(id);
+            if (keyPath.isDeadEnd())
+                properties().clearValue(key);
+            
              
         }
         

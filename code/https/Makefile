@@ -1,10 +1,10 @@
-CFLAGS = -std=c++17 -Wall -fmax-errors=1
+CFLAGS = -std=c++17 -Wall -fmax-errors=1 -Ofast
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
 PORT=8000
 DEPS=server.h session.h response.h response-headers.h app.h json-app.h file-system-app.h error-app.h storage-app.h test.h authentication.h version.h Makefile ParseURL.hpp main.cpp ../Config.hpp https.h authentication-app.h Makefile
 
-$(OUTPUT):	$(DEPS)
+$(OUTPUT):	$(DEPS) $(BUILD)/Database
 	@echo "Linking server"
 	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lpthread -latomic
 #	sudo setcap cap_net_bind_service=ep $(OUTPUT)
@@ -13,7 +13,10 @@ $(OUTPUT):	$(DEPS)
 $(BUILD):
 	mkdir $(BUILD)
 
-
+$(BUILD)/Database:
+	make -C ../Database $(DEBUG)
+	
+	
 install:	$(OUTPUT)
 	./start.sh $(PORT)
 

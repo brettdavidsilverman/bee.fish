@@ -22,6 +22,7 @@ namespace BeeFishDatabase {
         vector<Index> _indexStack;
         vector<BString> _keyStack;
         vector<Type> _typeStack;
+        ostream& _log = clog;
         
     public:
         using JSONParser::read;
@@ -62,21 +63,23 @@ namespace BeeFishDatabase {
         {
             JSONPath::Id id = start.id();
             
-            start[type];
+            
             
             Path words = JSONPath::words();
             switch (type)
             {
                 case Type::UNDEFINED:
                 {
-                    JSONPath parent = start.clear();
+                    BString key;
+                    JSONPath parent = start.parent(key);
+                    parent.deleteKey(key);
+                    _log << parent.toString() << "/undefined" << endl;
                     break;
                 }
                 case Type::NULL_:
                 {
-                    Path path = start[type];
-                    cout << start.toString() << "/null" << endl;
-            
+                    start[type];
+                    _log << start.toString() << "/null" << endl;
                     break;
                 }
                 case Type::BOOLEAN:
@@ -85,7 +88,7 @@ namespace BeeFishDatabase {
                 {
                     Path path = start[type];
                     path.setData(value);
-                    cout << start.toString() << "/" << value << endl;
+                    _log << start.toString() << "/" << value << endl;
             
                     break;
                 }
@@ -123,7 +126,7 @@ namespace BeeFishDatabase {
                         {
                             BString key;
                             word[parentPath.id()];
-                            
+
                             parentPath = parentPath.parent(key);
                             keys.push_back(key.toLower());
                         }
@@ -139,7 +142,7 @@ namespace BeeFishDatabase {
                         
                         fullPath.pop_back();
                         
-                        cerr << fullPath
+                        _log << fullPath
                              << endl;
                             
                         token = strtok(nullptr, delims); 
@@ -151,7 +154,7 @@ namespace BeeFishDatabase {
                 
                 case Type::ARRAY:
                 case Type::OBJECT:
-                    cout << start.toString() << endl;
+                    _log  << start.toString() << endl;
                     break;
 
                 default:
@@ -253,18 +256,25 @@ namespace BeeFishDatabase {
             
         }
         
-        virtual void onobjectvalue(BeeFishJSON::Object* object, BeeFishJSON::ObjectKey* key, BeeFishJSON::JSON* value)
+        virtual void onobjectvalue(BeeFishJSON::Object* object, BeeFishJSON::ObjectKey* key, BeeFishJSON::JSON* json)
         override
         {
 
             JSONPath path = topPath();
-            path = path[key->value()];
-
-            setVariable(path, value->type(), value->value());
-        
+            
+            if (json->type() == Type::UNDEFINED)
+            {
+                path.deleteKey(key->value());
+            }
+            else
+            {
+                path = path[key->value()];
+                setVariable(path, json->type(), json->value());
+            }
+            
             pop_back_key();
 
-            JSONParser::onobjectvalue(object, key, value);
+            JSONParser::onobjectvalue(object, key, json);
 
             
         }
