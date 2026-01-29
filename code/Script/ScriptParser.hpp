@@ -105,7 +105,7 @@ namespace BeeFishScript
          BeeFishJSON::JSONParser::onvalue(json);
       }
 
-      virtual void onbeginobject(JSON* match)
+      virtual void onbeginobject(BeeFishJSON::JSON* match)
       override
       {
          
@@ -123,7 +123,7 @@ namespace BeeFishScript
       virtual void onobjectvalue(
          BeeFishJSON::Object* object,
          ObjectKey* key,
-         JSON* value
+         BeeFishJSON::JSON* value
       ) override
       {
          Variable _value = _stack.pop();
@@ -137,19 +137,19 @@ namespace BeeFishScript
          BeeFishJSON::JSONParser::onobjectvalue(object, key, value);
       }
 
-      virtual void onendobject(JSON* match) {
+      virtual void onendobject(BeeFishJSON::JSON* match) {
          BeeFishJSON::JSONParser::onendobject(match);
       }  
 
 
-      virtual void onbeginarray(JSON* match) {
+      virtual void onbeginarray(BeeFishJSON::JSON* match) {
          _stack.push(
             ArrayPointer(new Array())
          );
          JSONParser::onbeginarray(match);
       }
 
-      virtual void onarrayvalue(JSON* match) {
+      virtual void onarrayvalue(BeeFishJSON::JSON* match) {
          Variable value = _stack.pop();
          Variable& array = _stack.top();
          ArrayPointer pointer = array;
@@ -159,7 +159,7 @@ namespace BeeFishScript
          JSONParser::onarrayvalue(match);
       }
 
-      virtual void onendarray(JSON* match) {
+      virtual void onendarray(BeeFishJSON::JSON* match) {
          JSONParser::onendarray(match);
       }
 

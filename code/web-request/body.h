@@ -20,7 +20,7 @@ class Body :
 {
 protected:
     bool _parseJSON;
-    JSON* _json = nullptr;
+    BeeFishJSON::JSON* _json = nullptr;
     Headers* _headers = nullptr;
     Size _contentCount = 0;
     Size _contentLength = 0;

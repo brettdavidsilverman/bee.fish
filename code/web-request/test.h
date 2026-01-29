@@ -643,7 +643,7 @@ using namespace BeeFishTest;
 
         parser.invokeValue(
             "name",
-            [&name, &hit](const BString& key, JSON& json) 
+            [&name, &hit](const BString& key, BeeFishJSON::JSON& json) 
             {
                 name = json.value();
                 hit = true;

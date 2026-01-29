@@ -7,42 +7,31 @@
 namespace BeeFishDatabase
 {
 
+    class JSONPath;
+    
     class JSONDatabase : public Database
     {
     protected:
-        BString _origin;
+        
         Path _root;
         Path _properties;
         Path _words;
+        Path _json;
+        Path _origin;
         Path _objects;
         Path _authentication;
-        
+
     public:
+        // defined in JSONPath.hpp
         JSONDatabase(
             const BString& origin,
             const BString& filePath = ""
-        )
-            : Database(filePath),
-            _origin(origin)
+        );
+        
+        Path root() const
         {
-     
-    
-            _root = Path(*this)[ORIGINS][_origin];
-            
-            _properties = 
-                _root[PROPERTIES];
-                
-            _words =
-                _root[WORDS];
-                
-            _objects =
-                _root[OBJECTS];
-                
-            _authentication =
-                _root[AUTHENTICATION];
+            return _root;
         }
-        
-        
         
         Path properties() const
         {
@@ -54,21 +43,18 @@ namespace BeeFishDatabase
             return _words;
         }
         
+        // defined in JSONPath
+        JSONPath origin() const;
+
+        // defined in JSONPath
+        JSONPath json() const;
+    
         
-        virtual Path objects() const
-        {
-            return _objects;
-        }
-        
-        virtual Path root() const
+        Path authentication()
         {
             return _authentication;
         }
         
-        const BString& origin() const
-        {
-            return _origin;
-        }
         
         
     };

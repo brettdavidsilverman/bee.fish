@@ -57,8 +57,7 @@ int main(int argc, const char* argv[])
     }
     
     JSONDatabase database(origin, DATABASE_FILENAME);
-    Path root = database.objects();
-    
+
     cout << database << endl;
     
     bool propertiesArg =
@@ -97,12 +96,30 @@ int main(int argc, const char* argv[])
         cout << "Input deaths.json" << endl;
     }
 
+    
+    if (loadDeaths)
+    {
+        JSONPathParser json(database.origin());
+        cout << WWW_ROOT_DIRECTORY "/deaths.json" << endl;
+        
+        ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");
+        
+        json.read(file);
+    }
+
     bool input =
         (hasArg(argc, argv, "-input") != -1);
         
     if (input)
     {
         cout << "Input" << endl;
+    }
+    
+    
+    if (input)
+    {
+        JSONPathParser json(database.origin());
+        json.read(cin);
     }
     
     bool output =
@@ -113,26 +130,9 @@ int main(int argc, const char* argv[])
         cout << "Output" << endl;
     }
     
-    if (loadDeaths)
-    {
-        JSONPathParser json(root);
-        cout << WWW_ROOT_DIRECTORY "/deaths.json" << endl;
-        
-        ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");
-        
-        json.read(file);
-    }
-
-    if (input)
-    {
-        JSONPathParser json(root);
-        json.read(cin);
-    }
-    
     if (output)
     {
-        JSONPath path(root);
-        cout << path << endl;
+        cout << database.origin() << endl;
     }
 
     cout << database << endl;

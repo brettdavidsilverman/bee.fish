@@ -7,6 +7,12 @@
 #include <filesystem>
 #include <pwd.h>
 #include <cmath>
+#include <iostream>
+#include <fstream>
+#include <iterator>
+#include <algorithm>
+#include <vector>
+#include <cassert>
 #include "Log.hpp"
 #include "Optional.hpp"
 #include "../Size.hpp"
@@ -19,6 +25,7 @@
 namespace BeeFishMisc {
 
     using namespace std::filesystem;
+    using namespace std;
     
     inline int hasArg(
         int argc,
@@ -158,19 +165,53 @@ namespace BeeFishMisc {
         return std::string(buffer);
     }
 
-    inline bool compareFiles(std::string file1, std::string file2)
-    {
-        // Compare the files
-        std::stringstream stream;
-        stream  << "diff -s -Z "
-                  << file1
-                  << " "
-                  << file2;
-                     
-        std::string command = stream.str();
+    inline bool compareFiles(const std::string& p1, const std::string& p2, bool display = true) {
+        std::ifstream f1(p1, std::ifstream::binary | std::ifstream::ate);
+        std::ifstream f2(p2, std::ifstream::binary | std::ifstream::ate);
+
+        bool equal = true;
+        
+        if (f1.fail() || f2.fail()) {
+            // Handle file open errors
+            std::cerr << "Error opening files." << std::endl;
+            return false;
+        }
+
+        // 1. Check file sizes
+        if (f1.tellg() != f2.tellg()) {
+            equal = false; // Files have different sizes, so they are different
+        }
+
+        if (equal)
+        {
+             // Return to the beginning of the files
+            f1.seekg(0, std::ifstream::beg);
+            f2.seekg(0, std::ifstream::beg);
+        }
+        
+        // 2. Compare file contents in chunks
+        // You can use a specific buffer size, or simply compare using iterators for simplicity
+        if (equal)
+        {
+            equal = std::equal(std::istreambuf_iterator<char>(f1.rdbuf()),
+                      std::istreambuf_iterator<char>(),
+                      std::istreambuf_iterator<char>(f2.rdbuf()));
+        }
+        
+        if (!equal && display) {
+            f1.seekg(0, std::ifstream::beg);
+            f2.seekg(0, std::ifstream::beg);
+            cout << p1 << endl;
+            cout << f1.rdbuf() << endl;
             
-        return
-            (system(command.c_str()) == 0);
+            cout << "-----" << endl;
+            
+            cout << p2 << endl;
+            cout << f2.rdbuf() << endl;
+            
+        }
+        
+        return equal;
         
     }
     

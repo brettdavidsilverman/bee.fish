@@ -272,6 +272,13 @@ using namespace BeeFishBString;
         }
         
     public:
+        
+        bool isRoot()
+        {
+            return
+                index() == 0;
+        }
+        
         template<typename T>
         Path parent(T& value) {
             Stack stack;
@@ -314,7 +321,7 @@ using namespace BeeFishBString;
                 
                 branch = parent;
             }
-            while(count > 0);
+            while(count > 0 && !isRoot());
             
             std::reverse(stack.begin(), stack.end());
             
@@ -501,7 +508,7 @@ using namespace BeeFishBString;
 
         }
         
-        virtual void clear()
+        void clear()
         {
             Database::ScopedFileLock lock(database());
 

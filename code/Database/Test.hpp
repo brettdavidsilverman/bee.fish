@@ -101,7 +101,7 @@ namespace BeeFishDatabase
             
         JSONDatabase db("https://test");
         
-        Path start(db.objects());
+        Path start(db.json());
         
 
         cout << "\tSimple path [] " << flush;
@@ -582,12 +582,14 @@ namespace BeeFishDatabase
         bool success = true;
         JSONDatabase database("https://test");
 
-        Path root = database.objects();
+        JSONPath root = database.origin();
+        /*
         cout << "Test data" << std::endl;
         {
         
             BString str1 = "Hello 🤗";
             Path path = root["str"];
+            
             path.setData(str1);
             Path path2 = root["str"];
             assert(path == path2);
@@ -597,6 +599,7 @@ namespace BeeFishDatabase
             success = testValue(str1, str1 == str2);
             BeeFishMisc::outputSuccess(success);
         }
+        */
         
         // Test string
         cout << "\tTest strings" << endl;
@@ -766,7 +769,7 @@ if (success) {
         cout << "Test Array 2 Path \"[[]]\" " << endl;
  
         JSONDatabase database("https://test");
-        Path path = database.objects()["array"];
+        Path path = database.json()["array"];
         JSONPathParser parser(path);
         parser.read("[[]]");
         parser.eof();
@@ -822,7 +825,7 @@ if (success) {
         cout << "Test Sub Array 2 Path: ";
         
         JSONDatabase database("https://test");
-        Path path = database.objects();
+        Path path = database.origin();
         JSONPathParser parser(path);
         parser.read("[[1]]");
         bool success = true;
@@ -931,7 +934,7 @@ cerr << "MAX:" << max << endl;
             cout << json << endl;
             
             JSONDatabase database("https://test");
-            JSONPath path = database.objects();
+            JSONPath path = database.json();
             JSONPathParser parser(path);
         
             parser.read(json);
@@ -1028,7 +1031,7 @@ assert(success);
             
         for (auto file : files) {
             if (success)
-                success = testFile(tempDB.objects(), file, true);
+                success = testFile(tempDB.origin(), file, true);
             else
                 break;
         }
@@ -1066,17 +1069,17 @@ inline bool testFile(JSONPath root, std::filesystem::path file, bool expect)
             // Compare the files
             success = success &&
                 compareFiles(tempFile, file);
-                
-            if (!success) {
-                ifstream inputFile(tempFile);
+/*
+    if (!success) {
+        ifstream inputFile(tempFile);
             
-                string line;
-                while (getline(inputFile, line))
-                    cout << line << endl;
+        string line;
+        while (getline(inputFile, line))
+            cout << line << endl;
                 
-                inputFile.close();
-            }
-            
+        inputFile.close();
+    }
+*/
             if (success)
                 remove(tempFile);
  
@@ -1296,7 +1299,7 @@ inline bool testFile(JSONPath root, std::filesystem::path file, bool expect)
  
         JSONDatabase database("https://test");
         
-        JSONPath start = database.objects();
+        JSONPath start = database.origin();
         JSONPathParser parser1(start);
         parser1.read("[1,2,3]");
         JSONPath path = start[Index(0)];

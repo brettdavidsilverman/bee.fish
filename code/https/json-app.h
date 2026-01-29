@@ -64,6 +64,8 @@ namespace BeeFishHTTPS {
          const BString& search =
             request()->search();
          
+         JSONDatabase* database = _session->database();
+         
          optional<Path> jsonPath =
             parseURL(
                userData,

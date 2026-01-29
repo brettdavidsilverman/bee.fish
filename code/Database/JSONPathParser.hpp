@@ -1,9 +1,10 @@
-#ifndef BEE_FISH_DATABASE_JSON_PARSER_HPP
-#define BEE_FISH_DATABASE_JSON_PARSER_HPP
-#include "../Database/DatabaseBase.hpp"
+#ifndef BEE_FISH_DATABASE_JSON_PATH_PARSER_HPP
+#define BEE_FISH_DATABASE_JSON_PATH_PARSER_HPP
 #include "../json/json.h"
 #include "../json/json-parser.h"
+#include "JSONDatabase.hpp"
 #include "JSONPath.hpp"
+
 
 namespace BeeFishDatabase {
  
@@ -59,39 +60,38 @@ namespace BeeFishDatabase {
 
         virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
-//JSONPath::Id id = start.id();
-            JSONPath path = start[type];
+            JSONPath::Id id = start.id();
+            
 
-            cout << start.toString() << endl;
             
             Path words = JSONPath::words();
-            Path root = database().objects();
-            /*
-            cerr << database().origin();
-            for (auto key : _keyStack)
-            {
-                cerr << "/" << key;
-                
-                Path keyPath = words[key.toLower()];
-                keyPath[id];
-            }
-            
-            cerr << endl;
-            */
-            
             switch (type)
             {
                 case Type::UNDEFINED:
-                    start.clear();
+                {
+                    JSONPath parent = start.clear();
                     break;
+                }
                 case Type::NULL_:
+                {
+                    Path path = start[type];
+                    cout << start.toString() << "/null" << endl;
+            
+                    break;
+                }
                 case Type::BOOLEAN:
                 case Type::INTEGER:
                 case Type::NUMBER:
+                {
+                    Path path = start[type];
                     path.setData(value);
+                    cout << start.toString() << "/" << value << endl;
+            
                     break;
+                }
                 case Type::STRING:
                 {
+                    Path path = start[type];
                     path.setData(value);
                     BString copy(value);
                     char* str = copy.data();
@@ -112,22 +112,36 @@ namespace BeeFishDatabase {
                             words[lower];
                             
                         
-/*
                         word[id];
-                        for (auto parentPath : _pathStack)
-                        {
-                            word[parentPath.id()];
-                        }
-*/
-                        #warning use parent instead of stack
-                        JSONPath parentPath = start;
-                        while (parentPath != root && parentPath.index())
-                        {
-                            word[parentPath.id()];
-                            parentPath = parentPath.parent();
-                        }
-                
                         
+                        JSONPath parentPath = start;
+                        std::vector<BString> keys;
+        
+                        keys.push_back(lower);
+                        
+                        while(!parentPath.isRoot())
+                        {
+                            BString key;
+                            word[parentPath.id()];
+                            
+                            parentPath = parentPath.parent(key);
+                            keys.push_back(key.toLower());
+                        }
+                        
+                        std::reverse(keys.begin(), keys.end());
+                        
+                        BString fullPath;
+                        for (auto key : keys)
+                        {
+                            fullPath += key;
+                            fullPath += "/";
+                        }
+                        
+                        fullPath.pop_back();
+                        
+                        cerr << fullPath
+                             << endl;
+                            
                         token = strtok(nullptr, delims); 
 
                     }
@@ -200,14 +214,16 @@ namespace BeeFishDatabase {
             }
             path[type];
             _pathStack.push_back(path);
-            _indexStack.push_back(1);
+            if (type == Type::ARRAY)
+                _indexStack.push_back(1);
             _typeStack.push_back(type);
         }
 
         void pop_back_path()
         {
             _pathStack.pop_back();
-            _indexStack.pop_back();
+            if (topType() == Type::ARRAY)
+                _indexStack.pop_back();
             _typeStack.pop_back();
         }
         
@@ -222,7 +238,7 @@ namespace BeeFishDatabase {
         }
         
 
-        virtual void onbeginobject(JSON* match) 
+        virtual void onbeginobject(BeeFishJSON::JSON* match) 
         override {
             
         
@@ -239,13 +255,13 @@ namespace BeeFishDatabase {
             
         }
         
-        virtual void onobjectvalue(BeeFishJSON::Object* object, ObjectKey* key, JSON* value)
+        virtual void onobjectvalue(BeeFishJSON::Object* object, BeeFishJSON::ObjectKey* key, BeeFishJSON::JSON* value)
         override
         {
 
             JSONPath path = topPath();
             path = path[key->value()];
-            ++topIndex();
+
             setVariable(path, value->type(), value->value());
         
             pop_back_key();
@@ -256,7 +272,7 @@ namespace BeeFishDatabase {
         }
           
           
-        virtual void onendobject(JSON* match)
+        virtual void onendobject(BeeFishJSON::JSON* match)
         override
         {
     
@@ -264,7 +280,7 @@ namespace BeeFishDatabase {
     
         }
 
-        virtual void onbeginarray(JSON* match)
+        virtual void onbeginarray(BeeFishJSON::JSON* match)
         override
         {
             
@@ -273,7 +289,7 @@ namespace BeeFishDatabase {
                 
         }
 
-        virtual void onarrayvalue(JSON* json)
+        virtual void onarrayvalue(BeeFishJSON::JSON* json)
         override
         {
             
@@ -285,7 +301,7 @@ namespace BeeFishDatabase {
 
         }
 
-        virtual void onendarray(JSON* match)
+        virtual void onendarray(BeeFishJSON::JSON* match)
         override
         {
     
@@ -294,7 +310,7 @@ namespace BeeFishDatabase {
         }
 
         
-        virtual void onvalue(JSON* json)
+        virtual void onvalue(BeeFishJSON::JSON* json)
         override
         {
 

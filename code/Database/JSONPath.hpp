@@ -1,9 +1,10 @@
 #ifndef BEE_FISH_DATABASE_JSON_PATH_HPP
 #define BEE_FISH_DATABASE_JSON_PATH_HPP
-#include "../Database/DatabaseBase.hpp"
-#include "../Database/Path.hpp"
 #include "../json/json.h"
 #include "../json/json-parser.h"
+#include "../Database/DatabaseBase.hpp"
+#include "../Database/Path.hpp"
+
 #include "JSONIndex.hpp"
 
 namespace BeeFishDatabase {
@@ -156,8 +157,7 @@ namespace BeeFishDatabase {
         BString toString() {
             vector<BString> keys;
             JSONPath path = *this;
-            JSONPath root = database().objects();
-            while (path != root && path.index())
+            while (!path.isRoot())
             {
                 BString key;
                 path = path.parent(key);
@@ -166,13 +166,26 @@ namespace BeeFishDatabase {
             
             std::reverse(keys.begin(), keys.end());
             
-            BString string = database().origin();
+            BString string;
+           //database().origin();
             for (auto key : keys)
             {
-                string += "/" + key;
+                string += key;
+                string += + "/";
             }
             
+            string.pop_back();
+            
             return string;
+        }
+        
+        bool isRoot()
+        {
+            return
+            (
+                *this == database().json() ||
+                index() == 0
+            );
         }
         
         
@@ -318,13 +331,19 @@ namespace BeeFishDatabase {
         }
         
         
-        virtual void clear()
-        override
+        JSONPath clear()
         {
                      
-           // getObjectPositions().clear();
-                 
-             Path::clear();
+            Stack stack;
+            BString key;
+            JSONPath parent =
+                    JSONPath::parent(key);
+                    
+            // Remove us and
+            // our key
+            parent.clearValue(key);
+            
+            return parent;
              
         }
         
@@ -469,8 +488,51 @@ namespace BeeFishDatabase {
         
     };
     
+    // Declared in JSONDatabase.hpp
+    JSONDatabase::JSONDatabase(
+        const BString& origin,
+        const BString& filePath
+    )
+        : Database(filePath)
+    {
+     
     
-
+        _root = *this;
+        
+        _properties = 
+            _root[origin][PROPERTIES];
+                
+        _words =
+            _root[origin][WORDS];
+                
+        _authentication =
+            _root[origin][AUTHENTICATION];
+            
+        JSONPath json =
+            _root[origin][JSON];
+            
+        _json = json;
+        
+        _origin = json[origin];
+        
+        
+    }
+        
+    // Declared in JSONDatabase.hpp
+    JSONPath JSONDatabase::origin() const
+    {
+        return _origin;
+    }
+    
+    // Declared in JSONDatabase.hpp
+    JSONPath JSONDatabase::json() const
+    {
+        return _json;
+    }
+    
+    
+        
+    
 }
 
 #endif

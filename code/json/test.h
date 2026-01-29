@@ -23,7 +23,7 @@ namespace BeeFishJSON
     inline bool testArrays();
     inline bool testObjects();
     inline bool testAllFiles(string directory);
-    inline bool testFile(Parser& parser, string file, bool expect);
+    inline bool testFile(Parser& parser, std::filesystem::path file, bool expect);
     
 #ifdef SERVER
     inline bool testStreams();
@@ -260,8 +260,7 @@ namespace BeeFishJSON
         
 
         ok &= testMatch("Set LoadOnDemand", &object, "{item,item}", true, "{item,item}");
-assert(ok);
-
+        
         class MySet;
         
         class MySetItem : public Capture {
@@ -665,11 +664,11 @@ assert(ok);
 
         bool success = true;
         
-        vector<string> files;
+        vector<std::filesystem::path> files;
 
         for (const auto & entry : directory_iterator(directory))
         {
-            files.push_back(entry.path());
+            files.push_back(entry);
         }
 
         sort(files.begin(), files.end());
@@ -691,9 +690,9 @@ assert(ok);
         return success;
     }
     
-    inline bool testFile(Parser& parser, string file, bool expect)
+    inline bool testFile(Parser& parser, std::filesystem::path file, bool expect)
     {
-        cout << "\t" << file << endl;
+        cout << "\t" << file.filename();
         
         string tempFile =
             TEMP_DIRECTORY;
