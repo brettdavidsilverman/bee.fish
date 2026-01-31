@@ -111,22 +111,19 @@ function loadJSON() {
             function (response) {
                 status = response.status;
                 if (status == "200")
-                     return response.json();
+                    return response.text();
                 else
-                     return response.text();
+                    throw new Error(
+                        response.statusText,
+                        loadJSON
+                    );
             }
         ).
         then(
-            function (json) {
-                if (status != "200") {
-                    if (json == "undefined")
-                        return undefined;
-                    else
-                    {
-                        throw new Error(json, loadJSON)
-                    }
-                }
-                return json;
+            function(text) {
+                if (text == "undefined")
+                    return undefined;
+                return JSON.parse(text);
             }
         ).
         then(
@@ -219,7 +216,7 @@ saveButton.onclick =
         ).
         then(
             function (response) {
-                return response.json();
+                return response.text();
             }
         ).
         then(

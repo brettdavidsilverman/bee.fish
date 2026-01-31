@@ -4,7 +4,7 @@
 #include "../json/json-parser.h"
 #include "JSONDatabase.hpp"
 #include "JSONPath.hpp"
-
+#include "NullStream.hpp"
 
 namespace BeeFishDatabase {
  
@@ -22,26 +22,29 @@ namespace BeeFishDatabase {
         vector<Index> _indexStack;
         vector<BString> _keyStack;
         vector<Type> _typeStack;
-        ostream& _log = clog;
+        ostream& _log;
         
     public:
         using JSONParser::read;
 
-        JSONPathParser(JSONPath path, Match& match) :
+        JSONPathParser(JSONPath path, Match& match, ostream& log = cnull) :
             JSONParser(match),
-            JSONPath(path)
+            JSONPath(path),
+            _log(log)
         {
         }
           
-        JSONPathParser(JSONPath path) :
+        JSONPathParser(JSONPath path, ostream& log = cnull) :
             JSONParser(),
-            JSONPath(path)
+            JSONPath(path),
+            _log(log)
         {
         }
           
-        JSONPathParser(Path path) :
+        JSONPathParser(Path path, ostream& log = clog) :
             JSONParser(),
-            JSONPath(path)
+            JSONPath(path),
+            _log(log)
         {
         }
 

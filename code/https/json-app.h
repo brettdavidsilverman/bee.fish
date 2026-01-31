@@ -96,55 +96,46 @@ namespace BeeFishHTTPS {
             token = strtok(str, delims);
 
             // Loop through all remaining tokens
+            JSONPath path = start;
             while (token != nullptr) 
             {
                 BString key(token);
-                Index index = -1;
+
                 if (key.size()) {
                     key = key.decodeURI();
                     if (key.isDigitsOnly()) {
-                        index = atoi(key.c_str());
+                        Index index = atoi(key.c_str());
+                        if (path.contains(index))
+                            path = path[index];
+                        else
+                            break;
                     }
                     else {
                         if (key.startsWith("\"") &&
-                            key.endsWith("\"") &&
-                            key.substr(
-                                1,
-                                key.length() - 2
-                            ).isDigitsOnly()
+                            key.endsWith("\"") 
                         )
                         {
-                            index =
-                                atoi(
-                                    key.substr(
-                                        1,
-                                        key.length() - 2
-                                    ).c_str()
+                            key =
+                                key.substr(
+                                    1,
+                                    key.length() - 2
                                 );
                         }
+                        if (path.contains(key) || method == "POST")
+                            path = path[key];
+                        else
+                            break;
                     }
                         
-                    if (index != Index(-1))
-                    {
-                        if (start.contains(index))
-                            start = start[index];
-                        else
-                            break;
-                    }
-                    else 
-                    {
-                        if (start.contains(key) || method == "POST")
-                            start = start[key];
-                        else
-                            break;
-                    }
+
+
                 }
                 token = strtok(nullptr, delims);
             }
             
             if (token == nullptr) {
                 
-                _bookmark = start;
+                _bookmark = path;
                 //jsonPath.value();
 
                 if (method == "GET") {
@@ -190,7 +181,7 @@ namespace BeeFishHTTPS {
                 _serve = App::SERVE_CONTENT;
 
                 _status = 404;
-                _statusText = "Path error";
+                _statusText = "Not found";
             }
             
 

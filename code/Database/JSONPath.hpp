@@ -218,10 +218,11 @@ namespace BeeFishDatabase {
         
         bool contains(const Index& index)
         {
-             if (!contains(Type::ARRAY))
+             if (!contains(Type::ARRAY) &&
+                 !contains(Type::OBJECT))
                  return false;
                  
-             Path path = (*this)[Type::ARRAY];
+             Path path = (*this)[type()];
              
              if (!path.contains(index))
              {

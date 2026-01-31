@@ -20,6 +20,7 @@ namespace BeeFishQuery {
     bool testExpressions();
     bool testAndPath();
     bool testQueryAndPath();
+    bool testQueryJSON();
     
     inline bool test() 
     {
@@ -33,7 +34,8 @@ namespace BeeFishQuery {
         ok = ok && testExpressions();
         ok = ok && testAndPath();
         ok = ok && testQueryAndPath();
-    
+        ok = ok && testQueryJSON();
+        
         if (ok)
             cout << "SUCCESS";
         else
@@ -588,13 +590,11 @@ namespace BeeFishQuery {
     
         bool ok  = true;
         auto test =
-        [](filesystem::path json, BString query, vector<JSONPath::Id> check) {
+        [](filesystem::path json, BString query, vector<BString> check) {
             
-            cout << "\t" << json.filename() << endl;
-            cout << "\t" << query << endl;
-            
-            JSONDatabase db("http://test");
-            JSONPath root = db.origin();
+            cout << "\t" << json.filename() << "?" << query << ": " <<flush;
+            JSONDatabase db("https://test");
+            JSONPath root = db.origin()[json.filename()];
             Path words = db.words();
             
             JSONPathParser parser(root);
@@ -621,10 +621,11 @@ namespace BeeFishQuery {
                     .getPath(words);
                 
                 Iterable<JSONPath::Id> iterable(*pathBase);
-                std::vector<JSONPath::Id> values;
+                std::vector<BString> values;
                 for (auto index : iterable)
                 {
-                    values.push_back(index);
+                    JSONPath path(db, index);
+                    values.push_back(path.toString());
                 }
              
                 delete pathBase;
@@ -637,8 +638,13 @@ namespace BeeFishQuery {
                     {
                         if (values[i] != check[i])
                         {
-                            ok = false;
-                            break;
+                            BeeFishMisc::outputSuccess(ok);
+                            
+                            cout << "Expected" << endl;
+                            cout << check[i] << endl;
+                            cout << "Got" << endl;
+                            cout << values[i] << endl;
+                            return false;
                         }
                     }
                 }
@@ -650,19 +656,36 @@ namespace BeeFishQuery {
         
             return ok;
         };
-
+/*
+{
+   "a": [
+      [
+         "b",
+         "c"
+      ],
+      [
+         "b",
+         "c"
+      ]
+   ]
+}
+*/
         
         ok = ok && test(TEST_DIRECTORY "/45-Object.json", "one", {});
+        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "a", 
+            {
+                "https://test/45-Object.json/a",
+                "https://test/45-Object.json/a/1",
+                "https://test/45-Object.json/a/1/1",
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2",
+                "https://test/45-Object.json/a/2/1",
+                "https://test/45-Object.json/a/2/2",
+            }
+        );
+
+        BeeFishMisc::outputSuccess(ok);
         
-        /*
-        ok = ok && test("two", {2,3,4});
-        ok = ok && test("one and one", {0,1,2,3});
-        ok = ok && test("one and two", {2,3});
-        ok = ok && test("two and two", {2,3,4});
-        ok = ok && test("one and three", {});
-        ok = ok && test("one and three", {});
-        ok = ok && test("three", {});
-        */
         return ok;
         
     }
