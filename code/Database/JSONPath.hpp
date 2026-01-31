@@ -203,24 +203,18 @@ namespace BeeFishDatabase {
             }
         };
         
-        static JSONPath fromString(JSONDatabase& database, const BString& origin, const BeeFishWeb::URL& url, BString method = "GET")
+        static JSONPath fromString(JSONDatabase& database, const BString& host, const BeeFishWeb::URL& url, const BString& method = "GET")
         {
-            JSONPath _origin;
+            JSONPath hostPath;
             
             if (url.origin().length())
             {
-cerr << "USING URL ORIGIN: " << url.origin() << endl;
-                _origin = database.origin(url.origin());
+                hostPath = database.host(url.origin());
             }
-            else
-                _origin = database.origin(origin);
-                
-            JSONPath start = _origin;
-            /*
-            [
-                Authentication::userId()
-            ];
-            */
+            else {
+                hostPath = database.host(host);
+            }
+            
             BString copy = url;
             char* str = copy.data();
             const char* delims ="/";
@@ -230,7 +224,7 @@ cerr << "USING URL ORIGIN: " << url.origin() << endl;
             token = strtok(str, delims);
 
             // Loop through all remaining tokens
-            JSONPath path = start;
+            JSONPath path = hostPath;
             while (token != nullptr) 
             {
                 BString key(token);
@@ -279,8 +273,8 @@ cerr << "USING URL ORIGIN: " << url.origin() << endl;
         {
             return
             (
-                *this == database().json() ||
-                index() == 0
+                *this == database().json() //||
+             //   index() == 0
             );
         }
         
@@ -580,47 +574,20 @@ cerr << "USING URL ORIGIN: " << url.origin() << endl;
         
     };
     
-    // Declared in JSONDatabase.hpp
-    JSONDatabase::JSONDatabase(
-        const BString& filePath
-    )
-        : Database(filePath)
-    {
-     
-    
-        _root = *this;
         
-        _properties = 
-            _root[PROPERTIES];
-                
-        _words =
-            _root[WORDS];
-                
-        _authentication =
-            _root[AUTHENTICATION];
-            
-        JSONPath json =
-            _root[JSON];
-            
-        _json = json;
-        
-        
-    }
-    
-    // Declared in JSONDatabase.hpp
-    JSONPath JSONDatabase::origin(const BString& origin) const
-    {
-        JSONPath json =
-            _root[JSON];
-        return json[origin];
-    }
-        
-    
     // Declared in JSONDatabase.hpp
     JSONPath JSONDatabase::json() const
     {
         return _json;
     }
+    
+    // Declared in JSONDatabase.hpp
+    JSONPath JSONDatabase::host(const BString& host) const
+    {
+        return json()[host];
+    }
+        
+
     
     
         

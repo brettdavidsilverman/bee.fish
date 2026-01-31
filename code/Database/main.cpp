@@ -61,6 +61,20 @@ int main(int argc, const char* argv[])
     JSONDatabase database(DATABASE_FILENAME);
 
     cout << database << endl;
+    /*
+    bool originsArg  =
+        (hasArg(argc, argv, "-origins") != -1);
+    
+    if (originsArg)
+    {
+        cout << "Origins " << endl;
+        JSONPath origins = database.json();
+        for (auto origin: origins)
+        {
+            cout << origin << endl;
+        }
+    }
+    */
     
     bool propertiesArg =
         (hasArg(argc, argv, "-properties") != -1);
@@ -101,12 +115,16 @@ int main(int argc, const char* argv[])
     
     if (loadDeaths)
     {
-        JSONPathParser json(database.origin(origin)["deaths"], clog);
-        cout << WWW_ROOT_DIRECTORY "/deaths.json" << endl;
+        JSONPath inputPath =
+            database.host(origin)
+            ["deaths"];
+            
+        JSONPathParser parser(inputPath, clog);
+        cout << "Loading deaths.json" << endl;
         
         ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");
         
-        json.read(file);
+        parser.read(file);
     }
 
     bool input =
@@ -120,8 +138,10 @@ int main(int argc, const char* argv[])
     
     if (input)
     {
-        JSONPathParser json(database.origin(origin));
-        json.read(cin);
+        JSONPath inputPath =
+            database.host(origin);
+        JSONPathParser parser(inputPath, clog);
+        parser.read(cin);
     }
     
     bool output =
@@ -134,7 +154,8 @@ int main(int argc, const char* argv[])
     
     if (output)
     {
-        cout << database.json() << endl;
+        
+        cout << database.host(origin) << endl;
     }
 
     cout << database << endl;

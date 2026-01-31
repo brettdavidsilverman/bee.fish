@@ -2,18 +2,21 @@
 #define BEE_FISH_SERVER__STORAGE_APP_H
 
 #include "../Miscellaneous/Miscellaneous.hpp"
-#include "session.h"
-#include "app.h"
-#include "authentication.h"
-#include "storage.h"
 #include "../json/json-parser.h"
 #include "../Script/Script.hpp"
 #include "../web-request/web-request.h"
+#include "../Database/Database.hpp"
+#include "../Id/Id.hpp"
+#include "session.h"
+#include "app.h"
+#include "authentication.h"
 
-using namespace std;
-using namespace BeeFishWeb;
+
 
 namespace BeeFishHTTPS {
+using namespace std;
+using namespace BeeFishWeb;
+using namespace BeeFishId;
 
    class StorageApp : public App {
    public:
@@ -71,12 +74,19 @@ namespace BeeFishHTTPS {
 
          path = request->path();
 
-         _bookmark = userData()[path];
+         ScopedDatabase scoped(this);
+         
+         JSONDatabase* database = scoped;
+        
+         Path rootPath = database->root();
+         Path userData =
+                rootPath[USERS][_userId];
+         Path bookmark = userData[path];
 
          if (key.has_value())
-            _bookmark = _bookmark[key.value()];
+            bookmark = bookmark[key.value()];
          else if (id.has_value()) {
-            _bookmark = _bookmark[id.value()];
+            bookmark = bookmark[id.value()];
          }
          else if (method != "DELETE")
             return;
@@ -99,9 +109,9 @@ namespace BeeFishHTTPS {
             BeeFishParser::Parser parser(postRequest);
             
             postRequest.setOnData(
-               [&pageIndex, &contentLength, this](const std::string& data) {
+               [&pageIndex, &contentLength, &bookmark, this](const std::string& data) {
                   contentLength += data.size();
-                  _bookmark[pageIndex++].setData(data);
+                  bookmark[pageIndex++].setData(data);
                }
             );
 
@@ -115,11 +125,11 @@ namespace BeeFishHTTPS {
 
             
             if ( contentLength == 0 )
-               deleteData();
+               deleteData(bookmark);
             else {
-               _bookmark["Content length"].setData(contentLength);
-               _bookmark["Content type"].setData(contentType);
-               _bookmark["Page count"].setData(pageIndex);
+               bookmark["Content length"].setData(contentLength);
+               bookmark["Content type"].setData(contentType);
+               bookmark["Page count"].setData(pageIndex);
             }
 
             returnJSON = true;
@@ -129,14 +139,15 @@ namespace BeeFishHTTPS {
          else if ( method == "GET" )
          {
 
-            if (_bookmark["Content length"].hasData())
-               _bookmark["Content type"].getData(contentType);
+            if (bookmark["Content length"].hasData())
+               bookmark["Content type"].getData(contentType);
 
 
             if (contentType.length()) {
                _status = 200;
-                _bookmark["Content length"].getData(_contentLength);
+                bookmark["Content length"].getData(_contentLength);
                _serve = App::SERVE_DATA;
+               _bookmark = bookmark.index();
                returnJSON = false;
             }
             else {
@@ -147,7 +158,7 @@ namespace BeeFishHTTPS {
          }
          else if (method == "DELETE") {
 
-            deleteData();
+            deleteData(bookmark);
            
             _status = 200;
 
@@ -210,18 +221,18 @@ namespace BeeFishHTTPS {
       }
 
    private:
-      void deleteData() {
-         if ( _bookmark.contains("Page count") &&
-              _bookmark["Page count"].hasData() )
+      void deleteData(Path bookmark) {
+         if ( bookmark.contains("Page count") &&
+              bookmark["Page count"].hasData() )
          {
 
-            size_t pageCount = _bookmark["Page count"];
+            size_t pageCount = bookmark["Page count"];
             for (size_t page = 0; page < pageCount; ++page)
-               _bookmark[page].deleteData();
+               bookmark[page].deleteData();
 
-            _bookmark["Page count"].setData((size_t)0);
+            bookmark["Page count"].setData((size_t)0);
          }
-         _bookmark.clear();
+         bookmark.clear();
  
       }
 

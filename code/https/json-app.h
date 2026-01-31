@@ -53,9 +53,6 @@ namespace BeeFishHTTPS {
             
             BString error;
     
-            Path userData =
-                Authentication::userData();
-            
                 /*
             const BString& clientIPAddress = 
                 session()->ipAddress();
@@ -65,20 +62,8 @@ namespace BeeFishHTTPS {
             const URL& url =
                 request()->url();
                 
-            BString origin; 
-                
-            const BeeFishWeb::Headers&
-                requestHeaders =
-                    _session->request()->headers();
-                    
-            if (requestHeaders.contains("host")) {
-                BString host = requestHeaders["host"];
-                origin = BString("https://") + host;
-            }
-            else {
-                origin = _session->origin();
-            }
-                
+            BString host = _session->host();
+
                 /*
             const BString& userId =
                 Authentication::userId();
@@ -87,7 +72,10 @@ namespace BeeFishHTTPS {
             const BString& search =
                 request()->search();
             */
-            JSONDatabase* database = _session->database();
+            
+            ScopedDatabase scoped(this);
+            
+            JSONDatabase* database = scoped;
             /*
             optional<Path> jsonPath =
                 parseURL(
@@ -99,14 +87,16 @@ namespace BeeFishHTTPS {
                     search
                 );
             */
-        
+            JSONPath jsonPath;
+            
             try {
-                _bookmark = JSONPath::fromString(
+                jsonPath = JSONPath::fromString(
                     *database,
-                    origin,
+                    host,
                     url,
                     method
                 );
+                _bookmark = jsonPath.index();
             }
             catch (JSONPath::PathNotFoundException& exception)
             {
@@ -115,8 +105,7 @@ namespace BeeFishHTTPS {
                 _status = 404;
                 _statusText = 
                     BString("Not found ") +
-                    exception.url();
-                
+                    host + exception.url();
                 return;
             }
                 
@@ -132,8 +121,9 @@ namespace BeeFishHTTPS {
                     
                 BeeFishDatabase::JSONPathParser
                     parser(
-                        _bookmark,
-                        postRequest
+                        jsonPath,
+                        postRequest,
+                        clog
                     );
 
                 if (!parseWebRequest(parser)) {
@@ -147,22 +137,19 @@ namespace BeeFishHTTPS {
                     _statusText = "JSONPathParser error";
                 }
                 else {
-                    _content = BString("\"") + BString(origin + url.value()).escape() + BString("\"");
+                    _content = BString("\"") + BString(host + url).escape() + BString("\"");
                     _serve = App::SERVE_CONTENT;
                     _status = 200;
                     _statusText = "ok";
                 }
             }
             
-
         }
         
         virtual BString name()
         {
             return "JSON app";
         }
-
-        
         
     };
 

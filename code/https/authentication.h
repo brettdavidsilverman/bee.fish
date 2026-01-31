@@ -29,15 +29,12 @@ namespace BeeFishHTTPS {
     class Authentication
     {
     private:
-        BString _origin;
-        JSONDatabase& _database;
+        
         bool _authenticated = false;
-        Path _rootPath;
-        Path _sessionData;
-        Path _userData;
         
     protected:
-        
+        Session* _session;
+        BString _origin;
         BString _ipAddress;
         BString _sessionId;
         BString _userId;
@@ -65,16 +62,13 @@ namespace BeeFishHTTPS {
         
         
         Authentication(
+            Session* session,
             const BString& origin,
-            JSONDatabase& database,
             BString ipAddress,
             BString sessionId
         ) :
+            _session(session),
             _origin(origin),
-            _database(database),
-            _rootPath(_database.root()),
-            _sessionData(_rootPath),
-            _userData(_rootPath),
             _ipAddress(ipAddress),
             _sessionId(sessionId)
         {
@@ -100,7 +94,12 @@ namespace BeeFishHTTPS {
             BString md5Secret =
                 md5(secret);
 
-            Path secrets = _rootPath
+            ScopedDatabase scoped(this);
+            JSONDatabase* database = scoped;
+            
+            Path rootPath = database->root();
+            
+            Path secrets = rootPath
                 [SECRETS]
                 [md5Secret];
                 
@@ -121,8 +120,8 @@ namespace BeeFishHTTPS {
             }
             
             // Set the user data path
-            _userData =
-                _rootPath[USERS][_userId];
+            Path userData =
+                rootPath[USERS][_userId];
                         
             // Create the session id
             // (Note, we use toHex, not toBase64 due to
@@ -135,23 +134,24 @@ namespace BeeFishHTTPS {
                 );
 
             // get the session data
-            _sessionData = _rootPath
+            Path sessionData = rootPath
                     [IP_ADDRESSES]
                     [_ipAddress]
                     [_sessionId];
                 
             // Save the user id
-            _sessionData[USER_ID]
+            sessionData[USER_ID]
                 .setData(_userId);
 
                 
             // Save last authenticated
             time_t lastAuthentication = epoch_seconds();
 
-            _sessionData[LAST_AUTHENTICATION]
+            sessionData[LAST_AUTHENTICATION]
                 .setData<time_t>(lastAuthentication);
                 
             _authenticated = true;
+            
 
         }
         
@@ -159,7 +159,15 @@ namespace BeeFishHTTPS {
         {
             if (_authenticated)
             {
-                _sessionData.clear();
+                ScopedDatabase scoped(this);
+                JSONDatabase* database = scoped;
+                Path rootPath = database->root();
+                Path sessionData = rootPath
+                    [IP_ADDRESSES]
+                    [_ipAddress]
+                    [_sessionId];
+                    
+                sessionData.clear();
             }
             
             _sessionId.clear();
@@ -175,23 +183,29 @@ namespace BeeFishHTTPS {
 
             _authenticated = false;
 
+            ScopedDatabase scoped(this);
+            JSONDatabase* database =
+                scoped;
+                
+            Path rootPath = database->root();
+                
             if ( _ipAddress.size() &&
                   _sessionId.size() )
             {
 
-                _sessionData = _rootPath
+                Path sessionData = rootPath
                     [IP_ADDRESSES]
                     [_ipAddress]
                     [_sessionId];
                     
-                if ( _sessionData
+                if ( sessionData
                           [LAST_AUTHENTICATION]
                           .hasData() )
                 {
              
                     time_t lastTime = -1;
                     
-                    _sessionData
+                    sessionData
                         [LAST_AUTHENTICATION]
                         .getData<time_t>(lastTime);
                         
@@ -201,17 +215,17 @@ namespace BeeFishHTTPS {
                     {
                         _authenticated = true;
                     
-                        _sessionData
+                        sessionData
                             [LAST_AUTHENTICATION]
                             .setData<time_t>(epoch_seconds());
                             
                         _userId =
-                            _sessionData[USER_ID]
+                            sessionData[USER_ID]
                             .getData();
                 
                         // Set the user data path
-                        _userData =
-                            _rootPath[USERS]
+                        Path userData =
+                            rootPath[USERS]
                             [_userId];
                         
                     }
@@ -224,21 +238,8 @@ namespace BeeFishHTTPS {
 
     public:
     
-        BeeFishDatabase::Path userData()
-        {
-            if (!_authenticated)
-                throw runtime_error("Unauthenticated");
-                
-            return _userData;
-        }
-        
-        BeeFishDatabase::Path sessionData()
-        {
-            if (!_authenticated)
-                throw runtime_error("Unauthenticated");
-                
-            return _sessionData;
-        }
+        // Defined in session.h
+        Server* server();
         
         virtual void write(BeeFishScript::Object& object) const {
             object["authenticated"] = _authenticated;
@@ -279,6 +280,29 @@ namespace BeeFishHTTPS {
             return _userId;
         }
 
+        class ScopedDatabase
+        {
+        private:
+            Authentication* _authentication;
+            JSONDatabase* _database;
+        public:
+            ScopedDatabase(Authentication* authentication) :
+                _authentication(authentication)
+            {
+                _database =
+                    _authentication->server()->requestDatabase();
+            }
+            
+            ~ScopedDatabase()
+            {
+                _authentication->server()->releaseDatabase(_database);
+            }
+            
+            operator JSONDatabase*() {
+                return _database;
+            }
+        };
+        
     };
     
     

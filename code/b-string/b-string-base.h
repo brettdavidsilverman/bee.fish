@@ -102,11 +102,11 @@ namespace BeeFishBString
             stream << *this;
             return stream.str();
         }
-        
+        /*
         operator const char* () const {
             return c_str();
         }
-
+*/
         void push_back(const Char &character)
         {
             *this += character;

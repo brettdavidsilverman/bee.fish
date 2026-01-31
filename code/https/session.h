@@ -50,7 +50,6 @@ namespace BeeFishHTTPS {
         bool _isStillPosting = false;
         BString _exception;
         BString _ipAddress;
-        JSONDatabase* _database = nullptr;
         // End Of File error value
         const int END_OF_FILE = 2;
     public:
@@ -81,9 +80,6 @@ namespace BeeFishHTTPS {
   
         virtual ~Session()
         {
-            if (_database)
-                delete _database;
-                
             clear();
         }
         
@@ -149,7 +145,7 @@ namespace BeeFishHTTPS {
         virtual void closeOrRestart()
         {
             
-            if (_request->headers()["connection"] == "close")
+            if (_request->headers()["connection"] != "keep-alive")
             {
                 // Close
                 delete this;
@@ -285,12 +281,6 @@ namespace BeeFishHTTPS {
                       << _request->url()      << ' '
                       << std::endl;
                       
-#warning create the database per thread
-                _database =
-                    new JSONDatabase(
-                        _server->databaseFile()
-                    );
-   
                 _response = new Response(
                     this
                 );
@@ -447,10 +437,6 @@ namespace BeeFishHTTPS {
             return _ipAddress;
         }
         
-        JSONDatabase* database()
-        {
-            return _database;
-        }
         
         const BString origin() const
         {
@@ -474,6 +460,22 @@ namespace BeeFishHTTPS {
             
             return origin;
                 
+        }
+        
+        BString host() const
+        {
+            
+            const BeeFishWeb::Headers&
+                requestHeaders =
+                    _request->headers();
+                    
+            if (requestHeaders.contains("host")) {
+                BString host = requestHeaders["host"];
+                return BString("https://") + host;
+            }
+            else {
+                return origin();
+            }
         }
     
         void handshake()
@@ -543,10 +545,22 @@ namespace BeeFishHTTPS {
     };
     
     // Declared in server.h
+    Server::~Server()
+    {
+        _transactionFile.close();
+        if (_newSession)
+            delete _newSession;
+            
+        for (Size i = 0; i < _databaseCount; ++i)
+            delete _databases[i];
+
+    }
+    
+    // Declared in server.h
     inline void Server::startAccept()
     {
-        
-        Session* newSession =
+
+        _newSession =
             new Session(
                 this, 
               _ioContext,
@@ -554,11 +568,11 @@ namespace BeeFishHTTPS {
           );
     
         _acceptor.async_accept(
-            newSession->socket(),
+            _newSession->socket(),
             boost::bind(
               &Server::handleAccept,
               this,
-              newSession,
+              _newSession,
               boost::asio::placeholders::error
             )
         );
@@ -582,19 +596,25 @@ namespace BeeFishHTTPS {
         }
 
     }
+    
 
     // Declared in authentication.h
     inline Authentication::Authentication(
         Session* session
     ) : Authentication(
+            session,
             session->origin(),
-            (* session->database() ),
             session->ipAddress(),
             session->
                 request()->
                 getCookie("sessionId")
         )
     {
+    }
+    
+    inline Server* Authentication::server()
+    {
+        return _session->server();
     }
 
     // Defined in app.h

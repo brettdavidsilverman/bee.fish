@@ -114,8 +114,8 @@ function loadJSON() {
                     return response.text();
                 else
                     throw new Error(
-                        response.statusText,
-                        loadJSON
+                        decodeURIComponent( response.statusText),
+                        "Load JSON"
                     );
             }
         ).
@@ -123,7 +123,7 @@ function loadJSON() {
             function(text) {
                 if (text == "undefined")
                     return undefined;
-                return JSON.parse(text);
+                return text
             }
         ).
         then(
@@ -137,8 +137,8 @@ function loadJSON() {
                     throw new Error(json.error, loadJSON);
                 }
             
-                jsonEditor.value =
-                    JSON.stringify(json, null, "    ");
+                jsonEditor.value = json;
+                   // JSON.stringify(json, null, "    ");
                 
                 
                 return json;
@@ -209,25 +209,34 @@ saveButton.onclick =
             body: json
         }
         
+        var status;
         
         fetch(
             pathInput.value,
             parameters
         ).
         then(
-            function (response) {
-                return response.text();
+            function(response) {
+                status = response.status;
+                if (status == "200")
+                    return response.json();
+                else
+                    throw new Error(
+                        decodeURIComponent(
+                            response.statusText
+                        ),
+                        "Save JSON"
+                    );
             }
         ).
         then(
             function (json) {
-                alert(json);
+                alert(decodeURI(json));
             }
         ).
         catch(
             function (error)
             {
-                Error(error, "saveButton.onclick");
             }
         );
     }

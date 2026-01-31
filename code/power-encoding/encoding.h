@@ -75,7 +75,7 @@ namespace BeeFishPowerEncoding
       char character;
       
       // read one
-      assert(input.readBit() == 1);
+      input.readBit(); // == 1
       
       while (input.peekBit())
       {
@@ -85,7 +85,7 @@ namespace BeeFishPowerEncoding
       }
 
       // read zero
-      assert(input.readBit() == 0);
+      input.readBit(); // == 0
 
       return input;
    }
@@ -111,7 +111,7 @@ namespace BeeFishPowerEncoding
    )
    {
       // read one
-      assert(input.readBit() == 1);
+      input.readBit(); // == 1
 
       input.read(value);
 

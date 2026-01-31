@@ -269,9 +269,8 @@ namespace BeeFishDatabase {
             else
             {
                 path = path[key->value()];
-              //  _pathStack.push_back(path);
                 setVariable(path, json->type(), json->value());
-               // _pathStack.pop_back();
+
             }
             
             pop_back_key();
@@ -306,9 +305,7 @@ namespace BeeFishDatabase {
             JSONPath path = topPath();
             Index& index = topIndex();
             path = path[index++];
-           // _pathStack.push_back(path);
             setVariable(path, json->type(), json->value());
-         //   _pathStack.pop_back();
 
         }
 

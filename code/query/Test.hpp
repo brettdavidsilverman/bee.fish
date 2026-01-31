@@ -594,7 +594,7 @@ namespace BeeFishQuery {
             
             cout << "\t" << json.filename() << "?" << query << ": " <<flush;
             JSONDatabase db;
-            JSONPath root = db.origin("https://test")[json.filename()];
+            JSONPath root = db.host("https://test")[json.filename()];
             Path words = db.words();
             
             JSONPathParser parser(root);

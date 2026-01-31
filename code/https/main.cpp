@@ -21,7 +21,8 @@ void start(
 );
 
 std::mutex _wait;
-const int _threadCount = 10;
+const Size _threadCount = 4;
+const Size _databaseCount = 10;
 
 int main(int argc, const char* argv[])
 
@@ -88,7 +89,8 @@ int main(int argc, const char* argv[])
          transactionFile,
          io_context,
          port,
-         _threadCount
+         _threadCount,
+         _databaseCount
       );
       
       _wait.lock();

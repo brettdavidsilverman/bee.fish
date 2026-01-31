@@ -582,7 +582,7 @@ namespace BeeFishDatabase
         bool success = true;
         JSONDatabase database;
 
-        JSONPath root = database.origin("https://test");
+        JSONPath root = database.host("https://test");
         /*
         cout << "Test data" << std::endl;
         {
@@ -825,7 +825,7 @@ if (success) {
         cout << "Test Sub Array 2 Path: ";
         
         JSONDatabase database;
-        Path path = database.origin("https://test");
+        Path path = database.host("https://test");
         JSONPathParser parser(path);
         parser.read("[[1]]");
         bool success = true;
@@ -1031,7 +1031,7 @@ assert(success);
             
         for (auto file : files) {
             if (success)
-                success = testFile(tempDB.origin("https://test"), file, true);
+                success = testFile(tempDB.host("https://test"), file, true);
             else
                 break;
         }
@@ -1043,7 +1043,7 @@ assert(success);
     
     inline bool testFile(JSONPath root, std::filesystem::path file, bool expect)
     {
-        cout << "\t" << file.filename() << endl;
+        cout << "\t" << file.filename() << " " << flush;
         
         string tempFile =
             TEMP_DIRECTORY;
@@ -1289,7 +1289,7 @@ assert(success);
  
         JSONDatabase database;
         
-        JSONPath start = database.origin("https://test");
+        JSONPath start = database.host("https://test");
         JSONPathParser parser1(start);
         parser1.read("[1,2,3]");
         JSONPath path = start[Index(0)];

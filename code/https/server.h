@@ -62,7 +62,8 @@ namespace BeeFishHTTPS {
                   boost::asio::io_context&
                       ioContext,
                   unsigned short port,
-                  Size threadCount
+                  Size threadCount,
+                  Size databaseCount
         ) :
             thread_pool(threadCount),
             _port(port),
@@ -74,7 +75,11 @@ namespace BeeFishHTTPS {
                     port
                 )
             ),
-            _context(boost::asio::ssl::context::sslv23)
+            _context(boost::asio::ssl::context::sslv23),
+            _threadCount(threadCount),
+            _newSession(nullptr),
+            _databaseCount(databaseCount),
+            _databaseLocks(_databaseCount)
         {
             _origin = "https://" + hostName;
             
@@ -108,7 +113,12 @@ namespace BeeFishHTTPS {
             std::cout << "Setting up database..." << std::endl;
 
             _databaseFile = databaseFile;
-            
+            for (Size i = 0; i < _databaseCount ; ++i)
+            {
+                _databases.push_back(
+                    new JSONDatabase(_databaseFile)
+                );
+            }
             
             std::cout << "Start accepting..." << std::endl;
 
@@ -117,11 +127,8 @@ namespace BeeFishHTTPS {
             std::cout << "HTTPS server started" << std::endl;
         }
 
-              
-        ~Server()
-        {
-            _transactionFile.close();
-        }
+        // Defined in session.h
+        ~Server();
     
         static BString password()
         {
@@ -143,6 +150,39 @@ namespace BeeFishHTTPS {
         {
              
             return _port;
+        }
+        
+        std::vector<JSONDatabase*>& databases()
+        {
+            return _databases;
+        }
+        
+        JSONDatabase* requestDatabase()
+        {
+            while (1) {
+                for (Size i = 0; i < _databaseCount; ++i)
+                {
+                    if (_databaseLocks[i].try_lock())
+                    {
+                        JSONDatabase*
+                            database = 
+                            _databases[i];
+                        return database;
+                    }
+                }
+                _databaseLock.lock();
+            }
+        }
+        
+        void releaseDatabase(JSONDatabase* database) {
+            for (Index i = 0; i < _databaseCount; ++i)
+            {
+                if (_databases[i] == database) {
+                    _databaseLocks[i].unlock();
+                    _databaseLock.unlock();
+                    return;
+                }
+            }
         }
         
         // Defined in session.h
@@ -188,6 +228,12 @@ namespace BeeFishHTTPS {
         BString _databaseFile;
         std::ofstream _transactionFile;
         std::mutex _mutex;
+        Size _threadCount;
+        Session* _newSession;
+        Size _databaseCount;
+        std::vector<JSONDatabase*> _databases;
+        std::vector<std::mutex> _databaseLocks;
+        std::mutex _databaseLock;
     };
     
     inline std::string my_password_callback(
