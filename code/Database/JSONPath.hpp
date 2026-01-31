@@ -412,6 +412,19 @@ namespace BeeFishDatabase {
             return path[Type::OBJECT];
         }
         
+        Index getKeyCount()
+        {
+            if (!contains(Type::OBJECT))
+                return 0;
+                
+            Path objPositions = getObjectPositions();
+                 
+            if (objPositions.isDeadEnd())
+                return 0;
+                     
+            return objPositions.max<Index>();
+        }
+        
         Type type() const {
             Path path(*this);
             return path.max<Type>();
@@ -465,7 +478,7 @@ namespace BeeFishDatabase {
                  path.getData(string);
                     
                  out << "\""
-                           << escape(string)
+                           << string.escape()
                        << "\"";
                  
                  break;
@@ -517,9 +530,9 @@ namespace BeeFishDatabase {
              }
              case Type::OBJECT:
              {
-                 Path objProps = getObjectPositions();
+                 Path objectPositions = getObjectPositions();
                  
-                 if (objProps.isDeadEnd())
+                 if (objectPositions.isDeadEnd())
                  {
                      out << "{}";
                      break;
@@ -528,22 +541,23 @@ namespace BeeFishDatabase {
                  out << "{";
                  Index count = 0;
                  
-                 
                  if (!path.isDeadEnd()) {
                      
                      out << "\r\n";
                     
                      optional<BString> key;
-                     count = path.max<Index>();
-
-                     for (Index position = 1; position <= count; ++position) 
+                     Stack stack;
+                     Index position = 0;
+                     
+                     while (objectPositions.next(stack, position))
                      {
                           key = getObjectKey(position);
 
                           if (key.has_value()) {
+                              ++count;
                               out << tabs(tabCount + 1)
                                     << "\""
-                                        << escape(key.value())
+                                        << key.value().escape()
                                     << "\": ";
                                
                               JSONPath value =
@@ -551,7 +565,9 @@ namespace BeeFishDatabase {
                           
                               value.write(out, tabCount + 1);
                           
-                              if (position < count)
+                              Stack stackCopy = stack;
+                              Path positionsCopy = objectPositions;
+                              if (positionsCopy.next(stackCopy))
                                   out << ",\r\n";
                           }
 

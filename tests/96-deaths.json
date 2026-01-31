@@ -2,13 +2,27 @@
    "data2": [
       [
          "male",
+         "y",
          "alcohol",
-         "83"
+         [
+            "one",
+            "two",
+            "three"
+         ],
+         "83",
+         []
       ],
       [
          "male",
+         "y",
          "alcohol",
-         "15"
+         [
+            "one",
+            "two",
+            "three"
+         ],
+         "15",
+         []
       ]
    ]
 }

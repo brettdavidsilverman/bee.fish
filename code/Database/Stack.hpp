@@ -104,7 +104,7 @@ using namespace BeeFishPowerEncoding;
             vector<bool>::push_back(
                 bit
             );
-           // ++_index;
+
         }
         
         virtual void pop_back()
@@ -117,7 +117,7 @@ using namespace BeeFishPowerEncoding;
                 ++_count;
                 
             vector<bool>::pop_back();
-           // --_index;
+
         }
         
         friend ostream& operator << (

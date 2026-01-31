@@ -105,34 +105,85 @@ namespace BeeFishDatabase {
 
 
         }
+        
+        bool previous(Stack& stack) {
+
+            // Algorithm:
+            // from maximum branch
+            // Up the tree until first
+            // left from a right
+
+            // Take that left, then
+            // follow next max
+
+            if (stack.size() == 0)
+            {
+                if (isDeadEnd())
+                    return false;
+                    
+                return goToMax(stack);
+            }
+            
+    
+    
+            // bool bit;
+            bool found = false;
+
+            // Up the tree until first left
+            // that hasn't been taken yet
+            bool bit;
+            
+            while(stack.size())
+            {
+                bit = stack.last();
+                
+                stack.pop_back();
+                goUp();
+                
+                if (canGoLeft() &&
+                     bit == 1)
+                {
+                    goLeft();
+                    stack.push_back(0);
+                    found = true;
+                    break;
+                }
+            
+            }
+
+            if (!found) {
+                return false;
+            }
+
+            // Follow the next max from
+            // this left
+            return goToMax(stack);
+
+
+        }
     public:
         virtual bool goToMin(
             Stack& stack
         )
         {
 
-            bool bit;
-            while (!isDeadEnd())
+            while (1)
             {
                 
                 
                 if (canGoLeft()) {
-                    bit = 0;
+                    stack.push_back(0);
                     goLeft();
                     
                 }
                 else if (canGoRight()) {
-                    bit = 1;
+                    stack.push_back(1);
                     goRight();
                 }
                 else {
                     return next(stack);
-    
-      //              stack.pop_back();
-      //              goUp();
+            
                 }
-                
-                stack.push_back(bit);
                 
                 if (stack.count() == 0)
                     return true;
@@ -149,26 +200,21 @@ namespace BeeFishDatabase {
             Stack& stack
         )
         {
-            bool bit;
-            while (!isDeadEnd())
+            while (1)
             {
                 
                 
                 if (canGoRight()) {
-                    bit = 1;
+                    stack.push_back(1);
                     goRight();
                 }
                 else if (canGoLeft()) {
-                    bit = 0;
+                    stack.push_back(0);
                     goLeft();
                 }
                 else
-                    break;
-                    
-                stack.push_back(
-                    bit
-                );
-
+                    return previous(stack);
+                
                 if (stack.count() == 0)
                     return true;
                 
