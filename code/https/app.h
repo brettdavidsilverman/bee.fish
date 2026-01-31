@@ -131,23 +131,24 @@ namespace BeeFishHTTPS {
                 "content-type",
                 "text/plain; charset=utf-8"
             );
-
+#warning app.h redirect cookie
+/*
             if (path != from)
             {
                  
                 _responseHeaders.emplace(
                     "set-cookie",
-                    BString("redirect=;path=/;max-age=0;")
+                    BString("redirect=;path=/;max-age=0;secure=true;httponly=false;samesite=None;Domain=") + host
                 
                 );
                 
                 _responseHeaders.emplace(
                     "set-cookie",
                     BString("redirect=") + from +
-                    BString(";path=/;")
+                    BString(";path=/;secure=true;httponly=false;samesite=None;Domain=") + host
                 );
             }
-
+*/
             _content = "redirecting...";
             
             _serve = App::SERVE_CONTENT;

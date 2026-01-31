@@ -165,8 +165,28 @@ using namespace BeeFishTest;
             assert(ok);
         }
         
-        assert(ok);
-
+        {
+            URL url = "https://test.bee.fish:8000/path";
+            ok = ok && testResult(
+                "URL",
+                url == "https://test.bee.fish:8000/path"
+            );
+            ok = ok && testResult(
+                "URL host",
+                url.host() == "test.bee.fish"
+            );
+            ok = ok && testResult(
+                "URL origin",
+                url.origin() == "https://test.bee.fish:8000"
+            );
+            ok = ok && testResult(
+                "URL path",
+                url.path() == "/path"
+            );
+            
+        
+        }
+        
         return ok;
 
 
@@ -197,7 +217,7 @@ using namespace BeeFishTest;
             if (ok)
                 ok = ok && testResult(
                     label + " url",
-                    firstLine.fullURL() == expectedURL
+                    firstLine.url() == expectedURL
                 );
                 
             if (!ok) {
@@ -206,7 +226,7 @@ using namespace BeeFishTest;
                      << parser.getError()
                      << endl
                      << "URL parsed: {"
-                     << escape(firstLine.fullURL()) << "}" << endl
+                     << escape(firstLine.url()) << "}" << endl
                      << "URL expected: {"
                      << escape(expectedURL)
                      << "}"

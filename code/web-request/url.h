@@ -5,13 +5,12 @@
 #include <vector>
 #include <typeinfo>
 #include "../parser/parser.h"
-#include "../query/Query.hpp"
 
 namespace BeeFishWeb {
 
     using namespace BeeFishParser;
     
-    class URL : public Match
+    class URL : public Capture
     {
     public:
         
@@ -229,25 +228,34 @@ namespace BeeFishWeb {
         };         
 
     public:
+        class URLException : public std::runtime_error
+        {
+        public:
+            URLException(const BString& message) :
+                std::runtime_error(message)
+            {
+            }
+        };
+        
+    public:
         Capture* _origin = nullptr;
         Protocol* _protocol = nullptr;
-        Host* _host = nullptr;
+        Capture* _host = nullptr;
         Port* _port = nullptr;
         Path* _path = nullptr;
         Search* _search = nullptr;
-        BeeFishQuery::Statement* _statement = nullptr;
+
     public:
             
-        URL() : Match()
+        URL() : Capture()
         {
               
             _protocol = new Protocol();
-            _host = new Host();
+            _host = new Capture(new Host());
             _port = new Port();
             _path = new Path();
             _search = new Search();
-            _statement = new BeeFishQuery::Statement();
-            
+
             _match = new And(
                 new Optional(
                     _origin = new Capture(
@@ -286,10 +294,49 @@ namespace BeeFishWeb {
             );
 
         }
-            
+        
+        URL(const BString& input) : URL() {
+            Parser parser(*this);
+            parser.read(input);
+            parser.eof();
+            if (!parser.matched())
+                throw URLException(parser.getError());
+        }
+        
+        URL(const char* input) :
+            URL(BString(input)) 
+        {
+        }
+        
+        bool operator == (const BString& rhs) const
+        {
+            return value() == rhs;
+        }
+        
+        bool operator == (const char* rhs) const
+        {
+            return value() == BString(rhs);
+        }
+        
+        operator const BString& () const
+        {
+            return value();
+        }
+        
+        
+        const BString& origin() const
+        {
+            return _origin->value();
+        }
+        
         const BString& path() const
         {
             return _path->value();
+        }
+        
+        const BString& host() const
+        {
+            return _host->value();
         }
             
         const Search& search() const

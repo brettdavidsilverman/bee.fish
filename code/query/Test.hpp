@@ -508,7 +508,7 @@ namespace BeeFishQuery {
     inline bool testQueryAndPath()
     {
         cout << "Test Query And Path" << endl;
-        JSONDatabase db("http://test");
+        JSONDatabase db;
         Words words(db.properties());
         
         
@@ -593,8 +593,8 @@ namespace BeeFishQuery {
         [](filesystem::path json, BString query, vector<BString> check) {
             
             cout << "\t" << json.filename() << "?" << query << ": " <<flush;
-            JSONDatabase db("https://test");
-            JSONPath root = db.origin()[json.filename()];
+            JSONDatabase db;
+            JSONPath root = db.origin("https://test")[json.filename()];
             Path words = db.words();
             
             JSONPathParser parser(root);

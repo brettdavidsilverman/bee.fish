@@ -32,7 +32,7 @@ int main(int argc, const char* argv[]) {
     
     string line;
 
-    JSONDatabase database(ORIGIN, DATABASE_FILENAME);
+    JSONDatabase database(DATABASE_FILENAME);
     
     Words words(database.words());
 /*

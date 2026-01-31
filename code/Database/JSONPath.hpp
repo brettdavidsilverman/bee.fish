@@ -4,6 +4,7 @@
 #include "../json/json-parser.h"
 #include "../Database/DatabaseBase.hpp"
 #include "../Database/Path.hpp"
+#include "../web-request/web-request.h"
 
 #include "JSONIndex.hpp"
 
@@ -158,6 +159,8 @@ namespace BeeFishDatabase {
             
         }
         
+        
+        
         BString toString() {
             vector<BString> keys;
             JSONPath path = *this;
@@ -182,6 +185,95 @@ namespace BeeFishDatabase {
             
             return string;
         }
+        
+        class PathNotFoundException : public std::runtime_error
+        {
+            const BString _url;
+            
+        public:
+            // Pass the message to the base class constructor
+            PathNotFoundException(const BString& url)
+                 : std::runtime_error(url),
+                 _url(url)
+            {
+            }
+            
+            const BString& url() {
+                return _url;
+            }
+        };
+        
+        static JSONPath fromString(JSONDatabase& database, const BString& origin, const BeeFishWeb::URL& url, BString method = "GET")
+        {
+            JSONPath _origin;
+            
+            if (url.origin().length())
+            {
+cerr << "USING URL ORIGIN: " << url.origin() << endl;
+                _origin = database.origin(url.origin());
+            }
+            else
+                _origin = database.origin(origin);
+                
+            JSONPath start = _origin;
+            /*
+            [
+                Authentication::userId()
+            ];
+            */
+            BString copy = url;
+            char* str = copy.data();
+            const char* delims ="/";
+            char* token;
+
+            // Get the first token
+            token = strtok(str, delims);
+
+            // Loop through all remaining tokens
+            JSONPath path = start;
+            while (token != nullptr) 
+            {
+                BString key(token);
+
+                if (key.size()) {
+                    key = key.decodeURI();
+                    if (key.isDigitsOnly()) {
+                        Index index = atoi(key.c_str());
+                        if (path.contains(index))
+                            path = path[index];
+                        else
+                            break;
+                    }
+                    else {
+                        if (key.startsWith("\"") &&
+                            key.endsWith("\"") 
+                        )
+                        {
+                            key =
+                                key.substr(
+                                    1,
+                                    key.length() - 2
+                                );
+                        }
+                        if (path.contains(key) || method == "POST")
+                            path = path[key];
+                        else
+                            break;
+                    }
+                        
+
+
+                }
+                token = strtok(nullptr, delims);
+            }
+            
+            if (token != nullptr) {
+                throw PathNotFoundException(url);
+            }
+            
+            return path;
+        }
+        
         
         bool isRoot()
         {
@@ -490,7 +582,6 @@ namespace BeeFishDatabase {
     
     // Declared in JSONDatabase.hpp
     JSONDatabase::JSONDatabase(
-        const BString& origin,
         const BString& filePath
     )
         : Database(filePath)
@@ -500,29 +591,30 @@ namespace BeeFishDatabase {
         _root = *this;
         
         _properties = 
-            _root[origin][PROPERTIES];
+            _root[PROPERTIES];
                 
         _words =
-            _root[origin][WORDS];
+            _root[WORDS];
                 
         _authentication =
-            _root[origin][AUTHENTICATION];
+            _root[AUTHENTICATION];
             
         JSONPath json =
-            _root[origin][JSON];
+            _root[JSON];
             
         _json = json;
         
-        _origin = json[origin];
-        
         
     }
-        
+    
     // Declared in JSONDatabase.hpp
-    JSONPath JSONDatabase::origin() const
+    JSONPath JSONDatabase::origin(const BString& origin) const
     {
-        return _origin;
+        JSONPath json =
+            _root[JSON];
+        return json[origin];
     }
+        
     
     // Declared in JSONDatabase.hpp
     JSONPath JSONDatabase::json() const

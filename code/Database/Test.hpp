@@ -74,7 +74,7 @@ namespace BeeFishDatabase
 
         cout << "Testing next index" << endl;
 
-        JSONDatabase db("https://test");
+        JSONDatabase db;
  
         Index index1 = db.getNextIndex(0);
         Index index2 = db.getNextIndex(0);
@@ -99,7 +99,7 @@ namespace BeeFishDatabase
         
         
             
-        JSONDatabase db("https://test");
+        JSONDatabase db;
         
         Path start(db.json());
         
@@ -580,9 +580,9 @@ namespace BeeFishDatabase
         cout << endl << "Testing path 2" << endl;
 
         bool success = true;
-        JSONDatabase database("https://test");
+        JSONDatabase database;
 
-        JSONPath root = database.origin();
+        JSONPath root = database.origin("https://test");
         /*
         cout << "Test data" << std::endl;
         {
@@ -768,7 +768,7 @@ if (success) {
 
         cout << "Test Array 2 Path \"[[]]\" " << endl;
  
-        JSONDatabase database("https://test");
+        JSONDatabase database;
         Path path = database.json()["array"];
         JSONPathParser parser(path);
         parser.read("[[]]");
@@ -824,8 +824,8 @@ if (success) {
 
         cout << "Test Sub Array 2 Path: ";
         
-        JSONDatabase database("https://test");
-        Path path = database.origin();
+        JSONDatabase database;
+        Path path = database.origin("https://test");
         JSONPathParser parser(path);
         parser.read("[[1]]");
         bool success = true;
@@ -933,7 +933,7 @@ cerr << "MAX:" << max << endl;
         
             cout << json << endl;
             
-            JSONDatabase database("https://test");
+            JSONDatabase database;
             JSONPath path = database.json();
             JSONPathParser parser(path);
         
@@ -1027,11 +1027,11 @@ assert(success);
         sort(files.begin(), files.end());
 
         // Test direct to database
-        JSONDatabase tempDB("https://test");
+        JSONDatabase tempDB;
             
         for (auto file : files) {
             if (success)
-                success = testFile(tempDB.origin(), file, true);
+                success = testFile(tempDB.origin("https://test"), file, true);
             else
                 break;
         }
@@ -1287,9 +1287,9 @@ assert(success);
         
         bool success = true;
  
-        JSONDatabase database("https://test");
+        JSONDatabase database;
         
-        JSONPath start = database.origin();
+        JSONPath start = database.origin("https://test");
         JSONPathParser parser1(start);
         parser1.read("[1,2,3]");
         JSONPath path = start[Index(0)];

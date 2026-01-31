@@ -55,14 +55,34 @@ namespace BeeFishHTTPS {
     
             Path userData =
                 Authentication::userData();
+            
                 /*
             const BString& clientIPAddress = 
                 session()->ipAddress();
                 */
             const BString& method =
                 request()->method();
-            BString url =
-                request()->path();
+            const URL& url =
+                request()->url();
+                
+            BString origin; 
+                
+            const BeeFishWeb::Headers&
+                requestHeaders =
+                    _session->request()->headers();
+                    
+            if (requestHeaders.contains("host")) {
+                BString host = requestHeaders["host"];
+                origin = BString("https://") + host;
+            }
+            else {
+                origin = _session->origin();
+            }
+                
+                /*
+            const BString& userId =
+                Authentication::userId();
+                */
                 /*
             const BString& search =
                 request()->search();
@@ -80,108 +100,58 @@ namespace BeeFishHTTPS {
                 );
             */
         
-                 
-            JSONPath origin = database->origin();
-            JSONPath start = origin;
-            /*
-            [
-                Authentication::userId()
-            ];
-            */
-            char* str = url.data();
-            const char* delims ="/";
-            char* token;
-
-            // Get the first token
-            token = strtok(str, delims);
-
-            // Loop through all remaining tokens
-            JSONPath path = start;
-            while (token != nullptr) 
-            {
-                BString key(token);
-
-                if (key.size()) {
-                    key = key.decodeURI();
-                    if (key.isDigitsOnly()) {
-                        Index index = atoi(key.c_str());
-                        if (path.contains(index))
-                            path = path[index];
-                        else
-                            break;
-                    }
-                    else {
-                        if (key.startsWith("\"") &&
-                            key.endsWith("\"") 
-                        )
-                        {
-                            key =
-                                key.substr(
-                                    1,
-                                    key.length() - 2
-                                );
-                        }
-                        if (path.contains(key) || method == "POST")
-                            path = path[key];
-                        else
-                            break;
-                    }
-                        
-
-
-                }
-                token = strtok(nullptr, delims);
+            try {
+                _bookmark = JSONPath::fromString(
+                    *database,
+                    origin,
+                    url,
+                    method
+                );
             }
-            
-            if (token == nullptr) {
-                
-                _bookmark = path;
-                //jsonPath.value();
-
-                if (method == "GET") {
-                    _serve = App::SERVE_JSON;
-                    _status = 200;
-                }
-                else if (method == "POST")
-                {
-                    // Clear the bookmarks contents
-                    //_bookmark.clear();
-                    
-                    // Stream posted file to
-                    // database
-                    WebRequest postRequest(true);
-                    
-                    BeeFishDatabase::JSONPathParser
-                        parser(
-                            _bookmark,
-                            postRequest
-                        );
-
-                    if (!parseWebRequest(parser)) {
-                        BeeFishScript::Object object
-                        {
-                            {"error", parser.getError()}
-                        };
-                        _content = object.str();
-                        _serve = App::SERVE_CONTENT;
-                        _status = 500;
-                        _statusText = "JSONPathParser error";
-                    }
-                    else {
-                        _content = "\"ok\"";
-                        _serve = App::SERVE_CONTENT;
-                        _status = 200;
-                        _statusText = "ok";
-                    }
-                }
-            }
-            else
+            catch (JSONPath::PathNotFoundException& exception)
             {
-                _content = "undefined";
                 _serve = App::SERVE_CONTENT;
-
+                _content = "undefined";
                 _status = 404;
-                _statusText = "Not found";
+                _statusText = 
+                    BString("Not found ") +
+                    exception.url();
+                
+                return;
+            }
+                
+            if (method == "GET") {
+                _serve = App::SERVE_JSON;
+                _status = 200;
+            }
+            else if (method == "POST")
+            {
+                // Stream posted file to
+                // database
+                WebRequest postRequest(true);
+                    
+                BeeFishDatabase::JSONPathParser
+                    parser(
+                        _bookmark,
+                        postRequest
+                    );
+
+                if (!parseWebRequest(parser)) {
+                    BeeFishScript::Object object
+                    {
+                        {"error", parser.getError()}
+                    };
+                    _content = object.str();
+                    _serve = App::SERVE_CONTENT;
+                    _status = 500;
+                    _statusText = "JSONPathParser error";
+                }
+                else {
+                    _content = BString("\"") + BString(origin + url.value()).escape() + BString("\"");
+                    _serve = App::SERVE_CONTENT;
+                    _status = 200;
+                    _statusText = "ok";
+                }
             }
             
 

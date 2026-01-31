@@ -9,10 +9,6 @@
 #include "../json/json.h"
 #include "../Config.hpp"
 
-#ifdef SERVER
-#include "../Database/Path.hpp"
-#endif
-
 #include "url.h"
 #include "headers.h"
 #include "body.h"
@@ -63,8 +59,6 @@ public:
         URL*     _url = nullptr;
         BString _version;
         NewLine* _newLine;
-    private:
-        BString _fullURL;
     public:
         FirstLine() : Match()
         {
@@ -92,10 +86,7 @@ public:
             }
                 ),
             new Blankspaces(1),
-            new Capture(
-                _url = new URL(),
-                _fullURL
-            ),
+            _url = new URL(),
             new Blankspaces(1),
             new Capture(
                 new Version(),
@@ -118,9 +109,6 @@ public:
             return *_url;
         }
 
-        const BString fullURL() const {
-            return _fullURL;
-        }
 
     };
 
@@ -278,11 +266,6 @@ public:
     URL& url()
     {
         return _firstLine->url();
-    }
-
-    BString fullURL() const
-    {
-        return _firstLine->fullURL();
     }
 
     BString path() const

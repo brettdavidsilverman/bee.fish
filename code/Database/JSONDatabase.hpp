@@ -17,14 +17,12 @@ namespace BeeFishDatabase
         Path _properties;
         Path _words;
         Path _json;
-        Path _origin;
         Path _objects;
         Path _authentication;
 
     public:
         // defined in JSONPath.hpp
         JSONDatabase(
-            const BString& origin,
             const BString& filePath = ""
         );
         
@@ -44,8 +42,8 @@ namespace BeeFishDatabase
         }
         
         // defined in JSONPath
-        JSONPath origin() const;
-
+        JSONPath origin(const BString& origin) const;
+        
         // defined in JSONPath
         JSONPath json() const;
     

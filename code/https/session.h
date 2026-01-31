@@ -282,12 +282,12 @@ namespace BeeFishHTTPS {
                       << ' '
                       << ipAddress()          << ' '
                       << _request->method()   << ' '
-                      << _request->fullURL()  << ' '
+                      << _request->url()      << ' '
                       << std::endl;
-               
+                      
+#warning create the database per thread
                 _database =
                     new JSONDatabase(
-                        origin(),
                         _server->databaseFile()
                     );
    

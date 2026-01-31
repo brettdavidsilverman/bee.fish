@@ -66,9 +66,12 @@ namespace BeeFishHTTPS {
                  return;
          }
 
-         BString path = request->path();
-         BString webMethod = request->method();
-
+         const BString& path = request->path();
+         const BString& webMethod = request->method();
+         const BString& host =
+             request->url().host();
+                
+                
          if (path == "/authenticate")
          {
     
@@ -131,7 +134,7 @@ namespace BeeFishHTTPS {
                "set-cookie",
                BString("sessionId=") +
                _sessionId +
-              BString(";path=/;max-age=3600;secure=true;httponly=false;samesite=None;")
+              BString(";path=/;max-age=3600;secure=true;httponly=false;samesite=None;Domain=" + host)
 /*
             "secure" => true, // Recommended for production
             "httponly" => false, // Recommended for security
@@ -143,9 +146,10 @@ namespace BeeFishHTTPS {
          }
          else
          {
-            _responseHeaders.emplace(
+             _responseHeaders.emplace(
                "set-cookie",
-               "sessionId=;path=/;max-age=0;"
+               "sessionId=" +
+               BString(";path=/;max-age=3600;secure=true;httponly=false;samesite=None;Domain=" + host)
             );
          }
 

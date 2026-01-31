@@ -51,12 +51,14 @@ int main(int argc, const char* argv[])
     int originArg =
         hasArg(argc, argv, "-origin");
     BString origin = ORIGIN;
-    if (originArg != -1 && argc > (originArg + 2))
+    if (originArg != -1 && argc > (originArg + 1))
     {
         origin = argv[originArg + 1];
     }
     
-    JSONDatabase database(origin, DATABASE_FILENAME);
+    cout << "Using origin " << origin << endl;
+    
+    JSONDatabase database(DATABASE_FILENAME);
 
     cout << database << endl;
     
@@ -99,7 +101,7 @@ int main(int argc, const char* argv[])
     
     if (loadDeaths)
     {
-        JSONPathParser json(database.origin()["deaths"], clog);
+        JSONPathParser json(database.origin(origin)["deaths"], clog);
         cout << WWW_ROOT_DIRECTORY "/deaths.json" << endl;
         
         ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");
@@ -118,7 +120,7 @@ int main(int argc, const char* argv[])
     
     if (input)
     {
-        JSONPathParser json(database.origin());
+        JSONPathParser json(database.origin(origin));
         json.read(cin);
     }
     
@@ -132,7 +134,7 @@ int main(int argc, const char* argv[])
     
     if (output)
     {
-        cout << database.origin() << endl;
+        cout << database.json() << endl;
     }
 
     cout << database << endl;
