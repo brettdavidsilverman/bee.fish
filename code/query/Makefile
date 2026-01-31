@@ -1,7 +1,7 @@
 BUILD=../../build
 OUTPUT=$(BUILD)/query
 CFLAGS=-std=c++17 -Wall -fmax-errors=1
-DEPS=main.cpp query.hpp NotPath.hpp AndPath.hpp OrPath.hpp test.hpp version.h Makefile $(BUILD)/Database
+DEPS=main.cpp Query.hpp NotPath.hpp AndPath.hpp OrPath.hpp Test.hpp version.h Makefile $(BUILD)/Database
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)

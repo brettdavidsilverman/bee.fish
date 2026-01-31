@@ -5,7 +5,7 @@
 #include <vector>
 #include <typeinfo>
 #include "../parser/parser.h"
-#include "../query/query.hpp"
+#include "../query/Query.hpp"
 
 namespace BeeFishWeb {
 

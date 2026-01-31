@@ -99,7 +99,7 @@ int main(int argc, const char* argv[])
     
     if (loadDeaths)
     {
-        JSONPathParser json(database.origin());
+        JSONPathParser json(database.origin()["deaths"]);
         cout << WWW_ROOT_DIRECTORY "/deaths.json" << endl;
         
         ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");

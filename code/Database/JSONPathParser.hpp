@@ -63,9 +63,13 @@ namespace BeeFishDatabase {
         {
             JSONPath::Id id = start.id();
             
-            
-            
             Path words = JSONPath::words();
+            
+            for (auto key : _keyStack)
+            {
+                words[key.toLower()][id];
+            }
+            
             switch (type)
             {
                 case Type::UNDEFINED:
@@ -117,34 +121,27 @@ namespace BeeFishDatabase {
                         
                         word[id];
                         
-                        JSONPath parentPath = start;
-                        std::vector<BString> keys;
-        
-                        keys.push_back(lower);
+                        for (auto parent : _pathStack)
+                        {
+                            word[parent.id()];
+                        }
                         
+                        _log << start.toString()
+                             << "/"
+                             << lower
+                             << endl;
+                        
+                        /*
+                        JSONPath parentPath = start;
+        
                         while(!parentPath.isRoot())
                         {
-                            BString key;
                             word[parentPath.id()];
 
-                            parentPath = parentPath.parent(key);
-                            keys.push_back(key.toLower());
+                            parentPath = parentPath.parent();
                         }
                         
-                        std::reverse(keys.begin(), keys.end());
-                        
-                        BString fullPath;
-                        for (auto key : keys)
-                        {
-                            fullPath += key;
-                            fullPath += "/";
-                        }
-                        
-                        fullPath.pop_back();
-                        
-                        _log << fullPath
-                             << endl;
-                            
+                        */
                         token = strtok(nullptr, delims); 
 
                     }
@@ -154,7 +151,7 @@ namespace BeeFishDatabase {
                 
                 case Type::ARRAY:
                 case Type::OBJECT:
-                    _log  << start.toString() << endl;
+                   // _log  << start.toString() << endl;
                     break;
 
                 default:
@@ -269,7 +266,9 @@ namespace BeeFishDatabase {
             else
             {
                 path = path[key->value()];
+              //  _pathStack.push_back(path);
                 setVariable(path, json->type(), json->value());
+               // _pathStack.pop_back();
             }
             
             pop_back_key();
@@ -304,8 +303,9 @@ namespace BeeFishDatabase {
             JSONPath path = topPath();
             Index& index = topIndex();
             path = path[index++];
+           // _pathStack.push_back(path);
             setVariable(path, json->type(), json->value());
-            
+         //   _pathStack.pop_back();
 
         }
 

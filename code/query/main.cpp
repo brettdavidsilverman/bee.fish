@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
-#include "query.hpp"
-#include "test.hpp"
+#include "Query.hpp"
+#include "Test.hpp"
 
 int main(int argc, const char* argv[]) {
     

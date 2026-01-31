@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "query.hpp"
+#include "Query.hpp"
 
 #include "../test/test.h"
 
@@ -33,7 +33,7 @@ namespace BeeFishQuery {
         ok = ok && testExpressions();
         ok = ok && testAndPath();
         ok = ok && testQueryAndPath();
-        
+    
         if (ok)
             cout << "SUCCESS";
         else
@@ -509,17 +509,10 @@ namespace BeeFishQuery {
         JSONDatabase db("http://test");
         Words words(db.properties());
         
-        words["one"][0];
-        words["one"][1];
-        words["one"][2];
-        words["one"][3];
-        words["two"][2];
-        words["two"][3];
-        words["two"][4];
-            
+        
         bool ok  = true;
         auto test =
-        [&db, &words](BString input, vector<int> check) {
+        [&db, &words](BString input, vector<JSONPath::Id> check) {
             
             
             cout << input << flush;
@@ -537,8 +530,8 @@ namespace BeeFishQuery {
                     expression
                     .getPath(words);
                 
-                Iterable<int> iterable(*pathBase);
-                std::vector<int> values;
+                Iterable<JSONPath::Id> iterable(*pathBase);
+                std::vector<JSONPath::Id> values;
                 for (auto index : iterable)
                 {
                     values.push_back(index);
@@ -568,6 +561,14 @@ namespace BeeFishQuery {
             return ok;
         };
         
+        words["one"][0];
+        words["one"][1];
+        words["one"][2];
+        words["one"][3];
+        words["two"][2];
+        words["two"][3];
+        words["two"][4];
+        
         ok = ok && test("one", {0,1,2,3});
         ok = ok && test("two", {2,3,4});
         ok = ok && test("one and one", {0,1,2,3});
@@ -577,6 +578,91 @@ namespace BeeFishQuery {
         ok = ok && test("one and three", {});
         ok = ok && test("three", {});
         
+        return ok;
+        
+    }
+    
+    inline bool testQueryJSON()
+    {
+        cout << "Test Query JSON" << endl;
+    
+        bool ok  = true;
+        auto test =
+        [](filesystem::path json, BString query, vector<JSONPath::Id> check) {
+            
+            cout << "\t" << json.filename() << endl;
+            cout << "\t" << query << endl;
+            
+            JSONDatabase db("http://test");
+            JSONPath root = db.origin();
+            Path words = db.words();
+            
+            JSONPathParser parser(root);
+            ifstream input(json);
+            parser.read(input);
+            parser.eof();
+            
+            bool ok = parser.matched();
+            
+            Expression expression;
+            if (ok)
+            {
+                Parser parser(expression);
+                parser.read(query);
+                parser.eof();
+        
+                ok = expression.matched();
+            }
+        
+            if (ok)
+            {
+                PathBase* pathBase =
+                    expression
+                    .getPath(words);
+                
+                Iterable<JSONPath::Id> iterable(*pathBase);
+                std::vector<JSONPath::Id> values;
+                for (auto index : iterable)
+                {
+                    values.push_back(index);
+                }
+             
+                delete pathBase;
+            
+                ok = ( values.size() == check.size());
+                
+                if (ok)
+                {
+                    for (unsigned int i = 0; i < values.size(); ++i)
+                    {
+                        if (values[i] != check[i])
+                        {
+                            ok = false;
+                            break;
+                        }
+                    }
+                }
+        
+                 
+            }
+        
+            BeeFishMisc::outputSuccess(ok);
+        
+            return ok;
+        };
+
+        
+        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "one", {});
+        
+        /*
+        ok = ok && test("two", {2,3,4});
+        ok = ok && test("one and one", {0,1,2,3});
+        ok = ok && test("one and two", {2,3});
+        ok = ok && test("two and two", {2,3,4});
+        ok = ok && test("one and three", {});
+        ok = ok && test("one and three", {});
+        ok = ok && test("three", {});
+        */
         return ok;
         
     }

@@ -4,7 +4,7 @@ OUTPUT=$(BUILD)/https
 PORT=8000
 DEPS=server.h session.h response.h response-headers.h app.h json-app.h file-system-app.h error-app.h storage-app.h test.h authentication.h version.h Makefile ParseURL.hpp main.cpp ../Config.hpp https.h authentication-app.h Makefile
 
-$(OUTPUT):	$(DEPS) $(BUILD)/Database
+$(OUTPUT):	$(DEPS) $(BUILD)/web-request $(BUILD)/query
 	@echo "Linking server"
 	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lpthread -latomic
 #	sudo setcap cap_net_bind_service=ep $(OUTPUT)
@@ -13,13 +13,16 @@ $(OUTPUT):	$(DEPS) $(BUILD)/Database
 $(BUILD):
 	mkdir $(BUILD)
 
-$(BUILD)/Database:
-	make -C ../Database $(DEBUG)
+$(BUILD)/web-request:
+	make -C ../web-request $(DEBUG) $(TEST)
 	
+$(BUILD)/query:
+	make -C ../query $(DEBUG) $(TEST)
 	
 install:	$(OUTPUT)
 	./start.sh $(PORT)
 
+test:	TEST=test
 test:	$(OUTPUT)
 	./stop.sh 8000
 	$(OUTPUT) -port 8000 -test
