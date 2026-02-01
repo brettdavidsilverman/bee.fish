@@ -80,8 +80,8 @@ using namespace BeeFishId;
         
          Path rootPath = database->root();
          Path userData =
-                rootPath[USERS][_userId];
-         Path bookmark = userData[path];
+                database->userData(_userId);
+         Path bookmark = userData[URLS][path];
 
          if (key.has_value())
             bookmark = bookmark[key.value()];

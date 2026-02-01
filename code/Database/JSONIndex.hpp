@@ -9,17 +9,17 @@ namespace BeeFishDatabase {
     inline static const Index PROPERTIES = 1;
     inline static const Index JSON = 2;
     inline static const Index WORDS = 3;
-    inline static const Index AUTHENTICATION = 4;
+    inline static const Index SECRETS = 4;
+    inline static const Index USERS = 5;
+    inline static const Index IP_ADDRESSES = 6;
     
     // Within user data
     inline static const Index URLS = 1;
     
-    // Within an object
-   // inline static const Index TYPES = 0;
-    //inline static const Index POSITIONS = 1;
+    // within session data
+    inline static const Index USER_ID = 1;
+    inline static const Index LAST_AUTHENTICATION = 2;
     
-    //inline static const Index BY_KEY = 0;
-    inline static const Index BY_OBJECT = 1;
 }
 
 #endif

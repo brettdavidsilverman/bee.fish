@@ -2,18 +2,17 @@
 #define BEE_FISH_SERVER__OPTIONS_APP_H
 
 #include "../Miscellaneous/Miscellaneous.hpp"
-#include "session.h"
-#include "app.h"
-#include "authentication.h"
 #include "../json/json-parser.h"
 #include "../Script/Script.hpp"
 #include "../web-request/web-request.h"
-#include "ParseURL.hpp"
+#include "session.h"
+#include "app.h"
+#include "authentication.h"
 
-using namespace std;
-using namespace BeeFishWeb;
 
 namespace BeeFishHTTPS {
+using namespace std;
+using namespace BeeFishWeb;
 
     class OptionsApp : public App {
     public:

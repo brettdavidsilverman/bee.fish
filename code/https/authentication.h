@@ -15,15 +15,8 @@ using namespace BeeFishMisc;
 
 namespace BeeFishHTTPS {
 
-    // ROOT
-    inline const Index SECRETS = 0;
-    inline const Index USERS = 1;
-    inline const Index IP_ADDRESSES = 2;
-    
-    // SESSION
-    inline const Index USER_ID = 0;
-    inline const Index LAST_AUTHENTICATION = 1;
-    
+
+
     class Session;
     
     class Authentication
@@ -120,8 +113,9 @@ namespace BeeFishHTTPS {
             }
             
             // Set the user data path
-            Path userData =
-                rootPath[USERS][_userId];
+            Path userData = database->userData(_userId);
+            
+                
                         
             // Create the session id
             // (Note, we use toHex, not toBase64 due to
@@ -134,11 +128,10 @@ namespace BeeFishHTTPS {
                 );
 
             // get the session data
-            Path sessionData = rootPath
-                    [IP_ADDRESSES]
-                    [_ipAddress]
-                    [_sessionId];
+            Path sessionData = 
+                database->sessionData(_ipAddress, _sessionId);
                 
+            
             // Save the user id
             sessionData[USER_ID]
                 .setData(_userId);
@@ -162,10 +155,11 @@ namespace BeeFishHTTPS {
                 ScopedDatabase scoped(this);
                 JSONDatabase* database = scoped;
                 Path rootPath = database->root();
-                Path sessionData = rootPath
-                    [IP_ADDRESSES]
-                    [_ipAddress]
-                    [_sessionId];
+                Path sessionData =
+                    database->sessionData(
+                        _ipAddress,
+                        _sessionId
+                    );
                     
                 sessionData.clear();
             }
@@ -193,10 +187,11 @@ namespace BeeFishHTTPS {
                   _sessionId.size() )
             {
 
-                Path sessionData = rootPath
-                    [IP_ADDRESSES]
-                    [_ipAddress]
-                    [_sessionId];
+                Path sessionData =
+                    database->sessionData(
+                        _ipAddress,
+                        _sessionId
+                    );
                     
                 if ( sessionData
                           [LAST_AUTHENTICATION]
@@ -225,8 +220,7 @@ namespace BeeFishHTTPS {
                 
                         // Set the user data path
                         Path userData =
-                            rootPath[USERS]
-                            [_userId];
+                            database->userData(_userId);
                         
                     }
                 }

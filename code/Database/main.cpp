@@ -48,8 +48,25 @@ int main(int argc, const char* argv[])
     }
     
     
+    JSONDatabase database(DATABASE_FILENAME);
+
+    cout << database << endl;
+    
+    bool originsArg  =
+        (hasArg(argc, argv, "-origins") != -1);
+    
+    if (originsArg)
+    {
+        cout << "Origins " << endl;
+        JSONPath origins = database.json();
+        for (auto origin : origins)
+        {
+            cout << origin << endl;
+        }
+    }
+    
     int originArg =
-        hasArg(argc, argv, "-origin");
+    hasArg(argc, argv, "-origin");
     BString origin = ORIGIN;
     if (originArg != -1 && argc > (originArg + 1))
     {
@@ -58,23 +75,6 @@ int main(int argc, const char* argv[])
     
     cout << "Using origin " << origin << endl;
     
-    JSONDatabase database(DATABASE_FILENAME);
-
-    cout << database << endl;
-    /*
-    bool originsArg  =
-        (hasArg(argc, argv, "-origins") != -1);
-    
-    if (originsArg)
-    {
-        cout << "Origins " << endl;
-        JSONPath origins = database.json();
-        for (auto origin: origins)
-        {
-            cout << origin << endl;
-        }
-    }
-    */
     
     bool propertiesArg =
         (hasArg(argc, argv, "-properties") != -1);

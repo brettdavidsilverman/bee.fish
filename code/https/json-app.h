@@ -2,19 +2,19 @@
 #define BEE_FISH_SERVER__JSON_APP_H
 
 #include "../Miscellaneous/Miscellaneous.hpp"
+#include "../json/json-parser.h"
+#include "../Script/Script.hpp"
+#include "../web-request/web-request.h"
+
 #include "session.h"
 #include "app.h"
 #include "authentication.h"
 #include "file-system-app.h"
-#include "../json/json-parser.h"
-#include "../Script/Script.hpp"
-#include "../web-request/web-request.h"
-#include "ParseURL.hpp"
 
-using namespace std;
-using namespace BeeFishWeb;
 
 namespace BeeFishHTTPS {
+using namespace std;
+using namespace BeeFishWeb;
 
     class JSONApp : public App {
     public:

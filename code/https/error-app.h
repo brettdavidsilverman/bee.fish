@@ -8,7 +8,6 @@
 #include "../json/json-parser.h"
 #include "../Script/Script.hpp"
 #include "../web-request/web-request.h"
-#include "ParseURL.hpp"
 
 using namespace std;
 using namespace BeeFishWeb;

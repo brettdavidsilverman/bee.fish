@@ -448,128 +448,123 @@ namespace BeeFishDatabase {
         
         virtual void write(ostream& out, Index tabCount = 0)
         {
-             if (isDeadEnd())
-                 return;
+            if (isDeadEnd())
+                return;
           
-             Type type = JSONPath::type();
+            Type type = JSONPath::type();
              
-             Path path =
-                 (*this)[type];
+            Path path =
+                (*this)[type];
                  
-             switch (type) {
-             case Type::UNDEFINED:
-                 out << "undefined";
-                 break;
-             case Type::NULL_:
-                 out << "null";
-                 break;
-             case Type::BOOLEAN:
-             case Type::INTEGER:
-             case Type::NUMBER:
-             {
-                 BString value;
-                 path.getData(value);
-                 out << value;
-                 break;
-             }
-             case Type::STRING:
-             {
-                 BString string;
-                 path.getData(string);
+            switch (type) {
+            case Type::UNDEFINED:
+                out << "undefined";
+                break;
+            case Type::NULL_:
+                out << "null";
+                break;
+            case Type::BOOLEAN:
+            case Type::INTEGER:
+            case Type::NUMBER:
+            {
+                BString value;
+                path.getData(value);
+                out << value;
+                break;
+            }
+            case Type::STRING:
+            {
+                BString string;
+                path.getData(string);
                     
-                 out << "\""
-                           << string.escape()
-                       << "\"";
+                out << "\""
+                    << string.escape()
+                    << "\"";
                  
-                 break;
-             }
-             case Type::ARRAY:
-             {
-                 out << "[";
+                break;
+            }
+            case Type::ARRAY:
+            {
+                out << "[";
                  
-                 Index count = 0;
+                Index count = 0;
                  
-                 if (!path.isDeadEnd())
-                     count = path.max<Index>();
+                if (!path.isDeadEnd())
+                    count = path.max<Index>();
                  
-                 if (count > 1) {
-                     out << "\r\n";
-                     out << tabs(tabCount + 1);
-                 }
+                if (count > 1) {
+                    out << "\r\n";
+                    out << tabs(tabCount + 1);
+                }
 
-                 for (Index index = 1;
-                        index <= count;
-                        ++index)
-                 {
-                     JSONPath item = (*this)[index];
+                for (Index index = 1;
+                    index <= count;
+                    ++index)
+                {
+                    JSONPath item = (*this)[index];
                           
-                     Index _tabCount = tabCount + 1;
+                    Index _tabCount = tabCount + 1;
                               
-                     if (count == 1)
-                          _tabCount--;
+                    if (count == 1)
+                        _tabCount--;
 
-                     item.write(
-                          out,
-                          _tabCount
-                     );
+                    item.write(
+                        out,
+                        _tabCount
+                    );
                           
-                     if (index < count)
-                     {
-                          out << ",\r\n" << tabs(tabCount + 1);
-                     }
-                 }
+                    if (index < count)
+                    {
+                        out << ",\r\n" << tabs(tabCount + 1);
+                    }
+                }
 
-                 if (count > 1) {
-                     out << "\r\n";
-                     out << tabs(tabCount);
-                 }
+                if (count > 1) {
+                    out << "\r\n";
+                    out << tabs(tabCount);
+                }
                  
-                 out << "]";
+                out << "]";
                      
-                 break;
-             }
-             case Type::OBJECT:
-             {
-                 Path objectPositions = getObjectPositions();
+                break;
+            }
+            case Type::OBJECT:
+            {
+                Path objectPositions = getObjectPositions();
                  
-                 if (objectPositions.isDeadEnd())
-                 {
-                     out << "{}";
-                     break;
-                 }
+                if (objectPositions.isDeadEnd())
+                {
+                    out << "{}";
+                    break;
+                }
                      
-                 out << "{";
-                 Index count = 0;
+                out << "{";
+                Index count = 0;
                  
-                 if (!path.isDeadEnd()) {
+                if (!path.isDeadEnd()) {
                      
-                     out << "\r\n";
+                    out << "\r\n";
                     
-                     optional<BString> key;
-                     Stack stack;
-                     Index position = 0;
-                     
-                     while (objectPositions.next(stack, position))
-                     {
-                          key = getObjectKey(position);
+                    BString key;
+                    for (auto iterator = begin(); iterator != end(); ++iterator)
+                    {
+                        key = *iterator;
 
-                          if (key.has_value()) {
-                              ++count;
-                              out << tabs(tabCount + 1)
-                                    << "\""
-                                        << key.value().escape()
-                                    << "\": ";
+                        ++count;
+                        
+                        out << tabs(tabCount + 1)
+                            << "\""
+                                << key.escape()
+                            << "\": ";
                                
-                              JSONPath value =
-                                  path[position];
+                        JSONPath value =
+                            path[iterator.position()];
                           
-                              value.write(out, tabCount + 1);
+                        value.write(out, tabCount + 1);
                           
-                              Stack stackCopy = stack;
-                              Path positionsCopy = objectPositions;
-                              if (positionsCopy.next(stackCopy))
-                                  out << ",\r\n";
-                          }
+                        auto iteratorCopy = iterator;
+                        if (++iteratorCopy != end())
+                            out << ",\r\n";
 
                      }
                  }
@@ -586,6 +581,108 @@ namespace BeeFishDatabase {
                  throw std::logic_error("JSONPath::write");
              }
             
+        }
+        
+    public:
+        
+        class PathIterator {
+        protected:
+            JSONPath* _jsonPath; // The underlying pointer that the iterator wraps
+            BString _item;
+            Stack _stack;
+            bool _isEnd = true;
+            Path _positions;
+            Index _position;
+        public:
+            
+            
+            // Iterator traits (required for STL compatibility in C++17 and earlier)
+            using iterator_category = std::forward_iterator_tag;
+            using value_type        = BString;
+            using difference_type   = std::ptrdiff_t;
+            using reference         = const BString&;
+
+            PathIterator(JSONPath* path, bool isEnd = false)
+                : _jsonPath(path)
+            {
+                
+                if (isEnd) {
+                    _isEnd = true;
+                }
+                else {
+                    _positions = _jsonPath->getObjectPositions();
+                    _isEnd = !_positions.next<Index>(_stack, _position);
+                    if (!_isEnd) {
+                        _item = _jsonPath->getObjectKey(_position).value();
+                    }
+                }
+            }
+            
+            
+            // Dereference operator (*)
+            reference operator*() const
+            {
+                return _item;
+            }
+
+            // Prefix increment operator (++)
+            PathIterator& operator++() {
+        
+                _isEnd = _isEnd or not
+                    _positions.next<Index>(
+                        _stack,
+                        _position
+                    );
+                    
+                if (!_isEnd)
+                    _item = _jsonPath->getObjectKey(_position).value();
+                    
+                return *this;
+            }
+
+            // Postfix increment operator (++)
+            PathIterator operator++(int) {
+                PathIterator tmp = *this;
+                ++(*this);
+                return tmp;
+            }
+
+            friend bool operator == (
+                const PathIterator& a,
+                const PathIterator& b
+            )
+            {
+                return  (a._isEnd == b._isEnd &&
+                         a._jsonPath == b._jsonPath &&
+                         a._stack == b._stack);
+            }
+            
+            friend bool operator != (
+                const PathIterator& a,
+                const PathIterator& b
+            )
+            { 
+                return (a._isEnd != b._isEnd ||
+                        a._jsonPath != b._jsonPath ||
+                        a._stack != b._stack);
+            }
+            
+            Index position() const {
+                return _position;
+            }
+
+        
+        };
+        
+        // Container methods to get iterators
+        PathIterator begin() {
+            return PathIterator(this);
+        }
+    
+        // Points one past the last element
+        PathIterator end() { 
+            PathIterator iterator(this, true);
+            return iterator;
         }
         
     };

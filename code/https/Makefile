@@ -2,7 +2,7 @@ CFLAGS = -std=c++17 -Wall -fmax-errors=1 -Ofast
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
 PORT=8000
-DEPS=server.h session.h response.h response-headers.h app.h json-app.h file-system-app.h error-app.h storage-app.h test.h authentication.h version.h Makefile ParseURL.hpp main.cpp ../Config.hpp https.h authentication-app.h Makefile
+DEPS=server.h session.h response.h response-headers.h app.h json-app.h file-system-app.h error-app.h storage-app.h test.h authentication.h version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h Makefile
 
 $(OUTPUT):	$(DEPS) $(BUILD)/web-request $(BUILD)/query
 	@echo "Linking server"
