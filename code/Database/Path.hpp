@@ -324,7 +324,7 @@ using namespace BeeFishBString;
             while(count > 0 && !isRoot());
             
             std::reverse(stack.begin(), stack.end());
-            
+            stack.reset();
             return Path(*this, index);
         }
         

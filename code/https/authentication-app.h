@@ -166,7 +166,7 @@ namespace BeeFishHTTPS {
                ) )
          {
             _status = 401;
-            _statusText = "Unathorised";
+            _statusText = "Unauthorised";
             _serve = SERVE_FILE;
             _filePath = getFilePath("/client/logon/index.html");
             return;

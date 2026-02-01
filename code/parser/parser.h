@@ -333,9 +333,7 @@ cerr << "MATCH RESULT: " << _match->result() << endl;
                  stringstream stream;
                  
                  stream << "Invalid Content '" << escape(_lastCharacter) << "' at position "
-                       << _charCount
-                       << " from match "
-                       << typeid(*match()).name();
+                       << _charCount;
                        
                  _error = stream.str();
              

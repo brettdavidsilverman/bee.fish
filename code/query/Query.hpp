@@ -105,7 +105,7 @@ using namespace BeeFishParser;
     class Not : public Operator
     {
     public:
-        Not() : Operator("not", "-")
+        Not() : Operator("not", "!")
         {
         }
         
@@ -121,7 +121,7 @@ using namespace BeeFishParser;
             new Character("\n"),
             new Character("+"),
             new Character("|"),
-            new Character("-"),
+            new Character("!"),
             new Character("("),
             new Character(")"),
             new Character(";")
@@ -572,14 +572,6 @@ using namespace BeeFishParser;
                         expressionB->getPath(words)
                     );
                     
-                    /*
-                output 
-                << *(_bracketedExpression1)
-                << " "
-                << *(_andOr1)
-                << " "
-                << *(_loadOnDemandExpression2->item());
-                */
                 
             }
             else if (_wordAndExpression->matched())
@@ -595,14 +587,6 @@ using namespace BeeFishParser;
                         wordPath,
                         expression->getPath(words)
                     );
-                    /*
-                output
-                << *_word1
-                << " "
-                << *(_andOr2)
-                << " "
-                << *(_loadOnDemandExpression3->item());
-                */
             }
             else if (_bracketedExpression->matched())
             {
@@ -611,17 +595,11 @@ using namespace BeeFishParser;
                     
                 return expression->getPath(words);
                 
-                    /*
-                output
-                << *_bracketedExpression2;
-                */
             }
             else if (_word->matched()) {
                 return
                     _word2->getPath(words);
-                    /*
-                output << *_word2;
-                */
+        
             }
             
             assert(false);

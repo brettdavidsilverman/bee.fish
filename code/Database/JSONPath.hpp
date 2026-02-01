@@ -135,7 +135,8 @@ namespace BeeFishDatabase {
         JSONPath parent(BString& key) {
             JSONPath path = *this;
 
-            Index position = 0;
+            Index position = -1;
+            
             path = path.parent(position);
             Type type;
             path = path.parent(type);
@@ -162,27 +163,17 @@ namespace BeeFishDatabase {
         
         
         BString toString() {
-            vector<BString> keys;
             JSONPath path = *this;
+            BString string;
             while (!path.isRoot())
             {
                 BString key;
                 path = path.parent(key);
-                keys.push_back(key);
+                BString newString =
+                   key + BString("/") + string;
+                string = newString;
             }
-            
-            std::reverse(keys.begin(), keys.end());
-            
-            BString string;
-           //database().origin();
-            for (auto key : keys)
-            {
-                string += key;
-                string += + "/";
-            }
-            
             string.pop_back();
-            
             return string;
         }
         
@@ -232,7 +223,7 @@ namespace BeeFishDatabase {
                 if (key.size()) {
                     key = key.decodeURI();
                     if (key.isDigitsOnly()) {
-                        Index index = atoi(key.c_str());
+                        Index index = atol(key.c_str());
                         if (path.contains(index))
                             path = path[index];
                         else
@@ -273,8 +264,8 @@ namespace BeeFishDatabase {
         {
             return
             (
-                *this == database().json() //||
-             //   index() == 0
+                *this == database().json() ||
+                index() == 0
             );
         }
         

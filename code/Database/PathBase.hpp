@@ -181,6 +181,10 @@ namespace BeeFishDatabase {
                     goRight();
                 }
                 else {
+                    
+                    if (stack.size() == 0)
+                        return false;
+                        
                     return next(stack);
             
                 }
