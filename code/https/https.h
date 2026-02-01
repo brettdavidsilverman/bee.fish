@@ -13,6 +13,7 @@
 
 #include "app.h"
 
+#include "options-app.h"
 #include "authentication-app.h"
 #include "file-system-app.h"
 #include "json-app.h"

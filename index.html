@@ -61,10 +61,7 @@
         <br />
         <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
         <script>
-
-const defaultURL = 
-    "Type the path of your document";
-    var logon = document.getElementById("logon");
+var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
 var pathInput = document.getElementById("pathInput");
@@ -89,12 +86,6 @@ authenticate();
 function loadJSON() {
     var url = pathInput.value;
     
-    if (url == defaultURL ||
-         url == "")
-    {
-        return Promise.resolve(undefined);
-    }
-        
     fetchButton.disabled = true;
     
     localStorage.setItem("path", url);
@@ -164,27 +155,22 @@ function loadJSON() {
 
 
 if (!pathInput.value)
-    pathInput.value = defaultURL;
+    pathInput.value = document.location.origin + "/";;
     
 pathInput.onfocus = 
     function() {
-        if (pathInput.value == defaultURL)
-            pathInput.value = "";
         fetchButton.disabled = false;
     };
     
     
 pathInput.onblur =
     function() {
-        if (pathInput.value == "" ||
-             pathInput.value == defaultURL)
+        if (pathInput.value == "")
         {
-            fetchButton.disabled = true;
-            pathInput.value = defaultURL;
+            pathInput.value = document.location.origin + "/";
         }
-        else {
-            fetchButton.disabled = false;
-        }
+        fetchButton.disabled = false;
+        
         setLinks();
     }
 
@@ -277,15 +263,15 @@ function getJSON()
     return json;
 }
 function setLinks() {
-    if (pathInput.value == "" ||
-         pathInput.value == defaultURL)
+    if (pathInput.value == "")
     {
         goLink.href = "";
         dataLink.href = "";
     }
     else {
+
         goLink.href = "/go.html?" + encodeURIComponent(pathInput.value);
-        dataLink.href = "/" + pathInput.value;
+        dataLink.href = pathInput.value;
     }
 }
 if (localStorage.getItem("path")) {
