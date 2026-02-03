@@ -82,7 +82,7 @@ namespace BeeFishHTTPS {
             
             flush();
           
-          _writingHeaders = false;
+            _writingHeaders = false;
         }
         
         void writeContent(App* app)
@@ -91,6 +91,8 @@ namespace BeeFishHTTPS {
             App::ScopedDatabase scoped(app);
                  
             JSONDatabase* database = scoped;
+            BeeFishQuery::Words words = database->words();
+            
             Path bookmark(*database, app->_bookmark);
             if (app->serve() == App::SERVE_JSON)
             {
@@ -100,6 +102,55 @@ namespace BeeFishHTTPS {
                 flush();
 
                 return;
+            }
+            
+            if (app->serve() == App::SERVE_QUERY)
+            {
+cout << __FILE__ << " " << app->request()->search() << endl;
+   
+                BeeFishQuery::Expression expression;
+                Parser parser(expression);
+                parser.read(app->request()->search());
+                parser.eof();
+                if (expression.matched()) {
+
+                    *this << "[" << endl;
+cout << __FILE__ << " " << expression << endl;
+   
+                    PathBase* path =
+                        expression
+                        .getPath(words);
+                
+                    Iterable<Index> matches(*path);
+                    for (auto it = matches.begin();
+                         it != matches.end();
+                         ++it)
+                    {
+                        JSONPath path(*database, *it);
+                        BString string = path.toString();
+                        if (string.length()) {
+cout << __FILE__ << " " << string << endl;
+                            *this << "   \"" << string << "\"";
+                        }
+                        else
+                            *this << "   null";
+                            
+                        PathBase::PathIterator<Index> next = it;
+                        if (++next != matches.end())
+                            *this << ",";
+                            
+                        *this << endl;
+                    }
+            
+                    delete path;
+                    
+                    *this << "]";
+                    
+                    flush();
+                    
+                    return;
+                    
+                }
             }
             
             Size bytesTransferred = 0;

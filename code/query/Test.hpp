@@ -699,6 +699,7 @@ namespace BeeFishQuery {
         ok = ok && test(TEST_DIRECTORY "/45-Object.json", "boo", {});
         ok = ok && test(TEST_DIRECTORY "/45-Object.json", "json",
             {
+                "https://test/45-Object.json",
                 "https://test/45-Object.json/a",
                 "https://test/45-Object.json/a/1",
                 "https://test/45-Object.json/a/1/1",
@@ -719,27 +720,6 @@ namespace BeeFishQuery {
                 "https://test/45-Object.json/a/2/2",
             }
         );
-        /*
-        ok = ok && test(TEST_DIRECTORY "/96-deaths.json", "male and alcohol", 
-            {
-                "https://test",
-                "https://test/96-deaths.json",
-                "https://test/96-deaths.json/data2",
-                "https://test/96-deaths.json/data2/1",
-                "https://test/96-deaths.json/data2/2"
-            }
-        );
-        
-        ok = ok && test(TEST_DIRECTORY "/97-deaths.json", "male and alcohol", 
-            {
-                "https://test",
-                "https://test/97-deaths.json",
-                "https://test/97-deaths.json/data",
-                "https://test/97-deaths.json/data/1",
-                "https://test/97-deaths.json/data/2"
-            }
-        );
-*/
 
         BeeFishMisc::outputSuccess(ok);
         

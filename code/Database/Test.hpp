@@ -1295,7 +1295,8 @@ assert(success);
         JSONPath path = start[Index(0)];
 
         BString key;
-        path = path.parent(key);
+        JSONPath parent;
+        success = path.parent(parent, key);
 
         success = success &&
             testValue(
@@ -1306,14 +1307,15 @@ assert(success);
         success = success &&
             testValue(
                 "Parent is root",
-                path == start
+                parent == start
             );
             
         JSONPathParser parser2(start);
         parser2.read("{\"hello\":\"world\"}");
         path = start["hello"];
         key.clear();
-        path = path.parent(key);
+        success = success &&
+            path.parent(parent, key);
 
         success = success &&
             testValue(
@@ -1324,7 +1326,7 @@ assert(success);
         success = success &&
             testValue(
                 "Parent is root",
-                path == start
+                parent == start
             );
             
         

@@ -123,39 +123,43 @@ namespace BeeFishDatabase {
             return parent(key);
         }
         
-        JSONPath parent(BString& key) {
+        bool parent(JSONPath& parent, BString& key) {
             Path path = *this;
 
             Index position = -1;
-            assert(!path.isRoot());
+            
+            if (path.isRoot())
+                return false;
             
             path = path.parent(position);
             
-            if (!path.isRoot()) {
+            if (path.isRoot())
+                return false;
             
-                Type type;
-                path = path.parent(type);
+            Type type;
+            path = path.parent(type);
 
-                if (type == Type::ARRAY)
+            if (type == Type::ARRAY)
+            {
+                stringstream stream;
+                stream << position;
+                key = stream.str();
+            }
+            else if (type == Type::OBJECT)
+            {
+                JSONPath object = path;
+                key = object.getObjectKey(position).value();
+                if (key.isDigitsOnly())
                 {
-                    stringstream stream;
-                    stream << position;
-                    key = stream.str();
+                    key = BString("\"") + key + BString("\"");
                 }
-                else if (type == Type::OBJECT)
-                {
-                    JSONPath object = path;
-                    key = object.getObjectKey(position).value();
-                    if (key.isDigitsOnly())
-                    {
-                        key = BString("\"") + key + BString("\"");
-                    }
-                    else
-                        key = key.escape();
-                }
+                else
+                    key = key.escape();
             }
     
-            return path;
+            parent = path;
+            
+            return true;
             
         }
         
@@ -163,18 +167,15 @@ namespace BeeFishDatabase {
         
         BString toString() {
             JSONPath path = *this;
+            JSONPath parent;
             BString string;
-            while (!path.isRoot())
+            BString key;
+            while (path.parent(parent, key))
             {
-                BString key;
-                path = path.parent(key);
-                if (key.size()) {
-                    BString newString =
-                       key + BString("/") + string;
-                    string = newString;
-                }
-                else
-                    break;
+                BString newString =
+                    key + BString("/") + string;
+                string = newString;
+                path = parent;
             }
             if (string.size())
                string.pop_back();
@@ -200,17 +201,10 @@ namespace BeeFishDatabase {
         
         static JSONPath fromString(JSONDatabase& database, const BString& host, const BeeFishWeb::URL& url, const BString& method = "GET")
         {
-            JSONPath hostPath;
+            JSONPath hostPath =
+                 database.host(host);
             
-            if (url.origin().length())
-            {
-                hostPath = database.host(url.origin());
-            }
-            else {
-                hostPath = database.host(host);
-            }
-            
-            BString copy = url;
+            BString copy = url.path();
             char* str = copy.data();
             const char* delims ="/";
             char* token;

@@ -295,6 +295,7 @@ namespace BeeFishWeb {
 
         }
         
+        
         URL(const BString& input) : URL() {
             Parser parser(*this);
             parser.read(input);

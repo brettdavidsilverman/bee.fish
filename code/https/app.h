@@ -25,7 +25,8 @@ namespace BeeFishHTTPS {
             SERVE_FILE,
             SERVE_CONTENT,
             SERVE_DATA,
-            SERVE_JSON
+            SERVE_JSON,
+            SERVE_QUERY
         } _serve = SERVE_CONTENT;
 
         int _status = -1;

@@ -193,8 +193,15 @@ using namespace BeeFishWeb;
 
       virtual void handleResponse()
       {
-         _status = 200;
+         
          WebRequest* request = _session->request();
+         
+         if (request->path() == "/" &&
+             request->search().length())
+             return;
+             
+         _status = 200;
+         
          const BString& requestPath = request->path();
 
          // Get the file path from the request path

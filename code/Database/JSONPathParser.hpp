@@ -62,7 +62,7 @@ namespace BeeFishDatabase {
         
      private:
 
-        void addWord(Path words, const BString& word, JSONPath path, bool display)
+        void addWord(Path words, const BString& word, JSONPath path)
         {
     
             static const char* _deliminators =
@@ -80,14 +80,12 @@ namespace BeeFishDatabase {
                 BString word =
                     BString(token).toLower();
 
-                words[word][path.id()];
-                token = strtok(nullptr, _deliminators); 
-                if (display)
-                {
-                    _log
-                    << path.toString()
-                    << "#" << word << endl;
+                if (word.size()) {
+_log << __FILE__ << "*" << word << "*" << endl;
+                    words[word][path.id()];
                 }
+                
+                token = strtok(nullptr, _deliminators); 
             }
         }
         
@@ -102,26 +100,27 @@ namespace BeeFishDatabase {
             Path words = JSONPath::words();
             
             JSONPath path = start;
-            
             // add all path keys except the
             // first (host)
-            while (!path.isRoot() &&
-                   !path.parent().isRoot())
+            JSONPath parent;
+            BString key;
+            while (path.parent(parent, key))
             {
-                BString key;
-                path = path.parent(key);
-                if (!key.isDigitsOnly())
-                {
-                    if (key.startsWith("\"") &&
-                        key.endsWith("\""))
+                if (!parent.isRoot()) {
+                    if (!key.isDigitsOnly())
                     {
-                        key = key.substr(1, key.length() - 2).unescape();
+                        if (key.startsWith("\"") &&
+                            key.endsWith("\""))
+                        {
+                            key = key.substr(1, key.length() - 2).unescape();
+                        }
+                        addWord(words, key, start);
                     }
-                    addWord(words, key, start, false);
                 }
-                
-                
+                path = parent;
             }
+                
+
             
             switch (type)
             {
@@ -154,7 +153,7 @@ namespace BeeFishDatabase {
                     while (!path.isRoot() &&
                            !path.parent().isRoot())
                     {
-                        addWord(words, value, path, false);
+                        addWord(words, value, path);
                         path = path.parent();
                     }
                 

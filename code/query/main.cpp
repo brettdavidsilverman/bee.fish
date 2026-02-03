@@ -78,9 +78,7 @@ int main(int argc, const char* argv[]) {
             {
                 JSONPath path(database, index);
                 BString string = path.toString();
-                
-                if (string.length())
-                    cout << string << endl;
+                cout << string << endl;
             }
             
             delete path;

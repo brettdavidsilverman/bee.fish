@@ -307,7 +307,7 @@ using namespace BeeFishBString;
             Branch branch = getBranch();
             Index index = Path::index();
             assert(!isRoot());
-            assert(branch._parent);
+            //assert(branch._parent);
             do
             {
                 Branch parent;

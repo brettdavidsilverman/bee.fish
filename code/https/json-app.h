@@ -5,6 +5,7 @@
 #include "../json/json-parser.h"
 #include "../Script/Script.hpp"
 #include "../web-request/web-request.h"
+#include "../query/Query.hpp"
 
 #include "session.h"
 #include "app.h"
@@ -34,10 +35,8 @@ using namespace BeeFishWeb;
 
             if (!authenticated())
             {
-                
                 throw std::runtime_error("Not authenticated");
             }
-            
             
             _responseHeaders.replace(
                 "content-type",
@@ -48,7 +47,7 @@ using namespace BeeFishWeb;
               "cache-control",
                 FileSystemApp::_noCacheControl
             );
-            _serve = App::SERVE_JSON;
+
             _contentLength = -1;
             
             BString error;
@@ -61,7 +60,7 @@ using namespace BeeFishWeb;
                 request()->method();
             const URL& url =
                 request()->url();
-                
+            
             BString host = _session->host();
 
                 /*
@@ -72,21 +71,20 @@ using namespace BeeFishWeb;
             const BString& search =
                 request()->search();
             */
+        
             
+            if (method == "GET" && 
+                request()->search().length())
+            {
+cout << __FILE__ << " " << request()->search() << endl;
+                _serve = App::SERVE_QUERY;
+                _status = 200;
+                return;
+            }
+
             ScopedDatabase scoped(this);
             
             JSONDatabase* database = scoped;
-            /*
-            optional<Path> jsonPath =
-                parseURL(
-                    userData,
-                    error,
-                    clientIPAddress,
-                    method,
-                    url,
-                    search
-                );
-            */
             JSONPath jsonPath;
             
             try {

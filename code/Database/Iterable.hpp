@@ -77,7 +77,7 @@ namespace BeeFishDatabase {
         
         // Container methods to get iterators
         virtual PathBase::PathIterator<T> begin() {
-            return PathBase::PathIterator<T>(&_path);
+            return PathBase::PathIterator<T>(this);
         }
     
         // Points one past the last element
