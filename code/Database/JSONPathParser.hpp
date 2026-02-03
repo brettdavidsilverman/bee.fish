@@ -81,7 +81,6 @@ namespace BeeFishDatabase {
                     BString(token).toLower();
 
                 if (word.size()) {
-_log << __FILE__ << "*" << word << "*" << endl;
                     words[word][path.id()];
                 }
                 

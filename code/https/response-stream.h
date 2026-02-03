@@ -106,17 +106,14 @@ namespace BeeFishHTTPS {
             
             if (app->serve() == App::SERVE_QUERY)
             {
-cout << __FILE__ << " " << app->request()->search() << endl;
-   
-                BeeFishQuery::Expression expression;
-                Parser parser(expression);
-                parser.read(app->request()->search());
-                parser.eof();
-                if (expression.matched()) {
+                const BString& search = 
+                    app->request()->search();
 
+                try {
+                    BeeFishQuery::Expression expression(search);
+        
                     *this << "[" << endl;
-cout << __FILE__ << " " << expression << endl;
-   
+
                     PathBase* path =
                         expression
                         .getPath(words);
@@ -124,19 +121,13 @@ cout << __FILE__ << " " << expression << endl;
                     Iterable<Index> matches(*path);
                     for (auto it = matches.begin();
                          it != matches.end();
-                         ++it)
+                         )
                     {
                         JSONPath path(*database, *it);
                         BString string = path.toString();
-                        if (string.length()) {
-cout << __FILE__ << " " << string << endl;
-                            *this << "   \"" << string << "\"";
-                        }
-                        else
-                            *this << "   null";
-                            
-                        PathBase::PathIterator<Index> next = it;
-                        if (++next != matches.end())
+                        *this << "   \"" << string.escape() << "\"";
+    
+                        if (++it != matches.end())
                             *this << ",";
                             
                         *this << endl;
@@ -145,12 +136,16 @@ cout << __FILE__ << " " << string << endl;
                     delete path;
                     
                     *this << "]";
-                    
-                    flush();
-                    
-                    return;
-                    
                 }
+                catch (const std::exception& exception)
+                {
+                    *this << "\"" << BString(exception.what()).escape() << "\"";
+                }
+            
+                flush();
+                    
+                return;
+            
             }
             
             Size bytesTransferred = 0;

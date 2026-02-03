@@ -76,7 +76,6 @@ using namespace BeeFishWeb;
             if (method == "GET" && 
                 request()->search().length())
             {
-cout << __FILE__ << " " << request()->search() << endl;
                 _serve = App::SERVE_QUERY;
                 _status = 200;
                 return;
@@ -98,12 +97,6 @@ cout << __FILE__ << " " << request()->search() << endl;
             }
             catch (JSONPath::PathNotFoundException& exception)
             {
-                _serve = App::SERVE_CONTENT;
-                _content = "undefined";
-                _status = 404;
-                _statusText = 
-                    BString("Not found ") +
-                    host + exception.url();
                 return;
             }
                 

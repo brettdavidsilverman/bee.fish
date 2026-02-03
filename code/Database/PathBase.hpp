@@ -162,8 +162,8 @@ namespace BeeFishDatabase {
                 }
                 else {
                     
-                    if (!stack.size())
-                        return false;
+                 //   if (!stack.size())
+                  //      return false;
                         
                     return next(stack);
             
@@ -197,8 +197,8 @@ namespace BeeFishDatabase {
                     goLeft();
                 }
                 else {
-                    if (!stack.size())
-                        return false;
+                  //  if (!stack.size())
+                  //      return false;
                     return previous(stack);
                 }
                 
@@ -345,7 +345,9 @@ namespace BeeFishDatabase {
             // Postfix increment operator (++)
             PathIterator operator++(int) {
                 PathIterator tmp = *this;
+                tmp.save();
                 ++(*this);
+                tmp.restore();
                 return tmp;
             }
 

@@ -234,6 +234,24 @@ using namespace BeeFishParser;
     class Expression : public BeeFishParser::Match
     {
     public:
+        Expression()
+        {
+        }
+        
+        Expression(const BString& input)
+        {
+            Parser parser(*this);
+            parser.read(input);
+            parser.eof();
+            if (!parser.matched())
+                throw std::runtime_error(parser.getError());
+        }
+        
+        operator BString () {
+            stringstream stream;
+            stream << *this;
+            return stream.str();
+        }
         
         class LoadOnDemandExpression :
             public LoadOnDemand<Expression>
@@ -352,9 +370,6 @@ using namespace BeeFishParser;
             return true;
         }
         
-        Expression()
-        {
-        }
         
         virtual void setup(Parser* parser)
         {
