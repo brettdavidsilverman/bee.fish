@@ -23,10 +23,7 @@ namespace BeeFishDatabase {
         vector<BString> _keyStack;
         vector<Type> _typeStack;
         ostream& _log;
-        bool _firstVariable = true;
         
-        inline static const char* _deliminators =
-            " .,!?()/\r\n\t\"\'{}:";
     public:
         using JSONParser::read;
 
@@ -35,7 +32,6 @@ namespace BeeFishDatabase {
             JSONPath(path),
             _log(log)
         {
-            loadKeyStack();
         }
           
         JSONPathParser(JSONPath path, ostream& log = cnull) :
@@ -43,106 +39,87 @@ namespace BeeFishDatabase {
             JSONPath(path),
             _log(log)
         {
-            loadKeyStack();
         }
           
-        JSONPathParser(Path path, ostream& log = clog) :
+        JSONPathParser(Path path, ostream& log = cnull) :
             JSONParser(),
             JSONPath(path),
             _log(log)
         {
-            loadKeyStack();
-        }
-        
-        void loadKeyStack() {
-
-            JSONPath path = *this;
-            
-            JSONPath parent;
-            while (!path.isRoot())
-            {
-                BString key;
-                
-                parent = path.parent(key);
-                
-                if (key.isDigitsOnly())
-                {
-                    Index index = atol(key.c_str());
-                    _indexStack.push_back(index);
-                    
-                    _typeStack.push_back(Type::ARRAY);
-                    _pathStack.push_back(parent);
-                    
-                }
-                else
-                {
-                    if (key.startsWith("\"") &&
-                        key.endsWith("\""))
-                    {
-                        key = key.substr(1, key.length() - 2);
-                    }
-                    
-                    _typeStack.push_back(Type::OBJECT);
-                    _keyStack.push_back(key);
-                    _pathStack.push_back(parent);
-                }
-                
-                path = parent;
-                
-                parent = parent.parent();
-                
-                if (parent.isRoot())
-                    break;
-                
-            }
-            
-            std::reverse(_keyStack.begin(), _keyStack.end());
-            std::reverse(_pathStack.begin(), _pathStack.end());
-            std::reverse(_typeStack.begin(), _typeStack.end());
-            std::reverse(_indexStack.begin(), _indexStack.end());
-        
         }
 
         virtual ~JSONPathParser()
         {
 
 #ifdef DEBUG
-           // assert(_pathStack.size() == 0);
-           // assert(_indexStack.size() == 0);
-           // assert(_keyStack.size() == 0);
-           // assert(_typeStack.size() == 0);
+            assert(_pathStack.size() == 0);
+            assert(_indexStack.size() == 0);
+            assert(_keyStack.size() == 0);
+            assert(_typeStack.size() == 0);
 #endif
 
         }
         
      private:
 
+        void addWord(Path words, const BString& word, JSONPath path, bool display)
+        {
+    
+            static const char* _deliminators =
+                " -.,!?()/\r\n\v\t\"\'{}:";
+                
+            BString copy = word;
+            char* str = copy.data();
+                    
+            char* token = 
+            strtok(str, _deliminators);
+
+            // Loop through all remaining tokens
+            while (token != nullptr) 
+            {
+                BString word =
+                    BString(token).toLower();
+
+                words[word][path.id()];
+                token = strtok(nullptr, _deliminators); 
+                if (display)
+                {
+                    _log
+                    << path.toString()
+                    << "#" << word << endl;
+                }
+            }
+        }
+        
         virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
     
-            JSONPath::Id id = start.id();
             start[type];
+            
+            if (&_log != &cnull)
+                _log << start.toString() << endl;
             
             Path words = JSONPath::words();
             
-            for (auto key : _keyStack)
+            JSONPath path = start;
+            
+            // add all path keys except the
+            // first (host)
+            while (!path.isRoot() &&
+                   !path.parent().isRoot())
             {
-                BString copy = key;
-                char* str = copy.data();
-                    
-                char* token = 
-                    strtok(str, _deliminators);
-
-                // Loop through all remaining tokens
-                while (token != nullptr) 
+                BString key;
+                path = path.parent(key);
+                if (!key.isDigitsOnly())
                 {
-                    BString word =
-                       BString(token).toLower();
-
-                    words[word][id];
-                    token = strtok(nullptr, _deliminators); 
-                    
+                    if (key.startsWith("\"") &&
+                        key.endsWith("\""))
+                    {
+                        key = key.substr(1, key.length() - 2).unescape();
+                    }
+                    addWord(words, key, start, false);
                 }
+                
                 
             }
             
@@ -153,67 +130,41 @@ namespace BeeFishDatabase {
                     BString key;
                     JSONPath parent = start.parent(key);
                     parent.deleteKey(key);
-                    _log << parent.toString() << "/undefined" << endl;
                     break;
                 }
                 case Type::NULL_:
                 {
                     start[type];
-                    _log << start.toString() << "/null" << endl;
                     break;
                 }
                 case Type::BOOLEAN:
                 case Type::INTEGER:
                 case Type::NUMBER:
                 {
-                    Path path = start[type];
-                    path.setData(value);
-                    _log << start.toString() << "/" << value << endl;
-            
+                    start[type].setData(value);
+                    
                     break;
                 }
                 case Type::STRING:
                 {
-                    Path path = start[type];
-                    path.setData(value);
-                    BString copy(value);
-                    char* str = copy.data();
+                    start[type].setData(value);
                     
-                    char* token =
-                        strtok(str, _deliminators);
-
-                    // Loop through all remaining tokens
-                    while (token != nullptr) 
+                    JSONPath path = start;
+        
+                    while (!path.isRoot() &&
+                           !path.parent().isRoot())
                     {
-                        BString lower = 
-                            BString(token).toLower();
-
-                        Path word = 
-                            words[lower];
-                            
-                        
-                        word[id];
-                        
-                        for (auto parent : _pathStack)
-                        {
-                            word[parent.id()];
-                        }
-                        
-                        _log << start.toString()
-                             << "/"
-                             << lower
-                             << endl;
-                        
-                        token = strtok(nullptr, _deliminators); 
-
+                        addWord(words, value, path, false);
+                        path = path.parent();
                     }
-
+                
+                
                     break;
                 }
                 
                 case Type::ARRAY:
                 case Type::OBJECT:
-                   // _log  << start.toString() << endl;
+            
                     break;
 
                 default:
@@ -255,7 +206,7 @@ namespace BeeFishDatabase {
         {
             JSONPath path;
             
-            if ( _firstVariable)
+            if (_pathStack.size() == 0)
             {
                 path = *this;
 
@@ -277,7 +228,7 @@ namespace BeeFishDatabase {
             if (type == Type::ARRAY)
                 _indexStack.push_back(1);
             _typeStack.push_back(type);
-            _firstVariable = false;
+        
         }
 
         void pop_back_path()
@@ -382,7 +333,7 @@ namespace BeeFishDatabase {
         override
         {
 
-            if (_firstVariable)
+            if (_pathStack.size() == 0)
             {
                 setVariable(
                     *this,

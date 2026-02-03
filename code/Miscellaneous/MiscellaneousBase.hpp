@@ -199,6 +199,7 @@ namespace BeeFishMisc {
         }
         
         if (!equal && display) {
+
             f1.seekg(0, std::ifstream::beg);
             f2.seekg(0, std::ifstream::beg);
             cout << p1 << endl;

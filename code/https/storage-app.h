@@ -78,7 +78,6 @@ using namespace BeeFishId;
          
          JSONDatabase* database = scoped;
         
-         Path rootPath = database->root();
          Path userData =
                 database->userData(_userId);
          Path bookmark = userData[URLS][path];

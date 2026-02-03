@@ -1,5 +1,5 @@
 OUTPUT=../../build/script
-CFLAGS=-std=c++17 -Wall -fmax-errors=1 -Ofast
+CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=main.cpp Version.hpp Variable.hpp Type.hpp Script.hpp ScriptParser.hpp Test.hpp ../../build/json Makefile
 
 $(OUTPUT): $(DEPS)

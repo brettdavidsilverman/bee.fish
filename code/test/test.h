@@ -38,8 +38,9 @@ namespace BeeFishTest
    {
       bool ok = true;
       
-      cout << "Opening file " << file << endl;
-      
+      cout << "\t" << label << endl;
+      cout << "\tFile " << file.filename() << endl;
+
      // file = string(HOME_DIR) + "/" + string(file);
 
       if (!exists(file)) {

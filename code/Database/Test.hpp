@@ -18,7 +18,7 @@ namespace BeeFishDatabase
     inline bool testArray2Path();
     inline bool testSubArray2Path();
     inline bool testComplexArrays();
-    inline bool testAllFiles(string directory);
+    inline bool testAllFiles(std::filesystem::path directory);
     inline bool testFile(JSONPath root, std::filesystem::path file, bool expect);
     inline bool testIterator();
     inline bool testClear();
@@ -653,9 +653,7 @@ namespace BeeFishDatabase
             cout << "\tParse array ";
             success &&
                 parser.result() == true;
-if (success) {
-    cerr << path << endl;
-}
+
             BeeFishMisc::outputSuccess(success);
         }
         
@@ -769,6 +767,8 @@ if (success) {
         cout << "Test Array 2 Path \"[[]]\" " << endl;
  
         JSONDatabase database;
+        JSONPath json =
+            database.json()["array"];
         Path path = database.json()["array"];
         JSONPathParser parser(path);
         parser.read("[[]]");
@@ -1011,9 +1011,9 @@ assert(success);
         return success;
     }
     
-    inline bool testAllFiles(string directory)
+    inline bool testAllFiles(std::filesystem::path directory)
     {
-        cout << "Testing all files in " << directory << endl;
+        cout << "Testing all files in " << directory.filename() << endl;
 
         bool success = true;
         

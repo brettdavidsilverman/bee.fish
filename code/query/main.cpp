@@ -7,6 +7,23 @@ int main(int argc, const char* argv[]) {
     
     using namespace BeeFishQuery;
     
+                
+
+        /*
+    {
+        JSONDatabase db(BEE_FISH_DATABASE_FILE);
+        Path word = db.words()["json"];
+       // word.clear();
+        Iterable<Index> iterable(word);
+        for (auto index : iterable)
+        {
+            cout << index << " " << flush << 
+            JSONPath(db, index).toString() << endl;
+        }
+        cout << "finished" << endl;
+        return 0;
+     }
+*/
     cout << "bee.fish.query"
               << endl
           << "C++ run time: "
@@ -35,15 +52,7 @@ int main(int argc, const char* argv[]) {
     JSONDatabase database(DATABASE_FILENAME);
     
     Words words(database.words());
-/*
-    {
-        Iterable<BString> iterable(words);
-        for (auto word : iterable)
-        {
-            cout << word << endl;
-        }
-    }
-        */
+
     do 
     {
         cout << "Expression: ";
@@ -68,7 +77,10 @@ int main(int argc, const char* argv[]) {
             for (auto index : jsonMatches)
             {
                 JSONPath path(database, index);
-                cout << path.toString() << endl;
+                BString string = path.toString();
+                
+                if (string.length())
+                    cout << string << endl;
             }
             
             delete path;

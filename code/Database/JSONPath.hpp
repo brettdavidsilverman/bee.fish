@@ -75,15 +75,7 @@ namespace BeeFishDatabase {
         {
              return database().words();
         }
-        /*
-        template<typename T>
-        JSONPath operator [] (const T& key)
-        {
 
-             return Path::operator[](key);
-        }
-        
-        */
         void clearValue(const BString& property)
         {
             
@@ -106,10 +98,9 @@ namespace BeeFishDatabase {
              Index position =
                  getObjectKeyPosition(key);
                  
-                    
-             return (*this)
-                 [Type::OBJECT]
-                 [position];
+             Path json = (*this)[Type::OBJECT][position];
+                 
+             return json;
               
         }
         
@@ -133,26 +124,34 @@ namespace BeeFishDatabase {
         }
         
         JSONPath parent(BString& key) {
-            JSONPath path = *this;
+            Path path = *this;
 
             Index position = -1;
+            assert(!path.isRoot());
             
             path = path.parent(position);
-            Type type;
-            path = path.parent(type);
+            
+            if (!path.isRoot()) {
+            
+                Type type;
+                path = path.parent(type);
 
-            if (type == Type::ARRAY)
-            {
-                stringstream stream;
-                stream << position;
-                key = stream.str();
-            }
-            else if (type == Type::OBJECT)
-            {
-                key = path.getObjectKey(position).value();
-                if (key.isDigitsOnly())
+                if (type == Type::ARRAY)
                 {
-                    key = BString("\"") + key + BString("\"");
+                    stringstream stream;
+                    stream << position;
+                    key = stream.str();
+                }
+                else if (type == Type::OBJECT)
+                {
+                    JSONPath object = path;
+                    key = object.getObjectKey(position).value();
+                    if (key.isDigitsOnly())
+                    {
+                        key = BString("\"") + key + BString("\"");
+                    }
+                    else
+                        key = key.escape();
                 }
             }
     
@@ -169,11 +168,16 @@ namespace BeeFishDatabase {
             {
                 BString key;
                 path = path.parent(key);
-                BString newString =
-                   key + BString("/") + string;
-                string = newString;
+                if (key.size()) {
+                    BString newString =
+                       key + BString("/") + string;
+                    string = newString;
+                }
+                else
+                    break;
             }
-            string.pop_back();
+            if (string.size())
+               string.pop_back();
             return string;
         }
         
@@ -238,7 +242,7 @@ namespace BeeFishDatabase {
                                 key.substr(
                                     1,
                                     key.length() - 2
-                                );
+                                ).unescape();
                         }
                         if (path.contains(key) || method == "POST")
                             path = path[key];
@@ -258,17 +262,6 @@ namespace BeeFishDatabase {
             
             return path;
         }
-        
-        
-        bool isRoot()
-        {
-            return
-            (
-                *this == database().json() ||
-                index() == 0
-            );
-        }
-        
         
         bool contains(const BString& key)
         {
@@ -484,7 +477,7 @@ namespace BeeFishDatabase {
                     count = path.max<Index>();
                  
                 if (count > 1) {
-                    out << "\r\n";
+                    out << "\n";
                     out << tabs(tabCount + 1);
                 }
 
@@ -506,12 +499,12 @@ namespace BeeFishDatabase {
                           
                     if (index < count)
                     {
-                        out << ",\r\n" << tabs(tabCount + 1);
+                        out << ",\n" << tabs(tabCount + 1);
                     }
                 }
 
                 if (count > 1) {
-                    out << "\r\n";
+                    out << "\n";
                     out << tabs(tabCount);
                 }
                  
@@ -534,7 +527,7 @@ namespace BeeFishDatabase {
                  
                 if (!path.isDeadEnd()) {
                      
-                    out << "\r\n";
+                    out << "\n";
                     
                     BString key;
                     for (auto iterator = begin(); iterator != end(); ++iterator)
@@ -555,13 +548,13 @@ namespace BeeFishDatabase {
                           
                         auto iteratorCopy = iterator;
                         if (++iteratorCopy != end())
-                            out << ",\r\n";
+                            out << ",\n";
 
                      }
                  }
                  
                  if (count > 0) {
-                     out << "\r\n";
+                     out << "\n";
                      out << tabs(tabCount);
                  }
                  

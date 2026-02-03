@@ -16,6 +16,10 @@ test:	TEST=test
 test:	$(OUTPUT)
 	$(OUTPUT) -test
 
+time:	CFLAGS += -Ofast
+time:	TIME = time
+time:	$(OUTPUT)
+
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
 debug:	$(OUTPUT)
@@ -25,7 +29,7 @@ run:	$(OUTPUT)
 	$(OUTPUT)
 	
 run_debug:	debug
-	gdb --args $(OUTPUT) -test
+	gdb --args $(OUTPUT)
 	
 trace:	$(OUTPUT)
 	rm -f trace.txt

@@ -332,6 +332,10 @@ namespace BeeFishDatabase {
 
             }
         }
+        
+        virtual Index rootIndex() {
+            return 0;
+        }
 
         friend ostream& operator <<
         (ostream& out, const Database& db)

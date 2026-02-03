@@ -276,14 +276,23 @@ using namespace BeeFishBString;
         bool isRoot()
         {
             return
+                index() == _database->rootIndex() ||
                 index() == 0;
         }
         
         template<typename T>
-        Path parent(T& value) {
+        Path parent(T& value)
+        {
+            assert(!isRoot());
+            
             Stack stack;
             Path parent = Path::parent(stack);
-            stack >> value;
+
+            stack.reset();
+            
+            if (stack.size())
+                stack >> value;
+                
             return parent;
         }
         
@@ -293,21 +302,22 @@ using namespace BeeFishBString;
         }
         
         Path parent(Stack& stack) {
-            Size count = 0;
+            Index count = 0;
+            Index rootIndex = _database->rootIndex();
             Branch branch = getBranch();
             Index index = Path::index();
-
+            assert(!isRoot());
+            assert(branch._parent);
             do
             {
+                Branch parent;
                 
-
-                Branch parent = _database->getBranch(
+                parent = _database->getBranch(
                     branch._parent
                 );
                 
                 if (index == parent._left)
                 {
-
                     stack.push_back(0);
                     ++count;
                 }
@@ -316,15 +326,26 @@ using namespace BeeFishBString;
                     stack.push_back(1);
                     --count;
                 }
+                else
+                {
+                    /*
+                    cout << "Parent: " << parent << endl;
+                    cout << "Branch: " << branch << endl;
+                    cout << "Index:  " <<  index << endl;
+                    */
+                    return Path(*this, rootIndex);
+                    break;
+                }
     
                 index = branch._parent;
-                
                 branch = parent;
+
             }
-            while(count > 0 && !isRoot());
+            while(count > 0 && index != rootIndex && index != 0);
             
             std::reverse(stack.begin(), stack.end());
             stack.reset();
+
             return Path(*this, index);
         }
         
@@ -345,6 +366,7 @@ using namespace BeeFishBString;
         Path operator [] (const char* key) const
         {
             BString _key(key);
+
             return Path::operator[](_key);
         }
         
@@ -514,8 +536,10 @@ using namespace BeeFishBString;
 
             deleteData();
             
-            clearLeft();
-            clearRight();
+            if (canGoLeft())
+                clearLeft();
+            else if (canGoRight())
+                clearRight();
             
         }
         
@@ -578,11 +602,7 @@ using namespace BeeFishBString;
             if (left)
             {
                 Path path(*this, left);
-                path.deleteData();
-                if (path.canGoLeft())
-                    path.clearLeft();
-                else if (path.canGoRight())
-                    path.clearRight();
+                path.clear();
                 
             }
         }
@@ -599,12 +619,7 @@ using namespace BeeFishBString;
             {
                 
                 Path path(*this, right);
-                path.deleteData();
-                if (path.canGoLeft())
-                    path.clearLeft();
-                else if (path.canGoRight())
-                    path.clearRight();
-                
+                path.clear();
             }
         }
         

@@ -8,213 +8,214 @@
 
 namespace BeeFishHTTPS {
 
-   using namespace BeeFishJSON;
-   using namespace BeeFishMisc;
-   using namespace BeeFishDatabase;
-   using namespace BeeFishScript;
-   using namespace BeeFishTest;
-   using namespace BeeFishId;
-   
-   using namespace std::filesystem;
+    using namespace BeeFishJSON;
+    using namespace BeeFishMisc;
+    using namespace BeeFishDatabase;
+    using namespace BeeFishScript;
+    using namespace BeeFishTest;
+    using namespace BeeFishId;
+    
+    using namespace std::filesystem;
 
   // inline bool testURLQuery(Path userData, const BString& uri, const BString& queryStr, bool expectedResult, const BString& expectedValue = "");
-   inline bool testLogon(const BString& origin);
-   inline bool testAllFiles(const BString& origin, string directory);
-   inline bool testFile(const BString& origin, filesystem::path file, bool expect = true);
-   
-   inline bool test(BString origin) {
-      cout << "Testing HTTPS" << endl;
-      bool success = true;
-      
-      Id id;
-      
-      success = success &&
-         testLogon(origin);
-         
-      success = success &&
-         testAllFiles(origin, TEST_DIRECTORY);
-      
-      outputSuccess(success);
-      
-      return success;
-   }
+    inline bool testLogon(const BString& origin);
+    inline bool testAllFiles(const BString& origin, string directory);
+    inline bool testFile(const BString& origin, filesystem::path file, bool expect = true);
+    
+    inline bool test(BString origin) {
+        cout << "Testing HTTPS" << endl;
+        bool success = true;
+        
+        Id id;
+        
+        success = success &&
+            testLogon(origin);
+            
+        success = success &&
+            testAllFiles(origin, TEST_DIRECTORY);
+
+    
+        outputSuccess(success);
+        
+        return success;
+    }
 
 /*
-   bool testURLQuery(Path userData, const BString& url, const BString& queryStr, bool expectedResult, const BString& expectedValue)
-   {
-      cout << "\t" << "Testing query " << queryStr << flush;
-     
-      BString error;
-
-      optional<JSONPath> object = parseURL(
-         userData,
-         error,
-         "127.0.0.1",
-         "GET",
-         url,
-         queryStr
-      );
+    bool testURLQuery(Path userData, const BString& url, const BString& queryStr, bool expectedResult, const BString& expectedValue)
+    {
+        cout << "\t" << "Testing query " << queryStr << flush;
       
-      bool result = object.has_value();
-      bool success = testValue("Expected result", expectedResult == result);
-      
-      std::stringstream stream;
+        BString error;
 
-      if (result)
-         stream << object.value();
-      else {
-         stream << error;
-      }
-      
-      BString value = stream.str();
-      
-      success = success &&
-         testValue("\tExpected value",
-            (value == expectedValue)
-         );
-         
-      outputSuccess(success);
+        optional<JSONPath> object = parseURL(
+            userData,
+            error,
+            "127.0.0.1",
+            "GET",
+            url,
+            queryStr
+        );
+        
+        bool result = object.has_value();
+        bool success = testValue("Expected result", expectedResult == result);
+        
+        std::stringstream stream;
 
-      if (!success)
-      {
-         cout << "Expected: " << endl << expectedValue << endl;
-         cout << "Got: " << endl << value << endl;
-      }
-      
-      return success;
-   }
-    */
-   std::optional<bool> testParser(Parser* parser) {
-
-      parser->read(cin);
- 
-      parser->eof();
-
-      cout << endl;
-
-      return parser->result();
-
-   }
-   
-   inline bool testAllFiles(const BString& origin, string directory)
-   {
-      cout << "Testing all files in " << directory << endl;
-
-      bool success = true;
-      
-      vector<filesystem::path> files;
-
-      for (const auto & entry : directory_iterator(directory))
-      {
-         files.push_back(entry);
-      }
-
-      sort(files.begin(), files.end());
-
-      // Test via apache web server
-      for (auto file : files) {
-         if (success)
-            success = testFile(origin, file, true);
-         else
-            break;
-      }
-
-      outputSuccess(success);
-
-      return success;
-   }
-   
-   inline bool testLogon(const BString& origin)
-   {
-      cout << "Testing logon" << endl;
-
-      
-      stringstream stream;
-      bool success = true;
-
-      BeeFishScript::Object auth {
-         {"method", "logon"},
-         {"secret", "boo"}
-      };
-      
-      BString str = escape(auth.str(false));
-      
-      stream
-         << "curl "
-         << origin  << "/authenticate"
-         << " -c cookies -b cookies "
-         << " -d \"" << str << "\""
-         << " -s -k > /dev/null";
-
-
-      string command = stream.str();
-
-      cout << "\t" << command << endl;
-      
-      success = (system(command.c_str()) == 0);
-      
-      outputSuccess(success);
-      
-      return success;
-   }
-   
-   inline bool testFile(const BString& origin, filesystem::path file, bool expect)
-   {
-      cout << "\tTesting "
-           << file.filename()
-           << endl;
-
-      string tempFile =
-         TEMP_DIRECTORY;
-         
-      tempFile += "test.curl.txt";
-      remove(tempFile);
-      
-      stringstream stream;
-      bool success = true;
-
-      stream << 
-         "curl -X POST " <<
-         origin << "/" <<
-         file.filename() << " "
-         << "-c cookies -b cookies " <<
-         "-H \"Content-Type: application/json; charset=utf-8\" " <<
-         "-H Expect: " <<
-         "-T " << file
-         << " -s -k > /dev/null";
-
-
-      string command = stream.str();
-
-      success &= (system(command.c_str()) == 0);
-
-      if (success && expect) {
-          
-         stringstream stream1;
-         stream1
-            << "curl "
-            << origin  << "/" << file.filename() << " "
-            << "-c cookies -b cookies "
-            << " -s -k > "
-            << tempFile;
+        if (result)
+            stream << object.value();
+        else {
+            stream << error;
+        }
+        
+        BString value = stream.str();
+        
+        success = success &&
+            testValue("\tExpected value",
+                (value == expectedValue)
+            );
             
-         string command = stream1.str();
-         success &= (system(command.c_str()) == 0);
+        outputSuccess(success);
 
-         // Compare the files
-         success = success &&
-            compareFiles(tempFile, file);
+        if (!success)
+        {
+            cout << "Expected: " << endl << expectedValue << endl;
+            cout << "Got: " << endl << value << endl;
+        }
+        
+        return success;
+    }
+     */
+    std::optional<bool> testParser(Parser* parser) {
 
-         
-      }
+        parser->read(cin);
+ 
+        parser->eof();
 
-      remove(tempFile);
-      
-      outputSuccess(success);
-      return success;
-   }
-   
-   
+        cout << endl;
+
+        return parser->result();
+
+    }
+    
+    inline bool testAllFiles(const BString& origin, string directory)
+    {
+        cout << "Testing all files in " << directory << endl;
+
+        bool success = true;
+        
+        vector<filesystem::path> files;
+
+        for (const auto & entry : directory_iterator(directory))
+        {
+            files.push_back(entry);
+        }
+
+        sort(files.begin(), files.end());
+
+        // Test via apache web server
+        for (auto file : files) {
+            if (success)
+                success = testFile(origin, file, true);
+            else
+                break;
+        }
+
+        outputSuccess(success);
+
+        return success;
+    }
+    
+    inline bool testLogon(const BString& origin)
+    {
+        cout << "Testing logon" << endl;
+
+        
+        stringstream stream;
+        bool success = true;
+
+        BeeFishScript::Object auth {
+            {"method", "logon"},
+            {"secret", "boo"}
+        };
+        
+        BString str = escape(auth.str(false));
+        
+        stream
+            << "curl "
+            << origin  << "/authenticate"
+            << " -c cookies -b cookies "
+            << " -d \"" << str << "\""
+            << " -s -k > /dev/null";
+
+
+        string command = stream.str();
+
+        cout << "\t" << command << endl;
+        
+        success = (system(command.c_str()) == 0);
+        
+        outputSuccess(success);
+        
+        return success;
+    }
+    
+    inline bool testFile(const BString& origin, filesystem::path file, bool expect)
+    {
+        cout << "\tTesting "
+              << file.filename()
+              << endl;
+
+        string tempFile =
+            TEMP_DIRECTORY;
+            
+        tempFile += "test.curl.txt";
+        remove(tempFile);
+        
+        stringstream stream;
+        bool success = true;
+
+        stream << 
+            "curl -X POST " <<
+            origin << "/" <<
+            file.filename() << " "
+            << "-c cookies -b cookies " <<
+            "-H \"Content-Type: application/json; charset=utf-8\" " <<
+            "-H Expect: " <<
+            "-T " << file
+            << " -s -k > /dev/null";
+
+
+        string command = stream.str();
+
+        success &= (system(command.c_str()) == 0);
+
+        if (success && expect) {
+             
+            stringstream stream1;
+            stream1
+                << "curl "
+                << origin  << "/" << file.filename() << " "
+                << "-c cookies -b cookies "
+                << " -s -k > "
+                << tempFile;
+                
+            string command = stream1.str();
+            success &= (system(command.c_str()) == 0);
+
+            // Compare the files
+            success = success &&
+                compareFiles(tempFile, file);
+
+            
+        }
+
+        remove(tempFile);
+        
+        outputSuccess(success);
+        return success;
+    }
+    
+    
 }
 
 #endif

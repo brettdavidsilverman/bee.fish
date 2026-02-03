@@ -1,4 +1,4 @@
-CFLAGS = -std=c++17 -Wall -fmax-errors=1 -Ofast
+CFLAGS = -std=c++17 -Wall -fmax-errors=1
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
 PORT=8000
@@ -21,6 +21,10 @@ $(BUILD)/query:
 	
 install:	$(OUTPUT)
 	./start.sh $(PORT)
+	
+time:	CFLAGS += -Ofast
+time:	TIME = time
+time:	install
 
 test:	TEST=test
 test:	$(OUTPUT)

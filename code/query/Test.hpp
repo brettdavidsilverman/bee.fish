@@ -597,7 +597,7 @@ namespace BeeFishQuery {
             JSONPath root = db.host("https://test")[json.filename()];
             Path words = db.words();
             
-            JSONPathParser parser(root, clog);
+            JSONPathParser parser(root);
             ifstream input(json);
             parser.read(input);
             parser.eof();
@@ -740,6 +740,7 @@ namespace BeeFishQuery {
             }
         );
 */
+
         BeeFishMisc::outputSuccess(ok);
         
         return ok;

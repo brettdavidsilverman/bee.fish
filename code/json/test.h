@@ -22,7 +22,7 @@ namespace BeeFishJSON
     inline bool testKeyedSets();
     inline bool testArrays();
     inline bool testObjects();
-    inline bool testAllFiles(string directory);
+    inline bool testAllFiles(std::filesystem::path directory);
     inline bool testFile(Parser& parser, std::filesystem::path file, bool expect);
     
 #ifdef SERVER
@@ -658,9 +658,9 @@ namespace BeeFishJSON
         return ok;
     }
     
-    inline bool testAllFiles(string directory)
+    inline bool testAllFiles(std::filesystem::path directory)
     {
-        cout << "Testing all files in " << directory << endl;
+        cout << "Testing all files in " << directory.filename() << endl;
 
         bool success = true;
         

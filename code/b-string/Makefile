@@ -1,6 +1,6 @@
 BUILD  = ../../build
 OUTPUT = $(BUILD)/b-string
-CFLAGS = -std=c++17 -Wall -fmax-errors=1 -Ofast
+CFLAGS = -std=c++17 -Wall -fmax-errors=1
 DEPS   = char.h b-string.h bit-stream.h base64.h misc.h b-string-base.h stream.h test.h main.cpp Makefile
 
 all:	$(OUTPUT)

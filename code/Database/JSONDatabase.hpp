@@ -14,7 +14,7 @@ namespace BeeFishDatabase
     protected:
         
         Path _root;
-      //  Path _authentication;
+        Path _authentication;
         Path _properties;
         Path _words;
         Path _json;
@@ -37,25 +37,32 @@ namespace BeeFishDatabase
             _words =
                 _root[WORDS];
                 
-           // _authentication =
-           //     _root[AUTHENTICATION];
+            _authentication =
+                _root[AUTHENTICATION];
             
             _json =
                 _root[JSON];
         
         
         }
-        
-        Path root() const
+
+        virtual Index rootIndex() 
+        override
+        {
+            return _json.index();
+        }
+        /*
+        Path root()
         {
             return _root;
         }
-        /*
+        */
+
         Path authentication()
         {
             return _authentication;
         }
-        */
+        
         Path properties() const
         {
             return _properties;

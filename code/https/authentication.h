@@ -90,7 +90,7 @@ namespace BeeFishHTTPS {
             ScopedDatabase scoped(this);
             JSONDatabase* database = scoped;
             
-            Path rootPath = database->root();
+            Path rootPath = database->authentication();
             
             Path secrets = rootPath
                 [SECRETS]
@@ -154,7 +154,7 @@ namespace BeeFishHTTPS {
             {
                 ScopedDatabase scoped(this);
                 JSONDatabase* database = scoped;
-                Path rootPath = database->root();
+        
                 Path sessionData =
                     database->sessionData(
                         _ipAddress,
@@ -180,8 +180,6 @@ namespace BeeFishHTTPS {
             ScopedDatabase scoped(this);
             JSONDatabase* database =
                 scoped;
-                
-            Path rootPath = database->root();
                 
             if ( _ipAddress.size() &&
                   _sessionId.size() )

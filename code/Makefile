@@ -14,7 +14,7 @@ all:	$(BUILD)
 	make -C query $(DEBUG) test
 	make -C web-request $(DEBUG) test
 	make -C Script $(DEBUG) test
-	make -C https $(DEBUG) test PORT=$(PORT)
+	make -C https $(DEBUG) $(TIME) test PORT=$(PORT)
 
 $(BUILD):
 	mkdir $(BUILD)
@@ -30,6 +30,11 @@ debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
 debug:	PORT=8000
 debug:	all
+
+time:	CFLAGS += -Ofast
+time:	TIME = time
+time:	all
+
 
 clean:
 	cd b-string && make clean

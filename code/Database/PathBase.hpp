@@ -70,9 +70,6 @@ namespace BeeFishDatabase {
             
     
     
-            // bool bit;
-            bool found = false;
-
             // Up the tree until first right
             // that hasn't been taken yet
             bool bit;
@@ -89,19 +86,12 @@ namespace BeeFishDatabase {
                 {
                     goRight();
                     stack.push_back(1);
-                    found = true;
-                    break;
+                    return goToMin(stack);
                 }
             
             }
 
-            if (!found) {
-                return false;
-            }
-
-            // Follow the next min from
-            // this right
-            return goToMin(stack);
+            return false;
 
 
         }
@@ -125,10 +115,6 @@ namespace BeeFishDatabase {
             }
             
     
-    
-            // bool bit;
-            bool found = false;
-
             // Up the tree until first left
             // that hasn't been taken yet
             bool bit;
@@ -145,19 +131,13 @@ namespace BeeFishDatabase {
                 {
                     goLeft();
                     stack.push_back(0);
-                    found = true;
-                    break;
+                    return goToMax(stack);
                 }
             
             }
 
-            if (!found) {
-                return false;
-            }
 
-            // Follow the next max from
-            // this left
-            return goToMax(stack);
+            return false;
 
 
         }
@@ -182,7 +162,7 @@ namespace BeeFishDatabase {
                 }
                 else {
                     
-                    if (stack.size() == 0)
+                    if (!stack.size())
                         return false;
                         
                     return next(stack);
@@ -190,7 +170,7 @@ namespace BeeFishDatabase {
                 }
                 
                 if (stack.count() == 0)
-                    return true;
+                    return (stack.size());
 
             }
             
@@ -216,11 +196,14 @@ namespace BeeFishDatabase {
                     stack.push_back(0);
                     goLeft();
                 }
-                else
+                else {
+                    if (!stack.size())
+                        return false;
                     return previous(stack);
+                }
                 
                 if (stack.count() == 0)
-                    return true;
+                    return stack.size();
                 
             }
             
