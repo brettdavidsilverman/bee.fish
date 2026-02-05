@@ -10,33 +10,36 @@ namespace BeeFishWeb {
 
     using namespace BeeFishParser;
     
-    class URL : public Capture
+    class URL : public Match
     {
     public:
         
-        class Protocol : public OrderOfPrecedence {
+        
+        class Protocol : public Capture {
         public:
-            Protocol() : OrderOfPrecedence(
+            Protocol() : Capture(
+                new OrderOfPrecedence(
                 {
                     {
-                        new Item(
+                        new OrderOfPrecedence::Item(
                             new CIWord("https")
                         )
                     },
                     {
-                        new Item(
+                        new OrderOfPrecedence::Item(
                             new CIWord("http")
                         )
                     }
                 }
+                )
             )
             {
             }
         };
         
-        class HostCharacter : public Not {
+        class DomainCharacter : public Not {
         public:
-            HostCharacter() : Not(
+            DomainCharacter() : Not(
                 new Or(
                     new Character(' '),
                     new Character('/'),
@@ -49,10 +52,10 @@ namespace BeeFishWeb {
             
         };
         
-        class Host : public Capture {
+        class Domain : public Capture {
         public:
-            Host() : Capture(
-                new Repeat<HostCharacter>()
+            Domain() : Capture(
+                new Repeat<DomainCharacter>()
             )
             {
             }
@@ -77,6 +80,35 @@ namespace BeeFishWeb {
         };
         
 
+        class Origin : public Capture
+        {
+        public:
+            Protocol* _protocol = nullptr;
+            Domain* _domain = nullptr;
+            Port* _port = nullptr;
+            
+        public:
+            Origin() : Capture(
+            )
+            {
+                _match = new And(
+                    new Optional(
+                        new And(
+                            _protocol = new Protocol(),
+                            new Word("://")
+                        )
+                    ),
+                    _domain = new Domain(),
+                    new Optional(
+                        new And(
+                            new Character(':'),
+                           _port = new Port()
+                        )
+                    )
+                );
+            }
+        };
+                    
         class PathCharacter : public Not {
         public:
             PathCharacter() : Not(
@@ -219,6 +251,17 @@ namespace BeeFishWeb {
             {
                 return _value;
             }
+        
+            virtual BString& value()
+            override
+            {
+                return _value;
+            }
+        
+            virtual operator const BString& () const
+            {
+                return _value;
+            }
             
             virtual bool contains(const BString& test) {
                 return count(test) > 0;
@@ -238,57 +281,28 @@ namespace BeeFishWeb {
         };
         
     public:
-        Capture* _origin = nullptr;
-        Protocol* _protocol = nullptr;
-        Capture* _host = nullptr;
-        Port* _port = nullptr;
+        Origin* _origin = nullptr;
         Path* _path = nullptr;
         Search* _search = nullptr;
+        const URL* _baseURL = nullptr;
 
     public:
             
-        URL() : Capture()
+        URL() : Match()
         {
-              
-            _protocol = new Protocol();
-            _host = new Capture(new Host());
-            _port = new Port();
-            _path = new Path();
-            _search = new Search();
-
             _match = new And(
                 new Optional(
-                    _origin = new Capture(
-                        new And(
-                            _protocol,
-                            new Word("://"),
-                            _host,
-                            new Optional(
-                                new And(
-                                    new Character(':'),
-                                    _port
-                                )
-                            )
-                        )
-                    )
+                    _origin = new Origin()
                 ),
-                _path,
                 new Optional(
                     new And(
-                        new Character('?'),
-                        _search
-                        /*
-                        new OrderOfPrecedence(
-                            {
-                                {
-                                    _search
-                                },
-                                {
-                                    _statement
-                                }
-                            }
+                        _path = new Path(),
+                        new Optional(
+                            new And(
+                                new Character('?'),
+                                _search = new Search()
+                            )
                         )
-                        */
                     )
                 )
             );
@@ -309,35 +323,154 @@ namespace BeeFishWeb {
         {
         }
         
+        URL(const BString& input, const BString& baseURL) :
+            URL(input)
+        {
+            _baseURL = new URL(baseURL);
+        }
+        
+        URL(const URL& source) :
+            URL(source.toString())
+        {
+        }
+        
+        virtual ~URL() {
+            if (_baseURL)
+                delete _baseURL;
+        }
+        
+        
         bool operator == (const BString& rhs) const
         {
-            return value() == rhs;
+            return toString() == rhs;
         }
         
         bool operator == (const char* rhs) const
         {
-            return value() == BString(rhs);
+            return toString() == BString(rhs);
         }
         
-        operator const BString& () const
+        operator BString ()
         {
-            return value();
+            return toString();
+        }
+        
+        friend ostream& operator << (ostream& output, const URL& url)
+        {
+            output << url.toString();
+            return output;
+        }
+        
+        BString toString() const
+        {
+            BString string = origin();
+            
+            BString path = _path->value();
+            
+            if (string.length()) {
+                if (path != "/")
+                    string += path;
+            }
+            else
+                string = path;
+                
+            if (search().matched())
+                string +=
+                        BString("?") +
+                        search().value();
+                        
+            return string;
         }
         
         
-        const BString& origin() const
+        const BString origin() const
         {
-            return _origin->value();
+    
+            if (_origin->_domain->matched())
+            {
+                BString origin = 
+                    protocol() + 
+                    BString("://") +
+                    domain();
+                
+                BString port = URL::port();
+            
+                if (port.length())
+                    origin += ":" + port;
+                    
+                return origin;
+            }
+            
+            if (_baseURL)
+                return _baseURL->origin();
+                
+            return "";
+        }
+        
+        const BString& port() const
+        {
+            static const BString emptyPort = "";
+            Port* port = _origin->_port;
+            if (port->matched()) {
+                if (protocol() == "https" && 
+                    port->value() != "443")
+                    return port->value();
+                else if (protocol() == "http" &&
+                    port->value() != "80")
+                    return port->value();
+            }
+            else if (_baseURL)
+                return _baseURL->port();
+                
+            return emptyPort;
         }
         
         const BString& path() const
         {
-            return _path->value();
+            static const BString
+                defaultPath = "/";
+            
+            if (_path->matched())
+                return _path->value();
+                
+            return defaultPath;
         }
         
-        const BString& host() const
+        const BString& domain() const
         {
-            return _host->value();
+            static const BString
+                emptyDomain = "";
+            
+            Domain* domain = _origin->_domain;
+            
+            if (domain->matched()) {
+                return domain->value();
+            }
+            
+            if (_baseURL)
+                return _baseURL->domain();
+                
+            
+            return emptyDomain;
+
+        }
+        
+        const BString& protocol() const
+        {
+            static const BString
+                defaultProtocol = 
+                "https";
+                
+            Protocol* protocol = 
+                _origin->_protocol;
+            
+            if (protocol->matched()) {
+                return protocol->value();
+            }
+            if (_baseURL)
+                return _baseURL->protocol();
+                
+            return defaultProtocol;
         }
             
         const Search& search() const

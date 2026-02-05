@@ -58,7 +58,7 @@ using namespace BeeFishTest;
         bool ok = true;
 
         BeeFishWeb::URL::Path path;
-        JSONParser pathParser(path);
+        Parser pathParser(path);
         pathParser.read("Hello%20World%25");
         pathParser.eof();
 
@@ -72,13 +72,27 @@ using namespace BeeFishTest;
             path.value().decodeURI() == "Hello World%"
         );
 
+        if (ok) {
+            cout << "Testing basic path" << endl;
+            BeeFishWeb::URL url;
+            Parser parser(url);
+            parser.read("/path");
+            parser.eof();
+            
+            ok =
+                testValue("Basic path result", parser.matched());
+            ok = ok &&
+                testValue("Basic path value", url.path() == "/path");
+                    }
+
         BeeFishWeb::URL url;
-        JSONParser urlWithQueryParser(url);
-        
+        Parser urlWithQueryParser(url);
+
         if (ok) {
             cout << "Path with three keys" << endl;
             urlWithQueryParser.read("/beehive/settings/?key1=value1&key2=value2&key3");
             urlWithQueryParser.eof();
+            ok = url.matched();
         }
             
         ok = ok && testResult(
@@ -161,31 +175,142 @@ using namespace BeeFishTest;
                 line.url().search()["key"] == "&"
             );
             
-            cerr << "*" << line.url().search()["key"] << "*" << endl;
             assert(ok);
         }
         
-        {
-            URL url = "https://test.bee.fish:8000/path";
+        if (ok) {
+            cout << "http://test.bee.fish:8000/path" << endl;
+            
+            const URL url = "http://test.bee.fish:8000/path";
             ok = ok && testResult(
                 "URL",
-                url == "https://test.bee.fish:8000/path"
+                url == "http://test.bee.fish:8000/path"
             );
             ok = ok && testResult(
-                "URL host",
-                url.host() == "test.bee.fish"
+                "URL protocol",
+                url.protocol() == "http"
+            );
+            
+            ok = ok && testResult(
+                "URL domain",
+                url.domain() == "test.bee.fish"
             );
             ok = ok && testResult(
                 "URL origin",
-                url.origin() == "https://test.bee.fish:8000"
+                url.origin() == "http://test.bee.fish:8000"
             );
             ok = ok && testResult(
                 "URL path",
                 url.path() == "/path"
             );
             
-        
+            assert(ok);
         }
+        
+        if (ok) {
+            cout << "test.bee.fish:8000" << endl;
+            
+            const URL url = "test.bee.fish:8000";
+            
+cout << __FILE__ << " URL " << url;
+            
+            ok = ok && testResult(
+                "URL domain",
+                url.domain() == "test.bee.fish"
+            );
+            
+            ok = ok && testResult(
+                "URL protocol",
+                url.protocol() == "https"
+            );
+
+
+            ok = ok && testResult(
+                "URL origin",
+                url.origin() == "https://test.bee.fish:8000"
+            );
+            ok = ok && testResult(
+                "URL path",
+                url.path() == "/"
+            );
+            
+            ok = ok && testResult(
+                "URL",
+                url == "https://test.bee.fish:8000"
+            );
+            
+        }
+        
+        if (ok) {
+            cout << "/" << endl;
+            
+            const URL url("/");
+
+            ok = ok && testResult(
+                "URL path",
+                url.path() == "/"
+            );
+            
+            ok = ok && testResult(
+                "URL domain",
+                url.domain() == ""
+            );
+            
+            ok = ok && testResult(
+                "URL protocol",
+                url.protocol() == "https"
+            );
+
+cerr << __FILE__ << " URL ORIGIN " << url.origin() << endl;
+            ok = ok && testResult(
+                "URL origin",
+                url.origin() == ""
+            );
+            
+            
+            ok = ok && testResult(
+                "URL",
+                url == "/"
+            );
+            
+        }
+        
+        
+        if (ok) {
+            cout << "/" << " with base path " << "test.bee.fish:8000" << endl;
+            
+            const URL url("/", "test.bee.fish:8000");
+
+            ok = ok && testResult(
+                "URL path",
+                url.path() == "/"
+            );
+            
+            ok = ok && testResult(
+                "URL domain",
+                url.domain() == "test.bee.fish"
+            );
+            
+            ok = ok && testResult(
+                "URL protocol",
+                url.protocol() == "https"
+            );
+
+cerr << __FILE__ << " URL ORIGIN " << url.origin() << endl;
+            ok = ok && testResult(
+                "URL origin",
+                url.origin() == "https://test.bee.fish:8000"
+            );
+            
+            
+            ok = ok && testResult(
+                "URL",
+                url == "https://test.bee.fish:8000"
+            );
+            
+        }
+        
+        assert(ok);
         
         return ok;
 
