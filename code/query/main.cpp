@@ -7,23 +7,7 @@ int main(int argc, const char* argv[]) {
     
     using namespace BeeFishQuery;
     
-                
-
-        /*
-    {
-        JSONDatabase db(BEE_FISH_DATABASE_FILE);
-        Path word = db.words()["json"];
-       // word.clear();
-        Iterable<Index> iterable(word);
-        for (auto index : iterable)
-        {
-            cout << index << " " << flush << 
-            JSONPath(db, index).toString() << endl;
-        }
-        cout << "finished" << endl;
-        return 0;
-     }
-*/
+    
     cout << "bee.fish.query"
               << endl
           << "C++ run time: "
@@ -46,12 +30,42 @@ int main(int argc, const char* argv[]) {
         return 0;
     }
     
-    
-    string line;
-
     JSONDatabase database(DATABASE_FILENAME);
     
-    Words words(database.words());
+    
+    auto displayResults =
+    [&database](Expression& expression)
+    {
+        Words words(database.words());
+    
+        PathBase* path =
+            expression
+            .getPath(words);
+                
+        Iterable<Index> jsonMatches(*path);
+        for (auto index : jsonMatches)
+        {
+            JSONPath path(database, index);
+            BString string = path.toString();
+            cout << string << endl;
+        }
+            
+        delete path;
+    };
+    
+    
+    int queryArg = hasArg(argc, argv, "-query");
+    if (queryArg >= 0 && argc > queryArg + 1)
+    {
+        string line;
+        line = argv[queryArg + 1];
+        Expression expression;
+        stringstream stream(line);
+        stream >> expression;
+        displayResults(expression);
+        return 0;
+    }
+    
 
     do 
     {
@@ -67,21 +81,7 @@ int main(int argc, const char* argv[]) {
                 break;
             }
                     
-            //cout << *(statement._expression) << endl;
-            
-            PathBase* path =
-                statement._expression
-                ->getPath(words);
-                
-            Iterable<Index> jsonMatches(*path);
-            for (auto index : jsonMatches)
-            {
-                JSONPath path(database, index);
-                BString string = path.toString();
-                cout << string << endl;
-            }
-            
-            delete path;
+            displayResults(*statement._expression);
             
             cout << "ok" << endl;
         
