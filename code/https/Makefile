@@ -22,8 +22,7 @@ $(BUILD)/query:
 install:	$(OUTPUT)
 	./start.sh $(PORT)
 	
-time:	CFLAGS += -Ofast
-time:	TIME = time
+time:	CFLAGS += -Ofast -D TIME -D DEBUG
 time:	install
 
 test:	TEST=test

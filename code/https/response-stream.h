@@ -107,7 +107,7 @@ namespace BeeFishHTTPS {
             if (app->serve() == App::SERVE_QUERY)
             {
                 const BString& search = 
-                    app->request()->search();
+                    app->request()->search().decodeURI();
 
                 try {
                     BeeFishQuery::Expression expression(search);
@@ -118,11 +118,15 @@ namespace BeeFishHTTPS {
                         expression
                         .getPath(words);
                 
+Index count = 0;
                     Iterable<Index> matches(*path);
                     for (auto it = matches.begin();
                          it != matches.end();
                          )
                     {
+++count;
+++it;
+                        /*
                         JSONPath path(*database, *it);
                         BString string = path.toString();
                         *this << "   \"" << string.escape() << "\"";
@@ -131,10 +135,11 @@ namespace BeeFishHTTPS {
                             *this << ",";
                             
                         *this << endl;
+                        */
                     }
             
                     delete path;
-                    
+*this << count << endl;
                     *this << "]";
                 }
                 catch (const std::exception& exception)

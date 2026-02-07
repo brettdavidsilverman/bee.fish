@@ -136,7 +136,8 @@ namespace BeeFishDatabase {
             if (path.isRoot())
                 return false;
             
-            Type type;
+            Type type = Type::UNKNOWN;
+            
             path = path.parent(type);
 
             if (type == Type::ARRAY)
@@ -156,7 +157,9 @@ namespace BeeFishDatabase {
                 else
                     key = key.escape();
             }
-    
+            else
+                return false;
+                
             parent = path;
             
             return true;
@@ -298,40 +301,49 @@ namespace BeeFishDatabase {
              
         }
         
+        void lock()
+        {
+            database().lock();
+        }
         
-        // properties[key][POSITION][objectId]
+        void unlock()
+        {
+            database().unlock();
+        }
+        
+        
         Index getObjectKeyPosition(const BString& key)
         {
-             Id id = this->id();
-             Path keyPath = 
-                 properties();
+            Id id = this->id();
+            Path keyPath = 
+                properties();
                  
-             keyPath = keyPath[key];
+            keyPath = keyPath[key];
              
-             Index keyPathIndex =
-                 keyPath.index();
+            Index keyPathIndex =
+                keyPath.index();
              
-             Path path = keyPath[id];
+            Path path = keyPath[id];
                  
-             Index position;
+            Index position;
              
-             if (path.hasData())
-                 path.getData(position);
-             else {
-                     
-                 Path object = (*this)[Type::OBJECT];
-                 
-                 if (object.isDeadEnd())
-                     position = 1;
-                 else {
-                     position =
-                          object.max<Index>()
-                          + 1;
-                 }
+            if (path.hasData())
+                path.getData(position);
+            else {
+            
+                lock();
+                    Path object = (*this)[Type::OBJECT];
+                    if (object.isDeadEnd())
+                        position = 1;
+                    else {
+                        position =
+                            object.max<Index>()
+                            + 1;
+                    }
 
-                 path.setData<Index>(position);
-                 
-             }
+                    path.setData<Index>(position);
+                unlock();
+            }
              
              getObjectPositions()
                  [position]
@@ -340,7 +352,6 @@ namespace BeeFishDatabase {
              return position;
         }
         
-        // properties[key][POSITION][objectId]
         optional<BString> getObjectKey(Index position)
         {
              Path path = getObjectPositions();
@@ -479,6 +490,9 @@ namespace BeeFishDatabase {
                     index <= count;
                     ++index)
                 {
+if (!contains(index))
+    continue;
+                        
                     JSONPath item = (*this)[index];
                           
                     Index _tabCount = tabCount + 1;

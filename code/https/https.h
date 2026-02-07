@@ -10,6 +10,7 @@
 #include "version.h"
 
 #include "server.h"
+#include "session.h"
 
 #include "app.h"
 
@@ -20,6 +21,7 @@
 #include "storage-app.h"
 #include "not-found-app.h"
 #include "error-app.h"
+
 #include "response-stream.h"
 
 #endif

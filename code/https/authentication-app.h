@@ -131,7 +131,13 @@ namespace BeeFishHTTPS {
                "set-cookie",
                BString("sessionId=") +
                _sessionId +
-              BString(";path=/;max-age=3600;secure=true;httponly=false;samesite=None;Domain=")
+              BString(
+                  ";path=/;"
+                  "max-age=3600;"
+                  "secure=true;"
+                  "httponly=false;"
+                  "samesite=None;"
+                  "Domain=")
               
             );
          }
@@ -139,7 +145,13 @@ namespace BeeFishHTTPS {
          {
              _responseHeaders.emplace(
                "set-cookie",
-               BString("sessionId=;path=/;secure=true;httponly=false;samesite=None;Domain=")
+               BString(
+                   "sessionId=;"
+                   "path=/;"
+                   "secure=true;"
+                   "httponly=false;"
+                   "samesite=None;"
+                   "Domain=")
             );
          }
 
@@ -155,7 +167,10 @@ namespace BeeFishHTTPS {
                   webMethod
                ) )
          {
-            _status = 401;
+            //_status = 401;
+            // Setting this to 200 so fetch can read
+            // the status text
+            _status = 200;
             _statusText = "Unauthorised";
             _serve = SERVE_FILE;
             _filePath = getFilePath("/client/logon/index.html");

@@ -266,6 +266,7 @@ namespace BeeFishWeb {
             virtual bool contains(const BString& test) {
                 return count(test) > 0;
             }
+        
             
         
         };         
@@ -350,7 +351,7 @@ namespace BeeFishWeb {
             return toString() == BString(rhs);
         }
         
-        operator BString ()
+        operator BString () const
         {
             return toString();
         }

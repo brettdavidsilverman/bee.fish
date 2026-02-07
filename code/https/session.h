@@ -477,6 +477,19 @@ namespace BeeFishHTTPS {
                 return origin();
             }
         }
+        
+        BString domain() const
+        {
+            
+            BString host = Session::host();
+            
+            // Use url to extract the domain
+            URL url = host;
+            
+            BString domain = url.domain();
+
+            return domain;
+        }
     
         void handshake()
         {

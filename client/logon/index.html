@@ -9,12 +9,12 @@
       <script src="/client/logon/authentication.js"></script>
       <link rel="stylesheet" type="text/css" href="/style.css" />
       <link rel="stylesheet" type="text/css" href="/client/logon/style.css" />
-      <title>Bee.Fish logon</title>
+      <title id="title">Logon</title>
       <style>
       </style>
    </head>
    <body>
-      <h1>Logon</h1>
+      <h1 id="h1">Logon</h1>
       <p>Click Secret to select your secret image.</p>
       <a href="/client/logon/authentication.js">authentication.js</a>
       <form id="form" onsubmit="onsubmit()">
@@ -24,7 +24,13 @@
          <input type="file" id="secretFile" onchange="createSecret(this.files[0]);" accept="image/*" style="display:none;" ></input>
          <canvas id="canvas" width="100" height="100" style="display:none;"></canvas>
          <script>
-         
+var h1 = document.getElementById("h1");
+var title = document.getElementById("title");
+title.innerText = document.location.hostname;
+h1.innerText = "Logon " + document.location.host;
+
+const params = new URL(document.location.href).searchParams;
+
 function onsumbit(event)
 {
    event.preventDefault();
@@ -70,11 +76,12 @@ function logon(secret)
          if (authentication.authenticated) {
             const params = new URL(document.location.href).searchParams;
             if (params.has("redirect")) {
-               redirect = params.get("redirect");
-               document.location.href = redirect;
+                redirect = params.get("redirect");
+                var url = new URL(decodeURIComponent(redirect));
+                document.location.href = url;
             }
             else {
-               document.location.reload();
+                document.location.reload();
             }
          }
          else {

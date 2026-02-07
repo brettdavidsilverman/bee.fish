@@ -76,6 +76,7 @@ using namespace BeeFishBString;
         {
             unlock();
         }
+        
 
         virtual void unlock() {
             if(_lockIndex >= 0) {
@@ -83,6 +84,7 @@ using namespace BeeFishBString;
                 _lockIndex = -1;
             }
         }
+
 
         Path& operator=(const Path& rhs)
         {
@@ -272,6 +274,8 @@ using namespace BeeFishBString;
         }
         
     public:
+        
+        
         
         bool isRoot()
         {

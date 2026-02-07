@@ -26,11 +26,11 @@ namespace BeeFishHTTPS {
         cout << "Testing HTTPS" << endl;
         bool success = true;
         
-        Id id;
-        
+    
         success = success &&
             testLogon(origin);
             
+    
         success = success &&
             testAllFiles(origin, TEST_DIRECTORY);
 

@@ -2,7 +2,6 @@ BUILD=../../build
 OUTPUT=$(BUILD)/Database
 CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=$(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp LeastRecentlyUsedCache.hpp Data.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Version.hpp Path.hpp PathBase.hpp Stack.hpp PathBase.hpp Iterable.hpp Makefile JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp JSONIndex.hpp NullStream.hpp
-DEATHS=$(BUILD)/../deaths.json
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
@@ -19,10 +18,16 @@ debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
 debug:	$(OUTPUT)
 
-time:	CFLAGS += -D TIME -D DEBUG -Ofast
-time:	$(OUTPUT)
+clean:
+	rm -f $(OUTPUT)
+	rm -f *.o
+	rm -f trace.txt
+
+load:
+load:	CFLAGS += -D TIME -D DEBUG -Ofast
+load:	test
 	time --verbose $(OUTPUT) -deaths
-	
+
 run:	$(OUTPUT)
 	$(OUTPUT) -input
 	
@@ -35,7 +40,3 @@ trace:	$(OUTPUT)
 	valgrind --tool=memcheck -s --leak-check=full --track-origins=yes --log-file="trace.txt"  $(OUTPUT) -test
 	cat trace.txt
 
-clean:
-	rm -f $(OUTPUT)
-	rm -f *.o
-	rm -f trace.txt

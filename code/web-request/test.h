@@ -212,8 +212,6 @@ using namespace BeeFishTest;
             
             const URL url = "test.bee.fish:8000";
             
-cout << __FILE__ << " URL " << url;
-            
             ok = ok && testResult(
                 "URL domain",
                 url.domain() == "test.bee.fish"
@@ -261,7 +259,6 @@ cout << __FILE__ << " URL " << url;
                 url.protocol() == "https"
             );
 
-cerr << __FILE__ << " URL ORIGIN " << url.origin() << endl;
             ok = ok && testResult(
                 "URL origin",
                 url.origin() == ""
@@ -296,7 +293,6 @@ cerr << __FILE__ << " URL ORIGIN " << url.origin() << endl;
                 url.protocol() == "https"
             );
 
-cerr << __FILE__ << " URL ORIGIN " << url.origin() << endl;
             ok = ok && testResult(
                 "URL origin",
                 url.origin() == "https://test.bee.fish:8000"

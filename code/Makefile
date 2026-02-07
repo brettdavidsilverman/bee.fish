@@ -10,11 +10,11 @@ all:	$(BUILD)
 	make -C Id $(DEBUG) test
 	make -C parser $(DEBUG) test
 	make -C json $(DEBUG) test
-	make -C Database $(DEBUG) test
+	make -C Database $(DEBUG) $(LOAD) test
 	make -C query $(DEBUG) test
 	make -C web-request $(DEBUG) test
 	make -C Script $(DEBUG) test
-	make -C https $(DEBUG) $(TIME) test PORT=$(PORT)
+	make -C https $(DEBUG) $(TIME) test  PORT=$(PORT)
 
 $(BUILD):
 	mkdir $(BUILD)
@@ -35,6 +35,9 @@ time:	CFLAGS += -Ofast
 time:	TIME = time
 time:	all
 
+load:
+load:	LOAD = load
+load:	debug
 
 clean:
 	cd b-string && make clean

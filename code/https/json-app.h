@@ -106,6 +106,7 @@ using namespace BeeFishWeb;
             }
             else if (method == "POST")
             {
+                
                 // Stream posted file to
                 // database
                 WebRequest postRequest(true);

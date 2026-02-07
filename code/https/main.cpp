@@ -77,6 +77,7 @@ int main(int argc, const char* argv[])
         appFactories.add<StorageApp>();
         appFactories.add<JSONApp>();
         appFactories.add<NotFoundApp>();
+        
         boost::asio::io_context io_context(_threadCount);
         
         std::cout << "Starting on port " << port << "..." << endl;
@@ -112,6 +113,7 @@ int main(int argc, const char* argv[])
         
         
         if (test) {
+
             bool ok = BeeFishHTTPS::test(server.origin());
             io_context.stop();
             startThread.join();

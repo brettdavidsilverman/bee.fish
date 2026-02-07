@@ -60,7 +60,12 @@
         <a href="/code/">Javascript server library</a>
         <br />
         <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
-        <script>
+        <script type="module">
+
+console.log = function(log)
+{
+    document.writeln(log + "<br/>");
+}
 var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
@@ -83,8 +88,56 @@ fetchButton.disabled = true;
 
 authenticate();
 
+async function fetchLines(url) {
+    var parameters = {
+        mode: "cors",
+        method: "GET",
+        credentials: "include"
+    }    
+
+  const response = await fetch(url, parameters);
+
+  if (!response.ok) {
+    throw new Error(`HTTP error, status = ${response.status}`);
+  }
+
+  // Get the response body as a ReadableStream
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let lineBuffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    // Decode the chunk and add to buffer
+    lineBuffer += decoder.decode(value, { stream: true });
+
+    // Process lines when a newline character is found
+    const lines = lineBuffer.split('\n');
+    for (let i = 0; i < lines.length - 1; i++) {
+      const line = lines[i].trim(); // Process each complete line
+      if (line) {
+        console.log(`Processing line: ${line}`);
+        // Add your line processing logic here
+      }
+    }
+    lineBuffer = lines[lines.length - 1]; // Keep the incomplete last line in buffer
+  }
+
+  // Process any remaining data in the buffer after the stream ends
+  if (lineBuffer.trim()) {
+    console.log(`Processing final line: ${lineBuffer.trim()}`);
+  }
+}
+
+// Example usage:
+//fetchLines('https://dev.bee.fish:8000/?deaths+data').catch(console.error);
+
 function loadJSON() {
-    var url = pathInput.value;
+    var url = new URL(pathInput.value);
     
     fetchButton.disabled = true;
     
@@ -100,11 +153,14 @@ function loadJSON() {
         then(
             function (response) {
                 status = response.status;
-                if (status == "200")
+                if (status == "200") {
+                    if (response.statusText == "Unauthorised")
+                        status = "Unauthorised";
                     return response.text();
+                }
                 else
                     throw new Error(
-                        decodeURIComponent( response.statusText),
+                        decodeURIComponent(response.statusText),
                         "Load JSON"
                     );
             }
@@ -113,6 +169,16 @@ function loadJSON() {
             function(text) {
                 if (text == "undefined")
                     return undefined;
+                if (status == "Unauthorised")
+                {
+                    url.pathname = 
+                        "/client/logon/index.html";
+                    url.search = "?redirect=" +
+                        encodeURIComponent(document.location.href);
+                        
+                    //alert("Unauthorised " + url);
+                    document.location.replace(url);
+                }
                 return text
             }
         ).
@@ -136,7 +202,7 @@ function loadJSON() {
         )
         .catch(
             function (error) {
-                Error(error,  "loadJSON");
+              //  Error(error,  "loadJSON");
             }
         )
         .finally(
@@ -282,6 +348,9 @@ function setLinks() {
     fetchButton.disabled = false;
 }
 setLinks();
+
+fetchButton.disabled = false;
+
 
         </script>
 

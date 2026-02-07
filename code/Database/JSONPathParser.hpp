@@ -66,8 +66,8 @@ namespace BeeFishDatabase {
         {
     
             static const char* _deliminators =
-                " -.,!?()/\r\n\v\t\"\'{}:";
-                
+                " .,!?()/\r\n\v\t\"\'{}\\";
+        
             BString copy = word;
             char* str = copy.data();
                     
@@ -105,7 +105,9 @@ namespace BeeFishDatabase {
             BString key;
             while (path.parent(parent, key))
             {
-                if (!parent.isRoot()) {
+                if (!parent.isRoot() &&
+                    !parent.parent().isRoot())
+                {
                     if (!key.isDigitsOnly())
                     {
                         if (key.startsWith("\"") &&
@@ -148,12 +150,16 @@ namespace BeeFishDatabase {
                     start[type].setData(value);
                     
                     JSONPath path = start;
-        
-                    while (!path.isRoot() &&
-                           !path.parent().isRoot())
+                    JSONPath parent;
+                    BString key;
+                    while (path.parent(parent, key))
                     {
-                        addWord(words, value, path);
-                        path = path.parent();
+                        if (!parent.isRoot() &&
+                           !parent.parent().isRoot())
+                        {
+                            addWord(words, value, path);
+                        }
+                        path = parent;
                     }
                 
                 
