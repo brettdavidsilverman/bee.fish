@@ -140,6 +140,7 @@ function loadJSON() {
     var url = new URL(pathInput.value);
     
     fetchButton.disabled = true;
+    jsonEditor.value = "Loading....";
     
     localStorage.setItem("path", url);
     var parameters = {
@@ -154,29 +155,30 @@ function loadJSON() {
             function (response) {
                 status = response.status;
                 if (status == "200") {
-                    if (response.statusText == "Unauthorised")
+                    if (response.statusText ==
+                        "Unauthorised")
+                    {
                         status = "Unauthorised";
+                    }
                     return response.text();
                 }
-                else
+                else {
                     throw new Error(
-                        decodeURIComponent(response.statusText),
-                        "Load JSON"
+                        decodeURIComponent(response.statusText)
                     );
+                }
             }
         ).
         then(
             function(text) {
+
                 if (text == "undefined")
                     return undefined;
                 if (status == "Unauthorised")
                 {
-                    url.pathname = 
-                        "/client/logon/index.html";
+                    url = new URL(JSON.parse(text));
                     url.search = "?redirect=" +
                         encodeURIComponent(document.location.href);
-                        
-                    //alert("Unauthorised " + url);
                     document.location.replace(url);
                 }
                 return text
@@ -202,6 +204,7 @@ function loadJSON() {
         )
         .catch(
             function (error) {
+                jsonEditor.value = error;
               //  Error(error,  "loadJSON");
             }
         )

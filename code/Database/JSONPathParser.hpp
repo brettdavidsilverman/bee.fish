@@ -64,27 +64,50 @@ namespace BeeFishDatabase {
 
         void addWord(Path words, const BString& word, JSONPath path)
         {
-    
+            static const char* _whiteSpace =
+                " \r\n\v\t";
+                
             static const char* _deliminators =
-                " .,!?()/\r\n\v\t\"\'{}\\";
+                "-+ .,!?()/\"\'{}\\";
         
             BString copy = word;
             char* str = copy.data();
                     
             char* token = 
-            strtok(str, _deliminators);
-
+            strtok(str, _whiteSpace);
+            std::vector<BString> outer;
+            
             // Loop through all remaining tokens
             while (token != nullptr) 
             {
                 BString word =
                     BString(token).toLower();
-
                 if (word.size()) {
                     words[word][path.id()];
+                    outer.push_back(word);
+                }
+                token = strtok(nullptr, _whiteSpace); 
+            }
+            
+            for (auto outerWord : outer)
+            {
+                BString copy = outerWord;
+                char* str = copy.data();
+                    
+                char* token = 
+                strtok(str, _deliminators);
+                
+                while (token != nullptr) 
+                {
+                    BString word =
+                        BString(token).toLower();
+                    if (word.size()) {
+                        words[word][path.id()];
+                    }
+        
+                    token = strtok(nullptr, _deliminators); 
                 }
                 
-                token = strtok(nullptr, _deliminators); 
             }
         }
         
@@ -99,26 +122,27 @@ namespace BeeFishDatabase {
             Path words = JSONPath::words();
             
             JSONPath path = start;
+            
             // add all path keys except the
             // first (host)
-            JSONPath parent;
             BString key;
-            while (path.parent(parent, key))
+                                
+        
+            while (!path.isRoot() &&
+                    !path.parent().isRoot())
             {
-                if (!parent.isRoot() &&
-                    !parent.parent().isRoot())
+                path = path.parent(key);
+                
+                if (!key.isDigitsOnly())
                 {
-                    if (!key.isDigitsOnly())
+                    if (key.startsWith("\"") &&
+                        key.endsWith("\""))
                     {
-                        if (key.startsWith("\"") &&
-                            key.endsWith("\""))
-                        {
-                            key = key.substr(1, key.length() - 2).unescape();
-                        }
-                        addWord(words, key, start);
+                        key = key.substr(1, key.length() - 2).unescape();
                     }
+                    addWord(words, key, start);
                 }
-                path = parent;
+    
             }
                 
 
@@ -127,14 +151,13 @@ namespace BeeFishDatabase {
             {
                 case Type::UNDEFINED:
                 {
-                    BString key;
                     JSONPath parent = start.parent(key);
                     parent.deleteKey(key);
                     break;
                 }
                 case Type::NULL_:
                 {
-                    start[type];
+                    start[Type::NULL_];
                     break;
                 }
                 case Type::BOOLEAN:
@@ -150,16 +173,13 @@ namespace BeeFishDatabase {
                     start[type].setData(value);
                     
                     JSONPath path = start;
-                    JSONPath parent;
-                    BString key;
-                    while (path.parent(parent, key))
+
+                    while (!path.isRoot() &&
+                           !path.parent().isRoot())
                     {
-                        if (!parent.isRoot() &&
-                           !parent.parent().isRoot())
-                        {
-                            addWord(words, value, path);
-                        }
-                        path = parent;
+                        addWord(words, value, path);
+                        
+                        path = path.parent();
                     }
                 
                 
@@ -339,11 +359,17 @@ namespace BeeFishDatabase {
 
             if (_pathStack.size() == 0)
             {
-                setVariable(
-                    *this,
-                    json->type(),
-                    json->value()
-                );
+                if (json->type() == Type::UNDEFINED)
+                {
+                    JSONPath::clear();
+                    (*this)[Type::UNDEFINED];
+                }
+                else
+                    setVariable(
+                        *this,
+                        json->type(),
+                        json->value()
+                    );
             }
                 
             

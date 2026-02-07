@@ -1292,16 +1292,16 @@ assert(success);
         JSONPath start = database.host("https://test");
         JSONPathParser parser1(start);
         parser1.read("[1,2,3]");
-        JSONPath path = start[Index(0)];
+        JSONPath path = start[Index(1)];
 
         BString key;
         JSONPath parent;
-        success = path.parent(parent, key);
+        parent = path.parent(key);
 
         success = success &&
             testValue(
                 "Key 1",
-                key == "0"
+                key == "1"
             );
             
         success = success &&
@@ -1314,8 +1314,7 @@ assert(success);
         parser2.read("{\"hello\":\"world\"}");
         path = start["hello"];
         key.clear();
-        success = success &&
-            path.parent(parent, key);
+        parent = path.parent(key);
 
         success = success &&
             testValue(

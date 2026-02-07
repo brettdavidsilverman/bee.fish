@@ -123,18 +123,17 @@ namespace BeeFishDatabase {
             return parent(key);
         }
         
-        bool parent(JSONPath& parent, BString& key) {
+        JSONPath parent(BString& key) {
             Path path = *this;
 
             Index position = -1;
             
-            if (path.isRoot())
-                return false;
+            assert (!path.isRoot());
+            //    return false;
             
             path = path.parent(position);
             
-            if (path.isRoot())
-                return false;
+            assert(!path.isRoot());
             
             Type type = Type::UNKNOWN;
             
@@ -157,28 +156,29 @@ namespace BeeFishDatabase {
                 else
                     key = key.escape();
             }
+            /*
             else
                 return false;
                 
             parent = path;
             
             return true;
-            
+            */
+            return path;
         }
         
         
         
         BString toString() {
             JSONPath path = *this;
-            JSONPath parent;
             BString string;
             BString key;
-            while (path.parent(parent, key))
+            while (!path.isRoot())
             {
+                path = path.parent(key);
                 BString newString =
                     key + BString("/") + string;
                 string = newString;
-                path = parent;
             }
             if (string.size())
                string.pop_back();
@@ -326,12 +326,14 @@ namespace BeeFishDatabase {
             Path path = keyPath[id];
                  
             Index position;
-             
+            
+            lock();
+            
             if (path.hasData())
                 path.getData(position);
             else {
             
-                lock();
+                
                     Path object = (*this)[Type::OBJECT];
                     if (object.isDeadEnd())
                         position = 1;
@@ -342,8 +344,9 @@ namespace BeeFishDatabase {
                     }
 
                     path.setData<Index>(position);
-                unlock();
-            }
+                
+             }
+             unlock();
              
              getObjectPositions()
                  [position]
@@ -490,8 +493,6 @@ namespace BeeFishDatabase {
                     index <= count;
                     ++index)
                 {
-if (!contains(index))
-    continue;
                         
                     JSONPath item = (*this)[index];
                           
@@ -538,7 +539,7 @@ if (!contains(index))
                     out << "\n";
                     
                     BString key;
-                    for (auto iterator = begin(); iterator != end(); ++iterator)
+                    for (Iterator iterator = begin(); iterator != end(); ++iterator)
                     {
                         key = *iterator;
 
@@ -554,7 +555,7 @@ if (!contains(index))
                           
                         value.write(out, tabCount + 1);
                           
-                        auto iteratorCopy = iterator;
+                        Iterator iteratorCopy = iterator;
                         if (++iteratorCopy != end())
                             out << ",\n";
 
@@ -577,7 +578,7 @@ if (!contains(index))
         
     public:
         
-        class PathIterator {
+        class Iterator {
         protected:
             JSONPath* _jsonPath; // The underlying pointer that the iterator wraps
             BString _item;
@@ -594,7 +595,7 @@ if (!contains(index))
             using difference_type   = std::ptrdiff_t;
             using reference         = const BString&;
 
-            PathIterator(JSONPath* path, bool isEnd = false)
+            Iterator(JSONPath* path, bool isEnd = false)
                 : _jsonPath(path)
             {
                 
@@ -618,7 +619,7 @@ if (!contains(index))
             }
 
             // Prefix increment operator (++)
-            PathIterator& operator++() {
+            Iterator& operator++() {
         
                 _isEnd = _isEnd or not
                     _positions.next<Index>(
@@ -633,15 +634,17 @@ if (!contains(index))
             }
 
             // Postfix increment operator (++)
-            PathIterator operator++(int) {
-                PathIterator tmp = *this;
+            Iterator operator++(int) {
+                Iterator tmp = *this;
+                tmp._positions.save();
                 ++(*this);
+                tmp._positions.restore();
                 return tmp;
             }
 
             friend bool operator == (
-                const PathIterator& a,
-                const PathIterator& b
+                const Iterator& a,
+                const Iterator& b
             )
             {
                 return  (a._isEnd == b._isEnd &&
@@ -650,8 +653,8 @@ if (!contains(index))
             }
             
             friend bool operator != (
-                const PathIterator& a,
-                const PathIterator& b
+                const Iterator& a,
+                const Iterator& b
             )
             { 
                 return (a._isEnd != b._isEnd ||
@@ -667,13 +670,13 @@ if (!contains(index))
         };
         
         // Container methods to get iterators
-        PathIterator begin() {
-            return PathIterator(this);
+        Iterator begin() {
+            return Iterator(this);
         }
     
         // Points one past the last element
-        PathIterator end() { 
-            PathIterator iterator(this, true);
+        Iterator end() { 
+            Iterator iterator(this, true);
             return iterator;
         }
         
