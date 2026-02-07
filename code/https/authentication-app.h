@@ -170,10 +170,35 @@ namespace BeeFishHTTPS {
             //_status = 401;
             // Setting this to 200 so fetch can read
             // the status text
-            _status = 200;
-            _statusText = "Unauthorised";
-            _serve = SERVE_FILE;
-            _filePath = getFilePath("/client/logon/index.html");
+            if (
+                request->headers().contains("sec-fetch-mode") &&
+                request->headers()["sec-fetch-mode"] != "navigate")
+            {
+                // fetch client
+                _status = 200;
+                _statusText = "Unauthorised";
+                _serve = App::SERVE_CONTENT;
+            
+                _responseHeaders.replace(
+                   "content-type",
+                   "application/json; charset=utf-8"
+                );
+         
+                BString output = session()->origin() + 
+                    BString("/client/logon/index.html");
+            
+                _content = BString("\"") + output.escape() + BString("\"");
+            
+            }
+            else
+            {
+                 // Non fetch client
+                _status = 401;
+                _statusText = "Unauthorised";
+                _filePath = getFilePath("/client/logon/index.html");
+                _serve = App::SERVE_FILE;
+            }
+            
             return;
          }
          
