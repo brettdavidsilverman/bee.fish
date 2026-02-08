@@ -68,7 +68,8 @@ namespace BeeFishHTTPS {
 
          const BString& path = request->path();
          const BString& webMethod = request->method();
-
+         const BString& search = request->search();
+         
          if (path == "/authenticate")
          {
     
@@ -162,10 +163,12 @@ namespace BeeFishHTTPS {
          );
          
          if ( !authenticated() &&
-               !isPrivileged(
+              (   !isPrivileged(
                   path,
-                  webMethod
-               ) )
+                  webMethod) || 
+                  search.length()
+              )
+            )
          {
             //_status = 401;
             // Setting this to 200 so fetch can read
