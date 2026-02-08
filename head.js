@@ -68,10 +68,13 @@ function Error(error, f)
        where = f.name;
     else if (f)
        where = f;
-    else
-       where = "Unknown function";
        
-    alert(error + "\r\n   " + where);
+    this.toString = function()
+    {
+        return error + (where ? " " + where : "");
+    }
+    
+    alert(this.toString());
     
 }
 

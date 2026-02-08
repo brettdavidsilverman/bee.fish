@@ -204,7 +204,7 @@ function loadJSON() {
         )
         .catch(
             function (error) {
-                jsonEditor.value = error;
+                jsonEditor.value = error
               //  Error(error,  "loadJSON");
             }
         )
@@ -285,7 +285,8 @@ saveButton.onclick =
         ).
         then(
             function (json) {
-                alert(decodeURI(json));
+                alert(decodeURIComponent(json));
+                pathInput.value = decodeURIComponent(json);
             }
         ).
         catch(
