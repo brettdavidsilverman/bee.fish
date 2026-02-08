@@ -606,7 +606,7 @@ namespace BeeFishDatabase
         
         if (success)
         {
-            Path path = root["string"];
+            JSONPath path = root["string"];
             JSONPathParser parser(path);
             cout << "\t\tParse string 2" << flush;
             parser.read("\"Hello World\"");
@@ -685,14 +685,14 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tType item 1 ";
             Path path = root["array"];
-            path = path[Type::ARRAY][1];
+            path = path[Type::ARRAY][JSONPath::POSITIONS][1];
             success = path.contains(Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tValue item 1 ";
-            Path path = root["array"][Type::ARRAY][1][Type::INTEGER];
+            Path path = root["array"][Type::ARRAY][JSONPath::POSITIONS][1][Type::INTEGER];
             BString value;
             path.getData(value);
             success = (value == "1");
@@ -702,14 +702,14 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tItem 2 ";
             Path path = root["array"];
-            path = path[Type::ARRAY];
+            path = path[Type::ARRAY][JSONPath::POSITIONS];
             success = path.contains(2);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tType item 2 ";
-            Path path = root["array"][Type::ARRAY][2];
+            Path path = root["array"][Type::ARRAY][JSONPath::POSITIONS][2];
             success = path.contains(Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
@@ -717,7 +717,7 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tValue item 2 ";
             Path path = root["array"];
-            success = path[Type::ARRAY][2][Type::ARRAY].isDeadEnd();
+            success = path[Type::ARRAY][2][JSONPath::POSITIONS][Type::ARRAY].isDeadEnd();
             BeeFishMisc::outputSuccess(success);
         }
         
@@ -725,7 +725,7 @@ namespace BeeFishDatabase
         cout << "Test numbers" << endl;
         if (success) {
             cout << "\tInteger" << flush;
-            Path path = root["integer"];
+            JSONPath path = root["integer"];
             JSONPathParser parser(path);
             parser.read("1234");
             parser.eof();
@@ -769,8 +769,9 @@ namespace BeeFishDatabase
         JSONDatabase database;
         JSONPath json =
             database.json()["array"];
-        Path path = database.json()["array"];
-        JSONPathParser parser(path);
+        JSONPath _path = database.json()["array"];
+        JSONPathParser parser(_path);
+        Path path = _path;
         parser.read("[[]]");
         parser.eof();
         bool success = true;
@@ -783,7 +784,7 @@ namespace BeeFishDatabase
         }
         
         if (success) {
-            path = path[Type::ARRAY];
+            path = path[Type::ARRAY][JSONPath::POSITIONS];
             success = path.contains(1);
         }
         
@@ -825,9 +826,10 @@ namespace BeeFishDatabase
         cout << "Test Sub Array 2 Path: ";
         
         JSONDatabase database;
-        Path path = database.host("https://test");
-        JSONPathParser parser(path);
+        JSONPath _path = database.host("https://test");
+        JSONPathParser parser(_path);
         parser.read("[[1]]");
+        Path path = _path;
         bool success = true;
         
         success = testResult(
@@ -854,7 +856,7 @@ cerr << test << endl;
         
         if (success) {
             cout << "\tOuter Array first index: ";
-            path = path[Type::ARRAY];
+            path = path[Type::ARRAY][JSONPath::POSITIONS];
             success = path.contains(1);
             BeeFishMisc::outputSuccess(success);
         }
@@ -870,7 +872,7 @@ cerr << test << endl;
                 cerr << "Position. " << position << endl;
             }
             
-            Index max = test[Type::ARRAY].max<Index>();
+            Index max = test[Type::ARRAY][JSONPath::POSITIONS].max<Index>();
             
             success = (max == 1);
 
@@ -885,7 +887,7 @@ cerr << test << endl;
         }
         
         if (success) {
-            path = path[Type::ARRAY];
+            path = path[Type::ARRAY][JSONPath::POSITIONS];
         }
     
         if (success) {
@@ -1052,7 +1054,8 @@ assert(success);
         remove(tempFile);
         
         ifstream inputFile(file);
-        JSONPathParser parser(root[file.filename()]);
+        JSONPath path = root[file.filename()];
+        JSONPathParser parser(path);
         parser.read(inputFile);
         parser.eof();
         inputFile.close();

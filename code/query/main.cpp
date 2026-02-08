@@ -32,23 +32,34 @@ int main(int argc, const char* argv[]) {
     
     JSONDatabase database(DATABASE_FILENAME);
     
-    
+    bool display = false;
+    if (hasArg(argc, argv, "-display") >= 0)
+    {
+        display = true;
+    }
+   
     auto displayResults =
-    [&database](Expression& expression)
+    [&database, display](Expression& expression)
     {
         Words words(database.words());
     
         PathBase* path =
             expression
             .getPath(words);
-                
+        Index count = 0;
+        
         Iterable<Index> jsonMatches(*path);
         for (auto index : jsonMatches)
         {
-            JSONPath path(database, index);
-            BString string = path.toString();
-            cout << string << endl;
+            if (display) {
+                JSONPath path(database, index);
+                BString string = path.toString();
+                cout << string << endl;
+            }
+          ++count;
         }
+        
+        cout << "Total count: " << count << endl;
             
         delete path;
     };

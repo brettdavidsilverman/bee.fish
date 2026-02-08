@@ -13,11 +13,10 @@ namespace BeeFishDatabase {
     using namespace BeeFishJSON;
      
     class JSONPathParser :
-        public JSONParser,
-        public JSONPath
+        public JSONParser
     {
-    protected:
-          
+    private:
+        JSONPath _start;
         vector<JSONPath> _pathStack;
         vector<Index> _indexStack;
         vector<BString> _keyStack;
@@ -29,24 +28,25 @@ namespace BeeFishDatabase {
 
         JSONPathParser(JSONPath path, Match& match, ostream& log = cnull) :
             JSONParser(match),
-            JSONPath(path),
+            _start(path),
             _log(log)
         {
         }
           
         JSONPathParser(JSONPath path, ostream& log = cnull) :
             JSONParser(),
-            JSONPath(path),
+            _start(path),
             _log(log)
         {
         }
-          
+          /*
         JSONPathParser(Path path, ostream& log = cnull) :
             JSONParser(),
-            JSONPath(path),
+            _start(path),
             _log(log)
         {
         }
+        */
 
         virtual ~JSONPathParser()
         {
@@ -60,8 +60,12 @@ namespace BeeFishDatabase {
 
         }
         
+        JSONPath start() {
+            return _start;
+        }
+        
      private:
-
+         
         void addWord(Path words, const BString& word, JSONPath path)
         {
             static const char* _whiteSpace =
@@ -114,12 +118,18 @@ namespace BeeFishDatabase {
         virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
     
-            start[type];
-            
             if (&_log != &cnull)
                 _log << start.toString() << endl;
             
-            Path words = JSONPath::words();
+            if (!start.isDeadEnd() && start.type() != type)
+            {
+                start.clear();
+                
+            }
+            
+            start[type];
+            
+            Path words = _start.words();
             
             JSONPath path = start;
             
@@ -151,13 +161,12 @@ namespace BeeFishDatabase {
             {
                 case Type::UNDEFINED:
                 {
-                    JSONPath parent = start.parent(key);
-                    parent.deleteKey(key);
+                    assert(false);
+            
                     break;
                 }
                 case Type::NULL_:
                 {
-                    start[Type::NULL_];
                     break;
                 }
                 case Type::BOOLEAN:
@@ -232,7 +241,7 @@ namespace BeeFishDatabase {
             
             if (_pathStack.size() == 0)
             {
-                path = *this;
+                path = _start;
 
             }
             else
@@ -300,6 +309,9 @@ namespace BeeFishDatabase {
             if (json->type() == Type::UNDEFINED)
             {
                 path.deleteKey(key->value());
+                if (&_log != &cnull)
+                    _log << path.toString() << endl;
+            
             }
             else
             {
@@ -340,7 +352,11 @@ namespace BeeFishDatabase {
             JSONPath path = topPath();
             Index& index = topIndex();
             path = path[index++];
-            setVariable(path, json->type(), json->value());
+            Type type = json->type();
+            if (type == Type::UNDEFINED)
+                type = Type::NULL_;
+                
+            setVariable(path, type, json->value());
 
         }
 
@@ -361,12 +377,18 @@ namespace BeeFishDatabase {
             {
                 if (json->type() == Type::UNDEFINED)
                 {
-                    JSONPath::clear();
-                    (*this)[Type::UNDEFINED];
+                    //assert(false)
+                    BString key;
+                    if (!_start.isRoot())
+                    {
+                        _start = _start.parent(key);
+                        _start.deleteKey(key);
+                    }
+                    
                 }
                 else
                     setVariable(
-                        *this,
+                        _start,
                         json->type(),
                         json->value()
                     );

@@ -31,7 +31,11 @@ using namespace BeeFishWeb;
                 "content-type",
                 "application/json; charset=utf-8"
             );
+            _content = "undefined";
+            _serve = App::SERVE_CONTENT;
             
+            _status = 200;
+            /*
             BeeFishScript::Object object
             {
                 {"error", "Not found"}
@@ -42,7 +46,7 @@ using namespace BeeFishWeb;
             
             _status = 404;
             _statusText = "Not found";
-            
+            */
         }
         
         virtual BString name()
