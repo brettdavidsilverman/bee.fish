@@ -78,6 +78,16 @@ using namespace BeeFishBString;
         }
         
 
+        virtual Branch lock() {
+            if (_lockIndex < 0) {
+                Branch branch = _database->lockBranch(_index);
+                _lockIndex = _index;
+                return branch;
+            }
+            return getBranch();
+
+        }
+        
         virtual void unlock() {
             if(_lockIndex >= 0) {
                 _database->unlockBranch(_lockIndex);
@@ -173,14 +183,9 @@ using namespace BeeFishBString;
             if (branch._left == 0) 
             {
 
-                if (_lockIndex < 0) {
-                    branch = _database->lockBranch(_index);
-                    _lockIndex = _index;
-                }
-
-                _database->lock();
-
-                branch = getBranch();
+                branch = lock();
+                
+//  _database->lock();
 
 
                 if (branch._left == 0)
@@ -189,7 +194,7 @@ using namespace BeeFishBString;
                         _database->getNextIndex(_index);
                     setBranch(branch);
                 }
-                _database->unlock();
+//  _database->unlock();
                 
             }
 
@@ -206,23 +211,17 @@ using namespace BeeFishBString;
             if (branch._right == 0) 
             {
 
-                if (_lockIndex < 0) {
-                    branch = _database->lockBranch(_index);
-                    _lockIndex = _index;
-                }
+                branch = lock();
 
-                _database->lock();
+// _database->lock();
                 
-                branch = getBranch();
-
-
                 if (branch._right == 0)
                 {
                     branch._right =
                         _database->getNextIndex(_index);
                     setBranch(branch);
                 }
-                _database->unlock();
+//  _database->unlock();
                 
             }
 
@@ -534,7 +533,7 @@ using namespace BeeFishBString;
 
         }
         
-        void clear()
+        virtual void clear()
         {
             Database::ScopedFileLock lock(database());
 

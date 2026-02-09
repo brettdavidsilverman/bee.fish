@@ -66,54 +66,6 @@ namespace BeeFishDatabase {
         
      private:
          
-        void addWord(Path words, const BString& word, JSONPath path)
-        {
-            static const char* _whiteSpace =
-                " \r\n\v\t";
-                
-            static const char* _deliminators =
-                "-+ .,!?()/\"\'{}\\";
-        
-            BString copy = word;
-            char* str = copy.data();
-                    
-            char* token = 
-            strtok(str, _whiteSpace);
-            std::vector<BString> outer;
-            
-            // Loop through all remaining tokens
-            while (token != nullptr) 
-            {
-                BString word =
-                    BString(token).toLower();
-                if (word.size()) {
-                    words[word][path.id()];
-                    outer.push_back(word);
-                }
-                token = strtok(nullptr, _whiteSpace); 
-            }
-            
-            for (auto outerWord : outer)
-            {
-                BString copy = outerWord;
-                char* str = copy.data();
-                    
-                char* token = 
-                strtok(str, _deliminators);
-                
-                while (token != nullptr) 
-                {
-                    BString word =
-                        BString(token).toLower();
-                    if (word.size()) {
-                        words[word][path.id()];
-                    }
-        
-                    token = strtok(nullptr, _deliminators); 
-                }
-                
-            }
-        }
         
         virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
@@ -129,7 +81,7 @@ namespace BeeFishDatabase {
             
             start[type];
             
-            Path words = _start.words();
+            Path words = start.words();
             
             JSONPath path = start;
             
@@ -150,7 +102,7 @@ namespace BeeFishDatabase {
                     {
                         key = key.substr(1, key.length() - 2).unescape();
                     }
-                    addWord(words, key, start);
+                    start.addWords(key);
                 }
     
             }
@@ -179,18 +131,7 @@ namespace BeeFishDatabase {
                 }
                 case Type::STRING:
                 {
-                    start[type].setData(value);
-                    
-                    JSONPath path = start;
-
-                    while (!path.isRoot() &&
-                           !path.parent().isRoot())
-                    {
-                        addWord(words, value, path);
-                        
-                        path = path.parent();
-                    }
-                
+                    start.setString(value);
                 
                     break;
                 }

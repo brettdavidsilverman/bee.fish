@@ -187,7 +187,7 @@ namespace BeeFishHTTPS {
                    "application/json; charset=utf-8"
                 );
          
-                BString output = session()->origin() + 
+                BString output = session()->host() + 
                     BString("/client/logon/index.html");
             
                 _content = BString("\"") + output.escape() + BString("\"");

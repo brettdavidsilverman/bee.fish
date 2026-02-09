@@ -29,6 +29,7 @@ namespace BeeFishDatabase {
         typedef Index Id;
         
         using Path::contains;
+        using Path::parent;
         
         JSONPath()
         {
@@ -77,7 +78,85 @@ namespace BeeFishDatabase {
         {
              return database().words();
         }
+        
+        void setString (const BString& value)
+        {
+            JSONPath start = *this;
+            if (!start.isDeadEnd())
+            {
+                Type type = start.type();
+                if (type == Type::STRING)
+                {
+                    if (start[type].hasData()) {
+                        BString current;
+                        start[type].getData<BString>(current);
+                        if (current == value)
+                        {
+                            return;
+                        }
+                    
+                    }
+    
+                    
+                }
+                else
+                    start.clear();
+            }
+            
+            start[Type::STRING].setData(value);
+                    
+            start.addWords(value);
+                
+                
+        }
 
+        virtual void clear()
+        override
+        {
+            if (isDeadEnd())
+                return;
+                
+            if (type() == Type::STRING)
+            {
+                Path path = (*this)[Type::STRING];
+                if (path.hasData()) {
+                    BString value;
+                    path.getData<BString>(value);
+                    removeWords(value);
+                }
+            }
+            
+            Path words = database().words();
+            
+            JSONPath  path = *this;
+            BString key;
+            while (!path.isRoot() &&
+                    !path.parent().isRoot())
+            {
+                path = path.parent(key);
+                
+                if (!key.isDigitsOnly())
+                {
+                    if (key.startsWith("\"") &&
+                        key.endsWith("\""))
+                    {
+                        key = key.substr(1, key.length() - 2).unescape();
+                    }
+                    if (words.contains(key)) {
+                        Path wordPath = words[key];
+                        wordPath.clearValue(id());
+                        if (wordPath.isDeadEnd()) {
+                            words.clearValue(key);
+                        }
+                    }
+                }
+    
+            }
+            
+            Path::clear();
+            
+        }
+        
         void clearValue(const BString& property)
         {
             
@@ -129,18 +208,22 @@ namespace BeeFishDatabase {
 
             Index position = -1;
             
-            assert (!path.isRoot());
-            //    return false;
+            key = "";
+            
+            if (path.isRoot())
+                return path;
             
             path = path.parent(position);
             
-            assert(!path.isRoot());
+            if (path.isRoot())
+                return path;
             
             Index seperator;
             path = path.parent(seperator);
             assert(seperator == POSITIONS);
             
-            assert(!path.isRoot());
+            if (path.isRoot())
+                return path;
             
             Type type = Type::UNKNOWN;
             
@@ -301,18 +384,7 @@ namespace BeeFishDatabase {
              return true;
              
         }
-        
-        void lock()
-        {
-            database().lock();
-        }
-        
-        void unlock()
-        {
-            database().unlock();
-        }
-        
-        
+
         Index getObjectPropertyPosition(const BString& key)
         {
             // Get the property index
@@ -329,7 +401,7 @@ namespace BeeFishDatabase {
             Index position;
             
             Path objectKeyPath = getObjectProperties()[keyPathIndex];
-            lock();
+            objectKeyPath.lock();
             if (objectKeyPath.hasData())
             {
                 objectKeyPath.getData<Index>(position);
@@ -350,8 +422,14 @@ namespace BeeFishDatabase {
             
                 objectKeyPath.setData<Index>(position);
             
+                Index count = 0;
+                keyPath.lock();
+                keyPath.getData<Index>(count);
+                ++count;
+                keyPath.setData<Index>(count);
+                keyPath.unlock();
             }
-            unlock();
+            objectKeyPath.unlock();
             
             return position;
         }
@@ -434,11 +512,26 @@ namespace BeeFishDatabase {
         void deleteKey(const BString& key)
         {
             Index position = getObjectPropertyPosition(key);
+            
+            JSONPath value = getPositions()[position];
+            value.clear();
+            
             getPositions().clearValue(position);
             
 
             Path keyPath = properties()[key];
             getObjectProperties().clearValue(keyPath.index());
+            
+            keyPath.lock();
+            Index count = 0;
+            keyPath.getData<Index>(count);
+            keyPath.setData<Index>(--count);
+            keyPath.unlock();
+            
+            if (count == 0)
+                properties().clearValue(key);
+                
+            removeWords(key);
             
              
         }
@@ -582,6 +675,112 @@ namespace BeeFishDatabase {
              }
             
         }
+    public:
+        void addWords(const BString& word)
+        {
+   
+            Path words = database().words();
+            
+            std::vector<BString> tokens =
+                tokenise(word);
+            
+            for (auto token : tokens)
+            {
+                BString word =
+                        token.toLower();
+                JSONPath path = *this;
+                
+                while (!path.isRoot() &&
+                    !path.parent().isRoot())
+                {
+                    words[word][path.id()];
+                    path = path.parent();
+                }
+                
+            }
+        }
+        
+        void removeWords(const BString& word)
+        {
+   
+            Path words = database().words();
+        
+            std::vector<BString> tokens =
+                tokenise(word);
+            
+            for (auto token : tokens)
+            {
+                BString word =
+                        token.toLower();
+        
+                if (words.contains(word))
+                {
+                    Path wordPath = words[word];
+                    JSONPath path = *this;
+                    while (!path.isRoot() &&
+                           !path.parent().isRoot())
+                    {
+                        wordPath.clearValue(path.id());
+                        if (wordPath.isDeadEnd()) {
+                            words.clearValue(word);
+                        }
+                        path = path.parent();
+                    }
+                    
+                    
+                    
+                }
+            }
+        }
+        
+        std::vector<BString> tokenise(BString word)
+        {
+            static const char* _whiteSpace =
+                " \r\n\v\t";
+                
+            static const char* _deliminators =
+                "-+ .,!?()/\"\'{}\\";
+        
+            char* str = word.data();
+            char* token = 
+                strtok(str, _whiteSpace);
+            std::vector<BString> words;
+            std::vector<BString> outer;
+            
+            // Loop through all remaining tokens
+            while (token != nullptr) 
+            {
+                if (strlen(token))
+                {
+                    words.push_back(token);
+                    outer.push_back(word);
+                }
+                token = strtok(nullptr, _whiteSpace); 
+            }
+            
+            for (auto outerWord : outer)
+            {
+                BString copy = outerWord;
+                char* str = copy.data();
+                    
+                char* token = 
+                strtok(str, _deliminators);
+                
+                while (token != nullptr) 
+                {
+                    if (strlen(token)) {
+                        
+                        words.push_back(token);
+                    }
+                    
+                    token = strtok(nullptr, _deliminators); 
+                }
+                
+            }
+            
+            return words;
+        }
+        
         
     public:
         
