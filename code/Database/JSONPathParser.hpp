@@ -133,7 +133,7 @@ namespace BeeFishDatabase {
                 case Type::STRING:
                 {
                     start[type].setData(value);
-                    start.addWords(value, true);
+                    start.addWords(value, true, _log);
                 }
                 
                 case Type::ARRAY:

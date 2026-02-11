@@ -5,7 +5,7 @@
 #include "../Database/DatabaseBase.hpp"
 #include "../Database/Path.hpp"
 #include "../web-request/web-request.h"
-
+#include "NullStream.hpp"
 #include "JSONIndex.hpp"
 
 namespace BeeFishDatabase {
@@ -441,7 +441,6 @@ namespace BeeFishDatabase {
             getPositions().clearValue(position);
             
 
-            #warning need to remove the property to
             Path propertyPath = properties()[property];
             
             propertyPath.lock();
@@ -462,19 +461,21 @@ namespace BeeFishDatabase {
         }
 
     public:
-        void addWords(const BString& word, bool addToParents)
+        void addWords(const BString& word, bool addToParents, ostream& log = cnull)
         {
    
             Path words = database().words();
-            
+            BString string = toString();
             std::vector<BString> tokens =
                 tokenise(word);
+            
             
             for (auto token : tokens)
             {
                 BString word =
                         token.toLower();
-                
+                        
+                log << string << "#" << word << endl;
                 
                 if (addToParents) {
                     JSONPath path = *this;
@@ -485,8 +486,12 @@ namespace BeeFishDatabase {
                         path = path.parent();
                     }
                 }
-                else
+                else {
+                    
+                    
+
                     words[word][id()];
+                }
                 
             }
         }
@@ -527,14 +532,16 @@ namespace BeeFishDatabase {
         std::vector<BString> tokenise(BString word)
         {
             static const char* _whiteSpace =
-                " \r\n\v\t";
+                " \r\n\v\t()";
                 
             static const char* _deliminators =
-                "+ .,!?()/\"\'{}\\";
+                "+: .,!?/\"\'{}\\";
         
             char* str = word.data();
+            
             char* token = 
                 strtok(str, _whiteSpace);
+                
             std::vector<BString> words;
             std::vector<BString> outer;
             
@@ -544,7 +551,7 @@ namespace BeeFishDatabase {
                 if (strlen(token))
                 {
                     words.push_back(token);
-                    outer.push_back(word);
+                    outer.push_back(token);
                 }
                 token = strtok(nullptr, _whiteSpace); 
             }

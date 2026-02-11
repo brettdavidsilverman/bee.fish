@@ -1,5 +1,5 @@
 #ifndef BEE_FISH__DATABASE__NULL_STREAM_HPP
-#define BEE_FISH__DATABASE__VERSION_HPP
+#define BEE_FISH__DATABASE__NULL_STREAM_HPP
 
 #include <iostream>
 #include <streambuf>
