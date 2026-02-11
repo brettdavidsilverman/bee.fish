@@ -78,8 +78,16 @@ using namespace BeeFishBString;
         }
         
 
+        virtual Branch lock() {
+            if (_lockIndex == -1) {
+                _lockIndex = _index;
+                return _database->lockBranch(_lockIndex);
+            }
+            return getBranch();
+        }
+        
         virtual void unlock() {
-            if(_lockIndex >= 0) {
+            if (_lockIndex != -1) {
                 _database->unlockBranch(_lockIndex);
                 _lockIndex = -1;
             }
@@ -96,7 +104,7 @@ using namespace BeeFishBString;
 
             return *this;
         }
-        
+         
         virtual bool readBit()
         {
 
@@ -173,15 +181,9 @@ using namespace BeeFishBString;
             if (branch._left == 0) 
             {
 
-                if (_lockIndex < 0) {
-                    branch = _database->lockBranch(_index);
-                    _lockIndex = _index;
-                }
+                branch = lock();
 
-                _database->lock();
-
-                branch = getBranch();
-
+//  _database->lock();
 
                 if (branch._left == 0)
                 {
@@ -189,7 +191,7 @@ using namespace BeeFishBString;
                         _database->getNextIndex(_index);
                     setBranch(branch);
                 }
-                _database->unlock();
+//  _database->unlock();
                 
             }
 
@@ -206,23 +208,17 @@ using namespace BeeFishBString;
             if (branch._right == 0) 
             {
 
-                if (_lockIndex < 0) {
-                    branch = _database->lockBranch(_index);
-                    _lockIndex = _index;
-                }
+                branch = lock();
 
-                _database->lock();
+// _database->lock();
                 
-                branch = getBranch();
-
-
                 if (branch._right == 0)
                 {
                     branch._right =
                         _database->getNextIndex(_index);
                     setBranch(branch);
                 }
-                _database->unlock();
+//  _database->unlock();
                 
             }
 
@@ -534,7 +530,7 @@ using namespace BeeFishBString;
 
         }
         
-        void clear()
+        virtual void clear()
         {
             Database::ScopedFileLock lock(database());
 
@@ -704,12 +700,8 @@ using namespace BeeFishBString;
             variable["index"] =
                 (BeeFishScript::Integer)_index;
 
-            if (_lockIndex == -1)
-                variable["lockIndex"] =
-                    (BeeFishScript::Number)(-1);
-            else
-                variable["lockIndex"] =
-                    (BeeFishScript::Integer)_lockIndex;
+            variable["lockIndex"] =
+                (BeeFishScript::Integer)_lockIndex;
 
 
             if (_database) {

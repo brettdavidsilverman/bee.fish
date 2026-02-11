@@ -301,7 +301,7 @@ namespace BeeFishDatabase {
              return true;
              
         }
-        
+        /*
         void lock()
         {
             database().lock();
@@ -312,7 +312,7 @@ namespace BeeFishDatabase {
             database().unlock();
         }
         
-        
+        */
         Index getObjectPropertyPosition(const BString& key)
         {
             // Get the property index
