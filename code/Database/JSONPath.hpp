@@ -442,6 +442,118 @@ namespace BeeFishDatabase {
             
              
         }
+
+    public:
+        void addWords(const BString& word, bool addToParents)
+        {
+   
+            Path words = database().words();
+            
+            std::vector<BString> tokens =
+                tokenise(word);
+            
+            for (auto token : tokens)
+            {
+                BString word =
+                        token.toLower();
+                
+                
+                if (addToParents) {
+                    JSONPath path = *this;
+                    while (!path.isRoot() &&
+                        !path.parent().isRoot())
+                    {
+                        words[word][path.id()];
+                        path = path.parent();
+                    }
+                }
+                else
+                    words[word][id()];
+                
+            }
+        }
+        
+        void removeWords(const BString& word)
+        {
+   
+            Path words = database().words();
+        
+            std::vector<BString> tokens =
+                tokenise(word);
+            
+            for (auto token : tokens)
+            {
+                BString word =
+                        token.toLower();
+        
+                if (words.contains(word))
+                {
+                    Path wordPath = words[word];
+                    JSONPath path = *this;
+                    while (!path.isRoot() &&
+                           !path.parent().isRoot())
+                    {
+                        wordPath.clearValue(path.id());
+                        if (wordPath.isDeadEnd()) {
+                            words.clearValue(word);
+                        }
+                        path = path.parent();
+                    }
+                    
+                    
+                    
+                }
+            }
+        }
+        
+        std::vector<BString> tokenise(BString word)
+        {
+            static const char* _whiteSpace =
+                " \r\n\v\t";
+                
+            static const char* _deliminators =
+                "-+ .,!?()/\"\'{}\\";
+        
+            char* str = word.data();
+            char* token = 
+                strtok(str, _whiteSpace);
+            std::vector<BString> words;
+            std::vector<BString> outer;
+            
+            // Loop through all remaining tokens
+            while (token != nullptr) 
+            {
+                if (strlen(token))
+                {
+                    words.push_back(token);
+                    outer.push_back(word);
+                }
+                token = strtok(nullptr, _whiteSpace); 
+            }
+            
+            for (auto outerWord : outer)
+            {
+                BString copy = outerWord;
+                char* str = copy.data();
+                    
+                char* token = 
+                strtok(str, _deliminators);
+                
+                while (token != nullptr) 
+                {
+                    if (strlen(token)) {
+                        
+                        words.push_back(token);
+                    }
+                    
+                    token = strtok(nullptr, _deliminators); 
+                }
+                
+            }
+            
+            return words;
+        }
+        
         
         virtual void write(ostream& out, Index tabCount = 0)
         {
