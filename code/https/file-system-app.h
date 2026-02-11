@@ -228,7 +228,7 @@ using namespace BeeFishWeb;
          {
             // Default error of not found
             _status = -1;
-            return;
+            _statusText = "Not Found";
          }
   
          
@@ -280,13 +280,20 @@ using namespace BeeFishWeb;
             {
                // Not found
                _status = -1;
+               _statusText = "Not found";
             }
          }
          
          if ( _status != 200 )
          {
-             return;
+
+            stringstream contentStream;
             
+            write(contentStream, _status, _statusText, requestPath, _filePath);
+
+            contentType = "application/json; charset=utf-8";
+            _content = contentStream.str();
+            _serve = App::SERVE_CONTENT;
             
          }
 

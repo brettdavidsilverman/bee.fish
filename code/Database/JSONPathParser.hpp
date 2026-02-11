@@ -67,6 +67,7 @@ namespace BeeFishDatabase {
      private:
          
         
+        
         virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
     
@@ -81,7 +82,7 @@ namespace BeeFishDatabase {
             
             start[type];
             
-            Path words = start.words();
+            Path words = _start.words();
             
             JSONPath path = start;
             
@@ -102,7 +103,7 @@ namespace BeeFishDatabase {
                     {
                         key = key.substr(1, key.length() - 2).unescape();
                     }
-                    start.addWords(key);
+                    start.addWords(key, false);
                 }
     
             }
@@ -131,8 +132,20 @@ namespace BeeFishDatabase {
                 }
                 case Type::STRING:
                 {
-                    start.setString(value);
+                    start[type].setData(value);
+                    
+                    JSONPath path = start;
+path.addWords(value, true);
+/*
+                    while (!path.isRoot() &&
+                           !path.parent().isRoot())
+                    {
+                        addWord(words, value, path);
+                        
+                        path = path.parent();
+                    }
                 
+                */
                     break;
                 }
                 

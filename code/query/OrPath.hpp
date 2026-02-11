@@ -19,7 +19,13 @@ using namespace BeeFishDatabase;
         PathBase* _b;
         bool _aEnded;
         bool _bEnded;
+        Index _aCount = 0;
+        Index _bCount = 0;
         
+        bool _saveAEnded;
+        bool _saveBEnded;
+        Index _saveACount = 0;
+        Index _saveBCount = 0;
     public:
 
         OrPath(PathBase* a,
@@ -41,25 +47,26 @@ using namespace BeeFishDatabase;
         override
         {
             return
-                _a->canGoLeft() or
-                _b->canGoLeft();
+                (!_aEnded && _a->canGoLeft() ) or
+                (!_bEnded && _b->canGoLeft());
         }
         
         virtual bool canGoRight() const
         override
         {
             return
-                _a->canGoRight() or
-                _b->canGoRight();
+                (!_aEnded && _a->canGoRight()) or
+                (!_bEnded && _b->canGoRight());
         }
         
         virtual void goLeft()
         override
         {
             if (!_aEnded &&
-                 _a->canGoLeft())
+                _a->canGoLeft())
             {
                 _a->goLeft();
+                ++_aCount;
             }
             else
                 _aEnded = true;
@@ -68,11 +75,20 @@ using namespace BeeFishDatabase;
                 _b->canGoLeft())
             {
                 _b->goLeft();
+                ++_bCount;
             }
             else
                 _bEnded = true;
                 
         }
+        
+        virtual bool isDeadEnd() const
+        override
+        {
+            return (_aEnded || _a->isDeadEnd()) &&
+                   (_bEnded || _b->isDeadEnd());
+        }
+   
         
         virtual void goRight()
         override
@@ -81,6 +97,7 @@ using namespace BeeFishDatabase;
                  _a->canGoRight())
             {
                 _a->goRight();
+                ++_aCount;
             }
             else
                 _aEnded = true;
@@ -89,6 +106,7 @@ using namespace BeeFishDatabase;
                 _b->canGoRight())
             {
                 _b->goRight();
+                ++_bCount;
             }
             else
                 _bEnded = true;
@@ -98,19 +116,54 @@ using namespace BeeFishDatabase;
         virtual void goUp()
         override
         {
-            assert(false);
+            assert(_aCount > 0 || _bCount > 0);
+            
+            if (_aCount == _bCount)
+            {
+                _a->goUp();
+                _b->goUp();
+                --_aCount;
+                --_bCount;
+                _aEnded = false;
+                _bEnded = false;
+            }
+            else if (_aCount > _bCount)
+            {
+                _a->goUp();
+                --_aCount;
+                _aEnded = false;
+            }
+            else if (_bCount > _aCount)
+            {
+                _b->goUp();
+                --_bCount;
+                _bEnded = false;
+            }
+            
         }
         
         virtual void save()
+        override
         {
             _a->save();
             _b->save();
+            
+            _saveAEnded = _aEnded;
+            _saveBEnded = _bEnded;
+            _saveACount = _aCount;
+            _saveBCount = _bCount;
         }
         
         virtual void restore()
+        override
         {
             _a->restore();
             _b->restore();
+            
+            _aEnded = _saveAEnded;
+            _bEnded = _saveBEnded;
+            _aCount = _saveACount;
+            _bCount = _saveBCount;
         }
         
     

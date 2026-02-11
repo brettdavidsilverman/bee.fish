@@ -31,3 +31,6 @@ debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	PORT=8000
 debug:	all
+
+load:
+		make -C code load

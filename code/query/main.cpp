@@ -32,10 +32,10 @@ int main(int argc, const char* argv[]) {
     
     JSONDatabase database(DATABASE_FILENAME);
     
-    bool display = false;
-    if (hasArg(argc, argv, "-display") >= 0)
+    bool display = true;
+    if (hasArg(argc, argv, "-count") >= 0)
     {
-        display = true;
+        display = false;
     }
    
     auto displayResults =

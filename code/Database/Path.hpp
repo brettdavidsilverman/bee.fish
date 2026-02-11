@@ -79,17 +79,15 @@ using namespace BeeFishBString;
         
 
         virtual Branch lock() {
-            if (_lockIndex < 0) {
-                Branch branch = _database->lockBranch(_index);
+            if (_lockIndex == -1) {
                 _lockIndex = _index;
-                return branch;
+                return _database->lockBranch(_lockIndex);
             }
             return getBranch();
-
         }
         
         virtual void unlock() {
-            if(_lockIndex >= 0) {
+            if (_lockIndex != -1) {
                 _database->unlockBranch(_lockIndex);
                 _lockIndex = -1;
             }
@@ -184,9 +182,8 @@ using namespace BeeFishBString;
             {
 
                 branch = lock();
-                
-//  _database->lock();
 
+//  _database->lock();
 
                 if (branch._left == 0)
                 {
@@ -703,12 +700,8 @@ using namespace BeeFishBString;
             variable["index"] =
                 (BeeFishScript::Integer)_index;
 
-            if (_lockIndex == -1)
-                variable["lockIndex"] =
-                    (BeeFishScript::Number)(-1);
-            else
-                variable["lockIndex"] =
-                    (BeeFishScript::Integer)_lockIndex;
+            variable["lockIndex"] =
+                (BeeFishScript::Integer)_lockIndex;
 
 
             if (_database) {
