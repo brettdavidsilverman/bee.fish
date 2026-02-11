@@ -34,8 +34,7 @@ using namespace BeeFishId;
 
          if (!authenticated())
          {
-             return;
-           // throw std::runtime_error("Not authenticated");
+            throw std::runtime_error("Not authenticated");
          }
          
 
