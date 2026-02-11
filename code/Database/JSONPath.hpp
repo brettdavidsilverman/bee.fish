@@ -433,6 +433,8 @@ namespace BeeFishDatabase {
         
         void deleteKey(const BString& key)
         {
+            removeWords(key);
+            
             Index position = getObjectPropertyPosition(key);
             getPositions().clearValue(position);
             
@@ -512,7 +514,7 @@ namespace BeeFishDatabase {
                 " \r\n\v\t";
                 
             static const char* _deliminators =
-                "-+ .,!?()/\"\'{}\\";
+                "+ .,!?()/\"\'{}\\";
         
             char* str = word.data();
             char* token = 

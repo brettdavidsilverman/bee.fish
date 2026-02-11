@@ -178,7 +178,7 @@ using namespace BeeFishParser;
         )
         {
             return new Path(
-                words[value()]
+                words[value().toLower()]
             );
         }
         

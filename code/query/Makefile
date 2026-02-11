@@ -16,7 +16,7 @@ test:	TEST=test
 test:	$(OUTPUT)
 	$(OUTPUT) -test
 
-time:	CFLAGS += -Ofast
+time:	CFLAGS += -Ofast -D DEBUG
 time:	TIME = time
 time:	$(OUTPUT)
 
