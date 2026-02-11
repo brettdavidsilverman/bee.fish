@@ -133,6 +133,8 @@ namespace BeeFishHTTPS {
                             
                         *this << endl;
                         
+                        flush();
+                        
                     }
             
                     delete path;

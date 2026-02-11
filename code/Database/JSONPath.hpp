@@ -78,21 +78,7 @@ namespace BeeFishDatabase {
              return database().words();
         }
 
-        void clearValue(const BString& property)
-        {
-            
-            Index position =
-                 getObjectPropertyPosition(property);
-                 
-            Path path =
-                 properties()[property];
-                 
-            Index propertyIndex = path.index();
-            
-            getPositions().clearValue(position);
-            getObjectProperties().clearValue(propertyIndex);
-        }
-
+        
         JSONPath operator [] (const BString& key)
         {
              Index position =
@@ -301,18 +287,7 @@ namespace BeeFishDatabase {
              return true;
              
         }
-        /*
-        void lock()
-        {
-            database().lock();
-        }
-        
-        void unlock()
-        {
-            database().unlock();
-        }
-        
-        */
+
         Index getObjectPropertyPosition(const BString& key)
         {
             // Get the property index
@@ -336,6 +311,19 @@ namespace BeeFishDatabase {
             }
             else 
             {
+                
+                // New property
+                // Update the properties counter
+                keyPath.lock();
+                
+                Index counter = 1;
+                if (keyPath.hasData()) {
+                    keyPath.getData<Index>(counter);
+                    ++counter;
+                }
+                keyPath.setData<Index>(counter);
+                
+                keyPath.unlock();
                 
                 Path objectPositions = getPositions();
                 
@@ -429,18 +417,46 @@ namespace BeeFishDatabase {
             Path path(*this);
             return path.max<Type>();
         }
-        
-        
-        void deleteKey(const BString& key)
+        /*
+        void clearValue(const BString& property)
         {
-            removeWords(key);
+            deleteProperty(property);
+        }
+        */
+        
+        void deleteProperty(const BString& property)
+        {
+            removeWords(property);
+
+            JSONPath path = (*this);
+            while (!path.isRoot() &&
+                   !path.parent().isRoot())
+            {
+                BString property;
+                path = path.parent(property);
+                removeWords(property);
+            }
             
-            Index position = getObjectPropertyPosition(key);
+            Index position = getObjectPropertyPosition(property);
             getPositions().clearValue(position);
             
 
-            Path keyPath = properties()[key];
-            getObjectProperties().clearValue(keyPath.index());
+            #warning need to remove the property to
+            Path propertyPath = properties()[property];
+            
+            propertyPath.lock();
+                
+            Index counter;
+            propertyPath.getData<Index>(counter);
+            --counter;
+            propertyPath.setData<Index>(counter);
+            propertyPath.unlock();
+                
+            if (counter == 0) {
+                properties().clearValue(property);
+            }
+            
+            getObjectProperties().clearValue(propertyPath.index());
             
              
         }

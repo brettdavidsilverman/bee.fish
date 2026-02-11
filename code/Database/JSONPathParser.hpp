@@ -133,20 +133,7 @@ namespace BeeFishDatabase {
                 case Type::STRING:
                 {
                     start[type].setData(value);
-                    
-                    JSONPath path = start;
-path.addWords(value, true);
-/*
-                    while (!path.isRoot() &&
-                           !path.parent().isRoot())
-                    {
-                        addWord(words, value, path);
-                        
-                        path = path.parent();
-                    }
-                
-                */
-                    break;
+                    start.addWords(value, true);
                 }
                 
                 case Type::ARRAY:
@@ -262,7 +249,7 @@ path.addWords(value, true);
             
             if (json->type() == Type::UNDEFINED)
             {
-                path.deleteKey(key->value());
+                path.deleteProperty(key->value());
                 if (&_log != &cnull)
                     _log << path.toString() << endl;
             
@@ -333,10 +320,11 @@ path.addWords(value, true);
                 {
                     //assert(false)
                     BString key;
-                    if (!_start.isRoot())
+                    if (!_start.isRoot() && 
+                        !_start.parent().isRoot())
                     {
                         _start = _start.parent(key);
-                        _start.deleteKey(key);
+                        _start.deleteProperty(key);
                     }
                     
                 }

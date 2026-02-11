@@ -88,138 +88,85 @@ fetchButton.disabled = true;
 
 authenticate();
 
-async function fetchLines(url) {
+async function fetchLines(url, f) {
     var parameters = {
         mode: "cors",
         method: "GET",
         credentials: "include"
     }    
 
-  const response = await fetch(url, parameters);
+    const response = await fetch(url, parameters);
 
-  if (!response.ok) {
-    throw new Error(`HTTP error, status = ${response.status}`);
-  }
-
-  // Get the response body as a ReadableStream
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let lineBuffer = '';
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
+    if (response.statusText == "Unauthorised")
+    {
+        var json = await response.text();
+        
+        url = new URL(JSON.parse(json));
+        url.search = "?redirect=" +
+            encodeURIComponent(document.location.href);
+        document.location.replace(url);
+    }
+    
+    if (!response.ok) {
+        throw new Error(`HTTP error, status = ${response.status}`);
     }
 
-    // Decode the chunk and add to buffer
-    lineBuffer += decoder.decode(value, { stream: true });
+    // Get the response body as a ReadableStream
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    var lineBuffer = '';
 
-    // Process lines when a newline character is found
-    const lines = lineBuffer.split('\n');
-    for (let i = 0; i < lines.length - 1; i++) {
-      const line = lines[i].trim(); // Process each complete line
-      if (line) {
-        console.log(`Processing line: ${line}`);
-        // Add your line processing logic here
-      }
+    while (true) {
+        
+        const { done, value } =
+            await reader.read();
+            
+        if (done) {
+            break;
+        }
+
+        // Decode the chunk and add to buffer
+        lineBuffer += decoder.decode(value, { stream: true });
+
+        // Process lines when a newline character is found
+        const lines = lineBuffer.split('\n');
+        for (let i = 0; i < lines.length - 1; i++) {
+            const line = lines[i];
+            f(line + '\n');
+        }
+        lineBuffer = lines[lines.length - 1];
     }
-    lineBuffer = lines[lines.length - 1]; // Keep the incomplete last line in buffer
-  }
-
-  // Process any remaining data in the buffer after the stream ends
-  if (lineBuffer.trim()) {
-    console.log(`Processing final line: ${lineBuffer.trim()}`);
-  }
+    
+    if (lineBuffer) {
+        f(lineBuffer);
+    }
 }
 
 // Example usage:
 //fetchLines('https://dev.bee.fish:8000/?deaths+data').catch(console.error);
 
-function loadJSON() {
+async function loadJSON() {
     var url = new URL(pathInput.value);
     
     fetchButton.disabled = true;
     jsonEditor.value = "Loading....";
     
-    localStorage.setItem("path", url);
-    var parameters = {
-        mode: "cors",
-        method: "GET",
-        credentials: "include"
-    }
-
-    var promise =
-    fetch(url, parameters).
-        then(
-            function (response) {
-                status = response.status;
-                if (status == "200") {
-                    if (response.statusText ==
-                        "Unauthorised")
-                    {
-                        status = "Unauthorised";
-                    }
-                    return response.text();
-                }
-                else {
-                    throw new Error(
-                        decodeURIComponent(response.statusText)
-                    );
-                }
-            }
-        ).
-        then(
-            function(text) {
-
-                if (text == "undefined")
-                    return undefined;
-                if (status == "Unauthorised")
-                {
-                    url = new URL(JSON.parse(text));
-                    url.search = "?redirect=" +
-                        encodeURIComponent(document.location.href);
-                    document.location.replace(url);
-                }
-                return text
-            }
-        ).
-        then(
-            function(json) {
-                if (json == undefined) {
-                    jsonEditor.value = "undefined";
-                    return undefined;
-                }
-            
-                if (json.error) {
-                    throw new Error(json.error, loadJSON);
-                }
-            
-                jsonEditor.value = json;
-                   // JSON.stringify(json, null, "    ");
-                
-                
-                return json;
-            }
-        )
-        .catch(
-            function (error) {
-                jsonEditor.value = error
-              //  Error(error,  "loadJSON");
-            }
-        )
-        .finally(
-            function() {
-                fetchButton.disabled = false;
-                saveButton.disabled = false;
-                switchFunctions(
-                    functionCheckbox.checked
-                );
-            }
-        );
+    localStorage.setItem("path", pathInput.value);
     
-    return promise;
-        
+    var firstLine = true;
+    
+    await fetchLines(
+        url,
+        (line) => {
+            if (firstLine) {
+                jsonEditor.value = "";
+                firstLine = false;
+            }
+            jsonEditor.value += line;
+        }
+    );
+    
+    fetchButton.disabled = false;
 }
 
 
@@ -263,6 +210,8 @@ saveButton.onclick =
             body: json
         }
         
+        saveButton.disabled = true;
+        
         var status;
         
         fetch(
@@ -292,6 +241,11 @@ saveButton.onclick =
         catch(
             function (error)
             {
+            }
+        ).
+        finally(
+            function() {
+                saveButton.disabled = false;
             }
         );
     }
