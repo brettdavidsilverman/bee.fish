@@ -1512,7 +1512,7 @@ assert(success);
         success = success &
             testValue(
                 "Parser 3 success",
-                parser2.matched()
+                parser3.matched()
             );
         
         cout << "Removing property a" << endl;
@@ -1543,6 +1543,38 @@ assert(success);
             testValue(
                 "Result {}",
                 stream.str() == "{}"
+            );
+            
+            
+            
+            
+                    
+        JSONDatabase database4;
+        JSONPath start4 = database4.host("https://test");
+        JSONPathParser parser4(start4);
+        parser4.read("{\"a\":{\"a\":\"a\"}}");
+        parser4.eof();
+        
+        success = success &
+            testValue(
+                "Parser 4 success",
+                parser4.matched()
+            );
+        
+        cout << "Removing property a" << endl;
+        
+        start4["a"].deleteProperty("a");
+        
+        success = success &&
+            testValue(
+                "Property a remains",
+                database4.properties().contains("a")
+            );
+            
+        success = success &&
+            testValue(
+                "Property value a remains",
+                database4.words().contains("a")
             );
        
             
