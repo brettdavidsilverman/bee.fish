@@ -35,9 +35,7 @@ namespace BeeFishDatabase
 success = success &&
     testIncrement();
     
-success = success &&
-    testDeleteProperty();
-            
+
         success = success &&
             testNextIndex();
         
@@ -54,25 +52,25 @@ success = success &&
             testSubArray2Path();
             
         success = success &&
-            testAllFiles(TEST_DIRECTORY);
-            
-        success = success &&
-            testIterator();
-            
-        success = success &&
             testClear();
             
         success = success &&
             testPathParent();
             
         success = success &&
-            testIncrement();
-            
-        success = success &&
             testJSONPathParent();
             
         success = success &&
+            testIncrement();
+            
+        success = success &&
             testDeleteProperty();
+            
+        success = success &&
+            testIterator();
+            
+        success = success &&
+            testAllFiles(TEST_DIRECTORY);
             
         outputSuccess(success);
 
@@ -1500,6 +1498,53 @@ assert(success);
                 "Words 2 still contain a",
                 database2.words().contains("a")
             );
+            
+            
+            
+            
+            
+        JSONDatabase database3;
+        JSONPath start3 = database3.host("https://test");
+        JSONPathParser parser3(start3);
+        parser3.read("{\"a\":{\"b\":\"c\"}}");
+        parser3.eof();
+        
+        success = success &
+            testValue(
+                "Parser 3 success",
+                parser2.matched()
+            );
+        
+        cout << "Removing property a" << endl;
+        
+        start3.deleteProperty("a");
+        
+        success = success &&
+            testValue(
+                "Property 3 removed",
+                !database3.properties().contains("a")
+            );
+            
+        success = success &&
+            testValue(
+                "Property 3 value b removed",
+                !database3.words().contains("b")
+            );
+        
+        success = success &&
+            testValue(
+                "Property 3 value c removed",
+                !database3.words().contains("c")
+            );
+        
+        stringstream stream;
+        stream << start3;
+        success = success &&
+            testValue(
+                "Result {}",
+                stream.str() == "{}"
+            );
+       
             
         BeeFishMisc::outputSuccess(success);
         
