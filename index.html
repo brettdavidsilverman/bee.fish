@@ -175,7 +175,6 @@ if (!pathInput.value)
     
 pathInput.onfocus = 
     function() {
-        fetchButton.disabled = false;
     };
     
     
@@ -185,7 +184,6 @@ pathInput.onblur =
         {
             pathInput.value = document.location.origin + "/";
         }
-        fetchButton.disabled = false;
         
         setLinks();
     }
