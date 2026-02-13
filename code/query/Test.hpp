@@ -711,7 +711,6 @@ namespace BeeFishQuery {
         );
         ok = ok && test(TEST_DIRECTORY "/45-Object.json", "a", 
             {
-               // "https://test/45-Object.json",
                 "https://test/45-Object.json/a",
                 "https://test/45-Object.json/a/1",
                 "https://test/45-Object.json/a/1/1",

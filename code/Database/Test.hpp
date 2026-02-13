@@ -23,14 +23,21 @@ namespace BeeFishDatabase
     inline bool testIterator();
     inline bool testClear();
     inline bool testPathParent();
+    inline bool testIncrement();
     inline bool testJSONPathParent();
-    
+    inline bool testDeleteProperty();
     inline bool test()
     {
         bool success = true;
         
         cout << "Test Database " << endl;
         
+success = success &&
+    testIncrement();
+    
+success = success &&
+    testDeleteProperty();
+            
         success = success &&
             testNextIndex();
         
@@ -59,7 +66,13 @@ namespace BeeFishDatabase
             testPathParent();
             
         success = success &&
+            testIncrement();
+            
+        success = success &&
             testJSONPathParent();
+            
+        success = success &&
+            testDeleteProperty();
             
         outputSuccess(success);
 
@@ -838,11 +851,12 @@ namespace BeeFishDatabase
         );
         
         JSONPath test = path;
-        
-cerr << test << endl;
+        ;
 
         if (success)
         {
+            std::stringstream stream;
+            stream << test;
              //success = path[ARRAY][0].contains(ARRAY);
         }
         
@@ -897,7 +911,6 @@ cerr << test << endl;
                 success = false;
             else {
                 Size max = maxPath.max<Size>();
-cerr << "MAX:" << max << endl;
                 success = (max == 1);
             }
             BeeFishMisc::outputSuccess(success);
@@ -1332,6 +1345,162 @@ assert(success);
             );
             
         
+        BeeFishMisc::outputSuccess(success);
+        
+        return success;
+    }
+    
+    inline bool testIncrement()
+    {
+        cout << "Test increment" << endl;
+        
+        Database database;
+        Path path = database;
+        
+        bool success = true;
+        
+        Index count = path++;
+        
+        success = success &&
+            testValue("Increment++ 0", count == 0);
+            
+        count = path++;
+        success = success &&
+            testValue("Increment++ 1", count == 1);
+            
+        count = ++path;
+        success = success &&
+            testValue("++Increment 3", count == 3);
+            
+        count = path--;
+        success = success &&
+            testValue("Increment-- 3", count == 3);
+            
+        count = --path;
+        success = success &&
+            testValue("--Increment 1", count == 1);
+            
+            
+        success = success &&
+            testValue("--Increment 0", --path == 0);
+            
+        BeeFishMisc::outputSuccess(success);
+        
+        return success;
+    }
+
+    
+    inline bool testDeleteProperty()
+    {
+
+        cout << "Test delete property" << endl;
+    
+        bool success = true;
+ 
+        JSONDatabase database;
+        
+        JSONPath start = database.host("https://test");
+        JSONPathParser parser(start);
+        parser.read("{\"a\":\"b\"}");
+        parser.eof();
+        
+        success = success &
+            testValue(
+                "Parser success",
+                parser.matched()
+            );
+            
+        success = success &&
+            testValue(
+                "Words contain a",
+                database.words().contains("a")
+            );
+            
+        success = success &&
+            testValue(
+                "Words contain b",
+                database.words().contains("b")
+            );
+            
+        start.deleteProperty("a");
+        
+        success = success &&
+            testValue(
+                "Property removed",
+                !database.properties().contains("a")
+            );
+            
+        success = success &&
+            testValue(
+                "Property value removed",
+                !database.words().contains("b")
+            );
+            
+        success = success &&
+            testValue(
+                "Property word removed",
+                !database.words().contains("a")
+            );
+            
+            
+            
+            
+            
+            
+        JSONDatabase database2;
+        
+        JSONPath start2 = database2.host("https://test");
+        JSONPathParser parser2(start2);
+        parser2.read("{\"a\":{\"b\":\"c\"}}");
+        parser2.eof();
+        
+        success = success &
+            testValue(
+                "Parser 2 success",
+                parser2.matched()
+            );
+            
+        success = success &&
+            testValue(
+                "Words 2 contain a",
+                database2.words().contains("a")
+            );
+            
+        success = success &&
+            testValue(
+                "Words 2 contain b",
+                database2.words().contains("b")
+            );
+            
+        success = success &&
+            testValue(
+                "Words 2 contain c",
+                database2.words().contains("c")
+            );
+        
+        
+        cout << "Removing property c" << endl;
+        
+        start2["a"].deleteProperty("b");
+        
+        success = success &&
+            testValue(
+                "Property 2 removed",
+                !database2.properties().contains("b")
+            );
+            
+        success = success &&
+            testValue(
+                "Property 2 value removed",
+                !database2.words().contains("c")
+            );
+        
+        success = success &&
+            testValue(
+                "Words 2 still contain a",
+                database2.words().contains("a")
+            );
+            
         BeeFishMisc::outputSuccess(success);
         
         return success;

@@ -10,6 +10,7 @@
 
 namespace BeeFishDatabase {
  
+    using namespace BeeFishPowerEncoding;
     using namespace BeeFishParser;
     using namespace BeeFishScript;
     using namespace BeeFishJSON;
@@ -417,26 +418,48 @@ namespace BeeFishDatabase {
             Path path(*this);
             return path.max<Type>();
         }
-        /*
-        void clearValue(const BString& property)
-        {
-            deleteProperty(property);
-        }
-        */
-        
+    
+    public:
         void deleteProperty(const BString& property)
         {
-            removeWords(property);
+            if (!contains(property))
+                return;
+                
+            Path words = database().words();
+            Path objects = database().objects();
 
-            JSONPath path = (*this);
+            JSONPath json = (*this)[property];
+            
+            if (!json.isDeadEnd() && json.type() == Type::STRING)
+            {
+                BString value;
+                json[Type::STRING].getData(value);
+                json.removeWords(value);
+            }
+            
+            json.removeWords(property);
+        
+        
+            json = (*this);
+            JSONPath path = json;
             while (!path.isRoot() &&
                    !path.parent().isRoot())
             {
                 BString property;
                 path = path.parent(property);
-                removeWords(property);
+                if (!property.isDigitsOnly())
+                {
+                    if (property.startsWith("\"") &&
+                        property.endsWith("\""))
+                    {
+                        property = property.substr(1, property.size() - 2);
+                    }
+                    json.removeWords(property);
+                }
+                
             }
-            
+    
+
             Index position = getObjectPropertyPosition(property);
             getPositions().clearValue(position);
             
@@ -460,11 +483,12 @@ namespace BeeFishDatabase {
              
         }
 
-    public:
         void addWords(const BString& word, bool addToParents, ostream& log = cnull)
         {
    
             Path words = database().words();
+            Path objects = database().objects();
+            
             BString string = toString();
             std::vector<BString> tokens =
                 tokenise(word);
@@ -477,32 +501,43 @@ namespace BeeFishDatabase {
                         
                 log << string << "#" << word << endl;
                 
+                
                 if (addToParents) {
                     JSONPath path = *this;
+                    
                     while (!path.isRoot() &&
                         !path.parent().isRoot())
                     {
-                        words[word][path.id()];
+        
+                        Path object = path;
+                        ++words[word][object];
+                        
+                        ++objects[object][words[word]];
+                        
                         path = path.parent();
                     }
                 }
                 else {
+                
+                    Path object = (*this);
+                    ++words[word][object];
+                    
+                    ++objects[object][words[word]];
                     
                     
-
-                    words[word][id()];
                 }
                 
             }
         }
         
-        void removeWords(const BString& word)
+        void removeWords(const BString& value)
         {
    
             Path words = database().words();
-        
+            Path objects = database().objects();
+            
             std::vector<BString> tokens =
-                tokenise(word);
+                tokenise(value);
             
             for (auto token : tokens)
             {
@@ -511,19 +546,39 @@ namespace BeeFishDatabase {
         
                 if (words.contains(word))
                 {
-                    Path wordPath = words[word];
-                    JSONPath path = *this;
-                    while (!path.isRoot() &&
-                           !path.parent().isRoot())
+                    
+                    
+                    JSONPath json = (*this);
+                    
+                    while (!json.isRoot() &&
+                            !json.parent().isRoot())
                     {
-                        wordPath.clearValue(path.id());
-                        if (wordPath.isDeadEnd()) {
-                            words.clearValue(word);
+                            
+                        Path object = json;
+                        Path objectWords = objects[object];
+                        Path wordObjects = words[word];
+                        if (--object[word] == 0)
+                        {
+                             object.clearValue(word);
+                             if (object.isDeadEnd())
+                             {
+                                 objects.clearValue(object);
+                             } 
                         }
-                        path = path.parent();
+                        
+                        if (--wordObjects[object] == 0)
+                        {
+                            wordObjects.clearValue(object);
+                            if (wordObjects.isDeadEnd())
+                            {
+                                words.clearValue(word);
+                            }
+                        }
+                        
+                        json = json.parent();
+                        
+                    
                     }
-                    
-                    
                     
                 }
             }
@@ -532,10 +587,10 @@ namespace BeeFishDatabase {
         std::vector<BString> tokenise(BString word)
         {
             static const char* _whiteSpace =
-                " \r\n\v\t()";
+                " \r\n\v\t()\".,!?{}";
                 
             static const char* _deliminators =
-                "+: .,!?/\"\'{}\\";
+                "+:; /\'\\";
         
             char* str = word.data();
             
@@ -575,6 +630,16 @@ namespace BeeFishDatabase {
                 }
                 
             }
+            
+            // 1. Sort words
+            std::sort(words.begin(), words.end());
+
+            // 2. Remove consecutive duplicates: v becomes {1, 2, 3, 4, 5, ?, ?, ?, ?, ?}
+            //    'last' points to the first '?'
+            auto last = std::unique(words.begin(), words.end());
+
+            // 3. Erase the extra elements
+            words.erase(last, words.end());
             
             return words;
         }

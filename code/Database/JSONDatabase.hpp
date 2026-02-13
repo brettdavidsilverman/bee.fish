@@ -17,6 +17,7 @@ namespace BeeFishDatabase
         Path _authentication;
         Path _properties;
         Path _words;
+        Path _objects;
         Path _json;
         
 
@@ -36,6 +37,9 @@ namespace BeeFishDatabase
                 
             _words =
                 _root[WORDS];
+                
+            _objects =
+                _root[OBJECTS];
                 
             _authentication =
                 _root[AUTHENTICATION];
@@ -71,6 +75,11 @@ namespace BeeFishDatabase
         Path words() const
         {
             return _words;
+        }
+        
+        Path objects() const
+        {
+            return _objects;
         }
         
         Path userData(const BString& userId)

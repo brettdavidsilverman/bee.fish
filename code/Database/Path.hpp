@@ -369,18 +369,80 @@ using namespace BeeFishBString;
 
             return Path::operator[](_key);
         }
-        
-        Path operator [] (const Path& key) const
-        {
-            return Path::operator[](key.index());
-        }
-
-      
+    
         bool hasData() const
         {
             std::string data = getData();
             
             return (data.size() > 0);
+        }
+        
+        Index operator++()
+        {
+            lock();
+            Index count = 1;
+            if (hasData())
+            {
+                getData<Index>(count);
+                ++count;
+            }
+            setData<Index>(count);
+            unlock();
+            return count;
+        }
+        
+        Index operator++(int)
+        {
+            lock();
+            Index existingCount = 0;
+            Index count = 1;
+            if (hasData())
+            {
+                getData<Index>(count);
+                existingCount = count;
+                ++count;
+            }
+            setData<Index>(count);
+            unlock();
+            
+            return existingCount;
+        }
+        
+        Index operator--()
+        {
+            lock();
+            Index count = 0;
+            if (hasData())
+            {
+                getData<Index>(count);
+                if (count > 0)
+                    --count;
+                else
+                    assert(false);
+            }
+            setData<Index>(count);
+            unlock();
+            return count;
+        }
+        
+        Index operator--(int)
+        {
+            lock();
+            Index existingCount = 0;
+            Index count = 1;
+            if (hasData())
+            {
+                getData<Index>(count);
+                existingCount = count;
+                if (count > 0)
+                    --count;
+                else
+                    assert(false);
+            }
+            setData<Index>(count);
+            unlock();
+            
+            return existingCount;
         }
         
         std::string getData() {
@@ -588,7 +650,13 @@ using namespace BeeFishBString;
                 
             
         }
+        /*
+        void clearValue(const Path& path)
+        {
+            clearValue(path.index());
+        }
         
+        */
     private:
         
         void clearLeft() {
@@ -691,7 +759,7 @@ using namespace BeeFishBString;
              out << value;
              return out;
         }
-        
+
         virtual Variable getVariable() const
         {
             BeeFishScript::Variable variable = 
@@ -876,5 +944,11 @@ using namespace BeeFishBString;
         
     };
 
+    PowerEncoding& operator << (PowerEncoding& out, const Path& path)
+    {
+        out << path.index();
+        return out;
+    }
 }
+
 #endif

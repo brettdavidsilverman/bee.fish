@@ -15,8 +15,8 @@ using namespace BeeFishMisc;
 using namespace std;
 
 int main(int argc, const char* argv[])
-{ 
-    
+{
+    // current size: 5,638,260,235
     cout << "bee.fish.database"
               << endl
           << "C++ run time: "

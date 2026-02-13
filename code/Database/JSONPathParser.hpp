@@ -71,9 +71,7 @@ namespace BeeFishDatabase {
         virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
     
-            if (&_log != &cnull)
-                _log << start.toString() << endl;
-            
+  
             if (!start.isDeadEnd() && start.type() != type)
             {
                 start.clear();
@@ -81,8 +79,6 @@ namespace BeeFishDatabase {
             }
             
             start[type];
-            
-            Path words = _start.words();
             
             JSONPath path = start;
             
@@ -120,6 +116,9 @@ namespace BeeFishDatabase {
                 }
                 case Type::NULL_:
                 {
+                    if (&_log != &cnull)
+                        _log << start.toString() << "#null" << endl;
+          
                     break;
                 }
                 case Type::BOOLEAN:
@@ -127,7 +126,10 @@ namespace BeeFishDatabase {
                 case Type::NUMBER:
                 {
                     start[type].setData(value);
-                    
+                               
+                    if (&_log != &cnull)
+                        _log << start.toString() << "#" << value << endl;
+          
                     break;
                 }
                 case Type::STRING:
