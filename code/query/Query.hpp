@@ -21,6 +21,7 @@ using namespace BeeFishBString;
 using namespace BeeFishParser;
 
     typedef Path Words;
+    typedef Path Bounds;
     
     class Blankspace : public Or
     {
@@ -556,7 +557,7 @@ using namespace BeeFishParser;
             return output;
         }
         
-        PathBase* getPath(Words& words)
+        PathBase* getPath(Words& words, Bounds& bounds)
         {
 
             if (_notExpression->matched())
@@ -567,9 +568,9 @@ using namespace BeeFishParser;
                     
                 PathBase* path = 
                     expression
-                    ->getPath(words);
+                    ->getPath(words, bounds);
                     
-                return new NotPath(path);
+                return new NotPath(path, new Path(bounds));
                 
             }
             else if (_bracketedExpressionAndExpression->matched())
@@ -583,8 +584,8 @@ using namespace BeeFishParser;
                     
                 return
                     _andOr1->getPath(
-                        expressionA->getPath(words),
-                        expressionB->getPath(words)
+                        expressionA->getPath(words, bounds),
+                        expressionB->getPath(words, bounds)
                     );
                     
                 
@@ -600,7 +601,7 @@ using namespace BeeFishParser;
                 return
                     _andOr2->getPath(
                         wordPath,
-                        expression->getPath(words)
+                        expression->getPath(words, bounds)
                     );
             }
             else if (_bracketedExpression->matched())
@@ -608,7 +609,7 @@ using namespace BeeFishParser;
                 Expression* expression =
                     _bracketedExpression2->item();
                     
-                return expression->getPath(words);
+                return expression->getPath(words, bounds);
                 
             }
             else if (_word->matched()) {
@@ -656,9 +657,9 @@ using namespace BeeFishParser;
             return _capture->value();
         }
         
-        PathBase* getPath(Words& words)
+        PathBase* getPath(Words& words, Bounds& bounds)
         {
-            return _expression->getPath(words);
+            return _expression->getPath(words, bounds);
         }
     };
     

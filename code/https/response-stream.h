@@ -92,6 +92,7 @@ namespace BeeFishHTTPS {
                  
             JSONDatabase* database = scoped;
             BeeFishQuery::Words words = database->words();
+            BeeFishQuery::Bounds bounds = database->objects();
             
             Path bookmark(*database, app->_bookmark);
             if (app->serve() == App::SERVE_JSON)
@@ -116,7 +117,7 @@ namespace BeeFishHTTPS {
 
                     PathBase* path =
                         expression
-                        .getPath(words);
+                        .getPath(words, bounds);
                 
                     Iterable<Index> matches(*path);
                     for (auto it = matches.begin();

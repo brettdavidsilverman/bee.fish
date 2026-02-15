@@ -42,10 +42,11 @@ int main(int argc, const char* argv[]) {
     [&database, display](Expression& expression)
     {
         Words words(database.words());
-    
+        Bounds bounds = database.objects();
+        
         PathBase* path =
             expression
-            .getPath(words);
+            .getPath(words, bounds);
         Index count = 0;
         
         Iterable<Index> jsonMatches(*path);

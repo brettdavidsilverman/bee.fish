@@ -1743,7 +1743,7 @@ assert(success);
             success = success &&
                 testValue(
                     "Cleared objects count",
-                    objects.count() == 2
+                    objects.count() == 1
                 );
                 
             if (!success)
@@ -1753,11 +1753,11 @@ assert(success);
         };
         
         success = success &&
-           test("{\"a\":\"b\"}", 3);
+           test("{\"a\":\"b\"}", 2);
         success = success &&
-           test("{\"a\":{\"a\":\"a\"}}", 4);
+           test("{\"a\":{\"a\":\"a\"}}", 3);
         success = success &&
-           test("[1,2,3]", 5);
+           test("[1,2,3]", 4);
         
             
         BeeFishMisc::outputSuccess(success);

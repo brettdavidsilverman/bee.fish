@@ -342,9 +342,12 @@ namespace BeeFishQuery {
         bool ok = true;
         BString query;
         Database db;
-        Words words(db);
+        Path root = db;
+        Words words(root["words"]);
+        Words objects(root["objects"]);
+        
         auto testmatch =
-        [&ok, &words](const BString& query) {
+        [&ok, &words, &objects](const BString& query) {
             
             
             
@@ -367,7 +370,7 @@ namespace BeeFishQuery {
             
             if (expression->matched()) {
                  PathBase* path =
-                    expression->getPath(words);
+                    expression->getPath(words, objects);
                 
                 delete path;
             }
@@ -509,12 +512,12 @@ namespace BeeFishQuery {
     {
         cout << "Test Query And Path" << endl;
         JSONDatabase db;
-        Words words(db.properties());
-        
+        Words words = db.words();
+        Bounds bounds = db.objects();
         
         bool ok  = true;
         auto test =
-        [&db, &words](BString input, vector<JSONPath::Id> check) {
+        [&db, &words, &bounds](BString input, vector<JSONPath::Id> check) {
             
             
             cout << input << flush;
@@ -530,7 +533,7 @@ namespace BeeFishQuery {
             {
                 PathBase* pathBase =
                     expression
-                    .getPath(words);
+                    .getPath(words, bounds);
                 
                 Iterable<JSONPath::Id> iterable(*pathBase);
                 std::vector<JSONPath::Id> values;
@@ -596,7 +599,7 @@ namespace BeeFishQuery {
             JSONDatabase db;
             JSONPath root = db.host("https://test")[json.filename()];
             Path words = db.words();
-            
+            Path bounds = db.objects();
             JSONPathParser parser(root);
             ifstream input(json);
             parser.read(input);
@@ -622,7 +625,7 @@ namespace BeeFishQuery {
                 
                 PathBase* pathBase =
                     expression
-                    .getPath(words);
+                    .getPath(words, bounds);
                 
                 Iterable<JSONPath::Id> iterable(*pathBase);
                 
@@ -652,13 +655,20 @@ namespace BeeFishQuery {
                         cout << "Got" << endl;
                         cout << values[i] << endl;
                         BeeFishMisc::outputSuccess(false);
-                        return false;
+                        ok = false;
                     }
                 }
             }
         
             ok = ok && (values.size() == check.size());
             if (!ok) {
+                
+                Iterable<Index> iterable(bounds);
+                cout << "BOUNDS" << endl;
+                for (auto index : iterable)
+                    cout << "BOUNDS: "<< index << " " << JSONPath(db, index).toString() << endl;
+
+      
                 cout << "Expected:" << endl;
                 for (unsigned int i = 0; 
                         i < check.size();
@@ -728,6 +738,23 @@ namespace BeeFishQuery {
                 "https://test/45-Object.json/a/1/1",
                 "https://test/45-Object.json/a/2",
                 "https://test/45-Object.json/a/2/1"
+            }
+        );
+        
+        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "a and not b", 
+            {
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2/2"
+            }
+        );
+        
+        
+        
+        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "not b", 
+            {
+                "https://test",
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2/2"
             }
         );
 

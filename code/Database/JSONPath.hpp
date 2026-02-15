@@ -412,13 +412,15 @@ namespace BeeFishDatabase {
             
             
             if (isDeadEnd()) {
-                database().objects()[*this];
+                if (!isRoot())
+                    database().objects()[*this];
             }
             else if (JSONPath::type() != type)
             {
                 
                 clear();
-                database().objects()[*this];
+                if (!isRoot())
+                    database().objects()[*this];
             }
             
             JSONPath path = *this;
@@ -429,7 +431,8 @@ namespace BeeFishDatabase {
         
         virtual void clear() override
         {
-            database().objects().clear(*this);
+            if (!isRoot())
+                database().objects().clear(*this);
    
             if (isDeadEnd())
             {
