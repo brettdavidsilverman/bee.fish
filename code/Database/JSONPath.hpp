@@ -407,20 +407,21 @@ namespace BeeFishDatabase {
         }
     
     public:
-        Path operator [] (Type type) const
+        Path operator [] (Type type)
         {
             
-            JSONPath path = *this;
             
-            if (path.isDeadEnd())
-                path.database().objects()[path];
-            else if (path.type() != type)
+            if (isDeadEnd()) {
+                database().objects()[*this];
+            }
+            else if (JSONPath::type() != type)
             {
-                path.clear();
-cerr << "SET VAL " << path.index() << " FROM TYPE " << path.type() << " TO TYPE " << type << endl;
-                path.database().objects()[path];
+                
+                clear();
+                database().objects()[*this];
             }
             
+            JSONPath path = *this;
             path << type;
                 
             return path;
@@ -428,16 +429,15 @@ cerr << "SET VAL " << path.index() << " FROM TYPE " << path.type() << " TO TYPE 
         
         virtual void clear() override
         {
-
+            database().objects().clear(*this);
+   
             if (isDeadEnd())
             {
                 Path::clear();
                 return;
             }
             
-cerr << "CLEAR VAL " << type() << " INDEX " << index() << endl;
-database().objects().clear(*this);
-            
+         
     
             switch (type())
             {
@@ -458,17 +458,20 @@ database().objects().clear(*this);
                     break;
                 case Type::ARRAY:
                 {
-cerr << "CLEAR ARRAY " << endl;
 
                     Path positions = getPositions();
                     Iterable<Index> array(positions);
-                    for (auto index : array)
+                    for (auto it = array.begin(); it != array.end();)
                     {
+                        Index index = *it;
+
                         JSONPath item = (*this)[index];
+
                         item.clear();
+
+                        ++it;
                         getPositions().clear(index);
-                        
-                        
+
                     }
                     
                     assert(getPositions().isDeadEnd());
@@ -476,11 +479,13 @@ cerr << "CLEAR ARRAY " << endl;
                 }
                 case Type::OBJECT:
                 {
-cerr << "CLEAR OBJECT " << endl;
-                    
+
                     for (auto property : *this)
                     {
+                        JSONPath json = (*this)[property];
+                        json.clear();
                         deleteProperty(property);
+                        
                     }
                     Path positions = getPositions();
                     assert(positions.isDeadEnd());

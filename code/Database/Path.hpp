@@ -594,13 +594,25 @@ using namespace BeeFishBString;
         
         virtual void clear()
         {
-            database().deleteBranch(index());
+            Branch branch = getBranch();
+            if (branch._left) {
+                _database->deleteBranch(branch._left);
+            }
+                
+            if (branch._right) {
+                _database->deleteBranch(branch._right);
+            }
+            
+
+       
         }
+        
         
 
         template<typename T>
         void clear(const T& value)
         {
+
             Database::ScopedFileLock lock(database());
             
             Stack stack;
@@ -660,6 +672,7 @@ using namespace BeeFishBString;
         
         */
     private:
+        /*
         
         void clearLeft() {
             Database::ScopedFileLock lock(database());
@@ -694,9 +707,18 @@ using namespace BeeFishBString;
         }
         
         
-      
+      */
     public:
         
+        Index count()
+        {
+            Index count = 0;
+            Stack stack;
+            while (next(stack))
+                ++count;
+            
+            return count;
+        }
         
 
         bool operator == (const Path& rhs) const

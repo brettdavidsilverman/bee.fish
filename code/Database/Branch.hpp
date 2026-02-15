@@ -31,13 +31,6 @@ namespace BeeFishDatabase
         {
         }
     
-/*
-        Branch(const Branch& source)
-        {
-            memcpy(this, &source, sizeof(Branch));
-        }
-*/
-
         inline bool isDeadEnd() const
         {
             return ( _left  == 0 ) &&

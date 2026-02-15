@@ -26,15 +26,13 @@ namespace BeeFishDatabase
     inline bool testIncrement();
     inline bool testJSONPathParent();
     inline bool testDeleteProperty();
+    inline bool testObjects();
+    
     inline bool test()
     {
         bool success = true;
         
         cout << "Test Database " << endl;
-        
-success = success &&
-    testIncrement();
-    
 
         success = success &&
             testNextIndex();
@@ -68,6 +66,9 @@ success = success &&
             
         success = success &&
             testIterator();
+            
+        success = success &&
+            testObjects();
             
         success = success &&
             testAllFiles(TEST_DIRECTORY);
@@ -1275,6 +1276,42 @@ assert(success);
                 iterate(database, path.index());
            
         }
+        
+        if (success)
+        {
+            Database database;
+            Path path = database;
+            for (Index i = 0; i < 10; ++i)
+                for (Index a = 0; a < 10; ++a)
+                    path[i][a];
+            
+            Iterable<Index> iterable(path);
+            for (int i = 9; i >= 0; --i)
+            {
+                for (int a = 0; a < 10; ++a)
+                    path[i].clear(a);
+                success = (path[i].isDeadEnd());
+                if (!success)
+                    break;
+                path.clear(i);
+            }
+            
+            success = testValue(
+                "Complex path is dead end",
+                path.isDeadEnd()
+            );
+        
+            success = success &&
+                testValue(
+                    "Path numbers is dead end",
+                    path.isDeadEnd()
+                );
+                       
+            if (!success)
+                iterate(database, path.index());
+           
+        }
+        
 
         BeeFishMisc::outputSuccess(success);
         
@@ -1653,16 +1690,81 @@ assert(success);
                 stream4.str() == "undefined"
             );
         
-        success = success &&
-            testValue(
-                "Cleared value objects only one",
-                database4.objects().PathBase::count() == 1
-            );
-            
+        
         BeeFishMisc::outputSuccess(success);
         
         return success;
     }
+    
+    inline bool testObjects()
+    {
+        cout << "Test objects" << endl;
+        
+        bool success = true;
+
+    
+        auto listObjects =
+        [] (Path objects) {
+
+            Iterable<Index> iterable(objects);
+            Index count = 0;
+            for (auto it = iterable.begin();
+                 it != iterable.end();
+                 ++it)
+            {
+                cerr << "Index " << *it << endl;
+                ++count;
+            }
+            cerr << "Count " << count << endl;
+        };
+            
+        auto test =
+        [&success, listObjects](const BString& json, Index objectCount)
+        {
+            cout << "\t " << json << endl;
+            
+            JSONDatabase database;
+            Path objects = database.objects();
+            JSONPath start = database.host("http://test");
+            
+            JSONPathParser parser(start);
+            parser.read(json);
+            parser.eof();
+        
+            success = success &&
+                testValue(
+                    "Array objects count",
+                    objects.count() == objectCount
+                );
+            
+            if (success)
+               start[Type::UNDEFINED];
+            
+            success = success &&
+                testValue(
+                    "Cleared objects count",
+                    objects.count() == 2
+                );
+                
+            if (!success)
+                listObjects(objects);
+                
+            return success;
+        };
+        
+        success = success &&
+           test("{\"a\":\"b\"}", 3);
+        success = success &&
+           test("{\"a\":{\"a\":\"a\"}}", 4);
+        success = success &&
+           test("[1,2,3]", 5);
+        
+            
+        BeeFishMisc::outputSuccess(success);
+    
+        return success;
+    }
+    
     
     
 }

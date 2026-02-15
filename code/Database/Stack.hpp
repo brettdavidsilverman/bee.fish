@@ -42,7 +42,6 @@ using namespace BeeFishPowerEncoding;
         override
         {
             PowerEncoding::writeBit(bit);
-           // ++_index;
             push_back(bit);
         }
 

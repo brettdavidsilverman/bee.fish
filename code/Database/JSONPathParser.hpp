@@ -39,14 +39,6 @@ namespace BeeFishDatabase {
             _log(log)
         {
         }
-          /*
-        JSONPathParser(Path path, ostream& log = cnull) :
-            JSONParser(),
-            _start(path),
-            _log(log)
-        {
-        }
-        */
 
         virtual ~JSONPathParser()
         {
@@ -71,13 +63,6 @@ namespace BeeFishDatabase {
         virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
     
-  
-            if (!start.isDeadEnd() && start.type() != type)
-            {
-                start.clear();
-                
-            }
-            
             start[type];
             
             JSONPath path = start;
@@ -321,14 +306,16 @@ namespace BeeFishDatabase {
                 if (json->type() == Type::UNDEFINED)
                 {
                     //assert(false)
-                    BString key;
+                    
+                    
                     if (!_start.isRoot() && 
                         !_start.parent().isRoot())
                     {
+                        
+                        BString key;
                         _start = _start.parent(key);
                         _start.deleteProperty(key);
                     }
-                    
                 }
                 else
                     setVariable(

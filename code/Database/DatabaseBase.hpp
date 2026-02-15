@@ -44,8 +44,6 @@ namespace BeeFishDatabase {
         typedef LeastRecentlyUsedCache<Index, Branch> Cache;
         typedef map<BString, Cache> Caches;
         static Caches _caches;
-// typedef PowerEncoding Encoding;
-    
     public:
         
         
@@ -138,7 +136,7 @@ namespace BeeFishDatabase {
         void deleteBranch(Index index)
         {
 
-//cerr << "DELETE BRANCH " << index << endl;
+
             ScopedFileLock lock(*this);
 
             deleteData(index);
@@ -151,15 +149,14 @@ namespace BeeFishDatabase {
             if (branch._right)
                 deleteBranch(branch._right);
             
-            if (index != 0)
+            if (index != rootIndex())
             {
                 
             
                 Branch parent = getBranch(
                     branch._parent
                 );
-                assert(index != branch._parent);
-                
+            
                 if (index == parent._left)
                 {
                     parent._left = 0;

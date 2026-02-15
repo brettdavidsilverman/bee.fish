@@ -290,18 +290,7 @@ namespace BeeFishDatabase {
             return false;
         }
         
-        Index count()
-        {
-            Stack stack;
-            save();
-            Index count = 0;
-            while (next(stack))
-                ++count;
-            restore();
-            
-            return count;
-        }
-        
+
         
     public:
         template<typename T>
