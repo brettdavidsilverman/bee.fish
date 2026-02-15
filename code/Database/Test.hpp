@@ -375,7 +375,7 @@ success = success &&
 
             success = (first == 0) &&
                 next && 
-                data.count() == 0;
+                data.PowerEncoding::count() == 0;
             
             outputSuccess(success);
 
@@ -1163,6 +1163,25 @@ assert(success);
         
     }
     
+    void iterate(Database& db, Index index, Index tabs = 0)
+    {
+        Branch branch = db.getBranch(index);
+        for (Index  i = 0; i < tabs; ++i)
+            cerr << "    ";
+        cerr << index << endl;
+        if (branch._left)
+        {
+            cerr << "LEFT ";
+            iterate(db, branch._left, tabs + 1);
+        }
+        else if (branch._right)
+        {
+            cerr << "RIGHT ";
+            iterate(db, branch._right, tabs + 1);
+        }
+    };
+
+    
     inline bool testClear()
     {
 
@@ -1170,6 +1189,43 @@ assert(success);
         
         bool success = true;
  
+             
+        Index key1 = 0;
+        Index key2 = 1;
+        
+        Database database2;
+        Path path2 = database2;
+        path2[key1];
+        path2[key2];
+        path2.clear(key1);
+        success = success &&
+            testValue(
+                "Key 1 cleared",
+                !path2.contains(key1)
+            );
+            
+        success = success &&
+            testValue(
+                "Key 2 remains",
+                path2.contains(key2)
+            );
+            
+        if (success) 
+            path2.clear(key2);
+                        
+        success = success &&
+            testValue(
+                "Key 2 cleared",
+                !path2.contains(key2)
+            );
+            
+
+        success = success &&
+            testValue(
+                "Path cleared to dead end",
+                path2.isDeadEnd()
+            );
+            
         Database database;
         Path path = database;
         BString key = "hello";
@@ -1181,7 +1237,9 @@ assert(success);
             path.contains(key)
         );
         
-        path.clearValue(key);
+        if (success)
+            path.clear(key);
+            
         success = success &&
             testValue(
                 "Single Path cleared",
@@ -1194,27 +1252,33 @@ assert(success);
                 path.contains("hell")
             );
             
-        Index key1 = 0;
-        Index key2 = 1;
-        
-        Database database2;
-        Path path2 = database2;
-        path2[key1];
-        path2[key2];
-        path2.clearValue(key1);
-        success = success &&
-            testValue(
-                "Key 1 cleared",
-                !path2.contains(key1)
-            );
+        if (success)
+        {
+            Database database;
+            Path path = database;
+            for (Index i = 0; i < 100; ++i)
+                path[i];
             
-        success = success &&
-            testValue(
-                "Key 2 remains",
-                path2.contains(key2)
-            );
+            Iterable<Index> iterable(path);
+            for (int i = 99; i >= 0; --i)
+            {
+                path.clear(i);
+            }
+        
+            success = success &&
+                testValue(
+                    "Path numbers is dead end",
+                    path.isDeadEnd()
+                );
+                       
+            if (!success)
+                iterate(database, path.index());
+           
+        }
 
         BeeFishMisc::outputSuccess(success);
+        
+        
         
         return success;
     }
@@ -1326,6 +1390,7 @@ assert(success);
             
         JSONPathParser parser2(start);
         parser2.read("{\"hello\":\"world\"}");
+    
         path = start["hello"];
         key.clear();
         parent = path.parent(key);
@@ -1577,6 +1642,22 @@ assert(success);
                 database4.words().contains("a")
             );
        
+            
+        start4.clear();
+        stringstream stream4;
+        stream4 << start4;
+        
+        success = success &&
+            testValue(
+                "Cleared value is undefined",
+                stream4.str() == "undefined"
+            );
+        
+        success = success &&
+            testValue(
+                "Cleared value objects only one",
+                database4.objects().PathBase::count() == 1
+            );
             
         BeeFishMisc::outputSuccess(success);
         

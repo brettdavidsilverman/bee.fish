@@ -82,12 +82,13 @@ namespace BeeFishDatabase {
         
         JSONPath operator [] (const BString& key)
         {
-             Index position =
-                 getObjectPropertyPosition(key);
+            
+            Index position =
+                getObjectPropertyPosition(key);
                  
-             Path json = getPositions()[position];
+            Path json = getPositions()[position];
                  
-             return json;
+            return json;
               
         }
         
@@ -99,12 +100,6 @@ namespace BeeFishDatabase {
             return JSONPath(path);
         }
         
-        Path operator [] (Type type)
-        {
-              Path path = *this;
-              path << type;
-              return path;
-        }
         
         JSONPath parent() {
             BString key;
@@ -412,6 +407,93 @@ namespace BeeFishDatabase {
         }
     
     public:
+        Path operator [] (Type type) const
+        {
+            
+            JSONPath path = *this;
+            
+            if (path.isDeadEnd())
+                path.database().objects()[path];
+            else if (path.type() != type)
+            {
+                path.clear();
+cerr << "SET VAL " << path.index() << " FROM TYPE " << path.type() << " TO TYPE " << type << endl;
+                path.database().objects()[path];
+            }
+            
+            path << type;
+                
+            return path;
+        }
+        
+        virtual void clear() override
+        {
+
+            if (isDeadEnd())
+            {
+                Path::clear();
+                return;
+            }
+            
+cerr << "CLEAR VAL " << type() << " INDEX " << index() << endl;
+database().objects().clear(*this);
+            
+    
+            switch (type())
+            {
+                case Type::STRING:
+                {
+                    BString value;
+                    (*this)[Type::STRING].getData(value);
+                    removeWords(value);
+ //   cout << "REMOVE WORDS " << value << endl;
+ //                   assert(false);
+                }
+                case Type::UNKNOWN:
+                case Type::UNDEFINED:
+                case Type::NULL_:
+                case Type::BOOLEAN:
+                case Type::INTEGER:
+                case Type::NUMBER:
+                    break;
+                case Type::ARRAY:
+                {
+cerr << "CLEAR ARRAY " << endl;
+
+                    Path positions = getPositions();
+                    Iterable<Index> array(positions);
+                    for (auto index : array)
+                    {
+                        JSONPath item = (*this)[index];
+                        item.clear();
+                        getPositions().clear(index);
+                        
+                        
+                    }
+                    
+                    assert(getPositions().isDeadEnd());
+                    break;
+                }
+                case Type::OBJECT:
+                {
+cerr << "CLEAR OBJECT " << endl;
+                    
+                    for (auto property : *this)
+                    {
+                        deleteProperty(property);
+                    }
+                    Path positions = getPositions();
+                    assert(positions.isDeadEnd());
+                    break;
+                    
+                }
+            }
+            
+            
+            Path::clear();
+
+        }
+        
         void deleteProperty(const BString& property)
         {
             if (!contains(property))
@@ -464,16 +546,16 @@ namespace BeeFishDatabase {
 
             // Remove the property
             Index position = getObjectPropertyPosition(property);
-            getPositions().clearValue(position);
+            getPositions().clear(position);
             
 
             Path propertyPath = properties()[property];
             
             if (--propertyPath == 0) {
-                properties().clearValue(property);
+                properties().clear(property);
             }
             
-            getObjectProperties().clearValue(propertyPath.index());
+            getObjectProperties().clear(propertyPath.index());
             
              
         }
@@ -523,7 +605,6 @@ namespace BeeFishDatabase {
         {
    
             Path words = database().words();
-            Path objects = database().objects();
             
             std::vector<BString> tokens =
                 tokenise(value);
@@ -549,10 +630,10 @@ namespace BeeFishDatabase {
 
                         if (--wordObjects[object] == 0)
                         {
-                            wordObjects.clearValue(object);
+                            wordObjects.clear(object);
                             if (wordObjects.isDeadEnd())
                             {
-                                words.clearValue(word);
+                                words.clear(word);
                             }
                         }
                         
@@ -885,8 +966,11 @@ namespace BeeFishDatabase {
         return json()[host];
     }
         
-
-    
+    PowerEncoding& operator << (PowerEncoding& output, const JSONPath& json)
+    {
+        Path path = json;
+        return output << path;
+    }
     
         
     

@@ -16,27 +16,27 @@ namespace BeeFishDatabase
 
     struct Branch
     {
-        Index _parent;
-        Index _left;
-        Index _right;
-        Index _dataIndex;
-        bool  _locked;
+        Index _parent = 0;
+        Index _left = 0;
+        Index _right = 0;
+        Index _dataIndex = 0;
+        bool  _locked = false;
         
         inline Branch()
         {
-            memset(this, 0, sizeof(Branch));
         }
         
-        Branch(Index parent) : Branch()
+        Branch(Index parent) :
+            _parent(parent)
         {
-            _parent = parent;
         }
-        
+    
+/*
         Branch(const Branch& source)
         {
             memcpy(this, &source, sizeof(Branch));
         }
-
+*/
 
         inline bool isDeadEnd() const
         {

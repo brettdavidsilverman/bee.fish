@@ -594,20 +594,12 @@ using namespace BeeFishBString;
         
         virtual void clear()
         {
-            Database::ScopedFileLock lock(database());
-
-            deleteData();
-            
-            if (canGoLeft())
-                clearLeft();
-            else if (canGoRight())
-                clearRight();
-            
+            database().deleteBranch(index());
         }
         
 
         template<typename T>
-        void clearValue(const T& value)
+        void clear(const T& value)
         {
             Database::ScopedFileLock lock(database());
             
@@ -615,14 +607,13 @@ using namespace BeeFishBString;
             stack << value;
             
             // Get the branches
-            Branch branch = getBranch();
             Index index = Path::index();
             Index lastIndex = index;
             bool lastBit = true;
             
             for (auto bit : stack)
             {
-                branch = _database->getBranch(
+                Branch branch = _database->getBranch(
                     index
                 );
                 
@@ -638,15 +629,26 @@ using namespace BeeFishBString;
                 else 
                     index = branch._right;
                     
-                    
             }
             
-            Path path(*this, lastIndex);
+            Branch branch = _database->getBranch(lastIndex);
             
             if (lastBit == 0)
-                path.clearLeft();
-            else
-                path.clearRight();
+            {
+                _database->deleteBranch(
+                    branch._left
+                );
+                branch._left = 0;
+            }
+            else {
+                _database->deleteBranch(
+                    branch._right
+                );
+                branch._right = 0;
+            }
+            
+            _database->setBranch(lastIndex, branch);
+                
                 
             
         }

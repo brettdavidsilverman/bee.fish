@@ -107,12 +107,7 @@ namespace BeeFishDatabase {
 
             ScopedFileLock lock(*this);
 
-            Branch branch;
-            branch._parent = parent;
-            branch._left = 0;
-            branch._right = 0;
-            branch._dataIndex = 0;
-            branch._locked = false;
+            Branch branch(parent);
 
             Index index = size();
 
@@ -139,6 +134,63 @@ namespace BeeFishDatabase {
             return dataIndex;
                 
         }
+
+        void deleteBranch(Index index)
+        {
+
+//cerr << "DELETE BRANCH " << index << endl;
+            ScopedFileLock lock(*this);
+
+            deleteData(index);
+            
+            Branch branch = getBranch(index);
+            
+            if (branch._left)
+                deleteBranch(branch._left);
+                    
+            if (branch._right)
+                deleteBranch(branch._right);
+            
+            if (index != 0)
+            {
+                
+            
+                Branch parent = getBranch(
+                    branch._parent
+                );
+                assert(index != branch._parent);
+                
+                if (index == parent._left)
+                {
+                    parent._left = 0;
+                }
+                else if (index == parent._right)
+                {
+                    parent._right = 0;
+                }
+                else
+                    assert(false);
+                
+                
+                setBranch(branch._parent, parent);
+            }
+            
+            // Reclaim space here
+            setBranch(index, Branch());
+        }
+        
+        void deleteData(Index index)
+        {
+            Database::ScopedFileLock lock(*this);
+
+            Branch branch = getBranch(index);
+            
+            if (branch._dataIndex) {
+                branch._dataIndex = 0;
+                setBranch(index, branch);
+            }
+            
+        }
         
         Branch getBranch(Index index)
         {
@@ -156,7 +208,7 @@ namespace BeeFishDatabase {
             }
 
             optional<Branch> optionalBranch = nullopt;
-                cache().get(index);
+              //  cache().get(index);
                 
             if (optionalBranch == nullopt)
             {
