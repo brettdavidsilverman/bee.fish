@@ -27,6 +27,10 @@ load:
 load:	CFLAGS += -D TIME -D DEBUG -Ofast
 load:	test
 	time --verbose $(OUTPUT) -deaths
+	
+time:
+time:	CFLAGS += -D TIME -D DEBUG -Ofast
+time:	$(OUTPUT)
 
 run:	$(OUTPUT)
 	$(OUTPUT) -input

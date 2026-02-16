@@ -53,7 +53,7 @@ using namespace BeeFishWeb;
          "public, max-age=60";
 #endif
 
-      inline static map<string, MimeType>
+      inline static std::map<string, MimeType>
          _mimeTypes{
             {
                ".txt",

@@ -24,9 +24,12 @@ inline void initializeLogs() {
 #ifndef DEBUG
    // Redirect log  to files
    clog.rdbuf(logfile().rdbuf());
+   
+   // Redirecr error to files
+   cerr.rdbuf(errfile().rdbuf());
 #endif
 
-cerr.rdbuf(errfile().rdbuf());
+
    
 }
 #endif

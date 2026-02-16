@@ -49,7 +49,7 @@ int main(int argc, const char* argv[])
     
     
     JSONDatabase database(DATABASE_FILENAME);
-
+    
     cout << database << endl;
     
     bool originsArg  =

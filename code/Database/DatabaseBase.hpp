@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <queue>
 #include <mutex>
+#include <boost/interprocess/managed_shared_memory.hpp>
 
 #include "../Miscellaneous/Debug.hpp"
 #include "../b-string/b-string.h"
@@ -23,6 +24,7 @@
 #include "Index.hpp"
 #include "Branch.hpp"
 #include "LeastRecentlyUsedCache.hpp"
+#include "Allocator.hpp"
 
 using namespace std;
 using namespace std::literals;
@@ -32,7 +34,8 @@ using namespace std::literals;
 namespace BeeFishDatabase {
     
    // using namespace BeeFishMisc;
-    
+    using namespace boost::interprocess;
+            
     // Store [left, right] branch elements.
     // A zero is stored if the branch
     // hasnt been visited yet.
@@ -42,60 +45,62 @@ namespace BeeFishDatabase {
     
     public:
         typedef LeastRecentlyUsedCache<Index, Branch> Cache;
-        typedef map<BString, Cache> Caches;
-        static Caches _caches;
+        Cache* _cache;
     public:
         
         
-        Size _pageSize = 0;
+        Index _pageSize = 0;
 
     public:
 
-        struct ScopedFileLock{
-
-            Database& _database;
-
-            ScopedFileLock(Database& database) :
-                _database(database)
-            {
-                _database.lock();
-            }
-            
-            ~ScopedFileLock() {
-                _database.unlock();
-            }
-
+        
+        /*
+        struct BranchLock {
+            Index _index = 0;
+            std::mutex _mutex;
+            Branch _branch;
         };
-
+        
+        std::map<Index, Index> _branchMap;
+        BranchLock* _branchLocks = nullptr;
+        const char* _sharedMemoryName = "shared_memory";
+        
+        void* _sharedMemory = nullptr;
+        shared_memory_object* _sharedMemoryObject = nullptr;
+        mapped_region* _mappedRegion = nullptr;
+        */
     public:
         Database(
             string filePath = "",
-            const Size pageSize = getPageSize()
+            const Index pageSize = getPageSize()
         ) :
             LockFile(
                 filePath
             ),
             _pageSize(pageSize)
+            
         {
-            //lock();
+            _cache = new Cache(*this, 100000);
         }
 
         virtual ~Database()
         {
+            delete _cache;
+                /*
+            if (_sharedMemory)
+               destroySharedMemory();
+               
+            */
             //unlock();
         }
         
     public:
         
         Cache& cache() {
-            if (_caches.find(filename()) == _caches.end())
-                _caches[filename()] = Cache(100000);
-                
-            return
-                _caches[filename()];
+            return *_cache;
         }
 
-        Size pageSize() const {
+        Index pageSize() const {
             return _pageSize;
         }
 
@@ -124,8 +129,8 @@ namespace BeeFishDatabase {
 
             Index dataIndex = size();
 
-            Size dataSize = data.size();
-            write(&dataSize, sizeof(Size));
+            Index dataSize = data.size();
+            write(&dataSize, sizeof(Index));
             write(data.data(), dataSize);
 
 
@@ -191,12 +196,16 @@ namespace BeeFishDatabase {
         
         Branch getBranch(Index index)
         {
-
+            ScopedFileLock lock(*this);
+/*
+            if (!_sharedMemory)
+                createSharedMemory(_pageSize);
+                */
             Branch branch;
             
             if (size() == 0) 
             {
-                ScopedFileLock lock(*this);
+                
                 if (size() == 0)
                 {
                     seek(0);
@@ -204,14 +213,14 @@ namespace BeeFishDatabase {
                 }
             }
 
-            optional<Branch> optionalBranch = nullopt;
-              //  cache().get(index);
+            optional<Branch> optionalBranch =
+                cache().get(index);
                 
             if (optionalBranch == nullopt)
             {
                 seek(index);
                 read(&branch, sizeof(Branch));
-               // cache().put(index, branch);
+                cache().put(index, branch);
             }
             else
                 branch = optionalBranch.value();
@@ -226,13 +235,85 @@ namespace BeeFishDatabase {
 
         inline void setBranch(Index index, const Branch& branch)
         {
+            ScopedFileLock lock(*this);
 
             seek(index);
             write(&branch, sizeof(Branch));
-           // cache().put(index, branch);
+            cache().put(index, branch);
+            
+        }
+        /*
+        inline virtual void createSharedMemory(Index size)
+        {
+            
+            try {
+                
+                _sharedMemoryObject = 
+                    new shared_memory_object
+                    (
+                        create_only,
+                        _sharedMemoryName,
+                        read_write 
+                    );
+                    
+                _sharedMemoryObject->truncate(size);
+                
+cerr << __FILE__ << " Created shared memory " << _pageSize << endl;
+   
+                //Map the whole shared memory in this process
+                _mappedRegion = new mapped_region(*_sharedMemoryObject, read_write);
+
+                _sharedMemory = _mappedRegion->get_address();
+                
+                //Write all the memory to 0
+                std::memset(_sharedMemory, 0, _mappedRegion->get_size());
+                
+                BranchLock* branchLock = static_cast<BranchLock*>(_sharedMemory);
+
+                for (Index i = 0; i < size / sizeof(BranchLock); ++i)
+                {
+                    new (branchLock++) BranchLock();
+                }
+            
+
+                
+                
+      
+            }
+            catch (boost::interprocess::interprocess_exception& ex)
+            {
+                _sharedMemoryObject = 
+                new shared_memory_object
+                (
+                    open_only,
+                    _sharedMemoryName,
+                    read_write 
+                );
+    
+                //Map the whole shared memory in this process
+                _mappedRegion = new mapped_region(*_sharedMemoryObject, read_write);
+                
+
+                _sharedMemory = _mappedRegion->get_address();
+
+            
+            }
+            
+            _branchLocks = static_cast<BranchLock*>(_sharedMemory);
             
         }
         
+        inline void destroySharedMemory()
+        {
+            
+            assert(_sharedMemory);
+            delete _mappedRegion;
+            delete _sharedMemoryObject;
+            shared_memory_object::remove(_sharedMemoryName);
+            _sharedMemory = nullptr;
+            
+        }
+        */
 
         // Waits till lock on branch is released
         // Sets the lock on the branch to true
@@ -297,26 +378,45 @@ namespace BeeFishDatabase {
         
         inline std::string getData(Index dataIndex)
         {
+            ScopedFileLock lock(*this);
+            
             if (dataIndex == 0)
                 return "";
 
 
             seek(dataIndex);
-            Size size;
+            Index size;
 
-            read(&size, sizeof(Size));
+            read(&size, sizeof(Index));
             std::string buffer(size, '\0');
             read(buffer.data(), size);
 
             return buffer;
         }
 
+        inline bool hasData(Index index)
+        {
+            ScopedFileLock lock(*this);
+            Branch branch = getBranch(index);
+            
+            if (branch._dataIndex == 0)
+                return false;
+
+
+            seek(branch._dataIndex);
+            Index size;
+
+            read(&size, sizeof(Index));
+            
+            return size > 0;
+        }
         
         inline void setData(Index dataIndex, const std::string& source)
         {
+            ScopedFileLock lock(*this);
             seek(dataIndex);
-            Size size = source.size();
-            write(&size, sizeof(Size));
+            Index size = source.size();
+            write(&size, sizeof(Index));
             write(source.data(), size);
             
         }
@@ -403,8 +503,6 @@ namespace BeeFishDatabase {
         }
 
     };
-    
-   inline Database::Caches Database::_caches;
 
 }
 

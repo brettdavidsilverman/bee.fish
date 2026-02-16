@@ -183,7 +183,7 @@ using namespace BeeFishBString;
 
                 branch = lock();
 
-//  _database->lock();
+                _database->lock();
 
                 if (branch._left == 0)
                 {
@@ -191,7 +191,7 @@ using namespace BeeFishBString;
                         _database->getNextIndex(_index);
                     setBranch(branch);
                 }
-//  _database->unlock();
+                _database->unlock();
                 
             }
 
@@ -210,7 +210,7 @@ using namespace BeeFishBString;
 
                 branch = lock();
 
-// _database->lock();
+                 _database->lock();
                 
                 if (branch._right == 0)
                 {
@@ -218,7 +218,8 @@ using namespace BeeFishBString;
                         _database->getNextIndex(_index);
                     setBranch(branch);
                 }
-//  _database->unlock();
+                
+                _database->unlock();
                 
             }
 
@@ -372,9 +373,7 @@ using namespace BeeFishBString;
     
         bool hasData() const
         {
-            std::string data = getData();
-            
-            return (data.size() > 0);
+            return _database->hasData(index());
         }
         
         Index operator++()
@@ -498,7 +497,7 @@ using namespace BeeFishBString;
 
         void setData(const std::string& value) {
 
-            Database::ScopedFileLock lock(database());
+            LockFile::ScopedFileLock lock(database());
             
             Branch branch = getBranch();
 
@@ -581,7 +580,7 @@ using namespace BeeFishBString;
 
         void deleteData()
         {
-            Database::ScopedFileLock lock(database());
+            LockFile::ScopedFileLock lock(database());
 
             Branch branch = getBranch();
             
@@ -613,7 +612,7 @@ using namespace BeeFishBString;
         void clear(const T& value)
         {
 
-            Database::ScopedFileLock lock(database());
+            LockFile::ScopedFileLock lock(database());
             
             Stack stack;
             stack << value;
@@ -675,7 +674,7 @@ using namespace BeeFishBString;
         /*
         
         void clearLeft() {
-            Database::ScopedFileLock lock(database());
+            LockFile::ScopedFileLock lock(database());
             
             Branch branch = getBranch();
             Index left = branch._left;
@@ -691,7 +690,7 @@ using namespace BeeFishBString;
         }
         
         void clearRight() {
-            Database::ScopedFileLock lock(database());
+            LockFile::ScopedFileLock lock(database());
 
             Branch branch = getBranch();
             Index right = branch._right;

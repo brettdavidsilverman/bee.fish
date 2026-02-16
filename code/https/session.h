@@ -336,7 +336,7 @@ namespace BeeFishHTTPS {
                 throw runtime_error("Failed to open temp file");
             }
             
-            permissions(
+            std::filesystem::permissions(
                 _tempFileName,
                     perms::group_read  |
                     perms::group_write |
@@ -345,7 +345,7 @@ namespace BeeFishHTTPS {
                 perm_options::remove
             );
             
-            permissions(
+            std::filesystem::permissions(
                 _tempFileName,
                     perms::owner_read |
                     perms::owner_write,

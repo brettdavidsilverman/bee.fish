@@ -119,7 +119,7 @@ namespace BeeFishParser
         {
           
 #ifdef TIME
-             cout << "Chars" << "\t" << "Matches" << "\t" << "Time" << endl;
+//             cout << "Chars" << "\t" << "Matches" << "\t" << "Time" << endl;
              unsigned long start = now();
 #endif
 

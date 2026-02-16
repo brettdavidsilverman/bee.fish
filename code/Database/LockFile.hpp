@@ -11,6 +11,22 @@ namespace BeeFishDatabase
     {
     protected:
         Size _lockCount = 0;
+    public:
+        struct ScopedFileLock{
+
+            LockFile& _lockFile;
+
+            ScopedFileLock(LockFile& lockFile) :
+                _lockFile(lockFile)
+            {
+                _lockFile.lock();
+            }
+            
+            ~ScopedFileLock() {
+                _lockFile.unlock();
+            }
+
+        };
         
     public:
     

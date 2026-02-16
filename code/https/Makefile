@@ -21,10 +21,12 @@ $(BUILD)/query:
 	
 install:	$(OUTPUT)
 	./start.sh $(PORT)
-	
-time:	CFLAGS += -Ofast -D TIME -D DEBUG
+
+time:
+time:	CFLAGS += -Ofast -D DEBUG
 time:	install
 
+test:
 test:	TEST=test
 test:	$(OUTPUT)
 	./stop.sh 8000
@@ -38,6 +40,8 @@ trace:	$(OUTPUT)
 	./start.sh 8000
 	cat trace.txt
 
+start:
+start:	CFLAGS += -Ofast
 start:	$(OUTPUT)
 	./start.sh $(PORT)
 

@@ -22,12 +22,21 @@ namespace BeeFishDatabase
         Index _dataIndex = 0;
         bool  _locked = false;
         
-        inline Branch()
+        inline Branch() :
+            _parent(0),
+            _left(0),
+            _right(0),
+            _dataIndex(0),
+            _locked(false)
         {
         }
         
         Branch(Index parent) :
-            _parent(parent)
+            _parent(parent),
+            _left(0),
+            _right(0),
+            _dataIndex(0),
+            _locked(false)
         {
         }
     
