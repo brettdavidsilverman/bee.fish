@@ -83,9 +83,14 @@ namespace BeeFishDatabase {
         JSONPath operator [] (const BString& key)
         {
             
+            JSONPath path = *this;
+            //path.lock();
+            
+            path[Type::OBJECT];
+
             Index position =
                 getObjectPropertyPosition(key);
-                 
+    
             Path json = getPositions()[position];
                  
             return json;
@@ -94,11 +99,39 @@ namespace BeeFishDatabase {
         
         JSONPath operator [] (const Index& index)
         {
+            lock();
             JSONPath path(*this);
-            Type type = path.type();
+            Type type;
+            if (path.isDeadEnd())
+                type = Type::ARRAY;
+            else
+                type = path.type();
+
             path << type << POSITIONS << index;
-            return JSONPath(path);
+            return path;
         }
+        
+        Path operator [] (Type type)
+        {
+
+            lock();
+            JSONPath path(*this);
+            if (isDeadEnd()) {
+                if (!isRoot())
+                    database().objects()[*this];
+            }
+            else if (JSONPath::type() != type)
+            {
+                clear();
+                if (!isRoot())
+                    database().objects()[*this];
+            }
+            
+            path << type;
+
+            return path;
+        }
+        
         
         
         JSONPath parent() {
@@ -286,6 +319,7 @@ namespace BeeFishDatabase {
 
         Index getObjectPropertyPosition(const BString& key)
         {
+
             // Get the property index
             Path keyPath = 
                 properties();
@@ -300,34 +334,24 @@ namespace BeeFishDatabase {
             Index position;
             
             Path objectKeyPath = getObjectProperties()[keyPathIndex];
-            lock();
+            
             if (objectKeyPath.hasData())
             {
                 objectKeyPath.getData<Index>(position);
             }
             else 
             {
-                
                 // New property
                 // Update the properties counter
-            
                 ++keyPath;
                 
                 Path objectPositions = getPositions();
-                
-                if (objectPositions.isDeadEnd())
-                    position = 1;
-                else {
-                    position =
-                        objectPositions.max<Index>()
-                        + 1;
-                }
+                position = ++objectPositions;
                 objectPositions[position].setData<Index>(keyPathIndex);
-            
                 objectKeyPath.setData<Index>(position);
-            
             }
-            unlock();
+            
+
             
             return position;
         }
@@ -335,6 +359,7 @@ namespace BeeFishDatabase {
         
         optional<BString> getObjectProperty(Index position)
         {
+             
              Path path = getPositions();
              
              if (!path.contains(position))
@@ -376,16 +401,23 @@ namespace BeeFishDatabase {
         
         Path getPositions()
         {
-            return (*this)
-                [type()]
-                [POSITIONS];
+
+            Path path = *this;
+
+            Type type = this->type();
+
+            path << type
+                 << POSITIONS;
+            
+            return path;
         }
         
         Path getObjectProperties()
         {
-            return  (*this)
-                 [Type::OBJECT]
-                 [PROPERTIES];
+            Path path = (*this);
+            path << Type::OBJECT
+                 << PROPERTIES;
+            return path;
         }
         
         Index getKeyCount()
@@ -407,30 +439,10 @@ namespace BeeFishDatabase {
         }
     
     public:
-        Path operator [] (Type type)
-        {
-            
-            
-            if (isDeadEnd()) {
-                if (!isRoot())
-                    database().objects()[*this];
-            }
-            else if (JSONPath::type() != type)
-            {
-                
-                clear();
-                if (!isRoot())
-                    database().objects()[*this];
-            }
-            
-            JSONPath path = *this;
-            path << type;
-                
-            return path;
-        }
         
         virtual void clear() override
         {
+            
             if (!isRoot())
                 database().objects().clear(*this);
    
@@ -439,6 +451,8 @@ namespace BeeFishDatabase {
                 Path::clear();
                 return;
             }
+            
+            
             
          
     
@@ -504,9 +518,11 @@ namespace BeeFishDatabase {
         
         void deleteProperty(const BString& property)
         {
+    
             if (!contains(property))
                 return;
                 
+            
             JSONPath json = (*this)[property];
             
             // Delete children
@@ -566,6 +582,7 @@ namespace BeeFishDatabase {
             getObjectProperties().clear(propertyPath.index());
             
              
+
         }
 
         void addWords(const BString& word, bool addToParents, ostream& log = cnull)
@@ -656,50 +673,26 @@ namespace BeeFishDatabase {
         
         std::vector<BString> tokenise(BString word)
         {
-            static const char* _whiteSpace =
-                " \r\n\v\t()\".,!?{}";
-                
             static const char* _deliminators =
-                "+:; /\'\\";
+                " \r\n\v\t()\".,!?{}+:; /";
         
             char* str = word.data();
             
             char* token = 
-                strtok(str, _whiteSpace);
+                strtok(str, _deliminators);
                 
             std::vector<BString> words;
-            std::vector<BString> outer;
-            
+
             // Loop through all remaining tokens
             while (token != nullptr) 
             {
                 if (strlen(token))
                 {
                     words.push_back(token);
-                    outer.push_back(token);
                 }
-                token = strtok(nullptr, _whiteSpace); 
+                token = strtok(nullptr, _deliminators); 
             }
             
-            for (auto outerWord : outer)
-            {
-                BString copy = outerWord;
-                char* str = copy.data();
-                    
-                char* token = 
-                strtok(str, _deliminators);
-                
-                while (token != nullptr) 
-                {
-                    if (strlen(token)) {
-                        
-                        words.push_back(token);
-                    }
-                    
-                    token = strtok(nullptr, _deliminators); 
-                }
-                
-            }
             
             // 1. Sort words
             std::sort(words.begin(), words.end());
@@ -722,9 +715,9 @@ namespace BeeFishDatabase {
           
             Type type = JSONPath::type();
              
-            Path path =
-                (*this)[type];
-                 
+            Path path = *this;
+            path << type;
+            
             switch (type) {
             case Type::UNDEFINED:
                 out << "undefined";

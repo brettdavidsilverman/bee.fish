@@ -22,11 +22,13 @@ using namespace boost::interprocess;
     class LeastRecentlyUsedCache {
     private:
         Index _capacity;
-        BString _filename;
+        LockFile& _lockFile;
+        BString _name;
+        BString _sharedMemoryName;
         
         // list stores {key, value} pairs
-        typedef std::pair<Key, Value> NodeType;
-                // Define the types for the allocator and the list
+        typedef std::pair<Key, offset_ptr<Value> > NodeType;
+        // Define the types for the allocator and the list
         // The allocator needs to know about the segment manager
         typedef managed_shared_memory::segment_manager SegmentManager;
         typedef boost::interprocess::allocator<NodeType, SegmentManager> SharedMemoryListAllocator;
@@ -44,64 +46,37 @@ using namespace boost::interprocess;
         >
         MapType;
             */
-        managed_shared_memory* _sharedMemory;
-        SharedMemoryMap* _map;
-        SharedMemoryList* _list;
-        LockFile& _lockFile;
+        managed_shared_memory* _sharedMemory = nullptr;
+        SharedMemoryMap* _map = nullptr;
+        SharedMemoryList* _list = nullptr;
+        
         
     public:
-        LeastRecentlyUsedCache(LockFile& lockFile, Index capacity = 100000) : 
+        LeastRecentlyUsedCache(const BString& name, LockFile& lockFile, Index capacity = 100000) : 
             _capacity(capacity),
-            _lockFile(lockFile)
+            _lockFile(lockFile),
+            _name(name)
         {
             
-            std::hash<std::string> hasher;
-
-            // Since path character '/' isnt allowed
-            // this will use the filename
-            // hash instead
-            std::size_t hashedValue = hasher(lockFile.filename());
-            std::stringstream stream;
-            stream << hashedValue;
-            _filename = stream.str();
-//#warning need to factor in size of shared memory
-            Index memorySize = _capacity * 4 * (sizeof(MapValue) + sizeof(NodeType));
-            
-            shared_memory_object::remove(_filename.c_str());
-            
-            _sharedMemory = new
-                managed_shared_memory(open_or_create, _filename.c_str(), memorySize);
-                        
-            _list = 
-                _sharedMemory->find_or_construct<SharedMemoryList>("LRUList")
-                (_sharedMemory->get_segment_manager());
-                
-            _map = 
-                _sharedMemory->find_or_construct<SharedMemoryMap>("LRUMap")
-                (_sharedMemory->get_segment_manager());
-            
+            createSharedMemoryObjects(name);
         }
         
         ~LeastRecentlyUsedCache()
         {
-            delete _sharedMemory;
-            shared_memory_object::remove(_filename.c_str());
+            if (_sharedMemory)
+                delete _sharedMemory;
+            //shared_memory_object::remove(_sharedMemoryName.c_str());
+            
         }
         
-        LeastRecentlyUsedCache& operator = (const LeastRecentlyUsedCache& source)
-        {
-            _capacity = source._capacity;
-            _filename = source._filename;
-
-            return *this;
-        }
-
         optional<Value> get(Key key)
         {
+            LockFile::ScopedFileLock lock(_lockFile);
             if (_map->find(key) == _map->end()) {
                 return nullopt;
             }
 
+            
             // Move the accessed item to the front (MRU)
             _list->splice(
                 _list->begin(),
@@ -109,15 +84,17 @@ using namespace boost::interprocess;
                 (*_map)[key]
             );
             
-            return (*_map)[key]->second;
+            return *((*_map)[key]->second);
         }
 
-        void put(Key key, Value value) {
+        void put(Key key, const Value& value) {
 
+            LockFile::ScopedFileLock lock(_lockFile);
+            
             if (_map->find(key) != _map->end())
             {
                 // Key exists, update value and move to front
-                (*_map)[key]->second = value;
+                *( (*_map)[key]->second ) = value;
                 _list->splice(
                     _list->begin(),
                     *_list,
@@ -129,25 +106,150 @@ using namespace boost::interprocess;
                 //cerr << "(LIST,CAP)" << "(" << _list->size() << "," << _capacity << ")" << endl;
 
     
-                // Evict the least recently used item if capacity is exceeded
-                while (_list->size() >  _capacity) 
-                {
-                    Key lru_key =
-                        _list->back().first;
-                    _list->pop_back();
-                    _map->erase(lru_key);
-                   // cerr << "(LIST,CAP)" << "(" << _list->size() << "," << _capacity << ")" << endl;
-                    
-                }
+                evict();
+                
+                void* ptrValue = 
+                    _sharedMemory
+                    ->get_segment_manager()
+                    ->allocate(sizeof(Value));
+                
+                new(ptrValue)Value(value);
+                
+                //offset_ptr<Value> offsetPtrValue(static_cast<Value*>(ptrValue));
 
-                // New item, add to front
-                _list->push_front({key, value});
+
+                _list->push_front({key, (Value*)ptrValue});
                 (*_map)[key] = _list->begin();
                 
             
                 
             }
         }
+        
+
+        Value& operator[] (Key key)
+        {
+            LockFile::ScopedFileLock lock(_lockFile);
+            
+            if (_map->find(key) != _map->end())
+            {
+                // Move the accessed item to the front (MRU)
+                _list->splice(
+                    _list->begin(),
+                    *_list,
+                    (*_map)[key]
+                );
+            }
+            else
+            {
+                evict();
+
+                // New item, add to front
+                void* ptrValue = 
+                    _sharedMemory
+                    ->get_segment_manager()
+                    ->allocate(sizeof(Value));
+                
+                new(ptrValue)Value();
+                
+                offset_ptr<Value> offsetPtrValue(static_cast<Value*>(ptrValue));
+                
+                _list->push_front({key, offsetPtrValue});
+                (*_map)[key] = _list->begin();
+                
+            }
+            
+            
+            return *(*_map)[key]->second;
+            
+        }
+        
+        void clear()
+        {
+            for (auto pair : *_list)
+            {
+                
+                pair.second->~Value();
+                
+                _sharedMemory->deallocate(
+                     pair.second.get()
+                );
+                
+            }
+            
+            _list->clear();
+            _map->clear();
+            
+            if (_sharedMemory) {
+                delete _sharedMemory;
+                _sharedMemory = nullptr;
+            }
+            
+            shared_memory_object::remove(_sharedMemoryName.c_str());
+            
+            createSharedMemoryObjects(_name);
+        }
+        
+        const BString& sharedMemoryName()
+        {
+            return _sharedMemoryName;
+        }
+        
+    private:
+        
+        void createSharedMemoryObjects(const BString& name)
+        {
+            std::hash<std::string> hasher;
+            std::filesystem::path path = _lockFile.filename();
+            
+            // Since path character '/' isnt allowed
+            // this will use the filename
+            // hash instead
+                
+            std::size_t hashedValue = hasher(path.string());
+            std::stringstream stream;
+            stream << hashedValue;
+            _sharedMemoryName = 
+                BString(stream.str()) +
+                BString(name);
+                
+//#warning need to factor in size of shared memory
+            Index memorySize = _capacity * 2.5 * (sizeof(MapValue) + sizeof(NodeType) + sizeof(Value));
+            
+           // shared_memory_object::remove(_sharedMemoryName.c_str());
+            
+            _sharedMemory = new
+                managed_shared_memory(open_or_create, _sharedMemoryName.c_str(), memorySize);
+                        
+            _list = 
+                _sharedMemory->find_or_construct<SharedMemoryList>("LRUList")
+                (_sharedMemory->get_segment_manager());
+                
+            _map = 
+                _sharedMemory->find_or_construct<SharedMemoryMap>("LRUMap")
+                (_sharedMemory->get_segment_manager());
+            
+        }
+        
+        // Evict the least recently used item if capacity is exceeded
+        void evict() {
+            while (_list->size() >=  _capacity) 
+            {
+                Key lru_key =
+                    _list->back().first;
+                _list->pop_back();
+                
+                (*_map)[lru_key]->second->~Value();
+                
+                _sharedMemory->deallocate(
+                     (*_map)[lru_key]->second.get()
+                );
+                
+                _map->erase(lru_key);
+                   // cerr << "(LIST,CAP)" << "(" << _list->size() << "," << _capacity << ")" << endl;
+            }
+        }
+        
     };
 
 }

@@ -60,12 +60,16 @@ namespace BeeFishDatabase {
          
         
         
-        virtual void setVariable(JSONPath start, const Type type, const BString& value)
+        virtual void setVariable(JSONPath path, const Type type, const BString& value)
         {
-    
+
+        
+            JSONPath start = path;
+            //ScopedPathLock lock(start);
             start[type];
             
-            JSONPath path = start;
+            
+            
             
             // add all path keys except the
             // first (host)
@@ -234,6 +238,8 @@ namespace BeeFishDatabase {
 
             JSONPath path = topPath();
             
+//  Path::ScopedPathLock lock(path, LockType::WRITE);
+            
             if (json->type() == Type::UNDEFINED)
             {
                 path.deleteProperty(key->value());
@@ -278,6 +284,9 @@ namespace BeeFishDatabase {
         {
             
             JSONPath path = topPath();
+            
+  // Path::ScopedPathLock lock(path, LockType::WRITE);
+            
             Index& index = topIndex();
             path = path[index++];
             Type type = json->type();
@@ -303,23 +312,25 @@ namespace BeeFishDatabase {
 
             if (_pathStack.size() == 0)
             {
+                JSONPath start = _start;
+//   Path::ScopedPathLock lock(start, LockType::WRITE);
                 if (json->type() == Type::UNDEFINED)
                 {
                     //assert(false)
                     
                     
-                    if (!_start.isRoot() && 
-                        !_start.parent().isRoot())
+                    if (!start.isRoot() && 
+                        !start.parent().isRoot())
                     {
                         
                         BString key;
-                        _start = _start.parent(key);
-                        _start.deleteProperty(key);
+                        start = start.parent(key);
+                        start.deleteProperty(key);
                     }
                 }
                 else
                     setVariable(
-                        _start,
+                        start,
                         json->type(),
                         json->value()
                     );

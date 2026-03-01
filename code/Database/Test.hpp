@@ -12,9 +12,10 @@ namespace BeeFishDatabase
     using namespace BeeFishTest;
     using namespace BeeFishPowerEncoding;
 
+    inline bool testFile();
     inline bool testNextIndex();
-    inline bool testPath1();
-    inline bool testPath2();
+    inline bool testPath();
+    inline bool testJSONPath();
     inline bool testArray2Path();
     inline bool testSubArray2Path();
     inline bool testComplexArrays();
@@ -27,21 +28,49 @@ namespace BeeFishDatabase
     inline bool testJSONPathParent();
     inline bool testDeleteProperty();
     inline bool testObjects();
+    inline bool testMultiThreaded();
     
     inline bool test()
     {
         bool success = true;
+        /*
+        Database db;
+        db.clear();
+        Path path = db;
+        {
+            
+            path[0];
+            path[1];
+            path[2];
+        }
         
+        {
+            cout << "Should dead lock here ❤️️" << endl;
+            Database db2(db.filename());
+            Path p1 = db;
+            Path p2 = db2;
+            p1.lock();
+            p2.lock();
+            
+        }
+        
+        assert(false);
+*/
         cout << "Test Database " << endl;
+success = testMultiThreaded();
 
+assert(success);
+        success = success &&
+            testFile();
+            
         success = success &&
             testNextIndex();
         
         success = success &&
-            testPath1();
+            testPath();
                     
         success = success &&
-            testPath2();
+            testJSONPath();
             
         success= success &&
             testArray2Path();
@@ -73,11 +102,34 @@ namespace BeeFishDatabase
         success = success &&
             testAllFiles(TEST_DIRECTORY);
             
+        success = success &&
+            testMultiThreaded();
+            
         outputSuccess(success);
 
         return success;
     }
     
+    
+    inline bool testFile()
+    {
+        cout << "Test file " << endl;
+        bool success = true;
+        
+        LockFile file;
+
+        cout << "\tLock" << endl;
+        file.lock();
+        file.lock();
+        
+        cout << "\tUnlock" << endl;
+        file.unlock();
+        file.unlock();
+        
+        outputSuccess(success);
+
+        return success;
+    }
     
     
     inline bool testNextIndex()
@@ -86,11 +138,18 @@ namespace BeeFishDatabase
 
         cout << "Testing next index" << endl;
 
-        JSONDatabase db;
+        
+        
+        Database db;
  
+        cout << "\tIndex 1 " << flush;
         Index index1 = db.getNextIndex(0);
+        cout << index1 << endl;
+        
+        cout << "\tIndex 2 " << flush;
         Index index2 = db.getNextIndex(0);
- 
+        cout << index2 << endl;
+        
         bool success =
           (index2 == index1 + sizeof(Branch));
           
@@ -99,7 +158,7 @@ namespace BeeFishDatabase
         return success;
     }
 
-    inline bool testPath1()
+    inline bool testPath()
     {
     
         bool success = true;
@@ -107,13 +166,13 @@ namespace BeeFishDatabase
         const Size min = 1;
         const Size max = 100;
         
-        cout << "Test Path 1" << endl;
+        cout << "Test Path" << endl;
         
         
             
-        JSONDatabase db;
+        Database db;
         
-        Path start(db.json());
+        Path start = db;
         
 
         cout << "\tSimple path [] " << flush;
@@ -580,38 +639,43 @@ namespace BeeFishDatabase
       
         
         outputSuccess(success);
-
+        
         return success;
     }
     
     
-    inline bool testPath2()
+    inline bool testJSONPath()
     {
         using namespace std;
 
-        cout << endl << "Testing path 2" << endl;
+        cout << endl << "Testing json path" << endl;
 
         bool success = true;
-        JSONDatabase database;
-
-        JSONPath root = database.host("https://test");
-        /*
-        cout << "Test data" << std::endl;
-        {
         
-            BString str1 = "Hello 🤗";
-            Path path = root["str"];
+        cout << "\tTest type" << endl;
+        JSONDatabase database;
+        JSONPath test = database.json();
+        test[Type::UNDEFINED];
+        
+        success = success && 
+            testValue(
+                "Set to undefined",
+                test.type() == Type::UNDEFINED
+            );
             
-            path.setData(str1);
-            Path path2 = root["str"];
-            assert(path == path2);
-            BString str2;
-            path2.getData(str2);
-    
-            success = testValue(str1, str1 == str2);
-            BeeFishMisc::outputSuccess(success);
+        if (success) {
+            cout << "\t keyed \"hello\" json path" << endl;
+            test["hello"].lock();
+            test["hello"].unlock();
+            success = success && 
+            testValue(
+                "Hello Unlocked",
+                true
+            );
         }
-        */
+        
+        JSONPath root = database.host("https://test");
+
         
         // Test string
         cout << "\tTest strings" << endl;
@@ -1059,10 +1123,11 @@ assert(success);
     {
         cout << "\t" << file.filename() << " " << flush;
         
-        string tempFile =
-            TEMP_DIRECTORY;
+        std::stringstream stream;
+        stream << TEMP_DIRECTORY << &root << "test.json";
+        
+        string tempFile = stream.str();
 
-        tempFile += "test.json";
         remove(tempFile);
         
         ifstream inputFile(file);
@@ -1765,6 +1830,85 @@ assert(success);
         return success;
     }
     
+    inline bool testMultiThreaded()
+    {
+        cout << "Test multi threaded" << endl;
+        
+        File tempFile;
+        std::filesystem::path file = tempFile.filename();
+        
+        auto test =
+        [file](bool getSuccess = false)
+        {
+            
+            static Index size = 0;
+            static bool success = true;
+
+            if (getSuccess)
+                return success;
+                
+            cout << "\tThread " << std::this_thread::get_id() << endl;
+            
+            JSONDatabase db(file);
+            JSONPath path = db.host("https://test");
+            ifstream input(TEST_DIRECTORY "/90-Sample.json");
+            JSONPathParser parser(path, cout);
+            parser.read(input);
+            input.close();
+            success = testValue(
+                "Parsed file",
+                parser.matched()
+            );
+            
+            if (success) {
+                if (size == 0)
+                {
+                    size = db.size();
+                    cout << "Size a " << size << endl;
+                }
+                else {
+                    success = testValue(
+                        "Subsequent size",
+                        db.size() == size
+                    );
+                    cout << "Size a " << size << endl;
+                    cout << "Size b " << db.size() << endl;
+                }
+            }
+            
+            return success;
+            
+        };
+        
+        cout <<"\tStarting threads" << endl;
+         
+        std::thread threads[] {
+            std::thread(test),
+            std::thread(test)
+        };
+        
+        cout << "\tWaiting threads" << endl;
+        
+        for (auto& thread : threads) {
+            if (thread.joinable()) {
+                thread.join();
+            }
+        }
+        
+        
+       // std::thread(test).join();
+        
+        cout << "Expected size " << 741432 << endl;
+
+        
+        
+        bool success = test(true);
+        
+        outputSuccess(success);
+        assert(false);
+        return success;
+        
+    }
     
     
 }

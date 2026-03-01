@@ -14,7 +14,16 @@
 #include <filesystem>
 #include <queue>
 #include <mutex>
+#include <iostream>
+#include <list>
+#include <unordered_map>
+#include <utility> // for std::pair
+
 #include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/interprocess/containers/list.hpp>
+#include <boost/interprocess/containers/map.hpp>
+#include <boost/interprocess/allocators/allocator.hpp>
+#include <boost/interprocess/sync/interprocess_sharable_mutex.hpp>
 
 #include "../Miscellaneous/Debug.hpp"
 #include "../b-string/b-string.h"
@@ -23,8 +32,8 @@
 #include "LockFile.hpp"
 #include "Index.hpp"
 #include "Branch.hpp"
+#include "LockFile.hpp"
 #include "LeastRecentlyUsedCache.hpp"
-#include "Allocator.hpp"
 
 using namespace std;
 using namespace std::literals;
@@ -35,7 +44,8 @@ namespace BeeFishDatabase {
     
    // using namespace BeeFishMisc;
     using namespace boost::interprocess;
-            
+    
+        
     // Store [left, right] branch elements.
     // A zero is stored if the branch
     // hasnt been visited yet.
@@ -44,31 +54,71 @@ namespace BeeFishDatabase {
     
     
     public:
+        
+
+        class AutoUnlockMutex :
+            
+            public interprocess_mutex
+            
+        {
+        protected:
+            bool _locked = false;
+            
+        public:
+            AutoUnlockMutex() :
+                interprocess_mutex()
+            {
+            }
+
+            virtual ~AutoUnlockMutex()
+            {
+                if (_locked)
+                    interprocess_mutex::unlock();
+            }
+            
+            void lock() {
+                interprocess_mutex::lock();
+                _locked = true;
+            }
+            
+            void unlock() {
+                interprocess_mutex::unlock();
+                _locked = false;
+            }
+            
+            
+
+        };
+
+        typedef AutoUnlockMutex Mutex;
+    private:
+        typedef LeastRecentlyUsedCache<Index, Mutex> Locks;
         typedef LeastRecentlyUsedCache<Index, Branch> Cache;
-        Cache* _cache;
-    public:
         
         
         Index _pageSize = 0;
-
-    public:
-
+        
+        std::map<Index, Index> _lockCounts;
         
         /*
-        struct BranchLock {
-            Index _index = 0;
-            std::mutex _mutex;
-            Branch _branch;
-        };
+        typedef managed_shared_memory::segment_manager SegmentManager;
+        typedef std::pair<const Index, AutoUnlockMutex> MapType;
+        typedef boost::interprocess::allocator<MapType, SegmentManager> SharedMemoryMapBranchLocksAllocator;
+        typedef boost::interprocess::map<Index, AutoUnlockMutex, std::less<Index>, SharedMemoryMapBranchLocksAllocator> SharedMemoryMapBranchLocks;
         
-        std::map<Index, Index> _branchMap;
-        BranchLock* _branchLocks = nullptr;
-        const char* _sharedMemoryName = "shared_memory";
-        
-        void* _sharedMemory = nullptr;
-        shared_memory_object* _sharedMemoryObject = nullptr;
-        mapped_region* _mappedRegion = nullptr;
         */
+        Cache* _cache = nullptr;
+        Locks* _locks = nullptr;
+    public:
+        
+        Cache& cache() {
+            return *_cache;
+        }
+        
+        Locks& locks() {
+            return *_locks;
+        }
+        
     public:
         Database(
             string filePath = "",
@@ -80,26 +130,122 @@ namespace BeeFishDatabase {
             _pageSize(pageSize)
             
         {
-            _cache = new Cache(*this, 100000);
+            createSharedMemoryObjects();
         }
 
         virtual ~Database()
         {
             delete _cache;
-                /*
-            if (_sharedMemory)
-               destroySharedMemory();
+            delete _locks;
+            
+            /*
+            shared_memory_object::remove(_sharedMemoryName.c_str());
+            
+            
                
             */
             //unlock();
         }
         
     public:
-        
-        Cache& cache() {
-            return *_cache;
+        void createSharedMemoryObjects()
+        {
+            _cache = new Cache("BranchCache", *this, 100000);
+            _locks = new Locks("BranchLocks", *this, 100);
         }
+        
+        using LockFile::lock;
+        using LockFile::unlock;
+        
+        void lock(Index lockIndex)
+        {
+           // ScopedFileLock lock(*this);
+            
+            if (_lockCounts[lockIndex]++ == 0) {
+#ifdef VERBOSE
+cout << lockIndex << " " << this_thread::get_id() << " +" << endl;
+#endif
+                assert(_lockCounts[lockIndex] == 1);
+                locks()[lockIndex].lock();
+                
+            }
+        }
+        
+        
+        void unlock(Index lockIndex)
+        {
 
+           // ScopedFileLock lock(*this);
+                
+
+            bool unlock = false;
+            if (_lockCounts.find(lockIndex) !=
+                _lockCounts.end())
+            {
+                    
+                if (_lockCounts[lockIndex] > 0)
+                    _lockCounts[lockIndex]--;
+            
+                if (_lockCounts[lockIndex] == 0)
+                    unlock = true;
+            }
+                    
+            if (unlock)
+            {
+#ifdef VERBOSE
+cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
+#endif
+                locks()[lockIndex].unlock();
+                _lockCounts.erase(lockIndex);
+            }
+        
+        }
+        
+        void clear() {
+            unlock();
+            lock();
+            _cache->clear();
+            _locks->clear();
+            unlock();
+        }
+        
+        /*
+    
+        inline managed_shared_memory* createSharedMemory(Index capacity)
+        {
+            
+            std::hash<std::string> hasher;
+            std::filesystem::path path = filename();
+            // Since path character '/' isnt allowed
+            // this will use the filename
+            // hash instead
+            std::size_t hashedValue = hasher(
+                path.string()
+            );
+            std::stringstream stream;
+            stream << hashedValue;
+            _sharedMemoryName = 
+                BString(stream.str()) +
+                BString("Database");
+            
+            Index memorySize = capacity * 4 * sizeof(MapType);
+            
+            shared_memory_object::remove(_sharedMemoryName.c_str());
+            
+            return new
+                managed_shared_memory(open_or_create, _sharedMemoryName.c_str(), memorySize);
+            
+        }
+        
+        inline void destroySharedMemory()
+        {
+            
+            delete _sharedMemory;
+            shared_memory_object::remove(_sharedMemoryName.c_str());
+            
+        }
+        
+*/
         Index pageSize() const {
             return _pageSize;
         }
@@ -109,7 +255,7 @@ namespace BeeFishDatabase {
         {
 
             ScopedFileLock lock(*this);
-
+            
             Branch branch(parent);
 
             Index index = size();
@@ -140,9 +286,6 @@ namespace BeeFishDatabase {
 
         void deleteBranch(Index index)
         {
-
-
-            ScopedFileLock lock(*this);
 
             deleteData(index);
             
@@ -179,12 +322,13 @@ namespace BeeFishDatabase {
             
             // Reclaim space here
             setBranch(index, Branch());
+            
         }
+        
+    public:
         
         void deleteData(Index index)
         {
-            Database::ScopedFileLock lock(*this);
-
             Branch branch = getBranch(index);
             
             if (branch._dataIndex) {
@@ -194,17 +338,18 @@ namespace BeeFishDatabase {
             
         }
         
+        
+        
         Branch getBranch(Index index)
         {
-            ScopedFileLock lock(*this);
-/*
-            if (!_sharedMemory)
-                createSharedMemory(_pageSize);
-                */
+
+            
+            
             Branch branch;
             
             if (size() == 0) 
             {
+                ScopedFileLock lock(*this);
                 
                 if (size() == 0)
                 {
@@ -218,6 +363,7 @@ namespace BeeFishDatabase {
                 
             if (optionalBranch == nullopt)
             {
+               // ScopedFileLock lock(*this);
                 seek(index);
                 read(&branch, sizeof(Branch));
                 cache().put(index, branch);
@@ -231,155 +377,24 @@ namespace BeeFishDatabase {
 
 
         }
+        
+        
 
 
         inline void setBranch(Index index, const Branch& branch)
         {
-            ScopedFileLock lock(*this);
-
+           // ScopedFileLock lock(*this);
+            cache().put(index, branch);
             seek(index);
             write(&branch, sizeof(Branch));
-            cache().put(index, branch);
+            
             
         }
-        /*
-        inline virtual void createSharedMemory(Index size)
-        {
-            
-            try {
-                
-                _sharedMemoryObject = 
-                    new shared_memory_object
-                    (
-                        create_only,
-                        _sharedMemoryName,
-                        read_write 
-                    );
-                    
-                _sharedMemoryObject->truncate(size);
-                
-cerr << __FILE__ << " Created shared memory " << _pageSize << endl;
-   
-                //Map the whole shared memory in this process
-                _mappedRegion = new mapped_region(*_sharedMemoryObject, read_write);
-
-                _sharedMemory = _mappedRegion->get_address();
-                
-                //Write all the memory to 0
-                std::memset(_sharedMemory, 0, _mappedRegion->get_size());
-                
-                BranchLock* branchLock = static_cast<BranchLock*>(_sharedMemory);
-
-                for (Index i = 0; i < size / sizeof(BranchLock); ++i)
-                {
-                    new (branchLock++) BranchLock();
-                }
-            
-
-                
-                
-      
-            }
-            catch (boost::interprocess::interprocess_exception& ex)
-            {
-                _sharedMemoryObject = 
-                new shared_memory_object
-                (
-                    open_only,
-                    _sharedMemoryName,
-                    read_write 
-                );
     
-                //Map the whole shared memory in this process
-                _mappedRegion = new mapped_region(*_sharedMemoryObject, read_write);
-                
-
-                _sharedMemory = _mappedRegion->get_address();
-
-            
-            }
-            
-            _branchLocks = static_cast<BranchLock*>(_sharedMemory);
-            
-        }
-        
-        inline void destroySharedMemory()
-        {
-            
-            assert(_sharedMemory);
-            delete _mappedRegion;
-            delete _sharedMemoryObject;
-            shared_memory_object::remove(_sharedMemoryName);
-            _sharedMemory = nullptr;
-            
-        }
-        */
-
-        // Waits till lock on branch is released
-        // Sets the lock on the branch to true
-        // Returns the latest version of the branch.
-        inline Branch lockBranch(Index lockIndex) 
-        {
-
-            lock();
-
-            Branch branch = getBranch(lockIndex);
-
-            // Wait until branch is unlocked
-            while (branch._locked) {
-                // Unlock the process lock
-                unlock();
-                
-                // Wait until branch is unlocked
-                while (branch._locked) {
-
-                    // Sleep to avoid spin wait
-                    BeeFishMisc::sleep(0.01);
-
-                    // Refresh the branch
-                    branch = getBranch(lockIndex);
-
-                }
-
-                // Regain exclusive lock
-                lock();
-
-                // Get the refreshed branch
-                branch = getBranch(lockIndex);
-            }
-
-            // Because we have an exclusive lock
-            // and have rereshed the branch
-            // The branch must have been unlocked
-            // by another process
-    
-            // Set the branch locked flag
-            branch._locked = true;
-            setBranch(lockIndex, branch);
-
-            // Release the process lock
-            unlock();
-            
-            // Return the lated version of branch
-            return branch;
-        }
-
-        inline void unlockBranch(Index lockIndex) 
-        {
-            ScopedFileLock lock(*this);
-
-            Branch branch = getBranch(lockIndex);
-
-            if (branch._locked) {
-                branch._locked = false;
-                setBranch(lockIndex, branch);
-            }
-        }
         
         inline std::string getData(Index dataIndex)
         {
-            ScopedFileLock lock(*this);
-            
+
             if (dataIndex == 0)
                 return "";
 
@@ -396,7 +411,7 @@ cerr << __FILE__ << " Created shared memory " << _pageSize << endl;
 
         inline bool hasData(Index index)
         {
-            ScopedFileLock lock(*this);
+    
             Branch branch = getBranch(index);
             
             if (branch._dataIndex == 0)
@@ -413,7 +428,7 @@ cerr << __FILE__ << " Created shared memory " << _pageSize << endl;
         
         inline void setData(Index dataIndex, const std::string& source)
         {
-            ScopedFileLock lock(*this);
+
             seek(dataIndex);
             Index size = source.size();
             write(&size, sizeof(Index));
@@ -453,35 +468,6 @@ cerr << __FILE__ << " Created shared memory " << _pageSize << endl;
             }
         }
         
-        virtual void unlockAll() {
-
-            std::queue<Index> queue;
-            queue.push(0);
-
-            while (queue.size()) 
-            {
-                Index index = queue.front();
-                queue.pop();
-
-                Branch branch = getBranch(index);
-
-                if (branch._locked)
-                {
-                    cout << "Unlocking " << index << endl;
-                    branch._locked = false;
-                    setBranch(index, branch);
-                    
-                }
-
-                if (branch._left)
-                    queue.push(branch._left);
-
-                if (branch._right)
-                    queue.push(branch._right);
-
-            }
-        }
-        
         virtual Index rootIndex() {
             return 0;
         }
@@ -494,6 +480,8 @@ cerr << __FILE__ << " Created shared memory " << _pageSize << endl;
                  << db.version() << endl
                  << "Filename: "
                  << db._filename << endl
+                 << "LockFile: "
+                 << db._mutexName << endl
                  << "Branch size: "
                  << sizeof(Branch) << endl
                  << "Size: "
@@ -501,8 +489,10 @@ cerr << __FILE__ << " Created shared memory " << _pageSize << endl;
              
             return out;
         }
-
+        
     };
+
+    
 
 }
 

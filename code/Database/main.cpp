@@ -6,6 +6,8 @@
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../Miscellaneous/SigHandler.hpp"
 
+#define VERBOSE
+
 #include "Database.hpp"
 #include "Path.hpp"
 #include "Test.hpp"
@@ -26,6 +28,18 @@ int main(int argc, const char* argv[])
               << DATABASE_VERSION
               << endl;
 
+
+    bool unlock =
+        (hasArg(argc, argv, "-unlock") != -1);
+        
+    if (unlock || true)
+    {
+        cout << "Unlocking " << DATABASE_FILENAME << endl;
+        Database db(DATABASE_FILENAME);
+        db.unlock();
+        db.clear();
+    }
+    
     bool test =
         (hasArg(argc, argv, "-test") != -1);
 
@@ -34,23 +48,21 @@ int main(int argc, const char* argv[])
         if (!BeeFishDatabase::test())
             return 1;
     }
+    /*
+    Database db1(DATABASE_FILENAME);
+    Database db2(DATABASE_FILENAME);
     
-    bool unlock =
-        (hasArg(argc, argv, "-unlock") != -1);
-
-    
-    if (unlock)
-    {
-        cout << "Unlocking " << DATABASE_FILENAME << endl;
-        Database db(DATABASE_FILENAME);
-        db.unlockAll();
-        return 0;
-    }
-    
+    cout << db1 << endl;
+    cout << "❤️" << endl;
+    db1.lock(0);
+    cout << db2 << endl;
+    cout << "🌏️" << endl;
+    db2.lock(0);
+    assert(false);
+    */
+    return 0;
     
     JSONDatabase database(DATABASE_FILENAME);
-    
-    cout << database << endl;
     
     bool originsArg  =
         (hasArg(argc, argv, "-origins") != -1);
@@ -159,6 +171,9 @@ int main(int argc, const char* argv[])
     }
 
     cout << database << endl;
+    
+    cout << "WARNING CLEARING DATABASE" << endl;
+    database.clear();
 
     return 0;
 

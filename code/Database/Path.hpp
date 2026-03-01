@@ -14,6 +14,7 @@
 #include "DatabaseBase.hpp"
 #include "PathBase.hpp"
 
+//#undef VERBOSE
 
 namespace BeeFishDatabase {
 using namespace std;
@@ -26,26 +27,44 @@ using namespace BeeFishBString;
     {
     private:
         Database*  _database  = nullptr;
-
+        
+        static const Index UNLOCKED = Index(-1);
+        
         Index _index = 0;
-        SSize _lockIndex = -1;
         Index _savedIndex = 0;
+        Index _lockIndex = UNLOCKED;
+    public:
+        
+        /*
+        struct ScopedPathLock
+        {
+            Path& _path;
+            bool _locked = false;
+            ScopedPathLock(Path& path) :
+                _path(path)
+            {
+                if (!_path.locked()) {
+                    _path.lock();
+                    _locked = true;
+                }
+            }
+            
+            ~ScopedPathLock()
+            {
+                if (_locked)
+                    _path.unlock();
+            }
+            
+
+        };
+        */
         
     public:
         
         Path()
         {
         }
-/*
-        Path( Database* database = nullptr,
-                Index index = Branch::Root ) :
-            PowerEncoding(),
-            _database(database),
-            _index(index),
-            _savedIndex(index)
-        {
-        }
-*/
+
         Path( Database& database,
                 Index index = Branch::Root ) :
             PowerEncoding(),
@@ -74,34 +93,43 @@ using namespace BeeFishBString;
 
         virtual ~Path()
         {
-            unlock();
+            if (locked())
+                unlock();
         }
         
-
-        virtual Branch lock() {
-            if (_lockIndex == -1) {
-                _lockIndex = _index;
-                return _database->lockBranch(_lockIndex);
-            }
-            return getBranch();
-        }
-        
-        virtual void unlock() {
-            if (_lockIndex != -1) {
-                _database->unlockBranch(_lockIndex);
-                _lockIndex = -1;
-            }
-        }
-
-
-        Path& operator=(const Path& rhs)
+        virtual void lock()
         {
-    
+            if (!locked())
+            {
+                _lockIndex = index();
+                _database->lock(_lockIndex);
+            }
+            
+        }
+        
+        virtual void unlock()
+        {
+            assert(locked());
+            _database->unlock(_lockIndex);
+            _lockIndex = UNLOCKED;
+        }
+        
+        bool locked()
+        {
+            return _lockIndex != UNLOCKED;
+        }
+        
+
+        Path& operator = (const Path& rhs)
+        {
+            if (locked()) {
+                unlock();
+            }
+            
             _database = rhs._database;
             _index = rhs._index;
             _savedIndex = rhs._savedIndex;
-            _lockIndex = -1;
-
+            
             return *this;
         }
         
@@ -175,42 +203,51 @@ using namespace BeeFishBString;
 
         virtual void goLeft()
         {
-
+#ifdef VERBOSE
+cout << _index << " " << std::this_thread::get_id() << " LEFT" << endl;
+#endif
+            
             Branch branch = getBranch();
-
+            
             if (branch._left == 0) 
             {
 
-                branch = lock();
-
-                _database->lock();
-
-                if (branch._left == 0)
+                if (!locked()) {
+                    lock();
+                    branch = getBranch();
+                }
+                
+                if (branch._left == 0) 
                 {
                     branch._left =
                         _database->getNextIndex(_index);
-                    setBranch(branch);
                 }
-                _database->unlock();
                 
+                setBranch(branch);
             }
-
+            
             _index = branch._left;
             
             if (_count > 0)
                 --_count;
+                
         }
         
         virtual void goRight()
         {
+#ifdef VERBOSE
+cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
+#endif
+            
             Branch branch = getBranch();
 
             if (branch._right == 0) 
             {
-
-                branch = lock();
-
-                 _database->lock();
+                
+                if (!locked()) {
+                    lock();
+                    branch = getBranch();
+                }
                 
                 if (branch._right == 0)
                 {
@@ -218,13 +255,11 @@ using namespace BeeFishBString;
                         _database->getNextIndex(_index);
                     setBranch(branch);
                 }
-                
-                _database->unlock();
-                
             }
-
+            
             _index = branch._right;
             ++_count;
+            
         }
         
         virtual void goUp()
@@ -253,6 +288,7 @@ using namespace BeeFishBString;
         
         virtual bool canGoRight() const
         {
+            
             Branch branch = getBranch();
             
             return (bool)branch._right;
@@ -329,11 +365,6 @@ using namespace BeeFishBString;
                 }
                 else
                 {
-                    /*
-                    cout << "Parent: " << parent << endl;
-                    cout << "Branch: " << branch << endl;
-                    cout << "Index:  " <<  index << endl;
-                    */
                     return Path(*this, rootIndex);
                     break;
                 }
@@ -351,6 +382,17 @@ using namespace BeeFishBString;
         }
         
     public:
+        
+        
+        template<typename T>
+        friend
+        Path& operator << (Path& path, const T& key)
+        {
+            PowerEncoding& encoding = path;
+            encoding << key;
+            return path;
+        }
+        
         template<typename T>
         Path operator [] (const T& key) const
         {
@@ -359,8 +401,7 @@ using namespace BeeFishBString;
 
             path << key;
 
-            path.unlock();
-
+            
             return path;
         }
  
@@ -379,6 +420,7 @@ using namespace BeeFishBString;
         Index operator++()
         {
             lock();
+            
             Index count = 1;
             if (hasData())
             {
@@ -386,13 +428,15 @@ using namespace BeeFishBString;
                 ++count;
             }
             setData<Index>(count);
-            unlock();
+
+            
             return count;
         }
         
         Index operator++(int)
         {
             lock();
+            
             Index existingCount = 0;
             Index count = 1;
             if (hasData())
@@ -402,7 +446,6 @@ using namespace BeeFishBString;
                 ++count;
             }
             setData<Index>(count);
-            unlock();
             
             return existingCount;
         }
@@ -410,6 +453,7 @@ using namespace BeeFishBString;
         Index operator--()
         {
             lock();
+            
             Index count = 0;
             if (hasData())
             {
@@ -420,13 +464,14 @@ using namespace BeeFishBString;
                     assert(false);
             }
             setData<Index>(count);
-            unlock();
+        
             return count;
         }
         
         Index operator--(int)
         {
             lock();
+            
             Index existingCount = 0;
             Index count = 1;
             if (hasData())
@@ -439,13 +484,15 @@ using namespace BeeFishBString;
                     assert(false);
             }
             setData<Index>(count);
-            unlock();
-            
+
             return existingCount;
         }
         
         std::string getData() {
-             
+            
+            //LockFile::ScopedFileLock lock(database());
+        
+            
             Branch branch = getBranch();
             
             if (branch._dataIndex)
@@ -456,25 +503,15 @@ using namespace BeeFishBString;
                     );
             }
 
+        
             return "";
 
 
         }
         
         const std::string getData() const {
-
-            Branch branch = getBranch();
-            
-            if (branch._dataIndex)
-            {
-                return
-                    _database->getData(
-                        branch._dataIndex
-                    );
-            }
-
-            return "";
-            
+            Path path = *this;
+            return path.getData();
         }
         
         
@@ -497,7 +534,7 @@ using namespace BeeFishBString;
 
         void setData(const std::string& value) {
 
-            LockFile::ScopedFileLock lock(database());
+            lock();
             
             Branch branch = getBranch();
 
@@ -528,7 +565,7 @@ using namespace BeeFishBString;
                 _database->setData(branch._dataIndex, value);
             }
 
-            
+
         }
         
         void setData(
@@ -572,27 +609,24 @@ using namespace BeeFishBString;
         }
         
         
-        Branch getBranch(Size index) const
+        Branch getBranch(Index index) const
         {
             return
                 _database->getBranch(index);
+
         }
 
         void deleteData()
         {
-            LockFile::ScopedFileLock lock(database());
-
-            Branch branch = getBranch();
-            
-            if (branch._dataIndex) {
-                branch._dataIndex = 0;
-                setBranch(branch);
-            }
+            _database->deleteData(_index);
 
         }
         
         virtual void clear()
         {
+            
+            lock();
+            
             Branch branch = getBranch();
             if (branch._left) {
                 _database->deleteBranch(branch._left);
@@ -612,7 +646,8 @@ using namespace BeeFishBString;
         void clear(const T& value)
         {
 
-            LockFile::ScopedFileLock lock(database());
+            Path path = *this;
+            path.lock();
             
             Stack stack;
             stack << value;
@@ -663,50 +698,7 @@ using namespace BeeFishBString;
                 
             
         }
-        /*
-        void clearValue(const Path& path)
-        {
-            clearValue(path.index());
-        }
-        
-        */
-    private:
-        /*
-        
-        void clearLeft() {
-            LockFile::ScopedFileLock lock(database());
-            
-            Branch branch = getBranch();
-            Index left = branch._left;
-            branch._left = 0;
-            setBranch(branch);
-            
-            if (left)
-            {
-                Path path(*this, left);
-                path.clear();
-                
-            }
-        }
-        
-        void clearRight() {
-            LockFile::ScopedFileLock lock(database());
 
-            Branch branch = getBranch();
-            Index right = branch._right;
-            branch._right = 0;
-            setBranch(branch);
-            
-            if (right)
-            {
-                
-                Path path(*this, right);
-                path.clear();
-            }
-        }
-        
-        
-      */
     public:
         
         Index count()
@@ -770,7 +762,7 @@ using namespace BeeFishBString;
             return *_database;
         }
         
-        Size pageSize() const {
+        Index pageSize() const {
             return _database->pageSize();
         }
     
@@ -790,9 +782,6 @@ using namespace BeeFishBString;
 
             variable["index"] =
                 (BeeFishScript::Integer)_index;
-
-            variable["lockIndex"] =
-                (BeeFishScript::Integer)_lockIndex;
 
 
             if (_database) {

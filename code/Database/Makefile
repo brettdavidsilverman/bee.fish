@@ -9,7 +9,7 @@ $(OUTPUT): $(DEPS)
 
 $(BUILD)/json:
 		cd ../json && make $(DEBUG) $(TEST)
-		
+
 test:	TEST=test
 test:	$(OUTPUT)
 	$(OUTPUT) -test
@@ -25,7 +25,7 @@ clean:
 
 load:
 load:	CFLAGS += -D TIME -D DEBUG -Ofast
-load:	test
+load:	$(OUTPUT)
 	time --verbose $(OUTPUT) -deaths
 	
 time:

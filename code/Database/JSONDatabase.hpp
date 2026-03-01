@@ -47,7 +47,6 @@ namespace BeeFishDatabase
             _json =
                 _root[JSON];
         
-        
         }
 
         virtual Index rootIndex() 

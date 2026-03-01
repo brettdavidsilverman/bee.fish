@@ -20,14 +20,12 @@ namespace BeeFishDatabase
         Index _left = 0;
         Index _right = 0;
         Index _dataIndex = 0;
-        bool  _locked = false;
         
         inline Branch() :
             _parent(0),
             _left(0),
             _right(0),
-            _dataIndex(0),
-            _locked(false)
+            _dataIndex(0)
         {
         }
         
@@ -35,8 +33,7 @@ namespace BeeFishDatabase
             _parent(parent),
             _left(0),
             _right(0),
-            _dataIndex(0),
-            _locked(false)
+            _dataIndex(0)
         {
         }
     
@@ -51,8 +48,7 @@ namespace BeeFishDatabase
                 {"parent", (BeeFishScript::Integer)_parent},
                 {"left", (BeeFishScript::Integer)_left},
                 {"right", (BeeFishScript::Integer)_right},
-                {"dataIndex", (BeeFishScript::Integer)_dataIndex},
-                {"locked", (BeeFishScript::Boolean)_locked}
+                {"dataIndex", (BeeFishScript::Integer)_dataIndex}
             };
             return var;
         }
