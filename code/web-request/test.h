@@ -873,7 +873,7 @@ using namespace BeeFishTest;
         
         ok = ok && testResult(
             "WebRequest escaped search is query<space>query",
-            escapedUrlWebRequest.search() == "query%20query"
+            escapedUrlWebRequest.search() == "query query"
         );
 
         BeeFishWeb::WebRequest postWebRequest;

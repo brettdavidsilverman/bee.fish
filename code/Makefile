@@ -3,18 +3,17 @@ CFLAGS = -std=c++17 -fmax-errors=1
 DEPS=Makefile
 TEMP = /var/tmp
 
-all:
 all:	$(BUILD)
-	make -C b-string $(DEBUG) $(TEST)
-	make -C power-encoding $(DEBUG) $(TEST)
-	make -C Id $(DEBUG) $(TEST)
-	make -C parser $(DEBUG) $(TEST)
-	make -C json $(DEBUG) $(TEST)
-	make -C Database $(DEBUG) $(TEST) $(LOAD) 
-	make -C query $(DEBUG) $(TEST)
-	make -C web-request $(DEBUG) $(TEST)
-	make -C Script $(DEBUG) $(TEST)
-	make -C https $(DEBUG) $(TIME) $(TEST) PORT=$(PORT)
+	make -C b-string $(DEBUG) test
+	make -C power-encoding $(DEBUG) test
+	make -C Id $(DEBUG) test
+	make -C parser $(DEBUG) test
+	make -C json $(DEBUG) test
+	make -C Database $(DEBUG) test $(LOAD) 
+	make -C query $(DEBUG) test
+	make -C web-request $(DEBUG) test
+	make -C Script $(DEBUG) test
+	make -C https $(DEBUG) $(TIME) test PORT=$(PORT)
 
 $(BUILD):
 	mkdir $(BUILD)
@@ -26,21 +25,17 @@ install:
 		make -C https $(DEBUG) install PORT=$(PORT);\
     fi
 	
-debug:
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
 debug:	PORT=8000
 debug:	all
 
-test:
-test:	TEST=test
 test:	all
 
 time:	CFLAGS += -Ofast
 time:	TIME = time
 time:	all
 
-load:
 load:	LOAD = load
 load:	debug
 

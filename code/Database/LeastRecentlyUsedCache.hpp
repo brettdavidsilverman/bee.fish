@@ -166,6 +166,8 @@ using namespace boost::interprocess;
         
         void clear()
         {
+LockFile::ScopedFileLock lock(_lockFile);
+            
             _list->clear();
             _map->clear();
             
@@ -227,15 +229,19 @@ using namespace boost::interprocess;
             {
                 Key lru_key =
                     _list->back().first;
-                _list->pop_back();
                 
-                (*_map)[lru_key]->second->~Value();
+                Value* pointer =
+                    (*_map)[lru_key]->second.get();
+                
+               // delete pointer;
                 
                 _sharedMemory->deallocate(
-                     (*_map)[lru_key]->second.get()
+                     pointer
                 );
                 
                 _map->erase(lru_key);
+                
+                _list->pop_back();
                    // cerr << "(LIST,CAP)" << "(" << _list->size() << "," << _capacity << ")" << endl;
             }
         }

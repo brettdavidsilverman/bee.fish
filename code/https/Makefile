@@ -6,7 +6,8 @@ DEPS=server.h session.h response.h response-headers.h app.h json-app.h file-syst
 
 $(OUTPUT):	$(DEPS) $(BUILD)/web-request $(BUILD)/query
 	@echo "Linking server"
-	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lpthread -latomic
+	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lboost_locale 
+	#-lpthread -latomic
 #	sudo setcap cap_net_bind_service=ep $(OUTPUT)
 
 
@@ -49,6 +50,7 @@ stop:
 	./stop.sh $(PORT)
 
 
+debug:
 debug:	DEBUG=debug
 debug:	CFLAGS += -g -D DEBUG
 debug:	PORT=8000

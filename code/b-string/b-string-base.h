@@ -11,8 +11,7 @@
 #include <cctype>
 #include <locale>
 #include <codecvt>
-#include <locale>
-#include <codecvt>
+#include <boost/algorithm/string.hpp>
 
 #ifdef SERVER
 #include <filesystem>
@@ -171,17 +170,6 @@ namespace BeeFishBString
             return (rfind(prefix, 0) == 0);
         }
 
-
-        BString toLower() const
-        {
-            BString copy;
-            for (const char &c : *this)
-                copy.push_back(
-                     tolower(c)
-                );
-
-            return copy;
-        }
 
         vector<BString> split(
             const char character
@@ -410,7 +398,16 @@ namespace BeeFishBString
             return myconv.to_bytes(str);
         }
         
-        BString toLower() {
+        BString toLower() const {
+            std::string string = *this;
+            
+            boost
+                ::algorithm
+                ::to_lower(string);
+                
+            return string;
+                
+            /*
             // the locale will be the UTF-8 enabled English
             std::setlocale(LC_CTYPE, "en_US.UTF-8");
             
@@ -422,9 +419,20 @@ namespace BeeFishBString
             }
             
             return wstring_to_utf8(str);
+            */
         }
         
-        BString toUpper() {
+        BString toUpper() const {
+            
+            std::string string = *this;
+            
+            boost
+                ::algorithm
+                ::to_upper(string);
+                
+            return string;
+            
+            /*
             // the locale will be the UTF-8 enabled English
             std::setlocale(LC_CTYPE, "en_US.UTF-8");
             
@@ -436,6 +444,7 @@ namespace BeeFishBString
             }
             
             return wstring_to_utf8(str);
+            */
         }
 
         BString escape() const

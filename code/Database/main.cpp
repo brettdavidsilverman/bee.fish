@@ -49,6 +49,7 @@ int main(int argc, const char* argv[])
     {
         if (!BeeFishDatabase::test())
             return 1;
+        return 0;
     }
     
     JSONDatabase database(DATABASE_FILENAME);

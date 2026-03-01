@@ -90,7 +90,7 @@ namespace BeeFishDatabase {
 
         };
 
-        typedef AutoUnlockMutex Mutex;
+        typedef interprocess_mutex Mutex;
     private:
         typedef LeastRecentlyUsedCache<Index, Mutex> Locks;
         typedef LeastRecentlyUsedCache<Index, Branch> Cache;

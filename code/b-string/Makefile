@@ -6,7 +6,7 @@ DEPS   = char.h b-string.h bit-stream.h base64.h misc.h b-string-base.h stream.h
 all:	$(OUTPUT)
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lssl -lcrypto
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lssl -lcrypto -lboost_locale
 	
 test:	TEST = test
 test:	all

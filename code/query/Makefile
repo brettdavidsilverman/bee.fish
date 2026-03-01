@@ -4,7 +4,7 @@ CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=main.cpp Query.hpp NotPath.hpp AndPath.hpp OrPath.hpp Test.hpp version.h Makefile $(BUILD)/Database
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_locale
 	
 $(BUILD):
 		mkdir $(BUILD)

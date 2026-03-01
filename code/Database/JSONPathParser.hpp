@@ -127,6 +127,8 @@ namespace BeeFishDatabase {
                 {
                     start[type].setData(value);
                     start.addWords(value, true, _log);
+                    
+                    break;
                 }
                 
                 case Type::ARRAY:
