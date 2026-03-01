@@ -122,10 +122,12 @@ namespace BeeFishDatabase {
     public:
         Database(
             string filePath = "",
+            bool readOnly = false,
             const Index pageSize = getPageSize()
         ) :
             LockFile(
-                filePath
+                filePath,
+                readOnly
             ),
             _pageSize(pageSize)
             
@@ -159,24 +161,18 @@ namespace BeeFishDatabase {
         
         void lock(Index lockIndex)
         {
-           // ScopedFileLock lock(*this);
-            
             if (_lockCounts[lockIndex]++ == 0) {
 #ifdef VERBOSE
 cout << lockIndex << " " << this_thread::get_id() << " +" << endl;
 #endif
                 assert(_lockCounts[lockIndex] == 1);
                 locks()[lockIndex].lock();
-                
             }
         }
         
         
         void unlock(Index lockIndex)
         {
-
-           // ScopedFileLock lock(*this);
-                
 
             bool unlock = false;
             if (_lockCounts.find(lockIndex) !=

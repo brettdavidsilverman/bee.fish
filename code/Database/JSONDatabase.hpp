@@ -24,11 +24,12 @@ namespace BeeFishDatabase
     public:
 
         JSONDatabase(
-            const BString& filePath = ""
+            const BString& filePath = "",
+            bool readOnly = false
         )
-        : Database(filePath)
+        : Database(filePath, readOnly)
         {
-     
+
     
             _root = *this;
         

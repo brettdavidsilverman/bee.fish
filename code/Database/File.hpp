@@ -28,13 +28,13 @@ namespace BeeFishDatabase {
         bool _isNew = false;
         bool _isTemp = false;
         string _filename;
-        Mode _mode = Mode::WRITE;
+        bool _readOnly = false;
     public:
         File(
             const string& filename = "",
-            Mode mode = Mode::WRITE
+            bool readOnly = false
         ) : _filename(filename),
-            _mode(mode)
+            _readOnly(readOnly)
         {
 
             
@@ -54,7 +54,8 @@ namespace BeeFishDatabase {
         }
 
         File(const File& source) :
-            _filename(source._filename)
+            _filename(source._filename),
+            _readOnly(source._readOnly)
             
         {
             _isNew = false;
@@ -210,7 +211,7 @@ namespace BeeFishDatabase {
             // Open the file
             int mode;
             
-            if (_mode == Mode::READ)
+            if (_readOnly)
                 mode = O_RDONLY;
             else
                 mode = O_RDWR;

@@ -82,7 +82,7 @@ namespace BeeFishDatabase {
         
         JSONPath operator [] (const BString& key)
         {
-            
+            lock();
             JSONPath path = *this;
             //path.lock();
             
@@ -587,7 +587,7 @@ namespace BeeFishDatabase {
 
         void addWords(const BString& word, bool addToParents, ostream& log = cnull)
         {
-   
+
             Path words = database().words();
         
             BString string = toString();
@@ -611,7 +611,7 @@ namespace BeeFishDatabase {
                     {
         
                         Path object = path;
-                        ++words[word][object];
+                        words[word][object];
                         
                         path = path.parent();
                     }
@@ -619,7 +619,7 @@ namespace BeeFishDatabase {
                 else {
                 
                     Path object = (*this);
-                    ++words[word][object];
+                    words[word][object];
                     
                 }
                 
@@ -653,13 +653,10 @@ namespace BeeFishDatabase {
                         
                         Path wordObjects = words[word];
 
-                        if (--wordObjects[object] == 0)
+                        wordObjects.clear(object);
+                        if (wordObjects.isDeadEnd())
                         {
-                            wordObjects.clear(object);
-                            if (wordObjects.isDeadEnd())
-                            {
-                                words.clear(word);
-                            }
+                            words.clear(word);
                         }
                         
                         json = json.parent();

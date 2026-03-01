@@ -37,47 +37,43 @@ namespace BeeFishDatabase
         
     public:
     
-        LockFile(const std::string& filename = "") :
-            File(filename)
+        LockFile(
+            const std::string& filename = "",
+            bool readOnly = false
+        ) :
+            File(filename, readOnly)
         {
-            try {
-                std::filesystem::path path(_filename);
+            std::filesystem::path path(_filename);
             
-                std::hash<std::string> hasher;
+            std::hash<std::string> hasher;
 
-                // Since path character '/' isnt allowed
-                // this will use the filename
-                // hash instead
+            // Since path character '/' isnt allowed
+            // this will use the filename
+            // hash instead
                 
-                std::size_t hashedValue =
-                    hasher(path.string());
-                std::stringstream stream;
-                stream << hashedValue;
+            std::size_t hashedValue =
+                hasher(path.string());
+            std::stringstream stream;
+            stream << hashedValue;
             
-                _mutexName =
-                    BString(stream.str()) +
-                    BString("LockFile");
+            _mutexName =
+                BString(stream.str()) +
+                BString("LockFile");
             
 
-                //shared_memory_object::remove(_mutexName.c_str());
-                Index memorySize = 1024;
-                _sharedMemory = new
-                    managed_shared_memory(
-                        open_or_create, 
-                        _mutexName.c_str(), 
-                        memorySize
-                    );
+            //shared_memory_object::remove(_mutexName.c_str());
+            Index memorySize = 1024;
+            _sharedMemory = new
+                managed_shared_memory(
+                    open_or_create, 
+                    _mutexName.c_str(), 
+                    memorySize
+                );
                     
-                _mutex = 
-                    _sharedMemory->find_or_construct
-                    <interprocess_mutex>("mutex")();
+            _mutex = 
+                _sharedMemory->find_or_construct
+                <interprocess_mutex>("mutex")();
                 
-            }
-            catch (std::exception& ex)
-            {
-                cerr << "LockFile fail " << ex.what() << endl;
-                throw ex;
-            }
         }
         
         virtual ~LockFile()
@@ -87,7 +83,7 @@ namespace BeeFishDatabase
              
         }
 
-        virtual void lock() {
+        void lock() {
             
             if (_lockCount++ == 0) {
                // flock(_fileNumber, LOCK_EX);
@@ -95,7 +91,7 @@ namespace BeeFishDatabase
             }
         }
          
-        virtual void unlock() {
+        void unlock() {
             
             if (_lockCount > 0)
                 --_lockCount;

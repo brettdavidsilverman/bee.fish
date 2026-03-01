@@ -6,7 +6,7 @@
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "../Miscellaneous/SigHandler.hpp"
 
-#define VERBOSE
+//#define VERBOSE
 
 #include "Database.hpp"
 #include "Path.hpp"

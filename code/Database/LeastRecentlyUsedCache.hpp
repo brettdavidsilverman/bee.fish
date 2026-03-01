@@ -115,7 +115,7 @@ using namespace boost::interprocess;
                 
                 new(ptrValue)Value(value);
                 
-                //offset_ptr<Value> offsetPtrValue(static_cast<Value*>(ptrValue));
+               // offset_ptr<Value> offsetPtrValue(static_cast<Value*>(ptrValue));
 
 
                 _list->push_front({key, (Value*)ptrValue});
@@ -152,9 +152,9 @@ using namespace boost::interprocess;
                 
                 new(ptrValue)Value();
                 
-                offset_ptr<Value> offsetPtrValue(static_cast<Value*>(ptrValue));
+               // offset_ptr<Value> offsetPtrValue(static_cast<Value*>(ptrValue));
                 
-                _list->push_front({key, offsetPtrValue});
+                _list->push_front({key, (Value*)ptrValue});
                 (*_map)[key] = _list->begin();
                 
             }
@@ -199,6 +199,7 @@ using namespace boost::interprocess;
         
         void createSharedMemoryObjects(const BString& name)
         {
+            LockFile::ScopedFileLock lock(_lockFile);
             std::hash<std::string> hasher;
             std::filesystem::path path = _lockFile.filename();
             

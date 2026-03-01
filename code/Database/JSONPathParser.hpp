@@ -62,9 +62,11 @@ namespace BeeFishDatabase {
         
         virtual void setVariable(JSONPath path, const Type type, const BString& value)
         {
-
-        
+            
+            
             JSONPath start = path;
+            start.lock();
+            
             //ScopedPathLock lock(start);
             start[type];
             

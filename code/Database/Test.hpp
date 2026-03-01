@@ -34,25 +34,35 @@ namespace BeeFishDatabase
     {
         bool success = true;
         /*
-        Database db;
-        db.clear();
-        Path path = db;
+        auto test =
+        [](std::filesystem::path path)
         {
-            
-            path[0];
-            path[1];
-            path[2];
+            Database db(path);
+            db.lock();
+            db.unlock();
+        };
+        
+        Database db;
+        db.lock();
+    
+                 
+        std::vector<std::thread> threads(100);
+        
+        for (auto& thread : threads)
+        {
+            thread =
+                std::thread(test, db.filename());
+        };
+        
+        cout << "\tWaiting threads" << endl;
+        db.unlock();
+        
+        for (auto& thread : threads) {
+            if (thread.joinable()) {
+                thread.join();
+            }
         }
         
-        {
-            cout << "Should dead lock here ❤️️" << endl;
-            Database db2(db.filename());
-            Path p1 = db;
-            Path p2 = db2;
-            p1.lock();
-            p2.lock();
-            
-        }
         
         assert(false);
 */
@@ -1838,7 +1848,7 @@ assert(success);
         std::filesystem::path file = tempFile.filename();
         
         auto test =
-        [file](bool getSuccess = false)
+        [file](bool readOnly, bool getSuccess = false)
         {
             
             static Index size = 0;
@@ -1849,7 +1859,7 @@ assert(success);
                 
             cout << "\tThread " << std::this_thread::get_id() << endl;
             
-            JSONDatabase db(file);
+            JSONDatabase db(file, readOnly);
             JSONPath path = db.host("https://test");
             ifstream input(TEST_DIRECTORY "/90-Sample.json");
             JSONPathParser parser(path, cout);
@@ -1882,10 +1892,15 @@ assert(success);
         
         cout <<"\tStarting threads" << endl;
          
-        std::thread threads[] {
-            std::thread(test),
-            std::thread(test)
-        };
+        std::thread threads[2];
+        test(false);
+        test(true);
+        
+        assert(false);
+        
+        threads[0] = std::thread(test, false);
+        BeeFishMisc::sleep(5);
+        threads[1] = std::thread(test, true);
         
         cout << "\tWaiting threads" << endl;
         
@@ -1902,7 +1917,7 @@ assert(success);
 
         
         
-        bool success = test(true);
+        bool success = test(true, true);
         
         outputSuccess(success);
         assert(false);
