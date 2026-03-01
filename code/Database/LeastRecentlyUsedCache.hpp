@@ -166,20 +166,6 @@ using namespace boost::interprocess;
         
         void clear()
         {
-            
-cerr << "LRU CLEAR" << endl;
-/*
-            for (auto pair : *_list)
-            {
-                
-                pair.second->~Value();
-                
-                _sharedMemory->deallocate(
-                     pair.second.get()
-                );
-                
-            }
-            */
             _list->clear();
             _map->clear();
             

@@ -9,11 +9,13 @@ all:	start
 build:
 	- mkdir build
 
+https:
 https:	build
-	cd code && make $(DEBUG) PORT=$(PORT)
+	cd code && make $(DEBUG) $(TEST) PORT=$(PORT)
 
-test:	build
-	cd code/https && make $(DEBUG) test PORT=$(PORT)
+test:
+test:	TEST=test
+test:	build https
 
 clean:
 	cd code && make clean
@@ -27,6 +29,7 @@ start:	https
 
 restart:	stop start
 
+debug:
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	PORT=8000

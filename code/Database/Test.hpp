@@ -1904,12 +1904,11 @@ assert(success);
             thread.join();
         }
         
-        cout << "Expected size " << 704376 << endl;
+        cout << "Expected size " << 741432 << endl;
 
         bool success = test("", true, true);
-        
+    
         outputSuccess(success);
-
         return success;
         
     }

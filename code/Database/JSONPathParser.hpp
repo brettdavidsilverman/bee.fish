@@ -315,21 +315,13 @@ namespace BeeFishDatabase {
             if (_pathStack.size() == 0)
             {
                 JSONPath start = _start;
-//   Path::ScopedPathLock lock(start, LockType::WRITE);
+                start.lock();
                 if (json->type() == Type::UNDEFINED)
                 {
-                    //assert(false)
-                    
-                    
                     if (!start.isRoot() && 
                         !start.parent().isRoot())
                     {
-start.clear();
-    /*
-                        BString key;
-                        start = start.parent(key);
-                        start.deleteProperty(key);
-    */
+                        start.clear();
                     }
                 }
                 else

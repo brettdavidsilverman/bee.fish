@@ -32,7 +32,7 @@ int main(int argc, const char* argv[])
     bool unlock =
         (hasArg(argc, argv, "-unlock") != -1);
         
-    if (unlock || true)
+    if (unlock)
     {
         cout << "Unlocking " << DATABASE_FILENAME << endl;
         LockFile lock(DATABASE_FILENAME);
@@ -50,19 +50,6 @@ int main(int argc, const char* argv[])
         if (!BeeFishDatabase::test())
             return 1;
     }
-    /*
-    Database db1(DATABASE_FILENAME);
-    Database db2(DATABASE_FILENAME);
-    
-    cout << db1 << endl;
-    cout << "❤️" << endl;
-    db1.lock(0);
-    cout << db2 << endl;
-    cout << "🌏️" << endl;
-    db2.lock(0);
-    assert(false);
-    
-    */
     
     JSONDatabase database(DATABASE_FILENAME);
     
@@ -171,11 +158,6 @@ int main(int argc, const char* argv[])
         
         cout << database.host(origin) << endl;
     }
-
-    cout << database << endl;
-    
-    cout << "WARNING CLEARING DATABASE" << endl;
-    database.clear();
 
     return 0;
 
