@@ -99,14 +99,7 @@ namespace BeeFishDatabase {
         Index _pageSize = 0;
         
         std::map<Index, Index> _lockCounts;
-        
-        /*
-        typedef managed_shared_memory::segment_manager SegmentManager;
-        typedef std::pair<const Index, AutoUnlockMutex> MapType;
-        typedef boost::interprocess::allocator<MapType, SegmentManager> SharedMemoryMapBranchLocksAllocator;
-        typedef boost::interprocess::map<Index, AutoUnlockMutex, std::less<Index>, SharedMemoryMapBranchLocksAllocator> SharedMemoryMapBranchLocks;
-        
-        */
+
         Cache* _cache = nullptr;
         Locks* _locks = nullptr;
     public:
@@ -198,11 +191,8 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
         }
         
         void clear() {
-            unlock();
-            lock();
             _cache->clear();
             _locks->clear();
-            unlock();
         }
         
         /*

@@ -324,10 +324,12 @@ namespace BeeFishDatabase {
                     if (!start.isRoot() && 
                         !start.parent().isRoot())
                     {
-                        
+start.clear();
+    /*
                         BString key;
                         start = start.parent(key);
                         start.deleteProperty(key);
+    */
                     }
                 }
                 else

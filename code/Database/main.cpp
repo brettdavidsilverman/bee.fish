@@ -35,8 +35,10 @@ int main(int argc, const char* argv[])
     if (unlock || true)
     {
         cout << "Unlocking " << DATABASE_FILENAME << endl;
+        LockFile lock(DATABASE_FILENAME);
+        lock.unlock();
         Database db(DATABASE_FILENAME);
-        db.unlock();
+        cout << "Clearing " << DATABASE_FILENAME << endl;
         db.clear();
     }
     
@@ -59,8 +61,8 @@ int main(int argc, const char* argv[])
     cout << "🌏️" << endl;
     db2.lock(0);
     assert(false);
+    
     */
-    return 0;
     
     JSONDatabase database(DATABASE_FILENAME);
     

@@ -26,7 +26,7 @@ using namespace boost::interprocess;
         BString _name;
         BString _sharedMemoryName;
         
-        // list stores {key, value} pairs
+        // list value type
         typedef std::pair<Key, offset_ptr<Value> > NodeType;
         // Define the types for the allocator and the list
         // The allocator needs to know about the segment manager
@@ -166,6 +166,9 @@ using namespace boost::interprocess;
         
         void clear()
         {
+            
+cerr << "LRU CLEAR" << endl;
+/*
             for (auto pair : *_list)
             {
                 
@@ -176,7 +179,7 @@ using namespace boost::interprocess;
                 );
                 
             }
-            
+            */
             _list->clear();
             _map->clear();
             

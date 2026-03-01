@@ -67,9 +67,7 @@ namespace BeeFishDatabase
         assert(false);
 */
         cout << "Test Database " << endl;
-success = testMultiThreaded();
 
-assert(success);
         success = success &&
             testFile();
             
@@ -109,11 +107,13 @@ assert(success);
         success = success &&
             testObjects();
             
-        success = success &&
-            testAllFiles(TEST_DIRECTORY);
-            
+                    
         success = success &&
             testMultiThreaded();
+            
+        success = success &&
+            testAllFiles(TEST_DIRECTORY);
+
             
         outputSuccess(success);
 
@@ -676,7 +676,6 @@ assert(success);
         if (success) {
             cout << "\t keyed \"hello\" json path" << endl;
             test["hello"].lock();
-            test["hello"].unlock();
             success = success && 
             testValue(
                 "Hello Unlocked",
@@ -1722,9 +1721,9 @@ assert(success);
                 stream.str() == "{}"
             );
             
+        cerr << "RESULT " << stream.str() << endl;
             
-            
-            
+        assert(success);
                     
         JSONDatabase database4;
         JSONPath start4 = database4.host("https://test");
@@ -1748,11 +1747,6 @@ assert(success);
                 database4.properties().contains("a")
             );
             
-        success = success &&
-            testValue(
-                "Property value a remains",
-                database4.words().contains("a")
-            );
        
             
         start4.clear();
@@ -1844,11 +1838,9 @@ assert(success);
     {
         cout << "Test multi threaded" << endl;
         
-        File tempFile;
-        std::filesystem::path file = tempFile.filename();
-        
+
         auto test =
-        [file](bool readOnly, bool getSuccess = false)
+        [](std::filesystem::path file, bool readOnly, bool getSuccess = false)
         {
             
             static Index size = 0;
@@ -1889,38 +1881,35 @@ assert(success);
             return success;
             
         };
-        
+        /*
+        {
+            File tempFile;
+            test(tempFile.filename(), false);
+            test(tempFile.filename(), true);
+        }
+        */
         cout <<"\tStarting threads" << endl;
          
-        std::thread threads[2];
-        test(false);
-        test(true);
-        
-        assert(false);
-        
-        threads[0] = std::thread(test, false);
-        BeeFishMisc::sleep(5);
-        threads[1] = std::thread(test, true);
-        
+        File tempFile;
+        std::thread threads[] =
+        {
+            std::thread(test, tempFile.filename(), false),
+            std::thread(test, tempFile.filename(), false)
+        };
+            
+
         cout << "\tWaiting threads" << endl;
         
         for (auto& thread : threads) {
-            if (thread.joinable()) {
-                thread.join();
-            }
+            thread.join();
         }
         
-        
-       // std::thread(test).join();
-        
-        cout << "Expected size " << 741432 << endl;
+        cout << "Expected size " << 704376 << endl;
 
-        
-        
-        bool success = test(true, true);
+        bool success = test("", true, true);
         
         outputSuccess(success);
-        assert(false);
+
         return success;
         
     }

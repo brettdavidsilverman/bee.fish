@@ -100,14 +100,18 @@ namespace BeeFishDatabase {
         JSONPath operator [] (const Index& index)
         {
             lock();
-            JSONPath path(*this);
+            
+            Path path(*this);
             Type type;
-            if (path.isDeadEnd())
+            if (isDeadEnd())
                 type = Type::ARRAY;
             else
-                type = path.type();
+                type = JSONPath::type();
+                
+            path = path[type];
 
-            path << type << POSITIONS << index;
+            path << POSITIONS << index;
+            
             return path;
         }
         
@@ -144,9 +148,13 @@ namespace BeeFishDatabase {
 
             Index position = -1;
             
-            assert (!path.isRoot());
-            //    return false;
-            
+            assert(!path.isRoot());
+            /*
+if (path.isRoot()) {
+    key = "";
+    return path;
+}
+            */
             path = path.parent(position);
             
             assert(!path.isRoot());
@@ -463,8 +471,6 @@ namespace BeeFishDatabase {
                     BString value;
                     (*this)[Type::STRING].getData(value);
                     removeWords(value);
- //   cout << "REMOVE WORDS " << value << endl;
- //                   assert(false);
                 }
                 case Type::UNKNOWN:
                 case Type::UNDEFINED:
@@ -581,13 +587,12 @@ namespace BeeFishDatabase {
             
             getObjectProperties().clear(propertyPath.index());
             
-             
 
         }
 
         void addWords(const BString& word, bool addToParents, ostream& log = cnull)
         {
-
+   
             Path words = database().words();
         
             BString string = toString();
@@ -611,7 +616,7 @@ namespace BeeFishDatabase {
                     {
         
                         Path object = path;
-                        words[word][object];
+                        ++words[word][object];
                         
                         path = path.parent();
                     }
@@ -619,7 +624,7 @@ namespace BeeFishDatabase {
                 else {
                 
                     Path object = (*this);
-                    words[word][object];
+                    ++words[word][object];
                     
                 }
                 
@@ -653,10 +658,13 @@ namespace BeeFishDatabase {
                         
                         Path wordObjects = words[word];
 
-                        wordObjects.clear(object);
-                        if (wordObjects.isDeadEnd())
+                        if (--wordObjects[object] == 0)
                         {
-                            words.clear(word);
+                            wordObjects.clear(object);
+                            if (wordObjects.isDeadEnd())
+                            {
+                                words.clear(word);
+                            }
                         }
                         
                         json = json.parent();
