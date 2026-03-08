@@ -205,7 +205,6 @@ LockFile::ScopedFileLock lock(_lockFile);
                 BString(stream.str()) +
                 BString(name);
                 
-//#warning need to factor in size of shared memory
             Index memorySize = _capacity * 2.5 * (sizeof(MapValue) + sizeof(NodeType) + sizeof(Value));
             
            // shared_memory_object::remove(_sharedMemoryName.c_str());

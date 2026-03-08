@@ -5,9 +5,8 @@ PORT=8000
 DEPS=server.h session.h response.h response-headers.h app.h json-app.h file-system-app.h error-app.h storage-app.h not-found-app.h options-app.h test.h authentication.h version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h Makefile
 
 $(OUTPUT):	$(DEPS) $(BUILD)/web-request $(BUILD)/query
-	@echo "Linking server"
+	@echo "Linking Web Server"
 	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lboost_locale 
-	#-lpthread -latomic
 #	sudo setcap cap_net_bind_service=ep $(OUTPUT)
 
 

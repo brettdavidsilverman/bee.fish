@@ -719,7 +719,7 @@ namespace BeeFishDatabase
             Path path = root["string"];
             path = path[Type::STRING];
             BString value;
-            path.getData(value);
+            path.getData<BString>(value);
             
             success = testValue("Hello World", value);
             
@@ -779,7 +779,7 @@ namespace BeeFishDatabase
             cout << "\tValue item 1 ";
             Path path = root["array"][Type::ARRAY][JSONPath::POSITIONS][1][Type::INTEGER];
             BString value;
-            path.getData(value);
+            path.getData<BString>(value);
             success = (value == "1");
             BeeFishMisc::outputSuccess(success);
         }
@@ -834,9 +834,48 @@ namespace BeeFishDatabase
             cout << "\tInteger value" << endl;
             Path path = root["integer"][Type::INTEGER];
             BString value;
-            path.getData(value);
+            path.getData<BString>(value);
             success = (value == "1234");
             BeeFishMisc::outputSuccess(success);
+        }
+        
+                
+        if (success)
+        {
+            JSONPath path = root["tobecleared"];
+            JSONPathParser parser(path);
+            cout << "\t\tParse string 3" << flush;
+            parser.read("\"Hello World\"");
+            parser.eof();
+
+            success = success &&
+                parser.result() == true;
+            BeeFishMisc::outputSuccess(success);
+            
+            BString string1 = path.toString();
+
+            path.clear();
+            success = success &&
+                testValue(
+                    "Cleared json is dead end",
+                     path.isDeadEnd()
+                );
+
+            path[Type::UNDEFINED];
+            success = success &&
+                testValue(
+                    "New type is undefined", 
+                    (path.type() == Type::UNDEFINED)
+                );
+            
+            BString string2 = path.toString();
+
+            success = success &&
+                testValue(
+                    "Cleared to string =",
+                    string1 == string2
+                );
+
         }
         
         BeeFishMisc::outputSuccess(success);
@@ -999,7 +1038,7 @@ namespace BeeFishDatabase
             cout << "\tInner array value" << endl;
             path = path[Type::INTEGER];
             BString value;
-            path.getData(value);
+            path.getData<BString>(value);
             success = (value == "1");
             BeeFishMisc::outputSuccess(success);
         }
@@ -1386,6 +1425,37 @@ assert(success);
            
         }
         
+        if (success)
+        {
+            Database database;
+            Path path = database;
+            path[key1];
+            path[key2];
+            path.clear();
+            success = success &&
+                testValue(
+                    "Path clear is dead end",
+                    path.isDeadEnd()
+                );
+                
+            if (success) {
+                path[key1][key1];
+                path[key1].clear();
+            }
+            
+            success = success &&
+                testValue(
+                    "Path contains key",
+                    path.contains(key1)
+                );
+                
+            success = success &&
+                testValue(
+                    "Path clear 2 is dead end",
+                    path[key1].isDeadEnd()
+                );
+        }
+        
 
         BeeFishMisc::outputSuccess(success);
         
@@ -1574,13 +1644,27 @@ assert(success);
         JSONDatabase database;
         
         JSONPath start = database.host("https://test");
+        /*
+        start = start["test"]["hello"];
+        start = database.host("https://test");
+        start["test"].deleteProperty("hello");
+        success = success &&
+            testValue(
+                "Test deleted",
+                start["test"].getPositions().isDeadEnd()
+            );
+        start.deleteProperty("test");
+        start.clear();
+        start = database.host("https://test");
+        */
+        
         JSONPathParser parser(start);
         parser.read("{\"a\":\"b\"}");
         parser.eof();
         
         success = success &
             testValue(
-                "Parser success",
+                "{\"a\":\"b\"}",
                 parser.matched()
             );
             
@@ -1595,32 +1679,49 @@ assert(success);
                 "Words contain b",
                 database.words().contains("b")
             );
+        
+        if (success)
+        {
+            start.deleteProperty("a");
             
-        start.deleteProperty("a");
+            testValue(
+                "Object property a removed",
+                start.getPositions().isDeadEnd()
+            );
+            
+            stringstream stream;
+            stream << start;
+            success = success &&
+                testValue(
+                    "Result {}",
+                    stream.str() == "{}"
+                );
+            
+        }
+        
         
         success = success &&
             testValue(
-                "Property removed",
+                "Property a removed",
                 !database.properties().contains("a")
             );
             
         success = success &&
             testValue(
-                "Property value removed",
+                "Word b removed",
                 !database.words().contains("b")
             );
             
+
+        
         success = success &&
             testValue(
-                "Property word removed",
+                "Word a removed",
                 !database.words().contains("a")
             );
             
-            
-            
-            
-            
-            
+        cout << endl;
+        
         JSONDatabase database2;
         
         JSONPath start2 = database2.host("https://test");
@@ -1628,9 +1729,10 @@ assert(success);
         parser2.read("{\"a\":{\"b\":\"c\"}}");
         parser2.eof();
         
+        
         success = success &
             testValue(
-                "Parser 2 success",
+                "{\"a\":{\"b\":\"c\"}}",
                 parser2.matched()
             );
             
@@ -1653,19 +1755,34 @@ assert(success);
             );
         
         
-        cout << "Removing property c" << endl;
-        
-        start2["a"].deleteProperty("b");
-        
+        if (success)
+        {
+            cout << "Removing property b" << endl;
+            start2["a"].deleteProperty("b");
+            testValue(
+                "Property a is still object",
+                start2["a"].type() == Type::OBJECT
+            );
+            testValue(
+                "Property b removed",
+                start2["a"].getPositions().isDeadEnd()
+            );
+            
+            stringstream stream;
+            stream << start2["a"];
+            cerr << "RESULT " << stream.str() << endl;
+assert(false);
+        }
+            
         success = success &&
             testValue(
-                "Property 2 removed",
+                "Property b removed",
                 !database2.properties().contains("b")
             );
             
         success = success &&
             testValue(
-                "Property 2 value removed",
+                "Property c removed",
                 !database2.words().contains("c")
             );
         
@@ -1676,8 +1793,7 @@ assert(success);
             );
             
             
-            
-            
+
             
         JSONDatabase database3;
         JSONPath start3 = database3.host("https://test");
@@ -1687,7 +1803,7 @@ assert(success);
         
         success = success &
             testValue(
-                "Parser 3 success",
+                "{\"a\":{\"b\":\"c\"}}",
                 parser3.matched()
             );
         
@@ -1697,7 +1813,7 @@ assert(success);
         
         success = success &&
             testValue(
-                "Property 3 removed",
+                "Property 3 a removed",
                 !database3.properties().contains("a")
             );
             
@@ -1713,15 +1829,19 @@ assert(success);
                 !database3.words().contains("c")
             );
         
-        stringstream stream;
-        stream << start3;
-        success = success &&
-            testValue(
-                "Result {}",
-                stream.str() == "{}"
-            );
+        {
+            stringstream stream;
+            stream << start3;
+            success = success &&
+                testValue(
+                    "Result {}",
+                    stream.str() == "{}"
+                );
+            cerr << "RESULT " << stream.str() << endl;
+assert(false);
+        }
             
-        cerr << "RESULT " << stream.str() << endl;
+        
             
         assert(success);
                     
@@ -1733,7 +1853,7 @@ assert(success);
         
         success = success &
             testValue(
-                "Parser 4 success",
+                "{\"a\":{\"a\":\"a\"}}",
                 parser4.matched()
             );
         
@@ -1748,7 +1868,7 @@ assert(success);
             );
             
        
-            
+            /*
         start4.clear();
         stringstream stream4;
         stream4 << start4;
@@ -1759,7 +1879,7 @@ assert(success);
                 stream4.str() == "undefined"
             );
         
-        
+        */
         BeeFishMisc::outputSuccess(success);
         
         return success;

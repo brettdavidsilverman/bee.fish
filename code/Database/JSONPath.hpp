@@ -30,6 +30,7 @@ namespace BeeFishDatabase {
         typedef Index Id;
         
         using Path::contains;
+        using Path::clear;
         
         JSONPath()
         {
@@ -119,7 +120,7 @@ namespace BeeFishDatabase {
         {
 
             lock();
-            JSONPath path(*this);
+            
             if (isDeadEnd()) {
                 if (!isRoot())
                     database().objects()[*this];
@@ -127,11 +128,16 @@ namespace BeeFishDatabase {
             else if (JSONPath::type() != type)
             {
                 clear();
+                assert(isDeadEnd());
                 if (!isRoot())
                     database().objects()[*this];
             }
             
+            Path path(*this);
             path << type;
+            
+            assert(JSONPath::type() == type);
+            
 
             return path;
         }
@@ -149,12 +155,7 @@ namespace BeeFishDatabase {
             Index position = -1;
             
             assert(!path.isRoot());
-            /*
-if (path.isRoot()) {
-    key = "";
-    return path;
-}
-            */
+
             path = path.parent(position);
             
             assert(!path.isRoot());
@@ -325,38 +326,33 @@ if (path.isRoot()) {
              
         }
 
-        Index getObjectPropertyPosition(const BString& key)
+        Index getObjectPropertyPosition(const BString& property)
         {
 
             // Get the property index
-            Path keyPath = 
-                properties();
+            Path propertyPath = 
+                properties()[property];
                  
-            keyPath = keyPath[key];
-             
-            Index keyPathIndex =
-                keyPath.index();
-             
-             
             // Get the position
             Index position;
             
-            Path objectKeyPath = getObjectProperties()[keyPathIndex];
+            Path objectPropertyPath =
+                getObjectProperties()[propertyPath];
             
-            if (objectKeyPath.hasData())
+            if (objectPropertyPath.hasData())
             {
-                objectKeyPath.getData<Index>(position);
+                objectPropertyPath.getData<Index>(position);
             }
             else 
             {
                 // New property
                 // Update the properties counter
-                ++keyPath;
+                ++propertyPath;
                 
                 Path objectPositions = getPositions();
                 position = ++objectPositions;
-                objectPositions[position].setData<Index>(keyPathIndex);
-                objectKeyPath.setData<Index>(position);
+                objectPositions[position].setData<Index>(propertyPath.index());
+                objectPropertyPath.setData<Index>(position);
             }
             
 
@@ -422,9 +418,8 @@ if (path.isRoot()) {
         
         Path getObjectProperties()
         {
-            Path path = (*this);
-            path << Type::OBJECT
-                 << PROPERTIES;
+            Path path = (*this)[Type::OBJECT];
+            path << PROPERTIES;
             return path;
         }
         
@@ -450,26 +445,16 @@ if (path.isRoot()) {
         
         virtual void clear() override
         {
-            
-            if (!isRoot())
-                database().objects().clear(*this);
-   
+
             if (isDeadEnd())
-            {
-                Path::clear();
                 return;
-            }
-            
-            
-            
          
-    
             switch (type())
             {
                 case Type::STRING:
                 {
                     BString value;
-                    (*this)[Type::STRING].getData(value);
+                    (*this)[Type::STRING].getData<BString>(value);
                     removeWords(value);
                 }
                 case Type::UNKNOWN:
@@ -483,42 +468,50 @@ if (path.isRoot()) {
                 {
 
                     Path positions = getPositions();
-                    Iterable<Index> array(positions);
-                    for (auto it = array.begin(); it != array.end();)
+                    if (positions.isDeadEnd())
+                        break;
+                    const Index count = positions.max<Index>();
+                    for (Index index = 1; index <= count; ++index)
                     {
-                        Index index = *it;
+                        if (positions.contains(index))
+                        {
 
-                        JSONPath item = (*this)[index];
-
-                        item.clear();
-
-                        ++it;
-                        getPositions().clear(index);
+                            JSONPath item = (*this)[index];
+                            item.clear();
+                            getPositions().clear(index);
+                        }
 
                     }
                     
                     assert(getPositions().isDeadEnd());
+
                     break;
                 }
                 case Type::OBJECT:
                 {
-
-                    for (auto property : *this)
-                    {
-                        JSONPath json = (*this)[property];
-                        json.clear();
-                        deleteProperty(property);
-                        
-                    }
                     Path positions = getPositions();
-                    assert(positions.isDeadEnd());
+                    if (positions.isDeadEnd())
+                        break;
+                    const Index count = positions.max<Index>();
+                    for (Index index = 1; index <= count; ++index)
+                    {
+                        if (positions.contains(index))
+                        {
+                            BString property = getObjectProperty(index).value();
+                            deleteProperty(property);
+                        }
+                    }
+                    assert(getPositions().isDeadEnd());
                     break;
                     
                 }
             }
             
-            
-            Path::clear();
+            if (!isRoot())
+                database().objects().clear(*this);
+   
+            clear(type());
+            assert(isDeadEnd());
 
         }
         
@@ -528,34 +521,13 @@ if (path.isRoot()) {
             if (!contains(property))
                 return;
                 
-            
+
             JSONPath json = (*this)[property];
-            
-            // Delete children
-            if (!json.isDeadEnd()) 
-            {
-                for (auto key : json)
-                {
-                    json.deleteProperty(key);
-                }
-            }
-            
-            Path words = database().words();
-            
-            // Remove words from string values
-            if (!json.isDeadEnd() && json.type() == Type::STRING)
-            {
-                BString value;
-                json[Type::STRING].getData(value);
-                json.removeWords(value);
-            }
-            
-            // Remove this property words
-            json.removeWords(property);
         
+            json.removeWords(property);
+
             // Remove parent properties
-            json = (*this);
-            JSONPath path = json;
+            JSONPath path = (*this);
             while (!path.isRoot() &&
                    !path.parent().isRoot())
             {
@@ -572,8 +544,10 @@ if (path.isRoot()) {
                 }
                 
             }
-    
-
+            
+            json.clear();
+            
+            
             // Remove the property
             Index position = getObjectPropertyPosition(property);
             getPositions().clear(position);
@@ -585,16 +559,18 @@ if (path.isRoot()) {
                 properties().clear(property);
             }
             
-            getObjectProperties().clear(propertyPath.index());
-            
+            getObjectProperties().clear(propertyPath);
 
+            
         }
 
         void addWords(const BString& word, bool addToParents, ostream& log = cnull)
         {
-   
+
             Path words = database().words();
-        
+            Path objects = database().objects();
+            Path object = objects[*this];
+            
             BString string = toString();
             std::vector<BString> tokens =
                 tokenise(word);
@@ -604,38 +580,35 @@ if (path.isRoot()) {
             {
                 BString word =
                         token.toLower();
-                        
+              
                 log << string << "#" << word << endl;
                 
-                
+                Path wordPath = words[word];
+                JSONPath json = *this;
                 if (addToParents) {
-                    JSONPath path = *this;
                     
-                    while (!path.isRoot() &&
-                        !path.parent().isRoot())
+                    while (!json.isRoot() &&
+                        !json.parent().isRoot())
                     {
-        
-                        Path object = path;
-                        ++words[word][object];
-                        
-                        path = path.parent();
+                        wordPath[json];
+                        json = json.parent();
                     }
                 }
                 else {
-                
-                    Path object = (*this);
-                    ++words[word][object];
-                    
+                    wordPath[json];
                 }
+                object[wordPath];
+                
+                assert(object.contains(wordPath));
                 
             }
         }
         
         void removeWords(const BString& value)
         {
-   
             Path words = database().words();
-            
+            Path objects = database().objects();
+            Path object = objects[*this];
             std::vector<BString> tokens =
                 tokenise(value);
             
@@ -643,37 +616,29 @@ if (path.isRoot()) {
             {
                 BString word =
                         token.toLower();
-        
                 if (words.contains(word))
                 {
-                    
-                    
-                    JSONPath json = (*this);
-                    
-                    while (!json.isRoot() &&
-                            !json.parent().isRoot())
-                    {
-                            
-                        Path object = json;
-                        
-                        Path wordObjects = words[word];
+                    Path wordPath = words[word];
 
-                        if (--wordObjects[object] == 0)
+                    if (object.contains(wordPath))
+                    {
+                        object.clear(wordPath);
+                        JSONPath json = (*this);
+                        while (!json.isRoot() &&
+                               !json.parent().isRoot())
                         {
-                            wordObjects.clear(object);
-                            if (wordObjects.isDeadEnd())
+                            words[word].clear(json);
+                            if (wordPath.isDeadEnd())
                             {
                                 words.clear(word);
                             }
+                            json = json.parent();
                         }
-                        
-                        json = json.parent();
-                        
-                    
                     }
                     
                 }
             }
+            
         }
         
         std::vector<BString> tokenise(BString word)
@@ -735,14 +700,14 @@ if (path.isRoot()) {
             case Type::NUMBER:
             {
                 BString value;
-                path.getData(value);
+                path.getData<BString>(value);
                 out << value;
                 break;
             }
             case Type::STRING:
             {
                 BString string;
-                path.getData(string);
+                path.getData<BString>(string);
                     
                 out << "\""
                     << string.escape()

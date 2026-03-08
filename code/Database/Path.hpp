@@ -628,6 +628,11 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
             lock();
             
             Branch branch = getBranch();
+            
+            if (branch._dataIndex) {
+                deleteData();
+            }
+            
             if (branch._left) {
                 _database->deleteBranch(branch._left);
             }
@@ -637,9 +642,8 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
             }
             
 
-       
+
         }
-        
         
 
         template<typename T>

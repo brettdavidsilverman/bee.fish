@@ -21,19 +21,12 @@ namespace BeeFishDatabase
         Index _right = 0;
         Index _dataIndex = 0;
         
-        inline Branch() :
-            _parent(0),
-            _left(0),
-            _right(0),
-            _dataIndex(0)
+        inline Branch()
         {
         }
         
         Branch(Index parent) :
-            _parent(parent),
-            _left(0),
-            _right(0),
-            _dataIndex(0)
+            _parent(parent)
         {
         }
     

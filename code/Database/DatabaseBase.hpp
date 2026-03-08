@@ -195,43 +195,7 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
             _locks->clear();
         }
         
-        /*
-    
-        inline managed_shared_memory* createSharedMemory(Index capacity)
-        {
-            
-            std::hash<std::string> hasher;
-            std::filesystem::path path = filename();
-            // Since path character '/' isnt allowed
-            // this will use the filename
-            // hash instead
-            std::size_t hashedValue = hasher(
-                path.string()
-            );
-            std::stringstream stream;
-            stream << hashedValue;
-            _sharedMemoryName = 
-                BString(stream.str()) +
-                BString("Database");
-            
-            Index memorySize = capacity * 4 * sizeof(MapType);
-            
-            shared_memory_object::remove(_sharedMemoryName.c_str());
-            
-            return new
-                managed_shared_memory(open_or_create, _sharedMemoryName.c_str(), memorySize);
-            
-        }
         
-        inline void destroySharedMemory()
-        {
-            
-            delete _sharedMemory;
-            shared_memory_object::remove(_sharedMemoryName.c_str());
-            
-        }
-        
-*/
         Index pageSize() const {
             return _pageSize;
         }
@@ -286,7 +250,6 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
             if (index != rootIndex())
             {
                 
-            
                 Branch parent = getBranch(
                     branch._parent
                 );
@@ -318,6 +281,7 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
             Branch branch = getBranch(index);
             
             if (branch._dataIndex) {
+                // Reclaim space here
                 branch._dataIndex = 0;
                 setBranch(index, branch);
             }

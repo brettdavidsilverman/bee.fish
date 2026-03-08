@@ -66,11 +66,8 @@ namespace BeeFishDatabase {
             
             JSONPath start = path;
             start.lock();
-            
-            //ScopedPathLock lock(start);
+          //ScopedPathLock lock(start);
             start[type];
-            
-            
             
             
             // add all path keys except the
@@ -96,7 +93,6 @@ namespace BeeFishDatabase {
             }
                 
 
-            
             switch (type)
             {
                 case Type::UNDEFINED:
@@ -116,7 +112,7 @@ namespace BeeFishDatabase {
                 case Type::INTEGER:
                 case Type::NUMBER:
                 {
-                    start[type].setData(value);
+                    start[type].setData<BString>(value);
                                
                     if (&_log != &cnull)
                         _log << start.toString() << "#" << value << endl;
@@ -125,7 +121,7 @@ namespace BeeFishDatabase {
                 }
                 case Type::STRING:
                 {
-                    start[type].setData(value);
+                    start[type].setData<BString>(value);
                     start.addWords(value, true, _log);
                     
                     break;
@@ -242,8 +238,6 @@ namespace BeeFishDatabase {
 
             JSONPath path = topPath();
             
-//  Path::ScopedPathLock lock(path, LockType::WRITE);
-            
             if (json->type() == Type::UNDEFINED)
             {
                 path.deleteProperty(key->value());
@@ -288,8 +282,6 @@ namespace BeeFishDatabase {
         {
             
             JSONPath path = topPath();
-            
-  // Path::ScopedPathLock lock(path, LockType::WRITE);
             
             Index& index = topIndex();
             path = path[index++];
