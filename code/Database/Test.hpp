@@ -1756,19 +1756,6 @@ assert(success);
         JSONDatabase database;
         
         JSONPath start = database.host("https://test");
-        /*
-        start = start["test"]["hello"];
-        start = database.host("https://test");
-        start["test"].deleteProperty("hello");
-        success = success &&
-            testValue(
-                "Test deleted",
-                start["test"].getPositions().isDeadEnd()
-            );
-        start.deleteProperty("test");
-        start.clear();
-        start = database.host("https://test");
-        */
         
         JSONPathParser parser(start);
         parser.read("{\"a\":\"b\"}");
@@ -1832,6 +1819,8 @@ assert(success);
                 !database.words().contains("a")
             );
             
+        assert(success);
+        
         cout << endl;
         
         JSONDatabase database2;
@@ -1889,8 +1878,11 @@ assert(success);
             
             stringstream stream;
             stream << start2["a"];
-            cerr << "RESULT " << stream.str() << endl;
-assert(false);
+            success = success &&
+                testValue(
+                    "Result", 
+                    BString(stream.str()) == "{}"
+                );
         }
             
         success = success &&

@@ -678,17 +678,13 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
                 _database->deleteBranch(
                     branch._left
                 );
-               // branch._left = 0;
             }
             else {
                 _database->deleteBranch(
                     branch._right
                 );
-               // branch._right = 0;
             }
             
-          //  _database->setBranch(lastIndex, branch);
-                
                 
             
         }

@@ -99,6 +99,7 @@ namespace BeeFishDatabase {
         JSONPath operator [] (const Index& index)
         {
             assert(index > 0);
+            getPositions()[index];
             return getChildren()[index];
         }
         
@@ -373,10 +374,11 @@ namespace BeeFishDatabase {
                 ++propertyPath;
                 
                 // Update positions
-                Path objectPositions = getPositions();
-                position = ++objectPositions;
-                objectPositions[position].setData<Index>(propertyPath.index());
+                Path positions = getPositions();
+                position = ++positions;
+                positions[position].setData<Index>(propertyPath.index());
                 objectPropertyPath.setData<Index>(position);
+                getChildren()[position];
                 
                 // add all path keys except the
                 // first (host)
@@ -511,7 +513,6 @@ assert(path.hasData());
 
             if (isDeadEnd())
                 return;
-cerr << "CLEAR " << *this << endl;
 
             switch (type())
             {
@@ -537,16 +538,11 @@ cerr << "CLEAR " << *this << endl;
                     
                     for (auto index : iterable)
                     {
-    assert(false);
-        cerr << "ARRAY ITEM " << index << endl;
                         JSONPath item = (*this)[index];
                         item.clear();
                         getPositions().clear(index);
                         getChildren().clear(index);
                     }
-                    
-            //        assert(getPositions().isDeadEnd());
-           //         assert(getChildren().isDeadEnd());
 
                     break;
                 }
@@ -561,16 +557,14 @@ cerr << "CLEAR " << *this << endl;
                         deleteProperty(property);
                     }
                     
-                    assert(getPositions().isDeadEnd());
-                    assert(getChildren().isDeadEnd());
-                    
                     break;
                     
                 }
             }
-            
                                 
-            
+            assert(getPositions().isDeadEnd());
+            assert(getChildren().isDeadEnd());
+                    
             
             if (!isRoot())
                 database().objects().clear(*this);
@@ -589,7 +583,7 @@ cerr << "CLEAR " << *this << endl;
 
             JSONPath json = (*this)[property];
         
-            json.removeWords(property);
+            removeWords(property);
 
             // Remove parent properties
             JSONPath path = (*this)[property];
@@ -605,7 +599,7 @@ cerr << "CLEAR " << *this << endl;
                     {
                         property = property.substr(1, property.size() - 2);
                     }
-                    json.removeWords(property);
+                    removeWords(property);
                 }
                 
             }
@@ -634,7 +628,8 @@ cerr << "CLEAR " << *this << endl;
             Path words = database().words();
             Path objects = database().objects();
             Path object = objects[*this];
-            
+cerr << "+OBJECT " << word << " " << object.index() << endl;
+   
             std::vector<BString> tokens =
                 tokenise(word);
             
@@ -645,6 +640,8 @@ cerr << "CLEAR " << *this << endl;
                         token.toLower();
               
                 Path wordPath = words[word];
+cerr << "+WORDPATH " << word << " " << wordPath.index() << endl;
+   
                 JSONPath json = *this;
                 if (addToParents) {
                     
@@ -670,6 +667,8 @@ cerr << "CLEAR " << *this << endl;
             Path words = database().words();
             Path objects = database().objects();
             Path object = objects[*this];
+cerr << "-OBJECT " << value << " " << object.index() << endl;
+   
             std::vector<BString> tokens =
                 tokenise(value);
             
@@ -679,22 +678,27 @@ cerr << "CLEAR " << *this << endl;
                         token.toLower();
                 if (words.contains(word))
                 {
-                    Path wordPath = words[word];
 
+                    Path wordPath = words[word];
+cerr << "-WORDPATH " << word << " " << wordPath.index() << endl;
                     if (object.contains(wordPath))
                     {
+cerr << "-OBJECTS[WORDPATH]" << endl;
                         object.clear(wordPath);
                         JSONPath json = (*this);
-                        while (!json.isRoot() &&
-                               !json.parent().isRoot())
+                        do
                         {
-                            words[word].clear(json);
+cerr << "-JSON " << json.index() << endl;
+                            wordPath.clear(json);
                             if (wordPath.isDeadEnd())
                             {
+cerr << "- " << word << endl;
                                 words.clear(word);
                             }
                             json = json.parent();
                         }
+                        while  (!json.isRoot() &&
+                                !json.parent().isRoot());
                     }
                     
                 }
