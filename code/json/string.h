@@ -308,7 +308,7 @@ namespace BeeFishJSON {
         
         virtual void setup(Parser* parser)
         {
-                
+
             _stringCharacters =
                 new StringCharacters();
             

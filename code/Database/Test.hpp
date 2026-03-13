@@ -71,8 +71,6 @@ namespace BeeFishDatabase
         success = success &&
             testFile();
             
-        return success;
-            
         success = success &&
             testNextIndex();
         
@@ -154,16 +152,51 @@ namespace BeeFishDatabase
         if (success)
         {
             JSONDatabase db;
-            JSONPath path = db.host("https:\\test");
+            BString value = "101";
+            Index data = db.allocate(value);
+            
+            success = success &&
+                testValue(
+                    "Allocated",
+                    data > 0
+                );
+                
+            BString value2;
+            JSONPath path = db.json();
+            
+            path.setData(value);
+            path.getData(value2);
+            
+            success = success &&
+                testValue(
+                    "Get/set data",
+                    value == value2
+                );
+                
+            path.setData<BString>(value);
+            path.getData<BString>(value2);
+            
+            success = success &&
+                testValue(
+                    "Get/set data 2",
+                    value == value2
+                );
+            
             JSONPathParser parser(path);
-            parser.read("\"Hello world\"");
+            parser.read("101");
+            parser.eof();
+            assert(parser.matched());
+            
             std::stringstream stream;
             stream << path;
+    
             success = success &&
                 testValue(
                     "Database read/write",
-                    BString(stream.str()) == "\"Hello world\""
+                    BString(stream.str()) == "101"
                 );
+            
+            
         }
         
         outputSuccess(success);
@@ -308,11 +341,42 @@ namespace BeeFishDatabase
             success = !data.hasData();
             if (success)
             {
+                BString value = data.getData();
+                
+                success = success &&
+                    testValue(
+                        "Get empty data 1",
+                        value == ""
+                    );
+            }
+        
+            
+            
+            if (success)
+            {
+                BString value;
+                data.getData<BString>(value);
+                success = success &&
+                    testValue(
+                        "Get empty data 2",
+                        value == ""
+                    );
+            }
+            
+            if (success)
+            {
                 BString value;
                 data.getData(value);
-                success = success && (value == "");
+                success = success &&
+                    testValue(
+                        "Get empty data 3",
+                        value == ""
+                    );
             }
-            outputSuccess(success);
+            
+            assert(success);
+            
+
         }
         
         Path bookmark = data;

@@ -485,7 +485,7 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
             return existingCount;
         }
         
-        std::string getData() {
+        BString getData() {
             
             //LockFile::ScopedFileLock lock(database());
         
@@ -506,7 +506,7 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
 
         }
         
-        const std::string getData() const {
+        const BString getData() const {
             Path path = *this;
             return path.getData();
         }
@@ -515,27 +515,33 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
         template<typename T>
         void getData(T& destination)
         {
-            std::string data = getData();
+            BString data = getData();
             destination = *(T*)data.data();
         }
 
-        void getData(std::string& destination)
-        {
-            destination = getData();
-        }
-
+        template<typename T = BString>
         void getData(BString& destination)
         {
             destination = getData();
         }
-
-        void setData(const std::string& value) {
-
+        
+        template<typename T>
+        void setData(const T& source)
+        {
+            const char* bytes = (const char*)&source;
+            BString data(bytes, sizeof(T));
+            setData<BString>(data);
+            
+        }
+        
+        template<typename T = BString>
+        void setData(const BString& value) {
+            
             lock();
             
             Branch branch = getBranch();
 
-            std::string current =
+            BString current =
                 _database->getData(branch._dataIndex);
 
             if (value.size() == 0) {
@@ -565,26 +571,14 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
 
         }
         
+        template<typename T = const char *>
         void setData(
             const char* source
         )
         {
-            setData(std::string(source));
+            setData<BString>(BString(source));
         }
         
-        void setData(const BString& value)
-        {
-            setData(value.str());
-        }
-  
-        template<typename T>
-        void setData(const T& source)
-        {
-            const char* bytes = (const char*)&source;
-            std::string data(bytes, sizeof(T));
-            setData(data);
-            
-        }
         
         
         Branch getBranch()
@@ -785,7 +779,7 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
 
 
             if (_database) {
-                std::string data = getData();
+                BString data = getData();
                 variable["hasData"] = (data.size() > 0);
                 if (data.size())
                 {
