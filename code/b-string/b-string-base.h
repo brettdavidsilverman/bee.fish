@@ -58,7 +58,14 @@ namespace BeeFishBString
         }
 
         // from vector
-        BString(const BStringBase &source) : BStringBase(source)
+        BString(const BStringBase &source) :
+            BStringBase(source)
+        {
+        }
+        
+        // repeated character
+        BString(size_t length, char c) :
+            BStringBase(length, c)
         {
         }
 

@@ -271,7 +271,15 @@ namespace BeeFishJSON {
             Repeat::matchedItem(item);
         }
         
-        virtual BString& value() {
+        virtual BString& value()
+        override
+        {
+            return *this;
+        }
+        
+        virtual const BString& value() const
+        override 
+        {
             return *this;
         }
         
@@ -324,11 +332,13 @@ namespace BeeFishJSON {
         }
         
         virtual BString& value()
+        override
         {
             return _value;
         }
         
         virtual const BString& value() const
+        override
         {
             return _value;
         }

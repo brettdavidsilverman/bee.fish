@@ -64,6 +64,8 @@ namespace BeeFishScript {
       out << toChar(type);
       return out;
    }
+   
+   /*
 
    PowerEncoding& operator << (PowerEncoding& out, const Type& type)
    {
@@ -78,7 +80,7 @@ namespace BeeFishScript {
       value = (Type)type;
       return in;
    }
-
+   */
 
 }
 

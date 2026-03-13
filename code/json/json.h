@@ -134,7 +134,15 @@ namespace BeeFishJSON
         // Defined in json-parser.h
         virtual void success();
         
-        virtual Match& item() const
+        virtual Match& item()
+        {
+            if (!_items->matched())
+                throw runtime_error("No JSON item matched");
+
+            return _items->item();
+        }
+        
+        virtual const Match& item() const
         {
             if (!_items->matched())
                 throw runtime_error("No JSON item matched");
@@ -148,11 +156,13 @@ namespace BeeFishJSON
         }
         
         virtual BString& value()
+        override
         {
             return item().value();
         }
 
         virtual const BString& value() const
+        override
         {
             return item().value();
         }

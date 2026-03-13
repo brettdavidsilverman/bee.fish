@@ -43,6 +43,6 @@ run_debug:	debug
 	
 trace:	$(OUTPUT)
 	rm -f trace.txt
-	valgrind --tool=memcheck -s --leak-check=full --track-origins=yes --log-file="trace.txt"  $(OUTPUT) -test
+	-valgrind --tool=memcheck -s --leak-check=full --track-origins=yes --log-file="trace.txt"  $(OUTPUT) -test
 	cat trace.txt
 

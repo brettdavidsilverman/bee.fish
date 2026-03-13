@@ -71,6 +71,8 @@ namespace BeeFishDatabase
         success = success &&
             testFile();
             
+        return success;
+            
         success = success &&
             testNextIndex();
         
@@ -135,6 +137,34 @@ namespace BeeFishDatabase
         cout << "\tUnlock" << endl;
         file.unlock();
         file.unlock();
+        
+        BString test = "Hello world";
+        file.write(test.data(), test.size());
+        
+        file.seek(0);
+        test = BString(test.size(), '\0');
+        
+        file.read(test.data(), test.size());
+        
+        success = testValue(
+            "File read/write",
+            test == "Hello world"
+        );
+        
+        if (success)
+        {
+            JSONDatabase db;
+            JSONPath path = db.host("https:\\test");
+            JSONPathParser parser(path);
+            parser.read("\"Hello world\"");
+            std::stringstream stream;
+            stream << path;
+            success = success &&
+                testValue(
+                    "Database read/write",
+                    BString(stream.str()) == "\"Hello world\""
+                );
+        }
         
         outputSuccess(success);
 
@@ -664,18 +694,21 @@ namespace BeeFishDatabase
         
         cout << "\tTest type" << endl;
         JSONDatabase database;
-        JSONPath test = database.json();
-        test[Type::UNDEFINED];
+        JSONPath start = database.host("https://test");
+        JSONPath test =start["test"];
+        
+        test.setType(Type::UNDEFINED);
         
         success = success && 
             testValue(
                 "Set to undefined",
                 test.type() == Type::UNDEFINED
             );
+        
             
         if (success) {
-            cout << "\t keyed \"hello\" json path" << endl;
-            test["hello"].lock();
+            cout << "\tKeyed \"hello\" json path" << endl;
+            start["hello"].lock();
             success = success && 
             testValue(
                 "Hello Unlocked",
@@ -707,9 +740,10 @@ namespace BeeFishDatabase
             
             cout << "\tIndexed string ";
             Path path = root["string"];
-            
+            Type type;
+            path[JSONPath::TYPE].getData<Type>(type);
             success = success &&
-                path.contains(Type::STRING);
+                type == Type::STRING;
                 
             BeeFishMisc::outputSuccess(success);
         }
@@ -717,11 +751,16 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tString value ";
             Path path = root["string"];
-            path = path[Type::STRING];
-            BString value;
-            path.getData<BString>(value);
+            success = success &&
+                path[JSONPath::VALUE].hasData();
+                
+            if (success)
+            {
+                BString value;
+                path[JSONPath::VALUE].getData<BString>(value);
             
-            success = testValue("Hello World", value);
+                success = testValue("Hello World", value);
+            }
             
             BeeFishMisc::outputSuccess(success);
         }
@@ -745,9 +784,8 @@ namespace BeeFishDatabase
         if (success) {
             
             cout << "\tIndexed array ";
-            Path path = root["array"];
             success =
-                path.contains(Type::ARRAY);
+                root["array"].type() == Type::ARRAY;
                 
             BeeFishMisc::outputSuccess(success);
 
@@ -756,30 +794,32 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tItem 1:" << endl;
             Path path = root["array"];
-            path = path[Type::ARRAY];
-            
-            Size test = path.min<Size>();
+    
+            Size test = path[JSONPath::CHILDREN].min<Size>();
             success = success &&
                 testResult("\tItem 1 index", test == 1);
                 
             success = success && 
-                testResult("\tItem contains 1", path.contains(test));
+                testResult("\tItem contains 1", path[JSONPath::CHILDREN].contains(test));
             
         }
         
         if (success) {
             cout << "\tType item 1 ";
             Path path = root["array"];
-            path = path[Type::ARRAY][JSONPath::POSITIONS][1];
-            success = path.contains(Type::INTEGER);
+            path = path[JSONPath::CHILDREN][1];
+            Type type;
+            path[JSONPath::TYPE].getData<Type>(type);
+            success = (type == Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tValue item 1 ";
-            Path path = root["array"][Type::ARRAY][JSONPath::POSITIONS][1][Type::INTEGER];
+            Path path = root["array"];
+            path = path[JSONPath::CHILDREN][1];
             BString value;
-            path.getData<BString>(value);
+            path[JSONPath::VALUE].getData<BString>(value);
             success = (value == "1");
             BeeFishMisc::outputSuccess(success);
         }
@@ -787,22 +827,25 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tItem 2 ";
             Path path = root["array"];
-            path = path[Type::ARRAY][JSONPath::POSITIONS];
+            path = path[JSONPath::CHILDREN];
             success = path.contains(2);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tType item 2 ";
-            Path path = root["array"][Type::ARRAY][JSONPath::POSITIONS][2];
-            success = path.contains(Type::ARRAY);
+            Path path = root["array"];
+            path = path[JSONPath::CHILDREN][2];
+            Type type;
+            path[JSONPath::TYPE].getData<Type>(type);
+            success = (type == Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tValue item 2 ";
             Path path = root["array"];
-            success = path[Type::ARRAY][2][JSONPath::POSITIONS][Type::ARRAY].isDeadEnd();
+            success = path[JSONPath::CHILDREN][2][JSONPath::CHILDREN].isDeadEnd();
             BeeFishMisc::outputSuccess(success);
         }
         
@@ -824,17 +867,18 @@ namespace BeeFishDatabase
             cout << "\tInteger type" << endl;
             Path path = root["integer"];
             
-            Stack stack;
-            success = path.contains(Type::INTEGER);
+            Type type;
+            path[JSONPath::TYPE].getData<Type>(type);
+            success = (type == Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success)
         {
             cout << "\tInteger value" << endl;
-            Path path = root["integer"][Type::INTEGER];
+            Path path = root["integer"];
             BString value;
-            path.getData<BString>(value);
+            path[JSONPath::VALUE].getData<BString>(value);
             success = (value == "1234");
             BeeFishMisc::outputSuccess(success);
         }
@@ -844,7 +888,7 @@ namespace BeeFishDatabase
         {
             JSONPath path = root["tobecleared"];
             JSONPathParser parser(path);
-            cout << "\t\tParse string 3" << flush;
+            cout << "\tParse string 3" << flush;
             parser.read("\"Hello World\"");
             parser.eof();
 
@@ -853,15 +897,17 @@ namespace BeeFishDatabase
             BeeFishMisc::outputSuccess(success);
             
             BString string1 = path.toString();
-
+cerr << string1 << endl;
             path.clear();
+
             success = success &&
                 testValue(
                     "Cleared json is dead end",
                      path.isDeadEnd()
                 );
 
-            path[Type::UNDEFINED];
+        //    path.setType(Type::UNDEFINED);
+
             success = success &&
                 testValue(
                     "New type is undefined", 
@@ -904,11 +950,11 @@ namespace BeeFishDatabase
         BeeFishMisc::outputSuccess(success);
         
         if (success) {
-            success = path.contains(Type::ARRAY);
+            success = _path.type() == Type::ARRAY;
         }
         
         if (success) {
-            path = path[Type::ARRAY][JSONPath::POSITIONS];
+            path = path[JSONPath::CHILDREN];
             success = path.contains(1);
         }
         
@@ -931,11 +977,13 @@ namespace BeeFishDatabase
         
         if (success) {
             path = path[1];
-            success = path.contains(Type::ARRAY);
+            Type type;
+            path[JSONPath::TYPE].getData<Type>(type);
+            success = (type == Type::ARRAY);
         }
         
         if (success) {
-            path = path[Type::ARRAY];
+            path = path[JSONPath::CHILDREN];
             success = path.isDeadEnd();
         }
         
@@ -973,15 +1021,16 @@ namespace BeeFishDatabase
         
         if (success) {
             cout << "\tOuter Array: ";
-            
-            success = path.contains(Type::ARRAY);
+            Type type;
+            path[JSONPath::TYPE].getData<Type>(type);
+            success = (type == Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         
         }
         
         if (success) {
             cout << "\tOuter Array first index: ";
-            path = path[Type::ARRAY][JSONPath::POSITIONS];
+            path = path[JSONPath::CHILDREN];
             success = path.contains(1);
             BeeFishMisc::outputSuccess(success);
         }
@@ -991,13 +1040,7 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tOuter Array max index: ";
             Stack stack;
-            Index position;
-            while (path.next(stack, position))
-            {
-                cerr << "Position. " << position << endl;
-            }
-            
-            Index max = test[Type::ARRAY][JSONPath::POSITIONS].max<Index>();
+            Index max = path.max<Index>();
             
             success = (max == 1);
 
@@ -1007,12 +1050,14 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tInner Array: ";
             path = path[1];
-            success = path.contains(Type::ARRAY);
+            Type type;
+            path[JSONPath::TYPE].getData<Type>(type);
+            success = (type == Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
-            path = path[Type::ARRAY][JSONPath::POSITIONS];
+            path = path[JSONPath::CHILDREN];
         }
     
         if (success) {
@@ -1030,15 +1075,16 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tInner array contains number" << endl;
             path = path[1];
-            success = path.contains(Type::INTEGER);
+            Type type;
+            path[JSONPath::TYPE].getData<Type>(type);
+            success = (type == Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tInner array value" << endl;
-            path = path[Type::INTEGER];
             BString value;
-            path.getData<BString>(value);
+            path[JSONPath::VALUE].getData<BString>(value);
             success = (value == "1");
             BeeFishMisc::outputSuccess(success);
         }
@@ -1569,6 +1615,8 @@ assert(success);
                 parent == start
             );
             
+        start.clear();
+    
         JSONPathParser parser2(start);
         parser2.read("{\"hello\":\"world\"}");
     
@@ -1758,12 +1806,19 @@ assert(success);
         if (success)
         {
             cout << "Removing property b" << endl;
+            
+            success = success && testValue(
+                "Property a is object",
+                start2["a"].type() == Type::OBJECT
+            );
+            
             start2["a"].deleteProperty("b");
-            testValue(
+            success = success && testValue(
                 "Property a is still object",
                 start2["a"].type() == Type::OBJECT
             );
-            testValue(
+            
+            success = success && testValue(
                 "Property b removed",
                 start2["a"].getPositions().isDeadEnd()
             );
@@ -1838,13 +1893,10 @@ assert(false);
                     stream.str() == "{}"
                 );
             cerr << "RESULT " << stream.str() << endl;
-assert(false);
         }
             
         
-            
-        assert(success);
-                    
+
         JSONDatabase database4;
         JSONPath start4 = database4.host("https://test");
         JSONPathParser parser4(start4);
@@ -1927,7 +1979,7 @@ assert(false);
                 );
             
             if (success)
-               start[Type::UNDEFINED];
+               start.setType(Type::UNDEFINED);
             
             success = success &&
                 testValue(

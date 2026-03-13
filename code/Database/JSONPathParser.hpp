@@ -60,82 +60,47 @@ namespace BeeFishDatabase {
          
         
         
-        virtual void setVariable(JSONPath path, const Type type, const BString& value)
+        virtual void setVariable(JSONPath start, const Type type, const BString& value)
         {
             
             
-            JSONPath start = path;
+            JSONPath path = start;
             start.lock();
           //ScopedPathLock lock(start);
-            start[type];
+           // start.setType(type);
             
+   
             
-            // add all path keys except the
-            // first (host)
-            BString key;
-                                
-        
-            while (!path.isRoot() &&
-                    !path.parent().isRoot())
-            {
-                path = path.parent(key);
-                
-                if (!key.isDigitsOnly())
-                {
-                    if (key.startsWith("\"") &&
-                        key.endsWith("\""))
-                    {
-                        key = key.substr(1, key.length() - 2).unescape();
-                    }
-                    start.addWords(key, false);
-                }
-    
-            }
-                
 
             switch (type)
             {
                 case Type::UNDEFINED:
-                {
-                    assert(false);
-            
-                    break;
-                }
+                    start.setUndefined();
                 case Type::NULL_:
-                {
-                    if (&_log != &cnull)
-                        _log << start.toString() << "#null" << endl;
-          
-                    break;
-                }
+                    start.setNull();
                 case Type::BOOLEAN:
+                    start.setBoolean(value);
+                    break;
                 case Type::INTEGER:
+                    start.setInteger(value);
+                    break;
                 case Type::NUMBER:
-                {
-                    start[type].setData<BString>(value);
-                               
-                    if (&_log != &cnull)
-                        _log << start.toString() << "#" << value << endl;
-          
+                    start.setNumber(value);
                     break;
-                }
                 case Type::STRING:
-                {
-                    start[type].setData<BString>(value);
-                    start.addWords(value, true, _log);
-                    
+                    start.setString(value);
                     break;
-                }
-                
                 case Type::ARRAY:
                 case Type::OBJECT:
-            
+                    start.setType(type);
                     break;
-
                 default:
                     throw std::logic_error("JSONPathParser::setVariable");
             }
-
+            
+            if (&_log != &cnull)
+                _log << start.toString() << endl;
+             
             
         }
 
@@ -183,12 +148,11 @@ namespace BeeFishDatabase {
                 if (topType() == Type::OBJECT)
                     path = path[topKey()];
                 else {
-                    Index index = topIndex();
-                    path = path[index];
+                    path = path[topIndex()];
                 }
                 
             }
-            path[type];
+            path.setType(type);
             _pathStack.push_back(path);
             if (type == Type::ARRAY)
                 _indexStack.push_back(1);

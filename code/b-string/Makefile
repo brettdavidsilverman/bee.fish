@@ -8,6 +8,10 @@ all:	$(OUTPUT)
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lssl -lcrypto -lboost_locale
 	
+trace:	$(OUTPUT)
+	-valgrind -s --log-file="trace.txt" --track-origins=yes --leak-check=yes ../../build/b-string -test
+	cat trace.txt
+	
 test:	TEST = test
 test:	all
 	$(OUTPUT) -test

@@ -232,7 +232,7 @@ LockFile::ScopedFileLock lock(_lockFile);
                 Value* pointer =
                     (*_map)[lru_key]->second.get();
                 
-               // delete pointer;
+                pointer->~Value();
                 
                 _sharedMemory->deallocate(
                      pointer

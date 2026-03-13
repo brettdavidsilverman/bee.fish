@@ -344,12 +344,12 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
             Branch branch = getBranch();
             Index index = Path::index();
             assert(!isRoot());
-            //assert(branch._parent);
+        
             do
             {
-                Branch parent;
                 
-                parent = _database->getBranch(
+
+                Branch parent = _database->getBranch(
                     branch._parent
                 );
                 
@@ -364,10 +364,7 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
                     --count;
                 }
                 else
-                {
-                    return Path(*this, rootIndex);
-                    break;
-                }
+                    assert(false);
     
                 index = branch._parent;
                 branch = parent;
@@ -628,7 +625,7 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
             lock();
             
             Branch branch = getBranch();
-            
+
             if (branch._dataIndex) {
                 deleteData();
             }
@@ -641,7 +638,6 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
                 _database->deleteBranch(branch._right);
             }
             
-
 
         }
         
@@ -688,16 +684,16 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
                 _database->deleteBranch(
                     branch._left
                 );
-                branch._left = 0;
+               // branch._left = 0;
             }
             else {
                 _database->deleteBranch(
                     branch._right
                 );
-                branch._right = 0;
+               // branch._right = 0;
             }
             
-            _database->setBranch(lastIndex, branch);
+          //  _database->setBranch(lastIndex, branch);
                 
                 
             

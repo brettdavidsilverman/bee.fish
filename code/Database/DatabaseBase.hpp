@@ -90,7 +90,7 @@ namespace BeeFishDatabase {
 
         };
 
-        typedef interprocess_mutex Mutex;
+        typedef AutoUnlockMutex Mutex;
     private:
         typedef LeastRecentlyUsedCache<Index, Mutex> Locks;
         typedef LeastRecentlyUsedCache<Index, Branch> Cache;
@@ -217,10 +217,8 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
             return index;
         }
  
-        inline Index allocate(const std::string& data)
+        inline Index allocate(const BString& data)
         {
-
-            
             ScopedFileLock lock(*this);
 
             Index dataIndex = size();
@@ -229,9 +227,7 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
             write(&dataSize, sizeof(Index));
             write(data.data(), dataSize);
 
-
             return dataIndex;
-                
         }
 
         void deleteBranch(Index index)
@@ -241,13 +237,8 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
             
             Branch branch = getBranch(index);
             
-            if (branch._left)
-                deleteBranch(branch._left);
-                    
-            if (branch._right)
-                deleteBranch(branch._right);
             
-            if (index != rootIndex())
+            if (index != 0)
             {
                 
                 Branch parent = getBranch(
@@ -269,8 +260,14 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
                 setBranch(branch._parent, parent);
             }
             
+            if (branch._left)
+                deleteBranch(branch._left);
+                    
+            if (branch._right)
+                deleteBranch(branch._right);
+            
+            
             // Reclaim space here
-            setBranch(index, Branch());
             
         }
         
@@ -278,8 +275,9 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
         
         void deleteData(Index index)
         {
+
             Branch branch = getBranch(index);
-            
+
             if (branch._dataIndex) {
                 // Reclaim space here
                 branch._dataIndex = 0;
@@ -293,8 +291,6 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
         Branch getBranch(Index index)
         {
 
-            
-            
             Branch branch;
             
             if (size() == 0) 
@@ -342,18 +338,17 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
         }
     
         
-        inline std::string getData(Index dataIndex)
+        inline BString getData(Index dataIndex)
         {
 
             if (dataIndex == 0)
                 return "";
 
-
             seek(dataIndex);
             Index size;
 
             read(&size, sizeof(Index));
-            std::string buffer(size, '\0');
+            BString buffer(size, '\0');
             read(buffer.data(), size);
 
             return buffer;
@@ -376,7 +371,7 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
             return size > 0;
         }
         
-        inline void setData(Index dataIndex, const std::string& source)
+        inline void setData(Index dataIndex, const BString& source)
         {
 
             seek(dataIndex);
