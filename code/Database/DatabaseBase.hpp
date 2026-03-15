@@ -72,8 +72,9 @@ namespace BeeFishDatabase {
 
             virtual ~AutoUnlockMutex()
             {
-                if (_locked)
+                if (_locked) {
                     interprocess_mutex::unlock();
+                }
             }
             
             void lock() {
@@ -181,9 +182,6 @@ cout << lockIndex << " " << this_thread::get_id() << " +" << endl;
                     
             if (unlock)
             {
-#ifdef VERBOSE
-cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
-#endif
                 locks()[lockIndex].unlock();
                 _lockCounts.erase(lockIndex);
             }
@@ -290,6 +288,8 @@ cout << lockIndex << " " << this_thread::get_id() << " -" << endl;
         
         Branch getBranch(Index index)
         {
+            
+          //  ScopedFileLock lock(*this);
 
             Branch branch;
             

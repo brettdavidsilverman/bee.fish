@@ -18,7 +18,6 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-    // current size: 5,638,260,235
     cout << "bee.fish.database"
               << endl
           << "C++ run time: "
@@ -32,7 +31,7 @@ int main(int argc, const char* argv[])
     bool unlock =
         (hasArg(argc, argv, "-unlock") != -1);
         
-    if (unlock)
+    if (unlock || true)
     {
         cout << "Unlocking " << DATABASE_FILENAME << endl;
         LockFile lock(DATABASE_FILENAME);

@@ -33,6 +33,8 @@ namespace BeeFishDatabase
     inline bool test()
     {
         bool success = true;
+        //return testAllFiles(TEST_DIRECTORY);
+        
         /*
         auto test =
         [](std::filesystem::path path)
@@ -107,7 +109,6 @@ namespace BeeFishDatabase
         success = success &&
             testObjects();
             
-                    
         success = success &&
             testMultiThreaded();
             
@@ -805,7 +806,7 @@ namespace BeeFishDatabase
             cout << "\tIndexed string ";
             Path path = root["string"];
             Type type;
-            path[JSONPath::TYPE].getData<Type>(type);
+            path.getData<Type>(type);
             success = success &&
                 type == Type::STRING;
                 
@@ -873,7 +874,7 @@ namespace BeeFishDatabase
             Path path = root["array"];
             path = path[JSONPath::CHILDREN][1];
             Type type;
-            path[JSONPath::TYPE].getData<Type>(type);
+            path.getData<Type>(type);
             success = (type == Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
@@ -901,7 +902,7 @@ namespace BeeFishDatabase
             Path path = root["array"];
             path = path[JSONPath::CHILDREN][2];
             Type type;
-            path[JSONPath::TYPE].getData<Type>(type);
+            path.getData<Type>(type);
             success = (type == Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
@@ -932,7 +933,7 @@ namespace BeeFishDatabase
             Path path = root["integer"];
             
             Type type;
-            path[JSONPath::TYPE].getData<Type>(type);
+            path.getData<Type>(type);
             success = (type == Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
@@ -970,7 +971,7 @@ cerr << string1 << endl;
                      path.isDeadEnd()
                 );
 
-        //    path.setType(Type::UNDEFINED);
+            path.setType(Type::UNDEFINED);
 
             success = success &&
                 testValue(
@@ -1042,7 +1043,7 @@ cerr << string1 << endl;
         if (success) {
             path = path[1];
             Type type;
-            path[JSONPath::TYPE].getData<Type>(type);
+            path.getData<Type>(type);
             success = (type == Type::ARRAY);
         }
         
@@ -1086,7 +1087,7 @@ cerr << string1 << endl;
         if (success) {
             cout << "\tOuter Array: ";
             Type type;
-            path[JSONPath::TYPE].getData<Type>(type);
+            path.getData<Type>(type);
             success = (type == Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         
@@ -1115,7 +1116,7 @@ cerr << string1 << endl;
             cout << "\tInner Array: ";
             path = path[1];
             Type type;
-            path[JSONPath::TYPE].getData<Type>(type);
+            path.getData<Type>(type);
             success = (type == Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
@@ -1140,7 +1141,7 @@ cerr << string1 << endl;
             cout << "\tInner array contains number" << endl;
             path = path[1];
             Type type;
-            path[JSONPath::TYPE].getData<Type>(type);
+            path.getData<Type>(type);
             success = (type == Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
@@ -1785,7 +1786,7 @@ assert(success);
             
             testValue(
                 "Object property a removed",
-                start.getPositions().isDeadEnd()
+                start.getChildren().isDeadEnd()
             );
             
             stringstream stream;
@@ -1873,7 +1874,7 @@ assert(success);
             
             success = success && testValue(
                 "Property b removed",
-                start2["a"].getPositions().isDeadEnd()
+                start2["a"].getChildren().isDeadEnd()
             );
             
             stringstream stream;
@@ -1896,6 +1897,8 @@ assert(success);
                 "Property c removed",
                 !database2.words().contains("c")
             );
+            
+        assert(success);
         
         success = success &&
             testValue(
@@ -1964,7 +1967,7 @@ assert(success);
                 "{\"a\":{\"a\":\"a\"}}",
                 parser4.matched()
             );
-        
+    
         cout << "Removing property a" << endl;
         
         start4["a"].deleteProperty("a");
@@ -2132,7 +2135,7 @@ assert(success);
             thread.join();
         }
         
-        cout << "Expected size " << 741432 << endl;
+        cout << "Expected size " << 776020 << endl;
 
         bool success = test("", true, true);
     

@@ -203,10 +203,7 @@ using namespace BeeFishBString;
 
         virtual void goLeft()
         {
-#ifdef VERBOSE
-cout << _index << " " << std::this_thread::get_id() << " LEFT" << endl;
-#endif
-            
+
             Branch branch = getBranch();
             
             if (branch._left == 0) 
@@ -235,9 +232,7 @@ cout << _index << " " << std::this_thread::get_id() << " LEFT" << endl;
         
         virtual void goRight()
         {
-#ifdef VERBOSE
-cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
-#endif
+        
             
             Branch branch = getBranch();
 
@@ -487,7 +482,7 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
         
         BString getData() {
             
-            //LockFile::ScopedFileLock lock(database());
+            lock();
         
             
             Branch branch = getBranch();
@@ -584,7 +579,7 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
         Branch getBranch()
         {
             return
-                _database->getBranch(_index);
+                getBranch(_index);
 
         }
 
@@ -594,14 +589,16 @@ cout << _index << " " << std::this_thread::get_id() << " RIGHT" << endl;
               _database->getBranch(_index);
         }
         
-        void setBranch(const Branch& branch) const
+        void setBranch(const Branch& branch)
         {
+           // lock();
             _database->setBranch(_index, branch);
         }
         
         
-        Branch getBranch(Index index) const
+        Branch getBranch(Index index)
         {
+           // lock();
             return
                 _database->getBranch(index);
 
