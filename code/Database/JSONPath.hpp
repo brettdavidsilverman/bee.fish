@@ -86,7 +86,8 @@ public:
 
     JSONPath operator [] (const BString& property)
     {
-        ScopedLock lock(*this);
+        Path path = *this;
+        ScopedLock lock(path);
         
         setType(Type::OBJECT);
 
@@ -108,7 +109,9 @@ public:
 
     JSONPath operator [] (const Index& index)
     {
-        ScopedLock lock(*this);
+        Path path = *this;
+        ScopedLock lock(path);
+        
         assert(index > 0);
 
         if (!getChildren().contains(index)) {
@@ -148,7 +151,9 @@ public:
 
     void setType(Type type)
     {
-       // ScopedLock lock(*this);
+        Path path = *this;
+        ScopedLock lock(path);
+        
         if (!hasData())
         {
             if (!isRoot())
@@ -172,7 +177,8 @@ public:
 
     void setUndefined()
     {
-       // ScopedLock lock(*this);
+        Path path = *this;
+        ScopedLock lock(path);
 
         if (type() == Type::UNDEFINED)
             return;
@@ -191,40 +197,41 @@ public:
 
     void setNull()
     {
-      //  ScopedLock lock(*this);
+        Path path = *this;
+        ScopedLock lock(path);
         setType(Type::NULL_);
     }
 
 
     void setBoolean(const BString& value)
     {
-        //ScopedLock lock(*this);
-        setType(Type::BOOLEAN);
         Path path = *this;
+        ScopedLock lock(path);
+        setType(Type::BOOLEAN);
         path[VALUE].setData<BString>(value);
     }
 
     void setInteger(const BString& value)
     {
-       // ScopedLock lock(*this);
-        setType(Type::INTEGER);
         Path path = *this;
+        ScopedLock lock(path);
+        setType(Type::INTEGER);
         path[VALUE].setData<BString>(value);
     }
 
     void setNumber(const BString& value)
     {
-       // ScopedLock lock(*this);
-        setType(Type::NUMBER);
         Path path = *this;
+        ScopedLock lock(path);
+        setType(Type::NUMBER);
         path[VALUE].setData<BString>(value);
     }
 
     void setString(const BString& value)
     {
-       // ScopedLock lock(*this);
-        setType(Type::STRING);
         Path path = *this;
+        ScopedLock lock(path);
+        setType(Type::STRING);
         if (path[VALUE].setData<BString>(value))
             addWords(value, true);
    

@@ -415,7 +415,7 @@ using namespace BeeFishBString;
         
         Index operator++()
         {
-           // ScopedLock lock(*this);
+            ScopedLock lock(*this);
             
             Index count = 1;
             if (hasData())
@@ -431,7 +431,7 @@ using namespace BeeFishBString;
         
         Index operator++(int)
         {
-            //ScopedLock lock(*this);
+            ScopedLock lock(*this);
             
             Index existingCount = 0;
             Index count = 1;
@@ -448,7 +448,7 @@ using namespace BeeFishBString;
         
         Index operator--()
         {
-            //ScopedLock lock(*this);
+            ScopedLock lock(*this);
             
             Index count = 0;
             if (hasData())
@@ -466,7 +466,7 @@ using namespace BeeFishBString;
         
         Index operator--(int)
         {
-           // ScopedLock lock(*this);
+            ScopedLock lock(*this);
             
             Index existingCount = 0;
             Index count = 1;
