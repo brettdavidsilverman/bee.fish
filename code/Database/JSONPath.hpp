@@ -20,9 +20,30 @@ using namespace BeeFishJSON;
 class JSONPath :
     public Path
 {
-protected:
-    
-    
+public:
+    struct ScopedLock
+    {
+    protected:
+        bool _unlock;
+        Path _path;
+    public:
+        ScopedLock(Path& path) :
+            _path(path)
+        {
+           // if (!_path.locked())
+            {
+                _unlock = true;
+                _path.lock();
+            }
+        }
+        
+        ~ScopedLock()
+        {
+           // if (_unlock)
+                _path.unlock();
+        }
+    };
+      
 public:
     inline static const Index VALUE = 0;
     inline static const Index PROPERTIES = 1;
@@ -86,8 +107,7 @@ public:
 
     JSONPath operator [] (const BString& property)
     {
-        Path path = *this;
-        ScopedLock lock(path);
+        ScopedLock lock(*this);
         
         setType(Type::OBJECT);
 
@@ -109,8 +129,7 @@ public:
 
     JSONPath operator [] (const Index& index)
     {
-        Path path = *this;
-        ScopedLock lock(path);
+        ScopedLock lock(*this);
         
         assert(index > 0);
 
@@ -149,11 +168,9 @@ public:
         }
     }
 
+protected:
     void setType(Type type)
     {
-        Path path = *this;
-        ScopedLock lock(path);
-        
         if (!hasData())
         {
             if (!isRoot())
@@ -170,21 +187,22 @@ public:
         }
 
         assert(JSONPath::type() == type);
-
-
     }
+    
+public:
 
 
     void setUndefined()
     {
-        Path path = *this;
-        ScopedLock lock(path);
+        ScopedLock lock(*this);
 
         if (type() == Type::UNDEFINED)
             return;
+            
+        setType(Type::UNDEFINED);
 
         if (!isRoot() &&
-                !parent().isRoot())
+            !parent().isRoot())
         {
             BString property;
             JSONPath path = parent(property);
@@ -197,45 +215,58 @@ public:
 
     void setNull()
     {
-        Path path = *this;
-        ScopedLock lock(path);
+        ScopedLock lock(*this);
         setType(Type::NULL_);
     }
 
 
     void setBoolean(const BString& value)
     {
+        ScopedLock lock(*this);
         Path path = *this;
-        ScopedLock lock(path);
+        
         setType(Type::BOOLEAN);
         path[VALUE].setData<BString>(value);
     }
 
     void setInteger(const BString& value)
     {
+        ScopedLock lock(*this);
         Path path = *this;
-        ScopedLock lock(path);
         setType(Type::INTEGER);
         path[VALUE].setData<BString>(value);
     }
 
     void setNumber(const BString& value)
     {
+        ScopedLock lock(*this);
         Path path = *this;
-        ScopedLock lock(path);
         setType(Type::NUMBER);
         path[VALUE].setData<BString>(value);
     }
 
     void setString(const BString& value)
     {
+        ScopedLock lock(*this);
         Path path = *this;
-        ScopedLock lock(path);
         setType(Type::STRING);
         if (path[VALUE].setData<BString>(value))
             addWords(value, true);
-   
-
+    }
+    
+    void setObject()
+    {
+        ScopedLock lock(*this);
+        Path path = *this;
+        
+        setType(Type::OBJECT);
+    }
+    
+    void setArray()
+    {
+        ScopedLock lock(*this);
+        Path path = *this;
+        setType(Type::ARRAY);
     }
 
     JSONPath parent() {

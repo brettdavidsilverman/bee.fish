@@ -95,8 +95,10 @@ namespace BeeFishDatabase {
                     start.setString(value);
                     break;
                 case Type::ARRAY:
+                    start.setArray();
+                    break;
                 case Type::OBJECT:
-                    start.setType(type);
+                    start.setObject();
                     break;
                 default:
                     throw std::logic_error("JSONPathParser::setVariable");
@@ -156,7 +158,14 @@ namespace BeeFishDatabase {
                 }
                 
             }
-            path.setType(type);
+            
+            if (type == Type::OBJECT)
+                path.setObject();
+            else if (type == Type::ARRAY)
+                path.setArray();
+            else
+                assert(false);
+                
             _pathStack.push_back(path);
             if (type == Type::ARRAY)
                 _indexStack.push_back(1);

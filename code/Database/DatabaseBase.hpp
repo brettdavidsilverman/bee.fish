@@ -33,7 +33,7 @@
 #include "Index.hpp"
 #include "Branch.hpp"
 #include "LockFile.hpp"
-#include "LeastRecentlyUsedCache.hpp"
+#include "Locks.hpp"
 
 using namespace std;
 using namespace std::literals;
@@ -52,190 +52,8 @@ namespace BeeFishDatabase {
     class Database : public LockFile
     {
     
-    
-    public:
-        
-
-        class AutoUnlockMutex :
-            
-            public interprocess_mutex
-            
-        {
-        protected:
-            bool _locked = false;
-            
-        public:
-            AutoUnlockMutex() :
-                interprocess_mutex()
-            {
-            }
-
-            virtual ~AutoUnlockMutex()
-            {
-                if (_locked) {
-                    interprocess_mutex::unlock();
-                }
-            }
-            
-            void lock() {
-                interprocess_mutex::lock();
-                _locked = true;
-            }
-            
-            void unlock() {
-                interprocess_mutex::unlock();
-                _locked = false;
-            }
-            
-            
-
-        };
-
-        typedef AutoUnlockMutex Mutex;
     private:
-        typedef LeastRecentlyUsedCache<Index, Mutex> LocksBase;
-        typedef LeastRecentlyUsedCache<Index, Branch> Cache;
-        
-        class Locks : public LocksBase
-        {
-        public:
-            
-            Locks(const BString& name, LockFile& lockFile, Index capacity) : 
-                LeastRecentlyUsedCache(name, lockFile, capacity)
-            {
-            }
-            
-            void lock(Index index)
-            {
-                Mutex* mutex;
-                
-                {
-                    LockFile::ScopedFileLock lock(_lockFile);
-                
-                    if (_map->find(index) == _map->end())
-                    {
-                        void* ptrValue = nullptr;
-                        
-                        auto segment =
-                            _sharedMemory
-                            ->get_segment_manager();
-                            
-                        while (ptrValue == nullptr)
-                        {
-                          try {
-                                ptrValue = 
-                                    segment
-                                    ->allocate(sizeof(Mutex));
-                            }
-                            catch (boost::interprocess::bad_alloc& e)
-                            {
-                                // evict from front
-                                evict();
-                    
-                            }
-                        }
-                         
-                        // New item, add to back
-                        new(ptrValue)Mutex();
-                
-                        bool allocated = false;
-                        while (!allocated)
-                        {
-                            try {
-                                _list->push_back({index, (Mutex*)ptrValue});
-                                allocated = true;
-                            }
-                            catch (boost::interprocess::bad_alloc& e)
-                            {
-                                // evict from front
-                                evict();
-                    
-                            }
-                        }
-                        
-                        allocated = false;
-                        while (!allocated)
-                        {
-                            try {
-                                auto it = _list->end();
-                                --it;
-                                (*_map)[index] = it;
-                                allocated = true;
-                            }
-                            catch (boost::interprocess::bad_alloc& e)
-                            {
-                                // evict from front
-                                evict();
-                    
-                            }
-                        }
-                        
-                        
-                    }
-                    else {
-                        _list->splice(
-                            _list->end(),
-                            *_list,
-                            (*_map)[index]
-                        );
-                    }
-                    
-                    mutex = 
-                        (*_map)[index]->second.get();
-                        
-                }
-                
-                mutex->lock();
-            }
-            
-            void unlock(Index index)
-            {
 
-                LockFile::ScopedFileLock lock(_lockFile);
-                if (_map->find(index) != _map->end())
-                {
-                    // Move to front ready to be evicted
-                    _list->splice(
-                        _list->begin(),
-                        *_list,
-                        (*_map)[index]
-                    );
-                    (*_map)[index]->second->unlock();
-                }
-            }
-            
-            void evict()
-            {
-                auto segment =
-                    _sharedMemory
-                    ->get_segment_manager();
-                    
-                for (Index i = 0; i < 10; ++i)
-                {
-
-                    Index index =
-                        _list->front().first;
-
-                    Mutex* pointer = _list->front().second.get();
-
-                    pointer->lock();
-                    pointer->~Mutex();
-
-                    segment->deallocate(
-                        pointer
-                    );
-                
-                    _map->erase(index);
-                
-                    _list->pop_front();
-                }
-                
-cerr << "FREE MEM " << segment->get_free_memory() << endl;
-  
-            }
-            
-        };
-        
         Index _pageSize = 0;
         
         std::map<Index, Index> _lockCounts;
@@ -262,7 +80,7 @@ cerr << "FREE MEM " << segment->get_free_memory() << endl;
             
         {
            // _cache = new Cache("BranchCache", *this, _pageSize);
-            _locks = new Locks("BranchLocks", *this, _pageSize * 100);
+            _locks = new Locks("BranchLocks", *this, _pageSize * 2);
         }
 
         virtual ~Database()
@@ -307,7 +125,9 @@ cerr << "FREE MEM " << segment->get_free_memory() << endl;
         
         }
         
-        void clear() {
+        void unlock() {
+            cerr << "UNLOCK " << endl;
+            LockFile::unlock();
             _locks->clear();
         }
         

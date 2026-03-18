@@ -18,229 +18,231 @@ using namespace boost::interprocess;
 
 
 
-    template<typename Key, typename Value>
-    class LeastRecentlyUsedCache {
-    protected:
-        Index _capacity;
-        LockFile& _lockFile;
-        BString _name;
-        BString _sharedMemoryName;
-        
-        // list value type
-        typedef std::pair<Key, offset_ptr<Value> > NodeType;
-        // Define the types for the allocator and the list
-        // The allocator needs to know about the segment manager
-        typedef managed_shared_memory::segment_manager SegmentManager;
-        typedef boost::interprocess::allocator<NodeType, SegmentManager> SharedMemoryListAllocator;
-        typedef boost::interprocess::list<NodeType, SharedMemoryListAllocator> SharedMemoryList;
-        
-        typedef std::pair<const Key, typename SharedMemoryList::iterator> MapValue;
-        typedef boost::interprocess::allocator<MapValue, SegmentManager> SharedMemoryMapAllocator;
-        typedef boost::interprocess::map<Key, typename SharedMemoryList::iterator, std::less<Key>, SharedMemoryMapAllocator> SharedMemoryMap;
+template<typename Key, typename Value>
+class LeastRecentlyUsedCache {
+protected:
+    Index _capacity;
+    LockFile& _lockFile;
+    BString _name;
+    BString _sharedMemoryName;
 
-        managed_shared_memory* _sharedMemory = nullptr;
-        SharedMemoryMap* _map = nullptr;
-        SharedMemoryList* _list = nullptr;
-        
-        
-    public:
-        LeastRecentlyUsedCache(const BString& name, LockFile& lockFile, Index capacity) : 
-            _capacity(capacity),
-            _lockFile(lockFile),
-            _name(name)
-        {
-            LockFile::ScopedFileLock lock(_lockFile);
-            createSharedMemoryObjects(name);
-        }
-        
-        virtual ~LeastRecentlyUsedCache()
-        {
-            if (_sharedMemory)
-                delete _sharedMemory;
-            //shared_memory_object::remove(_sharedMemoryName.c_str());
-        
-        }
-        
-        optional<Value> get(Key key)
-        {
-            LockFile::ScopedFileLock lock(_lockFile);
-            
-            if (_map->find(key) == _map->end()) {
-                return nullopt;
-            }
+    // list value type
+    typedef std::pair<Key, offset_ptr<Value> > NodeType;
+    // Define the types for the allocator and the list
+    // The allocator needs to know about the segment manager
+    typedef managed_shared_memory::segment_manager SegmentManager;
+    typedef boost::interprocess::allocator<NodeType, SegmentManager> SharedMemoryListAllocator;
+    typedef boost::interprocess::list<NodeType, SharedMemoryListAllocator> SharedMemoryList;
 
-            
-            // Move the accessed item to the front (MRU)
+    typedef std::pair<const Key, typename SharedMemoryList::iterator> MapValue;
+    typedef boost::interprocess::allocator<MapValue, SegmentManager> SharedMemoryMapAllocator;
+    typedef boost::interprocess::map<Key, typename SharedMemoryList::iterator, std::less<Key>, SharedMemoryMapAllocator> SharedMemoryMap;
+
+    managed_shared_memory* _sharedMemory = nullptr;
+    SharedMemoryMap* _map = nullptr;
+    SharedMemoryList* _list = nullptr;
+
+
+public:
+    LeastRecentlyUsedCache(const BString& name, LockFile& lockFile, Index capacity) :
+        _capacity(capacity),
+        _lockFile(lockFile),
+        _name(name)
+    {
+// LockFile::ScopedFileLock lock(_lockFile);
+        createSharedMemoryObjects(name);
+    }
+
+    virtual ~LeastRecentlyUsedCache()
+    {
+        if (_sharedMemory)
+            delete _sharedMemory;
+
+    }
+
+    optional<Value> get(Key key)
+    {
+        LockFile::ScopedFileLock lock(_lockFile);
+
+        if (_map->find(key) == _map->end()) {
+            return nullopt;
+        }
+
+
+        // Move the accessed item to the front (MRU)
+        _list->splice(
+            _list->begin(),
+            *_list,
+            (*_map)[key]
+        );
+
+        return *((*_map)[key]->second);
+    }
+
+    void put(Key key, const Value& value) {
+
+        LockFile::ScopedFileLock lock(_lockFile);
+
+        if (_map->find(key) != _map->end())
+        {
+            // Key exists, update value and move to front
+            *( (*_map)[key]->second ) = value;
             _list->splice(
                 _list->begin(),
                 *_list,
                 (*_map)[key]
             );
-            
-            return *((*_map)[key]->second);
         }
-
-        void put(Key key, const Value& value) {
-
-            LockFile::ScopedFileLock lock(_lockFile);
-            
-            if (_map->find(key) != _map->end())
-            {
-                // Key exists, update value and move to front
-                *( (*_map)[key]->second ) = value;
-                _list->splice(
-                    _list->begin(),
-                    *_list,
-                    (*_map)[key]
-                );
-            }
-            else
-            {
-                void* ptrValue = nullptr;
-                        
-                auto segment =
-                    _sharedMemory
-                    ->get_segment_manager();
-                            
-                while (ptrValue == nullptr)
-                {
-                    try {
-                        ptrValue = 
-                            segment
-                            ->allocate(sizeof(Value));
-                    }
-                    catch (boost::interprocess::bad_alloc& e)
-                    {
-                        evict();
-                    }
-                }
-                
-                new(ptrValue)Value(value);
-                
-                bool allocated = false;
-                while (!allocated)
-                {
-                    try {
-                        _list->push_front({key, (Value*)ptrValue});
-                        allocated = true;
-                    }
-                    catch (boost::interprocess::bad_alloc& e)
-                    {
-                        evict();
-                    }
-                }
-                
-                
-                allocated = false;
-                while (!allocated)
-                {
-                    try {
-                        (*_map)[key] = _list->begin();
-                        allocated = true;
-                    }
-                    catch (boost::interprocess::bad_alloc& e)
-                    {
-                        evict();
-                    }
-                }
-                
-            }
-        }
-        
-
-        
-        
-        void clear()
+        else
         {
-            LockFile::ScopedFileLock lock(_lockFile);
-            
-            while (_list->size() > 0) 
+            void* ptrValue = nullptr;
+
+            auto segment =
+                _sharedMemory
+                ->get_segment_manager();
+
+            while (ptrValue == nullptr)
             {
-                Key lru_key =
-                    _list->back().first;
-                
-                Value* pointer =
-                    (*_map)[lru_key]->second.get();
-                
-                pointer->~Value();
-                
-                _sharedMemory->deallocate(
-                     pointer
-                );
-                
-                _map->erase(lru_key);
-                
-                _list->pop_back();
+                try {
+                    ptrValue =
+                        segment
+                        ->allocate(sizeof(Value));
+                }
+                catch (boost::interprocess::bad_alloc& e)
+                {
+                    evict();
+                }
             }
-            
-            if (_sharedMemory) {
-                delete _sharedMemory;
-                _sharedMemory = nullptr;
+
+            new(ptrValue)Value(value);
+
+            bool allocated = false;
+            while (!allocated)
+            {
+                try {
+                    _list->push_front({key, (Value*)ptrValue});
+                    allocated = true;
+                }
+                catch (boost::interprocess::bad_alloc& e)
+                {
+                    evict();
+                }
             }
-            
-            shared_memory_object::remove(_sharedMemoryName.c_str());
-            
-            createSharedMemoryObjects(_name);
+
+
+            allocated = false;
+            while (!allocated)
+            {
+                try {
+                    (*_map)[key] = _list->begin();
+                    allocated = true;
+                }
+                catch (boost::interprocess::bad_alloc& e)
+                {
+                    evict();
+                }
+            }
+
         }
-        
-        const BString& sharedMemoryName()
+    }
+
+
+
+
+    void clear()
+    {
+
+        _lockFile.unlock();
+        _lockFile.lock();
+
+        shared_memory_object::remove(_sharedMemoryName.c_str());
+
+        while (_list->size() > 0)
         {
-            return _sharedMemoryName;
-        }
-        
-    private:
-        
-        void createSharedMemoryObjects(const BString& name)
-        {
-            LockFile::ScopedFileLock lock(_lockFile);
-            std::hash<std::string> hasher;
-            std::filesystem::path path = _lockFile.filename();
-            
-            // Since path character '/' isnt allowed
-            // this will use the filename
-            // hash instead
-                
-            std::size_t hashedValue = hasher(path.string());
-            std::stringstream stream;
-            stream << hashedValue;
-            _sharedMemoryName = 
-                BString(stream.str()) +
-                BString(name);
-                
-           // shared_memory_object::remove(_sharedMemoryName.c_str());
-            
-            _sharedMemory = new
-                managed_shared_memory(open_or_create, _sharedMemoryName.c_str(), _capacity);
-                        
-            _list = 
-                _sharedMemory->find_or_construct<SharedMemoryList>("LRUList")
-                (_sharedMemory->get_segment_manager());
-                
-            _map = 
-                _sharedMemory->find_or_construct<SharedMemoryMap>("LRUMap")
-                (_sharedMemory->get_segment_manager());
-            
-        }
-        
-        // Evict the least recently used item if capacity is exceeded
-        void evict() {
             Key lru_key =
                 _list->back().first;
-                
+
             Value* pointer =
                 (*_map)[lru_key]->second.get();
+
             pointer->~Value();
+
             _sharedMemory->deallocate(
                 pointer
             );
-                
-            _map->erase(lru_key);
-                
-            _list->pop_back();
 
+            _map->erase(lru_key);
+
+            _list->pop_back();
         }
-        
-    };
+
+        if (_sharedMemory) {
+            delete _sharedMemory;
+            _sharedMemory = nullptr;
+        }
+
+        _lockFile.unlock();
+
+        createSharedMemoryObjects(_name);
+    }
+
+    const BString& sharedMemoryName()
+    {
+        return _sharedMemoryName;
+    }
+
+private:
+
+    void createSharedMemoryObjects(const BString& name)
+    {
+// LockFile::ScopedFileLock lock(_lockFile);
+        std::hash<std::string> hasher;
+        std::filesystem::path path = _lockFile.filename();
+
+        // Since path character '/' isnt allowed
+        // this will use the filename
+        // hash instead
+
+        std::size_t hashedValue = hasher(path.string());
+        std::stringstream stream;
+        stream << hashedValue;
+        _sharedMemoryName =
+            BString(stream.str()) +
+            BString(name);
+
+
+        _sharedMemory = new
+        managed_shared_memory(open_or_create, _sharedMemoryName.c_str(), _capacity);
+
+        _list =
+            _sharedMemory->find_or_construct<SharedMemoryList>("LRUList")
+            (_sharedMemory->get_segment_manager());
+
+        _map =
+            _sharedMemory->find_or_construct<SharedMemoryMap>("LRUMap")
+            (_sharedMemory->get_segment_manager());
+
+    }
+
+    // Evict the least recently used item if capacity is exceeded
+    void evict() {
+        Key lru_key =
+            _list->back().first;
+
+        Value* pointer =
+            (*_map)[lru_key]->second.get();
+        pointer->~Value();
+        _sharedMemory->deallocate(
+            pointer
+        );
+
+        _map->erase(lru_key);
+
+        _list->pop_back();
+
+    }
+
+};
 
 }
 

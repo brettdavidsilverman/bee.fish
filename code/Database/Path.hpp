@@ -36,31 +36,6 @@ using namespace BeeFishBString;
         
     public:
         
-        struct ScopedLock
-        {
-        protected:
-            bool _unlock;
-            Path& _path;
-        public:
-            ScopedLock(Path& path) :
-                _path(path)
-            {
-                if (!_path.locked())
-                {
-                    _unlock = true;
-                    _path.lock();
-                }
-            }
-        
-            ~ScopedLock()
-            {
-                if (_unlock)
-                    _path.unlock();
-            }
-        };
-    
-    public:
-        
         Path()
         {
         }
@@ -99,7 +74,7 @@ using namespace BeeFishBString;
         
         virtual void lock()
         {
-            if (!locked())
+            assert(!locked());
             {
                 _lockIndex = index();
                 _database->lock(_lockIndex);
@@ -109,7 +84,8 @@ using namespace BeeFishBString;
         
         virtual void unlock()
         {
-            if (locked()) {
+            assert (locked());
+            {
                 _database->unlock(_lockIndex);
                 _lockIndex = UNLOCKED;
             }
@@ -209,13 +185,14 @@ using namespace BeeFishBString;
             
             if (branch._left == 0) 
             {
-
+/*
                 if (!locked()) {
                     lock();
                     branch = getBranch();
                 }
                 
                 if (branch._left == 0) 
+*/
                 {
                     branch._left =
                         _database->getNextIndex(_index);
@@ -242,13 +219,14 @@ using namespace BeeFishBString;
 
             if (branch._right == 0) 
             {
-                
+/*
                 if (!locked()) {
                     lock();
                     branch = getBranch();
                 }
                 
                 if (branch._right == 0)
+*/
                 {
                     branch._right =
                         _database->getNextIndex(_index);
@@ -384,8 +362,13 @@ using namespace BeeFishBString;
         friend
         Path& operator << (Path& path, const T& key)
         {
+
             PowerEncoding& encoding = path;
             encoding << key;
+            
+            if (path.locked())
+                path.unlock();
+                
             return path;
         }
         
@@ -397,7 +380,6 @@ using namespace BeeFishBString;
 
             path << key;
 
-            
             return path;
         }
  
@@ -415,8 +397,7 @@ using namespace BeeFishBString;
         
         Index operator++()
         {
-            ScopedLock lock(*this);
-            
+    
             Index count = 1;
             if (hasData())
             {
@@ -431,7 +412,6 @@ using namespace BeeFishBString;
         
         Index operator++(int)
         {
-            ScopedLock lock(*this);
             
             Index existingCount = 0;
             Index count = 1;
@@ -448,7 +428,6 @@ using namespace BeeFishBString;
         
         Index operator--()
         {
-            ScopedLock lock(*this);
             
             Index count = 0;
             if (hasData())
@@ -466,7 +445,7 @@ using namespace BeeFishBString;
         
         Index operator--(int)
         {
-            ScopedLock lock(*this);
+
             
             Index existingCount = 0;
             Index count = 1;
@@ -485,8 +464,7 @@ using namespace BeeFishBString;
         }
         
         BString getData() {
-            
-            //ScopedLock lock(*this);
+
         
             Branch branch = getBranch();
             
@@ -534,8 +512,7 @@ using namespace BeeFishBString;
         
         template<typename T = BString>
         bool setData(const BString& value) {
-            
-           // ScopedLock lock(*this);
+        
             
             Branch branch = getBranch();
 
@@ -618,7 +595,7 @@ using namespace BeeFishBString;
         virtual void clear()
         {
             
-            ScopedLock lock(*this);
+            Path path = *this;
             
             Branch branch = getBranch();
 
@@ -642,8 +619,8 @@ using namespace BeeFishBString;
         void clear(const T& value)
         {
 
-            ScopedLock lock(*this);
             Path path = *this;
+
             
             Stack stack;
             stack << value;

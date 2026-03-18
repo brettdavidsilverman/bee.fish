@@ -152,13 +152,36 @@ namespace BeeFishDatabase
         
         if (success)
         {
-            cout << "\tLock index" << flush;
+            cout << "\tLock index 1" << flush;
             Database db;
             db.lock(1);
             db.unlock(1);
             Database db2(db.filename());
             db2.lock(1);
             db2.unlock(1);
+            outputSuccess(true);
+            
+            {
+                cout << "\tLock index 2" << flush;
+                Path path1 = db;
+                Path path2 = db;
+                {
+                    JSONPath::ScopedLock lock1(path1);
+                    JSONPath::ScopedLock lock2(path2);
+                }
+                outputSuccess(true);
+            }
+            
+            
+            cout << "\tLock index3" << flush;
+            Path path1 = db;
+            Path path2 = db2;
+            {
+                JSONPath::ScopedLock lock1(path1);
+            }
+            {
+                JSONPath::ScopedLock lock2(path2);
+            }
             outputSuccess(true);
         }
         
@@ -775,7 +798,7 @@ namespace BeeFishDatabase
         JSONPath start = database.host("https://test");
         JSONPath test =start["test"];
         
-        test.setType(Type::UNDEFINED);
+        test.setUndefined();
         
         success = success && 
             testValue(
@@ -984,7 +1007,7 @@ cerr << string1 << endl;
                      path.isDeadEnd()
                 );
 
-            path.setType(Type::UNDEFINED);
+            path.setUndefined();
 
             success = success &&
                 testValue(
@@ -2051,7 +2074,7 @@ assert(success);
                 );
             
             if (success)
-               start.setType(Type::UNDEFINED);
+               start.setUndefined();
             
             success = success &&
                 testValue(
