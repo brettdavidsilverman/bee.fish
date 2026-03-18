@@ -65,8 +65,8 @@ namespace BeeFishDatabase {
             
             
             JSONPath path = start;
-            start.lock();
-          //ScopedPathLock lock(start);
+            Path::ScopedLock lock(start);
+            
            // start.setType(type);
             
    

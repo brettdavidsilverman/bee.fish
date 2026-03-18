@@ -648,26 +648,14 @@ namespace BeeFishQuery {
                 {
                     if (values[i] != check[i])
                     {
-                        BeeFishMisc::outputSuccess(ok);
-                            
-                        cout << "Expected" << endl;
-                        cout << check[i] << endl;
-                        cout << "Got" << endl;
-                        cout << values[i] << endl;
-                        BeeFishMisc::outputSuccess(false);
                         ok = false;
+                        break;
                     }
                 }
             }
         
             ok = ok && (values.size() == check.size());
             if (!ok) {
-                
-                Iterable<Index> iterable(bounds);
-                cout << "BOUNDS" << endl;
-                for (auto index : iterable)
-                    cout << "BOUNDS: "<< index << " " << JSONPath(db, index).toString() << endl;
-
       
                 cout << "Expected:" << endl;
                 for (unsigned int i = 0; 

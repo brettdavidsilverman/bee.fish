@@ -20,6 +20,9 @@ using namespace BeeFishJSON;
 class JSONPath :
     public Path
 {
+protected:
+    
+    
 public:
     inline static const Index VALUE = 0;
     inline static const Index PROPERTIES = 1;
@@ -30,6 +33,7 @@ public:
 
     using Path::contains;
     using Path::clear;
+    
 
     JSONPath()
     {
@@ -82,32 +86,69 @@ public:
 
     JSONPath operator [] (const BString& property)
     {
-        lock();
-
+        ScopedLock lock(*this);
+        
         setType(Type::OBJECT);
 
+        Index count = getChildren().count();
+        
         Index position =
             getObjectPropertyPosition(property);
+            
         assert(position > 0);
-        return getChildren()[position];
+        JSONPath json = getChildren()[position];
+        
+        if (position > count)
+            json.cascadeProperties();
+        
+        return json;
 
 
     }
 
     JSONPath operator [] (const Index& index)
     {
-        lock();
+        ScopedLock lock(*this);
         assert(index > 0);
 
-        if (!getChildren().contains(index))
+        if (!getChildren().contains(index)) {
             ++getChildren();
-
+            JSONPath json = getChildren()[index];
+            json.cascadeProperties();
+        }
+        
         return getChildren()[index];
+    }
+    
+    void cascadeProperties()
+    {
+        JSONPath json = *this;
+        
+        if (!json.hasData())
+        {
+            while (!json.isRoot() &&
+                   !json.parent().isRoot())
+            {
+                BString property;
+                json = json.parent(property);
+                if (!property.isDigitsOnly())
+                {
+                    if (property.startsWith("\"") &&
+                        property.endsWith("\""))
+                    {
+                        property =
+                            property.substr(1, property.length() - 2)
+                            .unescape();
+                    }
+                    addWords(property, false);
+                }
+            }
+        }
     }
 
     void setType(Type type)
     {
-
+       // ScopedLock lock(*this);
         if (!hasData())
         {
             if (!isRoot())
@@ -131,7 +172,7 @@ public:
 
     void setUndefined()
     {
-        lock();
+       // ScopedLock lock(*this);
 
         if (type() == Type::UNDEFINED)
             return;
@@ -150,14 +191,14 @@ public:
 
     void setNull()
     {
-        lock();
+      //  ScopedLock lock(*this);
         setType(Type::NULL_);
     }
 
 
     void setBoolean(const BString& value)
     {
-        lock();
+        //ScopedLock lock(*this);
         setType(Type::BOOLEAN);
         Path path = *this;
         path[VALUE].setData<BString>(value);
@@ -165,7 +206,7 @@ public:
 
     void setInteger(const BString& value)
     {
-        lock();
+       // ScopedLock lock(*this);
         setType(Type::INTEGER);
         Path path = *this;
         path[VALUE].setData<BString>(value);
@@ -173,7 +214,7 @@ public:
 
     void setNumber(const BString& value)
     {
-        lock();
+       // ScopedLock lock(*this);
         setType(Type::NUMBER);
         Path path = *this;
         path[VALUE].setData<BString>(value);
@@ -181,11 +222,12 @@ public:
 
     void setString(const BString& value)
     {
-        lock();
+       // ScopedLock lock(*this);
         setType(Type::STRING);
         Path path = *this;
-        path[VALUE].setData<BString>(value);
-        addWords(value, true);
+        if (path[VALUE].setData<BString>(value))
+            addWords(value, true);
+   
 
     }
 
@@ -374,7 +416,8 @@ public:
 
     Index getObjectPropertyPosition(const BString& property)
     {
-
+        
+        
         // Get the property index
         Path propertyPath =
             properties()[property];
@@ -385,6 +428,8 @@ public:
         Path objectPropertyPath =
             getObjectProperties()[propertyPath];
 
+       // ScopedLock lock(objectPropertyPath);
+        
         if (objectPropertyPath.hasData())
         {
             objectPropertyPath.getData<Index>(position);
@@ -405,7 +450,7 @@ public:
             // first (host)
 
 
-            JSONPath path = (*this)[property];
+            JSONPath path = *this;
             while (!path.isRoot() &&
                     !path.parent().isRoot())
             {
@@ -534,7 +579,6 @@ public:
 
     virtual void clear() override
     {
-
         //   if (!hasData())
         //       return;
 
@@ -547,7 +591,6 @@ public:
             path[VALUE].getData<BString>(value);
             removeWords(value, true);
         }
-        case Type::UNKNOWN:
         case Type::UNDEFINED:
         case Type::NULL_:
         case Type::BOOLEAN:
@@ -583,6 +626,8 @@ public:
             break;
 
         }
+        case Type::UNKNOWN:
+            throw runtime_error("Unknown type");
         }
 
         assert(getChildren().isDeadEnd());
@@ -605,7 +650,7 @@ public:
         JSONPath json = (*this)[property];
 
 
-        removeWords(property, false);
+        json.removeWords(property, false);
 
         // Remove parent properties
         JSONPath path = json;
@@ -649,8 +694,11 @@ public:
 
         Path words = database().words();
         Path objects = database().objects();
-        Path object = objects[*this];
+        
+        Path path = *this;
 
+      //  ScopedLock lock(path);
+        
         std::vector<BString> tokens =
             tokenise(word);
 
@@ -661,10 +709,11 @@ public:
                 token.toLower();
 
             Path wordPath = words[word];
-
+        
             JSONPath json = *this;
-            if (addToParents) {
-
+           
+            if (addToParents)
+            {
                 while (!json.isRoot() &&
                         !json.parent().isRoot())
                 {
@@ -673,12 +722,9 @@ public:
                 }
             }
             else {
-                wordPath[json];
+                ++wordPath[json];
             }
-            object[wordPath];
-
-            assert(object.contains(wordPath));
-
+            
         }
     }
 
@@ -700,39 +746,32 @@ public:
 
                 Path wordPath = words[word];
 
-                if (object.contains(wordPath))
+                JSONPath json = (*this);
+                
+                if (removeFromParents)
                 {
-
-                    object.clear(wordPath);
-                    JSONPath json = (*this);
-
-                    if (removeFromParents)
+                    while  (!json.isRoot() &&
+                            !json.parent().isRoot())
                     {
-                        while  (!json.isRoot() &&
-                                !json.parent().isRoot())
-                        {
-                            if (--wordPath[json] == 0)
-                                wordPath.clear(json);
-
-                            json = json.parent();
-
-                        }
-
-                    }
-                    else
-                    {
-                        if (--wordPath[json] == 0)
+                         if (--wordPath[json] == 0)
                             wordPath.clear(json);
-
+                        json = json.parent();
                     }
 
-                    if (wordPath.isDeadEnd())
-                    {
-                        words.clear(word);
-                    }
+                }
+                else
+                {
+                    if (--wordPath[json] == 0)
+                        wordPath.clear(json);
                 }
 
+                if (wordPath.isDeadEnd())
+                {
+                    words.clear(word);
+                }
             }
+
+
         }
 
     }
@@ -1030,8 +1069,7 @@ JSONPath JSONDatabase::host(const BString& host) const
 
 PowerEncoding& operator << (PowerEncoding& output, const JSONPath& json)
 {
-    Path path = json;
-    return output << path;
+    return output << json.index();
 }
 
 

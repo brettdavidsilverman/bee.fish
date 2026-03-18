@@ -20,7 +20,7 @@ using namespace boost::interprocess;
 
     template<typename Key, typename Value>
     class LeastRecentlyUsedCache {
-    private:
+    protected:
         Index _capacity;
         LockFile& _lockFile;
         BString _name;
@@ -38,40 +38,33 @@ using namespace boost::interprocess;
         typedef boost::interprocess::allocator<MapValue, SegmentManager> SharedMemoryMapAllocator;
         typedef boost::interprocess::map<Key, typename SharedMemoryList::iterator, std::less<Key>, SharedMemoryMapAllocator> SharedMemoryMap;
 
-        /*
-        // map stores key -> iterator to list element
-        typedef std::unordered_map<
-            Key,
-            typename SharedMemoryList::iterator
-        >
-        MapType;
-            */
         managed_shared_memory* _sharedMemory = nullptr;
         SharedMemoryMap* _map = nullptr;
         SharedMemoryList* _list = nullptr;
         
         
     public:
-        LeastRecentlyUsedCache(const BString& name, LockFile& lockFile, Index capacity = 100000) : 
+        LeastRecentlyUsedCache(const BString& name, LockFile& lockFile, Index capacity) : 
             _capacity(capacity),
             _lockFile(lockFile),
             _name(name)
         {
-            
+            LockFile::ScopedFileLock lock(_lockFile);
             createSharedMemoryObjects(name);
         }
         
-        ~LeastRecentlyUsedCache()
+        virtual ~LeastRecentlyUsedCache()
         {
             if (_sharedMemory)
                 delete _sharedMemory;
             //shared_memory_object::remove(_sharedMemoryName.c_str());
-            
+        
         }
         
         optional<Value> get(Key key)
         {
             LockFile::ScopedFileLock lock(_lockFile);
+            
             if (_map->find(key) == _map->end()) {
                 return nullopt;
             }
@@ -103,66 +96,59 @@ using namespace boost::interprocess;
             }
             else
             {
-                //cerr << "(LIST,CAP)" << "(" << _list->size() << "," << _capacity << ")" << endl;
-
-    
-                evict();
-                
-                void* ptrValue = 
+                void* ptrValue = nullptr;
+                        
+                auto segment =
                     _sharedMemory
-                    ->get_segment_manager()
-                    ->allocate(sizeof(Value));
+                    ->get_segment_manager();
+                            
+                while (ptrValue == nullptr)
+                {
+                    try {
+                        ptrValue = 
+                            segment
+                            ->allocate(sizeof(Value));
+                    }
+                    catch (boost::interprocess::bad_alloc& e)
+                    {
+                        evict();
+                    }
+                }
                 
                 new(ptrValue)Value(value);
                 
-               // offset_ptr<Value> offsetPtrValue(static_cast<Value*>(ptrValue));
-
-
-                _list->push_front({key, (Value*)ptrValue});
-                (*_map)[key] = _list->begin();
+                bool allocated = false;
+                while (!allocated)
+                {
+                    try {
+                        _list->push_front({key, (Value*)ptrValue});
+                        allocated = true;
+                    }
+                    catch (boost::interprocess::bad_alloc& e)
+                    {
+                        evict();
+                    }
+                }
                 
-            
+                
+                allocated = false;
+                while (!allocated)
+                {
+                    try {
+                        (*_map)[key] = _list->begin();
+                        allocated = true;
+                    }
+                    catch (boost::interprocess::bad_alloc& e)
+                    {
+                        evict();
+                    }
+                }
                 
             }
         }
         
 
-        Value& operator[] (Key key)
-        {
-            LockFile::ScopedFileLock lock(_lockFile);
-            
-            if (_map->find(key) != _map->end())
-            {
-                // Move the accessed item to the front (MRU)
-                _list->splice(
-                    _list->begin(),
-                    *_list,
-                    (*_map)[key]
-                );
-            }
-            else
-            {
-                evict();
-
-                // New item, add to front
-                void* ptrValue = 
-                    _sharedMemory
-                    ->get_segment_manager()
-                    ->allocate(sizeof(Value));
-                
-                new(ptrValue)Value();
-                
-               // offset_ptr<Value> offsetPtrValue(static_cast<Value*>(ptrValue));
-                
-                _list->push_front({key, (Value*)ptrValue});
-                (*_map)[key] = _list->begin();
-                
-            }
-            
-            
-            return *(*_map)[key]->second;
-            
-        }
+        
         
         void clear()
         {
@@ -221,12 +207,10 @@ using namespace boost::interprocess;
                 BString(stream.str()) +
                 BString(name);
                 
-            Index memorySize = _capacity * 2.5 * (sizeof(MapValue) + sizeof(NodeType) + sizeof(Value));
-            
            // shared_memory_object::remove(_sharedMemoryName.c_str());
             
             _sharedMemory = new
-                managed_shared_memory(open_or_create, _sharedMemoryName.c_str(), memorySize);
+                managed_shared_memory(open_or_create, _sharedMemoryName.c_str(), _capacity);
                         
             _list = 
                 _sharedMemory->find_or_construct<SharedMemoryList>("LRUList")
@@ -240,25 +224,20 @@ using namespace boost::interprocess;
         
         // Evict the least recently used item if capacity is exceeded
         void evict() {
-            while (_list->size() >=  _capacity) 
-            {
-                Key lru_key =
-                    _list->back().first;
+            Key lru_key =
+                _list->back().first;
                 
-                Value* pointer =
-                    (*_map)[lru_key]->second.get();
+            Value* pointer =
+                (*_map)[lru_key]->second.get();
+            pointer->~Value();
+            _sharedMemory->deallocate(
+                pointer
+            );
                 
-                pointer->~Value();
+            _map->erase(lru_key);
                 
-                _sharedMemory->deallocate(
-                     pointer
-                );
-                
-                _map->erase(lru_key);
-                
-                _list->pop_back();
-                   // cerr << "(LIST,CAP)" << "(" << _list->size() << "," << _capacity << ")" << endl;
-            }
+            _list->pop_back();
+
         }
         
     };

@@ -33,32 +33,32 @@ using namespace BeeFishBString;
         Index _index = 0;
         Index _savedIndex = 0;
         Index _lockIndex = UNLOCKED;
+        
     public:
         
-        /*
-        struct ScopedPathLock
+        struct ScopedLock
         {
+        protected:
+            bool _unlock;
             Path& _path;
-            bool _locked = false;
-            ScopedPathLock(Path& path) :
+        public:
+            ScopedLock(Path& path) :
                 _path(path)
             {
-                if (!_path.locked()) {
+                if (!_path.locked())
+                {
+                    _unlock = true;
                     _path.lock();
-                    _locked = true;
                 }
             }
-            
-            ~ScopedPathLock()
+        
+            ~ScopedLock()
             {
-                if (_locked)
+                if (_unlock)
                     _path.unlock();
             }
-            
-
         };
-        */
-        
+    
     public:
         
         Path()
@@ -109,9 +109,10 @@ using namespace BeeFishBString;
         
         virtual void unlock()
         {
-            assert(locked());
-            _database->unlock(_lockIndex);
-            _lockIndex = UNLOCKED;
+            if (locked()) {
+                _database->unlock(_lockIndex);
+                _lockIndex = UNLOCKED;
+            }
         }
         
         bool locked()
@@ -225,8 +226,11 @@ using namespace BeeFishBString;
             
             _index = branch._left;
             
-            if (_count > 0)
+            if (_count > 0) {
                 --_count;
+                if (locked() && _count == 0)
+                    unlock();
+            }
                 
         }
         
@@ -411,7 +415,7 @@ using namespace BeeFishBString;
         
         Index operator++()
         {
-            lock();
+           // ScopedLock lock(*this);
             
             Index count = 1;
             if (hasData())
@@ -427,7 +431,7 @@ using namespace BeeFishBString;
         
         Index operator++(int)
         {
-            lock();
+            //ScopedLock lock(*this);
             
             Index existingCount = 0;
             Index count = 1;
@@ -444,7 +448,7 @@ using namespace BeeFishBString;
         
         Index operator--()
         {
-            lock();
+            //ScopedLock lock(*this);
             
             Index count = 0;
             if (hasData())
@@ -462,7 +466,7 @@ using namespace BeeFishBString;
         
         Index operator--(int)
         {
-            lock();
+           // ScopedLock lock(*this);
             
             Index existingCount = 0;
             Index count = 1;
@@ -482,9 +486,8 @@ using namespace BeeFishBString;
         
         BString getData() {
             
-            lock();
+            //ScopedLock lock(*this);
         
-            
             Branch branch = getBranch();
             
             if (branch._dataIndex)
@@ -521,18 +524,18 @@ using namespace BeeFishBString;
         }
         
         template<typename T>
-        void setData(const T& source)
+        bool setData(const T& source)
         {
             const char* bytes = (const char*)&source;
             BString data(bytes, sizeof(T));
-            setData<BString>(data);
+            return setData<BString>(data);
             
         }
         
         template<typename T = BString>
-        void setData(const BString& value) {
+        bool setData(const BString& value) {
             
-            lock();
+           // ScopedLock lock(*this);
             
             Branch branch = getBranch();
 
@@ -543,7 +546,7 @@ using namespace BeeFishBString;
                 if (current.size() > 0) {
                     deleteData();
                 }
-                return;
+                return true;
             }
             
             
@@ -558,20 +561,24 @@ using namespace BeeFishBString;
                 branch._dataIndex = 
                     _database->allocate(value);
                 setBranch(branch);
+                return true;
             }
             else if (current != value) {
                 _database->setData(branch._dataIndex, value);
+                return true;
             }
+            
+            return false;
 
 
         }
         
         template<typename T = const char *>
-        void setData(
+        bool setData(
             const char* source
         )
         {
-            setData<BString>(BString(source));
+            return setData<BString>(BString(source));
         }
         
         
@@ -591,14 +598,12 @@ using namespace BeeFishBString;
         
         void setBranch(const Branch& branch)
         {
-           // lock();
             _database->setBranch(_index, branch);
         }
         
         
         Branch getBranch(Index index)
         {
-           // lock();
             return
                 _database->getBranch(index);
 
@@ -613,7 +618,7 @@ using namespace BeeFishBString;
         virtual void clear()
         {
             
-            lock();
+            ScopedLock lock(*this);
             
             Branch branch = getBranch();
 
@@ -637,8 +642,8 @@ using namespace BeeFishBString;
         void clear(const T& value)
         {
 
+            ScopedLock lock(*this);
             Path path = *this;
-            path.lock();
             
             Stack stack;
             stack << value;

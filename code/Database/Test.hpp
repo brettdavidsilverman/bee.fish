@@ -33,7 +33,7 @@ namespace BeeFishDatabase
     inline bool test()
     {
         bool success = true;
-        //return testAllFiles(TEST_DIRECTORY);
+        //return testMultiThreaded();
         
         /*
         auto test =
@@ -152,7 +152,20 @@ namespace BeeFishDatabase
         
         if (success)
         {
+            cout << "\tLock index" << flush;
+            Database db;
+            db.lock(1);
+            db.unlock(1);
+            Database db2(db.filename());
+            db2.lock(1);
+            db2.unlock(1);
+            outputSuccess(true);
+        }
+        
+        if (success)
+        {
             JSONDatabase db;
+
             BString value = "101";
             Index data = db.allocate(value);
             
@@ -199,7 +212,7 @@ namespace BeeFishDatabase
             
             
         }
-        
+
         outputSuccess(success);
 
         return success;
@@ -2068,21 +2081,27 @@ assert(success);
     inline bool testMultiThreaded()
     {
         cout << "Test multi threaded" << endl;
-        
+        const Index SIZE = 723876;
 
         auto test =
-        [](std::filesystem::path file, bool readOnly, bool getSuccess = false)
+        [SIZE](std::filesystem::path file, bool readOnly, bool getSuccess = false)
         {
             
             static Index size = 0;
             static bool success = true;
-
-            if (getSuccess)
-                return success;
-                
+            
+            
+            if (getSuccess) {
+                bool result = success && size ==  SIZE;
+                success = true;
+                size = 0;
+                return result;
+            }
+            
             cout << "\tThread " << std::this_thread::get_id() << endl;
             
             JSONDatabase db(file, readOnly);
+            
             JSONPath path = db.host("https://test");
             ifstream input(TEST_DIRECTORY "/90-Sample.json");
             JSONPathParser parser(path, cout);
@@ -2098,11 +2117,15 @@ assert(success);
                 {
                     size = db.size();
                     cout << "Size a " << size << endl;
+                    success = testValue(
+                        "First size",
+                        size == SIZE
+                    );
                 }
                 else {
                     success = testValue(
                         "Subsequent size",
-                        db.size() == size
+                        db.size() == SIZE
                     );
                     cout << "Size a " << size << endl;
                     cout << "Size b " << db.size() << endl;
@@ -2112,34 +2135,45 @@ assert(success);
             return success;
             
         };
-        /*
+        
+        bool success = true;
+        
         {
+            cout <<"\tTesting read only " << flush;
             File tempFile;
+        
             test(tempFile.filename(), false);
             test(tempFile.filename(), true);
+            success = test("", true, true);
+        
+            outputSuccess(success);
         }
-        */
-        cout <<"\tStarting threads" << endl;
-         
-        File tempFile;
-        std::thread threads[] =
+        
+        if (success)
         {
-            std::thread(test, tempFile.filename(), false),
-            std::thread(test, tempFile.filename(), false)
-        };
+            cout <<"\tStarting threads" << endl;
+         
+            File tempFile;
+            std::thread threads[] =
+            {
+                std::thread(test, tempFile.filename(), false),
+                std::thread(test, tempFile.filename(), false)
+            };
             
 
-        cout << "\tWaiting threads" << endl;
+            cout << "\tWaiting threads" << endl;
         
-        for (auto& thread : threads) {
-            thread.join();
+            for (auto& thread : threads) {
+                thread.join();
+            }
+        
+            cout << "Expected size " <<  SIZE << endl;
+
+            success = test("", true, true);
+    
+            outputSuccess(success);
         }
         
-        cout << "Expected size " << 776020 << endl;
-
-        bool success = test("", true, true);
-    
-        outputSuccess(success);
         return success;
         
     }

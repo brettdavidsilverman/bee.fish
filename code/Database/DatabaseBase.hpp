@@ -93,21 +93,156 @@ namespace BeeFishDatabase {
 
         typedef AutoUnlockMutex Mutex;
     private:
-        typedef LeastRecentlyUsedCache<Index, Mutex> Locks;
+        typedef LeastRecentlyUsedCache<Index, Mutex> LocksBase;
         typedef LeastRecentlyUsedCache<Index, Branch> Cache;
         
+        class Locks : public LocksBase
+        {
+        public:
+            
+            Locks(const BString& name, LockFile& lockFile, Index capacity) : 
+                LeastRecentlyUsedCache(name, lockFile, capacity)
+            {
+            }
+            
+            void lock(Index index)
+            {
+                Mutex* mutex;
+                
+                {
+                    LockFile::ScopedFileLock lock(_lockFile);
+                
+                    if (_map->find(index) == _map->end())
+                    {
+                        void* ptrValue = nullptr;
+                        
+                        auto segment =
+                            _sharedMemory
+                            ->get_segment_manager();
+                            
+                        while (ptrValue == nullptr)
+                        {
+                          try {
+                                ptrValue = 
+                                    segment
+                                    ->allocate(sizeof(Mutex));
+                            }
+                            catch (boost::interprocess::bad_alloc& e)
+                            {
+                                // evict from front
+                                evict();
+                    
+                            }
+                        }
+                         
+                        // New item, add to back
+                        new(ptrValue)Mutex();
+                
+                        bool allocated = false;
+                        while (!allocated)
+                        {
+                            try {
+                                _list->push_back({index, (Mutex*)ptrValue});
+                                allocated = true;
+                            }
+                            catch (boost::interprocess::bad_alloc& e)
+                            {
+                                // evict from front
+                                evict();
+                    
+                            }
+                        }
+                        
+                        allocated = false;
+                        while (!allocated)
+                        {
+                            try {
+                                auto it = _list->end();
+                                --it;
+                                (*_map)[index] = it;
+                                allocated = true;
+                            }
+                            catch (boost::interprocess::bad_alloc& e)
+                            {
+                                // evict from front
+                                evict();
+                    
+                            }
+                        }
+                        
+                        
+                    }
+                    else {
+                        _list->splice(
+                            _list->end(),
+                            *_list,
+                            (*_map)[index]
+                        );
+                    }
+                    
+                    mutex = 
+                        (*_map)[index]->second.get();
+                        
+                }
+                
+                mutex->lock();
+            }
+            
+            void unlock(Index index)
+            {
+
+                LockFile::ScopedFileLock lock(_lockFile);
+                if (_map->find(index) != _map->end())
+                {
+                    // Move to front ready to be evicted
+                    _list->splice(
+                        _list->begin(),
+                        *_list,
+                        (*_map)[index]
+                    );
+                    (*_map)[index]->second->unlock();
+                }
+            }
+            
+            void evict()
+            {
+                auto segment =
+                    _sharedMemory
+                    ->get_segment_manager();
+                    
+                for (Index i = 0; i < 10; ++i)
+                {
+
+                    Index index =
+                        _list->front().first;
+
+                    Mutex* pointer = _list->front().second.get();
+
+                    pointer->lock();
+                    pointer->~Mutex();
+
+                    segment->deallocate(
+                        pointer
+                    );
+                
+                    _map->erase(index);
+                
+                    _list->pop_front();
+                }
+                
+cerr << "FREE MEM " << segment->get_free_memory() << endl;
+  
+            }
+            
+        };
         
         Index _pageSize = 0;
         
         std::map<Index, Index> _lockCounts;
 
-        Cache* _cache = nullptr;
+       // Cache* _cache = nullptr;
         Locks* _locks = nullptr;
     public:
-        
-        Cache& cache() {
-            return *_cache;
-        }
         
         Locks& locks() {
             return *_locks;
@@ -126,70 +261,53 @@ namespace BeeFishDatabase {
             _pageSize(pageSize)
             
         {
-            createSharedMemoryObjects();
+           // _cache = new Cache("BranchCache", *this, _pageSize);
+            _locks = new Locks("BranchLocks", *this, _pageSize * 100);
         }
 
         virtual ~Database()
         {
-            delete _cache;
+            assert (_lockCounts.size() == 0);
             delete _locks;
-            
-            /*
-            shared_memory_object::remove(_sharedMemoryName.c_str());
-            
-            
-               
-            */
-            //unlock();
+
         }
         
     public:
-        void createSharedMemoryObjects()
-        {
-            _cache = new Cache("BranchCache", *this, 100000);
-            _locks = new Locks("BranchLocks", *this, 100);
-        }
-        
+
         using LockFile::lock;
         using LockFile::unlock;
         
         void lock(Index lockIndex)
         {
             if (_lockCounts[lockIndex]++ == 0) {
-#ifdef VERBOSE
-cout << lockIndex << " " << this_thread::get_id() << " +" << endl;
-#endif
                 assert(_lockCounts[lockIndex] == 1);
-                locks()[lockIndex].lock();
+                locks().lock(lockIndex);
             }
         }
         
         
         void unlock(Index lockIndex)
         {
-
             bool unlock = false;
             if (_lockCounts.find(lockIndex) !=
                 _lockCounts.end())
             {
                     
-                if (_lockCounts[lockIndex] > 0)
-                    _lockCounts[lockIndex]--;
-            
-                if (_lockCounts[lockIndex] == 0)
-                    unlock = true;
+                if (_lockCounts[lockIndex] > 0) {
+                    if (--_lockCounts[lockIndex] == 0)
+                        unlock = true;
+                }
             }
                     
             if (unlock)
             {
-                locks()[lockIndex].unlock();
+                locks().unlock(lockIndex);
                 _lockCounts.erase(lockIndex);
             }
         
         }
         
         void clear() {
-            _cache->clear();
             _locks->clear();
         }
         
@@ -289,8 +407,6 @@ cout << lockIndex << " " << this_thread::get_id() << " +" << endl;
         Branch getBranch(Index index)
         {
             
-          //  ScopedFileLock lock(*this);
-
             Branch branch;
             
             if (size() == 0) 
@@ -303,21 +419,9 @@ cout << lockIndex << " " << this_thread::get_id() << " +" << endl;
                     write(&branch, sizeof(Branch));
                 }
             }
-
-            optional<Branch> optionalBranch =
-                cache().get(index);
-                
-            if (optionalBranch == nullopt)
-            {
-               // ScopedFileLock lock(*this);
-                seek(index);
-                read(&branch, sizeof(Branch));
-                cache().put(index, branch);
-            }
-            else
-                branch = optionalBranch.value();
-                
             
+            seek(index);
+            read(&branch, sizeof(Branch));
             
             return branch;
 
@@ -329,12 +433,8 @@ cout << lockIndex << " " << this_thread::get_id() << " +" << endl;
 
         inline void setBranch(Index index, const Branch& branch)
         {
-           // ScopedFileLock lock(*this);
-            cache().put(index, branch);
             seek(index);
             write(&branch, sizeof(Branch));
-            
-            
         }
     
         
@@ -343,7 +443,7 @@ cout << lockIndex << " " << this_thread::get_id() << " +" << endl;
 
             if (dataIndex == 0)
                 return "";
-
+                
             seek(dataIndex);
             Index size;
 
@@ -351,6 +451,7 @@ cout << lockIndex << " " << this_thread::get_id() << " +" << endl;
             BString buffer(size, '\0');
             read(buffer.data(), size);
 
+            
             return buffer;
         }
 
@@ -373,11 +474,12 @@ cout << lockIndex << " " << this_thread::get_id() << " +" << endl;
         
         inline void setData(Index dataIndex, const BString& source)
         {
-
+            
             seek(dataIndex);
             Index size = source.size();
             write(&size, sizeof(Index));
             write(source.data(), size);
+            
             
         }
  
