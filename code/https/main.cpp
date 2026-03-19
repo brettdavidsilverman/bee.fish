@@ -51,15 +51,17 @@ int main(int argc, const char* argv[])
           << "Log file: "
               << logFile
               << std::endl;
-/*
+
+        bool unlock =
+            (hasArg(argc, argv, "-unlock") != -1);
+        
+        if (unlock)
         {
-            cout << "Unlocking " << databaseFile << endl;
-            LockFile lock(databaseFile);
-            lock.unlock();
-            Database db(databaseFile);
-            db.clear();
+            Database db(DATABASE_FILENAME);
+            cout << "Unlocking " << DATABASE_FILENAME << endl;
+            db.unlock();
         }
-*/
+        
         unsigned int port = 443;
         int portArg;
         if ((portArg = hasArg(argc, argv, "-port")) >= 0)

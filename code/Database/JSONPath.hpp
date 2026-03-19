@@ -477,7 +477,6 @@ public:
         {
             // New property
             // Update the properties counter
-//++propertyPath;
             propertyPath[*this];
             
             // Update positions
@@ -721,7 +720,6 @@ public:
 
         json.clear();
 
-//if (--propertyPath == 0)
         if (propertyPath.contains(*this))
         {
             propertyPath.clear(*this);
