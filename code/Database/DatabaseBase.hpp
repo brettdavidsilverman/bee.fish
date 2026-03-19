@@ -98,6 +98,7 @@ namespace BeeFishDatabase {
         void lock(Index lockIndex)
         {
             if (_lockCounts[lockIndex]++ == 0) {
+
                 assert(_lockCounts[lockIndex] == 1);
                 locks().lock(lockIndex);
             }

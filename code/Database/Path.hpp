@@ -44,17 +44,12 @@ public:
         ScopedLock(Path& path) :
             _path(path)
         {
-           // if (!_path.locked())
-              //  _path.lock();
-                
-_path.database().lock(_path._savedIndex);
+            _path.database().lock(_path._savedIndex);
         }
         
         ~ScopedLock()
         {
-           // if (_path.locked())
-             //   _path.unlock();
-_path.database().unlock(_path._savedIndex);
+            _path.database().unlock(_path._savedIndex);
         }
     };
 
@@ -90,43 +85,10 @@ _path.database().unlock(_path._savedIndex);
 
     virtual ~Path()
     {
-        if (locked())
-            unlock();
     }
-
-    virtual void lock()
-    {
-       // if (locked())
-        //    unlock();
-            
-        if (!locked())
-        {
-            _lockIndex = _savedIndex;
-            _database->lock(_lockIndex);
-        }
-
-    }
-
-    virtual void unlock()
-    {
-        if (locked())
-        {
-            _database->unlock(_lockIndex);
-            _lockIndex = UNLOCKED;
-        }
-    }
-
-    bool locked()
-    {
-        return _lockIndex != UNLOCKED;
-    }
-
 
     Path& operator = (const Path& rhs)
     {
-        if (locked()) {
-            unlock();
-        }
 
         _database = rhs._database;
         _index = rhs._index;
@@ -210,19 +172,9 @@ public:
 
         if (branch._left == 0)
         {
-/*
-            if (!locked()) {
-                lock();
-                branch = getBranch();
-            }
 
-            if (branch._left == 0)
-*/
-            {
-                branch._left =
-                    _database->getNextIndex(_index);
-            }
-
+            branch._left =
+                _database->getNextIndex(_index);
             setBranch(branch);
         }
 
@@ -230,8 +182,6 @@ public:
 
         if (_count > 0) {
             --_count;
-           // if (locked() && _count == 0)
-           //     unlock();
         }
 
     }
@@ -244,19 +194,9 @@ public:
 
         if (branch._right == 0)
         {
-    /*
-            if (!locked()) {
-                lock();
-                branch = getBranch();
-            }
-
-            if (branch._right == 0)
-    */
-            {
-                branch._right =
-                    _database->getNextIndex(_index);
-                setBranch(branch);
-            }
+            branch._right =
+                _database->getNextIndex(_index);
+            setBranch(branch);
         }
 
         _index = branch._right;
@@ -391,9 +331,6 @@ public:
         PowerEncoding& encoding = path;
         encoding << key;
 
-        if (path.locked())
-            path.unlock();
-            
         return path;
     }
 
@@ -424,8 +361,6 @@ public:
 
     Index operator++()
     {
-       // ScopedLock lock(*this);
-        
         Index count = 1;
         if (hasData())
         {
@@ -440,7 +375,6 @@ public:
 
     Index operator++(int)
     {
-       // ScopedLock lock(*this);
         
         Index existingCount = 0;
         Index count = 1;
@@ -457,7 +391,6 @@ public:
 
     Index operator--()
     {
-       // ScopedLock lock(*this);
         
         Index count = 0;
         if (hasData())
@@ -475,7 +408,6 @@ public:
 
     Index operator--(int)
     {
-       // ScopedLock lock(*this);
         
         Index existingCount = 0;
         Index count = 1;
@@ -543,7 +475,6 @@ public:
     template<typename T = BString>
     bool setData(const BString& value) {
         
-       // ScopedLock lock(*this);
         
         Branch branch = getBranch();
 
@@ -625,7 +556,6 @@ public:
 
     virtual void clear()
     {
-      //  ScopedLock lock(*this);
 
         Path path = *this;
 
@@ -651,7 +581,6 @@ public:
     void clear(const T& value)
     {
         
-      //  ScopedLock lock(*this);
 
         Path path = *this;
 

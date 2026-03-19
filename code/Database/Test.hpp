@@ -774,7 +774,7 @@ namespace BeeFishDatabase
                 test.type() == Type::UNDEFINED
             );
         
-            
+            /*
         if (success) {
             cout << "\tKeyed \"hello\" json path" << endl;
             start["hello"].lock();
@@ -787,6 +787,7 @@ namespace BeeFishDatabase
             
             
         }
+        */
         
         JSONPath root = database.host("https://test");
 
@@ -2075,7 +2076,7 @@ assert(success);
     inline bool testMultiThreaded()
     {
         cout << "Test multi threaded" << endl;
-        const Index SIZE = 711160;
+        const Index SIZE = 1073960;
 
         auto test =
         [SIZE](std::filesystem::path file, bool readOnly, bool getSuccess = false)
