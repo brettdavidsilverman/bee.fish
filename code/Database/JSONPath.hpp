@@ -21,34 +21,14 @@ class JSONPath :
     public Path
 {
 public:
-    struct ScopedLock
-    {
-    protected:
-        bool _unlock;
-        Path _path;
-    public:
-        ScopedLock(Path& path) :
-            _path(path)
-        {
-           // if (!_path.locked())
-            {
-                _unlock = true;
-                _path.lock();
-            }
-        }
-        
-        ~ScopedLock()
-        {
-           // if (_unlock)
-                _path.unlock();
-        }
-    };
+    
       
 public:
     inline static const Index VALUE = 0;
     inline static const Index PROPERTIES = 1;
     inline static const Index POSITIONS = 2;
-    inline static const Index CHILDREN = 3;
+    inline static const Index CASCADE = 3;
+    inline static const Index CHILDREN = 4;
 public:
     typedef Index Id;
 
@@ -108,61 +88,92 @@ public:
     JSONPath operator [] (const BString& property)
     {
         ScopedLock lock(*this);
-        
-        setType(Type::OBJECT);
 
-        Index count = getChildren().count();
+        setType(Type::OBJECT);
         
         Index position =
             getObjectPropertyPosition(property);
             
         assert(position > 0);
-        JSONPath json = getChildren()[position];
         
-        if (position > count)
-            json.cascadeProperties();
+        JSONPath json = getChildren()[position];
+
+        json.cascadeProperties();
         
         return json;
-
 
     }
 
     JSONPath operator [] (const Index& index)
     {
         ScopedLock lock(*this);
-        
-        assert(index > 0);
-
-        if (!getChildren().contains(index)) {
-            ++getChildren();
-            JSONPath json = getChildren()[index];
-            json.cascadeProperties();
+        if (index < 1)
+        {
+            throw runtime_error("Index out of bounds");
         }
         
-        return getChildren()[index];
+        Path children = getChildren();
+        Index count = 0;
+        
+        if (children.hasData())
+            children.getData<Index>(count);
+            
+        if (type() == Type::UNDEFINED)
+        {
+            setType(Type::ARRAY);
+        }
+        
+        if (index > count)
+        {
+            if (type() == Type::ARRAY)
+            {
+                while (index > count)
+                {
+                    JSONPath child = children[++count];
+                }
+            }
+            else
+                throw runtime_error("Index out of bounds");
+                
+            children.setData<Index>(count);
+        }
+        
+        JSONPath json = getChildren()[index];
+        
+        json.cascadeProperties();
+            
+        return json;
     }
     
     void cascadeProperties()
     {
-        JSONPath json = *this;
         
-        if (!json.hasData())
+        Path path = *this;
+        path = path[CASCADE];
+        if (!path.hasData())
         {
-            while (!json.isRoot() &&
-                   !json.parent().isRoot())
+            //ScopedLock lock(*this);
+            if (!path.hasData())
             {
-                BString property;
-                json = json.parent(property);
-                if (!property.isDigitsOnly())
+                path.setData(true);
+                
+                JSONPath json = *this;
+                while (!json.isRoot() &&
+                       !json.parent().isRoot())
                 {
-                    if (property.startsWith("\"") &&
-                        property.endsWith("\""))
+                    BString property;
+                    json = json.parent(property);
+                    if (!property.isDigitsOnly())
                     {
-                        property =
-                            property.substr(1, property.length() - 2)
-                            .unescape();
+                        if (property.startsWith("\"") &&
+                            property.endsWith("\""))
+                        {
+                            property =
+                                property.substr(1, property.length() - 2)
+                                .unescape();
+                        }
+                        addWords(property, false);
                     }
-                    addWords(property, false);
                 }
             }
         }
@@ -187,6 +198,7 @@ protected:
         }
 
         assert(JSONPath::type() == type);
+
     }
     
 public:
@@ -195,7 +207,7 @@ public:
     void setUndefined()
     {
         ScopedLock lock(*this);
-
+        
         if (type() == Type::UNDEFINED)
             return;
             
@@ -224,7 +236,6 @@ public:
     {
         ScopedLock lock(*this);
         Path path = *this;
-        
         setType(Type::BOOLEAN);
         path[VALUE].setData<BString>(value);
     }
@@ -257,16 +268,14 @@ public:
     void setObject()
     {
         ScopedLock lock(*this);
-        Path path = *this;
-        
         setType(Type::OBJECT);
     }
     
     void setArray()
     {
         ScopedLock lock(*this);
-        Path path = *this;
         setType(Type::ARRAY);
+        
     }
 
     JSONPath parent() {
@@ -466,49 +475,50 @@ public:
         Path objectPropertyPath =
             getObjectProperties()[propertyPath];
 
-       // ScopedLock lock(objectPropertyPath);
         
-        if (objectPropertyPath.hasData())
+        if (!objectPropertyPath.hasData())
         {
-            objectPropertyPath.getData<Index>(position);
-        }
-        else
-        {
-            // New property
-            // Update the properties counter
-            ++propertyPath;
-
-            // Update positions
-            position = ++getChildren();
-            getChildren()[position];
-            getPositions()[position].setData<Index>(propertyPath.index());
-            objectPropertyPath.setData<Index>(position);
-
-            // add all path properties except the
-            // first (host)
-
-
-            JSONPath path = *this;
-            while (!path.isRoot() &&
-                    !path.parent().isRoot())
+          //  ScopedLock lock(*this);
+            if (!objectPropertyPath.hasData())
             {
-                BString property;
-                path = path.parent(property);
-                if (!property.isDigitsOnly())
-                {
-                    if (property.startsWith("\"") &&
-                            property.endsWith("\""))
-                    {
-                        property =
-                            property.substr(1, property.length() - 2)
-                            .unescape();
-                    }
-                    addWords(property, false);
-                }
+                // New property
+                // Update the properties counter
+                ++propertyPath;
 
+                // Update positions
+                position = ++getChildren();
+                getChildren()[position];
+                getPositions()[position].setData<Index>(propertyPath.index());
+                objectPropertyPath.setData<Index>(position);
+
+                // add all path properties except the
+                // first (host)
+
+
+                JSONPath path = *this;
+                while (!path.isRoot() &&
+                       !path.parent().isRoot())
+                {
+                    BString property;
+                    path = path.parent(property);
+                    if (!property.isDigitsOnly())
+                    {
+                        if (property.startsWith("\"") &&
+                            property.endsWith("\""))
+                        {
+                            property =
+                                property.substr(1, property.length() - 2)
+                                .unescape();
+                        }
+                        addWords(property, false);
+                    }
+
+                }
             }
         }
-
+        
+        objectPropertyPath.getData<Index>(position);
+        
 
         return position;
     }
@@ -577,7 +587,7 @@ public:
 
     Path getObjectProperties()
     {
-        setType(Type::OBJECT);
+//setType(Type::OBJECT);
         Path path = *this;
         path << PROPERTIES;
         return path;
@@ -734,8 +744,6 @@ public:
         Path objects = database().objects();
         
         Path path = *this;
-
-      //  ScopedLock lock(path);
         
         std::vector<BString> tokens =
             tokenise(word);
@@ -913,10 +921,17 @@ public:
                 if (count == 1)
                     _tabCount--;
 
-                item.write(
-                    out,
-                    _tabCount
-                );
+                if (item.type() == Type::UNDEFINED)
+                {
+                    out << "null";
+                }
+                else
+                {
+                    item.write(
+                        out,
+                        _tabCount
+                    );
+                }
 
                 if (index < count)
                 {

@@ -55,16 +55,14 @@ public:
 
     void lock(Index index)
     {
-        Mutex* mutex;
-
+cerr << "+";
         {
             LockFile::ScopedFileLock lock(_lockFile);
-
             if (_map->find(index) == _map->end())
             {
-
+    
                 evict();
-                cerr << "+";
+
                 void* ptrValue = nullptr;
 
                 auto segment =
@@ -85,6 +83,8 @@ public:
                 (*_map)[index] = it;
             }
             else {
+                
+
                 _list->splice(
                     _list->end(),
                     *_list,
@@ -92,26 +92,27 @@ public:
                 );
             }
 
-            mutex =
-                (*_map)[index]->second.get();
 
         }
 
-        mutex->lock();
+        (*_map)[index]->second->lock();
     }
 
     void unlock(Index index)
     {
-
-        LockFile::ScopedFileLock lock(_lockFile);
+cerr << "-";
+       // 
         if (_map->find(index) != _map->end())
         {
-            // Move to front ready to be evicted
-            _list->splice(
-                _list->begin(),
-                *_list,
-                (*_map)[index]
-            );
+            {
+                LockFile::ScopedFileLock lock(_lockFile);
+                // Move to front ready to be evicted
+                _list->splice(
+                    _list->begin(),
+                    *_list,
+                    (*_map)[index]
+                );
+            }
             (*_map)[index]->second->unlock();
         }
     }
@@ -125,7 +126,7 @@ public:
 
         while (segment->get_free_memory() < MIN_SIZE)
         {
-            cerr << "-";
+
             Index index =
                 _list->front().first;
 

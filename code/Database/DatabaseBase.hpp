@@ -80,7 +80,7 @@ namespace BeeFishDatabase {
             
         {
            // _cache = new Cache("BranchCache", *this, _pageSize);
-            _locks = new Locks("BranchLocks", *this, _pageSize * 2);
+            _locks = new Locks("BranchLocks", *this, _pageSize * 4);
         }
 
         virtual ~Database()
@@ -126,7 +126,6 @@ namespace BeeFishDatabase {
         }
         
         void unlock() {
-            cerr << "UNLOCK " << endl;
             LockFile::unlock();
             _locks->clear();
         }

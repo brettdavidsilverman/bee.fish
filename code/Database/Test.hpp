@@ -35,39 +35,6 @@ namespace BeeFishDatabase
         bool success = true;
         //return testMultiThreaded();
         
-        /*
-        auto test =
-        [](std::filesystem::path path)
-        {
-            Database db(path);
-            db.lock();
-            db.unlock();
-        };
-        
-        Database db;
-        db.lock();
-    
-                 
-        std::vector<std::thread> threads(100);
-        
-        for (auto& thread : threads)
-        {
-            thread =
-                std::thread(test, db.filename());
-        };
-        
-        cout << "\tWaiting threads" << endl;
-        db.unlock();
-        
-        for (auto& thread : threads) {
-            if (thread.joinable()) {
-                thread.join();
-            }
-        }
-        
-        
-        assert(false);
-*/
         cout << "Test Database " << endl;
 
         success = success &&
@@ -166,8 +133,8 @@ namespace BeeFishDatabase
                 Path path1 = db;
                 Path path2 = db;
                 {
-                    JSONPath::ScopedLock lock1(path1);
-                    JSONPath::ScopedLock lock2(path2);
+                    Path::ScopedLock lock1(path1);
+                    Path::ScopedLock lock2(path2);
                 }
                 outputSuccess(true);
             }
@@ -177,10 +144,10 @@ namespace BeeFishDatabase
             Path path1 = db;
             Path path2 = db2;
             {
-                JSONPath::ScopedLock lock1(path1);
+                Path::ScopedLock lock1(path1);
             }
             {
-                JSONPath::ScopedLock lock2(path2);
+                Path::ScopedLock lock2(path2);
             }
             outputSuccess(true);
         }
@@ -795,6 +762,7 @@ namespace BeeFishDatabase
         
         cout << "\tTest type" << endl;
         JSONDatabase database;
+        
         JSONPath start = database.host("https://test");
         JSONPath test =start["test"];
         
@@ -810,11 +778,14 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tKeyed \"hello\" json path" << endl;
             start["hello"].lock();
+            start["hello"].lock();
             success = success && 
             testValue(
                 "Hello Unlocked",
                 true
             );
+            
+            
         }
         
         JSONPath root = database.host("https://test");
@@ -2104,7 +2075,7 @@ assert(success);
     inline bool testMultiThreaded()
     {
         cout << "Test multi threaded" << endl;
-        const Index SIZE = 723876;
+        const Index SIZE = 711160;
 
         auto test =
         [SIZE](std::filesystem::path file, bool readOnly, bool getSuccess = false)

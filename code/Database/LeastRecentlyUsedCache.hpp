@@ -49,7 +49,7 @@ public:
         _lockFile(lockFile),
         _name(name)
     {
-// LockFile::ScopedFileLock lock(_lockFile);
+//LockFile::ScopedFileLock lock(_lockFile);
         createSharedMemoryObjects(name);
     }
 
@@ -152,11 +152,12 @@ public:
     void clear()
     {
 
-        _lockFile.unlock();
-        _lockFile.lock();
+        //_lockFile.unlock();
+        
+        //LockFile::ScopedFileLock lock(_lockFile);
 
         shared_memory_object::remove(_sharedMemoryName.c_str());
-
+/*
         while (_list->size() > 0)
         {
             Key lru_key =
@@ -176,14 +177,17 @@ public:
             _list->pop_back();
         }
 
+
+*/
+
         if (_sharedMemory) {
             delete _sharedMemory;
             _sharedMemory = nullptr;
         }
-
-        _lockFile.unlock();
-
+        
         createSharedMemoryObjects(_name);
+        
+        
     }
 
     const BString& sharedMemoryName()
@@ -195,7 +199,7 @@ private:
 
     void createSharedMemoryObjects(const BString& name)
     {
-// LockFile::ScopedFileLock lock(_lockFile);
+        LockFile::ScopedFileLock lock(_lockFile);
         std::hash<std::string> hasher;
         std::filesystem::path path = _lockFile.filename();
 
