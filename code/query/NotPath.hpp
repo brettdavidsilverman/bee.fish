@@ -45,15 +45,20 @@ using namespace BeeFishDatabase;
             if (_count == 0)
             {
                 if (_stack.count() == 1)
-                    return false;
+                    return !_path->canGoLeft() &&
+                           _bounds->canGoLeft();
+//return false;
             }
-                    
+                    /*
             if (_stack.size())
             {
                 if (_stack.count() == 0)
+                {
+assert(false);
                     return false;
+                }
             }
-            
+            */
             return _bounds->canGoLeft();
             
         }
