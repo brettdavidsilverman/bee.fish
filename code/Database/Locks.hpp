@@ -55,20 +55,24 @@ public:
 
     void lock(Index index)
     {
+
+        
+        Mutex* mutex = nullptr;
+
         {
-            _lockFile.lock();
+            LockFile::ScopedFileLock lock(_lockFile);
+
             if (_map->find(index) == _map->end())
             {
-               
+
                 evict();
 
                 _list->push_back(index);
                 auto it = _list->end();
                 --it;
                 (*_map)[index].first = it;
-                (*_map)[index].second.lock();
-                
-                _lockFile.unlock();
+                mutex = &(*_map)[index].second;
+
 
             }
             else {
@@ -77,33 +81,36 @@ public:
                     *_list,
                     (*_map)[index].first
                 );
-                _lockFile.unlock();
-                (*_map)[index].second.lock();
+
+                mutex =
+                    &(*_map)[index].second;
+
             }
-
-
         }
 
-
+        mutex->lock();
+    
     }
+
 
     void unlock(Index index)
     {
+
         LockFile::ScopedFileLock lock(_lockFile);
 
         if (_map->find(index) != _map->end())
         {
 
-            {
-                
-                // Move to front ready to be evicted
-                _list->splice(
-                    _list->begin(),
-                    *_list,
-                    (*_map)[index].first
-                );
-            }
             (*_map)[index].second.unlock();
+
+            // Move to front ready to be evicted
+            _list->splice(
+                _list->begin(),
+                *_list,
+                (*_map)[index].first
+            );
+
+
 
         }
     }
@@ -122,7 +129,7 @@ public:
                 _list->front();
 
             (*_map)[index].second.lock();
-            
+
             _map->erase(index);
 
             _list->pop_front();
