@@ -54,11 +54,11 @@ int main(int argc, const char* argv[])
 
         bool unlock =
             (hasArg(argc, argv, "-unlock") != -1);
-        
+            
         if (unlock)
         {
-            Database db(DATABASE_FILENAME);
             cout << "Unlocking " << DATABASE_FILENAME << endl;
+            Database db(DATABASE_FILENAME);
             db.unlock();
         }
         

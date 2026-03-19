@@ -80,7 +80,7 @@ namespace BeeFishDatabase {
             
         {
            // _cache = new Cache("BranchCache", *this, _pageSize);
-            _locks = new Locks("BranchLocks", *this, _pageSize * 4);
+            _locks = new Locks("BranchLocks", *this, _pageSize * 10);
         }
 
         virtual ~Database()
@@ -97,8 +97,10 @@ namespace BeeFishDatabase {
         
         void lock(Index lockIndex)
         {
-            if (_lockCounts[lockIndex]++ == 0) {
 
+            if (_lockCounts[lockIndex]++ == 0) {
+LockFile::lock();
+return;
                 assert(_lockCounts[lockIndex] == 1);
                 locks().lock(lockIndex);
             }
@@ -120,7 +122,9 @@ namespace BeeFishDatabase {
                     
             if (unlock)
             {
-                locks().unlock(lockIndex);
+ //               locks().unlock(lockIndex);
+ LockFile::unlock();
+ 
                 _lockCounts.erase(lockIndex);
             }
         

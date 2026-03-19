@@ -55,7 +55,6 @@ public:
 
     void lock(Index index)
     {
-cerr << "+";
         {
             LockFile::ScopedFileLock lock(_lockFile);
             if (_map->find(index) == _map->end())
@@ -83,8 +82,6 @@ cerr << "+";
                 (*_map)[index] = it;
             }
             else {
-                
-
                 _list->splice(
                     _list->end(),
                     *_list,
@@ -100,12 +97,13 @@ cerr << "+";
 
     void unlock(Index index)
     {
-cerr << "-";
-       // 
+        LockFile::ScopedFileLock lock(_lockFile);
+
         if (_map->find(index) != _map->end())
         {
+            (*_map)[index]->second->unlock();
             {
-                LockFile::ScopedFileLock lock(_lockFile);
+                
                 // Move to front ready to be evicted
                 _list->splice(
                     _list->begin(),
@@ -113,7 +111,7 @@ cerr << "-";
                     (*_map)[index]
                 );
             }
-            (*_map)[index]->second->unlock();
+
         }
     }
 

@@ -32,13 +32,13 @@ int main(int argc, const char* argv[])
     bool unlock =
         (hasArg(argc, argv, "-unlock") != -1);
         
-    unlock = true;
-    
     if (unlock)
     {
-        Database db(DATABASE_FILENAME);
         cout << "Unlocking " << DATABASE_FILENAME << endl;
+        Database db(DATABASE_FILENAME);
+        
         db.unlock();
+        return 0;
     }
     
     bool test =
@@ -159,12 +159,6 @@ int main(int argc, const char* argv[])
         cout << database.host(origin) << endl;
     }
     
-    if (unlock)
-    {
-        Database db(DATABASE_FILENAME);
-        cout << "Unlocking " << DATABASE_FILENAME << endl;
-        db.unlock();
-    }
 
     return 0;
 

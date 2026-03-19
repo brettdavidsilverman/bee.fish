@@ -199,7 +199,7 @@ private:
 
     void createSharedMemoryObjects(const BString& name)
     {
-        LockFile::ScopedFileLock lock(_lockFile);
+        //LockFile::ScopedFileLock lock(_lockFile);
         std::hash<std::string> hasher;
         std::filesystem::path path = _lockFile.filename();
 

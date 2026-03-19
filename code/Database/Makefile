@@ -20,15 +20,18 @@ debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
 debug:	$(OUTPUT)
 
+unlock:	$(OUTPUT)
+	$(OUTPUT) -unlock
+
 clean:
 	rm -f $(OUTPUT)
 	rm -f *.o
 	rm -f trace.txt
 
-load:
-load:	CFLAGS += -D TIME -D DEBUG -Ofast
-load:	$(OUTPUT)
-	time --verbose $(OUTPUT) -deaths
+deaths:
+deaths:	CFLAGS += -D TIME -D DEBUG -Ofast
+deaths:	$(OUTPUT)
+	$(OUTPUT) -deaths
 	
 time:
 time:	CFLAGS += -D TIME -D DEBUG -Ofast

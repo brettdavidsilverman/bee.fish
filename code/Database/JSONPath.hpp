@@ -472,7 +472,6 @@ public:
         Path objectPropertyPath =
             getObjectProperties()[propertyPath];
 
-
         if (!objectPropertyPath.hasData())
         {
             // New property
@@ -481,6 +480,7 @@ public:
             
             // Update positions
             position = ++getChildren();
+            
             getChildren()[position];
             getPositions()[position].setData<Index>(propertyPath.index());
             objectPropertyPath.setData<Index>(position);
