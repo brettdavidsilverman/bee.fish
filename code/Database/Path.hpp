@@ -86,10 +86,23 @@ public:
     virtual ~Path()
     {
     }
-
+    
+    void lock() {
+        _database->lock(_index);
+        _lockIndex = _index;
+    }
+    
+    void unlock() {
+        _database->unlock(_lockIndex);
+        _lockIndex = UNLOCKED;
+    }
+    
+    bool locked() {
+        return (_lockIndex != UNLOCKED);
+    }
+    
     Path& operator = (const Path& rhs)
     {
-
         _database = rhs._database;
         _index = rhs._index;
         _savedIndex = rhs._savedIndex;
@@ -172,10 +185,19 @@ public:
 
         if (branch._left == 0)
         {
-
-            branch._left =
-                _database->getNextIndex(_index);
-            setBranch(branch);
+            
+            if (!locked())
+            {
+                lock();
+                branch = getBranch();
+            }
+            
+            if (branch._left == 0)
+            {
+                branch._left =
+                    _database->getNextIndex(_index);
+                setBranch(branch);
+            }
         }
 
         _index = branch._left;
@@ -194,9 +216,19 @@ public:
 
         if (branch._right == 0)
         {
-            branch._right =
-                _database->getNextIndex(_index);
-            setBranch(branch);
+            
+            if (!locked())
+            {
+                lock();
+                branch = getBranch();
+            }
+            
+            if (branch._right == 0)
+            {
+                branch._right =
+                    _database->getNextIndex(_index);
+                setBranch(branch);
+            }
         }
 
         _index = branch._right;
@@ -331,6 +363,9 @@ public:
         PowerEncoding& encoding = path;
         encoding << key;
 
+        if (path.locked())
+            path.unlock();
+            
         return path;
     }
 
@@ -475,6 +510,7 @@ public:
     template<typename T = BString>
     bool setData(const BString& value) {
         
+        ScopedLock (*this);
         
         Branch branch = getBranch();
 

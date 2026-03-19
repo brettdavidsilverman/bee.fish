@@ -56,43 +56,35 @@ public:
     void lock(Index index)
     {
         {
-            LockFile::ScopedFileLock lock(_lockFile);
+            _lockFile.lock();
             if (_map->find(index) == _map->end())
             {
-    
+               
                 evict();
 
-                void* ptrValue = nullptr;
-
-                auto segment =
-                    _sharedMemory
-                    ->get_segment_manager();
-
-                ptrValue =
-                    segment
-                    ->allocate(sizeof(Mutex));
-
-                // New item, add to back
-                new(ptrValue)Mutex();
-
-                _list->push_back({index, (Mutex*)ptrValue});
-
+                _list->push_back(index);
                 auto it = _list->end();
                 --it;
-                (*_map)[index] = it;
+                (*_map)[index].first = it;
+                (*_map)[index].second.lock();
+                
+                _lockFile.unlock();
+
             }
             else {
                 _list->splice(
                     _list->end(),
                     *_list,
-                    (*_map)[index]
+                    (*_map)[index].first
                 );
+                _lockFile.unlock();
+                (*_map)[index].second.lock();
             }
 
 
         }
 
-        (*_map)[index]->second->lock();
+
     }
 
     void unlock(Index index)
@@ -101,16 +93,17 @@ public:
 
         if (_map->find(index) != _map->end())
         {
-            (*_map)[index]->second->unlock();
+
             {
                 
                 // Move to front ready to be evicted
                 _list->splice(
                     _list->begin(),
                     *_list,
-                    (*_map)[index]
+                    (*_map)[index].first
                 );
             }
+            (*_map)[index].second.unlock();
 
         }
     }
@@ -126,17 +119,10 @@ public:
         {
 
             Index index =
-                _list->front().first;
+                _list->front();
 
-            Mutex* pointer = _list->front().second.get();
-
-            pointer->lock();
-            pointer->~Mutex();
-
-            segment->deallocate(
-                pointer
-            );
-
+            (*_map)[index].second.lock();
+            
             _map->erase(index);
 
             _list->pop_front();

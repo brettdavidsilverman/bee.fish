@@ -25,18 +25,16 @@ protected:
     LockFile& _lockFile;
     BString _name;
     BString _sharedMemoryName;
-
-    // list value type
-    typedef std::pair<Key, offset_ptr<Value> > NodeType;
+    
     // Define the types for the allocator and the list
     // The allocator needs to know about the segment manager
     typedef managed_shared_memory::segment_manager SegmentManager;
-    typedef boost::interprocess::allocator<NodeType, SegmentManager> SharedMemoryListAllocator;
-    typedef boost::interprocess::list<NodeType, SharedMemoryListAllocator> SharedMemoryList;
+    typedef boost::interprocess::allocator<Key, SegmentManager> SharedMemoryListAllocator;
+    typedef boost::interprocess::list<Key, SharedMemoryListAllocator> SharedMemoryList;
 
-    typedef std::pair<const Key, typename SharedMemoryList::iterator> MapValue;
+    typedef std::pair<const Key, std::pair<typename SharedMemoryList::iterator, Value> > MapValue;
     typedef boost::interprocess::allocator<MapValue, SegmentManager> SharedMemoryMapAllocator;
-    typedef boost::interprocess::map<Key, typename SharedMemoryList::iterator, std::less<Key>, SharedMemoryMapAllocator> SharedMemoryMap;
+    typedef boost::interprocess::map<Key, std::pair< typename SharedMemoryList::iterator, Value>, std::less<Key>, SharedMemoryMapAllocator> SharedMemoryMap;
 
     managed_shared_memory* _sharedMemory = nullptr;
     SharedMemoryMap* _map = nullptr;
@@ -59,7 +57,7 @@ public:
             delete _sharedMemory;
 
     }
-
+/*
     optional<Value> get(Key key)
     {
         LockFile::ScopedFileLock lock(_lockFile);
@@ -146,7 +144,7 @@ public:
         }
     }
 
-
+*/
 
 
     void clear()

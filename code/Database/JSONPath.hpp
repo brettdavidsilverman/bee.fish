@@ -87,7 +87,7 @@ public:
 
     JSONPath operator [] (const BString& property)
     {
-        ScopedLock lock(*this);
+       // ScopedLock lock(*this);
 
         setType(Type::OBJECT);
 
@@ -106,7 +106,7 @@ public:
 
     JSONPath operator [] (const Index& index)
     {
-        ScopedLock lock(*this);
+       // ScopedLock lock(*this);
         if (index < 1)
         {
             throw runtime_error("Index out of bounds");
@@ -115,27 +115,35 @@ public:
         Path children = getChildren();
         Index count = 0;
 
-        if (children.hasData())
-            children.getData<Index>(count);
-
-        if (type() == Type::UNDEFINED)
+                if (type() == Type::UNDEFINED)
         {
             setType(Type::ARRAY);
         }
 
+        if (children.hasData())
+            children.getData<Index>(count);
+            
         if (index > count)
         {
-            if (type() == Type::ARRAY)
+            ScopedLock lock(*this);
+            
+            if (children.hasData())
+                children.getData<Index>(count);
+                
+            if (index > count)
             {
-                while (index > count)
+                if (type() == Type::ARRAY)
                 {
-                    JSONPath child = children[++count];
+                    while (index > count)
+                    {
+                        JSONPath child = children[++count];
+                    }
                 }
-            }
-            else
-                throw runtime_error("Index out of bounds");
+                else
+                    throw runtime_error("Index out of bounds");
 
-            children.setData<Index>(count);
+                children.setData<Index>(count);
+            }
         }
 
         JSONPath json = getChildren()[index];
@@ -150,26 +158,32 @@ public:
 
         Path path = *this;
         path = path[CASCADE];
+
+
         if (!path.hasData())
         {
-            path.setData(true);
-
-            JSONPath json = *this;
-            while (!json.isRoot() &&
-                    !json.parent().isRoot())
+            ScopedLock lock(*this);
+            if (!path.hasData())
             {
-                BString property;
-                json = json.parent(property);
-                if (!property.isDigitsOnly())
+                path.setData(true);
+
+                JSONPath json = *this;
+                while (!json.isRoot() &&
+                        !json.parent().isRoot())
                 {
-                    if (property.startsWith("\"") &&
-                            property.endsWith("\""))
+                    BString property;
+                    json = json.parent(property);
+                    if (!property.isDigitsOnly())
                     {
-                        property =
-                            property.substr(1, property.length() - 2)
-                            .unescape();
+                        if (property.startsWith("\"") &&
+                                property.endsWith("\""))
+                        {
+                            property =
+                                property.substr(1, property.length() - 2)
+                                .unescape();
+                        }
+                        addWords(property, false);
                     }
-                    addWords(property, false);
                 }
             }
 
@@ -187,11 +201,15 @@ protected:
         }
         else if (JSONPath::type() != type)
         {
-            clear();
-            assert(isDeadEnd());
-            if (!isRoot())
-                database().objects()[*this];
-            setData<Type>(type);
+            ScopedLock lock(*this);
+            if (JSONPath::type() != type)
+            {
+                clear();
+                assert(isDeadEnd());
+                if (!isRoot())
+                    database().objects()[*this];
+                setData<Type>(type);
+            }
         }
 
         assert(JSONPath::type() == type);
@@ -474,39 +492,43 @@ public:
 
         if (!objectPropertyPath.hasData())
         {
-            // New property
-            // Update the properties counter
-            propertyPath[*this];
-            
-            // Update positions
-            position = ++getChildren();
-            
-            getChildren()[position];
-            getPositions()[position].setData<Index>(propertyPath.index());
-            objectPropertyPath.setData<Index>(position);
-
-            // add all path properties except the
-            // first (host)
-
-
-            JSONPath path = *this;
-            while (!path.isRoot() &&
-                    !path.parent().isRoot())
+            ScopedLock lock(*this);
+            if (!objectPropertyPath.hasData())
             {
-                BString property;
-                path = path.parent(property);
-                if (!property.isDigitsOnly())
-                {
-                    if (property.startsWith("\"") &&
-                            property.endsWith("\""))
-                    {
-                        property =
-                            property.substr(1, property.length() - 2)
-                            .unescape();
-                    }
-                    addWords(property, false);
-                }
+                // New property
+                // Update the properties counter
+                propertyPath[*this];
 
+                // Update positions
+                position = ++getChildren();
+
+                getChildren()[position];
+                getPositions()[position].setData<Index>(propertyPath.index());
+                objectPropertyPath.setData<Index>(position);
+
+                // add all path properties except the
+                // first (host)
+
+
+                JSONPath path = *this;
+                while (!path.isRoot() &&
+                        !path.parent().isRoot())
+                {
+                    BString property;
+                    path = path.parent(property);
+                    if (!property.isDigitsOnly())
+                    {
+                        if (property.startsWith("\"") &&
+                                property.endsWith("\""))
+                        {
+                            property =
+                                property.substr(1, property.length() - 2)
+                                .unescape();
+                        }
+                        addWords(property, false);
+                    }
+
+                }
             }
 
         }
@@ -724,7 +746,7 @@ public:
         {
             propertyPath.clear(*this);
             if (propertyPath.isDeadEnd())
-                 properties().clear(property);
+                properties().clear(property);
         }
 
 
@@ -802,7 +824,7 @@ public:
                             wordPath.clear(json);
                             object.clear(wordPath);
                         }
-                        
+
                         json = json.parent();
                     }
 
@@ -822,7 +844,7 @@ public:
                 {
                     words.clear(word);
                 }
-                
+
             }
 
 

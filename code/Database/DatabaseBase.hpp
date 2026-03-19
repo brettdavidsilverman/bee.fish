@@ -109,6 +109,7 @@ return;
         
         void unlock(Index lockIndex)
         {
+
             bool unlock = false;
             if (_lockCounts.find(lockIndex) !=
                 _lockCounts.end())
@@ -122,9 +123,9 @@ return;
                     
             if (unlock)
             {
- //               locks().unlock(lockIndex);
- LockFile::unlock();
+               // locks().unlock(lockIndex);
  
+ LockFile::unlock();
                 _lockCounts.erase(lockIndex);
             }
         
