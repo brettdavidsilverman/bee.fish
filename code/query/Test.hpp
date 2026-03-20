@@ -729,6 +729,7 @@ namespace BeeFishQuery {
             }
         );
         
+        
         ok = ok && test(TEST_DIRECTORY "/45-Object.json", "a and not b", 
             {
                 "https://test/45-Object.json/a/1/2",
@@ -754,6 +755,25 @@ namespace BeeFishQuery {
                 "https://test/45-Object.json/a/1/1",
                 "https://test/45-Object.json/a/2",
                 "https://test/45-Object.json/a/2/1"
+            }
+        );
+        
+        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "b or c", 
+            {
+                "https://test/45-Object.json",
+                "https://test/45-Object.json/a",
+                "https://test/45-Object.json/a/1",
+                "https://test/45-Object.json/a/1/1",
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2",
+                "https://test/45-Object.json/a/2/1",
+                "https://test/45-Object.json/a/2/2"
+            }
+        );
+        
+        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "not (b or c)", 
+            {
+                "https://test"
             }
         );
 
