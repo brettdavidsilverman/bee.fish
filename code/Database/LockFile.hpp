@@ -20,17 +20,17 @@ namespace BeeFishDatabase
         interprocess_mutex* _mutex = nullptr;
         
     public:
-        struct ScopedFileLock
+        struct ScopedLock
         {
             LockFile& _lockFile;
 
-            ScopedFileLock(LockFile& lockFile) :
+            ScopedLock(LockFile& lockFile) :
                 _lockFile(lockFile)
             {
                 _lockFile.lock();
             }
             
-            ~ScopedFileLock() {
+            ~ScopedLock() {
                 _lockFile.unlock();
             }
         };

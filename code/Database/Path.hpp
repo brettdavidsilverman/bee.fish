@@ -32,26 +32,11 @@ private:
 
     Index _index = 0;
     Index _savedIndex = 0;
-    Index _lockIndex = UNLOCKED;
-
+    bool _locked = false;
+    
 public:
     
-    struct ScopedLock
-    {
-    protected:
-        Path& _path;
-    public:
-        ScopedLock(Path& path) :
-            _path(path)
-        {
-            _path.database().lock(_path._savedIndex);
-        }
-        
-        ~ScopedLock()
-        {
-            _path.database().unlock(_path._savedIndex);
-        }
-    };
+    
 
     Path()
     {
@@ -88,17 +73,17 @@ public:
     }
     
     void lock() {
-        _database->lock(_index);
-        _lockIndex = _index;
+        _database->lock();
+        _locked = true;
     }
     
     void unlock() {
-        _database->unlock(_lockIndex);
-        _lockIndex = UNLOCKED;
+        _database->unlock();
+        _locked = false;
     }
     
     bool locked() {
-        return (_lockIndex != UNLOCKED);
+        return _locked;
     }
     
     Path& operator = (const Path& rhs)
@@ -516,7 +501,7 @@ public:
     template<typename T = BString>
     bool setData(const BString& value) {
         
-        ScopedLock lock(*this);
+        LockFile::ScopedLock lock(database());
         
         Branch branch = getBranch();
 

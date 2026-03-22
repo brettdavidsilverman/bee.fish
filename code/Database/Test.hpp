@@ -121,20 +121,18 @@ namespace BeeFishDatabase
         {
             cout << "\tLock index 1" << flush;
             Database db;
-            db.lock(1);
-            db.unlock(1);
+            db.lock();
+            db.unlock();
             Database db2(db.filename());
-            db2.lock(1);
-            db2.unlock(1);
+            db2.lock();
+            db2.unlock();
             outputSuccess(true);
             
             {
                 cout << "\tLock index 2" << flush;
-                Path path1 = db;
-                Path path2 = db;
                 {
-                    Path::ScopedLock lock1(path1);
-                    Path::ScopedLock lock2(path2);
+                    LockFile::ScopedLock lock1(db);
+                    LockFile::ScopedLock lock2(db);
                 }
                 outputSuccess(true);
             }
@@ -144,10 +142,10 @@ namespace BeeFishDatabase
             Path path1 = db;
             Path path2 = db2;
             {
-                Path::ScopedLock lock1(path1);
+                LockFile::ScopedLock lock1(db);
             }
             {
-                Path::ScopedLock lock2(path2);
+                LockFile::ScopedLock lock2(db2);
             }
             outputSuccess(true);
         }

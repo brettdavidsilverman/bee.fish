@@ -33,7 +33,6 @@
 #include "Index.hpp"
 #include "Branch.hpp"
 #include "LockFile.hpp"
-#include "Locks.hpp"
 
 using namespace std;
 using namespace std::literals;
@@ -56,15 +55,8 @@ namespace BeeFishDatabase {
 
         Index _pageSize = 0;
         
-        std::map<Index, Index> _lockCounts;
-
-       // Cache* _cache = nullptr;
-        Locks* _locks = nullptr;
     public:
         
-        Locks& locks() {
-            return *_locks;
-        }
         
     public:
         Database(
@@ -79,63 +71,15 @@ namespace BeeFishDatabase {
             _pageSize(pageSize)
             
         {
-           // _cache = new Cache("BranchCache", *this, _pageSize);
-            _locks = new Locks("BranchLocks", *this, _pageSize * 10);
+
         }
 
         virtual ~Database()
         {
-            assert (_lockCounts.size() == 0);
-            delete _locks;
-
         }
         
     public:
 
-        using LockFile::lock;
-        using LockFile::unlock;
-        
-        void lock(Index lockIndex)
-        {
-
-            if (_lockCounts[lockIndex]++ == 0) {
-LockFile::lock();
-return;
-                assert(_lockCounts[lockIndex] == 1);
-                locks().lock(lockIndex);
-            }
-        }
-        
-        
-        void unlock(Index lockIndex)
-        {
-
-            bool unlock = false;
-            if (_lockCounts.find(lockIndex) !=
-                _lockCounts.end())
-            {
-                    
-                if (_lockCounts[lockIndex] > 0) {
-                    if (--_lockCounts[lockIndex] == 0)
-                        unlock = true;
-                }
-            }
-                    
-            if (unlock)
-            {
-               // locks().unlock(lockIndex);
- 
- LockFile::unlock();
-                _lockCounts.erase(lockIndex);
-            }
-        
-        }
-        
-        void unlock() {
-            LockFile::unlock();
-            _locks->clear();
-        }
-        
         
         Index pageSize() const {
             return _pageSize;
@@ -145,7 +89,7 @@ return;
         Index getNextIndex(Index parent)
         {
 
-            ScopedFileLock lock(*this);
+            ScopedLock lock(*this);
             
             Branch branch(parent);
 
@@ -160,7 +104,6 @@ return;
  
         inline Index allocate(const BString& data)
         {
-            ScopedFileLock lock(*this);
 
             Index dataIndex = size();
 
@@ -236,7 +179,7 @@ return;
             
             if (size() == 0) 
             {
-                ScopedFileLock lock(*this);
+                ScopedLock lock(*this);
                 
                 if (size() == 0)
                 {

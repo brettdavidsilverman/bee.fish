@@ -87,7 +87,7 @@ public:
 
     JSONPath operator [] (const BString& property)
     {
-       // ScopedLock lock(*this);
+       // LockFile::ScopedLock lock(database());
 
         setType(Type::OBJECT);
 
@@ -106,7 +106,7 @@ public:
 
     JSONPath operator [] (const Index& index)
     {
-       // ScopedLock lock(*this);
+       // LockFile::ScopedLock lock(database());
         if (index < 1)
         {
             throw runtime_error("Index out of bounds");
@@ -125,7 +125,7 @@ public:
             
         if (index > count)
         {
-            ScopedLock lock(*this);
+            LockFile::ScopedLock lock(database());
             
             if (children.hasData())
                 count = children.getData<Index>();
@@ -162,7 +162,7 @@ public:
 
         if (!path.hasData())
         {
-            ScopedLock lock(*this);
+            LockFile::ScopedLock lock(database());
             if (!path.hasData())
             {
                 path.setData(true);
@@ -201,7 +201,7 @@ protected:
         }
         else if (JSONPath::type() != type)
         {
-            ScopedLock lock(*this);
+            LockFile::ScopedLock lock(database());
             if (JSONPath::type() != type)
             {
                 clear();
@@ -221,7 +221,7 @@ public:
 
     void setUndefined()
     {
-        ScopedLock lock(*this);
+        LockFile::ScopedLock lock(database());
 
         if (type() == Type::UNDEFINED)
             return;
@@ -242,14 +242,14 @@ public:
 
     void setNull()
     {
-        ScopedLock lock(*this);
+        LockFile::ScopedLock lock(database());
         setType(Type::NULL_);
     }
 
 
     void setBoolean(const BString& value)
     {
-        ScopedLock lock(*this);
+        LockFile::ScopedLock lock(database());
         Path path = *this;
         setType(Type::BOOLEAN);
         path[VALUE].setData<BString>(value);
@@ -257,7 +257,7 @@ public:
 
     void setInteger(const BString& value)
     {
-        ScopedLock lock(*this);
+        LockFile::ScopedLock lock(database());
         Path path = *this;
         setType(Type::INTEGER);
         path[VALUE].setData<BString>(value);
@@ -265,7 +265,7 @@ public:
 
     void setNumber(const BString& value)
     {
-        ScopedLock lock(*this);
+        LockFile::ScopedLock lock(database());
         Path path = *this;
         setType(Type::NUMBER);
         path[VALUE].setData<BString>(value);
@@ -273,7 +273,7 @@ public:
 
     void setString(const BString& value)
     {
-        ScopedLock lock(*this);
+        LockFile::ScopedLock lock(database());
         Path path = *this;
         setType(Type::STRING);
         if (path[VALUE].setData<BString>(value))
@@ -282,13 +282,13 @@ public:
 
     void setObject()
     {
-        ScopedLock lock(*this);
+        LockFile::ScopedLock lock(database());
         setType(Type::OBJECT);
     }
 
     void setArray()
     {
-        ScopedLock lock(*this);
+        LockFile::ScopedLock lock(database());
         setType(Type::ARRAY);
 
     }
@@ -492,7 +492,7 @@ public:
 
         if (!objectPropertyPath.hasData())
         {
-            ScopedLock lock(*this);
+            LockFile::ScopedLock lock(database());
             if (!objectPropertyPath.hasData())
             {
                 // New property
