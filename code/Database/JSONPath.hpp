@@ -121,14 +121,14 @@ public:
         }
 
         if (children.hasData())
-            children.getData<Index>(count);
+            count = children.getData<Index>();
             
         if (index > count)
         {
             ScopedLock lock(*this);
             
             if (children.hasData())
-                children.getData<Index>(count);
+                count = children.getData<Index>();
                 
             if (index > count)
             {
@@ -314,8 +314,8 @@ public:
         path = path.parent(seperator);
         assert(seperator == CHILDREN);
 
-        Type type;
-        path.getData<Type>(type);
+        Type type =
+            path.getData<Type>();
 
         if (type == Type::ARRAY)
         {
@@ -533,7 +533,7 @@ public:
 
         }
 
-        objectPropertyPath.getData<Index>(position);
+        position = objectPropertyPath.getData<Index>();
 
 
         return position;
@@ -549,9 +549,7 @@ public:
 
         path = path[position];
 
-        Index index = 0;
-
-        path.getData<Index>(index);
+        Index index = path.getData<Index>();
 
         BString property;
         Path propertyPath(database(), index);
@@ -620,8 +618,8 @@ public:
 
         if (children.hasData())
         {
-            Index count;
-            children.getData<Index>(count);
+            Index count =
+                children.getData<Index>();
             return count;
         }
 
@@ -634,8 +632,8 @@ public:
         if (!path.hasData())
             return Type::UNDEFINED;
 
-        Type type;
-        path.getData<Type>(type);
+        Type type =
+            path.getData<Type>();
         return type;
     }
 
@@ -650,9 +648,9 @@ public:
         {
         case Type::STRING:
         {
-            BString value;
             Path path = *this;
-            path[VALUE].getData<BString>(value);
+            BString value =
+                path[VALUE].getStringData();
             removeWords(value, true);
         }
         case Type::UNDEFINED:
@@ -907,15 +905,15 @@ public:
         case Type::INTEGER:
         case Type::NUMBER:
         {
-            BString value;
-            path[VALUE].getData<BString>(value);
+            BString value =
+                path[VALUE].getStringData();
             out << value;
             break;
         }
         case Type::STRING:
         {
-            BString string;
-            path[VALUE].getData<BString>(string);
+            BString string =
+                path[VALUE].getStringData();
 
             out << "\""
                 << string.escape()
@@ -934,7 +932,7 @@ public:
             Iterable<Index> arrayIndexes(path);
 
             if (path.hasData())
-                path.getData<Index>(count);
+                count = path.getData<Index>();
 
             if (count > 1) {
                 out << "\n";

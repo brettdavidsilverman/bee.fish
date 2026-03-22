@@ -169,7 +169,7 @@ namespace BeeFishDatabase
             JSONPath path = db.json();
             
             path.setData(value);
-            path.getData(value2);
+            value2 = path.getStringData();
             
             success = success &&
                 testValue(
@@ -178,7 +178,7 @@ namespace BeeFishDatabase
                 );
                 
             path.setData<BString>(value);
-            path.getData<BString>(value2);
+            value2 = path.getStringData();
             
             success = success &&
                 testValue(
@@ -279,7 +279,7 @@ namespace BeeFishDatabase
                 cout << "\tGet/Set Data size() " << flush;
                 BString test = "world";
                 next.setData(test);
-                std::string testHelloData = next.getData();
+                std::string testHelloData = next.getStringData();
                 success = testHelloData.size() == strlen("world");
                 outputSuccess(success);
 
@@ -296,7 +296,7 @@ namespace BeeFishDatabase
                 cout << "\tGet/Set Data size() " << flush;
 
                 std::string
-                    testHello = next.getData();
+                    testHello = next.getStringData();
 
                 success = testHello.size() == strlen("world");
                 outputSuccess(success);
@@ -307,13 +307,13 @@ namespace BeeFishDatabase
                 outputSuccess(success);
         }        
 
-        std::string testNext1 = start["Hello"].getData();
+        std::string testNext1 = start["Hello"].getStringData();
         cout << "\t" << "Hello 1: " << testNext1.size() ;
         std::string world1 = testNext1;
         success = success && (world1 == "world");
         outputSuccess(success);
 
-        std::string testNext2 = next.getData();
+        std::string testNext2 = next.getStringData();
         std::string world2 = testNext2;
         cout << "\t" << "Hello 2: " << testNext2.size() ;
         success = success && (world2 == "world");
@@ -345,7 +345,7 @@ namespace BeeFishDatabase
             success = !data.hasData();
             if (success)
             {
-                BString value = data.getData();
+                BString value = data.getStringData();
                 
                 success = success &&
                     testValue(
@@ -359,7 +359,7 @@ namespace BeeFishDatabase
             if (success)
             {
                 BString value;
-                data.getData<BString>(value);
+                value = data.getStringData();
                 success = success &&
                     testValue(
                         "Get empty data 2",
@@ -369,8 +369,8 @@ namespace BeeFishDatabase
             
             if (success)
             {
-                BString value;
-                data.getData(value);
+                BString value =
+                data.getStringData();
                 success = success &&
                     testValue(
                         "Get empty data 3",
@@ -495,7 +495,7 @@ namespace BeeFishDatabase
             Path data = start["getset"];
             Size count = -1;
             data.setData<Size>(22);
-            data.getData<Size>(count);
+            count = data.getData<Size>();
             success =
                 (count == 22);
 
@@ -813,8 +813,8 @@ namespace BeeFishDatabase
             
             cout << "\tIndexed string ";
             Path path = root["string"];
-            Type type;
-            path.getData<Type>(type);
+            Type type =
+            path.getData<Type>();
             success = success &&
                 type == Type::STRING;
                 
@@ -829,8 +829,8 @@ namespace BeeFishDatabase
                 
             if (success)
             {
-                BString value;
-                path[JSONPath::VALUE].getData<BString>(value);
+                BString value =
+                    path[JSONPath::VALUE].getStringData();
             
                 success = testValue("Hello World", value);
             }
@@ -881,8 +881,8 @@ namespace BeeFishDatabase
             cout << "\tType item 1 ";
             Path path = root["array"];
             path = path[JSONPath::CHILDREN][1];
-            Type type;
-            path.getData<Type>(type);
+            Type type =
+                path.getData<Type>();
             success = (type == Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
@@ -891,8 +891,8 @@ namespace BeeFishDatabase
             cout << "\tValue item 1 ";
             Path path = root["array"];
             path = path[JSONPath::CHILDREN][1];
-            BString value;
-            path[JSONPath::VALUE].getData<BString>(value);
+            BString value =
+                path[JSONPath::VALUE].getStringData();
             success = (value == "1");
             BeeFishMisc::outputSuccess(success);
         }
@@ -909,8 +909,8 @@ namespace BeeFishDatabase
             cout << "\tType item 2 ";
             Path path = root["array"];
             path = path[JSONPath::CHILDREN][2];
-            Type type;
-            path.getData<Type>(type);
+            Type type =
+                path.getData<Type>();
             success = (type == Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
@@ -940,8 +940,8 @@ namespace BeeFishDatabase
             cout << "\tInteger type" << endl;
             Path path = root["integer"];
             
-            Type type;
-            path.getData<Type>(type);
+            Type type =
+                path.getData<Type>();
             success = (type == Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
@@ -950,8 +950,8 @@ namespace BeeFishDatabase
         {
             cout << "\tInteger value" << endl;
             Path path = root["integer"];
-            BString value;
-            path[JSONPath::VALUE].getData<BString>(value);
+            BString value =
+                path[JSONPath::VALUE].getStringData();
             success = (value == "1234");
             BeeFishMisc::outputSuccess(success);
         }
@@ -1050,8 +1050,8 @@ cerr << string1 << endl;
         
         if (success) {
             path = path[1];
-            Type type;
-            path.getData<Type>(type);
+            Type type =
+                path.getData<Type>();
             success = (type == Type::ARRAY);
         }
         
@@ -1094,8 +1094,8 @@ cerr << string1 << endl;
         
         if (success) {
             cout << "\tOuter Array: ";
-            Type type;
-            path.getData<Type>(type);
+            Type type =
+                path.getData<Type>();
             success = (type == Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         
@@ -1123,8 +1123,8 @@ cerr << string1 << endl;
         if (success) {
             cout << "\tInner Array: ";
             path = path[1];
-            Type type;
-            path.getData<Type>(type);
+            Type type =
+                path.getData<Type>();
             success = (type == Type::ARRAY);
             BeeFishMisc::outputSuccess(success);
         }
@@ -1148,16 +1148,16 @@ cerr << string1 << endl;
         if (success) {
             cout << "\tInner array contains number" << endl;
             path = path[1];
-            Type type;
-            path.getData<Type>(type);
+            Type type =
+                path.getData<Type>();
             success = (type == Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
         
         if (success) {
             cout << "\tInner array value" << endl;
-            BString value;
-            path[JSONPath::VALUE].getData<BString>(value);
+            BString value =
+            path[JSONPath::VALUE].getStringData();
             success = (value == "1");
             BeeFishMisc::outputSuccess(success);
         }

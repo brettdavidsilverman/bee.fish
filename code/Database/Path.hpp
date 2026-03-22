@@ -399,7 +399,7 @@ public:
         Index count = 1;
         if (hasData())
         {
-            getData<Index>(count);
+            count = getData<Index>();
             ++count;
         }
         setData<Index>(count);
@@ -415,7 +415,7 @@ public:
         Index count = 1;
         if (hasData())
         {
-            getData<Index>(count);
+            count = getData<Index>();
             existingCount = count;
             ++count;
         }
@@ -430,7 +430,7 @@ public:
         Index count = 0;
         if (hasData())
         {
-            getData<Index>(count);
+            count = getData<Index>();
             if (count > 0)
                 --count;
             else
@@ -448,7 +448,7 @@ public:
         Index count = 1;
         if (hasData())
         {
-            getData<Index>(count);
+            count = getData<Index>();
             existingCount = count;
             if (count > 0)
                 --count;
@@ -460,43 +460,49 @@ public:
         return existingCount;
     }
 
-    BString getData() {
+    void getData(BString& destination) {
 
 
         Branch branch = getBranch();
 
         if (branch._dataIndex)
         {
-            return
+
+            destination =
                 _database->getData(
                     branch._dataIndex
                 );
+                
+            return ;
         }
 
 
-        return "";
+        destination = "";
 
 
     }
-
-    const BString getData() const {
+    
+    void getData(BString& destination) const
+    {
         Path path = *this;
-        return path.getData();
+        path.getData(destination);
     }
-
+    
+    BString getStringData() const
+    {
+        BString data;
+        getData(data);
+        return data;
+    }
 
     template<typename T>
-    void getData(T& destination)
+    T getData() const
     {
-        BString data = getData();
-        destination = *(T*)data.data();
+        BString data;
+        getData(data);
+        return *(T*)data.data();
     }
-
-    template<typename T = BString>
-    void getData(BString& destination)
-    {
-        destination = getData();
-    }
+    
 
     template<typename T>
     bool setData(const T& source)
@@ -510,7 +516,7 @@ public:
     template<typename T = BString>
     bool setData(const BString& value) {
         
-        ScopedLock (*this);
+        ScopedLock lock(*this);
         
         Branch branch = getBranch();
 
@@ -753,7 +759,7 @@ public:
 
 
         if (_database) {
-            BString data = getData();
+            BString data = getStringData();
             variable["hasData"] = (data.size() > 0);
             if (data.size())
             {

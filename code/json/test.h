@@ -615,6 +615,7 @@ namespace BeeFishJSON
     inline bool testStreams() 
     {
         
+
         cout << "Streams" << endl;
         
         bool ok = true;
