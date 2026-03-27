@@ -550,6 +550,7 @@ namespace BeeFishDatabase
                 int second = -1;
                 next =
                     data.next(stack, second);
+    cerr << stack << endl;
                 success &= (second == 1) && next;
                 outputSuccess(success);
             }

@@ -12,20 +12,18 @@ using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
 
     class OrPath :
-        public PathBase
+        public JoinPathBase<JSONPath::Id>
     {
     protected:
         PathBase* _a;
         PathBase* _b;
-        bool _aEnded;
-        bool _bEnded;
-        Index _aCount = 0;
-        Index _bCount = 0;
+
+        Index _aDepth = 0;
+        Index _bDepth = 0;
         
-        bool _saveAEnded;
-        bool _saveBEnded;
-        Index _saveACount = 0;
-        Index _saveBCount = 0;
+        Index _saveADepth = 0;
+        Index _saveBDepth = 0;
+        
     public:
 
         OrPath(PathBase* a,
@@ -33,8 +31,6 @@ using namespace BeeFishDatabase;
             _a(a),
             _b(b)
         {
-            _aEnded = _a->isDeadEnd();
-            _bEnded = _b->isDeadEnd();
         }
         
         virtual ~OrPath() {
@@ -47,98 +43,108 @@ using namespace BeeFishDatabase;
         override
         {
             return
-                (!_aEnded && _a->canGoLeft() ) or
-                (!_bEnded && _b->canGoLeft());
+                (_aDepth >= _bDepth and 
+                 _a->canGoLeft())
+                or
+                (_bDepth >= _aDepth and 
+                _b->canGoLeft());
         }
         
         virtual bool canGoRight() const
         override
         {
             return
-                (!_aEnded && _a->canGoRight()) or
-                (!_bEnded && _b->canGoRight());
+                (_aDepth >= _bDepth and
+                 _a->canGoRight())
+                or
+                (_bDepth >= _aDepth and
+                 _b->canGoRight());
         }
         
         virtual void goLeft()
         override
         {
-            if (!_aEnded &&
+            bool incrementA = false;
+            bool incrementB = false;
+            
+            if (_aDepth >= _bDepth and
                 _a->canGoLeft())
             {
                 _a->goLeft();
-                ++_aCount;
+                incrementA = true;
             }
-            else
-                _aEnded = true;
-                
-            if (!_bEnded &&
-                _b->canGoLeft())
+        
+            
+            if (_bDepth >= _aDepth and
+                 _b->canGoLeft())
             {
                 _b->goLeft();
-                ++_bCount;
+                incrementB = true;
             }
-            else
-                _bEnded = true;
+        
+                
+            if (incrementA)
+                ++_aDepth;
+                
+            if (incrementB)
+                ++_bDepth;
                 
         }
         
-        virtual bool isDeadEnd() const
-        override
-        {
-            return (_aEnded || _a->isDeadEnd()) &&
-                   (_bEnded || _b->isDeadEnd());
-        }
-   
+        
         
         virtual void goRight()
         override
         {
-            if (!_aEnded &&
-                 _a->canGoRight())
+            
+            bool incrementA = false;
+            bool incrementB = false;
+            
+            if (_aDepth >= _bDepth and 
+                _a->canGoRight())
             {
                 _a->goRight();
-                ++_aCount;
+                incrementA = true;
             }
-            else
-                _aEnded = true;
-                
-            if (!_bEnded &&
+    
+            if (_bDepth >= _aDepth and 
                 _b->canGoRight())
             {
                 _b->goRight();
-                ++_bCount;
+                incrementB = true;
             }
-            else
-                _bEnded = true;
+            
+            if (incrementA)
+                ++_aDepth;
                 
+            if (incrementB)
+                ++_bDepth;
         }
-        
+
         virtual void goUp()
         override
         {
-            assert(_aCount > 0 || _bCount > 0);
+            assert(_aDepth > 0 || _bDepth > 0);
             
-            if (_aCount == _bCount)
+            if (_aDepth == _bDepth)
             {
                 _a->goUp();
                 _b->goUp();
-                --_aCount;
-                --_bCount;
-                _aEnded = false;
-                _bEnded = false;
+                --_aDepth;
+                --_bDepth;
             }
-            else if (_aCount > _bCount)
+            else if (_aDepth > _bDepth)
             {
                 _a->goUp();
-                --_aCount;
-                _aEnded = false;
+                --_aDepth;
             }
-            else if (_bCount > _aCount)
+            else if (_bDepth > _aDepth)
             {
                 _b->goUp();
-                --_bCount;
-                _bEnded = false;
+                --_bDepth;
             }
+            else
+                assert(false);
             
         }
         
@@ -148,10 +154,9 @@ using namespace BeeFishDatabase;
             _a->save();
             _b->save();
             
-            _saveAEnded = _aEnded;
-            _saveBEnded = _bEnded;
-            _saveACount = _aCount;
-            _saveBCount = _bCount;
+            _saveADepth = _aDepth;
+            _saveBDepth = _bDepth;
+            
         }
         
         virtual void restore()
@@ -160,10 +165,9 @@ using namespace BeeFishDatabase;
             _a->restore();
             _b->restore();
             
-            _aEnded = _saveAEnded;
-            _bEnded = _saveBEnded;
-            _aCount = _saveACount;
-            _bCount = _saveBCount;
+            _aDepth = _saveADepth;
+            _bDepth = _saveBDepth;
+            
         }
         
     

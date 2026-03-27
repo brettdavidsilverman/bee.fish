@@ -11,7 +11,7 @@ using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
 
     class AndPath :
-        public PathBase
+        public JoinPathBase<JSONPath::Id>
     {
     protected:
         PathBase* _a;

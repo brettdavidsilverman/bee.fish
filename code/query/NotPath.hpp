@@ -11,15 +11,15 @@ using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
 
     class NotPath :
-        public PathBase
+        public JoinPathBase<JSONPath::Id>
     {
     protected:
         PathBase* _path;
         PathBase* _bounds;
         Stack _stack;
-        Index _count;
+        Index _depth = 0;
         Stack _saveStack;
-        Index _saveCount;
+        Index _saveDepth;
         
     public:
 
@@ -27,10 +27,12 @@ using namespace BeeFishDatabase;
             _path(path),
             _bounds(bounds)
         {
+        
             if (_path->isDeadEnd())
-                _count = 1;
+                _depth = 1;
             else
-                _count = 0;
+                _depth = 0;
+            
         }
    
         virtual ~NotPath()
@@ -42,23 +44,13 @@ using namespace BeeFishDatabase;
         virtual bool canGoLeft() const
         override
         {
-            if (_count == 0)
+            if (_depth == 0 and
+                _stack.count() == 1)
             {
-                if (_stack.count() == 1)
-                    return !_path->canGoLeft() &&
-                           _bounds->canGoLeft();
-//return false;
+                return
+                    !_path->canGoLeft() and
+                    _bounds->canGoLeft();
             }
-                    /*
-            if (_stack.size())
-            {
-                if (_stack.count() == 0)
-                {
-assert(false);
-                    return false;
-                }
-            }
-            */
             return _bounds->canGoLeft();
             
         }
@@ -72,13 +64,13 @@ assert(false);
         virtual void goLeft()
         override
         {
-            if (_count == 0 &&
+            if (_depth == 0 &&
                 _path->canGoLeft())
             {
                  _path->goLeft();
             }
             else
-                ++_count;
+                ++_depth;
             _stack.push_back(0);
             _bounds->goLeft();
         }
@@ -86,13 +78,13 @@ assert(false);
         virtual void goRight()
         override
         {
-            if (_count == 0 &&
+            if (_depth == 0 &&
                 _path->canGoRight())
             {
                  _path->goRight();
             }
             else
-                ++_count;
+                ++_depth;
             _stack.push_back(1);
             _bounds->goRight();
         }
@@ -100,28 +92,20 @@ assert(false);
         virtual void goUp()
         override
         {
-            if (_count == 0)
+            if (_depth == 0)
                 _path->goUp();
             else {
-                --_count;
+                --_depth;
             }
             _bounds->goUp();
             _stack.pop_back();
             
         }
-        /*
-        virtual bool isDeadEnd() const
-        override
-        {
-            if (_stack.size())
-                return _stack.count() == 0;
-            return false;
-        }
-        */
+
         virtual void save()
         {
             _saveStack = _stack;
-            _saveCount = _count;
+            _saveDepth = _depth;
             _path->save();
             _bounds->save();
         }
@@ -129,7 +113,7 @@ assert(false);
         virtual void restore()
         {
             _stack = _saveStack;
-            _count = _saveCount;
+            _depth = _saveDepth;
             _path->restore();
             _bounds->restore();
         }

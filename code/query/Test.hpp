@@ -19,6 +19,7 @@ namespace BeeFishQuery {
     bool testOperators();
     bool testExpressions();
     bool testAndPath();
+    bool testOrPath();
     bool testQueryAndPath();
     bool testQueryJSON();
     
@@ -33,6 +34,7 @@ namespace BeeFishQuery {
         ok = ok && testOperators();
         ok = ok && testExpressions();
         ok = ok && testAndPath();
+        ok = ok && testOrPath();
         ok = ok && testQueryAndPath();
         ok = ok && testQueryJSON();
         
@@ -477,11 +479,9 @@ namespace BeeFishQuery {
         if (ok)
         {
             vector<Index> array;
-            Iterable<Index> iterable(andPath);
-            
-            for (auto value : iterable)
+
+            for (auto value : andPath)
             {
-                cerr << "Value: " << value << endl;
                 array.push_back(value);
             }
         
@@ -506,6 +506,152 @@ namespace BeeFishQuery {
 
         return ok;
         
+    }
+    
+        
+    inline bool testOrPath()
+    {
+        cout << "Test Or Path" << endl;
+        
+        bool ok  = true;
+        
+        Database db;
+        Words words(db);
+        
+        words["one"][0];
+        words["two"][1];
+        words["three"][2];
+        
+        Path one = words["one"];
+        Path two = words["two"];
+        Path three = words["three"];
+        
+        OrPath orPath(
+            new Iterable<Index>(one),
+           // new OrPath(
+           //     new Iterable<Index>(two),
+                new Iterable<Index>(three)
+          //  )
+        );
+        
+        
+        if (ok) 
+        {
+            int min = orPath.min<Index>();
+            
+            ok = ok &&
+                testResult(
+                    "OrPath Minimum", 
+                    min == 0
+                );
+        }
+        
+        if (ok) 
+        {
+            int max = orPath.max<Index>();
+            
+            ok = ok &&
+                testResult(
+                    "OrPath Maximum", 
+                    max == 2
+                );
+        }
+        
+        assert(ok);
+        
+        if (ok) 
+        {
+            Stack stack;
+            orPath.save();
+
+            bool result = orPath.next(stack);
+            Index value;
+            stack >> value;
+            stack.reset();
+            
+            ok = ok &&
+                testResult(
+                    "OrPath next 1", 
+                    result
+                );
+                
+            ok = ok &&
+                testResult(
+                    "OrPath next 1 value", 
+                    value == 0
+                );
+                
+                
+            if (ok) {
+                result = orPath.next(stack);
+
+                ok = ok &&
+                    testResult(
+                        "OrPath next 2", 
+                        result
+                    );
+                
+             
+                if (ok) {
+                    stack >> value;
+                    stack.reset();
+                    ok = ok &&
+                        testResult(
+                            "OrPath next 2 value", 
+                            value == 2
+                        );
+                }
+                    
+            }
+    
+            if (ok) {
+                cout << stack << endl;
+                result = orPath.next(stack);
+
+                ok = ok &&
+                    testResult(
+                        "OrPath ended", 
+                        !result
+                    );
+                    
+            }
+            
+            orPath.restore();
+        }
+        
+        if (ok)
+        {
+            vector<Index> array;
+
+            for (auto value : orPath)
+            {
+                cerr << "Value: " << value << endl;
+                array.push_back(value);
+            }
+        
+            ok = ok &&
+                testResult("OrPath result size",
+                    array.size() == 2
+                );
+
+            ok = ok &&
+                testResult("OrPath first result",
+                    array[0] == 0
+                );
+                
+            ok = ok &&
+                testResult("OrPath second result",
+                    array[1] == 2
+                );
+                
+                
+        }
+        
+        
+        BeeFishMisc::outputSuccess(ok);
+        
+        
+        return ok;
     }
     
     inline bool testQueryAndPath()
@@ -544,17 +690,40 @@ namespace BeeFishQuery {
              
                 delete pathBase;
             
-                ok = ( values.size() == check.size());
+                
                 
                 if (ok)
                 {
-                    for (unsigned int i = 0; i < values.size(); ++i)
+                    for (unsigned int i = 0; i < values.size() && i < check.size(); ++i)
                     {
                         if (values[i] != check[i])
                         {
                             ok = false;
                             break;
                         }
+                    }
+                    
+                    ok = ok and ( values.size() == check.size());
+                    
+                    if (!ok)
+                    {
+                        cout << endl << "Expected" << endl;
+                        
+                        for (unsigned int i = 0; i < check.size(); ++i)
+                        {
+                            cout << "\t" << check[i] << endl;
+                        }
+                        
+                        cout << "-----" << endl;
+                        
+                        cout << "Got" << endl;
+                        
+                        for (unsigned int i = 0; i < values.size(); ++i)
+                        {
+                            cout << "\t" << values[i] << endl;
+                        }
+                    
+                    
                     }
                 }
         
@@ -574,13 +743,22 @@ namespace BeeFishQuery {
         words["two"][3];
         words["two"][4];
         
+        bounds[0];
+        bounds[1];
+        bounds[2];
+        bounds[3];
+        bounds[4];
+        
         ok = ok && test("one", {0,1,2,3});
         ok = ok && test("two", {2,3,4});
         ok = ok && test("one and one", {0,1,2,3});
         ok = ok && test("one and two", {2,3});
         ok = ok && test("two and two", {2,3,4});
         ok = ok && test("one and three", {});
-        ok = ok && test("one and three", {});
+        ok = ok && test("one or two", {0,1,2,3,4});
+        ok = ok && test("not two", {0, 1});
+        ok = ok && test("one and not two", {0, 1});
+        ok = ok && test("not not two", {2,3,4});
         ok = ok && test("three", {});
         
         return ok;
@@ -617,6 +795,16 @@ namespace BeeFishQuery {
                 parser.eof();
         
                 ok = expression.matched();
+                /*
+                Iterable<Index> test(bounds);
+                
+                for (auto i : test)
+                {
+                    JSONPath path(db, i);
+                    cout << path.toString() << endl;
+                }
+                assert(false);
+                */
             }
             std::vector<BString> values;
             if (ok)
@@ -729,6 +917,17 @@ namespace BeeFishQuery {
             }
         );
         
+                
+        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "not b", 
+            {
+                "https://test",
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2/2"
+            }
+        );
+        
+        assert(ok);
+        assert(false);
         
         ok = ok && test(TEST_DIRECTORY "/45-Object.json", "a and not b", 
             {
@@ -739,14 +938,7 @@ namespace BeeFishQuery {
         
         
         
-        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "not b", 
-            {
-                "https://test",
-                "https://test/45-Object.json/a/1/2",
-                "https://test/45-Object.json/a/2/2"
-            }
-        );
-        
+
         ok = ok && test(TEST_DIRECTORY "/45-Object.json", "not not b", 
             {
                 "https://test/45-Object.json",
