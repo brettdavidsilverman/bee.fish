@@ -70,5 +70,6 @@ clean:
 	rm -f *.o
 	rm -f test.data
 	rm -f trace.txt
+	rm -f cookies
 	rm -f $(OUTPUT)
 

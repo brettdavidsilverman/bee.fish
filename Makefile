@@ -1,34 +1,12 @@
-ifeq ("$(PORT)","")
-	PORT=443
-endif
 
-all:	https
-all:	start
-
-build:
-	- mkdir build
-
-https:	build
-	make -C code $(DEBUG) $(TEST) PORT=$(PORT)
-
-test:	TEST=test
-test:	build https
+live:
+	sudo make -C bee.fish/code PORT=443
 
 clean:
-	make -C code clean
-
-stop:
-	make -C code/https $(DEBUG) stop PORT=$(PORT)
+	sudo make -C bee.fish/code clean
 	
-start:
-	make -C code/https $(DEBUG) start PORT=$(PORT)
+debug:
+	make -C dev.bee.fish/code debug PORT=8000
 
-restart:	stop start
-
-debug:	DEBUG = debug
-debug:	CFLAGS += -g -DDEBUG
-debug:	PORT=8000
-debug:	all
-
-load:
-		make -C code load
+clean_debug:
+	make -C dev.bee.fish/code clean
