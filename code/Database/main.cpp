@@ -69,6 +69,12 @@ int main(int argc, const char* argv[])
     int originArg =
     hasArg(argc, argv, "-origin");
     BString origin = ORIGIN;
+#ifdef DEBUG
+    {
+        origin += ":8000";
+    }
+#endif
+
     if (originArg != -1 && argc > (originArg + 1))
     {
         origin = argv[originArg + 1];
