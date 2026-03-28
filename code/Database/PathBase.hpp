@@ -62,6 +62,8 @@ namespace BeeFishDatabase {
 
             if (stack.size() == 0)
             {
+                if (isDeadEnd())
+                    return false;
                 return goToMin(stack);
             }
             
@@ -109,6 +111,9 @@ namespace BeeFishDatabase {
 
             if (stack.size() == 0)
             {
+                if (isDeadEnd())
+                    return false;
+                   
                 return goToMax(stack);
             }
             
@@ -158,7 +163,7 @@ namespace BeeFishDatabase {
                     goRight();
                 }
                 else {
-                    return false;
+                    return next(stack);
                 }
                 
                 if (stack.count() == 0)
@@ -186,7 +191,7 @@ namespace BeeFishDatabase {
                     goLeft();
                 }
                 else {
-                    return false;
+                    return previous(stack);
                 }
                 
                 if (stack.count() == 0)

@@ -81,7 +81,13 @@ namespace BeeFishHTTPS {
             _databaseCount(databaseCount),
             _databaseLocks(_databaseCount)
         {
-            _origin = "https://" + hostName;
+            stringstream stream;
+            stream << "https://" + hostName;
+            
+            if (_port != 443)
+                stream << ":" << _port;
+                
+            _origin = stream.str();
             
             std::cout << "Opening transaction file " << std::endl;
     

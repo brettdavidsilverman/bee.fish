@@ -2,34 +2,29 @@ ifeq ("$(PORT)","")
 	PORT=443
 endif
 
-all:
 all:	https
 all:	start
 
 build:
 	- mkdir build
 
-https:
 https:	build
-	cd code && make $(DEBUG) $(TEST) PORT=$(PORT)
+	make -C code $(DEBUG) $(TEST) PORT=$(PORT)
 
-test:
 test:	TEST=test
 test:	build https
 
 clean:
-	cd code && make clean
+	make -C code clean
 
 stop:
-	cd code/https && ./stop.sh $(PORT)
+	make -C code/https $(DEBUG) stop PORT=$(PORT)
 	
 start:
-start:	https
-	cd code/https && ./start.sh $(PORT)
+	make -C code/https $(DEBUG) start PORT=$(PORT)
 
 restart:	stop start
 
-debug:
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	PORT=8000

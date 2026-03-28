@@ -98,7 +98,7 @@ namespace BeeFishHTTPS {
                 
             // Get or set the userId
             if (secrets.hasData())
-                _userId = secrets.getData();
+                _userId = secrets.getStringData();
             else
             {
                 _userId =
@@ -196,11 +196,10 @@ namespace BeeFishHTTPS {
                           .hasData() )
                 {
              
-                    time_t lastTime = -1;
-                    
-                    sessionData
+                    time_t lastTime =
+                        sessionData
                         [LAST_AUTHENTICATION]
-                        .getData<time_t>(lastTime);
+                        .getData<time_t>();
                         
                     // 1 hour duration
                     if ( (epoch_seconds() - lastTime) 
@@ -214,7 +213,7 @@ namespace BeeFishHTTPS {
                             
                         _userId =
                             sessionData[USER_ID]
-                            .getData();
+                            .getStringData();
                 
                         // Set the user data path
                         Path userData =

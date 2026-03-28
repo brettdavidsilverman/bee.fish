@@ -180,7 +180,7 @@ namespace BeeFishHTTPS {
                             pageSize;
 
                         std::string data =
-                            bookmark[pageIndex].getData();
+                            bookmark[pageIndex].getStringData();
                         
                         length = data.size();
 

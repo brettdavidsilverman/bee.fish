@@ -22,6 +22,7 @@ namespace BeeFishQuery {
     bool testOrPath();
     bool testQueryAndPath();
     bool testQueryJSON();
+    bool testNotPath();
     
     inline bool test() 
     {
@@ -35,6 +36,7 @@ namespace BeeFishQuery {
         ok = ok && testExpressions();
         ok = ok && testAndPath();
         ok = ok && testOrPath();
+        ok = ok && testNotPath();
         ok = ok && testQueryAndPath();
         ok = ok && testQueryJSON();
         
@@ -625,7 +627,6 @@ namespace BeeFishQuery {
 
             for (auto value : orPath)
             {
-                cerr << "Value: " << value << endl;
                 array.push_back(value);
             }
         
@@ -651,6 +652,169 @@ namespace BeeFishQuery {
         BeeFishMisc::outputSuccess(ok);
         
         
+        return ok;
+    }
+    
+    inline bool testNotPath()
+    {
+        cout << "Test Not Path" << endl;
+        
+        bool ok  = true;
+        
+        Database db;
+        Path path = db;
+        
+        Words words = path["words"];
+        Bounds bounds = path["bounds"];
+        
+        words["one"][0];
+        words["one"][2];
+        words["two"][1];
+        words["three"][2];
+        
+        bounds[0];
+        bounds[1];
+        bounds[2];
+        
+        Path one = words["one"];
+        Path two = words["two"];
+        Path three = words["three"];
+        
+        NotPath notPath(
+            new Path(one),
+            new Path(bounds)
+        );
+        
+        
+        if (ok) 
+        {
+            int min = notPath.min<Index>();
+            
+            ok = ok &&
+                testResult(
+                    "NotPath Minimum", 
+                    min == 1
+                );
+        }
+        
+        if (ok) 
+        {
+            notPath.save();
+            Stack stack;
+            notPath.goToMax(stack);
+            notPath.restore();
+
+            int max = notPath.max<Index>();
+            
+            ok = ok &&
+                testResult(
+                    "NotPath Maximum", 
+                    max == 1
+                );
+        }
+        
+        assert(ok);
+        
+        if (ok) 
+        {
+            Stack stack;
+            notPath.save();
+
+            bool result = notPath.next(stack);
+            Index value;
+            stack >> value;
+            stack.reset();
+            
+            ok = ok &&
+                testResult(
+                    "NotPath next 1", 
+                    result
+                );
+                
+            ok = ok &&
+                testResult(
+                    "NotPath next 1 value", 
+                    value == 1
+                );
+
+    
+            if (ok) {
+                result = notPath.next(stack);
+
+                ok = ok &&
+                    testResult(
+                        "NotPath ended", 
+                        !result
+                    );
+                    
+            }
+            
+            notPath.restore();
+        }
+        
+        if (ok)
+        {
+            vector<Index> array;
+
+            for (auto value : notPath)
+            {
+
+                array.push_back(value);
+            }
+        
+            ok = ok &&
+                testResult("NotPath result size",
+                    array.size() == 1
+                );
+
+            ok = ok &&
+                testResult("NotPath first result",
+                    array[0] == 1
+                );
+
+        }
+        
+        if (ok)
+        {
+            NotPath notNotPath(
+                new NotPath(
+                    new Path(one),
+                    new Path(bounds)
+                ),
+                new Path(bounds)
+            );
+        
+            if (ok)
+            {
+                vector<Index> array;
+
+                for (auto value : notNotPath)
+                {
+cerr << "Value: " << value << endl;
+                    array.push_back(value);
+                }
+        
+                ok = ok &&
+                    testResult("Not NotPath result size",
+                        array.size() == 2
+                    );
+
+                ok = ok &&
+                    testResult("Not NotPath first result",
+                        array[0] == 0
+                    );
+                    
+                ok = ok &&
+                    testResult("Not NotPath secondresult",
+                        array[1] == 2
+                    );
+                
+            }
+        }
+        
+        
+        BeeFishMisc::outputSuccess(ok);
+
         return ok;
     }
     
@@ -760,6 +924,8 @@ namespace BeeFishQuery {
         ok = ok && test("one and not two", {0, 1});
         ok = ok && test("not not two", {2,3,4});
         ok = ok && test("three", {});
+        
+        assert(ok);
         
         return ok;
         
@@ -926,8 +1092,6 @@ namespace BeeFishQuery {
             }
         );
         
-        assert(ok);
-        assert(false);
         
         ok = ok && test(TEST_DIRECTORY "/45-Object.json", "a and not b", 
             {

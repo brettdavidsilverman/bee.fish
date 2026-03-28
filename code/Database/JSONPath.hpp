@@ -115,7 +115,7 @@ public:
         Path children = getChildren();
         Index count = 0;
 
-                if (type() == Type::UNDEFINED)
+        if (type() == Type::UNDEFINED)
         {
             setType(Type::ARRAY);
         }

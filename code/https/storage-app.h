@@ -18,227 +18,228 @@ using namespace std;
 using namespace BeeFishWeb;
 using namespace BeeFishId;
 
-   class StorageApp : public App {
-   public:
-      StorageApp(
-         Session* session,
-         ResponseHeaders& responseHeaders
-      ) : App(session, responseHeaders)
-      {
-      }
+class StorageApp : public App {
+public:
+    StorageApp(
+        Session* session,
+        ResponseHeaders& responseHeaders
+    ) : App(session, responseHeaders)
+    {
+    }
 
 
-      virtual void handleResponse() {
-          
-         authenticate();
+    virtual void handleResponse() {
 
-         if (!authenticated())
-         {
+        authenticate();
+
+        if (!authenticated())
+        {
             throw std::runtime_error("Not authenticated");
-         }
-         
+        }
 
-         WebRequest* request = _session->request();
 
-         BeeFishBString::BString        path;
-         BeeFishScript::ObjectPointer  json;
-         BeeFishMisc::optional<BString> key = BeeFishMisc::nullopt;
-         BeeFishMisc::optional<Id>      id = BeeFishMisc::nullopt;
+        WebRequest* request = _session->request();
 
-         BString contentType;
-         bool returnJSON = true;
+        BeeFishBString::BString        path;
+        BeeFishScript::ObjectPointer  json;
+        BeeFishMisc::optional<BString> key = BeeFishMisc::nullopt;
+        BeeFishMisc::optional<Id>      id = BeeFishMisc::nullopt;
 
-         // Extract id from the search
-         BeeFishWeb::URL::Search& search = request->searchObject();
+        BString contentType;
+        bool returnJSON = true;
 
-         if (search.contains("id")) {
+        // Extract id from the search
+        BeeFishWeb::URL::Search& search = request->searchObject();
+
+        if (search.contains("id")) {
 
             BString searchID = search["id"];
-            
+
             // Test for correct Id
             try {
-               id = Id::fromKey(searchID);
+                id = Id::fromKey(searchID);
             }
             catch (...) {
-               id = BeeFishMisc::nullopt;
+                id = BeeFishMisc::nullopt;
             }
 
-         }
-        
-         
-         if (search.contains("key")) {
+        }
+
+
+        if (search.contains("key")) {
             key = search["key"];
-         }
-         
-         const BString& method = request->method();
+        }
 
-         path = request->path();
+        const BString& method = request->method();
 
-         ScopedDatabase scoped(this);
-         
-         JSONDatabase* database = scoped;
-        
-         Path userData =
-                database->userData(_userId);
-         Path bookmark = userData[URLS][path];
+        path = request->path();
 
-         if (key.has_value())
+        ScopedDatabase scoped(this);
+
+        JSONDatabase* database = scoped;
+
+        Path userData =
+            database->userData(_userId);
+        Path bookmark = userData[URLS][path];
+
+        if (key.has_value())
             bookmark = bookmark[key.value()];
-         else if (id.has_value()) {
+        else if (id.has_value()) {
             bookmark = bookmark[id.value()];
-         }
-         else if (method != "DELETE")
+        }
+        else if (method != "DELETE")
             return;
-        
-         
-         SSize contentLength = 0;
-         
-         if (method == "POST")
-         {
+
+
+        SSize contentLength = 0;
+
+        if (method == "POST")
+        {
 
             if (request->headers().contains("content-type"))
-               contentType = request->headers()["content-type"];
+                contentType = request->headers()["content-type"];
             else
-               contentType = "application/json; charset=utf-8";
+                contentType = "application/json; charset=utf-8";
 
             Size pageIndex = 0;
-            
+
 
             WebRequest postRequest(false);
             BeeFishParser::Parser parser(postRequest);
-            
+
             postRequest.setOnData(
-               [&pageIndex, &contentLength, &bookmark, this](const std::string& data) {
-                  contentLength += data.size();
-                  bookmark[pageIndex++].setData(data);
-               }
+            [&pageIndex, &contentLength, &bookmark, this](const std::string& data) {
+                contentLength += data.size();
+                bookmark[pageIndex++].setData(data);
+            }
             );
 
-            
+
 
             if (!parseWebRequest(parser)) {
-               throw std::runtime_error("Invalid input post to storage-app.h");
+                throw std::runtime_error("Invalid input post to storage-app.h");
             }
-            
+
             postRequest.flush();
 
-            
+
             if ( contentLength == 0 )
-               deleteData(bookmark);
+                deleteData(bookmark);
             else {
-               bookmark["Content length"].setData(contentLength);
-               bookmark["Content type"].setData(contentType);
-               bookmark["Page count"].setData(pageIndex);
+                bookmark["Content length"].setData(contentLength);
+                bookmark["Content type"].setData(contentType);
+                bookmark["Page count"].setData(pageIndex);
             }
 
             returnJSON = true;
             _status = 200;
-            
-         }
-         else if ( method == "GET" )
-         {
+
+        }
+        else if ( method == "GET" )
+        {
 
             if (bookmark["Content length"].hasData())
-               bookmark["Content type"].getData(contentType);
+                contentType =
+                    bookmark["Content type"].getStringData();
 
 
             if (contentType.length()) {
-               _status = 200;
-                bookmark["Content length"].getData(_contentLength);
-               _serve = App::SERVE_DATA;
-               _bookmark = bookmark.index();
-               returnJSON = false;
+                _status = 200;
+                _contentLength = bookmark["Content length"].getData<Index>();
+                _serve = App::SERVE_DATA;
+                _bookmark = bookmark.index();
+                returnJSON = false;
             }
             else {
-               _status = 404;
-               returnJSON = true;
+                _status = 404;
+                returnJSON = true;
             }
 
-         }
-         else if (method == "DELETE") {
+        }
+        else if (method == "DELETE") {
 
             deleteData(bookmark);
-           
+
             _status = 200;
 
             returnJSON = true;
-         }
-   
-         if ( _status != 200 )
+        }
+
+        if ( _status != 200 )
             return;
-            
-         if ( returnJSON )
-         {
+
+        if ( returnJSON )
+        {
             _responseHeaders.replace(
-               "content-type",
-               "application/json; charset=utf-8"
+                "content-type",
+                "application/json; charset=utf-8"
             );
-         }
-         else
-         {
+        }
+        else
+        {
             if (contentType.length()) {
-               _responseHeaders.replace(
-                  "content-type",
-                  contentType
-               );
+                _responseHeaders.replace(
+                    "content-type",
+                    contentType
+                );
             }
             else {
-               _responseHeaders.replace(
-                  "content-type",
-                  "text/plain"
-               );
+                _responseHeaders.replace(
+                    "content-type",
+                    "text/plain"
+                );
             }
 
             return;
-         }
+        }
 
-         BeeFishScript::Object output;
-         
-         output["method"] = method;
-         
-         if ( key.has_value() )
-         {
+        BeeFishScript::Object output;
+
+        output["method"] = method;
+
+        if ( key.has_value() )
+        {
             output["key"] = key.value();
-         }
-         
-         if ( id.has_value() )
-         {
+        }
+
+        if ( id.has_value() )
+        {
             output["id"] = id.value().key();
-         }
-               
-         output["response"] = "ok";
-                  
-         _content = output.str();
+        }
 
-         _serve = App::SERVE_CONTENT;
+        output["response"] = "ok";
 
-      }
-      
-      virtual BString name()
-      {
-         return "Storage app";
-      }
+        _content = output.str();
 
-   private:
-      void deleteData(Path bookmark) {
-         if ( bookmark.contains("Page count") &&
-              bookmark["Page count"].hasData() )
-         {
+        _serve = App::SERVE_CONTENT;
+
+    }
+
+    virtual BString name()
+    {
+        return "Storage app";
+    }
+
+private:
+    void deleteData(Path bookmark) {
+        if ( bookmark.contains("Page count") &&
+                bookmark["Page count"].hasData() )
+        {
 
             size_t pageCount = bookmark["Page count"];
             for (size_t page = 0; page < pageCount; ++page)
-               bookmark[page].deleteData();
+                bookmark[page].deleteData();
 
             bookmark["Page count"].setData((size_t)0);
-         }
-         bookmark.clear();
- 
-      }
+        }
+        bookmark.clear();
+
+    }
 
 
-   };
+};
 
-   
+
 
 }
 

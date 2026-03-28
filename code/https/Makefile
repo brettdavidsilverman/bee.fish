@@ -1,9 +1,12 @@
 CFLAGS = -std=c++17 -Wall -fmax-errors=1
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
-PORT=8000
 DEPS=server.h session.h response.h response-headers.h app.h json-app.h file-system-app.h error-app.h storage-app.h not-found-app.h options-app.h test.h authentication.h version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h Makefile
 
+ifeq ("$(PORT)","")
+	PORT=8000
+endif
+	
 $(OUTPUT):	$(DEPS) $(BUILD)/web-request $(BUILD)/query
 	@echo "Linking Web Server"
 	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lboost_locale 
@@ -20,40 +23,43 @@ $(BUILD)/query:
 	make -C ../query $(DEBUG) $(TEST)
 	
 install:	$(OUTPUT)
-	./start.sh $(PORT)
+install:	start
 
-time:
 time:	CFLAGS += -Ofast -D DEBUG
 time:	install
 
-test:
 test:	TEST=test
 test:	$(OUTPUT)
-	./stop.sh 8000
-	$(OUTPUT) -port 8000 -test
-	./start.sh 8000
+test:	stop
+	@echo "Testing on port $(PORT)"
+	./stop.sh $(PORT)
+	$(OUTPUT) -port $(PORT) -test
+	make -C . start PORT=$(PORT)
 
 trace:	$(OUTPUT)
 	rm -f trace.txt
-	./stop.sh 8000
+	./stop.sh $(PORT)
 	- valgrind --log-file="trace.txt" --track-origins=yes --leak-check=yes $(OUTPUT) -port $(PORT) -test
-	./start.sh 8000
+	./start.sh $(PORT)
 	cat trace.txt
 
-start:
 start:	CFLAGS += -Ofast
 start:	$(OUTPUT)
-	./start.sh $(PORT)
+start:	stop
+	$(OUTPUT) -port $(PORT) &
 
 stop:
-	./stop.sh $(PORT)
+	@echo Stopping $(PORT)...
+	@for pid in $$(lsof -t -i:$(PORT)); do \
+		kill $$pid;\
+    done
+	@echo Stopped
 
 
-debug:
 debug:	DEBUG=debug
 debug:	CFLAGS += -g -D DEBUG
-debug:	PORT=8000
 debug:	$(OUTPUT)
+
 
 
 run_debug:	debug

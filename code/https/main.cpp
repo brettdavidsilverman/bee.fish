@@ -76,7 +76,7 @@ int main(int argc, const char* argv[])
              }
         }
       
-        initializeLogs();
+       initializeLogs();
         
         std::cout << "Setting up App Factories" << std::endl;
 

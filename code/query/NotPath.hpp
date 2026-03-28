@@ -28,10 +28,6 @@ using namespace BeeFishDatabase;
             _bounds(bounds)
         {
         
-            if (_path->isDeadEnd())
-                _depth = 1;
-            else
-                _depth = 0;
             
         }
    
