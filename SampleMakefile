@@ -1,12 +1,12 @@
 
 live:
-	cd bee.fish/code/https && sudo make PORT=443
+	sudo make -C bee.fish/code PORT=443
 
 clean:
-	cd bee.fish/code/https && sudo make clean
+	sudo make -C bee.fish/code clean
 	
 debug:
-	cd dev.bee.fish/code/https && make debug PORT=8000
+	make -C dev.bee.fish/code debug PORT=8000
 
 clean_debug:
-	cd dev.bee.fish/code/https && make clean
+	make -C dev.bee.fish/code clean
