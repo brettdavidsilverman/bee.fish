@@ -1,9 +1,8 @@
 ifeq ("$(PORT)","")
-	PORT=443
+	PORT=8000
 endif
 
 all:	https
-all:	start
 
 build:
 	- mkdir build
