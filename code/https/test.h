@@ -162,8 +162,8 @@ namespace BeeFishHTTPS {
     inline bool testFile(const BString& origin, filesystem::path file, bool expect)
     {
         cout << "\tTesting "
-              << file.filename()
-              << endl;
+            << file.filename()
+            " ";
 
         string tempFile =
             TEMP_DIRECTORY;
