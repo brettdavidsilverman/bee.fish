@@ -219,13 +219,14 @@ using namespace BeeFishParser;
         PathBase*
         getPath(
             PathBase* a, 
-            PathBase* b
+            PathBase* b,
+            Path& bounds
         )
         {
             if (_and->matched())
-                return new AndPath(a, b);
+                return new AndPath(a, b, new Path(bounds));
             else
-                return new OrPath(a, b);
+                return new OrPath(a, b, new Path(bounds));
         }
         
     };
@@ -585,7 +586,8 @@ using namespace BeeFishParser;
                 return
                     _andOr1->getPath(
                         expressionA->getPath(words, bounds),
-                        expressionB->getPath(words, bounds)
+                        expressionB->getPath(words, bounds),
+                        bounds
                     );
                     
                 
@@ -601,7 +603,8 @@ using namespace BeeFishParser;
                 return
                     _andOr2->getPath(
                         wordPath,
-                        expression->getPath(words, bounds)
+                        expression->getPath(words, bounds),
+                        bounds
                     );
             }
             else if (_bracketedExpression->matched())

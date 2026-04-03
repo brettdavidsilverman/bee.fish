@@ -16,13 +16,16 @@ using namespace BeeFishDatabase;
     protected:
         PathBase* _a;
         PathBase* _b;
+        PathBase* _bounds;
         
     public:
 
         AndPath( PathBase* a,
-                 PathBase* b) :
+                 PathBase* b,
+                 PathBase* bounds) :
             _a(a),
-            _b(b)
+            _b(b),
+            _bounds(bounds)
         {
         }
    
@@ -30,6 +33,7 @@ using namespace BeeFishDatabase;
         {
             delete _a;
             delete _b;
+            delete _bounds;
         }
         
         
@@ -38,7 +42,8 @@ using namespace BeeFishDatabase;
         {
             return
                 _a->canGoLeft() and
-                _b->canGoLeft();
+                _b->canGoLeft() and
+                _bounds->canGoLeft();
         }
         
         virtual bool canGoRight() const
@@ -46,7 +51,8 @@ using namespace BeeFishDatabase;
         {
             return
                 _a->canGoRight() and
-                _b->canGoRight();
+                _b->canGoRight() and
+                _bounds->canGoRight();
         }
         
         virtual void goLeft()
@@ -54,6 +60,7 @@ using namespace BeeFishDatabase;
         {
             _a->goLeft();
             _b->goLeft();
+            _bounds->goLeft();
     
         }
         
@@ -62,6 +69,7 @@ using namespace BeeFishDatabase;
         {
             _a->goRight();
             _b->goRight();
+            _bounds->goRight();
         }
         
         virtual void goUp()
@@ -69,6 +77,7 @@ using namespace BeeFishDatabase;
         {
             _a->goUp();
             _b->goUp();
+            _bounds->goUp();
         }
 
         virtual void save()
@@ -76,6 +85,7 @@ using namespace BeeFishDatabase;
         {
             _a->save();
             _b->save();
+            _bounds->save();
         }
         
         virtual void restore()
@@ -83,8 +93,9 @@ using namespace BeeFishDatabase;
         {
             _a->restore();
             _b->restore();
+            _bounds->restore();
         }
-
+/*
         virtual bool isDeadEnd() const
         override
         {
@@ -103,7 +114,7 @@ using namespace BeeFishDatabase;
             return isDeadEnd;
                 
         }
-        
+*/
 
 
     

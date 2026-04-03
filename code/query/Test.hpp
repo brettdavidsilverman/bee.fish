@@ -432,6 +432,8 @@ namespace BeeFishQuery {
         
         Database db;
         Words words(db);
+        Path bounds = db;
+        bounds = bounds["bounds"];
         
         words["one"][0];
         words["one"][1];
@@ -441,12 +443,19 @@ namespace BeeFishQuery {
         words["two"][3];
         words["two"][4];
         
+        bounds[0];
+        bounds[1];
+        bounds[2];
+        bounds[3];
+        bounds[4];
+        
         Path one = words["one"];
         Path two = words["two"];
         
         AndPath andPath(
-            new Iterable<Index>(one),
-            new Iterable<Index>(two)
+            new Path(one),
+            new Path(two),
+            new Path(bounds)
         );
         
         
@@ -519,21 +528,26 @@ namespace BeeFishQuery {
         
         Database db;
         Words words(db);
-        
+        Path bounds = db;
         words["one"][0];
         words["two"][1];
         words["three"][2];
+        
+        
+        bounds = bounds["bounds"];
+        
+        bounds[0];
+        bounds[1];
+        bounds[2];
         
         Path one = words["one"];
         Path two = words["two"];
         Path three = words["three"];
         
         OrPath orPath(
-            new Iterable<Index>(one),
-           // new OrPath(
-           //     new Iterable<Index>(two),
-                new Iterable<Index>(three)
-          //  )
+            new Path(one),
+            new Path(three),
+            new Path(bounds)
         );
         
         
@@ -790,7 +804,6 @@ namespace BeeFishQuery {
 
                 for (auto value : notNotPath)
                 {
-cerr << "Value: " << value << endl;
                     array.push_back(value);
                 }
         
@@ -943,7 +956,7 @@ cerr << "Value: " << value << endl;
             JSONDatabase db;
             JSONPath root = db.host("https://test")[json.filename()];
             Path words = db.words();
-            Path bounds = db.objects();
+            Path objects = db.objects()[root][OBJECT_CHILDREN];
             JSONPathParser parser(root);
             ifstream input(json);
             parser.read(input);
@@ -979,7 +992,7 @@ cerr << "Value: " << value << endl;
                 
                 PathBase* pathBase =
                     expression
-                    .getPath(words, bounds);
+                    .getPath(words, objects);
                 
                 Iterable<JSONPath::Id> iterable(*pathBase);
                 
@@ -1086,7 +1099,6 @@ cerr << "Value: " << value << endl;
                 
         ok = ok && test(TEST_DIRECTORY "/45-Object.json", "not b", 
             {
-                "https://test",
                 "https://test/45-Object.json/a/1/2",
                 "https://test/45-Object.json/a/2/2"
             }
@@ -1129,7 +1141,6 @@ cerr << "Value: " << value << endl;
         
         ok = ok && test(TEST_DIRECTORY "/45-Object.json", "not (b or c)", 
             {
-                "https://test"
             }
         );
 
