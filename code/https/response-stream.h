@@ -114,26 +114,30 @@ namespace BeeFishHTTPS {
                     app->request()->search();
 
                 PathBase* path = nullptr;
-                
+        
                 try {
                     BeeFishQuery::Expression expression(search);
         
                     *this << "[" << endl;
 
-                    path =
+                    PathBase* path =
                         expression
                         .getPath(words, children);
-                
-                        
-                    Iterable<Index> matches(*path);
+
+                    Iterable<JSONPath::Id> matches(*path);
+                    
                     for (auto it = matches.begin();
                          it != matches.end();
                          )
                     {
                         
-                        JSONPath path(*database, *it);
-                        BString string = path.toString();
-                        *this << "   \"" << string.escape() << "\"";
+                        JSONPath json(*database, *it);
+                        
+                        BString string = json.toString();
+                        
+                        *this << "   \"" 
+                              << string.escape() 
+                              << "\"";
     
                         if (++it != matches.end())
                             *this << ",";
