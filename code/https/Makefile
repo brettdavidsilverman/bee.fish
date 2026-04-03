@@ -37,10 +37,10 @@ test:	stop
 	make -C . start PORT=$(PORT)
 
 trace:	$(OUTPUT)
+trace:	stop
 	rm -f trace.txt
-	./stop.sh $(PORT)
 	- valgrind --log-file="trace.txt" --track-origins=yes --leak-check=yes $(OUTPUT) -port $(PORT) -test
-	./start.sh $(PORT)
+	$(OUTPUT) -port $(PORT) &
 	cat trace.txt
 
 start:	CFLAGS += -Ofast
@@ -59,6 +59,7 @@ stop:
 debug:	DEBUG=debug
 debug:	CFLAGS += -g -D DEBUG
 debug:	$(OUTPUT)
+debug:	start
 
 
 

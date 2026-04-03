@@ -73,14 +73,7 @@ using namespace BeeFishWeb;
             */
         
             
-            if (method == "GET" && 
-                request()->search().length())
-            {
-                _serve = App::SERVE_QUERY;
-                _status = 200;
-                return;
-            }
-
+            
             ScopedDatabase scoped(this);
             
             JSONDatabase* database = scoped;
@@ -99,6 +92,15 @@ using namespace BeeFishWeb;
             {
                 return;
             }
+            
+            if (method == "GET" && 
+                request()->search().length())
+            {
+                _serve = App::SERVE_QUERY;
+                _status = 200;
+                return;
+            }
+            
                 
             if (method == "GET") {
                 _serve = App::SERVE_JSON;

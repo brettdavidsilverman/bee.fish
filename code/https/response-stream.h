@@ -92,9 +92,11 @@ namespace BeeFishHTTPS {
                  
             JSONDatabase* database = scoped;
             BeeFishQuery::Words words = database->words();
-            BeeFishQuery::Bounds bounds = database->objects();
-            
             Path bookmark(*database, app->_bookmark);
+            Path children =
+                database->parentChildren()
+                [bookmark];
+            
             if (app->serve() == App::SERVE_JSON)
             {
                       
@@ -108,7 +110,7 @@ namespace BeeFishHTTPS {
             if (app->serve() == App::SERVE_QUERY)
             {
                 const BString& search = 
-                    app->request()->search().decodeURI();
+                    app->request()->search();
 
                 try {
                     BeeFishQuery::Expression expression(search);
@@ -117,8 +119,9 @@ namespace BeeFishHTTPS {
 
                     PathBase* path =
                         expression
-                        .getPath(words, bounds);
+                        .getPath(words, children);
                 
+                        
                     Iterable<Index> matches(*path);
                     for (auto it = matches.begin();
                          it != matches.end();
