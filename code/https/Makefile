@@ -1,4 +1,4 @@
-CFLAGS = -std=c++17 -Wall -fmax-errors=1
+CFLAGS = -std=c++17 -Wall -fmax-errors=1 -Ofast
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
 DEPS=server.h session.h response.h response-headers.h app.h json-app.h file-system-app.h error-app.h storage-app.h not-found-app.h options-app.h test.h authentication.h version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h Makefile
