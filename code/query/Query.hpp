@@ -173,6 +173,24 @@ using namespace BeeFishParser;
             return _value;
         }
         
+        virtual void success()
+        override
+        {
+            _value = _value.toLower();
+            
+            if (_value == "and" ||
+                _value == "or" ||
+                _value == "not" ||
+                _value == "+" ||
+                _value == "|" ||
+                _value == "!")
+            {
+                fail();
+            }
+            else
+                BeeFishParser::And::success();
+        }
+        
         PathBase*
         getPath(
             Words& words,
@@ -318,7 +336,7 @@ using namespace BeeFishParser;
         
     protected:
         OrderOfPrecedence* _items = nullptr;
-        
+        OrderOfPrecedence::Item* _notWordAndOrExpression = nullptr;
         OrderOfPrecedence::Item* _notExpression = nullptr;
         OrderOfPrecedence::Item* _bracketedExpressionAndExpression = nullptr;
         OrderOfPrecedence::Item* _wordAndExpression = nullptr;
@@ -328,54 +346,19 @@ using namespace BeeFishParser;
         LoadOnDemandExpression* _loadOnDemandExpression1 = nullptr;
         LoadOnDemandExpression* _loadOnDemandExpression2 = nullptr;
         LoadOnDemandExpression* _loadOnDemandExpression3 = nullptr;
+        LoadOnDemandExpression* _loadOnDemandExpression4 = nullptr;
         
         BracketedExpression* _bracketedExpression1 = nullptr;
         BracketedExpression* _bracketedExpression2 = nullptr;
         
         AndOr* _andOr1 = nullptr;
         AndOr* _andOr2 = nullptr;
+        AndOr* _andOr3 = nullptr;
         
         BeeFishQuery::Word* _word1 = nullptr;
         BeeFishQuery::Word* _word2 = nullptr;
-        
+        BeeFishQuery::Word* _word3 = nullptr;
     public:
-        
-        virtual bool onNotExpression(Expression* expression)
-        {
-            return true;
-        }
-        
-        virtual bool onExpressionAndExpression(
-            Expression* a,
-            Expression* b
-        )
-        {
-            return true;
-        }
-        
-        virtual bool onExpressionOrExpression(
-            Expression* a,
-            Expression* b
-        )
-        {
-            return true;
-        }
-        
-        virtual bool onWordAndExpression(
-            const BString& word,
-            Expression* expression
-        )
-        {
-            return true;
-        }
-        
-        virtual bool onWordOrExpression(
-            const BString& word,
-            Expression* expression
-        )
-        {
-            return true;
-        }
         
         
         virtual void setup(Parser* parser)
@@ -386,27 +369,39 @@ using namespace BeeFishParser;
                 
         {
             {
+                // not word and/or expression
+                _notWordAndOrExpression =
+                new OrderOfPrecedence::Item(
+                    new BeeFishParser::And(
+                        new BeeFishQuery::Not(),
+                        _word3 =
+                        new BeeFishQuery::Word(),
+                        _andOr3 = 
+                        new BeeFishQuery::AndOr(),
+                        _loadOnDemandExpression4 =
+                        new LoadOnDemandExpression()
+                    )
+                )
+            },/*
+            {
+                // not word
+                _notWord = new OrderOfPrecedence::Item(
+                    new BeeFishParser::And(
+                        new BeeFishQuery::Not(),
+                        _word3 =
+                        new BeeFishQuery::Word()
+                    )
+                )
+            },
+            */
+            {
                 // not expression
                 _notExpression = new OrderOfPrecedence::Item(
                     new BeeFishParser::And(
                         new BeeFishQuery::Not(),
                         _loadOnDemandExpression1 =
                             new LoadOnDemandExpression()
-                    ),
-                    [this](Match*)
-                    {
-                        if (not onNotExpression(
-                                _loadOnDemandExpression1
-                                ->item()
-                            )
-                        )
-                        {
-                            fail();
-                            return false;
-                        }
-                        
-                        return true;
-                    }
+                    )
                 )
             },
             {
@@ -419,38 +414,7 @@ using namespace BeeFishParser;
                         _andOr1 = new AndOr(),
                         _loadOnDemandExpression2 =
                             new LoadOnDemandExpression()
-                    ),
-                    [this](Match*)
-                    {
-                        Expression* a = 
-                            _bracketedExpression1->item();
-                        Expression* b =
-                            _loadOnDemandExpression2->item();
-                                 
-                        bool result;
-                        
-                        if (_andOr1->_and->matched())
-                        {
-                            
-                            result =
-                                onExpressionAndExpression(a, b);
-                        }
-                        else
-                        {
-                            result =
-                                onExpressionOrExpression(a, b);
-                        }
-                        
-                        if (!result)
-                        {
-                            fail();
-                            return false;
-                        }
-                        
-                        return true;
-                                    
-                                    
-                    }
+                    )
                 )
             },
             {
@@ -462,36 +426,7 @@ using namespace BeeFishParser;
                         _andOr2 = new AndOr(),
                         _loadOnDemandExpression3 =
                             new LoadOnDemandExpression()
-                    ),
-                    [this](Match*)
-                    {
-                        BString& word =
-                            _word->value();
-                                        
-                        Expression* expression =
-                            _loadOnDemandExpression3->item();
-                                
-                        bool result;
-                        if (_andOr2->_and->matched())
-                        {
-                            result =
-                                onWordAndExpression(word, expression);
-                        }
-                        else
-                        {
-                            result =
-                                onWordOrExpression(word, expression);
-                        }
-                        
-                        if (!result)
-                        {
-                            fail();
-                            return false;
-                        }
-                        
-                        return true;
-                                        
-                    }
+                    )
                 )
             },
             {
@@ -520,7 +455,16 @@ using namespace BeeFishParser;
         virtual void write(ostream& output, Size tabs = 0) const
         {
     
-            if (_notExpression->matched())
+            if (_notWordAndOrExpression->matched())
+            {
+                output << "not "
+                       << *_word3
+                       << " "
+                       << *_andOr3
+                       << " "
+                       << *(_loadOnDemandExpression4->item());
+            }
+            else if (_notExpression->matched())
             {
                 output
                 << "not "
@@ -565,8 +509,28 @@ using namespace BeeFishParser;
         
         PathBase* getPath(Words& words, Bounds& bounds)
         {
-
-            if (_notExpression->matched())
+                    
+            if (_notWordAndOrExpression->matched())
+            {
+                Expression* expression = 
+                    _loadOnDemandExpression4
+                    ->item();
+                    
+                PathBase* path =
+                    _andOr3
+                    ->getPath(
+                        new NotPath(
+                            _word3
+                            ->getPath(words, bounds),
+                            new Path(bounds)
+                        ),
+                        expression->getPath(words, bounds),
+                        bounds
+                    );
+                    
+                return path;
+            }
+            else if (_notExpression->matched())
             {
                 Expression* expression = 
                     _loadOnDemandExpression1

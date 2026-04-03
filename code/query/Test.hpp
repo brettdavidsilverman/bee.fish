@@ -949,31 +949,37 @@ namespace BeeFishQuery {
         cout << "Test Query JSON" << endl;
     
         bool ok  = true;
+        filesystem::path json = TEST_DIRECTORY "/45-Object.json";
+        
+        JSONDatabase db;
+        JSONPath root = db.host("https://test")[json.filename()];
+        JSONPathParser parser(root);
+        
+        ifstream input(json);
+        parser.read(input);
+        parser.eof();
+        ok = parser.matched();
+        
         auto test =
-        [](filesystem::path json, BString query, vector<BString> check) {
+        [&db, &root, &ok](BString query, vector<BString> check) {
             
-            cout << "\t" << json.filename() << " parse"  <<flush;
-            JSONDatabase db;
-            JSONPath root = db.host("https://test")[json.filename()];
+            cout << "\t" << query << flush;
+            
+            
             Path words = db.words();
             Path objects = db.objects()[root][OBJECT_CHILDREN];
-            JSONPathParser parser(root);
-            ifstream input(json);
-            parser.read(input);
-            parser.eof();
             
-            bool ok = parser.matched();
+        
             
             Expression expression;
             if (ok)
             {
-                cout << "?" << query  << flush;
-                
                 Parser parser(expression);
                 parser.read(query);
                 parser.eof();
         
                 ok = expression.matched();
+                
                 /*
                 Iterable<Index> test(bounds);
                 
@@ -988,7 +994,7 @@ namespace BeeFishQuery {
             std::vector<BString> values;
             if (ok)
             {
-                cout << "..." << flush;
+                cout << ": " << expression << "..." << flush;
                 
                 PathBase* pathBase =
                     expression
@@ -1061,8 +1067,8 @@ namespace BeeFishQuery {
    ]
 }
 */
-        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "boo", {});
-        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "json",
+        ok = ok && test("boo", {});
+        ok = ok && test("json",
             {
                 "https://test/45-Object.json",
                 "https://test/45-Object.json/a",
@@ -1074,7 +1080,7 @@ namespace BeeFishQuery {
                 "https://test/45-Object.json/a/2/2"
             }
         );
-        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "a", 
+        ok = ok && test("a", 
             {
                 "https://test/45-Object.json/a",
                 "https://test/45-Object.json/a/1",
@@ -1085,7 +1091,7 @@ namespace BeeFishQuery {
                 "https://test/45-Object.json/a/2/2",
             }
         );
-        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "b", 
+        ok = ok && test("b", 
             {
                 "https://test/45-Object.json",
                 "https://test/45-Object.json/a",
@@ -1097,7 +1103,7 @@ namespace BeeFishQuery {
         );
         
                 
-        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "not b", 
+        ok = ok && test("not b", 
             {
                 "https://test/45-Object.json/a/1/2",
                 "https://test/45-Object.json/a/2/2"
@@ -1105,7 +1111,7 @@ namespace BeeFishQuery {
         );
         
         
-        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "a and not b", 
+        ok = ok && test("a and not b", 
             {
                 "https://test/45-Object.json/a/1/2",
                 "https://test/45-Object.json/a/2/2"
@@ -1115,7 +1121,7 @@ namespace BeeFishQuery {
         
         
 
-        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "not not b", 
+        ok = ok && test("not not b", 
             {
                 "https://test/45-Object.json",
                 "https://test/45-Object.json/a",
@@ -1126,7 +1132,7 @@ namespace BeeFishQuery {
             }
         );
         
-        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "b or c", 
+        ok = ok && test("b or c", 
             {
                 "https://test/45-Object.json",
                 "https://test/45-Object.json/a",
@@ -1139,10 +1145,33 @@ namespace BeeFishQuery {
             }
         );
         
-        ok = ok && test(TEST_DIRECTORY "/45-Object.json", "not (b or c)", 
+        ok = ok && test("not (b or c)", 
             {
             }
         );
+        
+        ok = ok && test("not b or c", 
+            {
+                "https://test/45-Object.json",
+                "https://test/45-Object.json/a",
+                "https://test/45-Object.json/a/1",
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2",
+                "https://test/45-Object.json/a/2/2",
+            }
+        );
+        
+        ok = ok && test("(not b) or c", 
+            {
+                "https://test/45-Object.json",
+                "https://test/45-Object.json/a",
+                "https://test/45-Object.json/a/1",
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2",
+                "https://test/45-Object.json/a/2/2",
+            }
+        );
+        
 
         BeeFishMisc::outputSuccess(ok);
         
