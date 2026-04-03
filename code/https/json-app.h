@@ -131,7 +131,7 @@ using namespace BeeFishWeb;
                     _statusText = "JSONPathParser error";
                 }
                 else {
-                    _content = BString("\"") + parser.start().toString() + BString("\"");
+                    _content = BString("\"") + jsonPath.toString().escape() + BString("\"");
                 //BString(host + url).escape()
                     _serve = App::SERVE_CONTENT;
                     _status = 200;

@@ -112,12 +112,14 @@ namespace BeeFishHTTPS {
                 const BString& search = 
                     app->request()->search();
 
+                PathBase* path = nullptr;
+                
                 try {
                     BeeFishQuery::Expression expression(search);
         
                     *this << "[" << endl;
 
-                    PathBase* path =
+                    path =
                         expression
                         .getPath(words, children);
                 
@@ -141,17 +143,18 @@ namespace BeeFishHTTPS {
                         
                     }
             
-                    delete path;
-
                     *this << "]";
                 }
                 catch (const std::exception& exception)
                 {
                     *this << "\"" << BString(exception.what()).escape() << "\"";
                 }
-            
+                
                 flush();
                     
+                if (path)
+                    delete path;
+                
                 return;
             
             }

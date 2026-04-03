@@ -21,7 +21,7 @@ void start(
 );
 
 std::mutex _wait;
-const Size _threadCount = 10;
+const Size _threadCount = 20;
 const Size _databaseCount = _threadCount;
 
 int main(int argc, const char* argv[])
@@ -76,7 +76,7 @@ int main(int argc, const char* argv[])
              }
         }
       
-       initializeLogs();
+        initializeLogs();
         
         std::cout << "Setting up App Factories" << std::endl;
 

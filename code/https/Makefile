@@ -9,8 +9,11 @@ endif
 	
 $(OUTPUT):	$(DEPS) $(BUILD)/web-request $(BUILD)/query
 	@echo "Linking Web Server"
-	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lboost_locale 
-#	sudo setcap cap_net_bind_service=ep $(OUTPUT)
+	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lboost_locale
+	@if [ "$(PORT)" = "443" ]; then \
+		echo "Allowing port $(PORT)"; \
+		sudo setcap cap_net_bind_service=ep $(OUTPUT); \
+	fi
 
 
 $(BUILD):
@@ -32,9 +35,8 @@ test:	TEST=test
 test:	$(OUTPUT)
 test:	stop
 	@echo "Testing on port $(PORT)"
-	./stop.sh $(PORT)
-	$(OUTPUT) -port $(PORT) -test
-	make -C . start PORT=$(PORT)
+	$(OUTPUT) -port $(PORT) -unlock -test
+	$(OUTPUT) -port $(PORT) &
 
 trace:	$(OUTPUT)
 trace:	stop
@@ -50,8 +52,8 @@ start:	stop
 
 stop:
 	@echo Stopping $(PORT)...
-	@for pid in $$(lsof -t -i:$(PORT)); do \
-		kill $$pid;\
+	@for pid in $$(sudo lsof -t -i:$(PORT)); do \
+		sudo kill $$pid;\
     done
 	@echo Stopped
 
@@ -59,12 +61,12 @@ stop:
 debug:	DEBUG=debug
 debug:	CFLAGS += -g -D DEBUG
 debug:	$(OUTPUT)
-debug:	start
 
 
 
 run_debug:	debug
-	gdb --args $(OUTPUT) -port $(PORT) -test
+run_debug:	stop
+	gdb --args $(OUTPUT) -port $(PORT) -test -unlock
 
 clean:
 	rm -f session.log

@@ -196,7 +196,6 @@ protected:
     {
         database().objects()[*this];
         
-
         Path parentChildren =
             database().parentChildren();
             
@@ -218,6 +217,7 @@ protected:
     
     void removeObject()
     {
+
         Path parentChildren =
             database().parentChildren();
             
@@ -242,9 +242,12 @@ protected:
     {
         if (!hasData())
         {
+            
+            setData<Type>(type);
+            
             if (!isRoot())
                 addObject();
-            setData<Type>(type);
+            
         }
         else if (JSONPath::type() != type)
         {
@@ -253,9 +256,10 @@ protected:
             {
                 clear();
                 assert(isDeadEnd());
+                setData<Type>(type);
                 if (!isRoot())
                     addObject();
-                setData<Type>(type);
+                
             }
         }
 
@@ -427,19 +431,17 @@ public:
         JSONPath hostPath =
             database.host(host);
 
-        BString copy = url.path();
-        char* str = copy.data();
-        const char* delims ="/";
-        char* token;
-
-        // Get the first token
-        token = strtok(str, delims);
-
-        // Loop through all remaining tokens
+        std::vector<BString> paths =
+            url.path().split('/');
+        
+        // Loop through all tokens
         JSONPath path = hostPath;
-        while (token != nullptr)
+        bool success = true;
+        
+        for (const BString& token : paths)
         {
-            BString key(token);
+
+            BString key = token;
 
             if (key.size()) {
                 key = key.decodeURI();
@@ -447,8 +449,10 @@ public:
                     Index index = atol(key.c_str());
                     if (path.contains(index))
                         path = path[index];
-                    else
+                    else {
+                        success = false;
                         break;
+                    }
                 }
                 else {
                     if (key.startsWith("\"") &&
@@ -464,17 +468,18 @@ public:
                     key = key.unescape();
                     if (path.contains(key) || method == "POST")
                         path = path[key];
-                    else
+                    else {
+                        success = false;
                         break;
+                    }
                 }
 
 
 
             }
-            token = strtok(nullptr, delims);
         }
 
-        if (token != nullptr) {
+        if (!success) {
             throw PathNotFoundException(url);
         }
 
@@ -903,9 +908,10 @@ public:
             " \r\n\v\t()\".,!?{}+:; /";
 
         char* str = word.data();
+        char *saveptr;
 
         char* token =
-            strtok(str, _deliminators);
+            strtok_r(str, _deliminators, &saveptr);
 
         std::vector<BString> words;
 
@@ -916,7 +922,7 @@ public:
             {
                 words.push_back(token);
             }
-            token = strtok(nullptr, _deliminators);
+            token = strtok_r(nullptr, _deliminators, &saveptr);
         }
 
 
