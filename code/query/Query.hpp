@@ -175,11 +175,16 @@ using namespace BeeFishParser;
         
         PathBase*
         getPath(
-            Words& words
+            Words& words,
+            Path& bounds
         )
         {
-            return new Path(
-                words[value().toLower()]
+            return new AndPath(
+                new Path(
+                    words[value().toLower()]
+                ),
+                new Path(bounds),
+                new Path(bounds)
             );
         }
         
@@ -595,7 +600,7 @@ using namespace BeeFishParser;
             else if (_wordAndExpression->matched())
             {
                 PathBase* wordPath =
-                    _word1->getPath(words);
+                    _word1->getPath(words, bounds);
                     
                 Expression* expression =
                     _loadOnDemandExpression3->item();
@@ -617,7 +622,7 @@ using namespace BeeFishParser;
             }
             else if (_word->matched()) {
                 return
-                    _word2->getPath(words);
+                    _word2->getPath(words, bounds);
         
             }
             

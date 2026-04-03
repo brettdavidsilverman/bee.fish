@@ -123,7 +123,16 @@ namespace BeeFishHTTPS {
                     PathBase* path =
                         expression
                         .getPath(words, children);
-
+/*
+                    PathBase* path =
+                        new BeeFishQuery::AndPath
+                        (
+                            pathInner,
+                            new Path(children),
+                            new Path(children)
+                        );
+*/
+                        
                     Iterable<JSONPath::Id> matches(*path);
                     
                     for (auto it = matches.begin();
