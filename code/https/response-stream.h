@@ -94,8 +94,9 @@ namespace BeeFishHTTPS {
             BeeFishQuery::Words words = database->words();
             Path bookmark(*database, app->_bookmark);
             Path children =
-                database->parentChildren()
-                [bookmark];
+                database->objects()
+                [bookmark]
+                [OBJECT_CHILDREN];
             
             if (app->serve() == App::SERVE_JSON)
             {

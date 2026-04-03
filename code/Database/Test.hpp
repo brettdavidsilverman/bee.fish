@@ -2075,7 +2075,7 @@ assert(success);
     inline bool testMultiThreaded()
     {
         cout << "Test multi threaded" << endl;
-        const Index SIZE = 1338920;
+        const Index SIZE = 1311944;
 
         auto test =
         [SIZE](std::filesystem::path file, bool readOnly, bool getSuccess = false)

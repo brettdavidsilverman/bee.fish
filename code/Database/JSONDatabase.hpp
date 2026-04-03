@@ -18,7 +18,6 @@ namespace BeeFishDatabase
         Path _properties;
         Path _words;
         Path _objects;
-        Path _parentChildren;
         Path _json;
         
 
@@ -42,9 +41,6 @@ namespace BeeFishDatabase
                 
             _objects =
                 _root[OBJECTS];
-                
-            _parentChildren =
-                _root[PARENT_CHILDREN];
                 
             _authentication =
                 _root[AUTHENTICATION];
@@ -84,11 +80,6 @@ namespace BeeFishDatabase
         Path objects() const
         {
             return _objects;
-        }
-        
-        Path parentChildren() const
-        {
-            return _parentChildren;
         }
         
         Path userData(const BString& userId)

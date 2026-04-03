@@ -194,14 +194,13 @@ protected:
     
     void addObject()
     {
-        database().objects()[*this];
-        
-        Path parentChildren =
-            database().parentChildren();
+        Path objects =
+            database().objects();
             
+        objects[*this];
         
         // Add this child
-        parentChildren[*this][*this];
+        objects[*this][OBJECT_CHILDREN][*this];
 
         // Add this child to all parents
         JSONPath json = *this;
@@ -209,7 +208,9 @@ protected:
                !json.parent().isRoot())
         {
 
-            parentChildren[json][*this];
+            objects[json]
+               [OBJECT_CHILDREN]
+               [*this];
             json = json.parent();
         }
 
@@ -218,8 +219,8 @@ protected:
     void removeObject()
     {
 
-        Path parentChildren =
-            database().parentChildren();
+        Path objects =
+            database().objects();
             
         JSONPath json = *this;
         
@@ -228,14 +229,13 @@ protected:
         while (!json.isRoot() &&
                !json.parent().isRoot())
         {
-            parentChildren[json].clear(*this);
+            objects[json][OBJECT_CHILDREN]
+                .clear(*this);
             json = json.parent();
         }
         
         // Remove this child
-        parentChildren.clear(*this);
-        
-        database().objects().clear(*this);
+        objects.clear(*this);
     }
     
     void setType(Type type)
@@ -830,13 +830,13 @@ public:
                 while (!json.isRoot() &&
                         !json.parent().isRoot())
                 {
-                    objects[json][wordPath];
+                    objects[json][OBJECT_WORDS][wordPath];
                     wordPath[json];
                     json = json.parent();
                 }
             }
             else {
-                objects[json][wordPath];
+                objects[json][OBJECT_WORDS][wordPath];
                 wordPath[json];
             }
 
@@ -868,7 +868,11 @@ public:
                     while  (!json.isRoot() &&
                             !json.parent().isRoot())
                     {
-                        Path object = objects[json];
+                        Path object =
+                            objects
+                            [json]
+                            [OBJECT_WORDS];
+                            
                         if (object.contains(wordPath))
                         {
                             wordPath.clear(json);
@@ -881,7 +885,10 @@ public:
                 }
                 else
                 {
-                    Path object = objects[json];
+                    Path object =
+                        objects
+                        [json]
+                        [OBJECT_WORDS];
                     if (object.contains(wordPath))
                     {
                         wordPath.clear(json);
