@@ -191,12 +191,59 @@ public:
     }
 
 protected:
+    
+    void addObject()
+    {
+        database().objects()[*this];
+        
+
+        Path parentChildren =
+            database().parentChildren();
+            
+        
+        // Add this child
+        parentChildren[*this][*this];
+
+        // Add this child to all parents
+        JSONPath json = *this;
+        while (!json.isRoot() &&
+               !json.parent().isRoot())
+        {
+
+            parentChildren[json][*this];
+            json = json.parent();
+        }
+
+    }
+    
+    void removeObject()
+    {
+        Path parentChildren =
+            database().parentChildren();
+            
+        JSONPath json = *this;
+        
+    
+        // Remove this child from its parents
+        while (!json.isRoot() &&
+               !json.parent().isRoot())
+        {
+            parentChildren[json].clear(*this);
+            json = json.parent();
+        }
+        
+        // Remove this child
+        parentChildren.clear(*this);
+        
+        database().objects().clear(*this);
+    }
+    
     void setType(Type type)
     {
         if (!hasData())
         {
             if (!isRoot())
-                database().objects()[*this];
+                addObject();
             setData<Type>(type);
         }
         else if (JSONPath::type() != type)
@@ -207,7 +254,7 @@ protected:
                 clear();
                 assert(isDeadEnd());
                 if (!isRoot())
-                    database().objects()[*this];
+                    addObject();
                 setData<Type>(type);
             }
         }
@@ -641,8 +688,7 @@ public:
 
     virtual void clear() override
     {
-        //   if (!hasData())
-        //       return;
+
 
         switch (type())
         {
@@ -694,10 +740,11 @@ public:
 
         assert(getChildren().isDeadEnd());
 
-
-        if (!isRoot())
-            database().objects().clear(*this);
-
+        if (!isRoot()) {
+            removeObject();
+        }
+            
+        
         Path::clear();
         assert(isDeadEnd());
 

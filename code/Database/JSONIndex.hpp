@@ -14,7 +14,8 @@ namespace BeeFishDatabase {
     inline static const Index PROPERTIES = 6;
     inline static const Index WORDS = 7;
     inline static const Index OBJECTS = 8;
-        
+    inline static const Index PARENT_CHILDREN = 9;
+    
     // Within user data
     inline static const Index URLS = 1;
     
