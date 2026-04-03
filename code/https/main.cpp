@@ -134,7 +134,7 @@ int main(int argc, const char* argv[])
         }
         
         
-        std::cout << "Started " << server.origin() << " 😊" << endl;
+        std::cout << "Started " << server.origin() << " 😊" << endl << endl;
         
         startThread.join();
         
