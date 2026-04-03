@@ -163,7 +163,7 @@ namespace BeeFishHTTPS {
     {
         cout << "\tTesting "
             << file.filename()
-            " ";
+            << " ";
 
         string tempFile =
             TEMP_DIRECTORY;
