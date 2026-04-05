@@ -184,8 +184,6 @@ using namespace BeeFishDatabase;
                 boost::make_u32regex(
                     L"[[:punct:]]+"
                 );
-                //    regex_constants::icase
-               // );
             
             if (length() < 1)
                 return false;
@@ -200,6 +198,7 @@ using namespace BeeFishDatabase;
                 wstr,
                 pattern
             );
+            
             
         }
         

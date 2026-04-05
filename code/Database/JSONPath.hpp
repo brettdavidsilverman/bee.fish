@@ -169,7 +169,7 @@ public:
 
                 JSONPath json = *this;
                 while (!json.isRoot() &&
-                        !json.parent().isRoot())
+                       !json.parent().isRoot())
                 {
                     BString property;
                     json = json.parent(property);
@@ -204,8 +204,7 @@ protected:
 
         // Add this child to all parents
         JSONPath json = *this;
-        while (!json.isRoot() &&
-               !json.parent().isRoot())
+        while (!json.isRoot())
         {
 
             objects[json]
@@ -226,8 +225,7 @@ protected:
         
     
         // Remove this child from its parents
-        while (!json.isRoot() &&
-               !json.parent().isRoot())
+        while (!json.isRoot())
         {
             objects[json][OBJECT_CHILDREN]
                 .clear(*this);
@@ -279,8 +277,7 @@ public:
 
         setType(Type::UNDEFINED);
 
-        if (!isRoot() &&
-                !parent().isRoot())
+        if (!isRoot())
         {
             BString property;
             JSONPath path = parent(property);
@@ -564,7 +561,7 @@ public:
 
                 JSONPath path = *this;
                 while (!path.isRoot() &&
-                        !path.parent().isRoot())
+                       !path.parent().isRoot())
                 {
                     BString property;
                     path = path.parent(property);
@@ -769,7 +766,7 @@ public:
         // Remove parent properties
         JSONPath path = json;
         while (!path.isRoot() &&
-                !path.parent().isRoot())
+               !path.parent().isRoot())
         {
             BString property;
             path = path.parent(property);
@@ -825,7 +822,7 @@ public:
             if (addToParents)
             {
                 while (!json.isRoot() &&
-                        !json.parent().isRoot())
+                       !json.parent().isRoot())
                 {
                     objects[json][OBJECT_WORDS][wordPath];
                     wordPath[json];

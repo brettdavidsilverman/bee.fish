@@ -2050,7 +2050,7 @@ assert(success);
             success = success &&
                 testValue(
                     "Cleared objects count",
-                    objects.count() == 1
+                    objects.count() == 0
                 );
                 
             if (!success)
@@ -2075,7 +2075,7 @@ assert(success);
     inline bool testMultiThreaded()
     {
         cout << "Test multi threaded" << endl;
-        const Index SIZE = 1365032;
+        const Index SIZE = 1327976;
 
         auto test =
         [SIZE](std::filesystem::path file, bool readOnly, bool getSuccess = false)
