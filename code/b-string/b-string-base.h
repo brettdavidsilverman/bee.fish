@@ -12,12 +12,17 @@
 #include <locale>
 #include <codecvt>
 #include <boost/algorithm/string.hpp>
+#include <boost/locale.hpp>
+#include <boost/regex.hpp>
+#include <boost/regex/icu.hpp>
 
 #ifdef SERVER
 #include <filesystem>
 #endif
 
 #include "../power-encoding/power-encoding.h"
+#include "../Database/Index.hpp"
+
 #include "char.h"
 
 #ifdef SERVER
@@ -27,6 +32,7 @@ using namespace std::filesystem;
 namespace BeeFishBString
 {
 
+using namespace BeeFishDatabase;
 
     //typedef vector<Char> BStringBase;
     typedef uint8_t Byte;
@@ -42,6 +48,23 @@ namespace BeeFishBString
     // power encoded vector of bits
     class BString : public BStringBase
     {
+    private:
+
+        struct Locale
+        {
+            std::locale _locale;
+            
+            Locale() 
+            {
+                std::setlocale(LC_ALL, "");
+                boost::locale::generator gen;
+                std::locale::global(
+                   // _locale = gen("en_US.UTF-8")
+                    _locale = gen("")
+                );
+            }
+            
+        } inline static _locale;
         
     public:
         typedef Char ValueType;
@@ -67,6 +90,12 @@ namespace BeeFishBString
         BString(size_t length, char c) :
             BStringBase(length, c)
         {
+        }
+        
+        // single character
+        BString(char c)
+        {
+            push_back(c);
         }
 
         virtual ~BString() {
@@ -108,11 +137,7 @@ namespace BeeFishBString
             stream << *this;
             return stream.str();
         }
-        /*
-        operator const char* () const {
-            return c_str();
-        }
-*/
+    
         void push_back(const Char &character)
         {
             *this += character;
@@ -122,42 +147,18 @@ namespace BeeFishBString
         {
             BStringBase::push_back(c);
         }
-/*
-        void push_back(uint8_t byte, UTF8Character& utf8)
-        {
-            if (utf8.match(byte))
-            {
-                if (utf8.result() == true)
-                {
-                    push_back(utf8.character());
-                    utf8.reset();
-                    return;
-                }
-            }
 
-            if (utf8.result() == false) {
-                throw std::runtime_error("Invalid utf-8 character");
-            }
-        }
-*/
         BString &operator+=(const BString &rhs)
         {
             std::string::operator += (rhs);
             return *this;
         }
 
-        BString operator+(const BString &rhs) const
+        friend BString operator+(const BString &lhs, const BString& rhs)
         {
-            BString str(*this);
-            str.reserve(this->size() + rhs.size());
+            BString str = lhs;
             str += rhs;
             return str;
-            /*
-            for (auto character : rhs)
-                str.push_back(character);
-            
-            return str;
-            */
         }
         
         BString &operator+=(const char &rhs)
@@ -176,7 +177,332 @@ namespace BeeFishBString
         bool startsWith(const BString& prefix) const {
             return (rfind(prefix, 0) == 0);
         }
+        
+        bool isPunctuation() const {
+            
+            static boost::u32regex pattern = 
+                boost::make_u32regex(
+                    L"[[:punct:]]+"
+                );
+                //    regex_constants::icase
+               // );
+            
+            if (length() < 1)
+                return false;
+                
+            std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(
+                *this,
+                _locale._locale
+            ); 
+            
+            
+            return boost::u32regex_match(
+                wstr,
+                pattern
+            );
+            
+        }
+        
+        bool isSpace() const {
+            
+            std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(
+                *this,
+                _locale._locale
+            ); 
 
+            
+            for (const auto& wch : wstr)
+            {
+                if (!std::iswspace(wch))
+                    return false;
+            }
+            
+            return true;
+            
+        }
+
+        vector<BString> tokenise() const
+        {
+            enum class Type {
+                Blankspace,
+                Punctuation,
+                Word
+            };
+        
+            struct Token {
+                Type _type;
+                BString _word;
+            };
+        
+            
+            auto splitOnDot =
+            [](
+                BString word,
+                std::vector<Token>& tokens
+            )
+            {
+                
+                boost::locale::boundary::ssegment_index map(
+                    boost::locale::boundary::character,
+                    word.begin(),
+                    word.end()
+                );
+    
+                // Iterate over words correctly
+                // utf-8 aligned
+                BString split;
+                for (auto it = map.begin();
+                     it != map.end();
+                     ++it)
+                {
+                    // Add token and type
+                    BString character = it->str();
+                    if (character == ".")
+                    {
+                        if (split.size())
+                            tokens.push_back(
+                                {
+                                    Type::Word,
+                                    split.toLower()
+                               }
+                            );
+                            
+                        tokens.push_back(
+                            {
+                                Type::Punctuation,
+                                character
+                            }
+                        );
+                        
+                        split = "";
+                    }
+                    else
+                        split += character;
+                        
+                }
+                
+                if (split.size())
+                    tokens.push_back(
+                        {
+                            Type::Word,
+                            split
+                        }
+                    );
+                
+            };
+        
+            std::vector<Token> tokens;
+        
+            boost::locale::boundary::ssegment_index map(
+                boost::locale::boundary::word,
+                begin(),
+                end()
+            );
+    
+            // Iterate over words correctly
+            // utf-8 aligned
+            for (auto it = map.begin();
+                 it != map.end();
+                 ++it)
+            {
+                // Add token and type
+                BString token = it->str();
+
+                if (it->rule() & boost::locale::boundary::word_letter ||
+                    it->rule() & boost::locale::boundary::word_number)
+                    /*
+                    it->rule() & boost::locale::boundary::character)*/
+                {
+                    splitOnDot(
+                        token,
+                        tokens
+                    );
+                }
+                else if (token.isSpace()) 
+                {
+                    tokens.push_back
+                    (
+                        {
+                            Type::Blankspace,
+                            token
+                        }
+                    );
+                }
+                else if (token.isPunctuation())
+                {
+                    tokens.push_back
+                    (
+                        {
+                            Type::Punctuation,
+                            token
+                        }
+                    );
+                }
+                else
+                {
+                    tokens.push_back
+                    (
+                        {
+                            Type::Word,
+                            token
+                        }
+                    );
+                }
+                    
+                    
+    
+            }
+            
+            Index i = 0;
+            
+            std::vector<BString> words;
+            while (i < tokens.size())
+            {
+                Token token = tokens[i];
+                
+                // strip leading non-words
+                while (token._type != Type::Word)
+                {
+                    if (++i >= tokens.size())
+                        break;
+                    token = tokens[i];
+                }
+
+                // No words
+                if (token._type != Type::Word)
+                    break;
+                    
+                // Find next blank space
+                Index nextBlankspace = i;
+                
+            
+                while (nextBlankspace < tokens.size())
+                {
+                    token = tokens[nextBlankspace];
+
+      
+                    if (token._type == Type::Blankspace)
+                        break;
+                        
+                    ++nextBlankspace;
+                    
+                }
+
+                Index trailingPunctuation = nextBlankspace;
+                token = tokens[trailingPunctuation - 1];
+                while (token._type == Type::Punctuation)
+                {
+                    --trailingPunctuation;
+                    token = tokens[trailingPunctuation - 1];
+                }
+                
+                // Add combinations of words
+                for (Index j = i; j < trailingPunctuation; ++j)
+                {
+                    token = tokens[j];
+                    
+                    // Skip start punctuation
+                    
+                    while (token._type == Type::Punctuation &&
+                           j < trailingPunctuation)
+                    {
+                        token = tokens[++j];
+                    }
+                    
+                    
+                    assert(token._type == Type::Word);
+                    //words.push_back(token._word.toLower());
+                    BString word;
+                    for (Index k = j; k < trailingPunctuation; ++k)
+                    {
+                        
+                        token = tokens[k];
+                        word += token._word;
+
+                        if (token._type == Type::Word)
+                        {
+                            words.push_back(word.toLower());
+                        }
+                    }
+
+           
+                    
+                    
+                }
+                
+                i = nextBlankspace + 1;
+                
+
+            }
+                        
+            // 1. Sort words
+            std::sort(words.begin(), words.end());
+
+            // 2. Remove consecutive duplicates: v becomes {1, 2, 3, 4, 5, ?, ?, ?, ?, ?}
+            //    'last' points to the first '?'
+            auto last = std::unique(words.begin(), words.end());
+
+            // 3. Erase the extra elements
+            words.erase(last, words.end());
+        
+            return words;
+            
+            
+        /*
+            Index from = 0;
+            std::vector<BString> words;
+            for (Index i = 0;
+                 i < tokens.size();
+                 ++i)
+            {
+                Token& token = tokens[i];
+            
+                if (token._type == Type::Blankspace)
+                {
+                    // Blankspace seperates words
+                    from = i + 1;
+                }
+                else
+                {
+                    
+                    for (Index j = from; j < tokens.size(); j++)
+                    {
+                        // Concatenate all tokens in
+                        // this blankspace
+                        BString word;
+                    
+                        bool trailingPunctuation = true;
+                        for (Index k = j + 1; k > from; --k)
+                        {
+                            Token& token = tokens[k - 1];
+                            if (token._type == Type::Word)
+                            {
+                                words.push_back(
+                                    token._word
+                                );
+                            }
+                        
+                            if (!trailingPunctuation ||
+                                token._type == Type::Word)
+                            {
+                                word = token._word + word;
+                                trailingPunctuation = false;
+                            }
+                        }
+                        
+                        if (word.size())
+                        {
+                            words.push_back(word);
+                        }
+                    
+            
+                    }
+                
+                }
+                
+            }
+            */
+        }
 
         vector<BString> split(
             const char character
@@ -406,52 +732,25 @@ namespace BeeFishBString
         }
         
         BString toLower() const {
-            std::string string = *this;
-            
-            boost
-                ::algorithm
-                ::to_lower(string);
-                
-            return string;
-                
-            /*
-            // the locale will be the UTF-8 enabled English
-            std::setlocale(LC_CTYPE, "en_US.UTF-8");
-            
-            std::wstring str = utf8_to_wstring();
-
-            for (std::wstring::iterator it = str.begin(); it != str.end(); ++it)
-            {
-                *it = towlower(*it);
-            }
-            
-            return wstring_to_utf8(str);
-            */
+            std::string lower =
+            boost::locale::to_lower(
+                *this, 
+                _locale._locale
+            );
+            return lower;
         }
         
         BString toUpper() const {
             
-            std::string string = *this;
+            std::string upper =
             
-            boost
-                ::algorithm
-                ::to_upper(string);
+            boost::locale::to_upper(
+                *this,
+                _locale._locale
+            );
                 
-            return string;
+            return upper;
             
-            /*
-            // the locale will be the UTF-8 enabled English
-            std::setlocale(LC_CTYPE, "en_US.UTF-8");
-            
-            std::wstring str = utf8_to_wstring();
-
-            for (std::wstring::iterator it = str.begin(); it != str.end(); ++it)
-            {
-                *it = towupper(*it);
-            }
-            
-            return wstring_to_utf8(str);
-            */
         }
 
         BString escape() const

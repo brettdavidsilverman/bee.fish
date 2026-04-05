@@ -382,18 +382,7 @@ using namespace BeeFishParser;
                         new LoadOnDemandExpression()
                     )
                 )
-            },/*
-            {
-                // not word
-                _notWord = new OrderOfPrecedence::Item(
-                    new BeeFishParser::And(
-                        new BeeFishQuery::Not(),
-                        _word3 =
-                        new BeeFishQuery::Word()
-                    )
-                )
             },
-            */
             {
                 // not expression
                 _notExpression = new OrderOfPrecedence::Item(

@@ -3,7 +3,7 @@ CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=main.cpp Version.hpp Variable.hpp Type.hpp Script.hpp ScriptParser.hpp Test.hpp ../../build/json Makefile
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_locale
 	
 test:	$(OUTPUT)
 	$(OUTPUT) -test

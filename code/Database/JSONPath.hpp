@@ -814,14 +814,11 @@ public:
         Path path = *this;
 
         std::vector<BString> tokens =
-            tokenise(word);
+            word.tokenise();
 
 
-        for (auto token : tokens)
+        for (auto word : tokens)
         {
-            BString word =
-                token.toLower();
-
             Path wordPath = words[word];
             JSONPath json = *this;
 
@@ -849,12 +846,10 @@ public:
         Path objects = database().objects();
 
         std::vector<BString> tokens =
-            tokenise(value);
+            value.tokenise();
 
-        for (auto token : tokens)
+        for (auto word : tokens)
         {
-            BString word =
-                token.toLower();
             if (words.contains(word))
             {
 
@@ -908,7 +903,7 @@ public:
         }
 
     }
-
+/*
     std::vector<BString> tokenise(BString word)
     {
         static const char* _deliminators =
@@ -946,6 +941,7 @@ public:
         return words;
     }
 
+*/
 
     virtual void write(ostream& out, Index tabCount = 0)
     {

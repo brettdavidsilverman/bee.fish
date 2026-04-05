@@ -6,7 +6,7 @@ DEPS   = char.h b-string.h bit-stream.h base64.h misc.h b-string-base.h stream.h
 all:	$(OUTPUT)
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lssl -lcrypto -lboost_locale
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lssl -lcrypto -lboost_locale -lboost_regex -licuuc
 	
 trace:	$(OUTPUT)
 	-valgrind -s --log-file="trace.txt" --track-origins=yes --leak-check=yes ../../build/b-string -test
@@ -20,5 +20,8 @@ debug:	DEBUG = debug
 debug:	CFLAGS += -g -D DEBUG
 debug:	all
 
+run_debug:	debug
+	gdb --args $(OUTPUT) -test
+	
 clean:
 	rm -f $(OUTPUT)

@@ -9,7 +9,7 @@ endif
 	
 $(OUTPUT):	$(DEPS) $(BUILD)/web-request $(BUILD)/query
 	@echo "Linking Web Server"
-	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lboost_locale
+	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lboost_locale -lboost_regex -licuuc
 	@if [ "$(PORT)" = "443" ]; then \
 		echo "Allowing port $(PORT)"; \
 		sudo setcap cap_net_bind_service=ep $(OUTPUT); \

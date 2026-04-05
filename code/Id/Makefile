@@ -4,7 +4,7 @@ CFLAGS = -std=c++17 -Wall -fmax-errors=1 -Ofast
 DEPS= $(BUILD)/power-encoding Id.hpp Test.hpp main.cpp Makefile
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT)
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_locale
 	
 $(BUILD)/power-encoding:
 	cd ../power-encoding && make $(DEBUG)

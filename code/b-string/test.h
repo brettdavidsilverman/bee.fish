@@ -20,7 +20,9 @@ namespace BeeFishBString
     inline bool testData();
     inline bool testEncodeURI();
     inline bool testEmojis();
-    
+    inline bool testPunctuation();
+    inline bool testIsSpace();
+    inline bool testWords();
     
     inline bool test()
     {
@@ -39,12 +41,13 @@ namespace BeeFishBString
         ok = ok && testData();
         ok = ok && testEncodeURI();
         ok = ok && testEmojis();
+        ok = ok && testPunctuation();
+        ok = ok && testIsSpace();
+        ok = ok && testWords();
         
-        if (ok)
-            cout << "SUCCESS" << endl;
-        else
-            cout << "FAIL" << endl;
-            
+        
+        outputSuccess(ok);
+        
         return ok;
     }
     
@@ -178,16 +181,27 @@ namespace BeeFishBString
 
 
         BString mixedCase = "I 💜 Rock and roll";
+        
         BString lowerCase = mixedCase.toLower();
         ok &= testResult(
             lowerCase,
             lowerCase == "i 💜 rock and roll"
         );
         
+        ok &= testResult(
+            "Original unchanged 1",
+            mixedCase == "I 💜 Rock and roll"
+        );
+        
         BString upperCase = mixedCase.toUpper();
         ok &= testResult(
             upperCase,
             upperCase == "I 💜 ROCK AND ROLL"
+        );
+        
+        ok &= testResult(
+            "Original unchanged 2",
+            mixedCase == "I 💜 Rock and roll"
         );
         cout << endl;
         
@@ -520,6 +534,351 @@ namespace BeeFishBString
         cout << endl;
         
         return ok;
+    }
+    
+    inline bool testPunctuation()
+    {
+        cout << "Test punctuation" << endl;
+        
+        bool ok = true;
+        
+        BString punc = "";
+        
+        ok = ok && testValue(
+            "Empty string",
+            punc.isPunctuation() == false
+        );
+        
+        punc = "*";
+        ok = ok && testValue(
+            "Single char punctuation",
+            punc.isPunctuation() == true
+        );
+        
+        punc = ".hello";
+        ok = ok && testValue(
+            "Multi char non punctuation",
+            punc.isPunctuation() == false
+        );
+        
+        punc = ".\"";
+        ok = ok && testValue(
+            "Multi char punctuation",
+            punc.isPunctuation() == true
+        );
+        
+        punc = "hello";
+        ok = ok && testValue(
+            "Multi char non punctuation",
+            punc.isPunctuation() == false
+        );
+        
+        return ok;
+    }
+    
+    inline bool testIsSpace()
+    {
+        cout << "Test is space" << endl;
+        
+        bool ok = true;
+        
+        BString space = "";
+        
+        ok = ok && testValue(
+            "Empty string",
+            space.isSpace() == true
+        );
+        
+        space  = " ";
+        ok = ok && testValue(
+            "Single char space",
+            space.isSpace() == true
+        );
+        
+        space = "  \t\n";
+        ok = ok && testValue(
+            "Multi char space",
+            space.isSpace() == true
+        );
+        
+        
+        space  = "c";
+        ok = ok && testValue(
+            "Single char non space",
+            space.isSpace() == false
+        );
+        
+        space = "hello";
+        ok = ok && testValue(
+            "Multi char non space",
+            space.isSpace() == false
+        );
+        
+        space = "\u2003";
+        ok = ok && testValue(
+            "Single unicode char space 1",
+            space.isSpace() == true
+        );
+        
+        space = "\u2009";
+        ok = ok && testValue(
+            "Single unicode char space 2",
+            space.isSpace() == true
+        );
+        
+        space = "\u2003\u2009";
+        ok = ok && testValue(
+            "Multi unicode char space",
+            space.isSpace() == true
+        );
+        
+        return ok;
+    }
+    
+    inline bool testWords()
+    {
+        cout << "Test words" << endl;
+        bool ok = true;
+
+        BString text;
+
+        
+        std::vector<BString> words;
+        
+        text = "one.two.three";
+        words = text.tokenise();
+        
+        ok = ok && testValue(
+            text,
+            words.size() == 6
+        );
+        
+        ok = ok && testValue(
+            words[0],
+            words[0] == "one"
+        );
+        
+        ok = ok && testValue(
+            words[1],
+            words[1] == "one.two"
+        );
+        
+        ok = ok && testValue(
+            words[2],
+            words[2] == "one.two.three"
+        );
+        
+        ok = ok && testValue(
+            words[3],
+            words[3] == "three"
+        );
+        
+        ok = ok && testValue(
+            words[4],
+            words[4] == "two"
+        );
+        
+        ok = ok && testValue(
+            words[5],
+            words[5] == "two.three"
+        );
+        
+        
+        if (ok)
+        {
+            text = "https://bee.fish";
+            words = text.tokenise();
+        }
+        
+        ok = ok && testValue(
+            text,
+            words.size() == 6
+        );
+        
+        ok = ok && testValue(
+            words[0],
+            words[0] == "bee"
+        );
+        
+        ok = ok && testValue(
+            words[1],
+            words[1] == "bee.fish"
+        );
+        
+        ok = ok && testValue(
+            words[2],
+            words[2] == "fish"
+        );
+        
+        ok = ok && testValue(
+            words[3],
+            words[3] == "https"
+        );
+        
+        ok = ok && testValue(
+            words[4],
+            words[4] == "https://bee"
+        );
+        
+        ok = ok && testValue(
+            words[5],
+            words[5] == "https://bee.fish"
+        );
+        
+        if (ok)
+        {
+            text = "Hello!";
+            words = text.tokenise();
+        }
+        
+        ok = ok && testValue(
+            text,
+            words.size() == 1
+        );
+        
+        ok = ok && testValue(
+            words[0],
+            words[0] == "hello"
+        );
+        
+        if (ok)
+        {
+            text = "file.txt";
+            words = text.tokenise();
+        }
+        
+        ok = ok && testValue(
+            text,
+            words.size() == 3
+        );
+        
+        ok = ok && testValue(
+            words[0],
+            words[0] == "file"
+        );
+        
+        ok = ok && testValue(
+            words[1],
+            words[1] == "file.txt"
+        );
+        
+        ok = ok && testValue(
+            words[2],
+            words[2] == "txt"
+        );
+        
+        if (ok)
+        {
+            text = "one two.three";
+            words = text.tokenise();
+        }
+
+        ok = ok && testValue(
+            text,
+            words.size() == 4
+        );
+        
+        ok = ok && testValue(
+            words[0],
+            words[0] == "one"
+        );
+        
+        ok = ok && testValue(
+            words[1],
+            words[1] == "three"
+        );
+        
+        ok = ok && testValue(
+            words[2],
+            words[2] == "two"
+        );
+        
+        ok = ok && testValue(
+            words[3],
+            words[3] == "two.three"
+        );
+        
+        if (ok)
+        {
+            text = "“one two.three”";
+            words = text.tokenise();
+        }
+
+        ok = ok && testValue(
+            text,
+            words.size() == 4
+        );
+        
+        ok = ok && testValue(
+            words[0],
+            words[0] == "one"
+        );
+        
+        ok = ok && testValue(
+            words[1],
+            words[1] == "three"
+        );
+        
+        ok = ok && testValue(
+            words[2],
+            words[2] == "two"
+        );
+        
+        ok = ok && testValue(
+            words[3],
+            words[3] == "two.three"
+        );
+        
+        if (ok)
+        {
+            text = "Hello World 🌎";
+            words = text.tokenise();
+        }
+        
+        ok = ok && testValue(
+            text,
+            words.size() == 3
+        );
+        
+        ok = ok && testValue(
+            words[0],
+            words[0] == "hello"
+        );
+        
+        ok = ok && testValue(
+            words[1],
+            words[1] == "world"
+        );
+        
+        ok = ok && testValue(
+            words[2],
+            words[2] == "🌎"
+        );
+        
+        if (ok)
+        {
+            text = " ";
+            words = text.tokenise();
+        }
+        
+        ok = ok && testValue(
+            "[space]",
+            words.size() == 0
+        );
+        
+        if (ok)
+        {
+            text = "!";
+            words = text.tokenise();
+        }
+        
+        ok = ok && testValue(
+            text,
+            words.size() == 0
+        );
+        
+        return ok;
+
     }
 
         
