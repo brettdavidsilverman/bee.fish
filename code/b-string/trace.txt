@@ -1,0 +1,14 @@
+==107158== Memcheck, a memory error detector
+==107158== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==107158== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==107158== Command: ../../build/b-string -test
+==107158== Parent PID: 107157
+==107158== 
+==107158== 
+==107158== HEAP SUMMARY:
+==107158==     in use at exit: 0 bytes in 0 blocks
+==107158==   total heap usage: 16,346 allocs, 16,346 frees, 4,553,179 bytes allocated
+==107158== 
+==107158== All heap blocks were freed -- no leaks are possible
+==107158== 
+==107158== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

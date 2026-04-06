@@ -22,7 +22,7 @@
 
 #include "../power-encoding/power-encoding.h"
 #include "../Database/Index.hpp"
-
+#include "locale.hpp"
 #include "char.h"
 
 #ifdef SERVER
@@ -50,21 +50,7 @@ using namespace BeeFishDatabase;
     {
     private:
 
-        struct Locale
-        {
-            std::locale _locale;
-            
-            Locale() 
-            {
-                std::setlocale(LC_ALL, "");
-                boost::locale::generator gen;
-                std::locale::global(
-                   // _locale = gen("en_US.UTF-8")
-                    _locale = gen("")
-                );
-            }
-            
-        } inline static _locale;
+        
         
     public:
         typedef Char ValueType;
@@ -180,7 +166,7 @@ using namespace BeeFishDatabase;
         
         bool isPunctuation() const {
             
-            static boost::u32regex pattern = 
+            boost::u32regex pattern =
                 boost::make_u32regex(
                     L"[[:punct:]]+"
                 );
@@ -410,7 +396,7 @@ using namespace BeeFishDatabase;
                     
                     
                     assert(token._type == Type::Word);
-                    //words.push_back(token._word.toLower());
+        
                     BString word;
                     for (Index k = j; k < trailingPunctuation; ++k)
                     {
@@ -733,7 +719,7 @@ using namespace BeeFishDatabase;
         BString toLower() const {
             std::string lower =
             boost::locale::to_lower(
-                *this, 
+                *this,
                 _locale._locale
             );
             return lower;

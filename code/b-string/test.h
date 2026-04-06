@@ -26,7 +26,8 @@ namespace BeeFishBString
     
     inline bool test()
     {
-    
+        BString string;
+        //return true;
         bool ok = true;
       
         ok = ok && testOptional();
