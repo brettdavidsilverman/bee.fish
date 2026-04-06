@@ -1172,6 +1172,30 @@ namespace BeeFishQuery {
             }
         );
         
+        /*
+        ok = ok && test("z and b or c", 
+            {
+                "https://test/45-Object.json",
+                "https://test/45-Object.json/a",
+                "https://test/45-Object.json/a/1",
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2",
+                "https://test/45-Object.json/a/2/2"
+            }
+        );
+        */
+        /*
+        ok = ok && test("z and b and h or c", 
+            {
+                "https://test/45-Object.json",
+                "https://test/45-Object.json/a",
+                "https://test/45-Object.json/a/1",
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2",
+                "https://test/45-Object.json/a/2/2"
+            }
+        );
+        */
 
         BeeFishMisc::outputSuccess(ok);
         

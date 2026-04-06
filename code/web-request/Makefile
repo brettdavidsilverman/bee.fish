@@ -6,7 +6,7 @@ DEPS=main.cpp body.h new-line.h headers.h url.h web-request.h version.h test.h .
 
 $(OUTPUT): $(DEPS)
 	@echo "Linking Web Request"
-	$(CC) $(CFLAGS) main.cpp -o $(OUTPUT) -lstdc++fs
+	$(CC) $(CFLAGS) main.cpp -o $(OUTPUT) -lstdc++fs -lboost_locale -lboost_regex -licuuc
 
 $(BUILD):
 	mkdir $(BUILD)
