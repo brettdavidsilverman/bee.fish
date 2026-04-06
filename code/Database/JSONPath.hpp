@@ -324,6 +324,12 @@ public:
         LockFile::ScopedLock lock(database());
         Path path = *this;
         setType(Type::STRING);
+        if (path[VALUE].hasData())
+        {
+            BString current = path[VALUE].getStringData();
+            if (current != value)
+                removeWords(current, true);
+        }
         if (path[VALUE].setData<BString>(value))
             addWords(value, true);
     }
