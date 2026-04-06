@@ -4,7 +4,7 @@ CFLAGS=-std=c++17 -Wall -fmax-errors=1 -Ofast
 DEPS=$(BUILD)/b-string power-encoding.h version.h encoding.h test.h Makefile main.cpp
 
 $(OUTPUT): $(DEPS)
-	g++ -o $(OUTPUT) $(CFLAGS) main.cpp -lboost_locale
+	g++ -o $(OUTPUT) $(CFLAGS) main.cpp -lboost_locale -licuuc
 	
 $(BUILD)/b-string:
 	cd  ../b-string && make $(DEBUG)

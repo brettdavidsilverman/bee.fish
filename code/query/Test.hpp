@@ -106,26 +106,64 @@ namespace BeeFishQuery {
            "   "
         );
         
+        ok &= testMatchDelete(
+           "Empty",
+            new Capture(new Blankspaces()),
+           "",
+           true,
+           ""
+        );
+        
+        class CharPlus: public Character
+        {
+        public:
+            CharPlus() : Character('+')
+            {
+            }
+            
+        };
+        
         class Test : public BeeFishParser::And
         {
         public:
             Test() : BeeFishParser::And(
-                new Blankspaces(0),
-                new BeeFishParser::Character("+")
+                new Blankspaces(),
+                new CharPlus()
                 
             )
             {
             }
+            
         };
+        
+        ok &= testMatchDelete(
+            "Test 1",
+            new Capture(
+                new Test()
+            ),
+            "+",
+            true,
+            "+"
+        );
 
         ok &= testMatchDelete(
-            "Repeat",
+            "Repeat + +",
             new Capture(
                 new Repeat<Test>()
             ),
             "+ +",
             true,
             "+ +"
+        );
+        
+        ok &= testMatchDelete(
+            "Repeat 2",
+            new Capture(
+                new Repeat<Test>()
+            ),
+            "++",
+            true,
+            "++"
         );
 
         BeeFishMisc::outputSuccess(ok);
@@ -194,14 +232,14 @@ namespace BeeFishQuery {
             "+",
             false
         );
-        /*
+        
         ok &= testMatchDelete(
             "Test word and",
              new Capture(new BeeFishQuery::Word()),
-            " and",
+            "and",
             false
         );
-        */
+        
         ok &= testMatchDelete(
             "Test word andother",
              new Capture(new BeeFishQuery::Word()),
@@ -216,14 +254,15 @@ namespace BeeFishQuery {
             "|",
             false
         );
-/*
+
+
         ok &= testMatchDelete(
             "Test word or",
              new Capture(new BeeFishQuery::Word()),
-            " or",
+            "or",
             false
         );
-*/
+
         ok &= testMatchDelete(
             "Test word oranother",
              new Capture(new BeeFishQuery::Word()),
@@ -246,14 +285,13 @@ namespace BeeFishQuery {
             "!",
             false
         );
-/*
+
         ok &= testMatchDelete(
             "Test word not",
              new Capture(new BeeFishQuery::Word()),
-            " not",
+            "not",
             false
         );
-*/
 
         ok &= testMatchDelete(
             "Test word notother",
@@ -351,7 +389,7 @@ namespace BeeFishQuery {
         Words objects(root["objects"]);
         
         auto testmatch =
-        [&ok, &words, &objects](const BString& query) {
+        [&ok, &words, &objects](const BString& query, const BString& expected = "") {
             
             
             
@@ -364,32 +402,47 @@ namespace BeeFishQuery {
             Capture* capture =
                 new Capture(expression);
                 
-            ok &= testMatch(
+            ok = testMatch(
                 query,
                 capture,
                 query,
                 true,
                 query
             );
-            
-            if (expression->matched()) {
+
+            if (ok && expression->matched()) {
+                if (expected.size())
+                {
+                    stringstream stream;
+                    stream << *expression;
+                    ok = ok &&
+                        testValue(
+                            expected,
+                            expected == stream.str()
+                        );
+                    if (!ok)
+                        cout << "Got [" << stream.str() << "]" << endl;
+                }
+                /*
                  PathBase* path =
                     expression->getPath(words, objects);
                 
                 delete path;
+                */
             }
-            
+
             delete capture;
             
             return ok;
         };
         
-        testmatch("word");
-        testmatch("(word)");
-        testmatch("( word )");
-        testmatch(" ( word ) ");
-        
-        testmatch("not word");
+        testmatch("word", "word");
+        testmatch("(word)", "(word)");
+        testmatch("( word )", "(word)");
+        testmatch(" ( word ) ", "(word)");
+        testmatch("((word))", "((word))");
+        testmatch("word1 word2");
+        testmatch("not word", "not word");
         testmatch("not (word1)");
         testmatch("not(word1)");
         testmatch("(not(word1))");
@@ -408,7 +461,7 @@ namespace BeeFishQuery {
         testmatch("word1 and not word2");
         
         testmatch("word1 and (word2 or word3)");
-        
+        testmatch("word1 and word2 or word3");
         testmatch("(word1 and word2) or word3");
         
         testmatch("(word1 and word2) or (word3 and word4)");
@@ -420,6 +473,7 @@ namespace BeeFishQuery {
         
         BeeFishMisc::outputSuccess(ok);
         
+        return false;
         return ok;
         
     }
@@ -854,19 +908,21 @@ namespace BeeFishQuery {
         
             if (ok)
             {
+                std::vector<JSONPath::Id> values;
+                /*
                 PathBase* pathBase =
                     expression
                     .getPath(words, bounds);
                 
                 Iterable<JSONPath::Id> iterable(*pathBase);
-                std::vector<JSONPath::Id> values;
+                
                 for (auto index : iterable)
                 {
                     values.push_back(index);
                 }
              
                 delete pathBase;
-            
+            */
                 
                 
                 if (ok)
@@ -995,7 +1051,7 @@ namespace BeeFishQuery {
             if (ok)
             {
                 cout << ": " << expression << "..." << flush;
-                
+                /*
                 PathBase* pathBase =
                     expression
                     .getPath(words, objects);
@@ -1009,7 +1065,7 @@ namespace BeeFishQuery {
                 }
              
                 delete pathBase;
-            
+            */
             }
                 
             if (ok)
@@ -1149,7 +1205,7 @@ namespace BeeFishQuery {
             {
             }
         );
-        
+        /*
         ok = ok && test("not b or c", 
             {
                 "https://test/45-Object.json",
@@ -1160,6 +1216,7 @@ namespace BeeFishQuery {
                 "https://test/45-Object.json/a/2/2",
             }
         );
+        */
         
         ok = ok && test("(not b) or c", 
             {

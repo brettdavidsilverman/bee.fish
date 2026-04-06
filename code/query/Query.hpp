@@ -16,106 +16,104 @@
 #include "OrPath.hpp"
 
 namespace BeeFishQuery {
-    
+
 using namespace BeeFishBString;
 using namespace BeeFishParser;
 
-    typedef Path Words;
-    typedef Path Bounds;
-    
-    class Blankspace : public Or
-    {
-    public:
-        Blankspace() : Or(
+typedef Path Words;
+typedef Path Bounds;
+
+
+class Blankspace : public Or
+{
+public:
+    Blankspace() : Or(
             new Character(" "),
             new Character("\t"),
             new Character("\r"),
             new Character("\n")
         )
-        {
-        }
-    };
-    
-    class Blankspaces : public Repeat<Blankspace>
     {
-    public:
-        Blankspaces(size_t count = 0) : Repeat(count)
-        {
-        }
-    };
-    
-    class Operator : public BeeFishParser::And
+    }
+};
+
+class Blankspaces : public Repeat<Blankspace>
+{
+public:
+    Blankspaces(Index count = 0) : Repeat(count)
     {
-    protected:
-        const BString _word;
-        const BString _letter;
-        
-    public:
-        Operator(
-            const BString& word,
-            const BString& letter
-        ) : BeeFishParser::And(
-            new Blankspaces(),
-            new BeeFishParser::Or(
-                new Character(letter),
-                new BeeFishParser::CIWord(word)
-            ),
-            new Blankspaces()
+    }
+
+};
+
+class Operator : public BeeFishParser::Or
+{
+protected:
+    const BString _word;
+    const BString _letter;
+
+public:
+    Operator(
+        const BString& word,
+        const BString& letter
+    ) : BeeFishParser::Or(
+            new BeeFishParser::CIWord(word),
+            new Character(letter)
         ),
-            _word(word),
-            _letter(letter)
-        {
-        }
-        
-        friend ostream& operator <<
-        (
-            ostream& output,
-            const Operator& _operator
-        )
-        {
-            _operator.write(output);
-            return output;
-        }
-        
-        virtual void write(ostream& output, Size tabs = 0)
-        const
-        {
-            output << _word;
-        }
-        
-    };
-    
-    class And : public Operator
+        _word(word),
+        _letter(letter)
     {
-    public:
-        And() : Operator("and", "+")
-        {
-        }
-        
-    };
-    
-    class Or : public Operator
+    }
+
+    friend ostream& operator <<
+    (
+        ostream& output,
+        const Operator& _operator
+    )
     {
-    public:
-        Or() : Operator("or", "|")
-        {
-        }
-        
-    };
-    
-    class Not : public Operator
+        _operator.write(output);
+        return output;
+    }
+
+    virtual void write(ostream& output, Size tabs = 0)
+    const
     {
-    public:
-        Not() : Operator("not", "!")
-        {
-        }
-        
-    };
-    
-    class Seperator : public BeeFishParser::Or
+        output << _word;
+    }
+
+};
+
+class And : public Operator
+{
+public:
+    And() : Operator("and", "+")
     {
-    public:
-        Seperator() : BeeFishParser::Or(
+    }
+
+};
+
+class Or : public Operator
+{
+public:
+    Or() : Operator("or", "|")
+    {
+    }
+
+};
+
+class Not : public Operator
+{
+public:
+    Not() : Operator("not", "!")
+    {
+    }
+
+};
+
+class Seperator : public BeeFishParser::Or
+{
+public:
+    Seperator() : BeeFishParser::Or(
             new Character(" "),
             new Character("\t"),
             new Character("\r"),
@@ -127,504 +125,440 @@ using namespace BeeFishParser;
             new Character(")"),
             new Character(";")
         )
-        {
-        }
-        
-    };
-    
-    class WordCharacter : public BeeFishParser::Not
     {
-    public:
-        WordCharacter() :
-            BeeFishParser::Not(
-                new Seperator()
-            )
-        {
-        }
-    };
-    
-    class Word : public BeeFishParser::And
-    {
-    protected:
-        BString _value;
-        
-    public:
-        Word(): And(
-            new Blankspaces(),
-            new Capture(
-                new Repeat<WordCharacter>(1),
-                _value
-            ),
-            new Blankspaces()
+    }
+
+};
+
+class WordCharacter : public BeeFishParser::Not
+{
+public:
+    WordCharacter() :
+        BeeFishParser::Not(
+            new Seperator()
         )
-        {
-        }
-        
-        
-        const BString& value() const
-        override
-        {
-            return _value;
-        }
-        
-        BString& value()
-        override
-        {
-            return _value;
-        }
-        
-        virtual void success()
-        override
-        {
-            _value = _value.toLower();
-            
-            if (_value == "and" ||
-                _value == "or" ||
-                _value == "not" ||
-                _value == "+" ||
-                _value == "|" ||
-                _value == "!")
-            {
-                fail();
-            }
-            else
-                BeeFishParser::And::success();
-        }
-        
-        PathBase*
-        getPath(
-            Words& words,
-            Path& bounds
-        )
-        {
-            return new AndPath(
-                new Path(
-                    words[value().toLower()]
-                ),
-                new Path(bounds),
-                new Path(bounds)
-            );
-        }
-        
-    
-    };
-    
-    class AndOr : public BeeFishParser::Or
     {
-    public:
-        BeeFishQuery::And* _and;
-        BeeFishQuery::Or* _or;
-        
-    public:
-        AndOr() : Or(
+    }
+};
+
+class Word : public BeeFishParser::Capture
+{
+public:
+    Word(): Capture(
+            new Repeat<WordCharacter>(1)
+        )
+    {
+    }
+
+    virtual void success()
+    override
+    {
+        if (value() == "and" ||
+                value() == "or" ||
+                value() == "not")
+        {
+            Capture::fail();
+        }
+        else
+            Capture::success();
+    }
+
+    PathBase*
+    getPath(
+        Words& words,
+        Path& bounds
+    )
+    {
+        return new AndPath(
+                   new Path(
+                       words[value().toLower()]
+                   ),
+                   new Path(bounds),
+                   new Path(bounds)
+               );
+    }
+
+
+};
+
+class AndOr : public BeeFishParser::Or
+{
+public:
+    BeeFishQuery::And* _and;
+    BeeFishQuery::Or* _or;
+
+public:
+    AndOr() : Or(
             _and = new BeeFishQuery::And(),
             _or = new BeeFishQuery::Or()
         )
+    {
+    }
+
+    virtual void write(ostream& output, Size tabs = 0)
+    const
+    {
+        output << (*_item);
+    }
+
+    friend ostream& operator <<
+    (
+        ostream& output,
+        const AndOr& andOr
+    )
+    {
+        andOr.write(output);
+        return output;
+    }
+
+    PathBase*
+    getPath(
+        PathBase* a,
+        PathBase* b,
+        Path& bounds
+    )
+    {
+        if (_and->matched())
+            return new AndPath(a, b, new Path(bounds));
+        else
+            return new OrPath(a, b, new Path(bounds));
+    }
+
+};
+
+
+
+class Expression : public BeeFishParser::Match
+{
+
+    class Item
+    {
+    public:
+        enum class Type {
+            And,
+            Or,
+            Not,
+            Word,
+            Expression
+        } _type;
+
+        Item(Type type) :
+            _type(type)
         {
         }
         
-        virtual void write(ostream& output, Size tabs = 0)
-        const
+        virtual ~Item()
         {
-            output << (*_item);
         }
         
-        friend ostream& operator <<
-        (
+        virtual void write(ostream& output) const
+        {
+            switch (_type)
+            {
+            case Type::And:
+                output << "and";
+                break;
+            case Type::Or:
+                output << "or";
+                break;
+            default:
+                assert(false);
+            }
+        }
+        
+        friend ostream& operator << (
             ostream& output,
-            const AndOr& andOr
+            const Item& item
         )
         {
-            andOr.write(output);
+            item.write(output);
             return output;
         }
-        
-        PathBase*
-        getPath(
-            PathBase* a, 
-            PathBase* b,
-            Path& bounds
-        )
+
+    };
+
+    class WordItem : public Item
+    {
+    public:
+        BString _word;
+
+        WordItem(BString& word) :
+            Item(Type::Word),
+            _word(word)
         {
-            if (_and->matched())
-                return new AndPath(a, b, new Path(bounds));
-            else
-                return new OrPath(a, b, new Path(bounds));
         }
+        
+        virtual void write(ostream& output) const
+        override
+        {
+            output << _word;
+        }
+        
         
     };
     
-
-    
-    class Expression : public BeeFishParser::Match
+    class NotItem : public Item
     {
     public:
-        Expression()
-        {
-        }
-        
-        Expression(const BString& input)
-        {
-            Parser parser(*this);
-            parser.read(input);
-            parser.eof();
-            if (!parser.matched())
-                throw std::runtime_error(parser.getError());
-        }
-        
-        operator BString () {
-            stringstream stream;
-            stream << *this;
-            return stream.str();
-        }
-        
-        class LoadOnDemandExpression :
-            public LoadOnDemand<Expression>
-        {
-                
-        public:
+        Expression* _expression;
 
-            LoadOnDemandExpression()
-            {
-            }
-            
-        };
-        
-        class BracketedExpression : public BeeFishParser::And
+        NotItem(Expression* expression) :
+            Item(Type::Not),
+            _expression(expression)
         {
-        protected:
-            LoadOnDemand<Expression>* _item;
-                
-        public:
-            BracketedExpression() : BeeFishParser::And(
-                new Blankspaces(),
-                new Character("("),
-                new Blankspaces(),
-                _item = new LoadOnDemandExpression(),
-                new Blankspaces(),
-                new Character(")"),
-                new Blankspaces()
-            )
-            {
-            }
-        
-            Expression* item() {
-                return _item->item();
-            }
-            
-            const Expression* item() const {
-                return _item->item();
-            }
-            
-            virtual void write(ostream& output, Size tabs = 0)
-            const
-            {
-                output << "(" << *(item()) << ")";
-            }
-        
-            friend ostream& operator <<
-            (
-                ostream& output,
-                const BracketedExpression& bracketedExpression
-            )
-            {
-                bracketedExpression.write(output);
-                return output;
-            }
-            
-        };
-        
-    protected:
-        OrderOfPrecedence* _items = nullptr;
-        OrderOfPrecedence::Item* _notWordAndOrExpression = nullptr;
-        OrderOfPrecedence::Item* _notExpression = nullptr;
-        OrderOfPrecedence::Item* _bracketedExpressionAndExpression = nullptr;
-        OrderOfPrecedence::Item* _wordAndExpression = nullptr;
-        OrderOfPrecedence::Item* _bracketedExpression = nullptr;
-        OrderOfPrecedence::Item* _word = nullptr;
-        
-        LoadOnDemandExpression* _loadOnDemandExpression1 = nullptr;
-        LoadOnDemandExpression* _loadOnDemandExpression2 = nullptr;
-        LoadOnDemandExpression* _loadOnDemandExpression3 = nullptr;
-        LoadOnDemandExpression* _loadOnDemandExpression4 = nullptr;
-        
-        BracketedExpression* _bracketedExpression1 = nullptr;
-        BracketedExpression* _bracketedExpression2 = nullptr;
-        
-        AndOr* _andOr1 = nullptr;
-        AndOr* _andOr2 = nullptr;
-        AndOr* _andOr3 = nullptr;
-        
-        BeeFishQuery::Word* _word1 = nullptr;
-        BeeFishQuery::Word* _word2 = nullptr;
-        BeeFishQuery::Word* _word3 = nullptr;
-    public:
-        
-        
-        virtual void setup(Parser* parser)
-        {
-            _match = new BeeFishParser::And(
-            new Blankspaces(),
-            _items = new BeeFishParser::OrderOfPrecedence(
-                
-        {
-            {
-                // not word and/or expression
-                _notWordAndOrExpression =
-                new OrderOfPrecedence::Item(
-                    new BeeFishParser::And(
-                        new BeeFishQuery::Not(),
-                        _word3 =
-                        new BeeFishQuery::Word(),
-                        _andOr3 = 
-                        new BeeFishQuery::AndOr(),
-                        _loadOnDemandExpression4 =
-                        new LoadOnDemandExpression()
-                    )
-                )
-            },
-            {
-                // not expression
-                _notExpression = new OrderOfPrecedence::Item(
-                    new BeeFishParser::And(
-                        new BeeFishQuery::Not(),
-                        _loadOnDemandExpression1 =
-                            new LoadOnDemandExpression()
-                    )
-                )
-            },
-            {
-                // (expression) and/or expression
-               _bracketedExpressionAndExpression =
-               new OrderOfPrecedence::Item(
-                    new BeeFishParser::And(
-                        _bracketedExpression1 =
-                            new BracketedExpression(),
-                        _andOr1 = new AndOr(),
-                        _loadOnDemandExpression2 =
-                            new LoadOnDemandExpression()
-                    )
-                )
-            },
-            {
-                // word and/or expression
-                _wordAndExpression =
-                new OrderOfPrecedence::Item(
-                    new BeeFishParser::And(
-                        _word1 = new BeeFishQuery::Word(),
-                        _andOr2 = new AndOr(),
-                        _loadOnDemandExpression3 =
-                            new LoadOnDemandExpression()
-                    )
-                )
-            },
-            {
-                // (expression)
-                _bracketedExpression =
-                new OrderOfPrecedence::Item(
-                    _bracketedExpression2 = new BracketedExpression()
-                ),
-            },
-            {
-                // word
-                _word = new OrderOfPrecedence::Item(
-                    _word2 = new BeeFishQuery::Word()
-                )
-            }
-            
-                 
+            assert(_expression);
         }
         
-        )
-        );
-            Match::setup(parser);
-        }
-        
-        
-        virtual void write(ostream& output, Size tabs = 0) const
+        virtual void write(ostream& output) const
+        override
         {
+            output << "not ";
+            output << *_expression;
+        }
+    };
     
-            if (_notWordAndOrExpression->matched())
-            {
-                output << "not "
-                       << *_word3
-                       << " "
-                       << *_andOr3
-                       << " "
-                       << *(_loadOnDemandExpression4->item());
-            }
-            else if (_notExpression->matched())
-            {
-                output
-                << "not "
-                << *(_loadOnDemandExpression1->item());
-            }
-            else if (_bracketedExpressionAndExpression->matched())
-            {
-                    
-                output 
-                << *(_bracketedExpression1)
-                << " "
-                << *(_andOr1)
-                << " "
-                << *(_loadOnDemandExpression2->item());
-                
-            }
-            else if (_wordAndExpression->matched())
-            {
-                output
-                << *_word1
-                << " "
-                << *(_andOr2)
-                << " "
-                << *(_loadOnDemandExpression3->item());
-            }
-            else if (_bracketedExpression->matched())
-            {
-                output
-                << *_bracketedExpression2;
-            }
-            else if (_word->matched())
-                output << *_word2;
-                
+    class ExpressionItem : public Item
+    {
+    public:
+        Expression* _expression;
+
+        ExpressionItem(Expression* expression) :
+            Item(Type::Expression),
+            _expression(expression)
+        {
+            assert(_expression);
         }
         
-        friend ostream& operator << (ostream& output, const Expression& expression)
+        virtual void write(ostream& output) const
+        override
         {
-            expression.write(output);
-            
-            return output;
+            output << "(";
+            output << *_expression;
+            output << ")";
         }
-        
-        PathBase* getPath(Words& words, Bounds& bounds)
+    };
+
+
+    class Token : public BeeFishParser::Or
+    {
+    protected:
+        LoadOnDemand<Expression>* _loadOnDemand1;
+        LoadOnDemand<Expression>* _loadOnDemand2;
+    public:
+        Token(Expression* expression) :
+        Or(
+            new Invoke(
+                new BeeFishQuery::Word(),
+                [expression](Match* match)
+                {
+                    expression->_stack.push_back(
+                        new WordItem(match->value())
+                    );
+                    return true;
+                }
+            ),
+            new Invoke(
+                new BeeFishParser::And(
+                    new BeeFishQuery::Not(),
+                    _loadOnDemand1 =
+                    new LoadOnDemand<Expression>()
+                ),
+                [expression, this](Match* match)
+                {
+                    expression->_stack.push_back(
+                        new NotItem(_loadOnDemand1->item())
+                    );
+                    return true;
+                }
+            ),
+            new Invoke(
+                new BeeFishQuery::And(),
+                [expression](Match* match)
+                {
+                    expression->_stack.push_back(
+                        new Item(Item::Type::And)
+                    );
+                    return true;
+                }
+            ),
+            new Invoke(
+                new BeeFishQuery::Or(),
+                [expression](Match* match)
+                {
+                    expression->_stack.push_back(
+                        new Item(Item::Type::Or)
+                    );
+                    return true;
+                }
+            ),
+            new Invoke(
+                new BeeFishParser::And(
+                    new Character('('),
+                    _loadOnDemand2=
+                    new LoadOnDemand<Expression>(),
+                    new Character(')')
+                ),
+                [expression, this](Match* match)
+                {
+                    expression->_stack.push_back(
+                        new ExpressionItem(_loadOnDemand2->item())
+                    );
+                    return true;
+                }
+            )
+        )
         {
-                    
-            if (_notWordAndOrExpression->matched())
-            {
-                Expression* expression = 
-                    _loadOnDemandExpression4
-                    ->item();
-                    
-                PathBase* path =
-                    _andOr3
-                    ->getPath(
-                        new NotPath(
-                            _word3
-                            ->getPath(words, bounds),
-                            new Path(bounds)
-                        ),
-                        expression->getPath(words, bounds),
-                        bounds
-                    );
-                    
-                return path;
-            }
-            else if (_notExpression->matched())
-            {
-                Expression* expression = 
-                    _loadOnDemandExpression1
-                    ->item();
-                    
-                PathBase* path = 
-                    expression
-                    ->getPath(words, bounds);
-                    
-                return new NotPath(path, new Path(bounds));
-                
-            }
-            else if (_bracketedExpressionAndExpression->matched())
-            {
-                
-                Expression* expressionA =
-                    _bracketedExpression1->item();
-                Expression* expressionB =
-                    _loadOnDemandExpression2
-                    ->item();
-                    
-                return
-                    _andOr1->getPath(
-                        expressionA->getPath(words, bounds),
-                        expressionB->getPath(words, bounds),
-                        bounds
-                    );
-                    
-                
-            }
-            else if (_wordAndExpression->matched())
-            {
-                PathBase* wordPath =
-                    _word1->getPath(words, bounds);
-                    
-                Expression* expression =
-                    _loadOnDemandExpression3->item();
-                    
-                return
-                    _andOr2->getPath(
-                        wordPath,
-                        expression->getPath(words, bounds),
-                        bounds
-                    );
-            }
-            else if (_bracketedExpression->matched())
-            {
-                Expression* expression =
-                    _bracketedExpression2->item();
-                    
-                return expression->getPath(words, bounds);
-                
-            }
-            else if (_word->matched()) {
-                return
-                    _word2->getPath(words, bounds);
-        
-            }
-            
+        }
+    };
+
+
+    class TokenAndBlankspace : public BeeFishParser::And
+    {
+
+    public:
+        TokenAndBlankspace() {
             assert(false);
         }
-    
 
+        TokenAndBlankspace(Expression* expression) : And(
+                new Token(expression),
+                new Blankspaces()
+            )
+        {
+        }
     };
 
-
-    class Statement : public BeeFishParser::Match
+    class Tokens : public Repeat<TokenAndBlankspace>
     {
-    public:
-        
-        Capture* _capture;
+    protected:
         Expression* _expression;
-    
+        vector<Match*> _delete;
     public:
-        Statement() : BeeFishParser::Match()
+        Tokens(Expression* expression) :
+            Repeat(),
+            _expression(expression)
         {
-            _match = new BeeFishParser::And(
-                _capture = new Capture(
-                    _expression =
-                        new Expression()
-                ),
-                new Blankspaces(),
-                new Character(";")
-            );
         }
         
-        virtual BString& value() 
-        override
+        virtual ~Tokens()
         {
-            return _capture->value();
+            for (auto match : _delete)
+                delete match;
+        }
+
+        virtual TokenAndBlankspace* createItem() override {
+
+            if (_item)
+                delete _item;
+
+            TokenAndBlankspace* item =
+                new TokenAndBlankspace(_expression);
+
+            if (_parser)
+                item->setup(_parser);
+
+            return item;
         }
         
-        virtual const BString& value() const
-        override
+        virtual void matchedItem(TokenAndBlankspace *match)
         {
-            return _capture->value();
+            ++_matchedCount;
+
+            _delete.push_back(_item);
+            
+            _item = nullptr;
         }
-        
-        PathBase* getPath(Words& words, Bounds& bounds)
-        {
-            return _expression->getPath(words, bounds);
-        }
+
     };
+
+public:
+    vector<Item*> _stack;
+
+    Expression() : Match(
+            new BeeFishParser::And(
+                new Blankspaces(),
+                new Tokens(this)
+            )
+        )
+    {
+    }
     
+    virtual ~Expression()
+    {
+        for (auto item : _stack)
+            delete item;
+    }
     
+    virtual void write(
+        ostream& output, 
+        Size tabs = 0
+    ) const
+    {
+        for (Index i = 0; i < _stack.size(); ++i)
+        {
+            const Item* item = _stack[i];
+            output << *item;
+            
+            if (i < _stack.size() - 1)
+                output << " ";
+        }
+
+    }
+
+    friend ostream& operator << (ostream& output, const Expression& expression)
+    {
+        expression.write(output);
+
+        return output;
+    }
+
+    PathBase* getPath(Words& words, Bounds& bounds)
+    {
+    return nullptr;
+    }
+};
+
+
+class Statement : public BeeFishParser::Match
+{
+public:
+
+    Capture* _capture;
+    Expression* _expression;
+
+public:
+    Statement() : BeeFishParser::Match()
+    {
+        _match = new BeeFishParser::And(
+            _capture = new Capture(
+            _expression =
+                new Expression()
+        ),
+            new Blankspaces(),
+            new Character(";")
+        );
+    }
+
+    virtual BString& value()
+    override
+    {
+        return _capture->value();
+    }
+
+    virtual const BString& value() const
+    override
+    {
+        return _capture->value();
+    }
+    /*
+    PathBase* getPath(Words& words, Bounds& bounds)
+    {
+        return _expression->getPath(words, bounds);
+    }
+    */
+};
+
+
 }
 
 #endif
