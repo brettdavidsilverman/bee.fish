@@ -58,10 +58,14 @@ using namespace BeeFishWeb;
                 */
             const BString& method =
                 request()->method();
-            const URL& url =
+            URL& url =
                 request()->url();
-            
+                
             BString host = _session->host();
+            
+            if (url._baseURL == nullptr)
+                url._baseURL = new URL(host);
+            
 
                 /*
             const BString& userId =
@@ -82,7 +86,6 @@ using namespace BeeFishWeb;
             try {
                 jsonPath = JSONPath::fromString(
                     *database,
-                    host,
                     url,
                     method
                 );

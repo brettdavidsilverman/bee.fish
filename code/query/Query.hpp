@@ -163,22 +163,6 @@ public:
             Capture::success();
     }
 
-    PathBase*
-    getPath(
-        Words& words,
-        Path& bounds
-    )
-    {
-        return new AndPath(
-                   new Path(
-                       words[value().toLower()]
-                   ),
-                   new Path(bounds),
-                   new Path(bounds)
-               );
-    }
-
-
 };
 
 class AndOr : public BeeFishParser::Or
@@ -211,18 +195,7 @@ public:
         return output;
     }
 
-    PathBase*
-    getPath(
-        PathBase* a,
-        PathBase* b,
-        Path& bounds
-    )
-    {
-        if (_and->matched())
-            return new AndPath(a, b, new Path(bounds));
-        else
-            return new OrPath(a, b, new Path(bounds));
-    }
+
 
 };
 
@@ -239,7 +212,8 @@ class Expression : public BeeFishParser::Match
             Or,
             Not,
             Word,
-            Expression
+            Expression,
+            Iterable
         } _type;
 
         Item(Type type) :
@@ -253,19 +227,8 @@ class Expression : public BeeFishParser::Match
         
         virtual void write(ostream& output) const
         {
-            switch (_type)
-            {
-            case Type::And:
-                output << "and";
-                break;
-            case Type::Or:
-                output << "or";
-                break;
-            default:
-                assert(false);
-            }
         }
-        
+    
         friend ostream& operator << (
             ostream& output,
             const Item& item
@@ -274,7 +237,7 @@ class Expression : public BeeFishParser::Match
             item.write(output);
             return output;
         }
-
+    
     };
 
     class WordItem : public Item
@@ -282,68 +245,218 @@ class Expression : public BeeFishParser::Match
     public:
         BString _word;
 
-        WordItem(BString& word) :
+        WordItem(
+            Expression& expression,
+            BString& word
+        ) :
             Item(Type::Word),
             _word(word)
         {
+            IterableItem* iterable = new IterableItem(
+                new Path(
+                    expression._words[_word]
+                ),
+                _word
+            );
+            
+            
+            expression.push_back(iterable);
+            
+            delete this;
+            
+        }
+        
+        
+    };
+    
+    class AndItem : public Item
+    {
+    public:
+
+        AndItem(Expression& expression) :
+            Item(Item::Type::And)
+        {
+            expression.push_back(this);
         }
         
         virtual void write(ostream& output) const
         override
         {
-            output << _word;
+            output << "and";
+        }
+    };
+    
+    class OrItem : public Item
+    {
+    public:
+
+        OrItem(Expression& expression) :
+            Item(Item::Type::Or)
+        {
+            expression.push_back(this);
         }
         
+        virtual void write(ostream& output) const
+        override
+        {
+            output << "or";
+        }
         
     };
     
     class NotItem : public Item
     {
     public:
-        Expression* _expression;
 
-        NotItem(Expression* expression) :
-            Item(Type::Not),
-            _expression(expression)
+        NotItem(
+            Expression& expression,
+            Expression* notExpression) :
+            Item(Item::Type::Not)
         {
-            assert(_expression);
+            assert(notExpression->_stack.size() == 1);
+            IterableItem* item =
+                (IterableItem*)
+                notExpression->_stack[
+                     notExpression->_stack.size() - 1
+                ];
+                
+            IterableItem* notItem =
+                new IterableItem(
+                    new NotPath(
+                        item->_iterable,
+                        new Path(
+                            expression._bounds
+                        )
+                    ),
+                    BString("not ") + item->_text
+                );
+                
+            item->_iterable = nullptr;
+            delete item;
+            notExpression->_stack.pop_back();
+            assert(notExpression->_stack.size() == 0);
+        
+            expression.push_back(notItem);
+            
+            delete this;
+            
         }
         
-        virtual void write(ostream& output) const
-        override
+        NotItem(
+            Expression& expression,
+            const BString& word
+        ):
+            Item(Item::Type::Not)
         {
-            output << "not ";
-            output << *_expression;
+            IterableItem* notItem =
+                new IterableItem(
+                    new NotPath(
+                        new Path(
+                            expression._words[word]
+                        ),
+                        new Path(
+                            expression._bounds
+                        )
+                    ),
+                    BString("not ") + word
+                );
+                
+            expression.push_back(notItem);
+            
+            delete this;
+            
         }
+        
     };
     
     class ExpressionItem : public Item
     {
     public:
-        Expression* _expression;
 
-        ExpressionItem(Expression* expression) :
-            Item(Type::Expression),
-            _expression(expression)
+        ExpressionItem(
+            Expression& expression,
+            Expression* bracketedExpression
+        ) :
+            Item(Item::Type::Expression)
         {
-            assert(_expression);
+        
+            assert(bracketedExpression->_stack.size() == 1);
+            
+            IterableItem* item =
+                 (IterableItem*)
+                 bracketedExpression->_stack[0];
+            
+            item->_text = 
+                BString("(") +
+                item->_text + 
+                BString(")");
+            
+            bracketedExpression->_stack.pop_back();
+            
+            expression.push_back(item);
+            
+            delete this;
+        }
+        
+    };
+    
+    class IterableItem : public Item
+    {
+    public:
+        PathBase* _iterable = nullptr;
+        
+        BString _text;
+        
+        IterableItem(PathBase* iterable, const BString& text) :
+            Item(Item::Type::Iterable),
+            _iterable(iterable),
+            _text(text)
+        {
+        }
+        
+        virtual ~IterableItem()
+        {
+            if (_iterable)
+                 delete _iterable;
         }
         
         virtual void write(ostream& output) const
         override
         {
-            output << "(";
-            output << *_expression;
-            output << ")";
+            output << _text;
         }
+        
     };
 
 
+    class LoadOnDemandExpression :
+        public LoadOnDemand<Expression>
+    {
+    protected:
+        Expression* _parent;
+        
+    public:
+        LoadOnDemandExpression(Expression* parent) :
+            LoadOnDemand<Expression>(),
+            _parent(parent)
+        {
+        }
+        
+        virtual Expression* createItem() {
+            return new Expression(
+                *_parent->_database,
+                _parent->_words,
+                _parent->_bounds
+            );
+        }
+    };
+    
     class Token : public BeeFishParser::Or
     {
     protected:
-        LoadOnDemand<Expression>* _loadOnDemand1;
-        LoadOnDemand<Expression>* _loadOnDemand2;
+        LoadOnDemandExpression* _loadOnDemand1;
+        LoadOnDemandExpression* _loadOnDemand2;
+        BeeFishQuery::Word* _word;
     public:
         Token(Expression* expression) :
         Or(
@@ -351,8 +464,25 @@ class Expression : public BeeFishParser::Match
                 new BeeFishQuery::Word(),
                 [expression](Match* match)
                 {
-                    expression->_stack.push_back(
-                        new WordItem(match->value())
+                    new WordItem(
+                        *expression,
+                        match->value()
+                    );
+                    
+                    return true;
+                }
+            ),
+            new Invoke(
+                new BeeFishParser::And(
+                    new BeeFishQuery::Not(),
+                    new Blankspaces(),
+                    _word = new BeeFishQuery::Word
+                ),
+                [expression, this](Match* match)
+                {
+                    new NotItem(
+                        *expression,
+                        _word->value()
                     );
                     return true;
                 }
@@ -360,13 +490,17 @@ class Expression : public BeeFishParser::Match
             new Invoke(
                 new BeeFishParser::And(
                     new BeeFishQuery::Not(),
+                    new Blankspaces(),
+                    new BeeFishParser::Character("("),
                     _loadOnDemand1 =
-                    new LoadOnDemand<Expression>()
+                    new LoadOnDemandExpression(expression),
+                    new BeeFishParser::Character(")")
                 ),
                 [expression, this](Match* match)
                 {
-                    expression->_stack.push_back(
-                        new NotItem(_loadOnDemand1->item())
+                    new NotItem(
+                        *expression,
+                        _loadOnDemand1->item()
                     );
                     return true;
                 }
@@ -375,9 +509,7 @@ class Expression : public BeeFishParser::Match
                 new BeeFishQuery::And(),
                 [expression](Match* match)
                 {
-                    expression->_stack.push_back(
-                        new Item(Item::Type::And)
-                    );
+                    new AndItem(*expression);
                     return true;
                 }
             ),
@@ -385,9 +517,7 @@ class Expression : public BeeFishParser::Match
                 new BeeFishQuery::Or(),
                 [expression](Match* match)
                 {
-                    expression->_stack.push_back(
-                        new Item(Item::Type::Or)
-                    );
+                    new OrItem(*expression);
                     return true;
                 }
             ),
@@ -395,13 +525,14 @@ class Expression : public BeeFishParser::Match
                 new BeeFishParser::And(
                     new Character('('),
                     _loadOnDemand2=
-                    new LoadOnDemand<Expression>(),
+                    new LoadOnDemandExpression(expression),
                     new Character(')')
                 ),
                 [expression, this](Match* match)
                 {
-                    expression->_stack.push_back(
-                        new ExpressionItem(_loadOnDemand2->item())
+                    new ExpressionItem(
+                        *expression,
+                        _loadOnDemand2->item()
                     );
                     return true;
                 }
@@ -472,15 +603,70 @@ class Expression : public BeeFishParser::Match
     };
 
 public:
-    vector<Item*> _stack;
-
-    Expression() : Match(
-            new BeeFishParser::And(
-                new Blankspaces(),
-                new Tokens(this)
-            )
+    
+    class Items : public vector<Item*>
+    {
+    public:
+        Items() : vector<Item*>() 
+        {
+        }
+        
+    } _stack;
+    
+    Database* _database;
+    Path _words;
+    Path _bounds;
+    
+    Expression()
+    {
+        assert(false);
+    }
+    
+    Expression(JSONPath path, const BString& query) :
+        Expression(path)
+    {
+        Parser parser(*this);
+        parser.read(query);
+        parser.eof();
+        
+        if (!parser.matched())
+            throw runtime_error(parser.getError());
+    }
+        
+    Expression(JSONPath path) :
+        Expression(
+            path.database(),
+            path.database().words(),
+            path
         )
     {
+    }
+    
+    Expression(Database& database, Path words, Path bounds) :
+        Match(),
+        _database(&database),
+        _words(words),
+        _bounds(bounds)
+    {
+    }
+    
+    friend ostream& operator << (
+        ostream& output,
+        const Expression& expression
+    )
+    {
+        expression.write(output);
+        return output;
+    }
+    
+    virtual void write(
+        ostream& output
+    ) const
+    {
+        for (const auto& item : _stack)
+        {
+            output << *item;
+        }
     }
     
     virtual ~Expression()
@@ -489,33 +675,121 @@ public:
             delete item;
     }
     
-    virtual void write(
-        ostream& output, 
-        Size tabs = 0
-    ) const
+    virtual void setup(Parser* parser)
     {
-        for (Index i = 0; i < _stack.size(); ++i)
-        {
-            const Item* item = _stack[i];
-            output << *item;
+        _match = new BeeFishParser::And(
+            new Blankspaces(),
+            new Tokens(this)
+        );
+        
+        Match::setup(parser);
+    }
+    
+
+    void push_back(Item* item)
+    {
+        _stack.push_back(item);
+    }
+    
+    void push_back(IterableItem* right)
+    {
+        
+        Item::Type type = Item::Type::And;
+        IterableItem* left = nullptr;
             
-            if (i < _stack.size() - 1)
-                output << " ";
+        if (_stack.size() == 0)
+        {
+            _stack.push_back(right);
+
+            return;
         }
-
+        
+        if (_stack.size() == 1)
+        {
+            left =
+                (IterableItem*)
+                _stack[_stack.size() - 1];
+            type = Item::Type::And;
+            _stack.pop_back();
+        }
+        else if (_stack.size() >= 2)
+        {
+            Item* op = _stack[_stack.size() - 1];
+                
+            if (op->_type == Item::Type::And ||
+                op->_type == Item::Type::Or)
+            {
+                type = op->_type;
+                _stack.pop_back();
+                left =
+                    (IterableItem*)
+                        _stack
+                        [_stack.size() - 1];
+                _stack.pop_back();
+            }
+        }
+                    
+        Item* iterable;
+        
+        if (type == Item::Type::And)
+        {
+            BString text = BString("(") +
+                 left->_text +
+                 BString(" and ") +
+                 right->_text +
+                 BString(")");
+                 
+            iterable = new IterableItem(
+                new AndPath(
+                    left->_iterable,
+                    right->_iterable,
+                    new Path(_bounds)
+                ),
+                text
+            );
+            
+        }
+        else
+        {
+            BString text = "(" +
+                 left->_text +
+                 BString(" or ") +
+                 right->_text +
+                 BString(")");
+                 
+            iterable = new IterableItem(
+                new OrPath(
+                    left->_iterable,
+                    right->_iterable,
+                    new Path(_bounds)
+                ),
+                text
+            );
+        }
+                    
+        _stack.push_back(iterable);
+            
     }
-
-    friend ostream& operator << (ostream& output, const Expression& expression)
+    
+    PathBase* getPath()
     {
-        expression.write(output);
 
-        return output;
+        assert(_stack.size() == 1);
+        assert(
+            _stack[_stack.size() - 1]
+            ->_type == Item::Type::Iterable
+        );
+        
+        IterableItem* item =
+            (IterableItem*)
+            _stack[_stack.size() - 1];
+            
+        return item->_iterable;
+        
     }
+            
+    
 
-    PathBase* getPath(Words& words, Bounds& bounds)
-    {
-    return nullptr;
-    }
 };
 
 
@@ -527,13 +801,14 @@ public:
     Expression* _expression;
 
 public:
-    Statement() : BeeFishParser::Match()
+    Statement(JSONPath path) :
+        BeeFishParser::Match()
     {
         _match = new BeeFishParser::And(
             _capture = new Capture(
-            _expression =
-                new Expression()
-        ),
+                _expression =
+                    new Expression(path)
+            ),
             new Blankspaces(),
             new Character(";")
         );
@@ -550,12 +825,7 @@ public:
     {
         return _capture->value();
     }
-    /*
-    PathBase* getPath(Words& words, Bounds& bounds)
-    {
-        return _expression->getPath(words, bounds);
-    }
-    */
+
 };
 
 

@@ -116,23 +116,16 @@ namespace BeeFishHTTPS {
                 PathBase* path = nullptr;
         
                 try {
-                    BeeFishQuery::Expression expression(search);
+                    BeeFishQuery::Expression
+                        expression(bookmark, search);
         
+            
                     *this << "[" << endl;
 
                     PathBase* path =
                         expression
-                        .getPath(words, children);
-/*
-                    PathBase* path =
-                        new BeeFishQuery::AndPath
-                        (
-                            pathInner,
-                            new Path(children),
-                            new Path(children)
-                        );
-*/
-                        
+                        .getPath();
+
                     Iterable<JSONPath::Id> matches(*path);
                     
                     for (auto it = matches.begin();

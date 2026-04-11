@@ -29,11 +29,11 @@ run:	$(OUTPUT)
 	$(OUTPUT)
 	
 run_debug:	debug
-	gdb --args $(OUTPUT)
+	gdb --args $(OUTPUT) -test
 	
 trace:	$(OUTPUT)
 	rm -f trace.txt
-	valgrind  -s --log-file="trace.txt" --track-origins=yes --leak-check=yes $(OUTPUT) -test
+	-valgrind  -s --log-file="trace.txt" --track-origins=yes --leak-check=yes $(OUTPUT) -test
 	cat trace.txt
 	
 clean:

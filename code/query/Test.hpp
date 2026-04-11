@@ -12,6 +12,7 @@ namespace BeeFishQuery {
 
     using namespace std;
     using namespace BeeFishTest;
+    using namespace BeeFishQuery;
 
     bool testBlankspaces();
     bool testCharacters();
@@ -389,15 +390,13 @@ namespace BeeFishQuery {
         Words objects(root["objects"]);
         
         auto testmatch =
-        [&ok, &words, &objects](const BString& query, const BString& expected = "") {
-            
-            
+        [&ok, &db, &words, &objects](const BString& query, const BString& expected = "") {
             
             if (!ok)
                 return false;
                 
             Expression* expression =
-                new Expression();
+                new Expression(db, words, objects);
                 
             Capture* capture =
                 new Capture(expression);
@@ -422,13 +421,15 @@ namespace BeeFishQuery {
                         );
                     if (!ok)
                         cout << "Got [" << stream.str() << "]" << endl;
-                }
-                /*
-                 PathBase* path =
-                    expression->getPath(words, objects);
+
                 
-                delete path;
-                */
+                    if (ok) {
+                        cout << "\t" << expected ;
+                        expression->getPath();
+                        outputSuccess(true);
+                    }
+                }
+                
             }
 
             delete capture;
@@ -437,43 +438,48 @@ namespace BeeFishQuery {
         };
         
         testmatch("word", "word");
+        testmatch("word1 and word2", "(word1 and word2)");
         testmatch("(word)", "(word)");
         testmatch("( word )", "(word)");
         testmatch(" ( word ) ", "(word)");
         testmatch("((word))", "((word))");
-        testmatch("word1 word2");
+        testmatch("word1 word2", "(word1 and word2)");
         testmatch("not word", "not word");
-        testmatch("not (word1)");
-        testmatch("not(word1)");
-        testmatch("(not(word1))");
+        testmatch("not (word)", "not word");
+        testmatch("not(word)", "not word");
+        testmatch("(not(word))", "(not word)");
         
-        testmatch("word1 + word2");
-        testmatch("word1+word2");
-        testmatch("word1 and word2");
-        testmatch("word1 | word2");
-        testmatch("word1|word2");
-        testmatch("word1 or word2");
+        testmatch("word1 + word2", "(word1 and word2)");
+        testmatch("word1+word2", "(word1 and word2)");
+        testmatch("word1 and word2", "(word1 and word2)");
+        testmatch("word1 | word2", "(word1 or word2)");
+        testmatch("word1|word2", "(word1 or word2)");
+        testmatch("word1 or word2", "(word1 or word2)");
         
-        testmatch("not (word1 or word2)");
-        testmatch("!(word1 or word2)");
-        testmatch("(word1 or word2)");
-        testmatch("(word1 and word2)");
-        testmatch("word1 and not word2");
+        testmatch("not (word1 or word2)", "not (word1 or word2)");
+        testmatch("!(word1 or word2)", "not (word1 or word2)");
+        testmatch("(word1 or word2)", "((word1 or word2))");
+        testmatch("(word1 and word2)", "((word1 and word2))");
+        testmatch("word1 and not word2", "(word1 and not word2)");
         
-        testmatch("word1 and (word2 or word3)");
-        testmatch("word1 and word2 or word3");
-        testmatch("(word1 and word2) or word3");
+        testmatch("word1 and (word2 or word3)", "(word1 and ((word2 or word3)))");
+        testmatch("word1 and word2 or word3", "((word1 and word2) or word3)");
+        testmatch("(word1 and word2) or word3", "(((word1 and word2)) or word3)");
         
-        testmatch("(word1 and word2) or (word3 and word4)");
-        testmatch("(word1 or word2) and (word3 or word4)");
-        testmatch("((word1 or word2))");
+        testmatch("(word1 and word2) or (word3 and word4)", "(((word1 and word2)) or ((word3 and word4)))");
+        testmatch("(word1 or word2) and (word3 or word4)", "(((word1 or word2)) and ((word3 or word4)))");
+        testmatch("((word1 or word2))", "(((word1 or word2)))");
         
-        testmatch("(word1 and word2) and not word2");
-        testmatch("(word1 and word2) and not (word3 or word4)");
+        testmatch("(word1 and word2) and not word3", "(((word1 and word2)) and not word3)");
+        testmatch("(word1 and word2) and not (word3 or word4)", "(((word1 and word2)) and not (word3 or word4))");
+        
+        testmatch("word1 and word2 and word3", "((word1 and word2) and word3)");
+        testmatch("word1 and not word2 and word3", "((word1 and not word2) and word3)");
+        
+        testmatch("not (not word)", "not not word");
         
         BeeFishMisc::outputSuccess(ok);
         
-        return false;
         return ok;
         
     }
@@ -899,7 +905,7 @@ namespace BeeFishQuery {
             
             cout << input << flush;
             
-            Expression expression;
+            Expression expression(db, words, bounds);
             Parser parser(expression);
             parser.read(input);
             parser.eof();
@@ -909,10 +915,10 @@ namespace BeeFishQuery {
             if (ok)
             {
                 std::vector<JSONPath::Id> values;
-                /*
+                
                 PathBase* pathBase =
                     expression
-                    .getPath(words, bounds);
+                    .getPath();
                 
                 Iterable<JSONPath::Id> iterable(*pathBase);
                 
@@ -921,10 +927,6 @@ namespace BeeFishQuery {
                     values.push_back(index);
                 }
              
-                delete pathBase;
-            */
-                
-                
                 if (ok)
                 {
                     for (unsigned int i = 0; i < values.size() && i < check.size(); ++i)
@@ -991,7 +993,7 @@ namespace BeeFishQuery {
         ok = ok && test("one or two", {0,1,2,3,4});
         ok = ok && test("not two", {0, 1});
         ok = ok && test("one and not two", {0, 1});
-        ok = ok && test("not not two", {2,3,4});
+        ok = ok && test("not (not two)", {2,3,4});
         ok = ok && test("three", {});
         
         assert(ok);
@@ -1027,7 +1029,7 @@ namespace BeeFishQuery {
             
         
             
-            Expression expression;
+            Expression expression(db, words, objects);
             if (ok)
             {
                 Parser parser(expression);
@@ -1051,10 +1053,10 @@ namespace BeeFishQuery {
             if (ok)
             {
                 cout << ": " << expression << "..." << flush;
-                /*
+                
                 PathBase* pathBase =
                     expression
-                    .getPath(words, objects);
+                    .getPath();
                 
                 Iterable<JSONPath::Id> iterable(*pathBase);
                 
@@ -1064,8 +1066,6 @@ namespace BeeFishQuery {
                     values.push_back(path.toString());
                 }
              
-                delete pathBase;
-            */
             }
                 
             if (ok)
@@ -1177,7 +1177,7 @@ namespace BeeFishQuery {
         
         
 
-        ok = ok && test("not not b", 
+        ok = ok && test("not (not b)", 
             {
                 "https://test/45-Object.json",
                 "https://test/45-Object.json/a",
@@ -1205,7 +1205,7 @@ namespace BeeFishQuery {
             {
             }
         );
-        /*
+    
         ok = ok && test("not b or c", 
             {
                 "https://test/45-Object.json",
@@ -1216,7 +1216,7 @@ namespace BeeFishQuery {
                 "https://test/45-Object.json/a/2/2",
             }
         );
-        */
+        
         
         ok = ok && test("(not b) or c", 
             {
@@ -1229,7 +1229,7 @@ namespace BeeFishQuery {
             }
         );
         
-        /*
+        
         ok = ok && test("z and b or c", 
             {
                 "https://test/45-Object.json",
@@ -1240,8 +1240,7 @@ namespace BeeFishQuery {
                 "https://test/45-Object.json/a/2/2"
             }
         );
-        */
-        /*
+        
         ok = ok && test("z and b and h or c", 
             {
                 "https://test/45-Object.json",
@@ -1252,7 +1251,7 @@ namespace BeeFishQuery {
                 "https://test/45-Object.json/a/2/2"
             }
         );
-        */
+        
 
         BeeFishMisc::outputSuccess(ok);
         

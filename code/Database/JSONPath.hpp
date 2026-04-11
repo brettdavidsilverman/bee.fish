@@ -429,10 +429,10 @@ public:
         }
     };
 
-    static JSONPath fromString(JSONDatabase& database, const BString& host, const BeeFishWeb::URL& url, const BString& method = "GET")
+    static JSONPath fromString(JSONDatabase& database, const BeeFishWeb::URL& url, const BString& method = "GET")
     {
         JSONPath hostPath =
-            database.host(host);
+            database.host(url.origin());
 
         std::vector<BString> paths =
             url.path().split('/');

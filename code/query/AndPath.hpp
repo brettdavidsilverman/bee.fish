@@ -95,28 +95,6 @@ using namespace BeeFishDatabase;
             _b->restore();
             _bounds->restore();
         }
-/*
-        virtual bool isDeadEnd() const
-        override
-        {
-            bool isDeadEnd =
-            not (
-                    (
-                        _a->canGoLeft() and
-                        _b->canGoLeft()
-                    ) or
-                    (
-                        _a->canGoRight() and
-                        _b->canGoRight()
-                    )
-                );
-                
-            return isDeadEnd;
-                
-        }
-*/
-
-
     
     };
 

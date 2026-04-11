@@ -37,16 +37,35 @@ int main(int argc, const char* argv[]) {
     {
         display = false;
     }
-   
+    
+    int originArg =
+    hasArg(argc, argv, "-origin");
+    BString origin = ORIGIN;
+#ifdef DEBUG
+    {
+        origin += ":8000";
+    }
+#endif
+
+    if (originArg != -1 && argc > (originArg + 1))
+    {
+        origin = argv[originArg + 1];
+    }
+    
+    JSONPath path = JSONPath::fromString(
+        database,
+        origin
+    );
+    
+    cout << "Using origin " << origin << endl;
+ 
     auto displayResults =
     [&database, display](Expression& expression)
     {
-        Words words(database.words());
-        Bounds bounds = database.objects();
-        
+    
         PathBase* path =
             expression
-            .getPath(words, bounds);
+            .getPath();
         Index count = 0;
         
         Iterable<Index> jsonMatches(*path);
@@ -57,12 +76,11 @@ int main(int argc, const char* argv[]) {
                 BString string = path.toString();
                 cout << string << endl;
             }
-          ++count;
+            ++count;
         }
         
         cout << "Total count: " << count << endl;
             
-        delete path;
     };
     
     
@@ -71,7 +89,8 @@ int main(int argc, const char* argv[]) {
     {
         string line;
         line = argv[queryArg + 1];
-        Expression expression;
+        
+        Expression expression(path);
         stringstream stream(line);
         stream >> expression;
         displayResults(expression);
@@ -85,7 +104,7 @@ int main(int argc, const char* argv[]) {
         
         try {
              
-            Statement statement;
+            Statement statement(path);
             cin >> statement;
         
             if (statement.value().trim() == "exit")
