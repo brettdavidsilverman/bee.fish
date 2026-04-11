@@ -16,8 +16,7 @@ namespace BeeFishDatabase
     protected:
         Size _lockCount = 0;
         BString _mutexName;
-        managed_shared_memory* _sharedMemory = nullptr;
-        interprocess_mutex* _mutex = nullptr;
+        named_mutex* _mutex;
         
     public:
         struct ScopedLock
@@ -60,26 +59,17 @@ namespace BeeFishDatabase
                 BString(stream.str()) +
                 BString("LockFile");
             
-
-            //shared_memory_object::remove(_mutexName.c_str());
-            Index memorySize = 1024;
-            _sharedMemory = new
-                managed_shared_memory(
-                    open_or_create, 
-                    _mutexName.c_str(), 
-                    memorySize
-                );
-                    
             _mutex = 
-                _sharedMemory->find_or_construct
-                <interprocess_mutex>("mutex")();
-                
+                new named_mutex(
+                    open_or_create,
+                    _mutexName.c_str()
+                );
+            
         }
         
         virtual ~LockFile()
         {
             assert(_lockCount == 0);
-            delete _sharedMemory;
              
         }
 
