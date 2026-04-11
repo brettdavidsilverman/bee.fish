@@ -479,6 +479,8 @@ namespace BeeFishQuery {
         testmatch("word1 and and word2", "(word1 and word2)");
         testmatch("word1 and or word2", "(word1 or word2)");
         
+        testmatch("word1$", "word1");
+        
         if (ok)
         {
             cout << "\tInvalid expression: " << flush;

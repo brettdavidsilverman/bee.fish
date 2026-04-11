@@ -124,6 +124,7 @@ public:
             new Character("!"),
             new Character("("),
             new Character(")"),
+            new Character("$"),
             new Character(";")
         )
     {
@@ -728,7 +729,10 @@ public:
     {
         _match = new BeeFishParser::And(
             new Blankspaces(),
-            new Tokens(this)
+            new Tokens(this),
+            new Optional(
+                new Character("$")
+            )
         );
         
         Match::setup(parser);

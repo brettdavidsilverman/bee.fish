@@ -106,45 +106,63 @@ namespace BeeFishHTTPS {
             
             if (app->serve() == App::SERVE_QUERY)
             {
-                const BString& search = 
+                BString search = 
                     app->request()->search();
 
+                bool getCount = false;
+                if (search.endsWith("$"))
+                {
+                    getCount = true;
+                    search = search.substr(0, search.size() - 1);
+                }
+                
                 try {
                     BeeFishQuery::Expression
                         expression(bookmark, search);
         
-            
-                    *this << "[" << endl;
+                    Index count = 0;
+                    if (!getCount)
+                        *this << "[" << endl;
 
                     PathBase* path =
                         expression
                         .getPath();
 
                     Iterable<JSONPath::Id> matches(*path);
-                    
+                
                     for (auto it = matches.begin();
                          it != matches.end();
                          )
                     {
                         
-                        JSONPath json(*database, *it);
+                        if (!getCount)
+                        {
+                            JSONPath json(*database, *it);
                         
-                        BString string = json.toString();
+                            BString string = json.toString();
                         
-                        *this << "   \"" 
-                              << string.escape() 
-                              << "\"";
+                            *this << "   \"" 
+                                  << string.escape() 
+                                  << "\"";
     
-                        if (++it != matches.end())
-                            *this << ",";
+                            if (++it != matches.end())
+                                *this << ",";
                             
-                        *this << endl;
+                            *this << endl;
                         
-                        flush();
+                            flush();
+                        }
+                        else {
+                            ++it;
+                            ++count;
+                        }
                         
                     }
             
-                    *this << "]";
+                    if (!getCount)
+                        *this << "]";
+                    else
+                        *this << count;
                 }
                 catch (std::exception& exception)
                 {
