@@ -93,10 +93,6 @@ namespace BeeFishHTTPS {
             JSONDatabase* database = scoped;
             BeeFishQuery::Words words = database->words();
             Path bookmark(*database, app->_bookmark);
-            Path children =
-                database->objects()
-                [bookmark]
-                [OBJECT_CHILDREN];
             
             if (app->serve() == App::SERVE_JSON)
             {
@@ -113,8 +109,6 @@ namespace BeeFishHTTPS {
                 const BString& search = 
                     app->request()->search();
 
-                PathBase* path = nullptr;
-        
                 try {
                     BeeFishQuery::Expression
                         expression(bookmark, search);
@@ -152,16 +146,17 @@ namespace BeeFishHTTPS {
             
                     *this << "]";
                 }
-                catch (const std::exception& exception)
+                catch (std::exception& exception)
                 {
                     *this << "\"" << BString(exception.what()).escape() << "\"";
+                }
+                catch (...)
+                {
+                    *this << "\"Unknown error\"";
                 }
                 
                 flush();
                     
-                if (path)
-                    delete path;
-                
                 return;
             
             }

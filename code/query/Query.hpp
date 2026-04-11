@@ -14,6 +14,7 @@
 #include "NotPath.hpp"
 #include "AndPath.hpp"
 #include "OrPath.hpp"
+#include "WordPath.hpp"
 
 namespace BeeFishQuery {
 
@@ -253,8 +254,9 @@ class Expression : public BeeFishParser::Match
             _word(word)
         {
             IterableItem* iterable = new IterableItem(
-                new Path(
-                    expression._words[_word]
+                new BeeFishQuery::WordPath(
+                    new Path(expression._words[_word]),
+                    new Path(expression._bounds)
                 ),
                 _word
             );
@@ -308,6 +310,29 @@ class Expression : public BeeFishParser::Match
     {
     public:
 
+        NotItem(
+            Expression& expression
+        ) :
+            Item(Item::Type::Not)
+        {
+            Items& stack = expression._stack;
+            
+            if (stack.size() > 0)
+            {
+                Item* top = stack[stack.size() - 1];
+                if (top->_type == Item::Type::Not)
+                {
+                    stack.pop_back();
+                    delete top;
+                    delete this;
+                    return;
+                }
+                
+            }
+            
+            expression.push_back(this);
+        }
+        /*
         NotItem(
             Expression& expression,
             Expression* notExpression) :
@@ -366,7 +391,7 @@ class Expression : public BeeFishParser::Match
             delete this;
             
         }
-        
+        */
     };
     
     class ExpressionItem : public Item
@@ -473,6 +498,17 @@ class Expression : public BeeFishParser::Match
                 }
             ),
             new Invoke(
+                new BeeFishQuery::Not(),
+                [expression, this](Match* match)
+                {
+                    new NotItem(
+                        *expression
+                    );
+                    return true;
+                }
+            ),
+            /*
+            new Invoke(
                 new BeeFishParser::And(
                     new BeeFishQuery::Not(),
                     new Blankspaces(),
@@ -505,6 +541,7 @@ class Expression : public BeeFishParser::Match
                     return true;
                 }
             ),
+            */
             new Invoke(
                 new BeeFishQuery::And(),
                 [expression](Match* match)
@@ -622,6 +659,23 @@ public:
         assert(false);
     }
     
+    Expression(Database& database, Path words, Path bounds) :
+        Match(),
+        _database(&database),
+        _words(words),
+        _bounds(bounds)
+    {
+    }
+    
+    Expression(JSONPath path) :
+        Expression(
+            path.database(),
+            path.database().words(),
+            path.database().objects()[path][OBJECT_CHILDREN]
+        )
+    {
+    }
+    
     Expression(JSONPath path, const BString& query) :
         Expression(path)
     {
@@ -633,22 +687,7 @@ public:
             throw runtime_error(parser.getError());
     }
         
-    Expression(JSONPath path) :
-        Expression(
-            path.database(),
-            path.database().words(),
-            path
-        )
-    {
-    }
     
-    Expression(Database& database, Path words, Path bounds) :
-        Match(),
-        _database(&database),
-        _words(words),
-        _bounds(bounds)
-    {
-    }
     
     friend ostream& operator << (
         ostream& output,
@@ -667,6 +706,16 @@ public:
         {
             output << *item;
         }
+    }
+    
+    virtual void success()
+    override
+    {
+        if (_stack.size() != 1 ||
+            _stack[0]->_type != Item::Type::Iterable)
+            fail();
+        else
+            Match::success();
     }
     
     virtual ~Expression()
@@ -688,6 +737,18 @@ public:
 
     void push_back(Item* item)
     {
+        if (_stack.size() >= 1 && 
+            (item->_type == Item::Type::And ||
+            item->_type == Item::Type::Or))
+        {
+            Item* top = _stack[_stack.size() - 1];
+            if (top->_type == Item::Type::And ||
+                top->_type == Item::Type::Or)
+            {
+                delete top;
+                _stack.pop_back();
+            }
+         }
         _stack.push_back(item);
     }
     
@@ -704,11 +765,43 @@ public:
             return;
         }
         
+        if (_stack.size() >= 1)
+        {
+            Item* top = _stack[_stack.size() - 1];
+            if (top->_type == Item::Type::Not)
+            {
+                delete top;
+                _stack.pop_back();
+                
+                IterableItem* item
+                = new IterableItem(
+                    new NotPath(
+                        right->_iterable,
+                        new Path(_bounds)
+                    ),
+                    BString("not ") +
+                    right->_text
+                );
+                
+                right->_iterable = nullptr;
+                delete right;
+                right = item;
+                
+                if (_stack.size() == 0)
+                {
+                    _stack.push_back(right);
+                    return;
+                }
+                
+            }
+        }
+        
         if (_stack.size() == 1)
         {
             left =
                 (IterableItem*)
                 _stack[_stack.size() - 1];
+                
             type = Item::Type::And;
             _stack.pop_back();
         }
@@ -721,6 +814,7 @@ public:
             {
                 type = op->_type;
                 _stack.pop_back();
+                delete op;
                 left =
                     (IterableItem*)
                         _stack
@@ -748,6 +842,7 @@ public:
                 text
             );
             
+            
         }
         else
         {
@@ -766,7 +861,13 @@ public:
                 text
             );
         }
-                    
+        
+        left->_iterable = nullptr;
+        right->_iterable = nullptr;
+        
+        delete left;
+        delete right;
+            
         _stack.push_back(iterable);
             
     }
