@@ -1,0 +1,14 @@
+==87506== Memcheck, a memory error detector
+==87506== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==87506== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==87506== Command: ../../build/query -test
+==87506== Parent PID: 87505
+==87506== 
+==87506== 
+==87506== HEAP SUMMARY:
+==87506==     in use at exit: 0 bytes in 0 blocks
+==87506==   total heap usage: 42,152 allocs, 42,152 frees, 5,826,052 bytes allocated
+==87506== 
+==87506== All heap blocks were freed -- no leaks are possible
+==87506== 
+==87506== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
