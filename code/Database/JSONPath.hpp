@@ -431,8 +431,17 @@ public:
 
     static JSONPath fromString(JSONDatabase& database, const BeeFishWeb::URL& url, const BString& method = "GET")
     {
+        return fromString(
+            database,
+            url.origin(),
+            url
+        );
+    }
+    
+    static JSONPath fromString(JSONDatabase& database, const BString& host, const BeeFishWeb::URL& url, const BString& method = "GET")
+    {
         JSONPath hostPath =
-            database.host(url.origin());
+            database.host(host);
 
         std::vector<BString> paths =
             url.path().split('/');

@@ -52,7 +52,7 @@ start:	stop
 
 stop:
 	@echo Stopping $(PORT)...
-	sudo kill -9 $$(sudo lsof -t -i :$(PORT))
+	@sudo kill -9 $$(sudo lsof -t -i :$(PORT))
 	@echo Stopped
 
 

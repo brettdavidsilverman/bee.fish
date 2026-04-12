@@ -52,9 +52,11 @@ int main(int argc, const char* argv[]) {
         origin = argv[originArg + 1];
     }
     
+    BeeFishWeb::URL url(origin);
+    
     JSONPath path = JSONPath::fromString(
         database,
-        origin
+        url
     );
     
     cout << "Using origin " << origin << endl;
