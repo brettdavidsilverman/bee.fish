@@ -1,9 +1,12 @@
 
 live:
-	sudo make -C bee.fish/code PORT=443
+	make -C bee.fish/code PORT=443
+	
+stop:
+	make -C bee.fish/code/https stop PORT=443
 
 clean:
-	sudo make -C bee.fish/code clean
+	make -C bee.fish/code clean
 	
 debug:
 	make -C dev.bee.fish/code debug PORT=8000

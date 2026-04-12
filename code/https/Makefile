@@ -52,9 +52,7 @@ start:	stop
 
 stop:
 	@echo Stopping $(PORT)...
-	@for pid in $$(sudo lsof -t -i:$(PORT)); do \
-		sudo kill $$pid;\
-    done
+	sudo kill -9 $$(sudo lsof -t -i :$(PORT))
 	@echo Stopped
 
 
