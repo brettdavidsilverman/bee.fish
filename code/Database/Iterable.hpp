@@ -86,6 +86,17 @@ namespace BeeFishDatabase {
             return iterator;
         }
         
+        // Container methods to get iterators
+        virtual PathBase::ReversePathIterator<T> rbegin() {
+            return PathBase::ReversePathIterator<T>(this);
+        }
+    
+        // Points one past the last element
+        Path::ReversePathIterator<T> rend() { 
+            PathBase::ReversePathIterator<T> iterator;
+            return iterator;
+        }
+        
     };
 
 }

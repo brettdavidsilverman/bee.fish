@@ -71,6 +71,17 @@ namespace BeeFishDatabase {
             _pageSize(pageSize)
             
         {
+            if (size() == 0) 
+            {
+                ScopedLock lock(*this);
+                
+                if (size() == 0)
+                {
+                    seek(0);
+                    Branch branch;
+                    write(&branch, sizeof(Branch));
+                }
+            }
 
         }
 
@@ -170,23 +181,10 @@ namespace BeeFishDatabase {
             
         }
         
-        
-        
         Branch getBranch(Index index)
         {
             
             Branch branch;
-            
-            if (size() == 0) 
-            {
-                ScopedLock lock(*this);
-                
-                if (size() == 0)
-                {
-                    seek(0);
-                    write(&branch, sizeof(Branch));
-                }
-            }
             
             seek(index);
             read(&branch, sizeof(Branch));
@@ -196,16 +194,12 @@ namespace BeeFishDatabase {
 
         }
         
-        
-
-
         inline void setBranch(Index index, const Branch& branch)
         {
             seek(index);
             write(&branch, sizeof(Branch));
         }
     
-        
         inline BString getData(Index dataIndex)
         {
 

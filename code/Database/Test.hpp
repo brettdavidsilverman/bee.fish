@@ -1374,7 +1374,7 @@ assert(success);
         
         if (success)
         {
-            cout << "\tIterable values: ";
+            cout << "\tIterable values forward: ";
             vector<BString> values;
         
             for (auto value : path)
@@ -1387,6 +1387,25 @@ assert(success);
             success = success && (values[0] == "brett");
             success = success && (values[1] == "hello");
             success = success && (values[2] == "world");
+        
+            outputSuccess(success);
+        }
+        
+        if (success)
+        {
+            cout << "\tIterable values reverse: ";
+            vector<BString> values;
+        
+            for (auto it = path.rbegin(); it != path.rend(); ++it)
+            {
+                values.push_back(*it);
+            }
+        
+            success = (values.size() == 3);
+                
+            success = success && (values[0] == "world");
+            success = success && (values[1] == "hello");
+            success = success && (values[2] == "brett");
         
             outputSuccess(success);
         }

@@ -883,6 +883,7 @@ namespace BeeFishQuery {
 
                 for (auto value : notNotPath)
                 {
+cerr << "NOT NOT VALUE: " << value << endl;
                     array.push_back(value);
                 }
         
@@ -1012,7 +1013,8 @@ namespace BeeFishQuery {
         ok = ok && test("one or two", {0,1,2,3,4});
         ok = ok && test("not two", {0, 1});
         ok = ok && test("one and not two", {0, 1});
-        ok = ok && test("not not two)", {2,3,4});
+        ok = ok && test("not not two", {2,3,4});
+        ok = ok && test("not (not two)", {2,3,4});
         ok = ok && test("three", {});
         
         assert(ok);

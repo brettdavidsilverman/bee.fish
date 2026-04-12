@@ -67,14 +67,14 @@ namespace BeeFishDatabase {
                 return goToMin(stack);
             }
             
-    
-    
+
             // Up the tree until first right
             // that hasn't been taken yet
             bool bit;
             
             while(stack.size())
             {
+
                 bit = stack.last();
                 
                 // Up the stack
@@ -87,11 +87,34 @@ namespace BeeFishDatabase {
                      bit == 0)
                 {
                     goRight();
+                    
                     stack.push_back(1);
+                    
                     // Follow min
-                    return goToMin(stack);
+
+                    while (1)
+                    {
+                
+                        if (canGoLeft()) {
+                            stack.push_back(0);
+                            goLeft();
+                    
+                        }
+                        else if (canGoRight()) {
+                            stack.push_back(1);
+                            goRight();
+                        }
+                        else {
+                            break;
+                        }
+                
+                        if (stack.count() == 0)
+                            return true;
+                    }
+                    
                 }
-            
+
+                
             }
 
             return false;
@@ -134,21 +157,54 @@ namespace BeeFishDatabase {
                 {
                     goLeft();
                     stack.push_back(0);
-                    return goToMax(stack);
+                    
+                    // Follow to next max
+                    while (1)
+                    {
+                
+                        if (canGoRight()) {
+                            stack.push_back(1);
+                            goRight();
+                        }
+                        else if (canGoLeft()) {
+                            stack.push_back(0);
+                            goLeft();
+                        }
+                        else {
+                            break;
+                        }
+                
+                        if (stack.count() == 0)
+                            return true;
+                
+                    }
                 }
             
             }
 
 
             return false;
-
-
+            
         }
+        
+        template<typename T>
+        bool previous(Stack& stack, T& item)
+        {
+            bool result = previous(stack);
+            if (result)
+            {
+                stack.reset();
+                stack >> item;
+            }
+            return result;
+        }
+        
     public:
         virtual bool goToMin(
             Stack& stack
         )
         {
+
 
             while (1)
             {
@@ -163,7 +219,7 @@ namespace BeeFishDatabase {
                     goRight();
                 }
                 else {
-                    return next(stack);
+                   return next(stack);
                 }
                 
                 if (stack.count() == 0)
@@ -364,6 +420,83 @@ namespace BeeFishDatabase {
         };
         
         
+        template<typename T>
+        class ReversePathIterator {
+        protected:
+            PathBase* _path = nullptr; // The underlying pointer that the iterator wraps
+            T _item;
+            Stack _stack;
+            bool _isEnd = true;
+            
+        public:
+            // Iterator traits (required for STL compatibility in C++17 and earlier)
+            using iterator_category = std::forward_iterator_tag;
+            using value_type        = T;
+            using difference_type   = std::ptrdiff_t;
+            using pointer           = T*;
+            using reference         = const T&;
+
+            // Constructor
+            ReversePathIterator() {
+            }
+            
+            ReversePathIterator(PathBase* path) :
+                _path(path)
+            {
+                _isEnd = !_path->previous<T>(_stack, _item);
+            }
+            
+            
+            // Dereference operator (*)
+            reference operator*() const
+            {
+                return _item;
+            }
+
+            // Arrow operator (->)
+            pointer operator->() const 
+            {
+                return &_item; 
+            }
+
+            // Prefix increment operator (++)
+            ReversePathIterator& operator++() {
+                assert(!_isEnd);
+                _isEnd = not
+                    _path->previous<T>(
+                        _stack,
+                        _item
+                    );
+                return *this;
+            }
+
+            // Postfix increment operator (++)
+            ReversePathIterator operator++(int) {
+                ReversePathIterator tmp = *this;
+                tmp.save();
+                ++(*this);
+                tmp.restore();
+                return tmp;
+            }
+
+            friend bool operator == (
+                const ReversePathIterator& a,
+                const ReversePathIterator& b
+            )
+            {
+                return  (a._isEnd == b._isEnd);
+            }
+            
+            friend bool operator != (
+                const ReversePathIterator& a,
+                const ReversePathIterator& b
+            )
+            { 
+                return (a._isEnd != b._isEnd);
+            }
+
+        
+        };
         
         
     public:

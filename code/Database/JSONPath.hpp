@@ -495,9 +495,6 @@ public:
             throw PathNotFoundException(url);
         }
         
-        cerr << "JSONPath fromString " << path.toString() << endl;
-        
-
         return path;
     }
 
