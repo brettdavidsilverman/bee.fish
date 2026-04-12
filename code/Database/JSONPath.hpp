@@ -442,6 +442,7 @@ public:
     {
         JSONPath hostPath =
             database.host(host);
+cerr << "JSONPath fromString " << hostPath.toString() << endl;
 
         std::vector<BString> paths =
             url.path().split('/');

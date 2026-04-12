@@ -35,7 +35,7 @@ test:	TEST=test
 test:	$(OUTPUT)
 test:	stop
 	@echo "Testing on port $(PORT)"
-	$(OUTPUT) -port $(PORT) -unlock -test
+	$(OUTPUT) -port $(PORT) -test
 	$(OUTPUT) -port $(PORT) &
 
 trace:	$(OUTPUT)
