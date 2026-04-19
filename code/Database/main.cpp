@@ -83,9 +83,14 @@ int main(int argc, const char* argv[])
         origin = argv[originArg + 1];
     }
     
-    cout << "Using origin " << origin << endl;
+    
     
     BeeFishWeb::URL url(origin);
+    JSONPath path =
+            database.host(url.origin())
+            [url.path().substr(1)];
+            
+    cout << "Using origin " << path.toString() << endl;
     
     bool propertiesArg =
         (hasArg(argc, argv, "-properties") != -1);
@@ -150,10 +155,7 @@ int main(int argc, const char* argv[])
     if (input)
     {
         
-        JSONPath inputPath =
-            database.host(url.origin())
-            [url.path()];
-        JSONPathParser parser(inputPath, clog);
+        JSONPathParser parser(path, clog);
         parser.read(cin);
     }
     
@@ -168,7 +170,7 @@ int main(int argc, const char* argv[])
     if (output)
     {
         
-        cout << database.host(url.origin())[url.path()] << endl;
+        cout << path << endl;
     }
     
 
