@@ -2297,7 +2297,7 @@ assert(success);
 #ifdef JSON_INDEX
         // When compiled with this flag,
         // sizes are consistent
-        const Index SIZE = 1052040;
+        const Index SIZE = 1165080;
 #else
         const Index SIZE = 0;
 #endif

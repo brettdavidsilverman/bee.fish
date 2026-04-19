@@ -242,7 +242,7 @@ using namespace BeeFishDatabase;
                 {
                     // Add token and type
                     BString character = it->str();
-                    if (character == ".")
+                    if (character == "." || character == "_")
                     {
                         if (split.size())
                             tokens.push_back(
