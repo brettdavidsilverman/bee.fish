@@ -18,6 +18,7 @@ namespace BeeFishDatabase
         BString _mutexName;
         named_mutex* _mutex;
         
+        
     public:
         struct ScopedLock
         {
@@ -70,6 +71,7 @@ namespace BeeFishDatabase
         virtual ~LockFile()
         {
             assert(_lockCount == 0);
+            delete _mutex;
              
         }
 

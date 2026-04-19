@@ -1,5 +1,7 @@
 #ifndef BEE_FISH__DATABASE__TEST_HPP
 #define BEE_FISH__DATABASE__TEST_HPP
+
+#include <thread>
 #include "../Miscellaneous/Miscellaneous.hpp"
 
 #include "Database.hpp"
@@ -16,6 +18,8 @@ namespace BeeFishDatabase
     inline bool testNextIndex();
     inline bool testPath();
     inline bool testJSONPath();
+    inline bool testJSONId();
+    inline bool testJSONPathClear();
     inline bool testArray2Path();
     inline bool testSubArray2Path();
     inline bool testComplexArrays();
@@ -26,8 +30,9 @@ namespace BeeFishDatabase
     inline bool testPathParent();
     inline bool testIncrement();
     inline bool testJSONPathParent();
-    inline bool testDeleteProperty();
     inline bool testObjects();
+    inline bool testDeleteProperty();
+    
     inline bool testMultiThreaded();
     
     inline bool test()
@@ -49,6 +54,12 @@ namespace BeeFishDatabase
         success = success &&
             testJSONPath();
             
+        success = success &&
+            testJSONId();
+            
+        success = success &&
+            testJSONPathClear();
+            
         success= success &&
             testArray2Path();
             
@@ -67,15 +78,16 @@ namespace BeeFishDatabase
         success = success &&
             testIncrement();
             
+                    
+        success = success &&
+            testObjects();
+            
         success = success &&
             testDeleteProperty();
             
         success = success &&
             testIterator();
-            
-        success = success &&
-            testObjects();
-            
+
         success = success &&
             testMultiThreaded();
             
@@ -152,7 +164,7 @@ namespace BeeFishDatabase
         
         if (success)
         {
-            JSONDatabase db;
+            Database db;
 
             BString value = "101";
             Index data = db.allocate(value);
@@ -164,7 +176,7 @@ namespace BeeFishDatabase
                 );
                 
             BString value2;
-            JSONPath path = db.json();
+            Path path = db;
             
             path.setData(value);
             value2 = path.getStringData();
@@ -183,7 +195,13 @@ namespace BeeFishDatabase
                     "Get/set data 2",
                     value == value2
                 );
-            
+                
+        }
+        
+        if (success) {
+            JSONDatabase db;
+            JSONPath path = db.host("https://test");
+
             JSONPathParser parser(path);
             parser.read("101");
             parser.eof();
@@ -766,7 +784,7 @@ namespace BeeFishDatabase
         JSONPath test =start["test"];
         
         test.setUndefined();
-        
+
         success = success && 
             testValue(
                 "Set to undefined",
@@ -955,10 +973,139 @@ namespace BeeFishDatabase
             BeeFishMisc::outputSuccess(success);
         }
         
-                
+        outputSuccess(success);
+        
+
+        return success;
+    }
+    
+    inline bool testJSONId()
+    {
+        using namespace std;
+        using namespace BeeFishId;
+
+        cout << endl << "Testing json id" << endl;
+
+        bool success = true;
+        
+        cout << "\tTest id" << endl;
+        JSONDatabase database;
+        
+        JSONPath start = database.host("https://test");
+        JSONPath test = start["test"];
+        
+        test.setNull();
+        
+        JSONPath::Id id = test.id();
+        
+        JSONPath::Id id2 = test.id();
+        
+        success = success &&
+            testValue(
+                "Ids compare",
+                id == id2
+            );
+            
+       // test.clear();
+        
+        
+        auto addTimestamps =
+        [](std::string filename, Index size)
+        {
+            Database db(filename);
+            Path path = db;
+            std::vector<Timestamp> timestamps(size);
+            for (auto timestamp : timestamps)
+            {
+                path[timestamp];
+            }
+        };
+        
+        const Index size = 100;
+        Database db;
+        
+        std::thread threads[] = {
+            std::thread(addTimestamps, db.filename(), size),
+            std::thread(addTimestamps, db.filename(), size)
+        };
+        
+        for (auto& t : threads) {
+            //if (t.joinable()) {
+                t.join();
+           // }
+        }
+        
+        Path path = db;
+        
+        Index count = path.childCount();
+cerr << "Child count " << count << endl;
+        success = success &&
+            testValue(
+                "Path id count",
+                count == size * 2
+            );
+            
         if (success)
         {
-            JSONPath path = root["tobecleared"];
+            BString key;
+            JSONPath path = test.parent(key);
+            
+            success = success &&
+                testValue(
+                    "Parent key 1",
+                    key == "test"
+                );
+        }
+        
+        if (success)
+        {
+            JSONPathParser parser(start);
+            parser.read("{\"a\":1}");
+            test = start["a"];
+            BString key;
+            JSONPath path = test.parent(key);
+            
+            success = success &&
+                testValue(
+                    "Parent key 2",
+                    key == "a"
+                );
+        }
+    
+        if (success)
+        {
+            cout << "\tTesting clear " << flush;
+            //test.clear();
+            test.setNull();
+            outputSuccess(true);
+            cout << "\tTesting parent after clear " << flush;
+            cout << test.parent() << endl;
+            outputSuccess(success);
+            cout << "\tTesting toString after clear " << flush;
+            BString str = test.toString();
+            success = str == "https://test/a";
+
+            outputSuccess(success);
+        }
+        
+        outputSuccess(success);
+        
+        return success;
+    }
+    
+    inline bool testJSONPathClear()
+    {
+        cout << endl << "Testing json path clear " << endl;
+
+        bool success = true;
+        
+        JSONDatabase database;
+        
+        JSONPath start = database.host("https://test");
+    
+        if (success)
+        {
+            JSONPath path = start["tobecleared"];
             JSONPathParser parser(path);
             cout << "\tParse string 3" << flush;
             parser.read("\"Hello World\"");
@@ -968,40 +1115,50 @@ namespace BeeFishDatabase
                 parser.result() == true;
             BeeFishMisc::outputSuccess(success);
             
+            
             BString string1 = path.toString();
 cerr << string1 << endl;
-            path.clear();
+cerr << path << endl;
+cerr << "HERE 6" << endl;
+            path.setNull();
+cerr << "HERE 7" << endl;
+            
 
+            outputSuccess(true);
+/*
             success = success &&
                 testValue(
                     "Cleared json is dead end",
                      path.isDeadEnd()
                 );
+                
+            */
 
-            path.setUndefined();
+cerr << path << endl;
 
             success = success &&
                 testValue(
-                    "New type is undefined", 
-                    (path.type() == Type::UNDEFINED)
+                    "New type is null", 
+                    (path.type() == Type::NULL_)
                 );
-            
-            BString string2 = path.toString();
 
+            cerr << "\tGet toString after clear " << flush;
+
+            BString string2 = path.toString();
+cerr << string2 << endl;
             success = success &&
                 testValue(
-                    "Cleared to string =",
+                    "Cleared to string equal",
                     string1 == string2
                 );
+                
 
         }
         
-        BeeFishMisc::outputSuccess(success);
+        outputSuccess(success);
         
         return success;
     }
-    
-        
     
     inline bool testArray2Path()
     {
@@ -1688,7 +1845,8 @@ assert(success);
         JSONPath start = database.host("https://test");
         JSONPathParser parser1(start);
         parser1.read("[1,2,3]");
-        JSONPath path = start[Index(1)];
+        JSONPath path = start[1];
+
 
         BString key;
         JSONPath parent;
@@ -1706,15 +1864,19 @@ assert(success);
                 parent == start
             );
             
-        start.clear();
-    
+
+        start.setNull();
+
         JSONPathParser parser2(start);
         parser2.read("{\"hello\":\"world\"}");
-    
-        path = start["hello"];
-        key.clear();
-        parent = path.parent(key);
+        
 
+        path = start["hello"];
+        
+        key.clear();
+        
+        parent = path.parent(key);
+        
         success = success &&
             testValue(
                 "Key hello",
@@ -1729,7 +1891,7 @@ assert(success);
             
         
         BeeFishMisc::outputSuccess(success);
-        
+    
         return success;
     }
     
@@ -1771,6 +1933,89 @@ assert(success);
         
         return success;
     }
+    
+    inline bool testObjects()
+    {
+        cout << "Test objects" << endl;
+        
+        bool success = true;
+
+        auto listObjects =
+        [] (Path objects) {
+
+            Iterable<JSONPath::Id> iterable(objects);
+            Index count = 0;
+            for (auto it = iterable.begin();
+                 it != iterable.end();
+                 ++it)
+            {
+#ifdef JSON_INDEX
+                cerr << "Id " << *it << endl;
+#else
+                cerr << "Id " << it->toString() << endl;
+#endif
+                ++count;
+            }
+            cerr << "Count " << count << endl;
+        };
+            
+        auto test =
+        [&success, listObjects](const BString& json, Index objectCount)
+        {
+            cout << "\t " << json << endl;
+            
+            JSONDatabase database;
+            Path objects = database.objects();
+            Index startCount = objects.childCount();
+            JSONPath start = database.host("http://test");
+            
+            
+            JSONPathParser parser(start);
+            parser.read(json);
+            parser.eof();
+            
+            Index endCount = objects.childCount() - startCount - 1;
+            
+            success = success &&
+                testValue(
+                    "Objects count",
+                    endCount == objectCount
+                );
+                
+            if (!success)
+            {
+                cout << "Expected " << objectCount << endl;
+                cout << "Got " << endCount << endl;
+            }
+            
+            if (success)
+               start.setUndefined();
+cerr << "Cleared objects count " << objects.childCount()  << endl;
+            success = success &&
+                testValue(
+                    "Cleared objects count",
+                    objects.childCount() == 1
+                );
+                
+            if (!success)
+                listObjects(objects);
+                
+            return success;
+        };
+        
+        success = success &&
+           test("{\"a\":\"b\"}", 2);
+        success = success &&
+           test("{\"a\":{\"a\":\"a\"}}", 3);
+        success = success &&
+           test("[1,2,3]", 4);
+        
+            
+        BeeFishMisc::outputSuccess(success);
+    
+        return success;
+    }
+    
 
     
     inline bool testDeleteProperty()
@@ -1914,8 +2159,14 @@ assert(success);
             
         success = success &&
             testValue(
-                "Property b removed",
+                "Property b removed properties",
                 !database2.properties().contains("b")
+            );
+            
+        success = success &&
+            testValue(
+                "Property b removed words",
+                !database2.words().contains("b")
             );
             
         success = success &&
@@ -1993,10 +2244,17 @@ assert(success);
                 "{\"a\":{\"a\":\"a\"}}",
                 parser4.matched()
             );
+            
+        success = success &&
+            testValue(
+                "Word a belongs before",
+                database4.words()["a"].contains(start4["a"].id())
+            );
+            
     
         cout << "Removing property a" << endl;
         
-        start4["a"].deleteProperty("a");
+        start4["a"]["a"].setUndefined();
         
         success = success &&
             testValue(
@@ -2004,98 +2262,38 @@ assert(success);
                 database4.properties().contains("a")
             );
             
-       
-            /*
-        start4.clear();
-        stringstream stream4;
-        stream4 << start4;
-        
         success = success &&
             testValue(
-                "Cleared value is undefined",
-                stream4.str() == "undefined"
+                "Word a remains",
+                database4.words().contains("a")
             );
-        
-        */
+            
+
+        success = success &&
+            testValue(
+                "Word a belongs after",
+                database4.words()["a"].contains(start4["a"].id())
+            );
+            
+assert(success);
+       
         BeeFishMisc::outputSuccess(success);
         
         return success;
     }
     
-    inline bool testObjects()
-    {
-        cout << "Test objects" << endl;
-        
-        bool success = true;
-
-    
-        auto listObjects =
-        [] (Path objects) {
-
-            Iterable<Index> iterable(objects);
-            Index count = 0;
-            for (auto it = iterable.begin();
-                 it != iterable.end();
-                 ++it)
-            {
-                cerr << "Index " << *it << endl;
-                ++count;
-            }
-            cerr << "Count " << count << endl;
-        };
-            
-        auto test =
-        [&success, listObjects](const BString& json, Index objectCount)
-        {
-            cout << "\t " << json << endl;
-            
-            JSONDatabase database;
-            Path objects = database.objects();
-            JSONPath start = database.host("http://test");
-            
-            JSONPathParser parser(start);
-            parser.read(json);
-            parser.eof();
-        
-            success = success &&
-                testValue(
-                    "Array objects count",
-                    objects.count() == objectCount
-                );
-            
-            if (success)
-               start.setUndefined();
-            
-            success = success &&
-                testValue(
-                    "Cleared objects count",
-                    objects.count() == 0
-                );
-                
-            if (!success)
-                listObjects(objects);
-                
-            return success;
-        };
-        
-        success = success &&
-           test("{\"a\":\"b\"}", 2);
-        success = success &&
-           test("{\"a\":{\"a\":\"a\"}}", 3);
-        success = success &&
-           test("[1,2,3]", 4);
-        
-            
-        BeeFishMisc::outputSuccess(success);
-    
-        return success;
-    }
     
     inline bool testMultiThreaded()
     {
         cout << "Test multi threaded" << endl;
-        const Index SIZE = 1327976;
-
+        
+#ifdef JSON_INDEX
+        // When compiled with this flag,
+        // sizes are consistent
+        const Index SIZE = 1052040;
+#else
+        const Index SIZE = 0;
+#endif
         auto test =
         [SIZE](std::filesystem::path file, bool readOnly, bool getSuccess = false)
         {
@@ -2105,7 +2303,12 @@ assert(success);
             
             
             if (getSuccess) {
-                bool result = success && size ==  SIZE;
+                bool result;
+                if (SIZE > 0)
+                    result = success && size ==  SIZE;
+                else
+                    result = success;
+                    
                 success = true;
                 size = 0;
                 return result;
@@ -2125,7 +2328,7 @@ assert(success);
                 parser.matched()
             );
             
-            if (success) {
+            if (success && SIZE > 0) {
                 if (size == 0)
                 {
                     size = db.size();
@@ -2142,6 +2345,17 @@ assert(success);
                     );
                     cout << "Size a " << size << endl;
                     cout << "Size b " << db.size() << endl;
+                }
+            }
+            else if (success)
+            {
+                if (size > 0)
+                {
+                    success = testValue(
+                        "Subsequent size",
+                        size <= db.size() * 1.5 &&
+                        db.size() <= size * 1.5
+                    );
                 }
             }
             

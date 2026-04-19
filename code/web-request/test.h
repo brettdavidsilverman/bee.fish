@@ -631,7 +631,7 @@ using namespace BeeFishTest;
         if (ok)
         {
             string request =
-            "GET /client/storage/?id=/jHJPjHicH4nI+Jxk+Jw+Jk+JPhycZPhycY+HJxPhycPhyPhxk+HD4PJxjycTyY8ORA= HTTP/1.1";
+            "GET /client/storage/?id=/jHJPjHicH8TkfE4yfE4fEyfEx8R8OTjJ8OTifDkx8OR8OMnw4x8OHwyfDHwnweTjJ5OMeTieTHjHJIA HTTP/1.1";
             WebRequest webRequest(false);
             JSONParser parser(webRequest);
             parser.read(request);
@@ -652,7 +652,7 @@ using namespace BeeFishTest;
             
             ok = ok && testResult(
                 "search has id=*",
-                 id.key() ==  "/jHJPjHicH4nI+Jxk+Jw+Jk+JPhycZPhycY+HJxPhycPhyPhxk+HD4PJxjycTyY8ORA="
+                 id.key() ==  "/jHJPjHicH8TkfE4yfE4fEyfEx8R8OTjJ8OTifDkx8OR8OMnw4x8OHwyfDHwnweTjJ5OMeTieTHjHJIA"
             );
             
             if (!ok)

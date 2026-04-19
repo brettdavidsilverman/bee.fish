@@ -511,22 +511,30 @@ namespace BeeFishQuery {
         
         Database db;
         Words words(db);
+        words = words["words"];
         Path bounds = db;
         bounds = bounds["bounds"];
+        JSONPath::Id ids[5];
         
-        words["one"][0];
-        words["one"][1];
-        words["one"][2];
-        words["one"][3];
-        words["two"][2];
-        words["two"][3];
-        words["two"][4];
+#ifdef JSON_INDEX
+        Index count = 0;
+        for (auto& id : ids)
+        {
+            id = count++;
+        }
         
-        bounds[0];
-        bounds[1];
-        bounds[2];
-        bounds[3];
-        bounds[4];
+#endif
+
+        words["one"][ids[0]];
+        words["one"][ids[1]];
+        words["one"][ids[2]];
+        words["one"][ids[3]];
+        words["two"][ids[2]];
+        words["two"][ids[3]];
+        words["two"][ids[4]];
+        
+        for (auto id : ids)
+            bounds[id];
         
         Path one = words["one"];
         Path two = words["two"];
@@ -540,12 +548,13 @@ namespace BeeFishQuery {
         
         if (ok) 
         {
-            int min = andPath.min<Index>();
+            JSONPath::Id min = 
+                andPath.min<JSONPath::Id>();
             
             ok = ok &&
                 testResult(
                     "AndPath Minimum", 
-                    min == 2
+                    min == ids[2]
                 );
         }
         
@@ -568,7 +577,7 @@ namespace BeeFishQuery {
         
         if (ok)
         {
-            vector<Index> array;
+            vector<JSONPath::Id> array;
 
             for (auto value : andPath)
             {
@@ -582,12 +591,13 @@ namespace BeeFishQuery {
 
             ok = ok &&
                 testResult("AndPath first result",
-                    array[0] == 2
+                    array[0] == ids[2]
                 );
                 
             ok = ok &&
                 testResult("AndPath second result",
-                    array[1] == 3
+                    array[1] == ids[3]
+                    
                 );
                 
         }
@@ -608,17 +618,24 @@ namespace BeeFishQuery {
         Database db;
         Words words(db);
         Path bounds = db;
-        words["one"][0];
-        words["two"][1];
-        words["three"][2];
+        
+        JSONPath::Id ids[3];
+        
+#ifdef JSON_INDEX
+        Index count = 0;
+        for (auto& id : ids)
+            id = ++count;
+#endif
+        words["one"][ids[0]];
+        words["two"][ids[1]];
+        words["three"][ids[2]];
         
         
         bounds = bounds["bounds"];
         
-        bounds[0];
-        bounds[1];
-        bounds[2];
-        
+        for (auto id : ids)
+            bounds[id];
+
         Path one = words["one"];
         Path two = words["two"];
         Path three = words["three"];
@@ -632,23 +649,25 @@ namespace BeeFishQuery {
         
         if (ok) 
         {
-            int min = orPath.min<Index>();
+            JSONPath::Id min = 
+                orPath.min<JSONPath::Id>();
             
             ok = ok &&
                 testResult(
                     "OrPath Minimum", 
-                    min == 0
+                    min == ids[0]
                 );
         }
         
         if (ok) 
         {
-            int max = orPath.max<Index>();
+            JSONPath::Id max =
+                orPath.max<JSONPath::Id>();
             
             ok = ok &&
                 testResult(
                     "OrPath Maximum", 
-                    max == 2
+                    max == ids[2]
                 );
         }
         
@@ -660,7 +679,7 @@ namespace BeeFishQuery {
             orPath.save();
 
             bool result = orPath.next(stack);
-            Index value;
+            JSONPath::Id value;
             stack >> value;
             stack.reset();
             
@@ -673,7 +692,7 @@ namespace BeeFishQuery {
             ok = ok &&
                 testResult(
                     "OrPath next 1 value", 
-                    value == 0
+                    value == ids[0]
                 );
                 
                 
@@ -693,14 +712,14 @@ namespace BeeFishQuery {
                     ok = ok &&
                         testResult(
                             "OrPath next 2 value", 
-                            value == 2
+                            value == ids[2]
                         );
                 }
                     
             }
     
             if (ok) {
-                cout << stack << endl;
+        
                 result = orPath.next(stack);
 
                 ok = ok &&
@@ -716,7 +735,7 @@ namespace BeeFishQuery {
         
         if (ok)
         {
-            vector<Index> array;
+            vector<JSONPath::Id> array;
 
             for (auto value : orPath)
             {
@@ -730,12 +749,12 @@ namespace BeeFishQuery {
 
             ok = ok &&
                 testResult("OrPath first result",
-                    array[0] == 0
+                    array[0] == ids[0]
                 );
                 
             ok = ok &&
                 testResult("OrPath second result",
-                    array[1] == 2
+                    array[1] == ids[2]
                 );
                 
                 
@@ -760,14 +779,21 @@ namespace BeeFishQuery {
         Words words = path["words"];
         Bounds bounds = path["bounds"];
         
-        words["one"][0];
-        words["one"][2];
-        words["two"][1];
-        words["three"][2];
+        JSONPath::Id ids[3];
         
-        bounds[0];
-        bounds[1];
-        bounds[2];
+#ifdef JSON_INDEX
+        Index count = 0;
+        for (auto& id : ids)
+            id = ++count;
+            
+#endif
+        words["one"][ids[0]];
+        words["one"][ids[2]];
+        words["two"][ids[1]];
+        words["three"][ids[2]];
+        
+        for (auto id : ids)
+            bounds[id];
         
         Path one = words["one"];
         Path two = words["two"];
@@ -781,12 +807,13 @@ namespace BeeFishQuery {
         
         if (ok) 
         {
-            int min = notPath.min<Index>();
+            JSONPath::Id min = 
+                notPath.min<JSONPath::Id>();
             
             ok = ok &&
                 testResult(
                     "NotPath Minimum", 
-                    min == 1
+                    min == ids[1]
                 );
         }
         
@@ -797,12 +824,12 @@ namespace BeeFishQuery {
             notPath.goToMax(stack);
             notPath.restore();
 
-            int max = notPath.max<Index>();
+            JSONPath::Id max = notPath.max<JSONPath::Id>();
             
             ok = ok &&
                 testResult(
                     "NotPath Maximum", 
-                    max == 1
+                    max == ids[1]
                 );
         }
         
@@ -814,7 +841,7 @@ namespace BeeFishQuery {
             notPath.save();
 
             bool result = notPath.next(stack);
-            Index value;
+            JSONPath::Id  value;
             stack >> value;
             stack.reset();
             
@@ -827,7 +854,7 @@ namespace BeeFishQuery {
             ok = ok &&
                 testResult(
                     "NotPath next 1 value", 
-                    value == 1
+                    value == ids[1]
                 );
 
     
@@ -847,7 +874,7 @@ namespace BeeFishQuery {
         
         if (ok)
         {
-            vector<Index> array;
+            vector<JSONPath::Id> array;
 
             for (auto value : notPath)
             {
@@ -862,7 +889,7 @@ namespace BeeFishQuery {
 
             ok = ok &&
                 testResult("NotPath first result",
-                    array[0] == 1
+                    array[0] == ids[1]
                 );
 
         }
@@ -879,11 +906,10 @@ namespace BeeFishQuery {
         
             if (ok)
             {
-                vector<Index> array;
+                vector<JSONPath::Id > array;
 
                 for (auto value : notNotPath)
                 {
-cerr << "NOT NOT VALUE: " << value << endl;
                     array.push_back(value);
                 }
         
@@ -894,12 +920,12 @@ cerr << "NOT NOT VALUE: " << value << endl;
 
                 ok = ok &&
                     testResult("Not NotPath first result",
-                        array[0] == 0
+                        array[0] == ids[0]
                     );
                     
                 ok = ok &&
                     testResult("Not NotPath secondresult",
-                        array[1] == 2
+                        array[1] == ids[2]
                     );
                 
             }
@@ -920,7 +946,7 @@ cerr << "NOT NOT VALUE: " << value << endl;
         
         bool ok  = true;
         auto test =
-        [&db, &words, &bounds](BString input, vector<JSONPath::Id> check) {
+        [&db, &words, &bounds](BString input, JSONPath::Id* ids, vector<Index> check) {
             
             
             cout << input << flush;
@@ -951,7 +977,7 @@ cerr << "NOT NOT VALUE: " << value << endl;
                 {
                     for (unsigned int i = 0; i < values.size() && i < check.size(); ++i)
                     {
-                        if (values[i] != check[i])
+                        if (values[i] != ids[check[i]])
                         {
                             ok = false;
                             break;
@@ -990,32 +1016,37 @@ cerr << "NOT NOT VALUE: " << value << endl;
             return ok;
         };
         
-        words["one"][0];
-        words["one"][1];
-        words["one"][2];
-        words["one"][3];
-        words["two"][2];
-        words["two"][3];
-        words["two"][4];
+        JSONPath::Id ids[5];
+#ifdef JSON_INDEX
+        Index count = 0;
+        for (auto& id : ids)
+            id = ++count;
+#endif
         
-        bounds[0];
-        bounds[1];
-        bounds[2];
-        bounds[3];
-        bounds[4];
+        words["one"][ids[0]];
+        words["one"][ids[1]];
+        words["one"][ids[2]];
+        words["one"][ids[3]];
+        words["two"][ids[2]];
+        words["two"][ids[3]];
+        words["two"][ids[4]];
         
-        ok = ok && test("one", {0,1,2,3});
-        ok = ok && test("two", {2,3,4});
-        ok = ok && test("one and one", {0,1,2,3});
-        ok = ok && test("one and two", {2,3});
-        ok = ok && test("two and two", {2,3,4});
-        ok = ok && test("one and three", {});
-        ok = ok && test("one or two", {0,1,2,3,4});
-        ok = ok && test("not two", {0, 1});
-        ok = ok && test("one and not two", {0, 1});
-        ok = ok && test("not not two", {2,3,4});
-        ok = ok && test("not (not two)", {2,3,4});
-        ok = ok && test("three", {});
+        for (auto& id : ids)
+            bounds[id];
+            
+        
+        ok = ok && test("one", ids, {0,1,2,3});
+        ok = ok && test("two", ids, {2,3,4});
+        ok = ok && test("one and one", ids, {0,1,2,3});
+        ok = ok && test("one and two", ids, {2,3});
+        ok = ok && test("two and two", ids, {2,3,4});
+        ok = ok && test("one and three", ids, {});
+        ok = ok && test("one or two", ids, {0,1,2,3,4});
+        ok = ok && test("not two", ids, {0, 1});
+        ok = ok && test("one and not two", ids, {0, 1});
+        ok = ok && test("not not two", ids, {2,3,4});
+        ok = ok && test("not (not two)", ids, {2,3,4});
+        ok = ok && test("three", ids, {});
         
         assert(ok);
         
@@ -1046,7 +1077,7 @@ cerr << "NOT NOT VALUE: " << value << endl;
             
             
             Path words = db.words();
-            Path objects = db.objects()[root][OBJECT_CHILDREN];
+            Path objects = db.objects()[root.id()];
             
         
             

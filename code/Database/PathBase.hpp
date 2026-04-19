@@ -375,7 +375,7 @@ namespace BeeFishDatabase {
             }
 
             // Arrow operator (->)
-            pointer operator->() const 
+            pointer operator->()
             {
                 return &_item; 
             }

@@ -581,7 +581,7 @@ public:
 
     }
 
-    virtual void clear()
+    void clear()
     {
 
         Path path = *this;
@@ -611,7 +611,9 @@ public:
 
         Path path = *this;
 
-
+        if (!Path::contains(value))
+            return;
+            
         Stack stack;
         stack << value;
 
@@ -660,7 +662,7 @@ public:
 
 public:
 
-    Index count()
+    Index childCount()
     {
         Index count = 0;
         Stack stack;

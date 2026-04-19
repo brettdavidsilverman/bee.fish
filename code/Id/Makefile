@@ -16,6 +16,12 @@ debug:	DEBUG = debug
 debug:	CFLAGS += -Og -g -D DEBUG
 debug:	$(OUTPUT)
 
+
+trace:	$(OUTPUT)
+	rm -f trace.txt
+	- valgrind --log-file="trace.txt" --track-origins=yes --leak-check=yes -s $(OUTPUT) -test
+	cat trace.txt
+	
 clean:
 	rm -f $(OUTPUT)
 	rm -f callgrind.out.*

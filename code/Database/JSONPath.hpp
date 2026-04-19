@@ -1,5 +1,6 @@
 #ifndef BEE_FISH_DATABASE_JSON_PATH_HPP
 #define BEE_FISH_DATABASE_JSON_PATH_HPP
+#include "../Id/Id.hpp"
 #include "../json/json.h"
 #include "../json/json-parser.h"
 #include "../Database/DatabaseBase.hpp"
@@ -28,12 +29,18 @@ public:
     inline static const Index PROPERTIES = 1;
     inline static const Index POSITIONS = 2;
     inline static const Index CASCADE = 3;
-    inline static const Index CHILDREN = 4;
+    inline static const Index ID = 4;
+    inline static const Index CHILDREN = 5;
 public:
+#ifdef JSON_INDEX
     typedef Index Id;
-
+#else
+    typedef BeeFishId::Timestamp Id;
+#endif
+    
     using Path::contains;
     using Path::clear;
+    
 
 
     JSONPath()
@@ -45,6 +52,18 @@ public:
     {
 
     }
+    
+#ifndef JSON_INDEX
+    JSONPath(JSONDatabase& database, Id id) :
+        Path(
+            database, 
+            database.objects()
+                [id].getData<Index>()
+        )
+    {
+
+    }
+#endif
 
     JSONPath(JSONDatabase& database, const Path& start) :
         Path(database, start.index())
@@ -71,8 +90,55 @@ public:
 
     Id id()
     {
-        return index();
+        //return index();
+        
+        Path path = *this;
+        path = path[ID];
+        
+        assert(path.hasData());
+
+        return path.getData<Id>();
+        
     }
+    
+#ifdef JSON_INDEX
+    Id setId()
+    {
+        Id id = index();
+        return setId(id);
+    }
+    
+    Id setId(const Id& id)
+    {
+        Path path = *this;
+        path = path[ID];
+        assert(!path.hasData());
+
+        path.setData<Id>(id);
+        
+        return id;
+    }
+    
+#else
+    Id setId(const Id& id = Id())
+    {
+        Path path = *this;
+        path = path[ID];
+        assert(!path.hasData());
+
+        path.setData<Id>(id);
+        
+        return id;
+    }
+#endif
+    
+    bool hasId()
+    {
+        Path path = *this;
+        path = path[ID];
+        return path.hasData();
+    }
+    
 
     Path properties()
     {
@@ -88,8 +154,8 @@ public:
     JSONPath operator [] (const BString& property)
     {
        // LockFile::ScopedLock lock(database());
-
         setType(Type::OBJECT);
+
 
         Index position =
             getObjectPropertyPosition(property);
@@ -98,7 +164,7 @@ public:
 
         JSONPath json = getChildren()[position];
 
-        json.cascadeProperties();
+       // json.cascadeProperties();
 
         return json;
 
@@ -137,6 +203,11 @@ public:
                     while (index > count)
                     {
                         JSONPath child = children[++count];
+
+                        child.setId();
+                        
+//
+child.cascadeProperties();
                     }
                 }
                 else
@@ -148,7 +219,8 @@ public:
 
         JSONPath json = getChildren()[index];
 
-        json.cascadeProperties();
+      
+// json.cascadeProperties();
 
         return json;
     }
@@ -182,7 +254,9 @@ public:
                                 property.substr(1, property.length() - 2)
                                 .unescape();
                         }
-                        addWords(property, false);
+            
+//addWords(property, false);
+addWords(property, false);
                     }
                 }
             }
@@ -194,76 +268,79 @@ protected:
     
     void addObject()
     {
+        
+        Id id = JSONPath::id();
+
         Path objects =
             database().objects();
             
-        objects[*this];
-        
-        // Add this child
-        objects[*this][OBJECT_CHILDREN][*this];
-
         // Add this child to all parents
         JSONPath json = *this;
         while (!json.isRoot())
         {
-
-            objects[json]
-               [OBJECT_CHILDREN]
-               [*this];
+            objects[json.id()][id];
             json = json.parent();
         }
-
+        
+        objects[id].setData<Index>(index());
     }
     
     void removeObject()
     {
 
+        Id id = JSONPath::id();
+
         Path objects =
             database().objects();
             
         JSONPath json = *this;
         
-    
         // Remove this child from its parents
-        while (!json.isRoot())
+        while (!json.isRoot() )
         {
-            objects[json][OBJECT_CHILDREN]
-                .clear(*this);
+            objects[json.id()].clear(id);
             json = json.parent();
         }
-        
+
         // Remove this child
-        objects.clear(*this);
+        objects.clear(id);
     }
     
     void setType(Type type)
     {
+        LockFile::ScopedLock lock(database());
+
         if (!hasData())
         {
-            
             setData<Type>(type);
-            
-            if (!isRoot())
-                addObject();
-            
+
+            if (!hasId())
+                setId();
+                
+            addObject();
+                
         }
         else if (JSONPath::type() != type)
         {
-            LockFile::ScopedLock lock(database());
-            if (JSONPath::type() != type)
-            {
-                clear();
-                assert(isDeadEnd());
-                setData<Type>(type);
-                if (!isRoot())
-                    addObject();
-                
-            }
+            Id id = JSONPath::id();
+            
+            clear();
+            assert(isDeadEnd());
+            setData<Type>(type);
+
+            setId(id);
+            
+            addObject();
         }
 
         assert(JSONPath::type() == type);
+        
+        assert(hasId());
+
+        
 
     }
+    
 
 public:
 
@@ -272,20 +349,25 @@ public:
     {
         LockFile::ScopedLock lock(database());
 
-        if (type() == Type::UNDEFINED)
+        if (type() == Type::UNDEFINED) {
             return;
-
-        setType(Type::UNDEFINED);
-
+        }
+        
         if (!isRoot())
         {
             BString property;
-            JSONPath path = parent(property);
-            if (path.type() == Type::OBJECT)
-                path.deleteProperty(property);
-            else if (path.type() == Type::ARRAY)
+            JSONPath parent =
+                JSONPath::parent(property);
+            if (parent.type() == Type::OBJECT) 
+            {
+                parent.deleteProperty(property);
+            }
+            else if (parent.type() == Type::ARRAY)
                 setType(Type::NULL_);
+            else
+                setType(Type::UNDEFINED);
         }
+        
     }
 
     void setNull()
@@ -337,8 +419,10 @@ public:
     void setObject()
     {
         LockFile::ScopedLock lock(database());
+
         setType(Type::OBJECT);
-    }
+        
+    };
 
     void setArray()
     {
@@ -349,10 +433,10 @@ public:
 
     JSONPath parent() {
         BString key;
-        return parent(key);
+        return parent(key, false);
     }
 
-    JSONPath parent(BString& key) {
+    JSONPath parent(BString& key, bool fetchKey = true) {
         Path path = *this;
 
         Index position = -1;
@@ -371,25 +455,28 @@ public:
         Type type =
             path.getData<Type>();
 
-        if (type == Type::ARRAY)
+        if (fetchKey)
         {
-            stringstream stream;
-            stream << position;
-            key = stream.str();
-        }
-        else if (type == Type::OBJECT)
-        {
-            JSONPath object = path;
-            key = object.getObjectProperty(position);
-            if (key.isDigitsOnly())
+            if (type == Type::ARRAY)
             {
-                key = BString("\"") + key + BString("\"");
+                stringstream stream;
+                stream << position;
+                key = stream.str();
+            }
+            else if (type == Type::OBJECT)
+            {
+                JSONPath object = path;
+                key = object.getObjectProperty(position);
+                if (key.isDigitsOnly())
+                {
+                    key = BString("\"") + key + BString("\"");
+                }
+                else
+                    key = key.escape();
             }
             else
-                key = key.escape();
+                assert(false);
         }
-        else
-            assert(false);
 
         return path;
     }
@@ -516,7 +603,7 @@ public:
 
         bool contains =
             getObjectProperties()
-            .contains(path.index());
+            .contains(path);
 
         return contains;
 
@@ -573,33 +660,21 @@ public:
                 // add all path properties except the
                 // first (host)
 
+                JSONPath childPath = getChildren()[position];
+                childPath.setId();
+// childPath.addObject();
+        
+        
+//
+childPath.cascadeProperties();
 
-                JSONPath path = *this;
-                while (!path.isRoot() &&
-                       !path.parent().isRoot())
-                {
-                    BString property;
-                    path = path.parent(property);
-                    if (!property.isDigitsOnly())
-                    {
-                        if (property.startsWith("\"") &&
-                                property.endsWith("\""))
-                        {
-                            property =
-                                property.substr(1, property.length() - 2)
-                                .unescape();
-                        }
-                        addWords(property, false);
-                    }
-
-                }
             }
 
         }
 
         position = objectPropertyPath.getData<Index>();
 
-
+        
         return position;
     }
 
@@ -665,7 +740,6 @@ public:
 
     Path getObjectProperties()
     {
-//setType(Type::OBJECT);
         Path path = *this;
         path << PROPERTIES;
         return path;
@@ -696,17 +770,12 @@ public:
         if (!path.hasData())
             return Type::UNDEFINED;
 
-        Type type =
-            path.getData<Type>();
-        return type;
+        return path.getData<Type>();
     }
 
-public:
-
-    virtual void clear() override
+private:
+    void clear()
     {
-
-
         switch (type())
         {
         case Type::STRING:
@@ -755,31 +824,33 @@ public:
             throw runtime_error("Unknown type");
         }
 
+        
+        removeObject();
+        
         assert(getChildren().isDeadEnd());
 
-        if (!isRoot()) {
-            removeObject();
-        }
-            
-        
+
         Path::clear();
         assert(isDeadEnd());
-
+        
+        
     }
 
+public:
     void deleteProperty(const BString& property)
     {
 
-        //if (!contains(property))
-        //    return;
-
+        if (!contains(property))
+            return;
+            
         JSONPath json = (*this)[property];
 
 
-        json.removeWords(property, false);
+//json.removeWords(property, false);
 
         // Remove parent properties
         JSONPath path = json;
+
         while (!path.isRoot() &&
                !path.parent().isRoot())
         {
@@ -793,7 +864,8 @@ public:
                     property = property.substr(1, property.size() - 2);
                     property = property.unescape();
                 }
-                removeWords(property, false);
+//removeWords(property, false);
+json.removeWords(property, false);
             }
 
         }
@@ -817,13 +889,11 @@ public:
         --getChildren();
     }
 
+private:
     void addWords(const BString& word, bool addToParents)
     {
 
         Path words = database().words();
-        Path objects = database().objects();
-
-        Path path = *this;
 
         std::vector<BString> tokens =
             word.tokenise();
@@ -832,6 +902,7 @@ public:
         for (auto word : tokens)
         {
             Path wordPath = words[word];
+            
             JSONPath json = *this;
 
             if (addToParents)
@@ -839,14 +910,12 @@ public:
                 while (!json.isRoot() &&
                        !json.parent().isRoot())
                 {
-                    objects[json][OBJECT_WORDS][wordPath];
-                    wordPath[json];
+                    ++wordPath[json.id()];
                     json = json.parent();
                 }
             }
             else {
-                objects[json][OBJECT_WORDS][wordPath];
-                wordPath[json];
+                ++wordPath[json.id()];
             }
 
         }
@@ -875,15 +944,14 @@ public:
                     while  (!json.isRoot() &&
                             !json.parent().isRoot())
                     {
-                        Path object =
-                            objects
-                            [json]
-                            [OBJECT_WORDS];
-                            
-                        if (object.contains(wordPath))
+
+                        assert(wordPath.contains(json.id()));
+                        
+                        Index count = --wordPath[json.id()];
+                        
+                        if (count == 0)
                         {
-                            wordPath.clear(json);
-                            object.clear(wordPath);
+                            wordPath.clear(json.id());
                         }
 
                         json = json.parent();
@@ -892,15 +960,16 @@ public:
                 }
                 else
                 {
-                    Path object =
-                        objects
-                        [json]
-                        [OBJECT_WORDS];
-                    if (object.contains(wordPath))
+
+                    assert (wordPath.contains(json.id()));
+                    
+                    Index count = --wordPath[json.id()];
+
+                    if (count == 0)
                     {
-                        wordPath.clear(json);
-                        object.clear(wordPath);
+                        wordPath.clear(json.id());
                     }
+
                 }
 
 
@@ -915,45 +984,6 @@ public:
         }
 
     }
-/*
-    std::vector<BString> tokenise(BString word)
-    {
-        static const char* _deliminators =
-            " \r\n\v\t()\".,!?{}+:; /";
-
-        char* str = word.data();
-        char *saveptr;
-
-        char* token =
-            strtok_r(str, _deliminators, &saveptr);
-
-        std::vector<BString> words;
-
-        // Loop through all remaining tokens
-        while (token != nullptr)
-        {
-            if (strlen(token))
-            {
-                words.push_back(token);
-            }
-            token = strtok_r(nullptr, _deliminators, &saveptr);
-        }
-
-
-        // 1. Sort words
-        std::sort(words.begin(), words.end());
-
-        // 2. Remove consecutive duplicates: v becomes {1, 2, 3, 4, 5, ?, ?, ?, ?, ?}
-        //    'last' points to the first '?'
-        auto last = std::unique(words.begin(), words.end());
-
-        // 3. Erase the extra elements
-        words.erase(last, words.end());
-
-        return words;
-    }
-
-*/
 
     virtual void write(ostream& out, Index tabCount = 0)
     {

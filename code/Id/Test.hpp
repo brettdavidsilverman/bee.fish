@@ -1,5 +1,7 @@
 #ifndef BEE_FISH_ID__TEST_HPP
 #define BEE_FISH_ID__TEST_HPP
+#include <mutex>
+#include <thread>
 
 #include "Id.hpp"
 #include "../test/test.h"
@@ -8,93 +10,169 @@ using namespace BeeFishTest;
 
 namespace BeeFishId
 {
-   inline bool testId();
-   inline bool testIds();
-   
-   inline bool test()
-   {
-   
-      bool ok = true;
-      
-      ok = ok && testId();
-      ok = ok && testIds();
-      
-      if (ok)
-         cout << "SUCCESS" << endl;
-      else
-         cout << "FAIL" << endl;
-         
-      return ok;
-   }
-   
-   inline bool testId()
-   {
-      cout << "Id" << endl;
-      
-      bool ok = true;
-      
-      Id id = Id::fromKey("/jHiY+MeJxPjHicR+J4Y+J4T4nJw+JyY+JyPicY+JxPiPhycY+HJxPhyY+HI+HE+GT4TycZPJw8Tk4mA");
+inline bool testTimestamp();
+inline bool testTimestamps();
+inline bool testId();
+inline bool testIds();
 
-      ok &= testResult(
-         "Id from key",
-         (id._name == "bee")
-      );
-      
-      cout << endl;
-      
-      return ok;
-   }
-   
-   inline bool testIds()
-   {
-      cout << "Testing large array of ids " << flush;
-      ofstream ofile("test.txt");
-      vector<Id> array(1000);
-      map<std::string, int> map;
-      
-      for (Id& id : array)
-      {
-         //cout << id.key() << endl;
-         ofile << id.key() << endl;
-      }
+inline bool test()
+{
 
-      ofile << endl;
+    bool ok = true;
+    ok = ok && testTimestamp();
+    ok = ok && testTimestamps();
+    ok = ok && testId();
+    ok = ok && testIds();
 
-      ofile.close();
+    if (ok)
+        cout << "SUCCESS" << endl;
+    else
+        cout << "FAIL" << endl;
+
+    return ok;
+}
+
+inline bool testTimestamp()
+{
+    cout << "Timestamp" << endl;
+
+    bool ok = true;
+
+    BitStream bits;
+    Timestamp timestamp;
+
+    bits << timestamp;
+
+    bits.reset();
+    Timestamp check;
+    bits >> check;
+
+    ok = testValue(
+             "Timestamp equal",
+             (check == timestamp)
+         );
+
+    Timestamp timestamp1;
+    Timestamp timestamp2;
+
+    BitStream bits1;
+    bits1 << timestamp1;
+    assert(bits1.count() == 0);
 
 
-      ifstream ifile("test.txt");
-      string key;
-      bool duplicates = false;
-      
-      for (;;) {
-         getline(ifile, key);
-         if (key == "")
-            break;
-         if (map.count(key) == 0)
-            map[key] = 1;
-         else {
-            map[key]++;
-            cout << "Duplicate key" << endl;
-            duplicates = true;
-         }
-         
-         Id id = Id::fromKey(key);
-         //cout << id.toString() << endl;
-      }
+    BitStream bits2;
+    bits2 << timestamp2;
+    assert(bits2.count() == 0);
+    
+    Timestamp timestamp3;
+    Timestamp timestamp4;
 
-      ifile.close();
-      
-      remove("test.txt");
-      
-      bool ok = !duplicates;
-      
-      BeeFishMisc::outputSuccess(ok);
-      
-      return ok;
-   
-   }
-   
+    bits1.reset();
+    bits1 >> timestamp3;
+    assert(bits1.count() == 0);
+    assert(timestamp3 == timestamp1);
+
+    bits2.reset();
+    bits2 >> timestamp4;
+    assert(bits2.count() == 0);
+    assert(timestamp4 == timestamp2);
+
+
+    return ok;
+
+}
+
+inline bool testTimestamps()
+{
+    cout << "Testing large array of timestamps " << endl;
+    const int size = 1000;
+    std::mutex mutex;
+    map<std::string, int> map;
+    auto loadMap =
+    [size, &map, &mutex]() {
+        vector<Timestamp> array(size);
+        std::scoped_lock lock(mutex);
+        for (Timestamp& timestamp : array)
+        {
+            auto it = map.find(timestamp.toData());
+            if (it != map.end()) {
+                cerr << "Duplicate " << timestamp << endl;
+            }
+            map[timestamp.toData()] = 0;
+        }
+    };
+
+    
+    std::thread threads[] =
+    {
+        std::thread(loadMap),
+        std::thread(loadMap)
+    };
+    
+    threads[0].join();
+    threads[1].join();
+    
+    cerr << "Timestamp " << map.size() << endl;
+    
+    bool ok = testValue(
+        "Timestamps has all with no duplicates",
+        map.size() == size * 2
+    );
+
+    BeeFishMisc::outputSuccess(ok);
+
+    return ok;
+
+}
+
+
+inline bool testId()
+{
+    cout << "Id" << endl;
+
+    bool ok = true;
+
+    Id id("bee");
+
+
+    Id id2 = Id::fromKey(
+                 id.key()
+             );
+
+    ok &= testResult(
+              "Id from key",
+              (id2._name == "bee")
+          );
+
+    cout << endl;
+
+    return ok;
+}
+
+inline bool testIds()
+{
+    cout << "Testing large array of ids " << endl;
+    const int size = 1000;
+    vector<Id> array(size);
+    map<std::string, int> map;
+
+    for (Id& id : array)
+    {
+        map[id.toData()] = 0;
+    }
+
+    
+    bool ok = testValue(
+        "Map has all with no duplicates",
+        map.size() == size
+    );
+
+    BeeFishMisc::outputSuccess(ok);
+
+    return ok;
+
+}
+
 
 }
 

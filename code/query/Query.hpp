@@ -672,7 +672,7 @@ public:
         Expression(
             path.database(),
             path.database().words(),
-            path.database().objects()[path][OBJECT_CHILDREN]
+            path.database().objects()[path.id()]
         )
     {
     }
