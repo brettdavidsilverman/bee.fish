@@ -343,7 +343,7 @@ namespace BeeFishDatabase {
     public:
         template<typename T>
         class PathIterator {
-        protected:
+        public:
             PathBase* _path = nullptr; // The underlying pointer that the iterator wraps
             T _item;
             Stack _stack;
@@ -360,6 +360,7 @@ namespace BeeFishDatabase {
             // Constructor
             PathIterator() {
             }
+            
             
             PathIterator(PathBase* path) :
                 _path(path)
@@ -399,6 +400,16 @@ namespace BeeFishDatabase {
                 tmp.restore();
                 return tmp;
             }
+            
+            void save()
+            {
+                _path->save();
+            }
+            
+            void restore()
+            {
+                _path->restore();
+            }
 
             friend bool operator == (
                 const PathIterator& a,
@@ -422,7 +433,7 @@ namespace BeeFishDatabase {
         
         template<typename T>
         class ReversePathIterator {
-        protected:
+        public:
             PathBase* _path = nullptr; // The underlying pointer that the iterator wraps
             T _item;
             Stack _stack;

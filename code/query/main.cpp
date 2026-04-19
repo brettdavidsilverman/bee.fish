@@ -68,14 +68,18 @@ int main(int argc, const char* argv[]) {
         PathBase* path =
             expression
             .getPath();
+            
         Index count = 0;
         
-        Iterable<Index> jsonMatches(*path);
-        for (auto index : jsonMatches)
+        BeeFishQuery::Iterable
+            jsonMatches(
+                database,
+                *path
+            );
+            
+        for (auto string : jsonMatches)
         {
             if (display) {
-                JSONPath path(database, index);
-                BString string = path.toString();
                 cout << string << endl;
             }
             ++count;

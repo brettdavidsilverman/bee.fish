@@ -2,7 +2,6 @@
 #define BEE_FISH__QUERY__AND_PATH_HPP
 
 #include "../Database/Database.hpp"
-#include "JoinPathBase.hpp"
 
 namespace BeeFishQuery {
 
@@ -11,7 +10,7 @@ using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
 
     class AndPath :
-        public JoinPathBase<JSONPath::Id>
+        public PathBase
     {
     protected:
         PathBase* _a;
@@ -20,9 +19,11 @@ using namespace BeeFishDatabase;
         
     public:
 
-        AndPath( PathBase* a,
-                 PathBase* b,
-                 PathBase* bounds) :
+        AndPath( 
+            PathBase* a,
+            PathBase* b,
+            PathBase* bounds
+        ) :
             _a(a),
             _b(b),
             _bounds(bounds)

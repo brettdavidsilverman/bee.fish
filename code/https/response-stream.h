@@ -128,7 +128,11 @@ namespace BeeFishHTTPS {
                         expression
                         .getPath();
 
-                    Iterable<JSONPath::Id> matches(*path);
+                    BeeFishQuery::Iterable
+                        matches(
+                            *database,
+                            *path
+                        );
                 
                     for (auto it = matches.begin();
                          it != matches.end();
@@ -137,12 +141,8 @@ namespace BeeFishHTTPS {
                         
                         if (!getCount)
                         {
-                            JSONPath json(*database, *it);
-                        
-                            BString string = json.toString();
-                        
                             *this << "   \"" 
-                                  << string.escape() 
+                                  << it->escape() 
                                   << "\"";
     
                             if (++it != matches.end())

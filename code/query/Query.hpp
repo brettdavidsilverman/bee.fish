@@ -15,6 +15,7 @@
 #include "AndPath.hpp"
 #include "OrPath.hpp"
 #include "WordPath.hpp"
+#include "Iterable.hpp"
 
 namespace BeeFishQuery {
 
@@ -333,66 +334,7 @@ class Expression : public BeeFishParser::Match
             
             expression.push_back(this);
         }
-        /*
-        NotItem(
-            Expression& expression,
-            Expression* notExpression) :
-            Item(Item::Type::Not)
-        {
-            assert(notExpression->_stack.size() == 1);
-            IterableItem* item =
-                (IterableItem*)
-                notExpression->_stack[
-                     notExpression->_stack.size() - 1
-                ];
-                
-            IterableItem* notItem =
-                new IterableItem(
-                    new NotPath(
-                        item->_iterable,
-                        new Path(
-                            expression._bounds
-                        )
-                    ),
-                    BString("not ") + item->_text
-                );
-                
-            item->_iterable = nullptr;
-            delete item;
-            notExpression->_stack.pop_back();
-            assert(notExpression->_stack.size() == 0);
-        
-            expression.push_back(notItem);
-            
-            delete this;
-            
-        }
-        
-        NotItem(
-            Expression& expression,
-            const BString& word
-        ):
-            Item(Item::Type::Not)
-        {
-            IterableItem* notItem =
-                new IterableItem(
-                    new NotPath(
-                        new Path(
-                            expression._words[word]
-                        ),
-                        new Path(
-                            expression._bounds
-                        )
-                    ),
-                    BString("not ") + word
-                );
-                
-            expression.push_back(notItem);
-            
-            delete this;
-            
-        }
-        */
+
     };
     
     class ExpressionItem : public Item
@@ -651,7 +593,7 @@ public:
         
     } _stack;
     
-    Database* _database;
+    JSONDatabase* _database;
     Path _words;
     Path _bounds;
     
@@ -660,7 +602,7 @@ public:
         assert(false);
     }
     
-    Expression(Database& database, Path words, Path bounds) :
+    Expression(JSONDatabase& database, Path words, Path bounds) :
         Match(),
         _database(&database),
         _words(words),

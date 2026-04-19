@@ -3,8 +3,6 @@
 
 #include "../Database/Database.hpp"
 
-#include "JoinPathBase.hpp"
-
 namespace BeeFishQuery {
 
 using namespace std;
@@ -12,7 +10,7 @@ using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
 
     class OrPath :
-        public JoinPathBase<JSONPath::Id>
+        public PathBase
     {
     protected:
         PathBase* _a;
@@ -27,9 +25,11 @@ using namespace BeeFishDatabase;
         
     public:
 
-        OrPath(PathBase* a,
-               PathBase* b,
-               PathBase* bounds) :
+        OrPath(
+            PathBase* a,
+            PathBase* b,
+            PathBase* bounds
+        ) :
             _a(a),
             _b(b),
             _bounds(bounds)

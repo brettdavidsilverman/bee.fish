@@ -2,7 +2,6 @@
 #define BEE_FISH__QUERY__WORD_PATH_HPP
 
 #include "../Database/Database.hpp"
-#include "JoinPathBase.hpp"
 
 namespace BeeFishQuery {
 
@@ -11,7 +10,7 @@ using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
 
     class WordPath :
-        public JoinPathBase<JSONPath::Id>
+        public PathBase
     {
     protected:
         PathBase* _a;
@@ -19,8 +18,10 @@ using namespace BeeFishDatabase;
         
     public:
 
-        WordPath( PathBase* a,
-                 PathBase* bounds) :
+        WordPath(
+            PathBase* a,
+            PathBase* bounds
+        ) :
             _a(a),
             _bounds(bounds)
         {

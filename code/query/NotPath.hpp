@@ -2,7 +2,6 @@
 #define BEE_FISH__QUERY__NOT_PATH_HPP
 
 #include "../Database/Database.hpp"
-#include "JoinPathBase.hpp"
 
 namespace BeeFishQuery {
 
@@ -11,7 +10,7 @@ using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
 
     class NotPath :
-        public JoinPathBase<JSONPath::Id>
+        public PathBase
     {
     protected:
         PathBase* _path;
@@ -23,7 +22,10 @@ using namespace BeeFishDatabase;
         
     public:
 
-        NotPath(PathBase* path, PathBase* bounds) :
+        NotPath(
+            PathBase* path,
+            PathBase* bounds
+        ) :
             _path(path),
             _bounds(bounds)
         {
