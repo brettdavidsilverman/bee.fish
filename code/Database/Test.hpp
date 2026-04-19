@@ -1021,20 +1021,27 @@ namespace BeeFishDatabase
             }
         };
         
+
         const Index size = 100;
         Database db;
-        
+        /*
+        cerr << "Press enter to continue" << endl;
+        std::string line;
+        std::getline(std::cin, line);
+        */
         std::thread threads[] = {
             std::thread(addTimestamps, db.filename(), size),
             std::thread(addTimestamps, db.filename(), size)
         };
         
         for (auto& t : threads) {
-            //if (t.joinable()) {
+            if (t.joinable()) {
                 t.join();
-           // }
+            }
         }
         
+        cerr << "Done" << endl;
+    
         Path path = db;
         
         Index count = path.childCount();

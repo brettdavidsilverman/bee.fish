@@ -26,6 +26,9 @@ int main(int argc, const char* argv[])
               << endl
           << "Version: "
               << DATABASE_VERSION
+              << endl
+          << "File: "
+              << DATABASE_FILENAME
               << endl;
 
 
