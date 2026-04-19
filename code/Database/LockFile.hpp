@@ -96,6 +96,30 @@ namespace BeeFishDatabase
             
         }
         
+        static void unlock(const std::string& filename)
+        {
+            std::filesystem::path path(filename);
+            
+            std::hash<std::string> hasher;
+
+            // Since path character '/' isnt allowed
+            // this will use the filename
+            // hash instead
+                
+            std::size_t hashedValue =
+                hasher(path.string());
+            std::stringstream stream;
+            stream << hashedValue;
+            
+            BString mutexName =
+                BString(stream.str()) +
+                BString("LockFile");
+            
+            boost::interprocess::named_mutex::remove(mutexName.c_str());
+            
+
+        }
+        
         
         
         

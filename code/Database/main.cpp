@@ -38,9 +38,7 @@ int main(int argc, const char* argv[])
     if (unlock)
     {
         cout << "Unlocking " << DATABASE_FILENAME << endl;
-        Database db(DATABASE_FILENAME);
-        
-        db.unlock();
+        LockFile::unlock(DATABASE_FILENAME);
         return 0;
     }
     
