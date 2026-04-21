@@ -41,7 +41,7 @@ test:	stop
 trace:	$(OUTPUT)
 trace:	stop
 	rm -f trace.txt
-	- valgrind --log-file="trace.txt" --track-origins=yes --leak-check=yes $(OUTPUT) -port $(PORT) -test
+	- valgrind --log-file="trace.txt" --track-origins=yes -s --leak-check=yes $(OUTPUT) -port $(PORT) -test
 	$(OUTPUT) -port $(PORT) &
 	cat trace.txt
 

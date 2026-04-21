@@ -21,11 +21,11 @@ namespace BeeFishHTTPS {
     inline bool testLogon(const BString& origin);
     inline bool testAllFiles(const BString& origin, string directory);
     inline bool testFile(const BString& origin, filesystem::path file, bool expect = true);
+    inline bool testQueries(const BString& origin);
     
     inline bool test(BString origin) {
-        cout << "Testing HTTPS" << endl;
+        cout << "Testing HTTPS for " << origin << endl;
         bool success = true;
-        
     
         success = success &&
             testLogon(origin);
@@ -34,57 +34,36 @@ namespace BeeFishHTTPS {
         success = success &&
             testAllFiles(origin, TEST_DIRECTORY);
 
-    
-        outputSuccess(success);
-        
-        return success;
-    }
-
-/*
-    bool testURLQuery(Path userData, const BString& url, const BString& queryStr, bool expectedResult, const BString& expectedValue)
-    {
-        cout << "\t" << "Testing query " << queryStr << flush;
-      
-        BString error;
-
-        optional<JSONPath> object = parseURL(
-            userData,
-            error,
-            "127.0.0.1",
-            "GET",
-            url,
-            queryStr
-        );
-        
-        bool result = object.has_value();
-        bool success = testValue("Expected result", expectedResult == result);
-        
-        std::stringstream stream;
-
-        if (result)
-            stream << object.value();
-        else {
-            stream << error;
-        }
-        
-        BString value = stream.str();
-        
         success = success &&
-            testValue("\tExpected value",
-                (value == expectedValue)
-            );
+            testQueries(origin);
             
         outputSuccess(success);
-
-        if (!success)
-        {
-            cout << "Expected: " << endl << expectedValue << endl;
-            cout << "Got: " << endl << value << endl;
-        }
         
         return success;
     }
-     */
+    
+    inline bool testQueries(const BString& origin)
+    {
+        cout << "Test Queries: ";
+            
+        stringstream stream;
+            stream
+                << "curl "
+                << origin  << "/?wordnotindictionary"
+                << " -c cookies -b cookies";
+                
+                
+        string command = stream.str();
+        cout << command << endl;
+        bool success = (system(command.c_str()) == 0);
+            
+        outputSuccess(success);
+        
+        return success;
+            
+    }
+    
+    
     std::optional<bool> testParser(Parser* parser) {
 
         parser->read(cin);

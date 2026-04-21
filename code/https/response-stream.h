@@ -143,7 +143,10 @@ namespace BeeFishHTTPS {
                         {
                             *this << "   \"" 
                                   << it->escape() 
-                                  << "\"";
+                                  << "\""
+                                  << ": ";
+                                
+                            it.jsonPath().write(*this, 1);
     
                             if (++it != matches.end())
                                 *this << ",";

@@ -985,6 +985,7 @@ private:
 
     }
 
+public:
     virtual void write(ostream& out, Index tabCount = 0)
     {
 

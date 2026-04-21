@@ -36,6 +36,7 @@ using namespace BeeFishDatabase;
             JSONDatabase* _database = nullptr;
             BString _parentValue;
             BString _value;
+            JSONPath _jsonPath;
         public:
             // Iterator traits (required for STL compatibility in C++17 and earlier)
             using iterator_category = std::forward_iterator_tag;
@@ -63,6 +64,7 @@ using namespace BeeFishDatabase;
                 while (!_iterator._isEnd) {
                     _parentValue = 
                         toString(_iterator);
+                    
                     save();
                     _Iterator iterator = _iterator;
                     ++iterator;
@@ -76,19 +78,31 @@ using namespace BeeFishDatabase;
                         else {
                             _value = _parentValue;
                             restore();
-                            return;
+                            break;
                         }
                     }
                     else {
                         _value = _parentValue;
                         restore();
-                        return;
+                        break;
                     }
                 }
+                
+                _jsonPath = JSONPath::fromString(
+                    *_database, 
+                    _value
+                );
                 
             }
             
             BString toString(_Iterator& iterator) 
+            {
+                
+                return jsonPath(iterator).toString();
+
+            }
+            
+            JSONPath jsonPath(_Iterator& iterator)
             {
                 Path path = _database->objects()[*iterator];
                 assert(path.hasData());
@@ -99,8 +113,13 @@ using namespace BeeFishDatabase;
                     index
                 );
                 
-                return json.toString();
-
+                return json;
+                
+            }
+            
+            JSONPath jsonPath()
+            {
+                return _jsonPath;
             }
         
             // Dereference operator (*)
