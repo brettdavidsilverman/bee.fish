@@ -39,6 +39,7 @@ int main(int argc, const char* argv[])
     {
         cout << "Unlocking " << DATABASE_FILENAME << endl;
         LockFile::unlock(DATABASE_FILENAME);
+    
         return 0;
     }
     

@@ -256,7 +256,7 @@ child.cascadeProperties();
                         }
             
 //addWords(property, false);
-addWords(property, false);
+addWords(property, true);
                     }
                 }
             }
@@ -413,7 +413,9 @@ public:
                 removeWords(current, true);
         }
         if (path[VALUE].setData<BString>(value))
+        {
             addWords(value, true);
+        }
     }
 
     void setObject()
@@ -662,11 +664,8 @@ public:
 
                 JSONPath childPath = getChildren()[position];
                 childPath.setId();
-// childPath.addObject();
-        
-        
-//
-childPath.cascadeProperties();
+
+                childPath.cascadeProperties();
 
             }
 
@@ -846,8 +845,6 @@ public:
         JSONPath json = (*this)[property];
 
 
-//json.removeWords(property, false);
-
         // Remove parent properties
         JSONPath path = json;
 
@@ -864,8 +861,8 @@ public:
                     property = property.substr(1, property.size() - 2);
                     property = property.unescape();
                 }
-//removeWords(property, false);
-json.removeWords(property, false);
+
+json.removeWords(property, true);
             }
 
         }

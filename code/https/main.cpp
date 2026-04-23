@@ -21,7 +21,12 @@ void start(
 );
 
 std::mutex _wait;
+#ifdef DEBUG
 const Size _threadCount = 20;
+#else
+const Size _threadCount = 20;
+#endif
+
 const Size _databaseCount = _threadCount;
 
 int main(int argc, const char* argv[])

@@ -98,6 +98,10 @@ namespace BeeFishDatabase
         
         static void unlock(const std::string& filename)
         {
+            LockFile lock(filename);
+            lock._mutex->unlock();
+            return;
+            
             std::filesystem::path path(filename);
             
             std::hash<std::string> hasher;
@@ -116,6 +120,8 @@ namespace BeeFishDatabase
                 BString("LockFile");
             
             boost::interprocess::named_mutex::remove(mutexName.c_str());
+            
+            
             
 
         }
