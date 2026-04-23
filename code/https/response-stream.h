@@ -122,7 +122,7 @@ namespace BeeFishHTTPS {
         
                     Index count = 0;
                     if (!getCount)
-                        *this << "[" << endl;
+                        *this << "{" << endl;
 
                     PathBase* path =
                         expression
@@ -163,7 +163,7 @@ namespace BeeFishHTTPS {
                     }
             
                     if (!getCount)
-                        *this << "]";
+                        *this << "}";
                     else
                         *this << count;
                 }
