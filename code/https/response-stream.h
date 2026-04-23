@@ -122,7 +122,7 @@ namespace BeeFishHTTPS {
         
                     Index count = 0;
                     if (!getCount)
-                        *this << "{" << endl;
+                        *this << "[" << endl;
 
                     PathBase* path =
                         expression
@@ -143,11 +143,8 @@ namespace BeeFishHTTPS {
                         {
                             *this << "   \"" 
                                   << it->escape() 
-                                  << "\""
-                                  << ": ";
+                                  << "\"";
                                 
-                            it.jsonPath().write(*this, 1);
-    
                             if (++it != matches.end())
                                 *this << ",";
                             
@@ -163,7 +160,7 @@ namespace BeeFishHTTPS {
                     }
             
                     if (!getCount)
-                        *this << "}";
+                        *this << "]";
                     else
                         *this << count;
                 }
