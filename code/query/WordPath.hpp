@@ -13,23 +13,34 @@ using namespace BeeFishDatabase;
         public PathBase
     {
     protected:
+    
         PathBase* _a;
         PathBase* _bounds;
         
     public:
 
         WordPath(
-            PathBase* a,
+            const Path& words,
+            const BString& word,
             PathBase* bounds
-        ) :
-            _a(a),
-            _bounds(bounds)
+        )
         {
+            
+            BString lower = 
+                word.toLower();
+                
+            if (words.contains(lower))
+                _a = new Path(words[lower]);
+            else
+                _a = nullptr;
+                
+            _bounds = bounds;
         }
    
         virtual ~WordPath()
         {
-            delete _a;
+            if (_a)
+                delete _a;
             delete _bounds;
         }
         
@@ -37,7 +48,7 @@ using namespace BeeFishDatabase;
         virtual bool canGoLeft() const
         override
         {
-            return
+            return _a &&
                 _a->canGoLeft() and
                 _bounds->canGoLeft();
         }
@@ -45,7 +56,7 @@ using namespace BeeFishDatabase;
         virtual bool canGoRight() const
         override
         {
-            return
+            return _a &&
                 _a->canGoRight() and
                 _bounds->canGoRight();
         }
@@ -75,14 +86,16 @@ using namespace BeeFishDatabase;
         virtual void save()
         override
         {
-            _a->save();
+            if (_a)
+                _a->save();
             _bounds->save();
         }
         
         virtual void restore()
         override
         {
-            _a->restore();
+            if (_a)
+                _a->restore();
             _bounds->restore();
         }
     

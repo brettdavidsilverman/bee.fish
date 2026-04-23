@@ -257,7 +257,8 @@ class Expression : public BeeFishParser::Match
         {
             IterableItem* iterable = new IterableItem(
                 new BeeFishQuery::WordPath(
-                    new Path(expression._words[_word]),
+                    expression._words,
+                    _word,
                     new Path(expression._bounds)
                 ),
                 _word

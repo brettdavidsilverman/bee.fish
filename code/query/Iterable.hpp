@@ -36,6 +36,7 @@ using namespace BeeFishDatabase;
             JSONDatabase* _database = nullptr;
             BString _parentValue;
             BString _value;
+            JSONPath _parentPath;
             JSONPath _jsonPath;
         public:
             // Iterator traits (required for STL compatibility in C++17 and earlier)
@@ -60,38 +61,42 @@ using namespace BeeFishDatabase;
             
             void setValue()
             {
+                
+                
 
                 while (!_iterator._isEnd) {
                     _parentValue = 
                         toString(_iterator);
-                    
+                    _parentPath =
+                        jsonPath(_iterator);
+                        
                     save();
                     _Iterator iterator = _iterator;
                     ++iterator;
                     if (!iterator._isEnd) {
                         _value = toString(iterator);
+                        _jsonPath = jsonPath(iterator);
                         if (_value.startsWith(_parentValue))
                         {
                             _parentValue = _value;
+                            _parentPath = _jsonPath;
                             _iterator = iterator;
                         }
                         else {
                             _value = _parentValue;
+                            _jsonPath = _parentPath;
                             restore();
                             break;
                         }
                     }
                     else {
                         _value = _parentValue;
+                        _jsonPath = _parentPath;
                         restore();
                         break;
                     }
                 }
                 
-                _jsonPath = JSONPath::fromString(
-                    *_database, 
-                    _value
-                );
                 
             }
             

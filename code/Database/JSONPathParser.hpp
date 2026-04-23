@@ -68,6 +68,7 @@ namespace BeeFishDatabase {
           //  Path::ScopedLock lock(start);
             
            // start.setType(type);
+           BString hash = "#";
             
    
             
@@ -81,18 +82,23 @@ namespace BeeFishDatabase {
                     return;
                 case Type::NULL_:
                     start.setNull();
+                    hash += "null";
                     break;
                 case Type::BOOLEAN:
                     start.setBoolean(value);
+                    hash += value;
                     break;
                 case Type::INTEGER:
                     start.setInteger(value);
+                    hash += value;
                     break;
                 case Type::NUMBER:
                     start.setNumber(value);
+                    hash += value;
                     break;
                 case Type::STRING:
                     start.setString(value);
+                    hash += value;
                     break;
                 case Type::ARRAY:
                     start.setArray();
@@ -104,9 +110,15 @@ namespace BeeFishDatabase {
                     throw std::logic_error("JSONPathParser::setVariable");
             }
             
-            if (&_log != &cnull)
-                _log << start.toString() << endl;
-             
+            if (&_log != &cnull) {
+                _log << start.toString();
+                
+                if (hash != "#") {
+                    _log
+                        << hash;
+                }
+                _log << endl;
+            }
             
         }
 

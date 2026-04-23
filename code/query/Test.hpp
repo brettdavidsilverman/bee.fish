@@ -1101,23 +1101,25 @@ namespace BeeFishQuery {
         bool ok  = true;
         filesystem::path json = TEST_DIRECTORY "/45-Object.json";
         
-        JSONDatabase db;
-        JSONPath root = db.host("https://test")[json.filename()];
+        JSONDatabase database;
+        JSONPath root = database.host("https://test")[json.filename()];
         JSONPathParser parser(root);
-        
+        Path objects = database.objects()[root.id()];
+        Path words = database.words();
+            
         ifstream input(json);
         parser.read(input);
         parser.eof();
         ok = parser.matched();
         
+        JSONDatabase readOnlyDatabase(database.filename(), true);
         auto test =
-        [&db, &root, &ok](BString query, vector<BString> check) {
+        [&readOnlyDatabase, &words, &objects, &ok](BString query, vector<BString> check) {
             
             cout << "\t" << query << flush;
+
+            JSONDatabase& db = readOnlyDatabase;
             
-            
-            Path words = db.words();
-            Path objects = db.objects()[root.id()];
             
         
             
