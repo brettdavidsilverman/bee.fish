@@ -73,9 +73,6 @@ return;
 
         const BString& method = request->method();
 
-        path = request->path();
-//path = path.substr(1);
-        
         ScopedDatabase scoped(this);
 
         JSONDatabase* database = scoped;
@@ -86,7 +83,7 @@ return;
         Path bookmark = userData[URLS];
         
         vector<BString> paths =
-            request->path().split('/');
+            request->url().paths();
             
         for (auto path : paths)
             bookmark = bookmark[path];

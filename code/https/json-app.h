@@ -62,7 +62,7 @@ using namespace BeeFishWeb;
                 request()->url();
                 
             const BString& host = _session->host();
-
+const BString& origin = _session->origin();
                 /*
             const BString& userId =
                 Authentication::userId();
@@ -82,7 +82,8 @@ using namespace BeeFishWeb;
             try {
                 jsonPath = JSONPath::fromString(
                     *database,
-                    host,
+//    host,
+origin,
                     url,
                     method
                 );

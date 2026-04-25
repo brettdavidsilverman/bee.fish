@@ -89,10 +89,11 @@ int main(int argc, const char* argv[])
             database.host(url.origin());
             
     vector<BString> paths = 
-        url.path().split('/');
-        
-    for (auto p : paths)
+        url.paths();
+    
+    for (auto p : paths) {
         path = path[p];
+    }
             
     cout << "Using origin " << path.toString() << endl;
     

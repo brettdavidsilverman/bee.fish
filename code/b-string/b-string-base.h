@@ -628,7 +628,7 @@ using namespace BeeFishDatabase;
 
         }
         
-        bool isDigitsOnly() {
+        bool isDigitsOnly() const {
             if (empty()) {
                 return false;
             }

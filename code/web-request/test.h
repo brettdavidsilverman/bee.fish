@@ -82,7 +82,7 @@ using namespace BeeFishTest;
             ok =
                 testValue("Basic path result", parser.matched());
             ok = ok &&
-                testValue("Basic path value", url.path() == "path");
+                testValue("Basic path value", url.path() == "/path");
                     }
 
         BeeFishWeb::URL url;
@@ -202,7 +202,7 @@ using namespace BeeFishTest;
             
             ok = ok && testResult(
                 "URL path",
-                url.path() == "path"
+                url.path() == "/path"
             );
             
             assert(ok);
@@ -230,17 +230,15 @@ using namespace BeeFishTest;
             );
             ok = ok && testResult(
                 "URL path",
-                url.path() == ""
+                url.path() == "/"
             );
             
-cerr << "URL: "<< url << endl;
 
             ok = ok && testResult(
                 "URL",
                 url == "https://test.bee.fish:8000"
             );
-assert(ok);
-            
+
         }
         
         if (ok) {
@@ -250,7 +248,7 @@ assert(ok);
 
             ok = ok && testResult(
                 "URL path",
-                url.path() == ""
+                url.path() == "/"
             );
             
             ok = ok && testResult(
@@ -284,7 +282,7 @@ assert(ok);
 
             ok = ok && testResult(
                 "URL path",
-                url.path() == ""
+                url.path() == "/"
             );
             
             ok = ok && testResult(
@@ -302,7 +300,7 @@ assert(ok);
                 url.origin() == "https://test.bee.fish:8000"
             );
             
-            
+cerr << "URL: "<< url << endl;
             ok = ok && testResult(
                 "URL",
                 url == "https://test.bee.fish:8000"
@@ -853,7 +851,7 @@ assert(ok);
         
         ok = ok && testResult(
             "WebRequest path is path",
-            urlWebRequest.path() == "path"
+            urlWebRequest.path() == "/path"
         );
         
         ok = ok && testResult(
@@ -872,7 +870,7 @@ assert(ok);
         
         ok = ok && testResult(
             "WebRequest escaped path is path",
-            escapedUrlWebRequest.path() == "path"
+            escapedUrlWebRequest.path() == "/path"
         );
         
         ok = ok && testResult(

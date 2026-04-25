@@ -533,51 +533,46 @@ public:
             database.host(host);
 
         std::vector<BString> paths =
-            url.path().split('/');
+            url.paths();
         
         // Loop through all tokens
         JSONPath path = hostPath;
         bool success = true;
         
-        for (const BString& token : paths)
+        for (BString key : paths)
         {
 
-            BString key = token;
-
-            if (key.size()) {
-                key = key.decodeURI();
-                if (key.isDigitsOnly()) {
-                    Index index = atol(key.c_str());
-                    if (path.contains(index))
-                        path = path[index];
-                    else {
-                        success = false;
-                        break;
-                    }
-                }
+            if (key.isDigitsOnly()) {
+                Index index = atol(key.c_str());
+                if (path.contains(index))
+                    path = path[index];
                 else {
-                    if (key.startsWith("\"") &&
-                            key.endsWith("\"")
-                       )
-                    {
-                        key =
-                            key.substr(
-                                1,
-                                key.length() - 2
-                            );
-                    }
-                    key = key.unescape();
-                    if (path.contains(key) || method == "POST")
-                        path = path[key];
-                    else {
-                        success = false;
-                        break;
-                    }
+                    success = false;
+                    break;
                 }
-
-
-
             }
+            else {
+                if (key.startsWith("\"") &&
+                    key.endsWith("\"")
+                )
+                {
+                    key =
+                        key.substr(
+                            1,
+                            key.length() - 2
+                        );
+                }
+                key = key.unescape();
+                if (path.contains(key) || method == "POST")
+                    path = path[key];
+                else {
+                    success = false;
+                    break;
+                }
+            }
+
+
+
         }
 
         if (!success) {

@@ -20,27 +20,27 @@ namespace BeeFishHTTPS {
       
          _privileged
          {
-            "",
-            "authenticate",
-            "index.html",
-            "favicon.ico",
-            "feebee.jpg",
-            "feebee-small.jpg",
-            "head.js",
-            "body.js",
-            "style.css",
-            "client/style.css",
-            "client/fetch.js",
-            "client/evaluate.js",
-            "client/punycode.js",
-            "client/console/console.js",
-            "client/logon/",
-            "client/logon/index.html",
-            "client/logon/style.css",
-            "client/logon/sha512.js",
-            "client/logon/hash-secret.js",
-            "client/logon/authentication.js",
-            "client/storage/storage.js"
+            "/",
+            "/authenticate",
+            "/index.html",
+            "/favicon.ico",
+            "/feebee.jpg",
+            "/feebee-small.jpg",
+            "/head.js",
+            "/body.js",
+            "/style.css",
+            "/client/style.css",
+            "/client/fetch.js",
+            "/client/evaluate.js",
+            "/client/punycode.js",
+            "/client/console/console.js",
+            "/client/logon/",
+            "/client/logon/index.html",
+            "/client/logon/style.css",
+            "/client/logon/sha512.js",
+            "/client/logon/hash-secret.js",
+            "/client/logon/authentication.js",
+            "/client/storage/storage.js"
          };
 
    public:
@@ -69,7 +69,7 @@ namespace BeeFishHTTPS {
          const BString& webMethod = request->method();
          const BString& search = request->search();
          
-         if (path == "authenticate")
+         if (path == "/authenticate")
          {
     
             BeeFishMisc::optional<BString> method;
@@ -199,7 +199,7 @@ request->url().origin() +
                  // Non fetch client
                 _status = 401;
                 _statusText = "Unauthorised";
-                _filePath = getFilePath("client/logon/index.html");
+                _filePath = getFilePath("/client/logon/index.html");
                 _serve = App::SERVE_FILE;
             }
             

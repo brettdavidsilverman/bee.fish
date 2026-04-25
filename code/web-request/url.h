@@ -135,9 +135,18 @@ namespace BeeFishWeb {
             virtual void success()
             override
             {
-                if (_value.startsWith("/"))
-                    _value = _value.substr(1);
+                if (_value.endsWith("/"))
+                {
+                    _value = _value.substr(
+                        0, 
+                        _value.length() - 1
+                    );
+                }
+                
+                if (_value == "")
+                    _value = "/";
             }
+            
         };
 
         class Search;
@@ -382,8 +391,8 @@ namespace BeeFishWeb {
             
             BString path = _path->value();
             
-            if (path != "")
-                string += "/" + path;
+            if (path != "/")
+                string += path;
                     
             if (search().matched())
                 string +=
@@ -439,10 +448,39 @@ namespace BeeFishWeb {
             return emptyPort;
         }
         
-        const BString& path() const
+        BString path() const
         {
-            return _path->value();
+            const BString& path = _path->value();
+            if (path.length() > 0) {
+                if (path != "/" && path.endsWith('/'))
+                    return path.substr(0, path.length() - 1);
+                return path;
+            }
+            
+            return "/";
                 
+        }
+        
+        vector<BString> paths() const
+        {
+            BString path = URL::path();
+
+            // Remove leading /
+            path = path.substr(1);
+            
+
+            
+            assert(!path.endsWith("/"));
+            
+            if (path.length() == 0)
+                return vector<BString>();
+                
+            vector<BString> paths = path.split('/');
+            for (auto& path : paths) {
+                path = path.decodeURI();
+            }
+            
+            return paths;
         }
         
         const BString& domain() const

@@ -145,7 +145,6 @@ namespace BeeFishHTTPS {
                 
             BString fullWebRequestPath =
                 BString(WWW_ROOT_DIRECTORY) +
-BString("/") +
                 requestPath;
                     
             path filePath = canonical(
@@ -159,7 +158,7 @@ BString("/") +
                     BString indexPath =
                         fullWebRequestPath +
                         BString("index.html");
-cerr << "app.h INDEX PATH " << indexPath << endl;
+
                     filePath =
                         canonical(
                             path(indexPath.str())

@@ -197,7 +197,7 @@ using namespace BeeFishWeb;
          WebRequest* request = _session->request();
          
     
-if (request->path() == "" &&
+         if (request->path() == "/" &&
              request->search().length())
              return;
              
@@ -419,9 +419,9 @@ if (request->path() == "" &&
             if (path[path.size() - 1] != '/')
             {
                BString newPath =
-                  BString("/") + path + BString("/") +
+                  path + BString("/") +
                   request.search();
-cerr << "REDIRECT 1 " << newPath << endl;
+
                redirect(newPath, true);
                
                return true;
