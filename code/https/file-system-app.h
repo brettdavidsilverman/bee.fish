@@ -411,7 +411,7 @@ using namespace BeeFishWeb;
       bool redirectDirectories(const WebRequest& request, const path& filePath)
       {
          if ( is_directory(filePath) &&
-              request.path() != "" )
+              request.path() != "/" )
          {
             const BString& path =
                request.path();
@@ -419,10 +419,16 @@ using namespace BeeFishWeb;
             if (path[path.size() - 1] != '/')
             {
                BString newPath =
-                  path + BString("/") +
-                  request.search();
+                  path + BString("/") ;
+                  
+               BString search = request.url().search().value();
+               
+               if (search.length())
+                  newPath += BString("?") + search;
+                  
+cerr << "file-system-app.h redirectDirectories: " << newPath << endl;
 
-               redirect(newPath, true);
+               redirect(newPath, false);
                
                return true;
             }

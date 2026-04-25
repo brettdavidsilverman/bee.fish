@@ -157,7 +157,7 @@ namespace BeeFishHTTPS {
                 {
                     BString indexPath =
                         fullWebRequestPath +
-                        BString("index.html");
+                        BString("/index.html");
 
                     filePath =
                         canonical(
