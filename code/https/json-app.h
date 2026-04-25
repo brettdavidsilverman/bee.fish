@@ -82,8 +82,8 @@ const BString& origin = _session->origin();
             try {
                 jsonPath = JSONPath::fromString(
                     *database,
-//    host,
-origin,
+    host,
+//origin,
                     url,
                     method
                 );
