@@ -107,7 +107,7 @@ namespace BeeFishHTTPS {
             if (app->serve() == App::SERVE_QUERY)
             {
                 BString search = 
-                    app->request()->search();
+                    app->request()->search().decodeURI();
 
                 bool getCount = false;
                 if (search.endsWith("$"))
