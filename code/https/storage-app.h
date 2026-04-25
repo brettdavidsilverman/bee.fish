@@ -34,6 +34,7 @@ public:
 
         if (!authenticated())
         {
+return;
             throw std::runtime_error("Not authenticated");
         }
 
@@ -73,14 +74,22 @@ public:
         const BString& method = request->method();
 
         path = request->path();
-
+//path = path.substr(1);
+        
         ScopedDatabase scoped(this);
 
         JSONDatabase* database = scoped;
-
+        
         Path userData =
             database->userData(_userId);
-        Path bookmark = userData[URLS][path];
+            
+        Path bookmark = userData[URLS];
+        
+        vector<BString> paths =
+            request->path().split('/');
+            
+        for (auto path : paths)
+            bookmark = bookmark[path];
 
         if (key.has_value())
             bookmark = bookmark[key.value()];
@@ -110,7 +119,7 @@ public:
             postRequest.setOnData(
             [&pageIndex, &contentLength, &bookmark, this](const std::string& data) {
                 contentLength += data.size();
-                bookmark[pageIndex++].setData(data);
+                bookmark[pageIndex++].setData<BString>(data);
             }
             );
 

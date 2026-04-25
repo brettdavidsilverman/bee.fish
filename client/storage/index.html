@@ -29,6 +29,18 @@ var console = new Console();
 var url;
 var query;
 var key;
+
+function setStorageURL() {
+    document.getElementById("storageURL").innerText  =
+        document.location.origin + 
+        "/" +
+        document.getElementById("storagePath").value;
+       // query;
+        
+    document.getElementById("link").href =
+        document.getElementById("storageURL").innerText + query;
+        
+}
         </script>
         
         <h1 id="h1">Storage</h1>
@@ -77,12 +89,8 @@ setStorage("remoteStorage");
         
         <form>
             <label for="storageURL">Storage URL (remote)</label><br>
-            <input type="text" id="storageURL">
-            <script>
-            
-document.getElementById("storageURL").value =
-     document.location.origin + "/storage";
-            </script>
+            <input type="text" id="storagePath" onchange="setStorageURL()" value="storage">
+            <div id="storageURL"></div>
         </form>
 
 
@@ -98,8 +106,8 @@ function changeKey(newKey)
 {
     document.getElementById("setId").value = "";
     key = newKey;
-    document.getElementById("link").href =
-        document.getElementById("storageURL").value + "?key=" + encodeURI(key);
+    query = "?key=" + encodeURI(key);
+    setStorageURL();
 }
             </script>
         </form>
@@ -116,23 +124,14 @@ function changeId(newId)
         newId = Id.fromKey(newId);
         
     document.getElementById("setKey").value = "";
-    url = "?id=" + newId.key;
+    query = "?id=" + newId.key;
     key = newId;
-    document.getElementById("link").href =
-         document.getElementById("storageURL").value + url;
+    setStorageURL();
     
 }
             </script>
         </form>
-        
-        <script>
-window.onload = function() {
-    var id = new Id();
-    document.getElementById("setId").value = id.key;
-    changeId(id);
-}
-        </script>
-        
+
         <h2>3. Set storage value</h2>
         
         <form>
@@ -165,7 +164,7 @@ function setItem()
     if (isNull)
         value = null;
 
-    storage.url = document.getElementById("storageURL").value;
+    storage.url = document.getElementById("storageURL").innerText;
     return storage.setItem(key, value, contentType).then(
         function(key) {
             alert("Ok " + key)
@@ -204,7 +203,7 @@ function getItem()
     var getIsNull = document.getElementById("getIsNull");
     getValue.innerHTML = "Getting...";
 
-    storage.url = document.getElementById("storageURL").value;
+    storage.url = document.getElementById("storageURL").innerText;
 
     storage.getItem(key).then(
         function(value) {
@@ -238,7 +237,7 @@ function getItem()
 function removeItem()
 {
     var removeKey = document.getElementById("removeKey");
-    storage.url = document.getElementById("storageURL").value;
+    storage.url = document.getElementById("storageURL").innerText;
 
     storage.removeItem(key).then(
         function() {
@@ -262,7 +261,7 @@ function removeItem()
             <script>
 function clearData()
 {
-    storage.url = document.getElementById("storageURL").value;
+    storage.url = document.getElementById("storageURL").innerText;
 
     storage.clear().then(
         function() {
@@ -278,6 +277,16 @@ function clearData()
 
 
             </script>
+            
+
         </form>
+                
+        <script>
+window.onload = function() {
+    var id = new Id();
+    document.getElementById("setId").value = id.key;
+    changeId(id);
+}
+        </script>
     </body>
 </html>

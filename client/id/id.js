@@ -106,11 +106,15 @@ class Id {
 
         this.name.encode(stream);
         
+        stream.write("1");
+        
         // encode milliseconds
         this.milliseconds.encode(stream);
         
         // encode incrementrement
         this.increment.encode(stream);
+        
+        stream.write("0");
         
         // end bit
         stream.write("0");
@@ -157,11 +161,21 @@ class Id {
         // read the name
         this.name = String.decode(stream);
 
+        CHECK(
+            "Id._decodeKey start timestamp bit",
+            stream.read() == "1"
+        );
+        
         // read the time
         this.milliseconds = Number.decode(stream);
         
         // read the incrementrement
         this.increment = Number.decode(stream);
+        
+        CHECK(
+            "Id._decodeKey end timestamp bit",
+            stream.read() == "0"
+        );
         
         CHECK(
             "Id._decodeKey end bit",
@@ -253,7 +267,6 @@ class Id {
             json = JSON.parse(value);
         }
         catch(error) {
-alert("id.js: 256 here " + json);
             throw new Error(error);
         }
         

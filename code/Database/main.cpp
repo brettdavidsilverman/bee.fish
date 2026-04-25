@@ -86,8 +86,13 @@ int main(int argc, const char* argv[])
     
     BeeFishWeb::URL url(origin);
     JSONPath path =
-            database.host(url.origin())
-            [url.path().substr(1)];
+            database.host(url.origin());
+            
+    vector<BString> paths = 
+        url.path().split('/');
+        
+    for (auto p : paths)
+        path = path[p];
             
     cout << "Using origin " << path.toString() << endl;
     

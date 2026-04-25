@@ -210,6 +210,24 @@ using namespace BeeFishScript;
             return output;
         }
         
+        friend bool operator == (
+            const Timestamp& a, 
+            const Timestamp& b
+        )
+        {
+            return a._milliseconds == b._milliseconds &&
+                   a._increment == b._increment;
+        }
+        
+        friend bool operator != (
+            const Timestamp& a, 
+            const Timestamp& b
+        )
+        {
+            return a._milliseconds != b._milliseconds ||
+                   a._increment != b._increment;
+        }
+        
         BString toString() const {
             // Convert to seconds
             std::time_t seconds = _milliseconds / 1000;
@@ -318,6 +336,40 @@ using namespace BeeFishScript;
 
         }
         
+        friend PowerEncoding& operator >>
+        (
+            PowerEncoding& stream,
+            Id& id
+        )
+        {
+            bool read = (stream.readBit() == 1);
+            if (read)
+            {
+                stream >> id._name
+                       >> id._timestamp;
+                       
+                read = (stream.readBit() == 0);
+            }
+            
+            if (!read)
+                throw runtime_error("Invalid Id");
+                
+            return stream;
+            
+        }
+        
+        friend bool operator == (const Id& idA, const Id& idB)
+        {
+            return idA.timestamp() == idB.timestamp() &&
+                   idA.name() == idB.name();
+        }
+        
+        friend bool operator != (const Id& idA, const Id& idB)
+        {
+            return idA.timestamp() != idB.timestamp() ||
+                   idA.name() != idB.name();
+        }
+        
         
         const BString& key()
         {
@@ -332,7 +384,7 @@ using namespace BeeFishScript;
             return _timestamp;
         }
         
-        const BString& name()
+        const BString& name() const
         {
             return _name;
         }

@@ -35,7 +35,7 @@ public:
 #ifdef JSON_INDEX
     typedef Index Id;
 #else
-    typedef BeeFishId::Timestamp Id;
+    typedef BeeFishId::Id Id;
 #endif
     
     using Path::contains;
@@ -120,7 +120,7 @@ public:
     }
     
 #else
-    Id setId(const Id& id = Id())
+    Id setId(const Id& id = Id(""))
     {
         Path path = *this;
         path = path[ID];

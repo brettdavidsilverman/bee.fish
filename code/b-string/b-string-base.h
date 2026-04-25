@@ -433,60 +433,7 @@ using namespace BeeFishDatabase;
             return words;
             
             
-        /*
-            Index from = 0;
-            std::vector<BString> words;
-            for (Index i = 0;
-                 i < tokens.size();
-                 ++i)
-            {
-                Token& token = tokens[i];
-            
-                if (token._type == Type::Blankspace)
-                {
-                    // Blankspace seperates words
-                    from = i + 1;
-                }
-                else
-                {
-                    
-                    for (Index j = from; j < tokens.size(); j++)
-                    {
-                        // Concatenate all tokens in
-                        // this blankspace
-                        BString word;
-                    
-                        bool trailingPunctuation = true;
-                        for (Index k = j + 1; k > from; --k)
-                        {
-                            Token& token = tokens[k - 1];
-                            if (token._type == Type::Word)
-                            {
-                                words.push_back(
-                                    token._word
-                                );
-                            }
-                        
-                            if (!trailingPunctuation ||
-                                token._type == Type::Word)
-                            {
-                                word = token._word + word;
-                                trailingPunctuation = false;
-                            }
-                        }
-                        
-                        if (word.size())
-                        {
-                            words.push_back(word);
-                        }
-                    
-            
-                    }
-                
-                }
-                
-            }
-            */
+
         }
 
         vector<BString> split(

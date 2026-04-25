@@ -204,10 +204,10 @@ namespace BeeFishHTTPS {
                         Size pageIndex =
                             bytesTransferred  /
                             pageSize;
-
-                        std::string data =
+                            
+                        BString data =
                             bookmark[pageIndex].getStringData();
-                        
+                            
                         length = data.size();
 
                         memcpy(buffer.data(), data.data(), length);

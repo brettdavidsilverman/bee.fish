@@ -196,7 +196,8 @@ using namespace BeeFishWeb;
          
          WebRequest* request = _session->request();
          
-         if (request->path() == "/" &&
+    
+if (request->path() == "" &&
              request->search().length())
              return;
              
@@ -410,7 +411,7 @@ using namespace BeeFishWeb;
       bool redirectDirectories(const WebRequest& request, const path& filePath)
       {
          if ( is_directory(filePath) &&
-              request.path() != "/" )
+              request.path() != "" )
          {
             const BString& path =
                request.path();
@@ -418,9 +419,9 @@ using namespace BeeFishWeb;
             if (path[path.size() - 1] != '/')
             {
                BString newPath =
-                  path + BString("/") +
+                  BString("/") + path + BString("/") +
                   request.search();
-                  
+cerr << "REDIRECT 1 " << newPath << endl;
                redirect(newPath, true);
                
                return true;

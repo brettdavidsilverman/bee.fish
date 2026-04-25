@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <script src="/error.js"></script>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <script src="../console/console.js"></script>
+      
+      <link rel="stylesheet" type="text/css" href="/style.css" />
+      <link rel="stylesheet" type="text/css" href="../style.css" />
+
+      <title>Audio</title>
+      <style>
+.volume {
+    background-color: pink;
+    width: 100px;
+}
+      </style>
+   </head>
+   <body>
+      <h1>Audio</h1>
+      <a href="audio.js">audio.js</a>
+      <input type="file" id="audio-input" accept="audio/*" capture="microphone" />
+      <button onclick="startAudio()">Start</button>
+      <div id="volume" class="volume">Volume</div>
+      <pre>
+         <script>
+var console = new Console();
+console.log("Hello world");
+
+// main.js
+async function startAudio() {
+    const audioContext = new AudioContext();
+    await audioContext.audioWorklet.addModule('analyser-processor.js');
+
+    // Create stream (microphone)
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const source = audioContext.createMediaStreamSource(stream);
+
+    // Create worklet node
+    const analyserNode = new AudioWorkletNode(audioContext, 'analyser-processor');
+    
+    
+    // Get the volume div
+    const volumeDiv = document.getElementById("volume");
+    
+    // Handle messages from processor
+    analyserNode.port.onmessage = (event) => {
+        const volume = event.data.volume * 1000;
+        console.log("Volume: " + volume);
+        volumeDiv.style.width = volume * 100;
+        // Visualize volume here (e.g., update a div width)
+    };
+
+    source.connect(analyserNode);
+    // Optional: Connect to destination if you want to hear mic input
+    // analyserNode.connect(audioContext.destination);
+}
+
+         </script>
+      </pre>
+   </body>
+</html>
