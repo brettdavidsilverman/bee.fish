@@ -249,13 +249,6 @@ namespace BeeFishWeb {
                 Repeat<KeyValuePair>::matchedItem(item);
             }
             
-            virtual void success()
-            override
-            {
-                _value = _value.decodeURI();
-                Repeat<KeyValuePair>::success();
-            }
-            
             virtual bool match(Parser* parser, const Char& character)
             override
             {
