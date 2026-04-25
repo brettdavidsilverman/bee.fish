@@ -300,7 +300,6 @@ using namespace BeeFishTest;
                 url.origin() == "https://test.bee.fish:8000"
             );
             
-cerr << "URL: "<< url << endl;
             ok = ok && testResult(
                 "URL",
                 url == "https://test.bee.fish:8000"
@@ -875,7 +874,7 @@ cerr << "URL: "<< url << endl;
         
         ok = ok && testResult(
             "WebRequest escaped search is query<space>query",
-            escapedUrlWebRequest.search() == "query query"
+            escapedUrlWebRequest.search().decodeURI() == "query query"
         );
 
         BeeFishWeb::WebRequest postWebRequest;
