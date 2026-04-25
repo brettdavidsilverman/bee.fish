@@ -426,9 +426,7 @@ using namespace BeeFishWeb;
                if (search.length())
                   newPath += BString("?") + search;
                   
-cerr << "file-system-app.h redirectDirectories: " << newPath << endl;
-
-               redirect(newPath, false);
+               redirect(newPath, true);
                
                return true;
             }
