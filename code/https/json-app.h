@@ -35,6 +35,7 @@ using namespace BeeFishWeb;
 
             if (!authenticated())
             {
+return;
                 throw std::runtime_error("Not authenticated");
             }
             
