@@ -78,7 +78,7 @@ var title = document.getElementById("title");
 
 var origin =
     punycode.toUnicode(
-        window.location.hostname
+        window.location.origin
     );
 
 header.innerText = origin;

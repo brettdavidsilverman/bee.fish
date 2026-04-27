@@ -203,8 +203,9 @@ public:
                     while (index > count)
                     {
                         JSONPath child = children[++count];
-
-                        child.setId();
+                        
+                        if (!child.hasId())
+                            child.setId();
                         
 //
 child.cascadeProperties();
@@ -1245,7 +1246,5 @@ PowerEncoding& operator << (PowerEncoding& output, const JSONPath& json)
 }
 
 
-
-}
 
 #endif
