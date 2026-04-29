@@ -132,21 +132,6 @@ namespace BeeFishWeb {
             {
             }
             
-            virtual void success()
-            override
-            {
-                if (_value.endsWith("/"))
-                {
-                    _value = _value.substr(
-                        0, 
-                        _value.length() - 1
-                    );
-                }
-                
-                if (_value == "")
-                    _value = "/";
-            }
-            
         };
 
         class Search;
@@ -382,19 +367,13 @@ namespace BeeFishWeb {
         {
             BString string = origin();
             
-            BString path = _path->value();
+            string += path();
             
-            if (path != "/")
-                string += path;
-                    
             if (search().matched())
                 string +=
                         BString("?") +
                         search().value();
                         
-            if (string == "")
-                string = "/";
-                
             return string;
         }
         
@@ -441,9 +420,11 @@ namespace BeeFishWeb {
             return emptyPort;
         }
         
-        BString path() const
+        const BString& path() const
         {
             const BString& path = _path->value();
+            return path;
+            /*
             if (path.length() > 0) {
                 if (path != "/" && path.endsWith('/'))
                     return path.substr(0, path.length() - 1);
@@ -451,6 +432,7 @@ namespace BeeFishWeb {
             }
             
             return "/";
+            */
                 
         }
         

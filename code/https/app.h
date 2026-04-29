@@ -150,6 +150,10 @@ namespace BeeFishHTTPS {
             path filePath = canonical(
                 path(fullWebRequestPath.str())
             );
+            
+            return filePath;
+            /*
+cerr << "getFilePath fullWebRequestPath: " <<  fullWebRequestPath << endl;
                 
             if (is_directory(filePath))
             {
@@ -170,6 +174,7 @@ namespace BeeFishHTTPS {
             }
             
             return filePath;
+*/
         }
         
         // Defined in session.h

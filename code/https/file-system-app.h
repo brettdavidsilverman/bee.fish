@@ -18,468 +18,479 @@ using namespace std;
 using namespace std::filesystem;
 using namespace BeeFishWeb;
 
-   class FileSystemApp : public App {
-   
+class FileSystemApp : public App {
 
-      static bool comparePaths (
-         const path& i,
-         const path& j
-      ) 
-      {
-         if (is_directory(i) && !is_directory(j))
+
+    static bool comparePaths (
+        const path& i,
+        const path& j
+    )
+    {
+        if (is_directory(i) && !is_directory(j))
             return true;
-         else if (!is_directory(i) && is_directory(j))
+        else if (!is_directory(i) && is_directory(j))
             return false;
-         else
-            return (i<j); 
-      }
+        else
+            return (i<j);
+    }
 
-   public:
-      struct MimeType
-      {
-         string contentType;
-         string cacheControl;
-      };
-      
-      inline static string _noCacheControl =
-         "no-store, max-age=0";
+public:
+    struct MimeType
+    {
+        string contentType;
+        string cacheControl;
+    };
+
+    inline static string _noCacheControl =
+        "no-store, max-age=0";
 
 #if defined(DEBUG) || defined(DISABLE_CACHE)
-      inline static string _defaultCacheControl =
-         _noCacheControl;
+    inline static string _defaultCacheControl =
+        _noCacheControl;
 
 #else
-      inline static string _defaultCacheControl =
-         "public, max-age=60";
+    inline static string _defaultCacheControl =
+        "public, max-age=60";
 #endif
 
-      inline static std::map<string, MimeType>
-         _mimeTypes{
+    inline static std::map<string, MimeType>
+    _mimeTypes{
+        {
+            ".txt",
             {
-               ".txt",
-               {
-                  "text/plain; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            {
-               ".html",
-               {
-                  "text/html; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            
-            {
-               ".xhtml",
-               {
-                  "application/xhtml+xml; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            {
-               ".js",
-               {
-                  "text/javascript; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            {
-               ".json",
-               {
-                  "application/json; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            {
-               ".css", 
-               {
-                  "text/css; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            {
-               ".jpg",
-               {
-                  "image/jpeg",
-                  "public, max-age=31536000, immutable"
-               }
-            },
-            {
-               ".png",
-               {
-                  "image/png",
-                  "public, max-age=31536000, immutable"
-               }
-            },
-            {
-               ".gif",
-               {
-                  "image/gif",
-                  "public, max-age=31536000, immutable"
-               }
-            },
-            {
-               ".ico",
-               {
-                  "image/x-icon",
-                  "public, max-age=31536000, immutable"
-               }
-            },
-            {
-               ".h",
-               {
-                  "text/plain; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            {
-               ".hpp",
-               {
-                  "text/plain; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            {
-               ".cpp",
-               {
-                  "text/plain; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            
-            {
-               ".c",
-               {
-                  "text/plain; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            {
-               ".ino",
-               {
-                  "text/plain; charset=utf-8",
-                  _defaultCacheControl
-               }
-            },
-            {
-               ".bin",
-               {
-                  "application/octet-stream",
-                  _defaultCacheControl
-               }
-            },
-            {
-               ".sh",
-               {
-                  "application/json; charset=utf-8",
-                  _defaultCacheControl
-               }
+                "text/plain; charset=utf-8",
+                _defaultCacheControl
             }
-         };
-         
+        },
+        {
+            ".html",
+            {
+                "text/html; charset=utf-8",
+                _defaultCacheControl
+            }
+        },
+
+        {
+            ".xhtml",
+            {
+                "application/xhtml+xml; charset=utf-8",
+                _defaultCacheControl
+            }
+        },
+        {
+            ".js",
+            {
+                "text/javascript; charset=utf-8",
+                _defaultCacheControl
+            }
+        },
+        {
+            ".json",
+            {
+                "application/json; charset=utf-8",
+                _defaultCacheControl
+            }
+        },
+        {
+            ".css",
+            {
+                "text/css; charset=utf-8",
+                _defaultCacheControl
+            }
+        },
+        {
+            ".jpg",
+            {
+                "image/jpeg",
+                "public, max-age=31536000, immutable"
+            }
+        },
+        {
+            ".png",
+            {
+                "image/png",
+                "public, max-age=31536000, immutable"
+            }
+        },
+        {
+            ".gif",
+            {
+                "image/gif",
+                "public, max-age=31536000, immutable"
+            }
+        },
+        {
+            ".ico",
+            {
+                "image/x-icon",
+                "public, max-age=31536000, immutable"
+            }
+        },
+        {
+            ".h",
+            {
+                "text/plain; charset=utf-8",
+                _defaultCacheControl
+            }
+        },
+        {
+            ".hpp",
+            {
+                "text/plain; charset=utf-8",
+                _defaultCacheControl
+            }
+        },
+        {
+            ".cpp",
+            {
+                "text/plain; charset=utf-8",
+                _defaultCacheControl
+            }
+        },
+
+        {
+            ".c",
+            {
+                "text/plain; charset=utf-8",
+                _defaultCacheControl
+            }
+        },
+        {
+            ".ino",
+            {
+                "text/plain; charset=utf-8",
+                _defaultCacheControl
+            }
+        },
+        {
+            ".bin",
+            {
+                "application/octet-stream",
+                _defaultCacheControl
+            }
+        },
+        {
+            ".sh",
+            {
+                "application/json; charset=utf-8",
+                _defaultCacheControl
+            }
+        }
+    };
 
 
-         
-   public:
-      FileSystemApp(
-         Session* session,
-         ResponseHeaders& responseHeaders
-      ) : App(session, responseHeaders)
-      {
-
-      }
 
 
-      virtual void handleResponse()
-      {
-         
-         WebRequest* request = _session->request();
-         
-    
-         if (request->path() == "/" &&
-             request->search().length())
-             return;
-             
-         _status = 200;
-         
-         const BString& requestPath = request->path();
+public:
+    FileSystemApp(
+        Session* session,
+        ResponseHeaders& responseHeaders
+    ) : App(session, responseHeaders)
+    {
 
-         // Get the file path from the request path
-         try
-         {
+    }
+
+
+    virtual void handleResponse()
+    {
+
+        WebRequest* request = _session->request();
+
+        if (request->path() == "/" &&
+                request->search().length())
+            return;
+
+        
+        const BString& requestPath = request->path();
+
+        // Get the file path from the request path
+        try
+        {
             //if (authenticate())
-            {
-               _filePath =
-                  getFilePath(requestPath);
-            }
-           // else
-            {
-              // redirect("/client/logon/index.html", false, requestPath);
-           //    return;
-            }
-            
+            _filePath =
+                getFilePath(requestPath);
+
             // Make sure file path is under
             // file system root
             if (!pathIsChild(_filePath, fileSystemPath()))
-               throw runtime_error("Invalid path accessing beyond root.");
-    
-         }
-         catch (filesystem_error& err)
-         {
+                throw runtime_error("Invalid path accessing beyond root.");
+
+        }
+        catch (filesystem_error& err)
+        {
             // Default error of not found
-            _status = -1;
-            _statusText = "Not Found";
-         }
-  
-         
-         // Redirect to add trailing slashes
-         // to directories
-         if ( redirectDirectories(
-                 *request,
-                 _filePath
-              ) )
-         {
+           // _status = -1;
+           // _statusText = "Not Found";
             return;
-         }
-            
-         
-         string contentType = "text/plain; charset=utf-8";
-         string cacheControl = _defaultCacheControl;
-         
-         if ( _status == 200 )
-         {
-            if (is_directory(_filePath) )
+        }
+
+
+        // Redirect to add trailing slashes
+        // to directories
+        if ( redirectDirectories(
+                    *request,
+                    _filePath
+                ) )
+        {
+            return;
+        }
+        
+        if (is_directory(_filePath))
+        {
+            try
             {
-               // Directory listing
-               _serve = App::SERVE_CONTENT;
-               contentType = "text/html; charset=utf-8";
-               _content = getDirectoryListing(
-                  requestPath,
-                  _filePath
-               );
-              
+                _filePath =
+                    getFilePath(
+                        requestPath + 
+                        BString("index.html")
+                    );
             }
-            else if ( _mimeTypes.count(
+            catch(filesystem_error& err)
+            {
+            }
+        }
+
+        string contentType = "text/plain; charset=utf-8";
+        string cacheControl = _defaultCacheControl;
+
+        if (is_directory(_filePath) )
+        {
+            // Directory listing
+            _serve = App::SERVE_CONTENT;
+            contentType = "text/html; charset=utf-8";
+            _content = getDirectoryListing(
+                    requestPath,
+                    _filePath
+            );
+
+        }
+        else if ( _mimeTypes.count(
+                _filePath.extension()
+                ) )
+        {
+            // File content
+            MimeType mimeType = 
+                _mimeTypes[
                     _filePath.extension()
-                 ) )
-            {
-               // File content
-               MimeType mimeType = _mimeTypes[
-                  _filePath.extension()
-               ];
-               contentType = mimeType.contentType;
-               cacheControl = mimeType.cacheControl;
-               _serve = SERVE_FILE;
-            }
-            else if ( (std::string)_filePath.filename() ==
-                      "Makefile" )
-            {
-               _serve = SERVE_FILE;
-            }
-            else
-            {
-               // Not found
-               _status = -1;
-               _statusText = "Not found";
-            }
-         }
-         
-         if ( _status != 200 )
-         {
+                ];
+            contentType = mimeType.contentType;
+            cacheControl = mimeType.cacheControl;
+            _serve = SERVE_FILE;
+        }
+        else if ( (std::string)_filePath.filename() ==
+            "Makefile" )
+        {
+            _serve = SERVE_FILE;
+        }
+        else
+        {
+            return;
+        }
+/*
+        if ( _status != 200 )
+        {
 
             stringstream contentStream;
-            
+
             write(contentStream, _status, _statusText, requestPath, _filePath);
 
             contentType = "application/json; charset=utf-8";
             _content = contentStream.str();
             _serve = App::SERVE_CONTENT;
-            
-         }
 
-         _responseHeaders.replace(
+        }
+        
+*/
+
+        _responseHeaders.replace(
             "content-type",
             contentType
-         );
-         
-         _responseHeaders.replace(
-           "cache-control",
+        );
+
+        _responseHeaders.replace(
+            "cache-control",
             cacheControl
-         );
-            
-         _responseHeaders.replace(
+        );
+
+        _responseHeaders.replace(
             "connection",
             "keep-alive"
-         );
+        );
+        
+        _status = 200;
 
-      }
-      
-      string getDirectoryListing(const BString& requestPath, const path& directory)
-      {
-         stringstream stream;
-         stream
-            << "<!DOCTYPE html>" << endl
-            << "<html lang=\"en\">" << endl
-            << "<head>" << endl
-            << "   <script src=\"/head.js\"></script>" << endl
-            << "   <meta charset=\"utf-8\"/>" << endl
-            << "   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>" << endl
-            << "   <script src=\"/client/console/console.js\"></script>" << endl
-            << "   <link rel=\"stylesheet\" type=\"text/css\" href=\"/style.css\" />" << endl
-            << "   <title>Template</title>" << endl
-            << "</head>" << endl
-            << "<body>" << endl
-            << "   <h1>" << requestPath.str() << "</h1>" << endl
-            << "   <ul>" << endl;
-            
-         // store paths
-         vector<path> paths;
+    }
 
-         copy(
+    string getDirectoryListing(const BString& requestPath, const path& directory)
+    {
+        stringstream stream;
+        stream
+                << "<!DOCTYPE html>" << endl
+                << "<html lang=\"en\">" << endl
+                << "<head>" << endl
+                << "   <script src=\"/head.js\"></script>" << endl
+                << "   <meta charset=\"utf-8\"/>" << endl
+                << "   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>" << endl
+                << "   <script src=\"/client/console/console.js\"></script>" << endl
+                << "   <link rel=\"stylesheet\" type=\"text/css\" href=\"/style.css\" />" << endl
+                << "   <title>Template</title>" << endl
+                << "</head>" << endl
+                << "<body>" << endl
+                << "   <h1>" << requestPath.str() << "</h1>" << endl
+                << "   <ul>" << endl;
+
+        // store paths
+        vector<path> paths;
+
+        copy(
             directory_iterator(directory),
             directory_iterator(),
             back_inserter(paths)
-         );
-         
-        
-         sort(
+        );
+
+
+        sort(
             paths.begin(),
             paths.end(),
             comparePaths
-         );
-         
-         for (const auto & entry : paths)
-         {
-            
+        );
+
+        for (const auto & entry : paths)
+        {
+
             const path& file = entry;
             string filename = file.filename();
             string extension = file.extension();
-            
+
             if (filename[0] == '\"')
-               filename = filename.substr(0, filename.size() - 2);
-               
+                filename = filename.substr(0, filename.size() - 2);
+
             stream
-               << "      <li>";
-                  
-           
+                    << "      <li>";
+
+
             if ( is_directory(file) ||
-                 _mimeTypes.count(extension) ||
-                 filename == "Makefile" )
+                    _mimeTypes.count(extension) ||
+                    filename == "Makefile" )
             {
-               stream
-                  << "<a href=\"" << filename << "\">";
-                  
-               if ( is_directory(file) )
-               {
-                  stream << "+";
-               }
-               
-               stream 
-                  << filename << "</a>" << endl;
+                stream
+                        << "<a href=\"" << filename << "\">";
+
+                if ( is_directory(file) )
+                {
+                    stream << "+";
+                }
+
+                stream
+                        << filename << "</a>" << endl;
             }
             else
-               stream
-                  << filename << endl;
+                stream
+                        << filename << endl;
 
-             stream
-                  << "</li>" << endl;
-         }
-         
-         stream
-            << "   </ul>" << endl
-            << "</body>" << endl
-            << "</html>" << endl;
+            stream
+                    << "</li>" << endl;
+        }
 
-         return stream.str();
-      }
-      
-      bool pathIsChild(const path & child, const path & prefix)
-      {
-         auto pair = std::mismatch(child.begin(), child.end(), prefix.begin(), prefix.end());
-         return pair.second == prefix.end();
-      }
-      
-      path fileSystemPath(string child = "") const
-      {
-         string filename = WWW_ROOT_DIRECTORY;
-         filename += child;
-         return path(filename);
-      }
-      
+        stream
+                << "   </ul>" << endl
+                << "</body>" << endl
+                << "</html>" << endl;
 
-      bool redirectDirectories(const WebRequest& request, const path& filePath)
-      {
-         if ( is_directory(filePath) &&
-              request.path() != "/" )
-         {
-            const BString& path =
+        return stream.str();
+    }
+
+    bool pathIsChild(const path & child, const path & prefix)
+    {
+        auto pair = std::mismatch(child.begin(), child.end(), prefix.begin(), prefix.end());
+        return pair.second == prefix.end();
+    }
+
+    path fileSystemPath(string child = "") const
+    {
+        string filename = WWW_ROOT_DIRECTORY;
+        filename += child;
+        return path(filename);
+    }
+
+
+    bool redirectDirectories(const WebRequest& request, const path& filePath)
+    {
+        
+        const BString& path =
                request.path();
                
-            if (path[path.size() - 1] != '/')
+        if ( is_directory(filePath) &&
+            path != "/" )
+        {
+
+            if (!path.endsWith("/"))
             {
-               BString newPath =
-                  path + BString("/") ;
-                  
-               BString search = request.url().search().value();
-               
-               if (search.length())
-                  newPath += BString("?") + search;
-                  
-               redirect(newPath, true);
-               
-               return true;
+                BString newPath =
+                    path + BString("/") ;
+
+                BString search = request.url().search().value();
+
+                if (search.length())
+                    newPath += BString("?") + search;
+
+                if (newPath != path) 
+                {
+                    redirect(newPath, false);
+                    return true;
+                }
             }
-         }
-         return false;
-      }
-      
-      void write(ostream& headerStream, const int status, const BString& statusText, const BString& requestPath, const path& filePath)
-      {
-         BeeFishScript::Object output;
+        }
+        return false;
+    }
 
-         output["status"] = status;
-         output["statusText"] = statusText;
+    void write(ostream& headerStream, const int status, const BString& statusText, const BString& requestPath, const path& filePath)
+    {
+        BeeFishScript::Object output;
 
-         Authentication::write(output);
-         
-         output["requestPath"] = requestPath;
-                    
-         if ((std::string)filePath != "")
-         {
+        output["status"] = status;
+        output["statusText"] = statusText;
+
+        Authentication::write(output);
+
+        output["requestPath"] = requestPath;
+
+        if ((std::string)filePath != "")
+        {
             BString path(filePath);
-            
+
             output["filePath"] = path;
-            
+
             // extension
             if ( _mimeTypes.count(
-                  filePath.extension()
-                ) )
+                        filePath.extension()
+                    ) )
             {
-               MimeType mimeType =
-                  _mimeTypes[
-                     filePath.extension()
-                  ];
+                MimeType mimeType =
+                    _mimeTypes[
+                        filePath.extension()
+                    ];
 
-               output["contentType"] = BString(mimeType.contentType);
-               output["cacheControl"] = BString(mimeType.cacheControl);
+                output["contentType"] = BString(mimeType.contentType);
+                output["cacheControl"] = BString(mimeType.cacheControl);
 
             }
-         }
+        }
 
-         headerStream << output << endl;
+        headerStream << output << endl;
 
-      }
-      
+    }
 
 
-      virtual BString name()
-      {
-         return "File system app";
-      }
-   };
 
-   
+    virtual BString name()
+    {
+        return "File system app";
+    }
+    
+};
+
+
 
 }
 

@@ -1245,6 +1245,6 @@ PowerEncoding& operator << (PowerEncoding& output, const JSONPath& json)
     return output << json.index();
 }
 
-
+}
 
 #endif

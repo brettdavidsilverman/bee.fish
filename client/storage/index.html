@@ -19,6 +19,11 @@
 script {
     display: none;
 }
+
+input[type="radio"] {
+    position: relative;
+    top: -20px;
+}
         </style>
     </head>
     <body>
@@ -49,12 +54,27 @@ function setStorageURL() {
         <h2>0. Choose storage</h2>
         
         <form>
-            <input type="radio" id="localStorage" name="storage" value="localStorage" onchange="setStorage('localStorage')">
-            <label for="localStorage">Local Storage</label><br>
-            <input type="radio" id="sessionStorage" name="storage" value="sessionStorage" onchange="setStorage('sessionStorage')">
-            <label for="sessionStorage">Session Storage</label><br>
-            <input type="radio" id="remoteStorage" name="storage" value="remoteStorage" onchange="setStorage('remoteStorage')">
-            <label for="remoteStorage">Remote Storage</label><br>
+            <fieldset>
+                <div>
+                    <label for="localStorage">
+                        Local storage
+                        <input type="radio" id="localStorage" name="storage" value="localStorage" onchange="setStorage('localStorage')"></input>
+                    </label>
+                </div>
+                <div>
+                    <label for="sessionStorage">
+                        Session Storage
+                        <input type="radio" id="sessionStorage" name="storage" value="sessionStorage" onchange="setStorage('sessionStorage')"></input>
+                    </label>
+                </div>
+                <div>
+                    <label for="remoteStorage">
+                        Remote Storage
+                        <input type="radio" id="remoteStorage" name="storage" value="remoteStorage" onchange="setStorage('remoteStorage')"></input>
+                    </label>
+                </div>
+            </fieldset>
+            
             <script style="display:none;">
 
 function setStorage(storageString)

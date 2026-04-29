@@ -230,7 +230,7 @@ using namespace BeeFishTest;
             );
             ok = ok && testResult(
                 "URL path",
-                url.path() == "/"
+                url.path() == ""
             );
             
 
@@ -302,7 +302,7 @@ using namespace BeeFishTest;
             
             ok = ok && testResult(
                 "URL",
-                url == "https://test.bee.fish:8000"
+                url == "https://test.bee.fish:8000/"
             );
             
         }
