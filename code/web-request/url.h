@@ -443,9 +443,9 @@ namespace BeeFishWeb {
             // Remove leading /
             path = path.substr(1);
             
-
             
-            assert(!path.endsWith("/"));
+            if (path.endsWith("/"))
+                path = path.substr(0, path.length() - 1);
             
             if (path.length() == 0)
                 return vector<BString>();
