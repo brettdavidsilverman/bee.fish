@@ -95,3 +95,4 @@ function CHECK(label, bool)
       throw new CheckError(label);
    }
 }
+

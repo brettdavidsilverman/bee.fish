@@ -35,16 +35,16 @@ var url;
 var query;
 var key;
 
+console.log("here");
+
 function setStorageURL() {
     document.getElementById("storageURL").innerText  =
         document.location.origin + 
         "/" +
         document.getElementById("storagePath").value;
-       // query;
         
     document.getElementById("link").href =
         document.getElementById("storageURL").innerText + query;
-        
 }
         </script>
         
@@ -209,11 +209,6 @@ function setItem()
             <br/>
             <button onclick="getItem()" type="button">Ok</button>
             <br />
-            Value:
-            <br />
-            <label for="getIsNull">Is Null</label>
-            <input type="checkbox" id="getIsNull"></input>
-            <br />
             <div id="getValue"></div>
             
             <script>
@@ -221,22 +216,15 @@ function getItem()
 {
     var getValue = document.getElementById("getValue");
     var getIsNull = document.getElementById("getIsNull");
-    getValue.innerHTML = "Getting...";
-
+    var textArea =
+        document.getElementById("setValue");
+    textArea.value  = "Getting...";
+    
     storage.url = document.getElementById("storageURL").innerText;
 
     storage.getItem(key).then(
         function(value) {
-            getIsNull.checked = (value == null);
-            getValue.innerHTML = "";
-            if (value != null)
-            {
-                var textNode =
-                    document.createTextNode(value);
-                getValue.appendChild(textNode);
-            }
-    
-            alert("ok");
+            textArea.value = value;
         }
     ).catch(
         function(error)
