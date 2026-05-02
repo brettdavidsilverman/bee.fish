@@ -175,6 +175,13 @@ public:
                 "application/json; charset=utf-8",
                 _defaultCacheControl
             }
+        },
+        {
+            ".wav",
+            {
+                "audio/wav",
+                _defaultCacheControl
+            }
         }
     };
 

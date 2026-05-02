@@ -1,63 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <script src="/error.js"></script>
-      <meta charset="utf-8"/>
-      <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <script src="../console/console.js"></script>
-      
-      <link rel="stylesheet" type="text/css" href="/style.css" />
-      <link rel="stylesheet" type="text/css" href="../style.css" />
+    <head>
+        <script src="/head.js"></script>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <script src="../console/console.js"></script>
+        
+        <link rel="stylesheet" type="text/css" href="/style.css" />
+        <link rel="stylesheet" type="text/css" href="../style.css" />
 
-      <title>Audio</title>
-      <style>
-.volume {
-    background-color: pink;
+        <title>Audio</title>
+        <style>
+#setup, #start, #stop{
     width: 100px;
+    height: 100px;
 }
-      </style>
-   </head>
-   <body>
-      <h1>Audio</h1>
-      <a href="audio.js">audio.js</a>
-      <input type="file" id="audio-input" accept="audio/*" capture="microphone" />
-      <button onclick="startAudio()">Start</button>
-      <div id="volume" class="volume">Volume</div>
-      <pre>
-         <script>
+
+#setup {
+    background-color: grey;
+}
+
+#start {
+    background-color: green;
+}
+
+#stop {
+    background-color: red;
+}
+
+#canvas {
+    width: 100%;
+    height: 200px;
+    background-color: yellow;
+}
+        </style>
+    </head>
+    <body>
+        <h1>Audio</h1>
+        <a href="sine-processor.js">sine-proccessor.js</a>
+        <div id="setup"></div>
+        <div id="start"></div>
+        <div id="stop"></div>
+        <canvas id="canvas"></div>
+        <pre>
+            <script type="module">
 var console = new Console();
 console.log("Hello world");
 
-// main.js
-async function startAudio() {
-    const audioContext = new AudioContext();
-    await audioContext.audioWorklet.addModule('analyser-processor.js');
+const audioContext = new AudioContext({
+    sampleRate: 192000
+});
 
-    // Create stream (microphone)
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const source = audioContext.createMediaStreamSource(stream);
+var sineNode1;
+var sineNode2;
 
-    // Create worklet node
-    const analyserNode = new AudioWorkletNode(audioContext, 'analyser-processor');
-    
-    
-    // Get the volume div
-    const volumeDiv = document.getElementById("volume");
-    
-    // Handle messages from processor
-    analyserNode.port.onmessage = (event) => {
-        const volume = event.data.volume * 1000;
-        console.log("Volume: " + volume);
-        volumeDiv.style.width = volume * 100;
-        // Visualize volume here (e.g., update a div width)
-    };
+var initialSetup = false;
 
-    source.connect(analyserNode);
-    // Optional: Connect to destination if you want to hear mic input
-    // analyserNode.connect(audioContext.destination);
+async function setup() {
+    
+    if (initialSetup)
+        return;
+        
+    await audioContext
+        .audioWorklet
+        .addModule('sine-processor.js');
+  
+    await audioContext
+        .audioWorklet
+        .addModule('sum-processor.js');
+        
+    sineNode1 = 
+        new AudioWorkletNode(
+            audioContext, 
+            'sine-processor'
+        );
+
+    sineNode1.port.postMessage({
+        sampleRate: audioContext.sampleRate,
+        frequency: 440
+    });
+    
+    sineNode2 = 
+        new AudioWorkletNode(
+            audioContext, 
+            'sine-processor'
+        );
+
+    sineNode2.port.postMessage({
+        sampleRate: audioContext.sampleRate,
+        frequency: 196
+    });
+
+    var sumNode = 
+        new AudioWorkletNode(
+            audioContext, 
+            'sum-processor',
+            {
+                numberOfInputs: 2,
+                numberOfOutputs: 1,
+                outputChannelCount: [2] // Set to match input channel count
+            }
+        );
+        
+    sineNode1.connect(sumNode, 0, 0);
+    sineNode2.connect(sumNode, 0, 1);
+    
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 4096; // Small size for faster, less detailed data
+    sumNode.connect(analyser);
+
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    
+    analyser.connect(
+        audioContext.destination
+    );
+    
+    var canvas = document.getElementById("canvas");
+    var canvasCtx = canvas.getContext("2d");
+    // Fill solid color
+    canvasCtx.fillStyle = "yellow";
+    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    function getTriggerIndex(data, threshold = 128) {
+        // Search for a rising edge: current value > threshold AND previous value <= threshold
+        var found = 0;
+        for (var i = 1; i < data.length / 2; i++) {
+            if (data[i] > threshold && data[i - 1] <= threshold) {
+                return i; // Found the stable starting point
+                break;
+            }
+        }
+        /*
+        for (var i = found; i < data.length; i++) {
+            if (data[i] < threshold && data[i - 1] >= threshold) {
+                return i; // Found the stable starting point
+            }
+        }
+        */
+        return 0; // Fallback to start if no trigger found
+    }
+    
+    function draw() {
+        
+        analyser.getByteTimeDomainData(dataArray);
+        const triggerIndex = getTriggerIndex(dataArray);
+        
+        // Fill solid color
+        canvasCtx.fillStyle = "yellow";
+        canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Begin the path
+        canvasCtx.lineWidth = 1;
+        canvasCtx.strokeStyle = "black";
+        canvasCtx.beginPath();
+        
+        // Draw each point in the waveform
+        const sliceWidth =
+            canvas.width / 
+            (bufferLength - triggerIndex) ;
+            
+        var x = 0;
+        for (var i = triggerIndex; i < bufferLength; i++) {
+            const volume = dataArray[i] / 128.0;
+            const y = volume * (canvas.height / 2);
+
+            if (i === triggerIndex) {
+                canvasCtx.moveTo(x, y);
+            } else {
+                canvasCtx.lineTo(x, y);
+            }
+
+            x += sliceWidth;
+            /*
+            if (x > canvas.width)
+            {
+                canvasCtx.stroke();
+                // Fill solid color
+                canvasCtx.fillStyle = "yellow";
+                canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+                x = 0;
+                canvasCtx.moveTo(x, y);
+            }
+            */
+        }
+
+        // Finish the line
+        canvasCtx.stroke();
+        
+        requestAnimationFrame(draw);
+    }
+    
+    if (audioContext.state === 'suspended') 
+        audioContext.resume();
+        
+    draw();
+    
+    initialSetup = true;
 }
 
-         </script>
-      </pre>
-   </body>
+
+
+document.getElementById("setup")
+    .onclick =
+    async (event) => {
+        await setup();
+        navigator.vibrate(100);
+    }
+          
+document.getElementById("start")
+    .ontouchstart =
+    async (event) => {
+
+        await setup();
+    
+        sineNode1.port.postMessage("start");
+        sineNode2.port.postMessage("start");
+        navigator.vibrate(100);
+    }
+
+
+          
+document.getElementById("stop")
+    .ontouchstart =
+    (event) => {
+        if (sineNode1)
+            sineNode1.port.postMessage("stop");
+        if (sineNode2)
+            sineNode2.port.postMessage("stop");
+        navigator.vibrate(100);
+    }
+     
+
+            </script>
+        </pre>
+    </body>
 </html>
