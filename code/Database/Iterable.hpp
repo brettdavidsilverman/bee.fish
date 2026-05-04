@@ -6,7 +6,8 @@
 #include <cstddef> 
 #include "../power-encoding/stack.h"
 #include "Path.hpp"
-
+#include "Iterator.hpp"
+#include "ReverseIterator.hpp"
 
 using namespace std;
 using namespace BeeFishPowerEncoding;
@@ -76,24 +77,24 @@ namespace BeeFishDatabase {
     public:
         
         // Container methods to get iterators
-        virtual PathBase::PathIterator<T> begin() {
-            return PathBase::PathIterator<T>(this);
+        virtual Iterator<T> begin() {
+            return Iterator<T>(this);
         }
     
         // Points one past the last element
-        Path::PathIterator<T> end() { 
-            PathBase::PathIterator<T> iterator;
+        Iterator<T> end() { 
+            Iterator<T> iterator;
             return iterator;
         }
         
         // Container methods to get iterators
-        virtual PathBase::ReversePathIterator<T> rbegin() {
-            return PathBase::ReversePathIterator<T>(this);
+        virtual ReverseIterator<T> rbegin() {
+            return ReverseIterator<T>(this);
         }
     
         // Points one past the last element
-        Path::ReversePathIterator<T> rend() { 
-            PathBase::ReversePathIterator<T> iterator;
+        ReverseIterator<T> rend() { 
+            ReverseIterator<T> iterator;
             return iterator;
         }
         

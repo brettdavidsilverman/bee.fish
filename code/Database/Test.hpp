@@ -26,6 +26,7 @@ namespace BeeFishDatabase
     inline bool testAllFiles(std::filesystem::path directory);
     inline bool testFile(JSONPath root, std::filesystem::path file, bool expect);
     inline bool testIterator();
+    inline bool testReverseIterator();
     inline bool testClear();
     inline bool testPathParent();
     inline bool testIncrement();
@@ -87,6 +88,9 @@ namespace BeeFishDatabase
             
         success = success &&
             testIterator();
+            
+        success = success &&
+            testReverseIterator();
 
         success = success &&
             testMultiThreaded();
@@ -1555,6 +1559,30 @@ assert(success);
             outputSuccess(success);
         }
         
+
+        return success;
+        
+    }
+    
+    inline bool testReverseIterator()
+    {
+        using namespace std;
+
+        cout << "Testing reverse iterator" << endl;
+        
+        bool success = true;
+        
+        Database db;
+        Path root(db);
+        
+        Iterable<BString> path(root);
+        
+        root["hello"];
+        root["world"];
+        root["brett"];
+        
+        
+
         if (success)
         {
             cout << "\tIterable values reverse: ";
@@ -1570,10 +1598,12 @@ assert(success);
             success = success && (values[0] == "world");
             success = success && (values[1] == "hello");
             success = success && (values[2] == "brett");
-        
-            outputSuccess(success);
+    
         }
         
+        
+        outputSuccess(success);
+
         return success;
         
     }

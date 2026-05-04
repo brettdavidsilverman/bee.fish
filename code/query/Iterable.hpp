@@ -31,7 +31,7 @@ using namespace BeeFishDatabase;
         
         class Iterator {
         protected:
-            typedef PathBase::PathIterator<JSONPath::Id> _Iterator;
+            typedef BeeFishDatabase::Iterator<JSONPath::Id> _Iterator;
             _Iterator _iterator;
             JSONDatabase* _database = nullptr;
             BString _parentValue;
@@ -188,7 +188,7 @@ using namespace BeeFishDatabase;
         
         class ReversePathIterator {
         protected:
-            PathBase::ReversePathIterator<JSONPath::Id> _iterator;
+            BeeFishDatabase::ReverseIterator<JSONPath::Id> _iterator;
             
             BString _value;
             

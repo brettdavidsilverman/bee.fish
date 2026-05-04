@@ -1,0 +1,85 @@
+#ifndef BEE_FISH__DATABASE__REVERSE_ITERATOR_HPP
+#define BEE_FISH__DATABASE__REVERSE_ITERATOR_HPP
+
+namespace BeeFishDatabase {
+template<typename T>
+class ReverseIterator {
+public:
+    PathBase* _path = nullptr; // The underlying pointer that the iterator wraps
+    T _item;
+    Stack _stack;
+    bool _isEnd = true;
+
+public:
+    // Iterator traits (required for STL compatibility in C++17 and earlier)
+    using iterator_category = std::forward_iterator_tag;
+    using value_type        = T;
+    using difference_type   = std::ptrdiff_t;
+    using pointer           = T*;
+    using reference         = const T&;
+
+    // Constructor
+    ReverseIterator() {
+    }
+
+    ReverseIterator(PathBase* path) :
+        _path(path)
+    {
+        _isEnd = !_path->previous<T>(_stack, _item);
+    }
+
+
+    // Dereference operator (*)
+    reference operator*() const
+    {
+        return _item;
+    }
+
+    // Arrow operator (->)
+    pointer operator->() const
+    {
+        return &_item;
+    }
+
+    // Prefix increment operator (++)
+    ReverseIterator& operator++() {
+        assert(!_isEnd);
+        _isEnd = not
+                 _path->previous<T>(
+                     _stack,
+                     _item
+                 );
+        return *this;
+    }
+
+    // Postfix increment operator (++)
+    ReverseIterator operator++(int) {
+        ReverseIterator tmp = *this;
+        tmp.save();
+        ++(*this);
+        tmp.restore();
+        return tmp;
+    }
+
+    friend bool operator == (
+        const ReverseIterator& a,
+        const ReverseIterator& b
+    )
+    {
+        return  (a._isEnd == b._isEnd);
+    }
+
+    friend bool operator != (
+        const ReverseIterator& a,
+        const ReverseIterator& b
+    )
+    {
+        return (a._isEnd != b._isEnd);
+    }
+
+
+};
+
+}
+
+#endif
