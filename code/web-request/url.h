@@ -441,7 +441,8 @@ namespace BeeFishWeb {
             BString path = URL::path();
 
             // Remove leading /
-            path = path.substr(1);
+            if (path.length())
+                path = path.substr(1);
             
             
             if (path.endsWith("/"))

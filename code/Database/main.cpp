@@ -140,7 +140,7 @@ int main(int argc, const char* argv[])
             database.host(origin)
             ["deaths"];
             
-        JSONPathParser parser(inputPath, clog);
+        JSONPathParser parser(inputPath, cout);
         cout << "Loading deaths.json" << endl;
         
         ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");

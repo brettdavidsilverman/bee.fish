@@ -49,7 +49,7 @@ namespace BeeFishHTTPS {
         stringstream stream;
             stream
                 << "curl "
-                << origin  << "/?wordnotindictionary"
+                << origin  << "/?json%20or%20sample"
                 << " -c cookies -b cookies";
                 
                 

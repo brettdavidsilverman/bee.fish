@@ -6,6 +6,8 @@
 #include <fcntl.h>
 
 #include "../power-encoding/power-encoding.h"
+#include "../Id/Id.hpp"
+
 #include "../Script/Variable.hpp"
 #include "Data.hpp"
 #include "File.hpp"
@@ -488,6 +490,12 @@ public:
         return *(T*)data.data();
     }
     
+    void getData(BeeFishId::Id& id) const
+    {
+        BString data = getStringData();
+        id = BeeFishId::Id::fromData(data);
+    }
+    
 
     template<typename T>
     bool setData(const T& source)
@@ -496,6 +504,13 @@ public:
         BString data(bytes, sizeof(T));
         return setData<BString>(data);
 
+    }
+    
+    template<typename T = BeeFishId::Id>
+    bool setData(const BeeFishId::Id& id)
+    {
+        BString data = id.toData();
+        return setData<BString>(data);
     }
 
     template<typename T = BString>

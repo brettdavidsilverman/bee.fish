@@ -88,7 +88,7 @@ public:
                Path::database();
     }
 
-    Id id()
+    Id id() const
     {
         //return index();
         
@@ -96,8 +96,14 @@ public:
         path = path[ID];
         
         assert(path.hasData());
-
-        return path.getData<Id>();
+#ifdef JSON_INDEX
+        return path.getData<Index>();
+#else
+        Id id;
+        path.getData(id);
+        
+        return id;
+#endif
         
     }
     
@@ -646,7 +652,7 @@ public:
             {
                 // New property
                 // Update the properties counter
-                propertyPath[*this];
+propertyPath[index()];
 
                 // Update positions
                 position = ++getChildren();
@@ -869,9 +875,9 @@ json.removeWords(property, true);
 
         json.clear();
 
-        if (propertyPath.contains(*this))
+if (propertyPath.contains(index()))
         {
-            propertyPath.clear(*this);
+propertyPath.clear(index());
             if (propertyPath.isDeadEnd())
                 properties().clear(property);
         }
@@ -1242,9 +1248,14 @@ JSONPath JSONDatabase::host(const BString& host) const
 
 PowerEncoding& operator << (PowerEncoding& output, const JSONPath& json)
 {
-    return output << json.index();
+    return output << json.id();
 }
 
+
+
+
 }
+
+
 
 #endif

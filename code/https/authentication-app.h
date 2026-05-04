@@ -22,7 +22,7 @@ namespace BeeFishHTTPS {
          {
             "/",
             "/authenticate",
-            "/index.html",
+        //    "/index.html",
             "/favicon.ico",
             "/feebee.jpg",
             "/feebee-small.jpg",

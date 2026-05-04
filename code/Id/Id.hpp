@@ -251,6 +251,14 @@ using namespace BeeFishScript;
             return bits.toData();
         }
         
+        static Timestamp fromData(const BString& data)
+        {
+            BitStream bits(data);
+            Timestamp timestamp;
+            bits >> timestamp;
+            return timestamp;
+        }
+        
 
     private:
 
@@ -404,11 +412,20 @@ using namespace BeeFishScript;
             return output.str();
         }
         
-        BString toData() {
+        BString toData() const {
             BitStream bits;
             bits << *this;
             assert(bits.count() == 0);
             return bits.toData();
+        }
+        
+        static Id fromData(const BString& data)
+        {
+            BitStream bits(data);
+            Id id;
+            bits >> id;
+            assert(bits.count() == 0);
+            return id;
         }
         
     private:
