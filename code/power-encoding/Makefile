@@ -1,7 +1,7 @@
 BUILD=../../build
 OUTPUT=$(BUILD)/power-encoding
 CFLAGS=-std=c++17 -Wall -fmax-errors=1 -Ofast
-DEPS=$(BUILD)/b-string power-encoding.h version.h encoding.h test.h Makefile main.cpp
+DEPS=$(BUILD)/b-string power-encoding.h version.h encoding.h test.h stack.h Makefile main.cpp
 
 $(OUTPUT): $(DEPS)
 	g++ -o $(OUTPUT) $(CFLAGS) main.cpp -lboost_locale -licuuc

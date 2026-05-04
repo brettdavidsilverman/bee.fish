@@ -3,5 +3,6 @@
 
 #include "power-encoding-base.h"
 #include "encoding.h"
+#include "stack.h"
 
 #endif

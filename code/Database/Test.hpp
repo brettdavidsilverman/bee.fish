@@ -407,15 +407,15 @@ namespace BeeFishDatabase
             Size minimum = -1;
             Stack stack;
             bool ok = data.goToMin(stack);
+            stack.reset();
 
-   
             if (ok) {
                 stack >> minimum;
                 cout << minimum << flush;
             }
 
             success = ok && (minimum == min);
-            
+
             outputSuccess(success);
             
             assert(success);
@@ -430,7 +430,7 @@ namespace BeeFishDatabase
             Size minimum = -1;
             Stack stack;
             bool ok = data.goToMin(stack);
-
+            stack.reset();
    
             if (ok) {
                 stack >> minimum;

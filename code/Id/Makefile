@@ -16,7 +16,9 @@ debug:	DEBUG = debug
 debug:	CFLAGS += -Og -g -D DEBUG
 debug:	$(OUTPUT)
 
-
+run_debug:	debug
+	gdb --args $(OUTPUT) -test
+	
 trace:	$(OUTPUT)
 	rm -f trace.txt
 	- valgrind --log-file="trace.txt" --track-origins=yes --leak-check=yes -s $(OUTPUT) -test

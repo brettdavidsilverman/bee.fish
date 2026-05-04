@@ -18,7 +18,6 @@
 #include "b-string.h"
 #include "char.h"
 #include "base64.h"
-#include "bit-stream.h"
 
 namespace BeeFishMisc
 {

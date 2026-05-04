@@ -11,7 +11,6 @@
 #include "data.h"
 #include "base64.h"
 #include "misc.h"
-#include "bit-stream.h"
 #include "stream.h"
 
 #endif

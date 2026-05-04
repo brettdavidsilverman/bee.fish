@@ -43,7 +43,7 @@ int main(int argc, const char* argv[])
       if (line.size() == 0)
          break;
       
-      BitStream stream = BitStream::fromData(line);
+      Stack stream = Stack::fromData(line);
       
       BString string;
       stream >> string;

@@ -1,5 +1,5 @@
-#ifndef BEE_FISH_B_STRING__BIT_STREAM_H
-#define BEE_FISH_B_STRING__BIT_STREAM_H
+#ifndef BEE_FISH_POWER_ENCODING__STACK_H
+#define BEE_FISH_POWER_ENCODING__STACK_H
 
 #include <iostream>
 #include <string>
@@ -10,10 +10,8 @@
 #include <cassert>
 
 #include "../power-encoding/power-encoding.h"
-#include "b-string.h"
-#include "char.h"
 
-namespace BeeFishBString {
+namespace BeeFishPowerEncoding {
 
 // A byte aligned stream of bits
 // using a vector<bool> as storage
@@ -23,37 +21,29 @@ namespace BeeFishBString {
 // This defines the readBit and writeBit
 // functions of PowerEncoding, to append
 // a bit to the vector.
-class BitStream :
+class Stack :
     public PowerEncoding,
     public vector<bool>
 {
 private:
     vector<bool>::const_iterator _it;
-
+    typedef unsigned char Byte;
+    
 public:
 
-    BitStream()
+    Stack()
     {
-        _it = cend();
+        _it = cbegin();
     }
 
-    BitStream(const BitStream& bitStream) :
+    Stack(const Stack& bitStream) :
         vector<bool>(bitStream)
     {
         _it = cbegin();
     }
 
-    BitStream(const BString& source) :
-        BitStream(source.str())
-    {
-        /*
-        for (auto character : source) {
-            (*this) << character;
-        }
-        */
-    }
 
-    BitStream(const std::string& data)
+    Stack(const std::string& data)
     {
         // [0,1,2,3,4,5,6,7]
         const Byte* _data = (const Byte*)data.data();
@@ -94,9 +84,9 @@ public:
 
     }
 
-    static BitStream fromData(const std::string& data)
+    static Stack fromData(const std::string& data)
     {
-        return BitStream(data);
+        return Stack(data);
     }
 
     std::string toData() const
@@ -141,13 +131,15 @@ public:
         push_back(bit);
 
         PowerEncoding::writeBit(bit);
+        
     }
 
     virtual bool readBit()
     {
 
-
-        bool bit = PowerEncoding::readBit();
+        bool bit = peekBit();
+        
+        PowerEncoding::readBit();
 
         if (_it != cend())
             ++_it;
@@ -172,8 +164,14 @@ public:
         _it = cbegin();
         PowerEncoding::reset();
     }
+    
+    virtual void clear()
+    {
+        reset();
+        vector<bool>::clear();
+    }
 
-    friend ostream& operator << (ostream& out, const BitStream& bitStream) {
+    friend ostream& operator << (ostream& out, const Stack& bitStream) {
         bitStream.write(out);
         return out;
     }
@@ -184,13 +182,49 @@ public:
         }
     }
 
-    BString bstr() {
-        BString string;
+    std::string str() {
+        std::string string;
         for (auto bit : (*this)) {
             string.push_back(bit ? '1' : '0');
         }
         return string;
     }
+    
+    bool last() const {
+        size_t size = vector<bool>::size();
+        assert(size);
+        return (*this)[size - 1];
+    }
+    
+    virtual void push_back(bool bit)
+    {
+
+        if (bit)
+            ++_count;
+        else if (_count > 0)
+            --_count;
+
+        vector<bool>::push_back(
+            bit
+        );
+    
+
+    }
+
+
+    virtual void pop_back()
+    {
+        bool bit = last();
+
+        if (bit && _count > 0)
+            --_count;
+        else if (!bit)
+            ++_count;
+
+        vector<bool>::pop_back();
+
+    }
+    
 
 };
 

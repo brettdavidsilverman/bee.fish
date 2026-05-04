@@ -245,7 +245,7 @@ using namespace BeeFishScript;
         }
         
         BString toData() {
-            BitStream bits;
+            Stack bits;
             bits << *this;
             assert(bits.count() == 0);
             return bits.toData();
@@ -253,7 +253,7 @@ using namespace BeeFishScript;
         
         static Timestamp fromData(const BString& data)
         {
-            BitStream bits(data);
+            Stack bits(data);
             Timestamp timestamp;
             bits >> timestamp;
             return timestamp;
@@ -413,7 +413,7 @@ using namespace BeeFishScript;
         }
         
         BString toData() const {
-            BitStream bits;
+            Stack bits;
             bits << *this;
             assert(bits.count() == 0);
             return bits.toData();
@@ -421,7 +421,7 @@ using namespace BeeFishScript;
         
         static Id fromData(const BString& data)
         {
-            BitStream bits(data);
+            Stack bits(data);
             Id id;
             bits >> id;
             assert(bits.count() == 0);
@@ -448,7 +448,7 @@ using namespace BeeFishScript;
         BString createKey()
         {
         
-            BitStream stream;
+            Stack stream;
             
             write(stream);
 
@@ -473,7 +473,7 @@ using namespace BeeFishScript;
             // from the key
             
             // Create a string of char bits
-            BitStream stream(raw);
+            Stack stream(raw);
           
             // read the first "1"
             bool read =

@@ -699,8 +699,9 @@ namespace BeeFishQuery {
 
             bool result = orPath.next(stack);
             JSONPath::Id  value;
-            stack >> value;
             stack.reset();
+            stack >> value;
+            
             
             ok = ok &&
                 testResult(
@@ -717,7 +718,7 @@ namespace BeeFishQuery {
                 
             if (ok) {
                 result = orPath.next(stack);
-
+                stack.reset();
                 ok = ok &&
                     testResult(
                         "OrPath next 2", 
@@ -727,7 +728,7 @@ namespace BeeFishQuery {
              
                 if (ok) {
                     stack >> value;
-                    stack.reset();
+                    
                     ok = ok &&
                         testResult(
                             "OrPath next 2 value", 
@@ -847,27 +848,7 @@ namespace BeeFishQuery {
                 );
         }
         
-        if (ok && false) 
-        {
-            cout << "\tGet max using stack " << flush;
-            notPath.save();
-            Stack stack;
-            ok = notPath.goToMax(stack);
-            notPath.restore();
-            outputSuccess(ok);
-            
-            cout << "\tGet max " << flush;
-            JSONPath::Id max =
-                notPath.max<JSONPath::Id>();
-            
-            ok = ok &&
-                testResult(
-                    "NotPath Maximum", 
-                    max == ids[2]
-                );
-        }
-        
-        assert(ok);
+    
         
         if (ok) 
         {
@@ -875,9 +856,10 @@ namespace BeeFishQuery {
             notPath.save();
 
             bool result = notPath.next(stack);
+            stack.reset();
             JSONPath::Id  value;
             stack >> value;
-            stack.reset();
+            
             
             ok = ok &&
                 testResult(

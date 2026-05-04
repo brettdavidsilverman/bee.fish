@@ -1,11 +1,11 @@
 #ifndef BEE_FISH__DATABASE__ITERABLE_HPP
 #define BEE_FISH__DATABASE__ITERABLE_HPP
 
-#include "Path.hpp"
-#include "Stack.hpp"
 #include <iostream>
-#include <iterator> // Required for std::iterator_traits (C++17 and earlier)
-#include <cstddef>  // Required for std::ptrdiff_t
+#include <iterator>
+#include <cstddef> 
+#include "../power-encoding/stack.h"
+#include "Path.hpp"
 
 
 using namespace std;

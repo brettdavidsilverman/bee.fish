@@ -38,7 +38,7 @@ inline bool testTimestamp()
 
     bool ok = true;
 
-    BitStream bits;
+    Stack bits;
     Timestamp timestamp;
 
     bits << timestamp;
@@ -55,12 +55,12 @@ inline bool testTimestamp()
     Timestamp timestamp1;
     Timestamp timestamp2;
 
-    BitStream bits1;
+    Stack bits1;
     bits1 << timestamp1;
     assert(bits1.count() == 0);
 
 
-    BitStream bits2;
+    Stack bits2;
     bits2 << timestamp2;
     assert(bits2.count() == 0);
     
