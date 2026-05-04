@@ -182,9 +182,9 @@ public:
         }
     }
 
-    std::string str() {
+    std::string str() const {
         std::string string;
-        for (auto bit : (*this)) {
+        for (const auto bit : (*this)) {
             string.push_back(bit ? '1' : '0');
         }
         return string;

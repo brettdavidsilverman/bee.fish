@@ -27,6 +27,7 @@ namespace BeeFishDatabase
     inline bool testFile(JSONPath root, std::filesystem::path file, bool expect);
     inline bool testIterator();
     inline bool testReverseIterator();
+    inline bool testPartIterator();
     inline bool testClear();
     inline bool testPathParent();
     inline bool testIncrement();
@@ -91,6 +92,9 @@ namespace BeeFishDatabase
             
         success = success &&
             testReverseIterator();
+            
+        success = success &&
+            testPartIterator();
 
         success = success &&
             testMultiThreaded();
@@ -1598,6 +1602,72 @@ assert(success);
             success = success && (values[0] == "world");
             success = success && (values[1] == "hello");
             success = success && (values[2] == "brett");
+    
+        }
+        
+        
+        outputSuccess(success);
+
+        return success;
+        
+    }
+    
+    inline bool testPartIterator()
+    {
+        using namespace std;
+
+        cout << "Testing part iterator" << endl;
+        
+        bool success = true;
+        
+        Database db;
+        Path root(db);
+        
+        
+        
+        root["hello"];
+        root["world"];
+        root["brett"];
+        
+        
+
+        if (success)
+        {
+            cout << "\tIterable values part: ";
+            vector<BString> values;
+            BString key;
+            {
+                int i = 0;
+                Iterable<BString> path(root);
+                root.save();
+                for (auto value : path)
+                {
+                    values.push_back(value);
+                    if (++i > 0)
+                        break;
+                }
+                
+                key = path.toKey();
+                root.restore();
+                success = (values.size() == 1);
+            }
+            
+            if (success)
+            {
+                Iterable<BString> path(root);
+                
+                for (auto it = path.begin(key); it != path.end(); ++it)
+                {
+                    values.push_back(*it);
+                }
+                
+            }
+            
+            success = success && (values.size() == 3);
+            
+            success = success && (values[0] == "brett");
+            success = success && (values[1] == "hello");
+            success = success && (values[2] == "world");
     
         }
         

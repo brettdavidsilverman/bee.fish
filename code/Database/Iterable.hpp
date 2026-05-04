@@ -19,6 +19,8 @@ namespace BeeFishDatabase {
         public PathBase
     {
         PathBase& _path;
+        Stack _stack;
+        Stack _saveStack;
         
     public:
 
@@ -49,36 +51,71 @@ namespace BeeFishDatabase {
         override
         {
             _path.goLeft();
+            _stack.push_back(0);
         }
         
         virtual void goRight() 
         override
         {
             _path.goRight();
+            _stack.push_back(1);
         }
         
         virtual void goUp()
         override
         {
             _path.goUp();
+            _stack.pop_back();
         }
         
         virtual void save() 
         override
         {
             _path.save();
+            _saveStack = _stack;
         }
         
         virtual void restore()
         {
             _path.restore();
+            _stack = _saveStack;
         }
+        
+        BString toData()
+        {
+            return _stack.toData();
+        }
+        
+        BString toKey()
+        {
+            return toBase64(toData());
+        }
+        
 
     public:
         
         // Container methods to get iterators
         virtual Iterator<T> begin() {
             return Iterator<T>(this);
+        }
+        
+        virtual Iterator<T> begin(const BString& key) {
+            
+            Stack stack = Stack::fromData(fromBase64(key));
+            
+            for (const auto bit : stack)
+            {
+                if (bit == 0 && canGoLeft())
+                    goLeft();
+                else if (bit == 1 && canGoRight())
+                    goRight();
+                else {
+                    throw runtime_error("Invalid query");
+                }
+            }
+            
+            return Iterator<T>(this, stack);
+            
         }
     
         // Points one past the last element
@@ -87,12 +124,12 @@ namespace BeeFishDatabase {
             return iterator;
         }
         
-        // Container methods to get iterators
+        // Container methods to get reverse iterators
         virtual ReverseIterator<T> rbegin() {
             return ReverseIterator<T>(this);
         }
     
-        // Points one past the last element
+        // Points one past the first element
         ReverseIterator<T> rend() { 
             ReverseIterator<T> iterator;
             return iterator;

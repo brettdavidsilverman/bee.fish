@@ -28,7 +28,17 @@ public:
         _path(path)
     {
         _isEnd = !_path->next<T>(_stack, _item);
+
     }
+    
+    Iterator(PathBase* path, const Stack& stack) :
+        _path(path),
+        _stack(stack)
+    {
+        _isEnd = !_path->next<T>(_stack, _item);
+
+    }
+    
 
 
     // Dereference operator (*)
