@@ -1,5 +1,6 @@
 var connectFrom;
-var connectButton;
+var connectButton;var processes;
+
 function createProcess(label) {
 
    

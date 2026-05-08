@@ -1,0 +1,76 @@
+<html lang="en">
+   <head>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title id="title">Process</title>
+      <script src="/head.js"></script>
+      <script src="/client/console/console.js"></script>
+      <script src="/client/stream/stream.js"></script>
+      <script src="/client/power-encoding/power-encoding.js"></script>
+      <script src="/client/id/id.js"></script>
+      <script src="/client/evaluate.js"></script>      <script src="/client/logon/authentication.js"></script>
+      <script src="/client/punycode.js"></script>
+      <script src="/client/coordinates/script.js"></script>
+      <script src="/client/movable/script.js"></script>
+      <!--
+      <script src="/client/process/script.js"></script>
+      <link rel="stylesheet" type="text/css" href="/style.css"/>
+    
+      <link rel="stylesheet" type="text/css" href="style.css"/>
+      -->
+      <style>
+      
+button {
+    width: 100%;
+}
+
+#code {
+    width: 100%;
+}
+
+        </style>
+      
+    </head>
+    <body>
+      
+        <h1 id="h1">Process</h1>
+        <!--
+        <script src="/client/origin.js"></script>
+-->
+        <script>
+var console = new Console();
+console.log("Hello world");
+        </script>
+
+        <form oninput="eval(code.value)" class="movable">
+            <div class="movable">
+                <div>
+                    <input type="range" id="a" value="50"/>
+                </div>
+                <div>
+                    <button>connect</button>
+                </div>
+            </div>
+            <div class="movable">
+                <div>
+                     <input type="number" id="b" value="25"/>
+                </div>
+                <div>
+                    <button>connect</button>
+                </div>
+            </div>
+            <div class="movable">
+                <textarea id="code">
+x.value = 
+    Number(a.value) +
+    Number(b.value)
+                </textarea>
+            </div>
+            <div class="movable">
+                <output name="x" for="a b code"></output>
+            </div>
+        </form>
+    
+   </body>
+
+</html>

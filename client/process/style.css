@@ -13,7 +13,6 @@ body {
 }
 form {
     width: 250px;
-    position: absolute;
     padding: 5px;
     opacity: 0.8;
     background-image: url('move.png');
@@ -23,7 +22,6 @@ form {
 }
 
 h1 {
-   position: absolute;
    top: 10px;
 }
 
