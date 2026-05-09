@@ -41,7 +41,10 @@
                              onclick="switchFunctions(this.checked)" 
                     />                </div>
                 <textarea id="jsonEditor"></textarea>
-                <button id="saveButton">Save</button>
+                <div>
+                    <input type="file" id="file" onchange="loadFile(this)"></input>
+                    <button id="saveButton">Save</button>
+                </div>
             </form>
             
         </div>
@@ -75,6 +78,7 @@ var jsonEditor = document.getElementById("jsonEditor");var html = document.getE
 var dataLink = document.getElementById("dataLink");
 var header = document.getElementById("h1");
 var title = document.getElementById("title");
+var fileInput = document.getElementById("file");
 
 var origin =
     punycode.toUnicode(
@@ -97,15 +101,11 @@ async function fetchLines(url, f) {
 
     const response = await fetch(url, parameters);
 
-//if (response.statusText == "Unauthorised")
     if (response.status == 401) // Unauthorised 
     {
         var json = await response.text();
         
-        url = new URL(JSON.parse(json));
-        url.search = "?redirect=" +
-            encodeURIComponent(document.location.href);
-        document.location.replace(url);
+        redirect(json);
         return;
     }
     
@@ -146,6 +146,14 @@ async function fetchLines(url, f) {
 
 // Example usage:
 //fetchLines('https://dev.bee.fish:8000/?deaths+data').catch(console.error);
+
+function redirect(json)
+{
+    var url = new URL(JSON.parse(json));
+    url.search = "?redirect=" +
+        encodeURIComponent(document.location.href);
+    document.location.replace(url);
+}
 
 async function loadJSON() {
     var url = new URL(pathInput.value);
@@ -190,65 +198,92 @@ pathInput.onblur =
         setLinks();
     }
 
-saveButton.onclick =
-    function() {
-     
-        var json = jsonEditor.value;
+
+
+
+async function uploadData(data, contentType, contentLength, halfDuplex = false)
+{
+    var parameters = {
+        mode: "cors",
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "content-type": contentType,
+            "content-length": contentLength
+        },
+        body: data
+    }
     
-        try {
-            //localStorage.setItem("json", jsonEditor.value);
-            var test = formatJSON(json);
-        }
-        catch (error) {
-            throw new Error(error, "saveButton.onclick");
-        }
+    if (halfDuplex)
+        parameters["duplex"] = "half";
         
-        var parameters = {
-            mode: "cors",
-            method: "POST",
-            credentials: "include",
-            body: json
-        }
+    saveButton.disabled = true;
+    fileInput.disabled = true;
+    
+    var status;
         
-        saveButton.disabled = true;
-        
-        var status;
-        
-        fetch(
+    try
+    {
+        var response = await fetch(
             pathInput.value,
             parameters
-        ).
-        then(
-            function(response) {
-                status = response.status;
-                if (status == "200")
-                    return response.json();
-                else
-                    throw new Error(
-                        decodeURIComponent(
-                            response.statusText
-                        ),
-                        "Save JSON"
-                    );
-            }
-        ).
-        then(
-            function (json) {
-                alert(decodeURIComponent(json));
-                pathInput.value = decodeURIComponent(json);
-            }
-        ).
-        catch(
-            function (error)
-            {
-            }
-        ).
-        finally(
-            function() {
-                saveButton.disabled = false;
-            }
         );
+        
+        var status = response.status;
+        if (status == 401) // Unauthorised 
+        {
+            var json = await response.text();
+            redirect(json);
+            return;
+        }
+                
+        if (status == 200) {
+            var json = await response.json();
+            alert(decodeURIComponent(json));
+            pathInput.value = decodeURIComponent(json);
+            
+        }
+        else {
+            throw new Error(
+                decodeURIComponent(
+                    response.statusText
+                ),
+                "Save JSON"
+            );
+        }
+        
     }
+    catch (error)
+    {
+        alert(error);
+    }
+    finally {
+        saveButton.disabled = false;
+        fileInput.disabled = false;
+    }
+        
+}
+    
+saveButton.onclick = async function() {
+     
+    var json = jsonEditor.value;
+    
+    try {
+        var test = formatJSON(json);
+    }
+    catch (error) {
+        throw new Error(error, "saveButton.onclick");
+    }
+        
+    await uploadData(json, "application/json; charset=utf-8", json.length);
+};
+
+fileInput.onchange = async function(event)
+{
+    var file = fileInput.files[0];
+    await uploadData(file, file.type, file.size, true);
+    fileInput.value = "";
+}
 
 fetchButton.onclick =
     function() {

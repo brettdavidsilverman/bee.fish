@@ -35,14 +35,9 @@ using namespace BeeFishWeb;
 
             if (!authenticated())
             {
-return;
-                throw std::runtime_error("Not authenticated");
+                return;
+                //throw std::runtime_error("Not authenticated");
             }
-            
-            _responseHeaders.replace(
-                "content-type",
-                "application/json; charset=utf-8"
-            );
             
             _responseHeaders.replace(
               "cache-control",
@@ -63,7 +58,7 @@ return;
                 request()->url();
                 
             const BString& host = _session->host();
-const BString& origin = _session->origin();
+
                 /*
             const BString& userId =
                 Authentication::userId();
@@ -97,6 +92,11 @@ const BString& origin = _session->origin();
             if (method == "GET" && 
                 request()->search().length())
             {
+                _responseHeaders.replace(
+                    "content-type",
+                    "application/json; charset=utf-8"
+                );
+            
                 _serve = App::SERVE_QUERY;
                 _status = 200;
                 return;
@@ -104,40 +104,135 @@ const BString& origin = _session->origin();
             
                 
             if (method == "GET") {
-                _serve = App::SERVE_JSON;
+                // Check for HTTP field
+                // This is a special casw for serving
+                // HTTP content
+                if (jsonPath.contains("{HTTP}") &&
+                    jsonPath["{HTTP}"].contains("content-type") &&
+                    jsonPath["{HTTP}"]["content-type"].type() == Type::STRING)
+                {
+                    _responseHeaders.replace(
+                        "content-type",
+                        jsonPath
+                            ["{HTTP}"]
+                            ["content-type"]
+                            .getString()
+                    );
+                    
+                    if (jsonPath["{HTTP}"].contains("content-length") &&
+                        jsonPath["{HTTP}"]["content-length"].type() == Type::INTEGER)
+                    {
+                        stringstream stream;
+                        _contentLength =
+                            jsonPath
+                            ["{HTTP}"]
+                            ["content-length"]
+                            .getInteger();
+                            
+                        stream << _contentLength;
+                        
+                        _responseHeaders.replace(
+                            "content-length",
+                            stream.str()
+                        );
+                    }
+                    _serve = App::SERVE_HTTP;
+            
+                }
+                else {
+                    _responseHeaders.replace(
+                        "content-type",
+                        "application/json; charset=utf-8"
+                    );
+                    _serve = App::SERVE_JSON;
+                }
+                
                 _status = 200;
             }
             else if (method == "POST")
             {
                 
-                // Stream posted file to
-                // database
-                WebRequest postRequest(true);
-                    
-                BeeFishDatabase::JSONPathParser
-                    parser(
-                        jsonPath,
-                        postRequest,
-                        clog
-                    );
+                _responseHeaders.replace(
+                    "content-type",
+                    "application/json; charset=utf-8"
+                );
+                
+                
+                std::vector paths = request()->url().paths();
+                
+                if (paths.size() > 0 &&
+                    paths[paths.size() - 1] == "{HTTP}")
+                {
 
-                if (!parseWebRequest(parser)) {
-                    BeeFishScript::Object object
-                    {
-                        {"error", parser.getError()}
-                    };
-                    _content = object.str();
-                    _serve = App::SERVE_CONTENT;
-                    _status = 500;
-                    _statusText = "JSONPathParser error";
+                    BString contentType;
+                    if (request()->headers().contains("content-type"))
+                        contentType = request()->headers()["content-type"];
+                    else
+                        contentType = "text/plain; charset=utf-8";
+                    
+                    jsonPath.deleteProperty("content");
+                    JSONPath content = jsonPath["content"];
+                    
+                    WebRequest postRequest(false);
+                    BeeFishParser::Parser parser(postRequest);
+                    
+                    Index contentLength = 0;
+                    Size pageIndex = 0;
+                    
+                    postRequest.setOnData(
+                        [&pageIndex, &contentLength, &content](const std::string& data) {
+                            contentLength += data.size();
+                            BString base64 = toBase64(data);
+                            content[++pageIndex].setString(base64, false);
+                        }
+                    );
+                    
+                    if (!parseWebRequest(parser)) {
+                        throw std::runtime_error("Invalid input post to json-app.h");
+                    }
+
+                    postRequest.flush();
+
+                    if ( contentLength == 0 )
+                        jsonPath.setUndefined();
+                    else {
+                        jsonPath["content-type"].setString(contentType, false);
+                        jsonPath["content-length"].setInteger(contentLength);
+                    }
+
                 }
                 else {
-                    _content = BString("\"") + jsonPath.toString().escape() + BString("\"");
-                //BString(host + url).escape()
-                    _serve = App::SERVE_CONTENT;
-                    _status = 200;
-                    _statusText = "ok";
+                
+                    // Stream posted file to
+                    // database
+                    WebRequest postRequest(true);
+                    
+                    BeeFishDatabase::JSONPathParser
+                        parser(
+                            jsonPath,
+                            postRequest,
+                            clog
+                        );
+
+                    if (!parseWebRequest(parser)) {
+                        BeeFishScript::Object object
+                        {
+                            {"error", parser.getError()}
+                        };
+                        _content = object.str();
+                        _serve = App::SERVE_CONTENT;
+                        _status = 500;
+                        _statusText = "JSONPathParser error";
+                        return;
+                        
+                    }
                 }
+                
+                _content = BString("\"") + jsonPath.toString().escape() + BString("\"");
+                _serve = App::SERVE_CONTENT;
+                _status = 200;
+                _statusText = "ok";
+                    
             }
             
         }

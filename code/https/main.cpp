@@ -22,7 +22,7 @@ void start(
 
 std::mutex _wait;
 #ifdef DEBUG
-const Size _threadCount = 20;
+const Size _threadCount = 1;
 #else
 const Size _threadCount = 20;
 #endif

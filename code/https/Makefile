@@ -66,7 +66,7 @@ debug:	$(OUTPUT)
 
 run_debug:	debug
 run_debug:	stop
-	gdb --args $(OUTPUT) -port $(PORT) -test -unlock
+	gdb --args $(OUTPUT) -port $(PORT) -unlock
 
 clean:
 	rm -f session.log

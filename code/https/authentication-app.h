@@ -177,8 +177,7 @@ namespace BeeFishHTTPS {
                 request->headers()["sec-fetch-mode"] != "navigate")
             {
                 // fetch client
-//_status = 200;
-_status = 401;
+                _status = 401;
                 _statusText = "Unauthorised";
                 _serve = App::SERVE_CONTENT;
             

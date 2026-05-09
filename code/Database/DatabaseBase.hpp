@@ -127,6 +127,7 @@ namespace BeeFishDatabase {
 
         void deleteBranch(Index index)
         {
+            
 
             deleteData(index);
             

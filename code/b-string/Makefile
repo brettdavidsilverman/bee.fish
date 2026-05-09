@@ -26,4 +26,4 @@ run_debug:	debug
 	
 clean:
 	rm -f $(OUTPUT)
-	rm trace.txt
+	rm -f trace.txt

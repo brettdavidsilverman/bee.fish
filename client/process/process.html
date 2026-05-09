@@ -32,17 +32,6 @@
          <button id="fetchButton" onclick="fetchProcesses()">Fetch</button>
          <button id="saveButton" onclick="saveProcesses()">Save</button>
       </form>
-      <form oninput="eval(code.value)">
-          <input type="range" id="a" value="50"/>
-          +<input type="number" id="b" value="25"/>
-          <div>
-              <input type="text" id="code" value="x.value=Number(a.value)+Number(b.value)"></input>
-          </div>
-
-          <div>
-               <output name="x" for="a b code"></output>
-          </div>
-          </form>
       <script>
 
 var url = document.getElementById("urlInput");

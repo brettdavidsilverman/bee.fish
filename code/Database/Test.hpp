@@ -2382,10 +2382,39 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
                 database4.words()["a"].contains(start4["a"].id())
             );
             
-assert(success);
-       
-        BeeFishMisc::outputSuccess(success);
+        cout << "Delete property thats array " << endl;
+            
+        JSONDatabase database5;
+        JSONPath start5 = database4.host("https://test");
+        JSONPath test = start5["test"];
+        for (Index i = 1; i <= 10; ++i)
+        {
+            test[i].setString("boo", false);
+        }
         
+        start5.deleteProperty("test");
+        test = start5["test"];
+        for (Index i = 1; i <= 10; ++i)
+        {
+            test[i].setString("boo2", false);
+        }
+        
+        Path children = test.getChildren();
+        Iterable<Index> iterable(children);
+        for (auto index : iterable)
+            cout << "\tArray: " << index << endl;
+        
+        start5.deleteProperty("test");
+        
+        success = success &&
+            testValue(
+                "Deleted property",
+                !start5.contains("test")
+            );
+        
+        
+        BeeFishMisc::outputSuccess(success);
+
         return success;
     }
     
@@ -2397,7 +2426,7 @@ assert(success);
 #ifdef JSON_INDEX
         // When compiled with this flag,
         // sizes are consistent
-        const Index SIZE =  1235624;
+        const Index SIZE =  1212880;
 #else
         const Index SIZE = 0;
 #endif

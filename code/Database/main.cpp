@@ -19,26 +19,33 @@ using namespace std;
 int main(int argc, const char* argv[])
 {
     
-    cout << "bee.fish.database"
+    clog << "bee.fish.database"
               << endl
           << "C++ run time: "
               << __cplusplus
               << endl
           << "Version: "
               << DATABASE_VERSION
-              << endl
-          << "File: "
-              << DATABASE_FILENAME
               << endl;
 
+    int filenameArg =
+        hasArg(argc, argv, "-filename");
+    BString filename = DATABASE_FILENAME;
 
+    if (filenameArg != -1 && argc > (filenameArg + 1))
+    {
+        filename = argv[filenameArg + 1];
+    }
+    
+    clog << "Using database " << filename << endl;
+    
     bool unlock =
         (hasArg(argc, argv, "-unlock") != -1);
         
     if (unlock)
     {
-        cout << "Unlocking " << DATABASE_FILENAME << endl;
-        LockFile::unlock(DATABASE_FILENAME);
+        clog << "Unlocking" << endl;
+        LockFile::unlock(filename);
     
         return 0;
     }
@@ -53,18 +60,18 @@ int main(int argc, const char* argv[])
         return 0;
     }
     
-    JSONDatabase database(DATABASE_FILENAME);
+    JSONDatabase database(filename);
     
     bool originsArg  =
         (hasArg(argc, argv, "-origins") != -1);
     
     if (originsArg)
     {
-        cout << "Origins " << endl;
+        clog << "Origins " << endl;
         JSONPath origins = database.json();
         for (auto origin : origins)
         {
-            cout << origin << endl;
+            clog << origin << endl;
         }
     }
     
@@ -95,19 +102,19 @@ int main(int argc, const char* argv[])
         path = path[p];
     }
             
-    cout << "Using origin " << path.toString() << endl;
+    clog << "Using origin " << path.toString() << endl;
     
     bool propertiesArg =
         (hasArg(argc, argv, "-properties") != -1);
     
     if (propertiesArg)
     {
-        cout << "Properties" << endl;
+        clog << "Properties" << endl;
         Path propertiesPath = database.properties();
         Iterable<BString> properties(propertiesPath);
         for (auto property : properties)
         {
-            cout << property << endl;
+            clog << property << endl;
         }
     }
     
@@ -116,12 +123,12 @@ int main(int argc, const char* argv[])
     
     if (wordsArg)
     {
-        cout << "Words" << endl;
+        clog << "Words" << endl;
         Path wordsPath = database.words();
         Iterable<BString> words(wordsPath);
         for (auto word : words)
         {
-            cout << word << endl;
+            clog << word << endl;
         }
     }
     
@@ -130,7 +137,7 @@ int main(int argc, const char* argv[])
 
     if (loadDeaths)
     {
-        cout << "Input deaths.json" << endl;
+        clog << "Input deaths.json" << endl;
     }
 
     
@@ -140,8 +147,8 @@ int main(int argc, const char* argv[])
             database.host(origin)
             ["deaths"];
             
-        JSONPathParser parser(inputPath, cout);
-        cout << "Loading deaths.json" << endl;
+        JSONPathParser parser(inputPath, clog);
+        clog << "Loading deaths.json" << endl;
         
         ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");
         
@@ -153,7 +160,7 @@ int main(int argc, const char* argv[])
         
     if (input)
     {
-        cout << "Input" << endl;
+        clog << "Input" << endl;
     }
     
     
@@ -169,7 +176,7 @@ int main(int argc, const char* argv[])
         
     if (output)
     {
-        cout << "Output" << endl;
+        clog << "Output" << endl;
     }
     
     if (output)

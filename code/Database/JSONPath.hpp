@@ -30,7 +30,8 @@ public:
     inline static const Index POSITIONS = 2;
     inline static const Index CASCADE = 3;
     inline static const Index ID = 4;
-    inline static const Index CHILDREN = 5;
+    inline static const Index INDEXED = 5;
+    inline static const Index CHILDREN = 6;
 public:
 #ifdef JSON_INDEX
     typedef Index Id;
@@ -213,8 +214,7 @@ public:
                         if (!child.hasId())
                             child.setId();
                         
-//
-child.cascadeProperties();
+                        child.cascadeProperties();
                     }
                 }
                 else
@@ -226,9 +226,7 @@ child.cascadeProperties();
 
         JSONPath json = getChildren()[index];
 
-      
-// json.cascadeProperties();
-
+    
         return json;
     }
 
@@ -262,8 +260,7 @@ child.cascadeProperties();
                                 .unescape();
                         }
             
-//addWords(property, false);
-addWords(property, true);
+                        addWords(property, true);
                     }
                 }
             }
@@ -399,6 +396,13 @@ public:
         setType(Type::INTEGER);
         path[VALUE].setData<BString>(value);
     }
+    
+    void setInteger(const Index& value)
+    {
+        stringstream stream;
+        stream << value;
+        setInteger(stream.str());
+    }
 
     void setNumber(const BString& value)
     {
@@ -407,8 +411,19 @@ public:
         setType(Type::NUMBER);
         path[VALUE].setData<BString>(value);
     }
-
-    void setString(const BString& value)
+    
+    Index getInteger()
+    {
+        assert(type() == Type::INTEGER);
+        Path path = *this;
+        stringstream stream;
+        stream << path[VALUE].getStringData();
+        Index number;
+        stream >> number;
+        return number;
+    }
+    
+    void setString(const BString& value, bool index = true)
     {
         LockFile::ScopedLock lock(database());
         Path path = *this;
@@ -416,13 +431,24 @@ public:
         if (path[VALUE].hasData())
         {
             BString current = path[VALUE].getStringData();
-            if (current != value)
+            if (current != value && path[INDEXED].hasData() &&
+                path[INDEXED].getData<bool>())
+            {
                 removeWords(current, true);
+            }
         }
-        if (path[VALUE].setData<BString>(value))
+        if (path[VALUE].setData<BString>(value) && index)
         {
             addWords(value, true);
         }
+        path[INDEXED].setData<bool>(index);
+    }
+    
+    BString getString()
+    {
+        assert(type() == Type::STRING);
+        Path path = *this;
+        return path[VALUE].getStringData();
     }
 
     void setObject()
@@ -612,7 +638,12 @@ public:
         return contains;
 
     }
-
+    
+    bool contains(const char* property)
+    {
+        return contains(BString(property));
+    }
+    
     bool contains(const Index& index)
     {
         if ((type() != Type::ARRAY) &&
@@ -652,18 +683,16 @@ public:
             {
                 // New property
                 // Update the properties counter
-propertyPath[index()];
+                propertyPath[index()];
 
                 // Update positions
                 position = ++getChildren();
 
-                getChildren()[position];
                 getPositions()[position].setData<Index>(propertyPath.index());
                 objectPropertyPath.setData<Index>(position);
-
-                // add all path properties except the
-                // first (host)
-
+                
+                assert(!getChildren().contains(position));
+                
                 JSONPath childPath = getChildren()[position];
                 childPath.setId();
 
@@ -782,9 +811,14 @@ private:
         case Type::STRING:
         {
             Path path = *this;
-            BString value =
-                path[VALUE].getStringData();
-            removeWords(value, true);
+            
+            if (path[INDEXED].hasData() &&
+                path[INDEXED].getData<bool>())
+            {
+                BString value =
+                     path[VALUE].getStringData();
+                removeWords(value, true);
+            }
         }
         case Type::UNDEFINED:
         case Type::NULL_:
@@ -797,14 +831,15 @@ private:
 
             Path children = getChildren();
             Iterable<Index> iterable(children);
-
+            Path clearChildren = getChildren();
             for (auto index : iterable)
             {
                 JSONPath item = (*this)[index];
                 item.clear();
-                getChildren().clear(index);
+                clearChildren.clear(index);
             }
-
+            
+            assert(getChildren().isDeadEnd());
             break;
         }
         case Type::OBJECT:
@@ -864,7 +899,7 @@ public:
                     property = property.unescape();
                 }
 
-json.removeWords(property, true);
+                json.removeWords(property, true);
             }
 
         }
@@ -875,9 +910,9 @@ json.removeWords(property, true);
 
         json.clear();
 
-if (propertyPath.contains(index()))
+        if (propertyPath.contains(index()))
         {
-propertyPath.clear(index());
+            propertyPath.clear(index());
             if (propertyPath.isDeadEnd())
                 properties().clear(property);
         }
@@ -885,7 +920,7 @@ propertyPath.clear(index());
 
         getObjectProperties().clear(propertyPath);
         getChildren().clear(position);
-        --getChildren();
+        //--getChildren();
     }
 
 private:
@@ -944,13 +979,15 @@ private:
                             !json.parent().isRoot())
                     {
 
-                        assert(wordPath.contains(json.id()));
-                        
-                        Index count = --wordPath[json.id()];
-                        
-                        if (count == 0)
+                        if (wordPath.contains(json.id()))
                         {
-                            wordPath.clear(json.id());
+                        
+                            Index count = --wordPath[json.id()];
+                        
+                            if (count == 0)
+                            {
+                                wordPath.clear(json.id());
+                            }
                         }
 
                         json = json.parent();
@@ -960,13 +997,15 @@ private:
                 else
                 {
 
-                    assert (wordPath.contains(json.id()));
-                    
-                    Index count = --wordPath[json.id()];
-
-                    if (count == 0)
+                    if (wordPath.contains(json.id()))
                     {
-                        wordPath.clear(json.id());
+                    
+                        Index count = --wordPath[json.id()];
+
+                        if (count == 0)
+                        {
+                            wordPath.clear(json.id());
+                        }
                     }
 
                 }
