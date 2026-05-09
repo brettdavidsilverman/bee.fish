@@ -86,7 +86,10 @@ namespace BeeFishDatabase {
                     start.setNumber(value);
                     break;
                 case Type::STRING:
-                    start.setString(value);
+                    if (path.parent().contains("{HTTP}"))
+                        start.setString(value, false);
+                    else
+                        start.setString(value, true);
                     break;
                 case Type::ARRAY:
                     start.setArray();

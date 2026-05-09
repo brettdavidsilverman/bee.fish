@@ -59,10 +59,10 @@ namespace BeeFishMisc {
         char c
     )
     {
-        switch ((int)c)
+        switch (c)
         {
-        case 0:
-            return "\0";
+        case '\0':
+            return "\\0";
         case '\"':
             return "\\\"";
         case '\\':
@@ -77,15 +77,16 @@ namespace BeeFishMisc {
             return "\\n";
         case '\t':
             return "\\t";
-        case -1:
-            return "{eof}";
-        
+        case '\v':
+            return "\\v";
+        default:
+            std::stringstream stream;
+            stream << c;
+            return stream.str();
         }
         
         
-        std::string str;
-        str = c;
-        return str;
+
     
     }
 
@@ -115,21 +116,22 @@ namespace BeeFishMisc {
             return '\"';
         case '\\':
             return '\\';
-        case '\b':
+        case 'b':
             return '\b';
-        case '\f':
+        case 'f':
             return '\f';
-        case '\r':
+        case 'r':
             return '\r';
-        case '\n':
+        case 'n':
             return '\n';
-        case '\t':
+        case 't':
             return '\t';
-        case -1:
-            return (char)-1;
+        case 'v':
+            return '\v';
+        default:
+            return c;
         }
         
-        return c;
         
     }
 

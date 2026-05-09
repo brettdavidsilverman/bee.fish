@@ -29,8 +29,8 @@
             <br/>
             <form onsubmit="return false;">
                 <div style="text-align:left;">
-                    <label for="jsonEditor">
-                        JSON Editor
+                    <label for="editor">
+                        Editor
                     </label>
                     <br/>
                     <label for="functionCheckbox">
@@ -39,8 +39,18 @@
                     <input type="checkbox"
                              id="functionCheckbox"
                              onclick="switchFunctions(this.checked)" 
-                    />                </div>
-                <textarea id="jsonEditor"></textarea>
+                    />
+                    
+                    <label for="contentType">
+                        Content type
+                    </label>
+                    <select id="contentType">
+                        <option value="application/json; charset=utf-8">JSON</option>
+                        <option value="text/html; charset=utf-8">HTML</option>
+                        <option value="text/css; charset=utf-8">CSS</option>
+                        <option value="text/javascript; charset=utf-8">Javascript</option>
+                    </select>                </div>
+                <textarea id="editor"></textarea>
                 <div>
                     <input type="file" id="file" onchange="loadFile(this)"></input>
                     <button id="saveButton">Save</button>
@@ -74,11 +84,12 @@ logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
 var pathInput = document.getElementById("pathInput");
 var result = document.getElementById("result");
-var jsonEditor = document.getElementById("jsonEditor");var html = document.getElementById("html");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");var goLink = document.getElementById("goLink");
+var editor = document.getElementById("editor");var html = document.getElementById("html");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");var goLink = document.getElementById("goLink");
 var dataLink = document.getElementById("dataLink");
 var header = document.getElementById("h1");
 var title = document.getElementById("title");
 var fileInput = document.getElementById("file");
+var contentType = document.getElementById("contentType");
 
 var origin =
     punycode.toUnicode(
@@ -159,7 +170,7 @@ async function loadJSON() {
     var url = new URL(pathInput.value);
     
     fetchButton.disabled = true;
-    jsonEditor.value = "Loading....";
+    editor.value = "Loading....";
     
     localStorage.setItem("path", pathInput.value);
     
@@ -169,10 +180,10 @@ async function loadJSON() {
         url,
         (line) => {
             if (firstLine) {
-                jsonEditor.value = "";
+                editor.value = "";
                 firstLine = false;
             }
-            jsonEditor.value += line;
+            editor.value += line;
         }
     );
     
@@ -266,16 +277,19 @@ async function uploadData(data, contentType, contentLength, halfDuplex = false)
     
 saveButton.onclick = async function() {
      
-    var json = jsonEditor.value;
+    var json = editor.value;
     
-    try {
-        var test = formatJSON(json);
-    }
-    catch (error) {
-        throw new Error(error, "saveButton.onclick");
+    if (contentType.value.startsWith("application/json"))
+    {
+        try {
+            var test = formatJSON(json);
+        }
+        catch (error) {
+            throw new Error(error, "saveButton.onclick");
+        }
     }
         
-    await uploadData(json, "application/json; charset=utf-8", json.length);
+    await uploadData(editor.value, contentType.value, editor.value.length);
 };
 
 fileInput.onchange = async function(event)
@@ -305,12 +319,12 @@ function switchFunctions(showFunctions)
         json = hideFunctions(json);
         json = JSON.stringify(json, null, "    ");
     }
-    jsonEditor.value = json;
+    editor.value = json;
 }
 
 function getJSON()
 {
-    var json = jsonEditor.value;
+    var json = editor.value;
     
     if (json == "")
         return undefined;

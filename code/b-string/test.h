@@ -23,6 +23,7 @@ inline bool testEmojis();
 inline bool testPunctuation();
 inline bool testIsSpace();
 inline bool testWords();
+inline bool testEscape();
 
 inline bool test()
 {
@@ -44,7 +45,7 @@ inline bool test()
     ok = ok && testPunctuation();
     ok = ok && testIsSpace();
     ok = ok && testWords();
-
+    ok = ok && testEscape();
 
     outputSuccess(ok);
 
@@ -786,6 +787,34 @@ inline bool testWords()
 
 }
 
+inline bool testEscape()
+{
+    cout << "Test Escape" << endl;
+    bool ok = true;
+    
+    stringstream stream;
+    for (int i = 0; i < 128; ++i)
+    {
+        stream << char(i);
+    }
+    
+    std::string escaped = BeeFishMisc::escape(stream.str());
+    std::string unescaped = BeeFishMisc::unescape(escaped);
+    
+    for (int i = 0; i < 128; ++i)
+    {
+        char c = unescaped[i];
+        if (int(c) != i)
+        {
+            ok = false;
+            break;
+        }
+    }
+    
+    assert(ok);
+    
+    return ok;
+}
 
 }
 
