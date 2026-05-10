@@ -316,15 +316,15 @@ inline bool testHex()
 
     bool ok = true;
 
-    std::string start = "Hello World";
-    BString hex = toHex(start);
+    BString start = "Hello World";
+    BString hex = start.toHex();
 
     ok &= testResult(
               "From Data to hex",
               (hex.size() == 22)
           );
 
-    std::string endData = fromHex(hex);
+    BString endData = hex.fromHex();
 
     ok &= testResult(
               "From hex to data",
@@ -334,18 +334,13 @@ inline bool testHex()
 #ifdef SERVER
     const int SESSION_ID_SIZE = 32;
 
-    std::string random =
-        createRandom(
-            SESSION_ID_SIZE
-        );
-
-    BString randomHex = toHex(random);
-
-    cout << "\tRandom hex: " << randomHex << endl;
+    BString random = BString::createRandom(SESSION_ID_SIZE);
+    
+    cout << "\tRandom hex: " << random << endl;
 
     ok &= testResult(
               "Random hex",
-              (random.size() == SESSION_ID_SIZE)
+              (random.size() == SESSION_ID_SIZE * 2)
           );
 
 #endif
@@ -372,11 +367,9 @@ inline bool testData()
           );
 
 
-    std::string dataStart = "Hello World";
-    BString base64 = toBase64(dataStart);
-cerr << "BASE 64: " << base64  << endl;
-    BString dataEnd = fromBase64(base64);
-cerr << "DECODED: " << dataEnd.length() << endl;
+    BString dataStart = "Hello World";
+    BString base64 = dataStart.toBase64();
+    BString dataEnd = base64.fromBase64();
 
     ok &= testResult(
               "From data to base64 and back",
@@ -385,12 +378,12 @@ cerr << "DECODED: " << dataEnd.length() << endl;
 assert(ok);
 
 #ifdef SERVER
-    std::string stringMd5 = "Hello World";
-    BString md5hash = md5(stringMd5);
-    cerr << "MD5 " << md5hash << endl;
+    BString message = "Hello World";
+    BString hash = message.sha3();
+    cerr << "SHA-3 " << hash << endl;
     ok &= testResult(
-              "Compare md5 hash",
-              (md5hash == "b10a8db164e0754105b7a99be72e3fe5")
+              "Compare sha-3 hash",
+              (hash == "e167f68d6563d75bb25f3aa49c29ef612d41352dc00606de7cbd630bb2665f51")
           );
 #endif
 

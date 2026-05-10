@@ -88,7 +88,7 @@ namespace BeeFishDatabase {
         
         BString toKey()
         {
-            return toBase64(toData());
+            return toData().toBase64();
         }
         
 
@@ -101,7 +101,7 @@ namespace BeeFishDatabase {
         
         virtual Iterator<T> begin(const BString& key) {
             
-            Stack stack = Stack::fromData(fromBase64(key));
+            Stack stack = Stack::fromData(key.fromBase64());
             
             for (const auto bit : stack)
             {

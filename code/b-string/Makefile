@@ -1,12 +1,12 @@
 BUILD  = ../../build
 OUTPUT = $(BUILD)/b-string
 CFLAGS = -std=c++17 -Wall -fmax-errors=1
-DEPS   = char.h b-string.h base64.h misc.h b-string-base.h stream.h test.h locale.hpp main.cpp Makefile
+DEPS   = char.h b-string.h b-string-base.h stream.h test.h locale.hpp main.cpp Makefile
 
 all:	$(OUTPUT)
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lcrypto -lboost_locale -lboost_regex -licuuc -lcryptopp
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_locale -lboost_regex -licuuc -lcryptopp
 	
 	
 trace:	$(OUTPUT)

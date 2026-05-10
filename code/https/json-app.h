@@ -181,9 +181,9 @@ using namespace BeeFishWeb;
                     Size pageIndex = 0;
                     
                     postRequest.setOnData(
-                        [&pageIndex, &contentLength, &content](const std::string& data) {
+                        [&pageIndex, &contentLength, &content](const BString& data) {
                             contentLength += data.size();
-                            BString base64 = toBase64(data);
+                            BString base64 = data.toBase64();
                             content[++pageIndex].setString(base64, false);
                         }
                     );

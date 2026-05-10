@@ -102,7 +102,9 @@ namespace BeeFishDatabase {
             }
             
             if (&_log != &cnull) {
-                _log << start.toString()
+                BeeFishDate::writeDateTime(_log);
+                _log << " "
+                     << start.toString()
                      << endl;
             }
             

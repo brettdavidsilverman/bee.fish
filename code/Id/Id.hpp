@@ -458,7 +458,7 @@ using namespace BeeFishScript;
             // get the data
             BString data = stream.toData();
 
-            return toBase64(data);
+            return data.toBase64();
             
         }
         
@@ -466,8 +466,8 @@ using namespace BeeFishScript;
     
         
             // extract the raw data
-            std::string raw =
-                 fromBase64(key);
+            BString raw =
+                 key.fromBase64();
 
             // extract the timestamp
             // from the key

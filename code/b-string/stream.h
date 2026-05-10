@@ -10,6 +10,7 @@
 
 #include "../power-encoding/power-encoding.h"
 #include "../Miscellaneous/Miscellaneous.hpp"
+#include "b-string-base.h"
 
 using namespace BeeFishPowerEncoding;
 using namespace BeeFishMisc;
@@ -23,7 +24,7 @@ namespace BeeFishBString {
       public std::ostream
    {
    public:
-      typedef std::function<void(const std::string& buffer)> OnBuffer;
+      typedef std::function<void(const BString& buffer)> OnBuffer;
       OnBuffer _onbuffer = nullptr;
       size_t _bufferSize;
    protected:

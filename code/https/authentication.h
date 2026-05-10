@@ -84,8 +84,8 @@ namespace BeeFishHTTPS {
             _authenticated = false;
             
             // Save the secret
-            BString md5Secret =
-                md5(secret);
+            BString hashSecret =
+                secret.sha3();
 
             ScopedDatabase scoped(this);
             JSONDatabase* database = scoped;
@@ -94,7 +94,7 @@ namespace BeeFishHTTPS {
             
             Path secrets = rootPath
                 [SECRETS]
-                [md5Secret];
+                [hashSecret];
                 
             // Get or set the userId
             if (secrets.hasData())
@@ -102,10 +102,8 @@ namespace BeeFishHTTPS {
             else
             {
                 _userId =
-                    toHex(
-                        createRandom(
-                            USER_ID_SIZE
-                        )
+                    BString::createRandom(
+                        USER_ID_SIZE
                     );
                     
                 secrets.setData(_userId);
@@ -121,10 +119,8 @@ namespace BeeFishHTTPS {
             // (Note, we use toHex, not toBase64 due to
             // cookie encoding rules)
             _sessionId =
-                toHex(
-                    createRandom(
-                        SESSION_ID_SIZE
-                    )
+                BString::createRandom(
+                    SESSION_ID_SIZE
                 );
 
             // get the session data

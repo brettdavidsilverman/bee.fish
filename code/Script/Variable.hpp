@@ -6,7 +6,7 @@
 #include <memory>
 #include <cmath>
 
-#include "../b-string/string.h"
+#include "../b-string/b-string.h"
 #include "../Database/File.hpp"
 #include "../Script/Type.hpp"
 #include "Config.hpp"
@@ -15,6 +15,8 @@ namespace BeeFishScript {
 
    using namespace BeeFishDatabase;   
    using namespace BeeFishScript;
+   using namespace BeeFishBString;
+   
    using namespace std;
 
    class Object;

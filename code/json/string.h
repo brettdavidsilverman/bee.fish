@@ -313,7 +313,7 @@ namespace BeeFishJSON {
                 new StringCharacters();
             
             _stringCharacters->_onbuffer =
-                [this](const std::string& buffer) {
+                [this](const BString& buffer) {
                     _value = _stringCharacters->value();
                     if (this->_onbuffer) {
                         this->_onbuffer(buffer);

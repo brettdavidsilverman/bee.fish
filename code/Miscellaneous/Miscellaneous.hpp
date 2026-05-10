@@ -5,6 +5,7 @@
 #include "Debug.hpp"
 #include "Log.hpp"
 #include "Optional.hpp"
+#include "Date.hpp"
 #include "../Config.hpp"
 
 #endif

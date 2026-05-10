@@ -2,7 +2,6 @@
 #include "../test/test.h"
 #include "power-encoding-base.h"
 #include "../b-string/b-string.h"
-#include "../b-string/misc.h"
 #include "encoding.h"
 #include "stack.h"
 

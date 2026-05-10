@@ -257,7 +257,7 @@ namespace BeeFishHTTPS {
                                 ["content"]
                                 [++pageIndex].getString();
                                 
-                        BString data = fromBase64(base64);
+                        BString data = base64.fromBase64();
                         
                         length = data.size();
 

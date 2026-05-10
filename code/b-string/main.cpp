@@ -48,7 +48,7 @@ int main(int argc, const char* argv[]) {
 
         cout << line << endl;
 #ifdef SERVER
-        cout << sha3(line) << endl;
+        cout << line.sha3() << endl;
 #endif
 
     }

@@ -30,7 +30,8 @@
 #include "../Config.hpp"
 
 #include "../Database/Database.hpp"
-#include "../b-string/string.h"
+#include "../b-string/b-string.h"
+#include "../Miscellaneous/Date.hpp"
 
 #include "date.h"
 
@@ -217,12 +218,12 @@ namespace BeeFishHTTPS {
 
         static void writeDateTime(ostream& out)
         {
-            date::writeDateTime(out);
+            BeeFishDate::writeDateTime(out);
         }
         
         static BString getDateTime()
         {
-            return date::getDateTime();
+            return BeeFishDate::getDateTime();
         }
 
     private:

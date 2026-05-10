@@ -10,6 +10,8 @@
 using namespace std;
 
 namespace BeeFishParser {
+    
+    using namespace BeeFishBString;
 
     class Parser;
 

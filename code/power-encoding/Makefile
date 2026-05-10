@@ -1,6 +1,6 @@
 BUILD=../../build
 OUTPUT=$(BUILD)/power-encoding
-CFLAGS=-std=c++17 -Wall -fmax-errors=1 -Ofast
+CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=$(BUILD)/b-string power-encoding.h version.h encoding.h test.h stack.h Makefile main.cpp
 
 $(OUTPUT): $(DEPS)
