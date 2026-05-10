@@ -439,7 +439,6 @@ public:
         }
         if (path[VALUE].setData<BString>(value) && index)
         {
-cerr << "ADD WORDS " << value << endl;
             addWords(value, true);
         }
         path[INDEXED].setData<bool>(index);
