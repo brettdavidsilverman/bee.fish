@@ -424,7 +424,7 @@ namespace BeeFishScript {
           //  break;
 
             out << "\"";
-            out << BeeFishMisc::escape(_value._string);
+            out << _value._string.escape();
             out << "\"";
             break;
 
@@ -558,7 +558,7 @@ namespace BeeFishScript {
             if (tabs > 0 && blankSpace)
                output << std::string(tabs * TAB_SPACES, ' ');
             output << "\"";
-            output << BeeFishMisc::escape(key);
+            output << key.escape();
             output << "\":";
             if (blankSpace)
                output << " ";

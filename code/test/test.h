@@ -170,7 +170,7 @@ namespace BeeFishTest
    )
    {
       bool success = (expected == value);
-      cout << "\t" << escape(expected) << ":{" << escape(value) << "}" << flush;
+      cout << "\t" << BString(expected).escape() << ":{" << BString(value).escape() << "}" << flush;
      
       BeeFishMisc::outputSuccess(success);
 

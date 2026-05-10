@@ -332,7 +332,7 @@ cerr << "MATCH RESULT: " << _match->result() << endl;
                  
                  stringstream stream;
                  
-                 stream << "Invalid Content '" << escape(_lastCharacter) << "' at position "
+                 stream << "Invalid Content '" << BString(_lastCharacter).escape() << "' at position "
                        << _charCount;
                        
                  _error = stream.str();

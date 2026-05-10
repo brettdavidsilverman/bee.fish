@@ -81,7 +81,12 @@ namespace BeeFishMisc {
             return "\\v";
         default:
             std::stringstream stream;
-            stream << c;
+            if (c >= 0) {
+                stream << c;
+            }
+            else {
+                stream << "\\x" << setw(2) << setfill('0') << hex << (int)(unsigned char)c;
+            }
             return stream.str();
         }
         
@@ -90,19 +95,7 @@ namespace BeeFishMisc {
     
     }
 
-    inline std::string escape(
-        const std::string& input
-    )
-    {
-        std::stringstream stream;
-        for (char c : input) {
-
-            stream << escape(c);
-
-        }
-
-        return stream.str();
-    }
+    
     
     inline char unescape(
         char c
@@ -135,24 +128,6 @@ namespace BeeFishMisc {
         
     }
 
-    inline std::string unescape(
-        const std::string& input
-    )
-    {
-        std::stringstream stream;
-        for (Size i = 0; i < input.size(); ++i) {
-            char c = input[i];
-            if (c == '\\' && i < input.size()) {
-                char c2 = input[++i];
-                stream << unescape(c2);
-            }
-            else
-                stream << c;
-
-        }
-
-        return stream.str();
-    }
     
     
     inline size_t getPageSize() {
