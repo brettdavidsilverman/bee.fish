@@ -123,6 +123,10 @@ async function fetchLines(url, f) {
     if (!response.ok) {
         throw new Error(`HTTP error, status = ${response.status}`);
     }
+    
+    contentType.value =
+        response.headers.get("content-type");
+    
 
     // Get the response body as a ReadableStream
     const reader = response.body.getReader();
