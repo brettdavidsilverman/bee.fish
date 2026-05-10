@@ -5,7 +5,7 @@ CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=$(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp LeastRecentlyUsedCache.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Locks.hpp Version.hpp Branch.hpp Path.hpp PathBase.hpp PathBase.hpp Iterable.hpp Iterator.hpp ReverseIterator.hpp Makefile JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp JSONIndex.hpp NullStream.hpp
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_locale -lboost_regex -licuuc -lcryptopp
+	g++ $(CFLAGS) -Ofast main.cpp -o $(OUTPUT) -lboost_locale -lboost_regex -licuuc -lcryptopp
 
 $(OUTPUT_INDEX): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT_INDEX) -D JSON_INDEX -lboost_locale -lboost_regex -licuuc -lcryptopp

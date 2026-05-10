@@ -391,6 +391,8 @@ function setLinks() {
     pathInput.value =
         localStorage.getItem("path");
         
+    setLinks();
+    
     fetchButton.disabled = false;
 }
 if (localStorage.getItem("contentType")) {
@@ -406,7 +408,7 @@ if (localStorage.getItem("editor")) {
         localStorage.getItem("editor");
     
 }
-setLinks();
+
 
 fetchButton.disabled = false;
 
