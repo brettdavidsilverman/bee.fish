@@ -374,11 +374,15 @@ inline bool testData()
 
     std::string dataStart = "Hello World";
     BString base64 = toBase64(dataStart);
+cerr << "BASE 64: " << base64  << endl;
     BString dataEnd = fromBase64(base64);
+cerr << "DECODED: " << dataEnd.length() << endl;
+
     ok &= testResult(
               "From data to base64 and back",
               (dataStart == dataEnd)
           );
+assert(ok);
 
 #ifdef SERVER
     std::string stringMd5 = "Hello World";

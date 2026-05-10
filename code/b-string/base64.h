@@ -3,149 +3,200 @@
 
 #include <string>
 #include <vector>
+#include <cryptopp/base64.h>
+#include <cryptopp/filters.h>
 #include "b-string.h"
 
 using namespace BeeFishBString;
 
-namespace BeeFishBase64
+namespace BeeFishBString
+{
+/*
+// Lookup table for encoding
+// If you want to use an alternate alphabet,
+// change the characters here
+const char encodeLookup[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+const char padCharacter = '=';
+
+inline BString
+encode(const Byte* buffer, size_t size) {
+
+    std::string encodedString;
+    encodedString.reserve(((size/3) + (size % 3 > 0)) * 4);
+    long temp;
+    const Byte* cursor = &(buffer[0]);
+    for(size_t idx = 0; idx < size/3; idx++)
+    {
+        temp  = (*cursor++) << 16; //Convert to big endian
+        temp += (*cursor++) << 8;
+        temp += (*cursor++);
+        encodedString.push_back(encodeLookup[(temp & 0x00FC0000) >> 18]);
+        encodedString.push_back(encodeLookup[(temp & 0x0003F000) >> 12]);
+        encodedString.push_back(encodeLookup[(temp & 0x00000FC0) >> 6 ]);
+        encodedString.push_back(encodeLookup[(temp & 0x0000003F)      ]);
+    }
+
+    switch(size % 3)
+    {
+    case 1:
+        temp  = (*cursor++) << 16; //Convert to big endian
+        encodedString.push_back(encodeLookup[(temp & 0x00FC0000) >> 18]);
+        encodedString.push_back(encodeLookup[(temp & 0x0003F000) >> 12]);
+        encodedString.push_back(padCharacter);
+        encodedString.push_back(padCharacter);
+        break;
+    case 2:
+        temp  = (*cursor++) << 16; //Convert to big endian
+        temp += (*cursor++) << 8;
+        encodedString.push_back(encodeLookup[(temp & 0x00FC0000) >> 18]);
+        encodedString.push_back(encodeLookup[(temp & 0x0003F000) >> 12]);
+        encodedString.push_back(encodeLookup[(temp & 0x00000FC0) >> 6 ]);
+        encodedString.push_back(padCharacter);
+        break;
+    }
+    return encodedString;
+}
+
+inline BString
+encode(const std::string& data) {
+    return encode((const Byte*)(data.data()), data.size());
+}
+
+
+inline std::vector<Byte> decode(
+    const BString& input
+)
 {
 
-   // Lookup table for encoding
-   // If you want to use an alternate alphabet,
-   // change the characters here
-   const char encodeLookup[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-   const char padCharacter = '=';
 
-   inline BString
-   encode(const Byte* buffer, size_t size) {
+    if (input.size() % 4) //Sanity check
+        throw std::runtime_error("Non-Valid base64!");
 
-      std::string encodedString;
-      encodedString.reserve(((size/3) + (size % 3 > 0)) * 4);
-      long temp;
-      const Byte* cursor = &(buffer[0]);
-      for(size_t idx = 0; idx < size/3; idx++)
-      {
-         temp  = (*cursor++) << 16; //Convert to big endian
-         temp += (*cursor++) << 8;
-         temp += (*cursor++);
-         encodedString.push_back(encodeLookup[(temp & 0x00FC0000) >> 18]);
-         encodedString.push_back(encodeLookup[(temp & 0x0003F000) >> 12]);
-         encodedString.push_back(encodeLookup[(temp & 0x00000FC0) >> 6 ]);
-         encodedString.push_back(encodeLookup[(temp & 0x0000003F)      ]);
-      }
-      
-      switch(size % 3)
-      {
-      case 1:
-         temp  = (*cursor++) << 16; //Convert to big endian
-         encodedString.push_back(encodeLookup[(temp & 0x00FC0000) >> 18]);
-         encodedString.push_back(encodeLookup[(temp & 0x0003F000) >> 12]);
-         encodedString.push_back(padCharacter);
-         encodedString.push_back(padCharacter);
-         break;
-      case 2:
-         temp  = (*cursor++) << 16; //Convert to big endian
-         temp += (*cursor++) << 8;
-         encodedString.push_back(encodeLookup[(temp & 0x00FC0000) >> 18]);
-         encodedString.push_back(encodeLookup[(temp & 0x0003F000) >> 12]);
-         encodedString.push_back(encodeLookup[(temp & 0x00000FC0) >> 6 ]);
-         encodedString.push_back(padCharacter);
-         break;
-      }
-      return encodedString;
-   }
-   
-   inline BString
-   encode(const std::string& data) {
-      return encode((const Byte*)(data.data()), data.size());
-   }
-
-   
-   inline std::vector<Byte> decode(
-      const BString& input
-   )
-   {
-
-
-      if (input.size() % 4) //Sanity check
-         throw std::runtime_error("Non-Valid base64!");
-   
-      size_t padding = 0;
-      if (input.size())
-      {
-         if (input[input.size()-1] == padCharacter)
+    size_t padding = 0;
+    if (input.size())
+    {
+        if (input[input.size()-1] == padCharacter)
             padding++;
-         if (input[input.size()-2] == padCharacter)
+        if (input[input.size()-2] == padCharacter)
             padding++;
-      }
-  
-      //Setup a vector to hold the result
-      std::vector<Byte> decodedBytes;
-      decodedBytes.reserve(((input.size()/4)*3) - padding);
-      long temp=0; //Holds decoded quanta
-      BStringBase::const_iterator cursor = input.begin();
-   
-      while (cursor < input.end())
-      {
-         for (size_t quantumPosition = 0; quantumPosition < 4; quantumPosition++)
-         {
+    }
+
+    //Setup a vector to hold the result
+    std::vector<Byte> decodedBytes;
+    decodedBytes.reserve(((input.size()/4)*3) - padding);
+    long temp=0; //Holds decoded quanta
+    BStringBase::const_iterator cursor = input.begin();
+
+    while (cursor < input.end())
+    {
+        for (size_t quantumPosition = 0; quantumPosition < 4; quantumPosition++)
+        {
             temp <<= 6;
             auto value = *cursor;
             if (value >= 0x41 && value <= 0x5A) // This area will need tweaking if
-               temp |= value - 0x41;                    // you are using an alternate alphabet
+                temp |= value - 0x41;                    // you are using an alternate alphabet
             else if  (value >= 0x61 && value <= 0x7A)
-               temp |= value - 0x47;
+                temp |= value - 0x47;
             else if  (value >= 0x30 && value <= 0x39)
-               temp |= value + 0x04;
+                temp |= value + 0x04;
             else if  (value == 0x2B)
-               temp |= 0x3E; //change to 0x2D for URL alphabet
+                temp |= 0x3E; //change to 0x2D for URL alphabet
             else if  (value == 0x2F)
-               temp |= 0x3F; //change to 0x5F for URL alphabet
+                temp |= 0x3F; //change to 0x5F for URL alphabet
             else if  (value == padCharacter) //pad
             {
-               switch( input.end() - cursor )
-               {
-               case 1: //One pad character
-                  decodedBytes.push_back((temp >> 16) & 0x000000FF);
-                  decodedBytes.push_back((temp >> 8 ) & 0x000000FF);
-                  return decodedBytes;
-               case 2: //Two pad characters
-                  decodedBytes.push_back((temp >> 10) & 0x000000FF);
-                  return decodedBytes;
-               default:
-                  throw std::runtime_error("Invalid Padding in Base 64!");
-               }
+                switch( input.end() - cursor )
+                {
+                case 1: //One pad character
+                    decodedBytes.push_back((temp >> 16) & 0x000000FF);
+                    decodedBytes.push_back((temp >> 8 ) & 0x000000FF);
+                    return decodedBytes;
+                case 2: //Two pad characters
+                    decodedBytes.push_back((temp >> 10) & 0x000000FF);
+                    return decodedBytes;
+                default:
+                    throw std::runtime_error("Invalid Padding in Base 64!");
+                }
             }  else
-               throw std::runtime_error("Non-Valid Character in Base 64!");
+                throw std::runtime_error("Non-Valid Character in Base 64!");
             cursor++;
-         }
-         
-         decodedBytes.push_back((temp >> 16) & 0x000000FF);
-         decodedBytes.push_back((temp >> 8 ) & 0x000000FF);
-         decodedBytes.push_back((temp      ) & 0x000000FF);
-      }
-      return decodedBytes;
-   }
-   
+        }
+
+        decodedBytes.push_back((temp >> 16) & 0x000000FF);
+        decodedBytes.push_back((temp >> 8 ) & 0x000000FF);
+        decodedBytes.push_back((temp      ) & 0x000000FF);
+    }
+    return decodedBytes;
 }
 
-namespace BeeFishBString
+}
+*/
+inline BString toBase64(const std::string& data)
 {
-   inline BString toBase64(const std::string& data)
-   {
-      return BeeFishBase64::encode(data);
-   }
+    BString encoded;
+    CryptoPP::StringSource(
+        data,
+        true,
+        new CryptoPP::Base64Encoder(
+            new CryptoPP::StringSink(encoded),
+            false // Do not insert line breaks
+        )
+    );
+    return encoded;
+}
 
-   inline std::string fromBase64
-   (const BString& base64)
-   {
-      std::vector<Byte> bytes =
-          BeeFishBase64::decode(base64);
-          
-      std::string data((const char*)bytes.data(), bytes.size());
-      
-      return data;
-   }
+inline std::string fromBase64
+(const BString& base64)
+{
+    BString decoded;
+
+    CryptoPP::StringSource(
+        base64,
+        true,
+        new CryptoPP::Base64Decoder(
+            new CryptoPP::StringSink(decoded)
+        )
+    );
+    return decoded;
+
+}
+
+// Source - https://stackoverflow.com/a/60580965
+// Posted by mtrw
+// Retrieved 2026-05-10, License - CC BY-SA 4.0
+/*
+#include <iostream>
+#include <stdlib.h>
+#include <openssl/evp.h>
+
+BString toBase64(const BString& input) {
+    Index length = input.size();
+    
+    const auto pl = 4*((length+2)/3);
+    auto output = reinterpret_cast<char *>(calloc(pl+1, 1)); //+1 for the terminating null that EVP_EncodeBlock adds on
+    const auto ol = EVP_EncodeBlock(reinterpret_cast<unsigned char *>(output), (const unsigned char*)input.c_str(), length);
+    if (pl != Index(ol)) {
+        std::cerr << "Whoops, encode predicted " << pl << " but we got " << ol << "\n";
+    }
+    BString base64(output, pl);
+    free(output);
+    return base64;
+}
+
+BString fromBase64(const BString& input) {
+    Index length = input.size();
+    const auto pl = 3*length/4;
+    auto output = reinterpret_cast<unsigned char *>(calloc(pl+1, 1));
+    const auto ol = EVP_DecodeBlock(output, reinterpret_cast<const unsigned char *>(input.data()), length);
+    if (pl != Index(ol)) {
+        std::cerr << "Whoops, decode predicted " << pl << " but we got " << ol << "\n";
+    }
+    BString decoded((const char*)output, pl - 1);
+    free(output);
+    return decoded;
+}
+*/
+
 }
 
 

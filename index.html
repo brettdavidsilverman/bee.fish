@@ -223,8 +223,8 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
         method: "POST",
         credentials: "include",
         headers: {
-            "content-type": contentType,
-            "content-length": contentLength
+            "content-type": contentType
+            //"content-length": contentLength
         },
         body: data
     }
