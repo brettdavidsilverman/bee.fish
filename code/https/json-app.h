@@ -202,7 +202,9 @@ using namespace BeeFishWeb;
 
                 }
                 else {
-                
+                    // Posting JSON, remove {HTTP}
+                    jsonPath.deleteProperty("{HTTP}");
+                    
                     // Stream posted file to
                     // database
                     WebRequest postRequest(true);
