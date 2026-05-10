@@ -6,7 +6,7 @@ DEPS   = char.h b-string.h base64.h misc.h b-string-base.h stream.h test.h local
 all:	$(OUTPUT)
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lssl -lcrypto -lboost_locale -lboost_regex -licuuc -lcryptopp
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lcrypto -lboost_locale -lboost_regex -licuuc -lcryptopp
 	
 	
 trace:	$(OUTPUT)
