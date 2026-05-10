@@ -348,9 +348,9 @@ using namespace BeeFishTest;
                      << parser.getError()
                      << endl
                      << "URL parsed: {"
-                     << escape(firstLine.url()) << "}" << endl
+                     << firstLine.url() << "}" << endl
                      << "URL expected: {"
-                     << escape(expectedURL)
+                     << expectedURL
                      << "}"
                      << endl;
             }

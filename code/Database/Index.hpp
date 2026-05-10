@@ -4,13 +4,12 @@
 #include <cmath>
 #include <atomic>
 #include "Config.hpp"
-#include "File.hpp"
 
 using namespace std;
 
 namespace BeeFishDatabase {
 
-   typedef Size Index;
+   typedef size_t Index;
    typedef std::atomic<Index> AtomicIndex;
    
 

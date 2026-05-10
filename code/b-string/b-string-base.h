@@ -11,6 +11,7 @@
 #include <cctype>
 #include <locale>
 #include <codecvt>
+#include <filesystem>
 #include <cryptopp/base64.h>
 #include <cryptopp/filters.h>
 #include <cryptopp/cryptlib.h>
@@ -586,10 +587,7 @@ public:
         ostream &out
     ) const
     {
-        for (auto character : *this)
-        {
-            out << BeeFishMisc::escape(character);
-        }
+        out << escape();
     }
 
 
@@ -812,20 +810,55 @@ public:
         std::stringstream stream;
         for (char c : *this) {
 
-            stream << BeeFishMisc::escape(c);
+            stream << BString::escape(c);
 
         }
 
         return stream.str();
     }
 
+    static BString escape(
+        char c
+    )
+    {
+        switch (c)
+        {
+        case '\0':
+            return "\\0";
+        case '\"':
+            return "\\\"";
+        case '\\':
+            return "\\\\";
+        case '\b':
+            return "\\b";
+        case '\f':
+            return "\\f";
+        case '\r':
+            return "\\r";
+        case '\n':
+            return "\\n";
+        case '\t':
+            return "\\t";
+        case '\v':
+            return "\\v";
+        default:
+            BString string;
+            string = c;
+           //stream << "\\x" << setw(2) << setfill('0') << hex << (int)(unsigned char)c;
+            return string;
+        }
+        
+        
+
     
+    }
+
 
     BString unescape() const
     {
         const BString& input = *this;
         stringstream stream;
-        for (Size i = 0; i < input.size(); ++i) {
+        for (Index i = 0; i < input.size(); ++i) {
             char c = input[i];
             if (c == '\\' && i < input.size()) {
                 char c2 = input[++i];
@@ -838,13 +871,44 @@ public:
                     
                 }
                 else
-                    stream << BeeFishMisc::unescape(c2);
+                    stream << BString::unescape(c2);
             }
             else
                 stream << c;
         }
 
         return stream.str();
+    }
+    
+    static char unescape(
+        char c
+    )
+    {
+        switch (c)
+        {
+        case '0':
+            return '\0';
+        case '\"':
+            return '\"';
+        case '\\':
+            return '\\';
+        case 'b':
+            return '\b';
+        case 'f':
+            return '\f';
+        case 'r':
+            return '\r';
+        case 'n':
+            return '\n';
+        case 't':
+            return '\t';
+        case 'v':
+            return '\v';
+        default:
+            return c;
+        }
+        
+        
     }
     
 

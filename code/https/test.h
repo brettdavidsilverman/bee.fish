@@ -117,7 +117,7 @@ namespace BeeFishHTTPS {
             {"secret", "boo"}
         };
         
-        BString str = escape(auth.str(false));
+        BString str = auth.str(false).escape();
         
         stream
             << "curl "

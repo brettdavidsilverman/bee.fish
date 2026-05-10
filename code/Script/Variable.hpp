@@ -80,7 +80,7 @@ namespace BeeFishScript {
 
       //friend ostream& operator << (ostream& out, const Variable& variable);
 
-      virtual std::string str(bool blankSpace = true) const {
+      virtual String str(bool blankSpace = true) const {
          stringstream stream;
          this->write(stream, blankSpace);
          return stream.str();

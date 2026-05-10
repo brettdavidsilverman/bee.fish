@@ -55,79 +55,10 @@ namespace BeeFishMisc {
             std::cout << ON_FAIL << std::endl;
     }
 
-    inline std::string escape(
-        char c
-    )
-    {
-        switch (c)
-        {
-        case '\0':
-            return "\\0";
-        case '\"':
-            return "\\\"";
-        case '\\':
-            return "\\\\";
-        case '\b':
-            return "\\b";
-        case '\f':
-            return "\\f";
-        case '\r':
-            return "\\r";
-        case '\n':
-            return "\\n";
-        case '\t':
-            return "\\t";
-        case '\v':
-            return "\\v";
-        default:
-            std::stringstream stream;
-            if (c >= 0) {
-                stream << c;
-            }
-            else {
-                stream << "\\x" << setw(2) << setfill('0') << hex << (int)(unsigned char)c;
-            }
-            return stream.str();
-        }
-        
-        
-
-    
-    }
-
     
     
-    inline char unescape(
-        char c
-    )
-    {
-        switch (c)
-        {
-        case '0':
-            return '\0';
-        case '\"':
-            return '\"';
-        case '\\':
-            return '\\';
-        case 'b':
-            return '\b';
-        case 'f':
-            return '\f';
-        case 'r':
-            return '\r';
-        case 'n':
-            return '\n';
-        case 't':
-            return '\t';
-        case 'v':
-            return '\v';
-        default:
-            return c;
-        }
-        
-        
-    }
-
+    
+    
     
     
     inline size_t getPageSize() {
