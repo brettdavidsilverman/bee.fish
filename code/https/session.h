@@ -443,15 +443,15 @@ namespace BeeFishHTTPS {
             const BeeFishWeb::Headers&
                 requestHeaders =
                     _request->headers();
-          
+                    
             BString origin;
-
-            if (requestHeaders.contains("origin")) {
-                origin = requestHeaders["origin"];
-            }
-            else if (requestHeaders.contains("host")) {
+            
+            if (requestHeaders.contains("host")) {
                 BString host = requestHeaders["host"];
                 origin = BString("https://") + host;
+            }
+            else if (requestHeaders.contains("origin")) {
+                origin = requestHeaders["origin"];
             }
             else {
                 origin = server()->origin();
@@ -461,30 +461,12 @@ namespace BeeFishHTTPS {
             return origin;
                 
         }
-        
-        BString host() const
-        {
-            
-            const BeeFishWeb::Headers&
-                requestHeaders =
-                    _request->headers();
-                    
-            if (requestHeaders.contains("host")) {
-                BString host = requestHeaders["host"];
-                return BString("https://") + host;
-            }
-            else {
-                return origin();
-            }
-        }
-        
+    
         BString domain() const
         {
             
-            BString host = Session::host();
-            
             // Use url to extract the domain
-            URL url = host;
+            URL url = Session::origin();
             
             BString domain = url.domain();
 
