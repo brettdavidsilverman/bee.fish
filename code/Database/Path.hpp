@@ -71,6 +71,8 @@ public:
 
     virtual ~Path()
     {
+        if (locked())
+            unlock();
     }
     
     void lock() {
@@ -349,9 +351,7 @@ public:
         PowerEncoding& encoding = path;
         encoding << key;
 
-        if (path.locked())
-            path.unlock();
-            
+        
         return path;
     }
 
@@ -363,7 +363,8 @@ public:
 
         path << key;
         
-
+        if (path.locked())
+            path.unlock();
 
         return path;
     }
