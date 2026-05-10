@@ -2413,6 +2413,18 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
             );
         
         
+                 
+        cout << "Delete property then get parent" << endl;
+            
+        JSONDatabase database6;
+        JSONPath start6 = database5.host("https://test");
+        JSONPath hello = start6["hello"];
+        hello.setString("world");
+        JSONPath parent = hello.parent();
+        cout << hello.toString() << endl;
+        hello.setUndefined();
+        parent.toString();
+
         BeeFishMisc::outputSuccess(success);
 
         return success;

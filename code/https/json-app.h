@@ -159,17 +159,18 @@ using namespace BeeFishWeb;
                 
                 
                 std::vector paths = request()->url().paths();
-                
+                BString contentType;
+                if (request()->headers().contains("content-type"))
+                    contentType = request()->headers()["content-type"];
+                else
+                    contentType = "text/plain; charset=utf-8";
+                    
+ 
                 if (paths.size() > 0 &&
-                    paths[paths.size() - 1] == "{HTTP}")
+                    paths[paths.size() - 1] == "{HTTP}" &&
+                    !contentType.startsWith("application/json"))
                 {
 
-                    BString contentType;
-                    if (request()->headers().contains("content-type"))
-                        contentType = request()->headers()["content-type"];
-                    else
-                        contentType = "text/plain; charset=utf-8";
-                    
                     jsonPath.deleteProperty("content");
                     JSONPath content = jsonPath["content"];
                     
@@ -196,12 +197,15 @@ using namespace BeeFishWeb;
                     if ( contentLength == 0 )
                         jsonPath.setUndefined();
                     else {
-                        jsonPath["content-type"].setString(contentType, false);
+                        jsonPath["content-type"].setString(contentType);
                         jsonPath["content-length"].setInteger(contentLength);
                     }
 
                 }
                 else {
+                    // Save the parent
+                    JSONPath parent = jsonPath.parent();
+                    
                     // Posting JSON, remove {HTTP}
                     jsonPath.deleteProperty("{HTTP}");
                     
@@ -228,8 +232,15 @@ using namespace BeeFishWeb;
                         return;
                         
                     }
+                    
+                    if (jsonPath.type() == Type::UNDEFINED)
+                    {
+                        jsonPath = parent;
+                    }
                 }
                 
+                
+                    
                 _content = BString("\"") + jsonPath.toString().escape() + BString("\"");
                 _serve = App::SERVE_CONTENT;
                 _status = 200;
