@@ -806,16 +806,47 @@ public:
         return upper;
 
     }
-
+    
     BString escape() const
     {
-        return BeeFishMisc::escape(this->str());
+        std::stringstream stream;
+        for (char c : *this) {
+
+            stream << BeeFishMisc::escape(c);
+
+        }
+
+        return stream.str();
     }
+
+    
 
     BString unescape() const
     {
-        return BeeFishMisc::unescape(this->str());
+        const BString& input = *this;
+        stringstream stream;
+        for (Size i = 0; i < input.size(); ++i) {
+            char c = input[i];
+            if (c == '\\' && i < input.size()) {
+                char c2 = input[++i];
+                if (c2 == 'x' && i < input.size() - 1)
+                {
+                    BString str;
+                    str = input[++i];
+                    str += input[++i];
+                    stream << str.fromHex();
+                    
+                }
+                else
+                    stream << BeeFishMisc::unescape(c2);
+            }
+            else
+                stream << c;
+        }
+
+        return stream.str();
     }
+    
 
 
 };

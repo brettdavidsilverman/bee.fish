@@ -790,18 +790,20 @@ inline bool testEscape()
     bool ok = true;
     
     stringstream stream;
-    for (int i = 0; i < 128; ++i)
+    for (int i = 0; i < 256; ++i)
     {
-        stream << char(i);
+        stream << (char)i;
     }
     
-    std::string escaped = BeeFishMisc::escape(stream.str());
-    std::string unescaped = BeeFishMisc::unescape(escaped);
-    
-    for (int i = 0; i < 128; ++i)
+    BString data = stream.str();
+
+    BString escaped = data.escape();
+    BString unescaped = escaped.unescape();
+
+    for (int i = 0; i < 256; ++i)
     {
         char c = unescaped[i];
-        if (int(c) != i)
+        if ((int)(unsigned char)c != i)
         {
             ok = false;
             break;
