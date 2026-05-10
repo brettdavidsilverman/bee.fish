@@ -274,11 +274,12 @@ namespace BeeFishHTTPS {
             try {
 
                 // All input is now in
-                clog << now()
+                clog  << BeeFishDate::getDateTime()
                       << ' '
                       << ipAddress()          << ' '
                       << _request->method()   << ' '
-                      << _request->url()      << ' '
+                      << origin()
+                           << _request->url() << ' '
                       << std::endl;
                       
                 _response = new Response(

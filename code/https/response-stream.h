@@ -250,18 +250,31 @@ namespace BeeFishHTTPS {
                     case App::SERVE_HTTP:
                     {
                 
-                        
-                        BString base64  =
+                        JSONPath content =
                             jsonPath
                                 ["{HTTP}"]
-                                ["content"]
-                                [++pageIndex].getString();
+                                ["content"];
                                 
-                        BString data = base64.fromBase64();
+                        BString data;
                         
+                        if (content.type() == Type::ARRAY)
+                        {
+                            BString base64  =
+                                    content[++pageIndex].getString();
+                                
+                            data = base64.fromBase64();
+                        
+                            length = data.size();
+                        }
+                        else if (content.type() == Type::STRING)
+                        {
+                            data = content.getString();
+                        }
+            
                         length = data.size();
-
-                        memcpy(buffer.data(), data.data(), length);
+                        
+                        if (length)
+                            memcpy(buffer.data(), data.data(), length);
                         
                         break;
                     }
@@ -271,6 +284,9 @@ namespace BeeFishHTTPS {
                     }
                 }
                  
+                if (!length)
+                    break;
+                    
                 write(
                     buffer.data(),
                     length

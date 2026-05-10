@@ -179,12 +179,17 @@ using namespace BeeFishWeb;
                     
                     Index contentLength = 0;
                     Size pageIndex = 0;
+                    BString text;
                     
                     postRequest.setOnData(
-                        [&pageIndex, &contentLength, &content](const BString& data) {
+                        [&pageIndex, &contentLength, &contentType, &content, &text](const BString& data) {
                             contentLength += data.size();
-                            BString base64 = data.toBase64();
-                            content[++pageIndex].setString(base64, false);
+                            if (contentType.startsWith("text/"))
+                                text += data;
+                            else {
+                                BString base64 = data.toBase64();
+                                content[++pageIndex].setString(base64, false);
+                            }
                         }
                     );
                     
@@ -199,6 +204,8 @@ using namespace BeeFishWeb;
                     else {
                         jsonPath["content-type"].setString(contentType);
                         jsonPath["content-length"].setInteger(contentLength);
+                        if (contentType.startsWith("text/"))
+                            jsonPath["content"].setString(text);
                     }
 
                 }

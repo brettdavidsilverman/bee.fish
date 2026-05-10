@@ -58,7 +58,7 @@ namespace BeeFishHTTPS {
          if (app)
          {
             if (_log) {
-               clog << now() 
+               clog << BeeFishDate::getDateTime()
                   << " " << ipAddress()
                   << " " << app->status()
                   << " " << app->statusText()
