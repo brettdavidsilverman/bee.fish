@@ -208,7 +208,7 @@ namespace BeeFishDatabase
         
         if (success) {
             JSONDatabase db;
-            JSONPath path = db.host("https://test");
+            JSONPath path = db.origin("https://test");
 
             JSONPathParser parser(path);
             parser.read("101");
@@ -788,7 +788,7 @@ namespace BeeFishDatabase
         cout << "\tTest type" << endl;
         JSONDatabase database;
         
-        JSONPath start = database.host("https://test");
+        JSONPath start = database.origin("https://test");
         JSONPath test =start["test"];
         
         test.setUndefined();
@@ -814,7 +814,7 @@ namespace BeeFishDatabase
         }
         */
         
-        JSONPath root = database.host("https://test");
+        JSONPath root = database.origin("https://test");
 
         
         // Test string
@@ -999,7 +999,7 @@ namespace BeeFishDatabase
         cout << "\tTest id" << endl;
         JSONDatabase database;
         
-        JSONPath start = database.host("https://test");
+        JSONPath start = database.origin("https://test");
         JSONPath test = start["test"];
         
         test.setNull();
@@ -1116,7 +1116,7 @@ cerr << "Child count " << count << endl;
         
         JSONDatabase database;
         
-        JSONPath start = database.host("https://test");
+        JSONPath start = database.origin("https://test");
     
         if (success)
         {
@@ -1242,7 +1242,7 @@ cerr << string2 << endl;
         cout << "Test Sub Array 2 Path: ";
         
         JSONDatabase database;
-        JSONPath _path = database.host("https://test");
+        JSONPath _path = database.origin("https://test");
         JSONPathParser parser(_path);
         parser.read("[[1]]");
         Path path = _path;
@@ -1447,7 +1447,7 @@ assert(success);
             
         for (auto file : files) {
             if (success)
-                success = testFile(tempDB.host("https://test"), file, true);
+                success = testFile(tempDB.origin("https://test"), file, true);
             else
                 break;
         }
@@ -1949,7 +1949,7 @@ assert(success);
  
         JSONDatabase database;
         
-        JSONPath start = database.host("https://test");
+        JSONPath start = database.origin("https://test");
         JSONPathParser parser1(start);
         parser1.read("[1,2,3]");
         JSONPath path = start[1];
@@ -2074,7 +2074,7 @@ assert(success);
             JSONDatabase database;
             Path objects = database.objects();
             Index startCount = objects.childCount();
-            JSONPath start = database.host("http://test");
+            JSONPath start = database.origin("http://test");
             
             
             JSONPathParser parser(start);
@@ -2134,7 +2134,7 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
  
         JSONDatabase database;
         
-        JSONPath start = database.host("https://test");
+        JSONPath start = database.origin("https://test");
         
         JSONPathParser parser(start);
         parser.read("{\"a\":\"b\"}");
@@ -2204,7 +2204,7 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         
         JSONDatabase database2;
         
-        JSONPath start2 = database2.host("https://test");
+        JSONPath start2 = database2.origin("https://test");
         JSONPathParser parser2(start2);
         parser2.read("{\"a\":{\"b\":\"c\"}}");
         parser2.eof();
@@ -2294,7 +2294,7 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
 
             
         JSONDatabase database3;
-        JSONPath start3 = database3.host("https://test");
+        JSONPath start3 = database3.origin("https://test");
         JSONPathParser parser3(start3);
         parser3.read("{\"a\":{\"b\":\"c\"}}");
         parser3.eof();
@@ -2341,7 +2341,7 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         
 
         JSONDatabase database4;
-        JSONPath start4 = database4.host("https://test");
+        JSONPath start4 = database4.origin("https://test");
         JSONPathParser parser4(start4);
         parser4.read("{\"a\":{\"a\":\"a\"}}");
         parser4.eof();
@@ -2385,7 +2385,7 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         cout << "Delete property thats array " << endl;
             
         JSONDatabase database5;
-        JSONPath start5 = database4.host("https://test");
+        JSONPath start5 = database4.origin("https://test");
         JSONPath test = start5["test"];
         for (Index i = 1; i <= 10; ++i)
         {
@@ -2417,7 +2417,7 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         cout << "Delete property then get parent" << endl;
             
         JSONDatabase database6;
-        JSONPath start6 = database5.host("https://test");
+        JSONPath start6 = database5.origin("https://test");
         JSONPath hello = start6["hello"];
         hello.setString("world");
         JSONPath parent = hello.parent();
@@ -2466,7 +2466,7 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
             
             JSONDatabase db(file, readOnly);
             
-            JSONPath path = db.host("https://test");
+            JSONPath path = db.origin("https://test");
             ifstream input(TEST_DIRECTORY "/90-Sample.json");
             JSONPathParser parser(path, cout);
             parser.read(input);

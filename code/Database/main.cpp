@@ -93,7 +93,7 @@ int main(int argc, const char* argv[])
     
     BeeFishWeb::URL url(origin);
     JSONPath path =
-            database.host(url.origin());
+            database.origin(url.origin());
             
     vector<BString> paths = 
         url.paths();
@@ -144,8 +144,7 @@ int main(int argc, const char* argv[])
     if (loadDeaths)
     {
         JSONPath inputPath =
-            database.host(origin)
-            ["deaths"];
+            path["deaths"];
             
         JSONPathParser parser(inputPath, clog);
         clog << "Loading deaths.json" << endl;

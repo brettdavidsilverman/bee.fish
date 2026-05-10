@@ -103,7 +103,7 @@ namespace BeeFishDatabase
     
         
         // defined in JSONPath
-        JSONPath host(const BString& host) const;
+        JSONPath origin(const BString& origin) const;
         
 
         

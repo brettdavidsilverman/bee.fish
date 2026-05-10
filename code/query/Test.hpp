@@ -385,7 +385,7 @@ namespace BeeFishQuery {
         bool ok = true;
         BString query;
         JSONDatabase db;
-        JSONPath root = db.host("https://test");
+        JSONPath root = db.origin("https://test");
     
         auto testmatch =
         [&ok, root](const BString& query, const BString& expected = "") {
@@ -1084,7 +1084,7 @@ namespace BeeFishQuery {
         filesystem::path json = TEST_DIRECTORY "/45-Object.json";
         
         JSONDatabase database;
-        JSONPath root = database.host("https://test")[json.filename()];
+        JSONPath root = database.origin("https://test")[json.filename()];
         JSONPathParser parser(root);
         Path objects = database.objects()[root.id()];
         Path words = database.words();

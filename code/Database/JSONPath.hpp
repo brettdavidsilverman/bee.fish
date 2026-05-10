@@ -560,16 +560,16 @@ public:
         );
     }
     
-    static JSONPath fromString(JSONDatabase& database, const BString& host, const BeeFishWeb::URL& url, const BString& method = "GET")
+    static JSONPath fromString(JSONDatabase& database, const BString& origin, const BeeFishWeb::URL& url, const BString& method = "GET")
     {
-        JSONPath hostPath =
-            database.host(host);
+        JSONPath originPath =
+            database.origin(origin);
 
         std::vector<BString> paths =
             url.paths();
         
         // Loop through all tokens
-        JSONPath path = hostPath;
+        JSONPath path = originPath;
         bool success = true;
         
         for (BString key : paths)
@@ -1280,9 +1280,9 @@ JSONPath JSONDatabase::json() const
 }
 
 // Declared in JSONDatabase.hpp
-JSONPath JSONDatabase::host(const BString& host) const
+JSONPath JSONDatabase::origin(const BString& origin) const
 {
-    return json()[host];
+    return json()[origin];
 }
 
 PowerEncoding& operator << (PowerEncoding& output, const JSONPath& json)
