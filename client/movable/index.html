@@ -19,6 +19,8 @@ function properties(obj) {
        <script src="../coordinates/script.js"></script>
        <script src="script.js"></script>
        <link rel="stylesheet" type="text/css" href="style.css" />
+              <link rel="stylesheet" type="text/css" href="../style.css" />
+    
        <style>
 
 #outer {
@@ -32,23 +34,31 @@ function properties(obj) {
 
 #inner {
     background-color: red;
-    position: absolute;
+    position: relative;
     left: 75px;
     top: 75px;
     width: 50px;
     height: 50px;
 }
 
-#moveIframe {
-   width: 50px;
-   height: 50px;
-   background-color: grey;
+#move {
+    position: relative;
+    top: 300px;
+    left: 50px;
+    width: 50px;
+    height: 50px;
+    background-color: grey;
 }
+
+
 
        </style>
     </head>
     <body>
        <h1>Movable</h1>
+       <a href="../coordinates/script.js">coordinates/script.js</a>
+       <br />
+       <a href="script.js">script.js</a>
        <div>
           Move the blue or red square by dragging
           Add the class "movable" to elements you wish to be movable
@@ -56,27 +66,26 @@ function properties(obj) {
        <div id="outer" class="movable" onclick="alert(1)">
            <div id="inner" class="movable" onclick="alert(2)"></div>
        </div>
-<!--
-       <div id="top">
-       
-          <div id="moveIframe" class="movable">+</div>
+       <div id="display"></div>
+       <div id="move" class="movable">+</div>
           
-          <iframe id="iframe" src="../statement/index.html"></iframe>
-          
-       </div>
+       <pre>
+           <script>
+var move = document.getElementById("move");
+var display = document.getElementById("display");
 
-       <script>
-var moveIframe = document.getElementById("moveIframe");
-var iframe = document.getElementById("iframe");
+move.addEventListener("moving", onmove);
 
-moveIframe.addEventListener("moving", onmove);
+function onmove(event)
 
-function onmove(event) {
-   iframe.style.position = "absolute";
-   iframe.style.left = (event.point.x + moveIframe.clientWidth) + "px";
-   iframe.style.top = (event.point.y + moveIframe.clientHeight) + "px";
+{
+    display.innerText = JSON.stringify({
+       x: event.point.x, 
+       y: event.point.y
+    }, null, "   ");
 }
-       </script>
--->
+           </script>
+        </pre>
+
     </body>
 </html>

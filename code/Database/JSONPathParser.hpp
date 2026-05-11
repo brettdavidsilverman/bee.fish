@@ -91,7 +91,7 @@ namespace BeeFishDatabase {
                     JSONPath parent = start.parent(key);
                     while (!parent.isRoot())
                     {
-                        if (key == "deacription")
+                        if (key == "description")
                             break;
                             
                         if (key == "{HTTP}")

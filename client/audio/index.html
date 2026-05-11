@@ -5,15 +5,13 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <script src="../console/console.js"></script>
-        
-        <link rel="stylesheet" type="text/css" href="/style.css" />
-        <link rel="stylesheet" type="text/css" href="../style.css" />
-
+        <script src="../coordinates/script.js"></script>
+        <script src="../movable/script.js"></script>
         <title>Audio</title>
         <style>
 #setup, #start, #stop{
-    width: 100px;
-    height: 100px;
+    width: calc(100% / 3);;
+    aspect-ratio: 1;
 }
 
 #setup {
@@ -28,94 +26,130 @@
     background-color: red;
 }
 
+#processor
+{
+    float: right;
+    width: 70%;
+    height: 100%;
+}
+
 #canvas {
     width: 100%;
-    height: 200px;
+    height: 30%;
     background-color: yellow;
+}
+
+.audio {
+    background-color: blue;
+    position: relative;
+    left: 50px;
+    top: 50px;
+    width: 300px;
+    height: 300px;
 }
         </style>
     </head>
     <body>
         <h1>Audio</h1>
-        <a href="sine-processor.js">sine-proccessor.js</a>
-        <div id="setup"></div>
-        <div id="start"></div>
-        <div id="stop"></div>
-        <canvas id="canvas"></div>
-        <pre>
-            <script type="module">
+        <div class="audio movable">
+            <textarea id="processor">
+class Processor extends
+    AudioWorkletProcessor
+{
+    
+    process(inputs, outputs, parameters) {
+        
+        const output = outputs[0];
+        
+
+        for (let channel = 0;
+             channel < output.length; 
+             ++channel
+            ) 
+        {
+            const channelOutput = 
+                output[channel];
+            for (let i = 0; 
+                 i < channelOutput.length;
+                 ++i
+                ) 
+            {
+                channelOutput[i] =
+                    Math.sin(this.phase);
+                    
+                this.phase += 
+                    (2 * Math.PI * this.frequency)
+                    / this.sampleRate;
+            }
+        }
+        return true;
+    }
+    
+    constructor() {
+        super();
+        this.phase = 0;
+        var self = this;
+        this.post.onmessage =
+            (event) => {
+                Object.assign(self, event.data);
+            }
+    }
+    
+
+}
+
+registerProcessor('processor', Processor);
+
+            </textarea>
+            <div>
+                <div id="setup"></div>
+                <div id="start"></div>
+                <div id="stop"></div>
+            </div>
+            <canvas id="canvas" class="canvas">
+        </div>
+        <script type="module">
 var console = new Console();
 console.log("Hello world");
 
 const audioContext = new AudioContext({
-    sampleRate: 192000
+    sampleRate: 44100
 });
 
-var sineNode1;
-var sineNode2;
+var processor;
+var analyser
 
 var initialSetup = false;
 
 async function setup() {
     
-    if (initialSetup)
-        return;
-        
     await audioContext
         .audioWorklet
-        .addModule('sine-processor.js');
-  
-    await audioContext
-        .audioWorklet
-        .addModule('sum-processor.js');
+        .addModule('processor');
         
-    sineNode1 = 
+    processor = 
         new AudioWorkletNode(
             audioContext, 
-            'sine-processor'
-        );
-
-    sineNode1.port.postMessage({
-        sampleRate: audioContext.sampleRate,
-        frequency: 440
-    });
-    
-    sineNode2 = 
-        new AudioWorkletNode(
-            audioContext, 
-            'sine-processor'
-        );
-
-    sineNode2.port.postMessage({
-        sampleRate: audioContext.sampleRate,
-        frequency: 196
-    });
-
-    var sumNode = 
-        new AudioWorkletNode(
-            audioContext, 
-            'sum-processor',
-            {
-                numberOfInputs: 2,
-                numberOfOutputs: 1,
-                outputChannelCount: [2] // Set to match input channel count
-            }
+            'processor'
         );
         
-    sineNode1.connect(sumNode, 0, 0);
-    sineNode2.connect(sumNode, 0, 1);
-    
-    const analyser = audioContext.createAnalyser();
+    processor.port.postMessage(
+        {
+            frequency: 220,
+            sampleRate: 44100
+        }
+    );
+
+    analyser = audioContext.createAnalyser();
     analyser.fftSize = 4096; // Small size for faster, less detailed data
-    sumNode.connect(analyser);
+    processor.connect(analyser);
 
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
     
     analyser.connect(
-        audioContext.destination
-    );
-    
+            audioContext.destination
+        );
     var canvas = document.getElementById("canvas");
     var canvasCtx = canvas.getContext("2d");
     // Fill solid color
@@ -131,13 +165,7 @@ async function setup() {
                 break;
             }
         }
-        /*
-        for (var i = found; i < data.length; i++) {
-            if (data[i] < threshold && data[i - 1] >= threshold) {
-                return i; // Found the stable starting point
-            }
-        }
-        */
+    
         return 0; // Fallback to start if no trigger found
     }
     
@@ -172,17 +200,6 @@ async function setup() {
             }
 
             x += sliceWidth;
-            /*
-            if (x > canvas.width)
-            {
-                canvasCtx.stroke();
-                // Fill solid color
-                canvasCtx.fillStyle = "yellow";
-                canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-                x = 0;
-                canvasCtx.moveTo(x, y);
-            }
-            */
         }
 
         // Finish the line
@@ -191,48 +208,88 @@ async function setup() {
         requestAnimationFrame(draw);
     }
     
-    if (audioContext.state === 'suspended') 
-        audioContext.resume();
-        
+    
     draw();
     
-    initialSetup = true;
 }
 
+var processorTextArea = document.getElementById("processor");
 
+function redirect(path)
+{
+    var url = new URL(path);
+    url.search = "?redirect=" +
+        encodeURIComponent(document.location.href);
+    document.location.replace(url);
+}
+
+async function  saveProcessor(event) {
+    
+    var path = document.location.origin +
+        document.location.pathname +
+        "processor/{HTTP}";
+
+    var parameters = {
+        mode: "cors",
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "content-type": "text/javascript; charset=utf-8"
+        },
+        body: event.target.value
+    }
+    
+    var response;
+    var text;
+    
+    try {
+        response = await fetch(
+            path,
+            parameters
+        );
+        text = await response.text();
+    }
+    catch (error)
+    {
+        alert(error);
+        return;
+    }
+    
+    
+    var status = response.status;
+    if (status == 401) // Unauthorised 
+    {
+        var json  = await response.text();
+        var url = JSON.parse(json);
+        redirect(url);
+        return;
+    }
+    
+    setup();
+    
+}
+    
+processorTextArea.onblur = saveProcessor;
 
 document.getElementById("setup")
     .onclick =
-    async (event) => {
-        await setup();
-        navigator.vibrate(100);
+    (event) => {
+        setup();
     }
           
 document.getElementById("start")
     .ontouchstart =
-    async (event) => {
-
-        await setup();
-    
-        sineNode1.port.postMessage("start");
-        sineNode2.port.postMessage("start");
-        navigator.vibrate(100);
+    (event) => {
+        audioContext.resume();
     }
 
 
-          
 document.getElementById("stop")
     .ontouchstart =
     (event) => {
-        if (sineNode1)
-            sineNode1.port.postMessage("stop");
-        if (sineNode2)
-            sineNode2.port.postMessage("stop");
-        navigator.vibrate(100);
+        audioContext.suspend();
     }
-     
-
-            </script>
-        </pre>
+    
+        </script>
     </body>
 </html>
