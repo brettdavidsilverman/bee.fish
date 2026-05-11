@@ -86,11 +86,31 @@ namespace BeeFishDatabase {
                     start.setNumber(value);
                     break;
                 case Type::STRING:
-                    if (path.contains("{HTTP}"))
+                {
+                    BString key;
+                    JSONPath parent = start.parent(key);
+                    while (!parent.isRoot())
+                    {
+                        if (key == "deacription")
+                            break;
+                            
+                        if (key == "{HTTP}")
+                            break;
+                            
+                        parent = parent.parent(key);
+                    }
+                    
+                    if (key == "{HTTP}")
+                    {
                         start.setString(value, false);
+                    }
                     else
+                    {
                         start.setString(value, true);
+                    }
+                        
                     break;
+                }
                 case Type::ARRAY:
                     start.setArray();
                     break;
