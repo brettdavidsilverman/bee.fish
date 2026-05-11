@@ -58,9 +58,11 @@
             </form>
             
         </div>
+        <!--
         <h2>
             <a id="goLink" href="/go.html">App Link</a>
         </h2>
+        -->
         <h2>
             <a id="dataLink" href="/">Data Link</a>
         </h2>
@@ -84,7 +86,7 @@ logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
 var pathInput = document.getElementById("pathInput");
 var result = document.getElementById("result");
-var editor = document.getElementById("editor");var html = document.getElementById("html");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");var goLink = document.getElementById("goLink");
+var editor = document.getElementById("editor");var html = document.getElementById("html");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");//var goLink = document.getElementById("goLink");
 var dataLink = document.getElementById("dataLink");
 var header = document.getElementById("h1");
 var title = document.getElementById("title");
@@ -224,7 +226,6 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
         credentials: "include",
         headers: {
             "content-type": contentType
-            //"content-length": contentLength
         },
         body: data
     }
@@ -377,12 +378,12 @@ function getJSON()
 function setLinks() {
     if (pathInput.value == "")
     {
-        goLink.href = "";
+       // goLink.href = "";
         dataLink.href = "";
     }
     else {
 
-        goLink.href = "/go.html?" + encodeURIComponent(pathInput.value);
+       // goLink.href = "/go.html?" + encodeURIComponent(pathInput.value);
         dataLink.href = pathInput.value;
     }
 }
