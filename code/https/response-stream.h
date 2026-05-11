@@ -259,19 +259,29 @@ namespace BeeFishHTTPS {
                         
                         if (content.type() == Type::ARRAY)
                         {
-                            BString base64  =
-                                    content[++pageIndex].getString();
+                            ++pageIndex;
+                            if (content.contains(pageIndex) &&
+                                content[pageIndex].type() == Type::STRING)
+                            {
                                 
-                            data = base64.fromBase64();
+                                BString base64  =
+                                        content[pageIndex].getString();
+                                
+                                data = base64.fromBase64();
                         
-                            length = data.size();
+                                length = data.size();
+                                
+                            }
+                            else
+                                length = 0;
                         }
                         else if (content.type() == Type::STRING)
                         {
                             data = content.getString();
+                            length = data.size();
                         }
             
-                        length = data.size();
+                        
                         
                         if (length)
                             memcpy(buffer.data(), data.data(), length);
