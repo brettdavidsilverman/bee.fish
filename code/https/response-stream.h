@@ -185,7 +185,7 @@ namespace BeeFishHTTPS {
             Size length = _contentLength;
             std::string buffer(pageSize, '\0');
             JSONPath jsonPath = bookmark;
-            Index pageIndex = 0;
+            Index pageIndex = 1;
             
             while ((ssize_t)bytesTransferred < _contentLength)
             {
@@ -203,12 +203,12 @@ namespace BeeFishHTTPS {
                     case App::SERVE_DATA:
                     {
                 
-                        Size _pageIndex =
+                        Size pageIndex =
                             bytesTransferred  /
                             pageSize;
                             
                         BString data =
-                            bookmark[_pageIndex].getStringData();
+                            bookmark[pageIndex].getStringData();
                             
                         length = data.size();
 
@@ -259,7 +259,6 @@ namespace BeeFishHTTPS {
                         
                         if (content.type() == Type::ARRAY)
                         {
-                            ++pageIndex;
                             if (content.contains(pageIndex) &&
                                 content[pageIndex].type() == Type::STRING)
                             {
@@ -270,6 +269,8 @@ namespace BeeFishHTTPS {
                                 data = base64.fromBase64();
                         
                                 length = data.size();
+                                
+                                ++pageIndex;
                                 
                             }
                             else
@@ -285,8 +286,8 @@ namespace BeeFishHTTPS {
                         
                         if (length)
                             memcpy(buffer.data(), data.data(), length);
-                        
-                        break;
+                        else
+                            break;
                     }
                     default:
                     {
