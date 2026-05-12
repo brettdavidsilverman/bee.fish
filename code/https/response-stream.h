@@ -256,6 +256,7 @@ namespace BeeFishHTTPS {
                                 ["content"];
                                 
                         BString data;
+                        length = 0;
                         
                         if (content.type() == Type::ARRAY)
                         {
@@ -273,8 +274,7 @@ namespace BeeFishHTTPS {
                                 ++pageIndex;
                                 
                             }
-                            else
-                                length = 0;
+            
                         }
                         else if (content.type() == Type::STRING)
                         {
@@ -282,13 +282,12 @@ namespace BeeFishHTTPS {
                             length = data.size();
                         }
             
-                        
-                        
                         if (length)
                             memcpy(buffer.data(), data.data(), length);
-                        else
-                            break;
+                        
+                        break;
                     }
+                
                     default:
                     {
                         throw std::logic_error("Invalid Serve enum value");

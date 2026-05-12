@@ -94,6 +94,12 @@ namespace BeeFishDatabase {
                         if (key == "description")
                             break;
                             
+                        if (key == "content-type")
+                            break;
+                            
+                        if (key == "content")
+                            break;
+                            
                         if (key == "{HTTP}")
                             break;
                             
