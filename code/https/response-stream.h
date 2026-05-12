@@ -263,7 +263,6 @@ namespace BeeFishHTTPS {
                             if (content.contains(pageIndex) &&
                                 content[pageIndex].type() == Type::STRING)
                             {
-                                
                                 BString base64  =
                                         content[pageIndex].getString();
                                 
@@ -294,7 +293,7 @@ namespace BeeFishHTTPS {
                     }
                 }
                  
-                if (!length)
+                if (length == 0)
                     break;
                     
                 write(

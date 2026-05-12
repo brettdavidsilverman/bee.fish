@@ -97,7 +97,9 @@ namespace BeeFishDatabase {
                         if (key == "content-type")
                             break;
                             
-                        if (key == "content")
+                        if (key == "content" &&
+                            parent["content"].type() ==
+                                Type::STRING)
                             break;
                             
                         if (key == "{HTTP}")
