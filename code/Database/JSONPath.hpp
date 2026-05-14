@@ -444,11 +444,19 @@ public:
         path[INDEXED].setData<bool>(index);
     }
     
-    BString getString()
+    BString getString() const
     {
         assert(type() == Type::STRING);
         Path path = *this;
         return path[VALUE].getStringData();
+    }
+    
+    BString getValue() const
+    {
+        Path path = *this;
+        if (path[VALUE].hasData())
+            return path[VALUE].getStringData();
+        return "";
     }
 
     void setObject()

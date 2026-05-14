@@ -33,6 +33,7 @@ namespace BeeFishHTTPS {
             _bytesTransferred = 0;
             _session = session;
             setChunkedEncoding(app);
+
         }
         
         virtual ~ResponseStream()
@@ -76,6 +77,7 @@ namespace BeeFishHTTPS {
                     << ": "
                     << pair.second.str()
                     << "\r\n";
+                    
             }
                 
             stream << "\r\n";
@@ -194,10 +196,10 @@ namespace BeeFishHTTPS {
                     length = pageSize;
                 else
                     length = _contentLength - bytesTransferred;
-                            
+
                 if (!length)
                     break;
-                    
+        
                 switch (app->serve())
                 {
                     case App::SERVE_DATA:
@@ -218,7 +220,7 @@ namespace BeeFishHTTPS {
                     }
                     case App::SERVE_CONTENT:
                     {
-                      
+
                         memcpy(
                             buffer.data(),
                             (const Byte*)
@@ -249,14 +251,18 @@ namespace BeeFishHTTPS {
                     }
                     case App::SERVE_HTTP:
                     {
-                
+
                         JSONPath content =
                             jsonPath
                                 ["{HTTP}"]
                                 ["content"];
                                 
+                        JSONPath contentLength =
+                             jsonPath
+                                 ["{HTTP}"]
+                                 ["content-length"];
+                                
                         BString data;
-                        length = 0;
                         
                         if (content.type() == Type::ARRAY)
                         {
@@ -269,21 +275,30 @@ namespace BeeFishHTTPS {
                                 data = base64.fromBase64();
                         
                                 length = data.size();
-                                
+
                                 ++pageIndex;
                                 
                             }
+                            else
+                                length = 0;
             
                         }
                         else if (content.type() == Type::STRING)
                         {
-                            data = content.getString();
-                            length = data.size();
+                            
+                            data = content.getString()
+                                .substr(
+                                    bytesTransferred,
+                                    length
+                                );
+                            //length = data.size();
                         }
+                        else
+                            length = 0;
             
                         if (length)
                             memcpy(buffer.data(), data.data(), length);
-                        
+
                         break;
                     }
                 
@@ -295,7 +310,9 @@ namespace BeeFishHTTPS {
                  
                 if (length == 0)
                     break;
-                    
+                
+                assert(length <= buffer.size());
+                
                 write(
                     buffer.data(),
                     length
@@ -304,7 +321,7 @@ namespace BeeFishHTTPS {
                 bytesTransferred += length;
                  
             }
-        
+            
              
             flush();
         }
@@ -325,8 +342,12 @@ namespace BeeFishHTTPS {
                 app->responseHeaders();
                 
             _chunkedEncoding =
-                ( headers["transfer-encoding"]
-                  == "chunked" );
+                ( //!headers.contains("content-length") &&
+                  ( headers.contains("transfer-encoding") &&
+                    headers["transfer-encoding"]
+                    == "chunked"
+                  )
+                );
                   
         }
       

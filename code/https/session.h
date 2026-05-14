@@ -447,12 +447,12 @@ namespace BeeFishHTTPS {
                     
             BString origin;
             
-            if (requestHeaders.contains("host")) {
+            if (requestHeaders.contains("origin")) {
+                origin = requestHeaders["origin"];
+            }
+            else if (requestHeaders.contains("host")) {
                 BString host = requestHeaders["host"];
                 origin = BString("https://") + host;
-            }
-            else if (requestHeaders.contains("origin")) {
-                origin = requestHeaders["origin"];
             }
             else {
                 origin = server()->origin();
@@ -460,6 +460,30 @@ namespace BeeFishHTTPS {
  
             
             return origin;
+                
+        }
+        
+        const BString host() const
+        {
+            const BeeFishWeb::Headers&
+                requestHeaders =
+                    _request->headers();
+                    
+            BString host;
+            
+            if (requestHeaders.contains("host")) {
+                host = BString("https://") + 
+                    requestHeaders["host"];
+            }
+            else if (requestHeaders.contains("origin")) {
+                host = requestHeaders["origin"];
+            }
+            else {
+                host = server()->origin();
+            }
+ 
+            
+            return host;
                 
         }
     

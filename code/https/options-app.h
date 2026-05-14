@@ -29,24 +29,44 @@ using namespace BeeFishWeb;
         {
             const BString& method =
                 _session->request()->method();
-            const URL& url =
+           /* const URL& url =
                 _session->request()->url();
-                
+                */
             if (method == "OPTIONS") 
             {
+                /*
                 _responseHeaders.replace(
                     "content-type",
                     "application/json; charset=utf-8"
                 );
-            
+                */
+                
+                _responseHeaders.replace(
+                    "access-control-allow-methods",
+                    "GET, POST, DELETE, OPTIONS"
+                );
+                
+                _responseHeaders.replace(
+                    "access-control-allow-headers",
+                    "content-type"
+                );
+                
+                _responseHeaders.replace(
+                    "access-control-allow-origin",
+                    _session->origin()
+                );
+    
+            /*
                 BeeFishScript::Object object
                 {
                     {"options", (BeeFishScript::String)url}
                 };
-                
-               _content = object.str();
+                */
+                _content = "";//object.str();
+                _contentLength = 0;
                 _serve = App::SERVE_CONTENT;
-                _status = 200;
+                _status = 204;
+            
             }
             
         }

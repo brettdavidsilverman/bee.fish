@@ -8,6 +8,7 @@
         <script src="/client/stream/stream.js"></script>
         <script src="/client/power-encoding/power-encoding.js"></script>
         <script src="/client/id/id.js"></script>
+        <script src="/client/console/console.js"></script>
         <script src="/client/evaluate.js"></script>        <script src="/client/logon/authentication.js"></script>
         <script src="/client/punycode.js"></script>
         <link rel="stylesheet" type="text/css" href="style.css"/>
@@ -52,8 +53,8 @@
                     </select>                </div>
                 <textarea id="editor"></textarea>
                 <div>
-                    <input type="file" id="file"></input>
                     <button id="saveButton">Save</button>
+                    <input type="file" id="file"></input>
                 </div>
             </form>
             
@@ -77,10 +78,8 @@
         <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
         <script type="module">
 
-console.log = function(log)
-{
-    document.writeln(log + "<br/>");
-}
+var console = new Console();
+console.log("Hello world");
 var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
@@ -111,14 +110,24 @@ async function fetchLines(url, f) {
         method: "GET",
         credentials: "include"
     }    
-
-    const response = await fetch(url, parameters);
-
+console.log("Getting " + url);
+    var response;
+    
+    try {
+        response = await fetch(url, parameters);
+    }
+    catch (error)
+    {
+        alert(error);
+        return;
+    }
+    
+console.log(response.status);
     if (response.status == 401) // Unauthorised 
     {
         var json = await response.text();
         
-        redirect(json);
+        redirect(JSON.parse(json));
         return;
     }
     
@@ -164,9 +173,9 @@ async function fetchLines(url, f) {
 // Example usage:
 //fetchLines('https://dev.bee.fish:8000/?deaths+data').catch(console.error);
 
-function redirect(json)
+function redirect(path)
 {
-    var url = new URL(JSON.parse(json));
+    var url = new URL(path);
     url.search = "?redirect=" +
         encodeURIComponent(document.location.href);
     document.location.replace(url);
@@ -220,6 +229,16 @@ pathInput.onblur =
 
 async function uploadData(path, data, contentType, contentLength, halfDuplex = false)
 {
+    if (!contentType.startsWith("application/json") &&
+        !path.endsWith("{HTTP}"))
+    {
+        if (path.endsWith("/"))
+            path = path + "{HTTP}";
+        else
+            path = path + "/{HTTP}";
+    }
+
+
     var parameters = {
         mode: "cors",
         method: "POST",
@@ -250,7 +269,7 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
         if (status == 401) // Unauthorised 
         {
             var json = await response.text();
-            redirect(json);
+            redirect(JSON.parse(json));
             return;
         }
                 
@@ -292,10 +311,7 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
 }
     
 saveButton.onclick = async function() {
-     
-    if (pathInput.value.endsWith("/"))
-        pathInput.value = pathInput.value
-            .substr(0, pathInput.value.length - 1);
+
     localStorage.setItem("path", pathInput.value);
     
     var json = editor.value;
@@ -310,30 +326,23 @@ saveButton.onclick = async function() {
             throw new Error(error, "saveButton.onclick");
         }
     }
-    else
-    {
-        if (!pathInput.value.endsWith("{HTTP}"))
-        {
-            path = path + "/{HTTP}";
-        }
-    }
+    
     
     localStorage.setItem("contentType", contentType.value);
     localStorage.setItem("editor", editor.value);
+    
     await uploadData(path, editor.value, contentType.value, editor.value.length);
 };
 
 fileInput.onchange = async function(event)
 {
     var path = pathInput.value;
+    
+    if (path.endsWith("/"))
+        path = path.substr(0, path.length - 1);
+        
     var file = fileInput.files[0];
     localStorage.setItem("path", pathInput.value);
-    
-    if (!file.type.startsWith("application/json") &&
-       !path.endsWith("{HTTP}"))
-    {
-        path = path + "/{HTTP}";
-    }
     
     await uploadData(path, file, file.type, file.size, true);
     fileInput.value = "";
@@ -400,13 +409,6 @@ if (localStorage.getItem("contentType")) {
 
     contentType.value =
         localStorage.getItem("contentType");
-    
-}
-
-if (localStorage.getItem("editor")) {
-
-    editor.value =
-        localStorage.getItem("editor");
     
 }
 

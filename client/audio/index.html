@@ -88,8 +88,10 @@ class Processor extends
     constructor() {
         super();
         this.phase = 0;
+        this.sampleRate = 44100;
+        this.frequency = 220;
         var self = this;
-        this.post.onmessage =
+        this.port.onmessage =
             (event) => {
                 Object.assign(self, event.data);
             }
@@ -211,6 +213,7 @@ async function setup() {
     
     draw();
     
+
 }
 
 var processorTextArea = document.getElementById("processor");
@@ -265,11 +268,14 @@ async function  saveProcessor(event) {
         return;
     }
     
-    setup();
+    await setup();
+    
+    alert("Setup");
     
 }
     
 processorTextArea.onblur = saveProcessor;
+processorTextArea.focus();
 
 document.getElementById("setup")
     .onclick =
