@@ -367,6 +367,7 @@ namespace BeeFishDatabase
             data.setData("");
             
             success = !data.hasData();
+            
             if (success)
             {
                 BString value = data.getStringData();
@@ -850,12 +851,12 @@ namespace BeeFishDatabase
             cout << "\tString value ";
             Path path = root["string"];
             success = success &&
-                path[JSONPath::VALUE].hasData();
+                path[JSONPath::VALUE][1].hasData();
                 
             if (success)
             {
                 BString value =
-                    path[JSONPath::VALUE].getStringData();
+                    path[JSONPath::VALUE][1].getStringData();
             
                 success = testValue("Hello World", value);
             }
@@ -908,6 +909,7 @@ namespace BeeFishDatabase
             path = path[JSONPath::CHILDREN][1];
             Type type =
                 path.getData<Type>();
+
             success = (type == Type::INTEGER);
             BeeFishMisc::outputSuccess(success);
         }
@@ -1132,24 +1134,11 @@ cerr << "Child count " << count << endl;
             
             
             BString string1 = path.toString();
-cerr << string1 << endl;
-cerr << path << endl;
-cerr << "HERE 6" << endl;
+
             path.setNull();
-cerr << "HERE 7" << endl;
-            
 
             outputSuccess(true);
-/*
-            success = success &&
-                testValue(
-                    "Cleared json is dead end",
-                     path.isDeadEnd()
-                );
-                
-            */
 
-cerr << path << endl;
 
             success = success &&
                 testValue(
@@ -1160,7 +1149,7 @@ cerr << path << endl;
             cerr << "\tGet toString after clear " << flush;
 
             BString string2 = path.toString();
-cerr << string2 << endl;
+
             success = success &&
                 testValue(
                     "Cleared to string equal",
@@ -1463,7 +1452,7 @@ assert(success);
         
         std::stringstream stream;
         stream << TEMP_DIRECTORY << &root << "test.json";
-        
+
         string tempFile = stream.str();
 
         remove(tempFile);
@@ -1490,6 +1479,10 @@ assert(success);
 
             if (success)
                 remove(tempFile);
+            else {
+                cout << "Files differ" << endl;
+                cout << "diff " << file.string() << " " << tempFile << endl;
+            }
  
         }
         
@@ -1510,7 +1503,7 @@ assert(success);
         Database db;
         Path root(db);
         
-        Iterable<BString> path(root);
+        const Iterable<BString> iterable(root);
         
         root["hello"];
         root["world"];
@@ -1520,26 +1513,26 @@ assert(success);
         if (success) {
             cout << "\tPath min value 1: ";
         
-            success = success && (path.min<BString>() == "brett");
+            success = success && (iterable.min<BString>() == "brett");
             outputSuccess(success);
         }
         
         if (success) {
             cout << "\tPath min value 2: ";
-            success = success && (path.min<BString>() == "brett");
+            success = success && (iterable.min<BString>() == "brett");
             outputSuccess(success);
         }
         
         if (success) {
             cout << "\tPath max value 1: ";
         
-            success = success && (path.max<BString>() == "world");
+            success = success && (iterable.max<BString>() == "world");
             outputSuccess(success);
         }
         
         if (success) {
             cout << "\tPath max value 2: ";
-            success = success && (path.max<BString>() == "world");
+            success = success && (iterable.max<BString>() == "world");
             outputSuccess(success);
         }
         
@@ -1549,11 +1542,11 @@ assert(success);
             cout << "\tIterable values forward: ";
             vector<BString> values;
         
-            for (auto value : path)
+            for (auto value : iterable)
             {
                 values.push_back(value);
             }
-        
+
             success = (values.size() == 3);
                 
             success = success && (values[0] == "brett");
@@ -1638,25 +1631,38 @@ assert(success);
             BString key;
             {
                 int i = 0;
-                Iterable<BString> path(root);
-                root.save();
-                for (auto value : path)
+                Iterable<BString> iterable(root);
+                
+                for (auto it = iterable.begin(key); it != iterable.end(); ++it)
+                {
+                    values.push_back(*it);
+                    if (++i > 0)
+                        break;
+                }
+                
+                /*
+                for (auto value : iterable)
                 {
                     values.push_back(value);
                     if (++i > 0)
                         break;
                 }
+                */
+                assert(values.size() == 1);
                 
-                key = path.toKey();
-                root.restore();
+                assert(iterable._stack.size());
+                
+                key = iterable.toKey();
+                
+cerr << "PART KEY: " << key << endl;
                 success = (values.size() == 1);
             }
             
             if (success)
             {
-                Iterable<BString> path(root);
+                Iterable<BString> iterable(root);
                 
-                for (auto it = path.begin(key); it != path.end(); ++it)
+                for (auto it = iterable.begin(key); it != iterable.end(); ++it)
                 {
                     values.push_back(*it);
                 }
@@ -2389,14 +2395,14 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         JSONPath test = start5["test"];
         for (Index i = 1; i <= 10; ++i)
         {
-            test[i].setString("boo", false);
+            test[i].setString("boo");
         }
         
         start5.deleteProperty("test");
         test = start5["test"];
         for (Index i = 1; i <= 10; ++i)
         {
-            test[i].setString("boo2", false);
+            test[i].setString("boo2");
         }
         
         Path children = test.getChildren();
@@ -2438,7 +2444,7 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
 #ifdef JSON_INDEX
         // When compiled with this flag,
         // sizes are consistent
-        const Index SIZE =  1212880;
+        const Index SIZE =  1182952;
 #else
         const Index SIZE = 0;
 #endif

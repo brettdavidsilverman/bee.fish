@@ -18,7 +18,8 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-    
+
+
     clog << "bee.fish.database"
               << endl
           << "C++ run time: "
@@ -71,7 +72,7 @@ int main(int argc, const char* argv[])
         JSONPath origins = database.json();
         for (auto origin : origins)
         {
-            clog << origin << endl;
+            cout << origin << endl;
         }
     }
     
@@ -114,7 +115,7 @@ int main(int argc, const char* argv[])
         Iterable<BString> properties(propertiesPath);
         for (auto property : properties)
         {
-            clog << property << endl;
+            cout << property << endl;
         }
     }
     
@@ -128,7 +129,7 @@ int main(int argc, const char* argv[])
         Iterable<BString> words(wordsPath);
         for (auto word : words)
         {
-            clog << word << endl;
+            cout << word << endl;
         }
     }
     

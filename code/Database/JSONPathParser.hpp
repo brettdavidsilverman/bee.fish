@@ -21,6 +21,8 @@ namespace BeeFishDatabase {
         vector<Index> _indexStack;
         vector<BString> _keyStack;
         vector<Type> _typeStack;
+        Index _stringPageIndex = 0;
+        JSONPath _string;
         ostream& _log;
         
     public:
@@ -86,39 +88,8 @@ namespace BeeFishDatabase {
                     start.setNumber(value);
                     break;
                 case Type::STRING:
-                {
-                    BString key;
-                    JSONPath parent = start.parent(key);
-                    while (!parent.isRoot())
-                    {
-                        if (key == "description")
-                            break;
-                            
-                        if (key == "content-type")
-                            break;
-                            
-                        if (key == "content" &&
-                            parent["content"].type() ==
-                                Type::STRING)
-                            break;
-                            
-                        if (key == "{HTTP}")
-                            break;
-                            
-                        parent = parent.parent(key);
-                    }
-                    
-                    if (key == "{HTTP}")
-                    {
-                        start.setString(value, false);
-                    }
-                    else
-                    {
-                        start.setString(value, true);
-                    }
-                        
+                    assert(false);
                     break;
-                }
                 case Type::ARRAY:
                     start.setArray();
                     break;
@@ -129,12 +100,9 @@ namespace BeeFishDatabase {
                     throw std::logic_error("JSONPathParser::setVariable");
             }
             
-            if (&_log != &cnull) {
-                BeeFishDate::writeDateTime(_log);
-                _log << " "
-                     << start.toString()
-                     << endl;
-            }
+            log(start);
+            
+
             
         }
 
@@ -241,13 +209,16 @@ namespace BeeFishDatabase {
         override
         {
 
-            JSONPath path = topPath();
+            if (json->type() != Type::STRING)
+            {
+                JSONPath path = topPath();
             
-            path = path[key->value()];
-            setVariable(path, json->type(), json->value());
+                path = path[key->value()];
+                setVariable(path, json->type(), json->value());
             
-            pop_back_key();
-
+                pop_back_key();
+            }
+            
             JSONParser::onobjectvalue(object, key, json);
 
             
@@ -265,7 +236,7 @@ namespace BeeFishDatabase {
         virtual void onbeginarray(BeeFishJSON::JSON* match)
         override
         {
-            
+
             push_back_path(Type::ARRAY);
     
                 
@@ -274,23 +245,60 @@ namespace BeeFishDatabase {
         virtual void onarrayvalue(BeeFishJSON::JSON* json)
         override
         {
+            if (json->type() != Type::STRING)
+            {
+                JSONPath path = topPath();
             
-            JSONPath path = topPath();
-            
-            Index& index = topIndex();
-            path = path[index++];
-            setVariable(path, json->type(), json->value());
-
+                Index& index = topIndex();
+                
+                path = path[index++];
+                
+                setVariable(path, json->type(), json->value());
+            }
         }
 
         virtual void onendarray(BeeFishJSON::JSON* match)
         override
         {
-    
+
+            Index length = topIndex() - 1;
+
+            topPath().truncateArray(length);
+        
             pop_back_path();
-         
+            
         }
 
+        virtual void onbeginstring(BeeFishJSON::String* match)
+        {
+            if (_pathStack.size() == 0)
+                _string = _start;
+            else {
+                JSONPath path = topPath();
+                if (topType() == Type::OBJECT)
+                {
+                    _string = path[topKey()];
+                    pop_back_key();
+                }
+                else if (topType() == Type::ARRAY)
+                {
+                    Index& index = topIndex();
+                    _string = path[index++];
+                }
+            }
+        }
+        
+        virtual void onpartstring(const BString& partString)
+        {
+            _string.setString(partString);
+        }
+        
+        virtual void onendstring(BeeFishJSON::String* match)
+        {
+            _string.endString();
+            log(_string);
+
+        }
         
         virtual void onvalue(BeeFishJSON::JSON* json)
         override
@@ -298,16 +306,29 @@ namespace BeeFishDatabase {
 
             if (_pathStack.size() == 0)
             {
-                JSONPath start = _start;
-                setVariable(
-                    start,
-                    json->type(),
-                    json->value()
-                );
+                if (json->type() != Type::STRING)
+                {
+                    JSONPath start = _start;
+                    setVariable(
+                        start,
+                        json->type(),
+                        json->value()
+                    );
+                }
             }
                 
             
                 
+        }
+        
+        void log(JSONPath path)
+        {
+            if (&_log != &cnull) {
+                BeeFishDate::writeDateTime(_log);
+                _log << " "
+                     << path.toString()
+                     << endl;
+            }
         }
                           
           

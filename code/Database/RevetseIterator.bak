@@ -22,8 +22,8 @@ public:
     ReverseIterator() {
     }
 
-    ReverseIterator(PathBase* path) :
-        _path(path)
+    ReverseIterator(const PathBase* path) :
+        _path(path->copy())
     {
         _isEnd = !_path->previous<T>(_stack, _item);
     }

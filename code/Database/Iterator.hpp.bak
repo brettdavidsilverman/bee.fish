@@ -1,12 +1,14 @@
 #ifndef BEE_FISH__DATABASE__ITERATOR_HPP
 #define BEE_FISH__DATABASE__ITERATOR_HPP
 
+#include "Iterable.hpp"
+
 namespace BeeFishDatabase {
 
 template<typename T>
 class Iterator {
 public:
-    PathBase* _path = nullptr; // The underlying pointer that the iterator wraps
+    Iterable<T>* _iterable = nullptr; // The underlying pointer that the iterator wraps
     T _item;
     Stack _stack;
     bool _isEnd = true;
@@ -24,21 +26,34 @@ public:
     }
 
 
-    Iterator(PathBase* path) :
-        _path(path)
+    Iterator(const Iterable* iterable) :
+        _iterable(iterable->copy())
     {
-        _isEnd = !_path->next<T>(_stack, _item);
+        _isEnd = !_iterable->next<T>(_stack, _item);
 
     }
     
-    Iterator(PathBase* path, const Stack& stack) :
-        _path(path),
+    Iterator(const Iterable* iterable, const Stack& stack) :
+        _iterable(iterable->copy()),
         _stack(stack)
     {
-        _isEnd = !_path->next<T>(_stack, _item);
+        _isEnd = !_iterable->next<T>(_stack, _item);
 
     }
     
+    Iterator(const Iterator& source) :
+        _iterable(source._iterable->copy()),
+        _item(source._item),
+        _stack(source._stack),
+        _isEnd(source._isEnd)
+    {
+    }
+    
+    virtual ~Iterator()
+    {
+        if (_iterable)
+            delete _iterable;
+    }
 
 
     // Dereference operator (*)
@@ -57,7 +72,7 @@ public:
     Iterator& operator++() {
         assert(!_isEnd);
         _isEnd = not
-                 _path->next<T>(
+                 _iterable->next<T>(
                      _stack,
                      _item
                  );
@@ -72,17 +87,19 @@ public:
         tmp.restore();
         return tmp;
     }
+    
+    /*
 
     void save()
     {
-        _path->save();
+        _iterable->save();
     }
 
     void restore()
     {
-        _path->restore();
+        _iterable->restore();
     }
-
+*/
     friend bool operator == (
         const Iterator& a,
         const Iterator& b

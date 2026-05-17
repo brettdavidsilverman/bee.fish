@@ -25,8 +25,9 @@ namespace BeeFishDatabase {
         virtual void goLeft() = 0;
         virtual void goRight() = 0;
         virtual void goUp() = 0;
-        virtual void save() = 0;
-        virtual void restore() = 0;
+       // virtual void save() = 0;
+       // virtual void restore() = 0;
+        virtual PathBase* copy() const = 0;
         
         virtual bool isDeadEnd() const
         {
@@ -261,33 +262,40 @@ namespace BeeFishDatabase {
         
     public:
         template<typename T>
-        T min()
+        T min() const
         {
             Stack stack;
             
-            save();
-            bool result = goToMin(stack);
-            restore();
+            PathBase* path = copy();
             
-            if (result)
+            bool result = path->goToMin(stack);
+            
+            delete path;
+            
+            if (!result)
             {
-                T value;
-                stack.reset();
-                stack >> value;
-                return value;
-                
+                throw runtime_error("No minimum");
             }
             
-            throw runtime_error("No minimum");
+            T value;
+            stack.reset();
+            stack >> value;
+                
+            return value;
+            
         }
         
         template<typename T>
-        bool min(T& value)
+        bool min(T& value) const
         {
             Stack stack;
-            save();
-            bool result = goToMin(stack);
-            restore();
+            
+            PathBase* path = copy();
+            
+            bool result = path->goToMin(stack);
+            
+            delete path;
+            
             if (result)
             {
                 stack.reset();
@@ -299,13 +307,15 @@ namespace BeeFishDatabase {
         }
         
         template<typename T>
-        T max()
+        T max() const
         {
             Stack stack;
             
-            save();
-            bool result = goToMax(stack);
-            restore();
+            PathBase* path = copy();
+            
+            bool result = path->goToMax(stack);
+            
+            delete path;
             
             if (result)
             {
@@ -320,13 +330,15 @@ namespace BeeFishDatabase {
         }
         
         template<typename T>
-        bool max(T& value)
+        bool max(T& value) const
         {
             Stack stack;
             
-            save();
-            bool result = goToMax(stack);
-            restore();
+            PathBase* path = copy();
+            
+            bool result = path->goToMax(stack);
+            
+            delete path;
             
             if (result)
             {

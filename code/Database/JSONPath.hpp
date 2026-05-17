@@ -21,9 +21,10 @@ using namespace BeeFishJSON;
 class JSONPath :
     public Path
 {
-public:
-
-
+private:
+    bool _indexString = false;
+    Index _stringPageIndex = 0;
+    
 public:
     inline static const Index VALUE = 0;
     inline static const Index PROPERTIES = 1;
@@ -81,6 +82,12 @@ public:
         Path(source)
     {
 
+    }
+    
+    virtual PathBase* copy() const
+    override
+    {
+        return new JSONPath(*this);
     }
 
     JSONDatabase& database()
@@ -423,32 +430,100 @@ public:
         return number;
     }
     
-    void setString(const BString& value, bool index = true)
+    void setString(const BString& value)
     {
         LockFile::ScopedLock lock(database());
         Path path = *this;
         setType(Type::STRING);
-        if (path[VALUE].hasData())
+        
+        
+        if (_stringPageIndex == 0)
         {
-            BString current = path[VALUE].getStringData();
-            if (current != value && path[INDEXED].hasData() &&
-                path[INDEXED].getData<bool>())
-            {
-                removeWords(current, true);
-            }
+            
+            _indexString = !value.isData();
+            
         }
-        if (path[VALUE].setData<BString>(value) && index)
+        else
+            assert(!value.isData());
+            
+        ++_stringPageIndex;
+        
+        bool indexPart = false;
+        BString current;
+        if (_indexString &&
+            (current = path[VALUE][_stringPageIndex].getStringData())
+               != value)
         {
+            removeWords(current, true);
+            indexPart = true;
+        }
+        
+        path[VALUE][_stringPageIndex].setData<BString>(value);
+        
+        if (_indexString && indexPart)
             addWords(value, true);
-        }
-        path[INDEXED].setData<bool>(index);
+
     }
+    
+    void endString()
+    {
+        Path path = *this;
+        path = path[VALUE];
+        Index max = 0;
+        if (!path.isDeadEnd())
+            max = path.max<Index>();
+        
+        for (Index i = _stringPageIndex + 1;
+            i <= max;
+            ++i)
+        {
+assert(false);
+            path.clear(i);
+        }
+        
+        
+        _indexString = false;
+        _stringPageIndex = 0;
+    }
+    
+    void removeWords() {
+        
+        Path path = *this;
+        if (!path[VALUE].isDeadEnd())
+        {
+            
+            Path values = path[VALUE];
+            Path strings = values;
+            Iterable<Index> parts(values);
+            bool isData = false;
+            bool isFirst = true;
+            for (const auto index : parts)
+            {
+                BString current =
+                    strings[index].getStringData();
+                    
+                if (isFirst)
+                {
+                    isData = current.isData();
+                    isFirst = false;
+                }
+                
+                if (!isData) {
+                    removeWords(current, true);
+                }
+            }
+        
+        }
+    }
+    
     
     BString getString() const
     {
         assert(type() == Type::STRING);
         Path path = *this;
-        return path[VALUE].getStringData();
+        if (path[VALUE].isDeadEnd())
+            return "";
+        return path[VALUE][1].getStringData();
     }
     
     BString getValue() const
@@ -472,6 +547,31 @@ public:
         LockFile::ScopedLock lock(database());
         setType(Type::ARRAY);
 
+    }
+    
+    void truncateArray(Index size)
+    {
+        assert(type() == Type::ARRAY);
+
+        Path children = getChildren();
+        if (!children.isDeadEnd())
+        {
+            Index max = children.max<Index>();
+            for (Index i = size + 1; i <= max; ++i)
+            {
+                JSONPath child = children[i];
+                child.clear();
+                children.clear(i);
+            }
+        }
+        children.setData<Index>(size);
+        
+        bool ok = (
+            (size == 0 && children.isDeadEnd()) ||
+            (children.max<Index>() == size)
+        );
+        assert(ok);
+        assert(children.getData<Index>() == size);
     }
 
     JSONPath parent() {
@@ -514,8 +614,10 @@ public:
                 {
                     key = BString("\"") + key + BString("\"");
                 }
-                else
-                    key = key.escape();
+                else if (!object.isRoot())
+                {
+                    key = key.encodeURI();
+                }
             }
             else
                 assert(false);
@@ -603,7 +705,11 @@ public:
                             key.length() - 2
                         );
                 }
-                key = key.unescape();
+                else
+                {
+                    key = key.decodeURI();
+                }
+                
                 if (path.contains(key) || method == "POST")
                     path = path[key];
                 else {
@@ -811,22 +917,16 @@ public:
         return path.getData<Type>();
     }
 
-private:
+public:
     void clear()
     {
         switch (type())
         {
         case Type::STRING:
         {
+            removeWords();
             Path path = *this;
-            
-            if (path[INDEXED].hasData() &&
-                path[INDEXED].getData<bool>())
-            {
-                BString value =
-                     path[VALUE].getStringData();
-                removeWords(value, true);
-            }
+            path.clear(VALUE);
         }
         case Type::UNDEFINED:
         case Type::NULL_:
@@ -1057,12 +1157,20 @@ public:
         }
         case Type::STRING:
         {
-            BString string =
-                path[VALUE].getStringData();
+            Path strings = path[VALUE];
+            Iterable<Index> iterable(strings);
+            
+            out << "\"";
+            
+            for (const auto index : iterable)
+            {
+                BString string =
+                path[VALUE][index].getStringData();
 
-            out << "\""
-                << string.escape()
-                << "\"";
+                out << string.escape();
+            }
+            
+            out << "\"";
 
             break;
         }
@@ -1234,9 +1342,9 @@ public:
         // Postfix increment operator (++)
         Iterator operator++(int) {
             Iterator tmp = *this;
-            tmp._children.save();
+//Path children = _children;
             ++(*this);
-            tmp._children.restore();
+//tmp._children = _children
             return tmp;
         }
 
