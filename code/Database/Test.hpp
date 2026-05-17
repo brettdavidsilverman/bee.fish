@@ -1631,31 +1631,24 @@ assert(success);
             BString key;
             {
                 int i = 0;
-                Iterable<BString> iterable(root);
+                const Iterable<BString> iterable(root);
+                auto it = iterable.begin();
                 
-                for (auto it = iterable.begin(key); it != iterable.end(); ++it)
+                for (; it != iterable.end(); ++it)
                 {
                     values.push_back(*it);
                     if (++i > 0)
                         break;
                 }
                 
-                /*
-                for (auto value : iterable)
-                {
-                    values.push_back(value);
-                    if (++i > 0)
-                        break;
-                }
-                */
                 assert(values.size() == 1);
                 
-                assert(iterable._stack.size());
+                assert(it._stack.size());
                 
-                key = iterable.toKey();
+                key = it.toKey();
                 
-cerr << "PART KEY: " << key << endl;
                 success = (values.size() == 1);
+
             }
             
             if (success)

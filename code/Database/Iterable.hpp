@@ -19,9 +19,6 @@ class Iterable :
 {
 public:
     PathBase* _path;
-    Stack _stack;
-    Stack _saveStack;
-
 public:
 
     Iterable(const PathBase& path) :
@@ -29,30 +26,24 @@ public:
     {
     }
 
-    Iterable(const Iterable& source) 
+    Iterable(const Iterable& source)
     {
         if (source._path)
             _path = source._path->copy();
-            
-        _stack = source._stack;
-        _saveStack = source._saveStack;
 
     }
-    
+
     Iterable& operator = (const Iterable& source)
     {
         if (source._path)
             _path = source._path->copy();
         else
             _path = nullptr;
-            
-        _stack = source._stack;
-        _saveStack = source._saveStack;
-        
+
         return *this;
     }
-    
-    
+
+
 
     virtual ~Iterable()
     {
@@ -83,46 +74,20 @@ public:
     override
     {
         _path->goLeft();
-        _stack.push_back(0);
     }
 
     virtual void goRight()
     override
     {
         _path->goRight();
-        _stack.push_back(1);
     }
 
     virtual void goUp()
     override
     {
         _path->goUp();
-        _stack.pop_back();
-    }
-    /*
-            virtual void save()
-            override
-            {
-                assert(false);
-                _path->save();
-                _saveStack = _stack;
-            }
-
-            virtual void restore()
-            {
-                _path->restore();
-                _stack = _saveStack;
-            }
-            */
-    BString toData()
-    {
-        return _stack.toData();
     }
 
-    BString toKey()
-    {
-        return toData().toBase64();
-    }
 
 
 public:
@@ -148,12 +113,12 @@ public:
 
         Iterator(const Iterable& iterable) :
             _iterable(&iterable)
-            
+
         {
 
             if (iterable._path) {
                 _path = iterable._path->copy();
-                
+
                 _isEnd = !_path->next<T>(_stack, _item);
             }
         }
@@ -163,6 +128,18 @@ public:
             _path(iterable._path->copy()),
             _stack(stack)
         {
+
+            for (const auto bit : stack)
+            {
+                if (bit == 0 && _path->canGoLeft())
+                    _path->goLeft();
+                else if (bit == 1 && _path->canGoRight())
+                    _path->goRight();
+                else {
+                    throw runtime_error("Invalid iterator stack");
+                }
+            }
+
             _isEnd = !_path->next<T>(_stack, _item);
 
         }
@@ -177,7 +154,7 @@ public:
                 _path = source._path->copy();
             }
         }
-        
+
         Iterator& operator = (const Iterator& source)
         {
             _iterable = source._iterable;
@@ -186,15 +163,15 @@ public:
             _isEnd = source._isEnd;
             if (_path)
                 delete _path;
-                
+
             if (source._path)
                 _path = source._path->copy();
             else
                 _path = nullptr;
-                
+
             return *this;
         }
-        
+
 
         virtual ~Iterator()
         {
@@ -202,6 +179,15 @@ public:
                 delete _path;
         }
 
+        BString toData()
+        {
+            return _stack.toData();
+        }
+
+        BString toKey()
+        {
+            return toData().toBase64();
+        }
 
         // Dereference operator (*)
         reference operator*() const
@@ -286,15 +272,15 @@ public:
 
         ReverseIterator(const Iterable& iterable) :
             _iterable(&iterable)
-            
+
         {
             if (iterable._path) {
                 _path = iterable._path->copy();
-                
+
                 _isEnd = !_path->previous<T>(_stack, _item);
             }
         }
-        
+
         ReverseIterator(const Iterator& source) :
             _iterable(source._iterable),
             _item(source._item),
@@ -304,22 +290,22 @@ public:
             if (source._path)
                 _path = source._path->copy();
         }
-        
+
         ReverseIterator& operator = (const ReverseIterator& source)
         {
             _iterable = source._iterable;
             _item = source._item;
             _stack = source._stack;
             _isEnd = source._isEnd;
-            
+
             if (source._path)
                 _path = source._path->copy();
             else
                 _path = nullptr;
-                
+
             return *this;
         }
-        
+
         virtual ~ReverseIterator()
         {
             if (_path)
@@ -386,17 +372,6 @@ public:
     virtual Iterator begin(const BString& key) const {
 
         Stack stack = Stack::fromData(key.fromBase64());
-        Iterable<T> iterable(*this);
-        for (const auto bit : stack)
-        {
-            if (bit == 0 && iterable.canGoLeft())
-                iterable.goLeft();
-            else if (bit == 1 && canGoRight())
-                iterable.goRight();
-            else {
-                throw runtime_error("Invalid query");
-            }
-        }
 
         return Iterator(*this, stack);
 
