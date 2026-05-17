@@ -12,27 +12,36 @@ using namespace BeeFishDatabase;
     class Iterable
     {
     protected:
-        JSONDatabase& _database;
-        PathBase& _path;
+        JSONDatabase* _database;
+        PathBase* _path;
     public:
 
         Iterable(
             JSONDatabase& database,
             PathBase& path
         ) :
-            _database(database),
-            _path(path)
+            _database(&database),
+            _path(path.copy())
+        {
+        }
+        
+        Iterable(const Iterable& source) :
+            _database(source._database),
+            _path(source._path->copy())
         {
         }
         
         virtual ~Iterable()
         {
+            delete _path;
         }
         
         class Iterator {
         protected:
-            typedef BeeFishDatabase::Iterator<JSONPath::Id> _Iterator;
-            _Iterator _iterator;
+            typedef BeeFishDatabase::Iterable<JSONPath::Id>::Iterator IdIterator;
+            typedef BeeFishDatabase::Iterable<JSONPath::Id> IdIterable;
+            IdIterable* _iterable = nullptr;
+            IdIterator* _iterator = nullptr;
             JSONDatabase* _database = nullptr;
             BString _parentValue;
             BString _value;
@@ -46,53 +55,109 @@ using namespace BeeFishDatabase;
             using pointer           = const BString*;
             using reference         = const BString&;
 
-            Iterator()
-            {
-            }
-            
+
             Iterator(
-                Iterable* iterable
+                const Iterable& iterable
             ) :
-                _iterator(&iterable->_path),
-                _database(&iterable->_database)
+                _iterable(new IdIterable(*iterable._path)),
+                _iterator(new IdIterator(*_iterable)),
+                _database(iterable._database)
             {
                 setValue();
             }
+            
+            Iterator(
+                const Iterator& source
+            )
+            {
+                _iterable = nullptr;
+                    
+                if (source._iterator)
+                    _iterator = new IdIterator(*source._iterator);
+                else
+                    _iterator = nullptr;
+                    
+                _database = source._database;
+                _parentValue = source._parentValue;
+                _value = source._value;
+                _parentPath = source._parentPath;
+                _jsonPath = source._jsonPath;
+                
+            }
+            
+            Iterator() 
+            {
+            }
+            
+            virtual ~Iterator()
+            {
+                if (_iterator)
+                    delete _iterator;
+                    
+                if (_iterable)
+                    delete _iterable;
+            }
+            
+            Iterator& operator = (const Iterator& source)
+            {
+                if (_iterator)
+                    delete _iterator;
+                    
+                if (_iterable)
+                    delete _iterable;
+                    
+                _iterable = nullptr;
+                    
+                if (source._iterator)
+                    _iterator = new IdIterator(*source._iterator);
+                else
+                    _iterator = nullptr;
+                    
+                _database = source._database;
+                _parentValue = source._parentValue;
+                _value = source._value;
+                _parentPath = source._parentPath;
+                _jsonPath = source._jsonPath;
+                
+                 return *this;
+            }
+            
             
             void setValue()
             {
                 
                 
 
-                while (!_iterator._isEnd) {
+                while (!_iterator->_isEnd) {
                     _parentValue = 
-                        toString(_iterator);
+                        toString(*_iterator);
                     _parentPath =
-                        jsonPath(_iterator);
+                        jsonPath(*_iterator);
                         
-                    save();
-                    _Iterator iterator = _iterator;
+                    IdIterator iterator = *_iterator;
+                    assert(!iterator._isEnd);
                     ++iterator;
+                    //assert(!iterator._isEnd);
                     if (!iterator._isEnd) {
                         _value = toString(iterator);
                         _jsonPath = jsonPath(iterator);
-                        if (_value.startsWith(_parentValue))
+                        if (_value.startsWith(_parentValue + BString("/")))
                         {
                             _parentValue = _value;
                             _parentPath = _jsonPath;
-                            _iterator = iterator;
+                            *_iterator = iterator;
                         }
                         else {
                             _value = _parentValue;
                             _jsonPath = _parentPath;
-                            restore();
+                          //  restore();
                             break;
                         }
                     }
                     else {
                         _value = _parentValue;
                         _jsonPath = _parentPath;
-                        restore();
+                       // restore();
                         break;
                     }
                 }
@@ -100,25 +165,23 @@ using namespace BeeFishDatabase;
                 
             }
             
-            BString toString(_Iterator& iterator) 
+            BString toString(IdIterator& iterator) 
             {
                 
                 return jsonPath(iterator).toString();
-
             }
             
-            JSONPath jsonPath(_Iterator& iterator)
+            JSONPath jsonPath(IdIterator& iterator)
             {
                 Path path = _database->objects()[*iterator];
-                assert(path.hasData());
+                
                 Index index = path.getData<Index>();
                 
-                JSONPath json(
+                return JSONPath(
                     *_database,
                     index
                 );
                 
-                return json;
                 
             }
             
@@ -140,8 +203,9 @@ using namespace BeeFishDatabase;
 
             // Prefix increment operator (++)
             Iterator& operator++() {
-                assert(!_iterator._isEnd);
-                ++_iterator;
+                assert(_iterator);
+                assert(!_iterator->_isEnd);
+                ++(*_iterator);
                 setValue();
                 return *this;
             }
@@ -149,13 +213,13 @@ using namespace BeeFishDatabase;
             // Postfix increment operator (++)
             Iterator operator++(int) 
             {
-                assert(!_iterator._isEnd);
+                assert(!_iterator->_isEnd);
                 Iterator tmp = *this;
                 
                 ++(*this);
                 return tmp;
             }
-            
+/*
             void save()
             {
                 _iterator.save();
@@ -165,33 +229,57 @@ using namespace BeeFishDatabase;
             {
                 _iterator.restore();
             }
-
+*/
             friend bool operator == (
                 const Iterator& a,
                 const Iterator& b
             )
             {
-                return  (a._iterator == b._iterator);
+                bool aIsEnd = true;
+                bool bIsEnd = true;
+                
+                if (a._iterator)
+                    aIsEnd = a._iterator->_isEnd;
+                    
+                if (b._iterator)
+                    bIsEnd = b._iterator->_isEnd;
+                    
+                return aIsEnd == bIsEnd;
             }
             
             friend bool operator != (
                 const Iterator& a,
                 const Iterator& b
             )
-            { 
-                return (a._iterator != b._iterator);
+            {
+
+                bool aIsEnd = true;
+                bool bIsEnd = true;
+                
+                if (a._iterator)
+                    aIsEnd = a._iterator->_isEnd;
+                    
+                if (b._iterator)
+                    bIsEnd = b._iterator->_isEnd;
+                    
+                return aIsEnd != bIsEnd;
             }
 
         
         };
         
         
-        class ReversePathIterator {
+        class ReverseIterator {
         protected:
-            BeeFishDatabase::ReverseIterator<JSONPath::Id> _iterator;
-            
+            typedef BeeFishDatabase::Iterable<JSONPath::Id>::ReverseIterator IdIterator;
+            typedef BeeFishDatabase::Iterable<JSONPath::Id> IdIterable;
+            IdIterable* _iterable = nullptr;
+            IdIterator* _iterator = nullptr;
+            JSONDatabase* _database;
+            BString _parentValue;
             BString _value;
-            
+            JSONPath _parentPath;
+            JSONPath _jsonPath;
         public:
             // Iterator traits (required for STL compatibility in C++17 and earlier)
             using iterator_category = std::forward_iterator_tag;
@@ -201,13 +289,132 @@ using namespace BeeFishDatabase;
             using reference         = const BString&;
 
             // Constructor
-            ReversePathIterator() {
+            ReverseIterator(
+                const Iterable& iterable
+            ) :
+                _iterable(new IdIterable(*iterable._path)),
+                _iterator(new IdIterator(*_iterable)),
+                _database(iterable._database)
+            {
+                setValue();
             }
             
-            ReversePathIterator(Iterable* iterable) :
-                _iterator(&iterable->_path)
+            ReverseIterator()
             {
+            }
             
+            ReverseIterator(
+                const ReverseIterator& source
+            )
+            {
+                _iterable = nullptr;
+                    
+                if (source._iterator)
+                    _iterator = new IdIterator(*source._iterator);
+                else
+                    _iterator = nullptr;
+                    
+                _database = source._database;
+                _parentValue = source._parentValue;
+                _value = source._value;
+                _parentPath = source._parentPath;
+                _jsonPath = source._jsonPath;
+                
+            }
+            
+            virtual ~ReverseIterator()
+            {
+                if (_iterator)
+                    delete _iterator;
+                    
+                if (_iterable)
+                    delete _iterable;
+            }
+            
+            ReverseIterator& operator = (const ReverseIterator& source)
+            {
+                if (_iterator)
+                    delete _iterator;
+                    
+                if (_iterable)
+                    delete _iterable;
+                    
+                _iterable = nullptr;
+                    
+                if (source._iterator)
+                    _iterator = new IdIterator(*source._iterator);
+                else
+                    _iterator = nullptr;
+                    
+                _database = source._database;
+                _parentValue = source._parentValue;
+                _value = source._value;
+                _parentPath = source._parentPath;
+                _jsonPath = source._jsonPath;
+                
+                 return *this;
+            }
+            
+            void setValue()
+            {
+                
+                
+
+                while (!_iterator->_isEnd) {
+                    _parentValue = 
+                        toString(*_iterator);
+                    _parentPath =
+                        jsonPath(*_iterator);
+                        
+                   // save();
+                    IdIterator iterator = *_iterator;
+                    ++iterator;
+                    if (!iterator._isEnd) {
+                        _value = toString(iterator);
+                        _jsonPath = jsonPath(iterator);
+                        if (_parentValue.startsWith(_value))
+                        {
+                            _parentValue = _value;
+                            _parentPath = _jsonPath;
+                            *_iterator = iterator;
+                        }
+                        else {
+                            _value = _parentValue;
+                            _jsonPath = _parentPath;
+                          //  restore();
+                            break;
+                        }
+                    }
+                    else {
+                        _value = _parentValue;
+                        _jsonPath = _parentPath;
+                       // restore();
+                        break;
+                    }
+                }
+                
+                
+            }
+            
+            BString toString(IdIterator& iterator) 
+            {
+                
+                return jsonPath(iterator).toString() + BString("/");
+
+            }
+            
+            JSONPath jsonPath(IdIterator& iterator)
+            {
+                Path path = _database->objects()[*iterator];
+                
+                Index index = path.getData<Index>();
+                
+                return JSONPath(
+                    *_database,
+                    index
+                );
+                
+                
             }
             
             // Dereference operator (*)
@@ -223,61 +430,80 @@ using namespace BeeFishDatabase;
             }
 
             // Prefix increment operator (++)
-            ReversePathIterator& operator++() 
+            ReverseIterator& operator++() 
             {
-                assert(!_iterator._isEnd);
-                ++_iterator;
+                assert(!_iterator->_isEnd);
+                ++(*_iterator);
                 return *this;
             }
 
             // Postfix increment operator (++)
-            ReversePathIterator operator++(int) {
-                ReversePathIterator tmp = *this;
+            ReverseIterator operator++(int) {
+                ReverseIterator tmp = *this;
                 ++(*this);
                 return tmp;
             }
 
             friend bool operator == (
-                const ReversePathIterator& a,
-                const ReversePathIterator& b
+                const ReverseIterator& a,
+                const ReverseIterator& b
             )
             {
-                return  (a._iterator == b._iterator);
+                bool aIsEnd = true;
+                bool bIsEnd = true;
+                
+                if (a._iterator)
+                    aIsEnd = a._iterator->_isEnd;
+                    
+                if (b._iterator)
+                    bIsEnd = b._iterator->_isEnd;
+                    
+                return aIsEnd == bIsEnd;
             }
             
             friend bool operator != (
-                const ReversePathIterator& a,
-                const ReversePathIterator& b
+                const ReverseIterator& a,
+                const ReverseIterator& b
             )
-            { 
-                return (a._iterator != b._iterator);
+            {
+
+                bool aIsEnd = true;
+                bool bIsEnd = true;
+                
+                if (a._iterator)
+                    aIsEnd = a._iterator->_isEnd;
+                    
+                if (b._iterator)
+                    bIsEnd = b._iterator->_isEnd;
+                    
+                return aIsEnd != bIsEnd;
             }
+            
 
         
         };
    
         virtual Iterator begin() 
         {
-            return Iterator(this);
+            return Iterator(*this);
         }
     
         // Points one past the last element
         Iterator end()
-        { 
-            Iterator iterator;
-            return iterator;
+        {
+            return Iterator();
         }
         
-        virtual ReversePathIterator rbegin() 
+        
+        virtual ReverseIterator rbegin() 
         {
-            return ReversePathIterator(this);
+            return ReverseIterator(*this);
         }
     
         // Points one past the last element
-        ReversePathIterator rend()
+        ReverseIterator rend()
         { 
-            ReversePathIterator iterator;
-            return iterator;
+            return ReverseIterator();
         }
         
     };

@@ -1,0 +1,14 @@
+==124114== Memcheck, a memory error detector
+==124114== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==124114== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==124114== Command: ../../build/query -test
+==124114== Parent PID: 124113
+==124114== 
+==124114== 
+==124114== HEAP SUMMARY:
+==124114==     in use at exit: 0 bytes in 0 blocks
+==124114==   total heap usage: 46,834 allocs, 46,834 frees, 5,972,466 bytes allocated
+==124114== 
+==124114== All heap blocks were freed -- no leaks are possible
+==124114== 
+==124114== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

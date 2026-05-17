@@ -15,36 +15,45 @@ using namespace BeeFishDatabase;
     protected:
         PathBase* _a;
         PathBase* _b;
-        PathBase* _bounds;
         
     public:
 
         AndPath( 
             PathBase* a,
-            PathBase* b,
-            PathBase* bounds
+            PathBase* b
         ) :
             _a(a),
-            _b(b),
-            _bounds(bounds)
+            _b(b)
         {
         }
+        
+        AndPath(const AndPath& source) :
+            _a(source._a->copy()),
+            _b(source._b->copy())
+        {
+        }
+            
    
         virtual ~AndPath()
         {
             delete _a;
             delete _b;
-            delete _bounds;
         }
         
+        
+        virtual PathBase* copy() const
+        override
+        {
+            return new AndPath(*this);
+                
+        }
         
         virtual bool canGoLeft() const
         override
         {
             return
                 _a->canGoLeft() and
-                _b->canGoLeft() and
-                _bounds->canGoLeft();
+                _b->canGoLeft();
         }
         
         virtual bool canGoRight() const
@@ -52,8 +61,7 @@ using namespace BeeFishDatabase;
         {
             return
                 _a->canGoRight() and
-                _b->canGoRight() and
-                _bounds->canGoRight();
+                _b->canGoRight();
         }
         
         virtual void goLeft()
@@ -61,7 +69,6 @@ using namespace BeeFishDatabase;
         {
             _a->goLeft();
             _b->goLeft();
-            _bounds->goLeft();
     
         }
         
@@ -70,7 +77,6 @@ using namespace BeeFishDatabase;
         {
             _a->goRight();
             _b->goRight();
-            _bounds->goRight();
         }
         
         virtual void goUp()
@@ -78,9 +84,8 @@ using namespace BeeFishDatabase;
         {
             _a->goUp();
             _b->goUp();
-            _bounds->goUp();
         }
-
+/*
         virtual void save()
         override
         {
@@ -96,7 +101,7 @@ using namespace BeeFishDatabase;
             _b->restore();
             _bounds->restore();
         }
-    
+    */
     };
 
 }

@@ -17,8 +17,6 @@ using namespace BeeFishDatabase;
         PathBase* _bounds;
         Stack _stack;
         Index _depth = 0;
-        Stack _saveStack;
-        Index _saveDepth;
         
     public:
 
@@ -32,11 +30,27 @@ using namespace BeeFishDatabase;
         
             
         }
+        
+        NotPath(const NotPath& source) :
+            _path(source._path->copy()),
+            _bounds(source._bounds->copy()),
+            _stack(source._stack),
+            _depth(source._depth)
+        {
+        }
    
         virtual ~NotPath()
         {
             delete _path;
             delete _bounds;
+        }
+        
+        
+        
+        virtual PathBase* copy() const
+        override
+        {
+            return new NotPath(*this);
         }
         
         virtual bool canGoLeft() const
@@ -100,23 +114,6 @@ using namespace BeeFishDatabase;
             
         }
 
-        virtual void save()
-        {
-            _saveStack = _stack;
-            _saveDepth = _depth;
-            _path->save();
-            _bounds->save();
-        }
-        
-        virtual void restore()
-        {
-            _stack = _saveStack;
-            _depth = _saveDepth;
-            _path->restore();
-            _bounds->restore();
-        }
-
-    
     };
 
 }

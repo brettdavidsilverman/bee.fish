@@ -258,8 +258,7 @@ class Expression : public BeeFishParser::Match
             IterableItem* iterable = new IterableItem(
                 new BeeFishQuery::WordPath(
                     expression._words,
-                    _word,
-                    new Path(expression._bounds)
+                    _word
                 ),
                 _word
             );
@@ -451,41 +450,7 @@ class Expression : public BeeFishParser::Match
                     return true;
                 }
             ),
-            /*
-            new Invoke(
-                new BeeFishParser::And(
-                    new BeeFishQuery::Not(),
-                    new Blankspaces(),
-                    _word = new BeeFishQuery::Word
-                ),
-                [expression, this](Match* match)
-                {
-                    new NotItem(
-                        *expression,
-                        _word->value()
-                    );
-                    return true;
-                }
-            ),
-            new Invoke(
-                new BeeFishParser::And(
-                    new BeeFishQuery::Not(),
-                    new Blankspaces(),
-                    new BeeFishParser::Character("("),
-                    _loadOnDemand1 =
-                    new LoadOnDemandExpression(expression),
-                    new BeeFishParser::Character(")")
-                ),
-                [expression, this](Match* match)
-                {
-                    new NotItem(
-                        *expression,
-                        _loadOnDemand1->item()
-                    );
-                    return true;
-                }
-            ),
-            */
+            
             new Invoke(
                 new BeeFishQuery::And(),
                 [expression](Match* match)
@@ -783,8 +748,7 @@ public:
             iterable = new IterableItem(
                 new AndPath(
                     left->_iterable,
-                    right->_iterable,
-                    new Path(_bounds)
+                    right->_iterable
                 ),
                 text
             );
@@ -802,8 +766,7 @@ public:
             iterable = new IterableItem(
                 new OrPath(
                     left->_iterable,
-                    right->_iterable,
-                    new Path(_bounds)
+                    right->_iterable
                 ),
                 text
             );
@@ -819,7 +782,7 @@ public:
             
     }
     
-    PathBase* getPath()
+    AndPath getPath()
     {
 
         assert(_stack.size() == 1);
@@ -832,7 +795,10 @@ public:
             (IterableItem*)
             _stack[_stack.size() - 1];
             
-        return item->_iterable;
+        return AndPath(
+            item->_iterable->copy(),
+            new Path(_bounds)
+        );
         
     }
             

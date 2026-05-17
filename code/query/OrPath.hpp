@@ -15,31 +15,39 @@ using namespace BeeFishDatabase;
     protected:
         PathBase* _a;
         PathBase* _b;
-        PathBase* _bounds;
 
         Index _aDepth = 0;
         Index _bDepth = 0;
-        
-        Index _saveADepth = 0;
-        Index _saveBDepth = 0;
-        
+    
     public:
 
         OrPath(
             PathBase* a,
-            PathBase* b,
-            PathBase* bounds
+            PathBase* b
         ) :
             _a(a),
-            _b(b),
-            _bounds(bounds)
+            _b(b)
+        {
+        }
+        
+        OrPath(const OrPath& source) :
+            _a(source._a->copy()),
+            _b(source._b->copy()),
+            _aDepth(source._aDepth),
+            _bDepth(source._bDepth)
         {
         }
         
         virtual ~OrPath() {
             delete _a;
             delete _b;
-            delete _bounds;
+        }
+        
+        virtual PathBase* copy() const
+        override
+        {
+            return new OrPath(*this);
+                
         }
    
         
@@ -53,7 +61,7 @@ using namespace BeeFishDatabase;
                 or
                 (_bDepth >= _aDepth and 
                 _b->canGoLeft())
-            ) and _bounds->canGoLeft();
+            );
         }
         
         virtual bool canGoRight() const
@@ -66,7 +74,7 @@ using namespace BeeFishDatabase;
                 or
                 (_bDepth >= _aDepth and
                  _b->canGoRight())
-            ) and _bounds->canGoRight();
+            );
         }
         
         virtual void goLeft()
@@ -97,9 +105,7 @@ using namespace BeeFishDatabase;
             if (incrementB)
                 ++_bDepth;
                 
-                
-            _bounds->goLeft();
-                
+            
         }
         
         
@@ -131,7 +137,6 @@ using namespace BeeFishDatabase;
             if (incrementB)
                 ++_bDepth;
                 
-            _bounds->goRight();
         }
 
         virtual void goUp()
@@ -158,11 +163,11 @@ using namespace BeeFishDatabase;
             }
             else
                 assert(false);
-                
-            _bounds->goUp();
+            
             
         }
         
+/*
         virtual void save()
         override
         {
@@ -188,7 +193,7 @@ using namespace BeeFishDatabase;
             _bounds->restore();
             
         }
-        
+*/
     
     };
 

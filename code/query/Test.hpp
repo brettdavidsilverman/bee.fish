@@ -512,8 +512,6 @@ namespace BeeFishQuery {
         JSONDatabase db;
         Words words(db);
         words = words["words"];
-        Path bounds = db;
-        bounds = bounds["bounds"];
         JSONPath::Id ids[5];
         
 #ifdef JSON_INDEX
@@ -533,23 +531,17 @@ namespace BeeFishQuery {
         words["two"][ids[3]];
         words["two"][ids[4]];
         
-        for (auto id : ids)
-            bounds[id];
-            
         JSONDatabase dbReadOnly(db.filename(), true);
         
         words = dbReadOnly;
         words = words["words"];
-        bounds = dbReadOnly;
-        bounds = bounds["bounds"];
-        
+
         Path one = words["one"];
         Path two = words["two"];
         
         AndPath andPath(
             new Path(one),
-            new Path(two),
-            new Path(bounds)
+            new Path(two)
         );
         
         
@@ -568,8 +560,8 @@ namespace BeeFishQuery {
         if (ok) 
         {
             Stack stack;
-            andPath.save();
-            bool result = andPath.goToMin(stack);
+            AndPath copy = andPath;
+            bool result = copy.goToMin(stack);
             
             ok = ok &&
                 testResult(
@@ -577,7 +569,7 @@ namespace BeeFishQuery {
                     result
                 );
                 
-            andPath.restore();
+
         }
         
             
@@ -627,9 +619,7 @@ namespace BeeFishQuery {
         JSONDatabase db;
         Words words(db);
         words = words["words"];
-        Path bounds = db;
-        bounds = bounds["bounds"];
-        
+
         JSONPath::Id ids[3];
         
 #ifdef JSON_INDEX
@@ -644,24 +634,17 @@ namespace BeeFishQuery {
         
         
         
-        for (auto id : ids)
-            bounds[id];
-            
-                
         JSONDatabase dbReadOnly(db.filename(), true);
         words = dbReadOnly;
         words = words["words"];
-        bounds = dbReadOnly;
-        bounds = bounds["bounds"];
-
+    
         Path one = words["one"];
         Path two = words["two"];
         Path three = words["three"];
         
         OrPath orPath(
             new Path(one),
-            new Path(three),
-            new Path(bounds)
+            new Path(three)
         );
         
         
@@ -695,9 +678,10 @@ namespace BeeFishQuery {
         if (ok) 
         {
             Stack stack;
-            orPath.save();
+        
+            OrPath copy = orPath;
 
-            bool result = orPath.next(stack);
+            bool result = copy.next(stack);
             JSONPath::Id  value;
             stack.reset();
             stack >> value;
@@ -717,7 +701,7 @@ namespace BeeFishQuery {
                 
                 
             if (ok) {
-                result = orPath.next(stack);
+                result = copy.next(stack);
                 stack.reset();
                 ok = ok &&
                     testResult(
@@ -740,7 +724,7 @@ namespace BeeFishQuery {
     
             if (ok) {
         
-                result = orPath.next(stack);
+                result = copy.next(stack);
 
                 ok = ok &&
                     testResult(
@@ -750,7 +734,7 @@ namespace BeeFishQuery {
                     
             }
             
-            orPath.restore();
+    
         }
         
         if (ok)
@@ -853,8 +837,7 @@ namespace BeeFishQuery {
         if (ok) 
         {
             Stack stack;
-            notPath.save();
-
+    
             bool result = notPath.next(stack);
             stack.reset();
             JSONPath::Id  value;
@@ -885,7 +868,6 @@ namespace BeeFishQuery {
                     
             }
             
-            notPath.restore();
         }
         
         if (ok)
@@ -983,12 +965,12 @@ namespace BeeFishQuery {
             {
                 std::vector<JSONPath::Id> values;
                 
-                PathBase* path =
+                AndPath path =
                     expression
                     .getPath();
                 
                 BeeFishDatabase::Iterable<JSONPath::Id>
-                    iterable(*path);
+                    iterable(path);
                     
                 for (auto value : iterable)
                 {
@@ -1120,11 +1102,11 @@ namespace BeeFishQuery {
             {
                 cout << ": " << expression << "..." << flush;
                 
-                PathBase* pathBase =
+                AndPath pathBase =
                     expression
                     .getPath();
                 
-                BeeFishQuery::Iterable iterable(db, *pathBase);
+                BeeFishQuery::Iterable iterable(db, pathBase);
                 
                 for (auto value : iterable)
                 {

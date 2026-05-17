@@ -65,7 +65,7 @@ int main(int argc, const char* argv[]) {
     [&database, display](Expression& expression)
     {
     
-        PathBase* path =
+        AndPath path =
             expression
             .getPath();
             
@@ -74,7 +74,7 @@ int main(int argc, const char* argv[]) {
         BeeFishQuery::Iterable
             jsonMatches(
                 database,
-                *path
+                path
             );
             
         for (auto string : jsonMatches)
