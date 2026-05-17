@@ -540,8 +540,8 @@ namespace BeeFishQuery {
         Path two = words["two"];
         
         AndPath andPath(
-            new Path(one),
-            new Path(two)
+            one,
+            two
         );
         
         
@@ -643,8 +643,8 @@ namespace BeeFishQuery {
         Path three = words["three"];
         
         OrPath orPath(
-            new Path(one),
-            new Path(three)
+            one,
+            three
         );
         
         
@@ -814,8 +814,8 @@ namespace BeeFishQuery {
         Path three = words["three"];
         
         NotPath notPath(
-            new Path(one),
-            new Path(bounds)
+            one,
+            bounds
         );
         
         
@@ -898,11 +898,11 @@ namespace BeeFishQuery {
         if (ok)
         {
             NotPath notNotPath(
-                new NotPath(
-                    new Path(one),
-                    new Path(bounds)
+                NotPath(
+                    one,
+                    bounds
                 ),
-                new Path(bounds)
+                bounds
             );
         
             if (ok)

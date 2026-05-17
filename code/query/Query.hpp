@@ -688,15 +688,15 @@ public:
                 IterableItem* item
                 = new IterableItem(
                     new NotPath(
-                        right->_iterable,
-                        new Path(_bounds)
+                        *right->_iterable,
+                        _bounds
                     ),
                     BString("not ") +
                     right->_text
                 );
                 
-                right->_iterable = nullptr;
                 delete right;
+                
                 right = item;
                 
                 if (_stack.size() == 0)
@@ -747,8 +747,8 @@ public:
                  
             iterable = new IterableItem(
                 new AndPath(
-                    left->_iterable,
-                    right->_iterable
+                    *left->_iterable,
+                    *right->_iterable
                 ),
                 text
             );
@@ -765,16 +765,13 @@ public:
                  
             iterable = new IterableItem(
                 new OrPath(
-                    left->_iterable,
-                    right->_iterable
+                    *left->_iterable,
+                    *right->_iterable
                 ),
                 text
             );
         }
-        
-        left->_iterable = nullptr;
-        right->_iterable = nullptr;
-        
+
         delete left;
         delete right;
             
@@ -796,8 +793,8 @@ public:
             _stack[_stack.size() - 1];
             
         return AndPath(
-            item->_iterable->copy(),
-            new Path(_bounds)
+            *item->_iterable,
+            _bounds
         );
         
     }

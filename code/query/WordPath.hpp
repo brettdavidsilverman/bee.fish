@@ -94,23 +94,7 @@ using namespace BeeFishDatabase;
         {
             _a->goUp();
         }
-/*
-        virtual void save()
-        override
-        {
-            if (_a)
-                _a->save();
-            _bounds->save();
-        }
-        
-        virtual void restore()
-        override
-        {
-            if (_a)
-                _a->restore();
-            _bounds->restore();
-        }
-    */
+
     };
 
 }

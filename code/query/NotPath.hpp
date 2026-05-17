@@ -21,11 +21,11 @@ using namespace BeeFishDatabase;
     public:
 
         NotPath(
-            PathBase* path,
-            PathBase* bounds
+            const PathBase& path,
+            const PathBase& bounds
         ) :
-            _path(path),
-            _bounds(bounds)
+            _path(path.copy()),
+            _bounds(bounds.copy())
         {
         
             

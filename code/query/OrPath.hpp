@@ -22,11 +22,11 @@ using namespace BeeFishDatabase;
     public:
 
         OrPath(
-            PathBase* a,
-            PathBase* b
+            const PathBase& a,
+            const PathBase& b
         ) :
-            _a(a),
-            _b(b)
+            _a(a.copy()),
+            _b(b.copy())
         {
         }
         
