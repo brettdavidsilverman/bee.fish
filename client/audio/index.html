@@ -56,6 +56,15 @@
 class Processor extends
     AudioWorkletProcessor
 {
+    f(i) {
+        var sin = Math.sin(this.phase);
+                    
+        this.phase += 
+            (2 * Math.PI * this.frequency)
+            / this.sampleRate;
+            
+        return sin;
+    }
     
     process(inputs, outputs, parameters) {
         
@@ -74,12 +83,10 @@ class Processor extends
                  ++i
                 ) 
             {
-                channelOutput[i] =
-                    Math.sin(this.phase);
-                    
-                this.phase += 
-                    (2 * Math.PI * this.frequency)
-                    / this.sampleRate;
+                var f = this.f(i);
+                channelOutput[i] = f;
+                if (i % 1000 === 0)
+                    this.port.postMessage(f);
             }
         }
         return true;
@@ -88,15 +95,17 @@ class Processor extends
     constructor() {
         super();
         this.phase = 0;
-        this.sampleRate = 44100;
-        this.frequency = 220;
+        var self = this;
+        this.port.onmessage =
+        (event) => {
+            Object.assign(self, event.data)
+        };
     }
     
 
 }
 
 registerProcessor('processor', Processor);
-
             </textarea>
             <div>
                 <div id="setup"></div>
@@ -109,10 +118,7 @@ registerProcessor('processor', Processor);
 var console = new Console();
 console.log("Hello world");
 
-const audioContext = new AudioContext({
-    sampleRate: 44100
-});
-
+var audioContext;
 var processor;
 var analyser
 
@@ -120,25 +126,33 @@ var initialSetup = false;
 
 async function setup() {
     
+    if (audioContext)
+        await audioContext.close();
+        
+    audioContext = new AudioContext({
+        sampleRate: 44100
+    });
+    
+    audioContext.suspend();
+
+    
     await audioContext
         .audioWorklet
         .addModule('processor');
         
-    processor = 
+    processor = await
         new AudioWorkletNode(
             audioContext, 
             'processor'
         );
-        /*
-  
-    processor.port.postMessage(
-        {
-            frequency: 220,
-            sampleRate: 44100
-        }
-    );
+        
+    
+    
+    processor.port.onmessage = (event) => {
+        console.log(event.data);
+    }
 
-*/
+
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 4096; // Small size for faster, less detailed data
     processor.connect(analyser);
@@ -276,8 +290,12 @@ processorTextArea.focus();
 
 document.getElementById("setup")
     .onclick =
-    (event) => {
-        setup();
+    async (event) => {
+        
+        processor.port.postMessage({
+            sampleRate: audioContext.sampleRate,
+            frequency: Number(prompt("Frequency?"))
+        });
     }
           
 document.getElementById("start")

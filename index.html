@@ -300,18 +300,7 @@ saveButton.onclick = async function() {
     
     var json = editor.value;
     var path = pathInput.value;
-    
-    if (contentType.value.startsWith("application/json"))
-    {
-        try {
-            var test = formatJSON(json);
-        }
-        catch (error) {
-            throw new Error(error, "saveButton.onclick");
-        }
-    }
-    
-    
+
     localStorage.setItem("contentType", contentType.value);
     await uploadData(path, editor.value, contentType.value, editor.value.length);
 };
