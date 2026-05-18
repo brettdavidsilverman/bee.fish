@@ -228,7 +228,7 @@ using namespace BeeFishWeb;
                                     BString(";base64,") +
                                     data.toBase64();
                                     
-                                assert(base64.startsWith("data:"));
+                                assert(base64.isData());
                                 ++pageIndex;
                                 content[pageIndex].setString(base64);
     cerr << "POSTED PAGE " 

@@ -98,7 +98,8 @@ class Processor extends
         var self = this;
         this.port.onmessage =
         (event) => {
-            Object.assign(self, event.data)
+            Object.assign(self, event.data);
+            self.phase = 0;
         };
     }
     

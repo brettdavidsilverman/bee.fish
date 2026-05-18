@@ -153,29 +153,7 @@ namespace BeeFishHTTPS {
             );
             
             return filePath;
-            /*
-cerr << "getFilePath fullWebRequestPath: " <<  fullWebRequestPath << endl;
-                
-            if (is_directory(filePath))
-            {
-                try
-                {
-                    BString indexPath =
-                        fullWebRequestPath +
-                        BString("/index.html");
-
-                    filePath =
-                        canonical(
-                            path(indexPath.str())
-                        );
-                }
-                catch(filesystem_error& err)
-                {
-                }
-            }
             
-            return filePath;
-*/
         }
         
         // Defined in session.h

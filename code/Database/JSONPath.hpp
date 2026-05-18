@@ -1209,10 +1209,6 @@ public:
                         out,
                         _tabCount
                     );
-if (item.type() == Type::STRING && item.getString().isData())
-{
-   // assert(false);
-}
                 }
 
                 if (index < count)
