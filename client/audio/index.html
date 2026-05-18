@@ -90,11 +90,6 @@ class Processor extends
         this.phase = 0;
         this.sampleRate = 44100;
         this.frequency = 220;
-        var self = this;
-        this.port.onmessage =
-            (event) => {
-                Object.assign(self, event.data);
-            }
     }
     
 
@@ -134,7 +129,8 @@ async function setup() {
             audioContext, 
             'processor'
         );
-        
+        /*
+  
     processor.port.postMessage(
         {
             frequency: 220,
@@ -142,6 +138,7 @@ async function setup() {
         }
     );
 
+*/
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 4096; // Small size for faster, less detailed data
     processor.connect(analyser);
@@ -230,7 +227,7 @@ async function  saveProcessor(event) {
     
     var path = document.location.origin +
         document.location.pathname +
-        "processor/{HTTP}";
+        "processor";
 
     var parameters = {
         mode: "cors",
