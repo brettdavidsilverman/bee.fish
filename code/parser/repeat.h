@@ -55,8 +55,6 @@ namespace BeeFishParser
 
 			if (_item->result() == true)
 			{
-                //matched = true;
-
 				matchedItem(_item);
 
 				if (_maximum > 0)
@@ -70,7 +68,10 @@ namespace BeeFishParser
 					  fail();
 				   }
                 }
-              
+                
+                if (_item)
+                    delete _item;
+
                 _item = createItem();
                 
 
@@ -94,8 +95,7 @@ namespace BeeFishParser
 		virtual void matchedItem(T *match)
 		{
             ++_matchedCount;
-			delete match;
-            _item = nullptr;
+			
 		}
         
         virtual size_t matchedCount() const
@@ -104,9 +104,6 @@ namespace BeeFishParser
 		}
 
 		virtual T* createItem() {
-            
-            if (_item)
-                delete _item;
 
 			T* item = new T();
             
@@ -141,10 +138,7 @@ namespace BeeFishParser
         virtual void eof(Parser* parser) {
 
             setup(parser);
-            /*
-            if (result() != nullopt)
-                return;
-                */
+
             if (_item && _item->result() == nullopt)
             {
                 _item->eof(parser);

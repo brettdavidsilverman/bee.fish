@@ -83,7 +83,8 @@ namespace BeeFishJSON
       // virtual void onvalue(JSON* json);
         
     public:
-        JSON() : Match()
+        JSON() :
+            Match()
         {
             _undefined = new Undefined();
 
@@ -119,12 +120,6 @@ namespace BeeFishJSON
             );
             
         }
-        /*
-        virtual void setup(Parser* parser)
-        override{
-            assert(false);
-        }
-*/
 
         virtual ~JSON()
         {

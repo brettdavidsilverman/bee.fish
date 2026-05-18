@@ -790,7 +790,7 @@ inline bool testEscape()
     bool ok = true;
     
     stringstream stream;
-    for (int i = 0; i < 256; ++i)
+    for (unsigned int i = 0; i < 256; ++i)
     {
         stream << (char)i;
     }
@@ -800,10 +800,10 @@ inline bool testEscape()
     BString escaped = data.escape();
     BString unescaped = escaped.unescape();
 
-    for (int i = 0; i < 256; ++i)
+    for (unsigned int i = 0; i < 256; ++i)
     {
         char c = unescaped[i];
-        if ((int)(unsigned char)c != i)
+        if ((unsigned char)c != i)
         {
             ok = false;
             break;

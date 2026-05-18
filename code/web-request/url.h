@@ -367,13 +367,18 @@ namespace BeeFishWeb {
         {
             BString string = origin();
             
-            string += path();
+            BString path = URL::path();
+            
+            string += path;
             
             if (search().matched())
                 string +=
                         BString("?") +
                         search().value();
                         
+            if (string == "")
+                string = "/";
+                
             return string;
         }
         
@@ -420,19 +425,15 @@ namespace BeeFishWeb {
             return emptyPort;
         }
         
-        const BString& path() const
+        BString path() const
         {
             const BString& path = _path->value();
-            return path;
-            /*
+
             if (path.length() > 0) {
-                if (path != "/" && path.endsWith('/'))
-                    return path.substr(0, path.length() - 1);
                 return path;
             }
-            
-            return "/";
-            */
+            else
+                return "/";
                 
         }
         
@@ -444,11 +445,10 @@ namespace BeeFishWeb {
             if (path.length())
                 path = path.substr(1);
             
-            
             if (path.endsWith("/"))
                 path = path.substr(0, path.length() - 1);
             
-            if (path.length() == 0)
+            if (path == "")
                 return vector<BString>();
                 
             vector<BString> paths = path.split('/');

@@ -9,7 +9,7 @@ namespace BeeFishHTTPS {
 
     class Session;
     
-    typedef std::multimap<string, BString>
+    typedef std::multimap<BString, BString>
         ResponseHeadersBase;
     
     class ResponseHeaders :
@@ -19,18 +19,18 @@ namespace BeeFishHTTPS {
         // Defined in session.h
         ResponseHeaders(Session* session);
         
-        void replace(string key, BString value)
+        void replace(const BString& key, const BString& value)
         {
             erase(key);
             emplace(key, value);
         }
         
-        bool contains(string key) const
+        bool contains(const BString& key) const
         {
             return count(key) > 0;
         }
         
-        BString operator[] (string key) const
+        BString operator[] (const BString& key) const
         {
             BString value;
             
@@ -43,6 +43,24 @@ namespace BeeFishHTTPS {
             }
             
             return value;
+        }
+        
+        friend ostream& operator << (ostream& out, const ResponseHeaders& headers)
+        {
+            out << "{" << endl;
+            
+            for (auto it = headers.cbegin();
+                  it != headers.cend();
+                  ++it)
+            {
+                out << "\t" << it->first << ": "
+                    << it->second
+                    << endl;
+            }
+            
+            out << "}";
+            
+            return out;
         }
         
         

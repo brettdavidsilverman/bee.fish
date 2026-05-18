@@ -430,7 +430,7 @@ public:
         return number;
     }
     
-    void setString(const BString& value)
+    void setString(const BString& value, bool finalPart = true)
     {
         LockFile::ScopedLock lock(database());
         Path path = *this;
@@ -439,9 +439,7 @@ public:
         
         if (_stringPageIndex == 0)
         {
-            
             _indexString = !value.isData();
-            
         }
         else
             assert(!value.isData());
@@ -462,6 +460,9 @@ public:
         
         if (_indexString && indexPart)
             addWords(value, true);
+            
+        if (finalPart)
+            endString();
 
     }
     
@@ -477,10 +478,8 @@ public:
             i <= max;
             ++i)
         {
-assert(false);
             path.clear(i);
         }
-        
         
         _indexString = false;
         _stringPageIndex = 0;
@@ -1165,8 +1164,7 @@ public:
             for (const auto index : iterable)
             {
                 BString string =
-                path[VALUE][index].getStringData();
-
+                    strings[index].getStringData();
                 out << string.escape();
             }
             
@@ -1194,7 +1192,6 @@ public:
 
             for (auto index : arrayIndexes)
             {
-
                 JSONPath item = (*this)[index];
 
                 Index _tabCount = tabCount + 1;
@@ -1212,6 +1209,10 @@ public:
                         out,
                         _tabCount
                     );
+if (item.type() == Type::STRING && item.getString().isData())
+{
+   // assert(false);
+}
                 }
 
                 if (index < count)
@@ -1342,9 +1343,7 @@ public:
         // Postfix increment operator (++)
         Iterator operator++(int) {
             Iterator tmp = *this;
-//Path children = _children;
             ++(*this);
-//tmp._children = _children
             return tmp;
         }
 

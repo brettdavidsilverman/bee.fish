@@ -207,8 +207,7 @@ public:
                 request->search().length())
             return;
 
-        
-        const BString& requestPath = request->path();
+        BString requestPath = request->path();
 
         // Get the file path from the request path
         try
@@ -234,7 +233,7 @@ public:
 
         // Redirect to add trailing slashes
         // to directories
-        if ( redirectDirectories(
+        if (redirectDirectories(
                     *request,
                     _filePath
                 ) )
@@ -249,7 +248,7 @@ public:
                 _filePath =
                     getFilePath(
                         requestPath + 
-                        BString("index.html")
+                        BString("/index.html")
                     );
             }
             catch(filesystem_error& err)
@@ -424,11 +423,9 @@ public:
     bool redirectDirectories(const WebRequest& request, const path& filePath)
     {
         
-        const BString& path =
-               request.path();
+        BString path = request.path();
                
-        if ( is_directory(filePath) &&
-            path != "/" )
+        if ( is_directory(filePath))
         {
 
             if (!path.endsWith("/"))
@@ -440,12 +437,10 @@ public:
 
                 if (search.length())
                     newPath += BString("?") + search;
-
-                if (newPath != path) 
-                {
-                    redirect(newPath, false);
-                    return true;
-                }
+cerr << "REDIRECT PATH " << path << endl;
+cerr << "NEW REDIRECT PATH " << newPath << endl;
+                redirect(newPath, false);
+                return true;
             }
         }
         return false;

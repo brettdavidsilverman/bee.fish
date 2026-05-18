@@ -85,6 +85,7 @@ namespace BeeFishJSON
         
         virtual void onobjectkey(ObjectKey* key)
         {
+
         }
         
         virtual void onobjectvalue(Object* object, ObjectKey* key, JSON* value)
@@ -109,20 +110,29 @@ namespace BeeFishJSON
         virtual void onbeginarray(JSON* match) {
         }
 
-        virtual void onarrayvalue(JSON* match) {
+        virtual void onarrayvalue(JSON* match)
+        {
         }
 
         virtual void onendarray(JSON* match) {
         }
+        
 
-        virtual void onvalue(JSON* json) {
-            
+        virtual void onbeginstring(String* match)
+        {
         }
-        /*
-        virtual bool matched() const {
-            return _match->result() == true;
+        
+        virtual void onpartstring(const BString& partString)
+        {
         }
-        */
+        
+        virtual void onendstring(String* match)
+        {
+        }
+        
+        virtual void onvalue(JSON* json)
+        {
+        }
 
     };
 
@@ -138,6 +148,28 @@ namespace BeeFishJSON
         Match::success();
         
     }
+    
+    // Declared in string.h
+    inline void String::onbeginstring(String* json) {
+        if (_parser->isJSONParser()) {
+            jsonParser()->onbeginstring(this);
+        }
+    }
+    
+    // Declared in string.h
+    inline void String::onpartstring(const BString& partString) {
+        if (_parser->isJSONParser()) {
+            jsonParser()->onpartstring(partString);
+        }
+    }
+    
+    // Declared in string.h
+    inline void String::onendstring(String* json) {
+        if (_parser->isJSONParser()) {
+            jsonParser()->onendstring(this);
+        }
+    }
+    
     
 
     // Declared in object.h

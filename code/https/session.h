@@ -278,7 +278,7 @@ namespace BeeFishHTTPS {
                       << ' '
                       << ipAddress()          << ' '
                       << _request->method()   << ' '
-                      << origin()
+                      << host()
                            << _request->url() << ' '
                       << std::endl;
                       
@@ -491,7 +491,7 @@ namespace BeeFishHTTPS {
         {
             
             // Use url to extract the domain
-            URL url = Session::origin();
+            URL url = Session::host();
             
             BString domain = url.domain();
 
@@ -681,7 +681,8 @@ namespace BeeFishHTTPS {
                 { "access-control-allow-methods", "GET, POST, DELETE, OPTIONS" },
                 { "access-control-allow-headers", "origin, content-type, x-auth-token, authorization" },
                 { "access-control-expose-headers", "x-auth-token" },
-                { "connection", "keep-alive" }
+                { "connection", "keep-alive" },
+                { "keep-alive", "max=5" }
             }
         )
     {

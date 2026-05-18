@@ -77,14 +77,21 @@ namespace BeeFishMisc {
         std::ifstream f1(p1, std::ifstream::binary | std::ifstream::ate);
         std::ifstream f2(p2, std::ifstream::binary | std::ifstream::ate);
 
-        bool equal = true;
         
-        if (f1.fail() || f2.fail()) {
-            // Handle file open errors
-            std::cerr << "Error opening files." << std::endl;
+        // Handle file open errors
+        
+        if (f1.fail()) {
+            std::cerr << "Error opening file " << p1 << std::endl;
+            return false;
+        }
+        
+        if (f2.fail()) {
+            std::cerr << "Error opening file " << p2 << std::endl;
             return false;
         }
 
+        bool equal = true;
+        
         // 1. Check file sizes
         if (f1.tellg() != f2.tellg()) {
             equal = false; // Files have different sizes, so they are different
@@ -117,6 +124,9 @@ namespace BeeFishMisc {
             
             cout << p2 << endl;
             cout << f2.rdbuf() << endl;
+            
+            cout << "Files differ" << endl;
+                cout << "diff " << p1 << " " << p2 << endl;
             
         }
         

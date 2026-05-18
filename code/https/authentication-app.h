@@ -20,9 +20,7 @@ namespace BeeFishHTTPS {
       
          _privileged
          {
-            "/",
             "/authenticate",
-        //    "/index.html",
             "/favicon.ico",
             "/feebee.jpg",
             "/feebee-small.jpg",
@@ -65,7 +63,7 @@ namespace BeeFishHTTPS {
                  return;
          }
 
-         const BString& path = request->path();
+         const BString path = request->path();
          const BString& webMethod = request->method();
          const BString& search = request->search();
          

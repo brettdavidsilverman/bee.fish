@@ -108,7 +108,6 @@ protected:
             return item;
         }
 
-
     };
 
 
@@ -117,7 +116,7 @@ public:
     {
     }
 
-    virtual ~Set()
+    virtual ~Set() 
     {
     }
 

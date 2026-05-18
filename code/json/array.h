@@ -11,85 +11,85 @@ using namespace BeeFishParser;
 using namespace BeeFishPowerEncoding;
 
 namespace BeeFishJSON {
-   
-   class JSON;
-   class JSONParser;
-  
-   class ArrayOpenBrace : public And {
-   public:
-      ArrayOpenBrace() : And(
-         new Character('['),
-         new BlankSpace(0)
-      )
-      {
 
-      }
-   };
+class JSON;
+class JSONParser;
 
-   class ArrayCloseBrace : public And {
-   public:
-      ArrayCloseBrace() : And(
-         new BlankSpace(0),
-         new Character(']')
-      )
-      {
+class ArrayOpenBrace : public And {
+public:
+    ArrayOpenBrace() : And(
+            new Character('['),
+            new BlankSpace(0)
+        )
+    {
 
-      }
-   };
+    }
+};
 
-   class ArraySeperator : public And {
-   public:
-      ArraySeperator() : And(
-         new BlankSpace(0),
-         new Character(','),
-         new BlankSpace(0)
-      )
-      {
+class ArrayCloseBrace : public And {
+public:
+    ArrayCloseBrace() : And(
+            new BlankSpace(0),
+            new Character(']')
+        )
+    {
 
-      }
-   };
-   
-   typedef LoadOnDemand<JSON> ArrayValue;
-   
-   class Array : public Set<ArrayOpenBrace, ArrayValue, ArraySeperator, ArrayCloseBrace>
-   {
-   public:
-      size_t _size = 0;
+    }
+};
 
-   public:
-      Array() : Set()
-      {
-      }
-      
-      
-      virtual ~Array()
-      {
-      }
-      
-      // Defined in json-parser.h
-      virtual void onbeginset(Match* match);
+class ArraySeperator : public And {
+public:
+    ArraySeperator() : And(
+            new BlankSpace(0),
+            new Character(','),
+            new BlankSpace(0)
+        )
+    {
 
-      // Defined in json-parser.h
-      virtual void onarrayvalue(JSON* match);
-      
-      // Defined in json-parser.h
-      virtual void onendset(Match* match);
+    }
+};
 
-      BeeFishJSON::JSONParser* jsonParser() {
-         return (BeeFishJSON::JSONParser*)_parser;
-      }
-      
-      virtual void onsetvalue(ArrayValue* match)
-      override
-      {
-         JSON* json = (JSON*)(match->_match);
-         assert(json);
-         onarrayvalue(json);
-      }
-      
+typedef LoadOnDemand<JSON> ArrayValue;
 
-   };
-    
+class Array : public Set<ArrayOpenBrace, ArrayValue, ArraySeperator, ArrayCloseBrace>
+{
+public:
+    size_t _size = 0;
+
+public:
+    Array() : Set()
+    {
+    }
+
+
+    virtual ~Array()
+    {
+    }
+
+    // Defined in json-parser.h
+    virtual void onbeginset(Match* match);
+
+    // Defined in json-parser.h
+    virtual void onarrayvalue(JSON* match);
+
+    // Defined in json-parser.h
+    virtual void onendset(Match* match);
+
+    BeeFishJSON::JSONParser* jsonParser() {
+        return (BeeFishJSON::JSONParser*)_parser;
+    }
+
+    virtual void onsetvalue(ArrayValue* match)
+    override
+    {
+        JSON* json = (JSON*)(match->_match);
+        assert(json);
+        onarrayvalue(json);
+    }
+
+
+};
+
 }
 
 #endif

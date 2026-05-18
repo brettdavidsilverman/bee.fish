@@ -1479,10 +1479,7 @@ assert(success);
 
             if (success)
                 remove(tempFile);
-            else {
-                cout << "Files differ" << endl;
-                cout << "diff " << file.string() << " " << tempFile << endl;
-            }
+
  
         }
         
@@ -2467,7 +2464,7 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
             
             JSONPath path = db.origin("https://test");
             ifstream input(TEST_DIRECTORY "/90-Sample.json");
-            JSONPathParser parser(path, cout);
+            JSONPathParser parser(path);
             parser.read(input);
             input.close();
             success = testValue(

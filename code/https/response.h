@@ -19,7 +19,7 @@ namespace BeeFishHTTPS {
 
       Session* _session;
       Size _bytesTransferred = 0;
-      ssize_t _contentLength = 0;
+      Size _contentLength = 0;
       const Size _pageSize = getPageSize();
      // App*      _app = nullptr;
    public:
@@ -69,22 +69,20 @@ namespace BeeFishHTTPS {
                  
             _contentLength = app->contentLength();
 
-
-
-            if (_contentLength == -1) {
+            if (_contentLength == Size(-1)) {
                headers.erase("content-length");
                headers.replace(
                   "transfer-encoding",
                   "chunked"
                );
             }
-            else
+            else {
                headers.replace(
                   "content-length",
                   std::to_string(_contentLength)
                );
-               
-         
+            }
+            
             write(app);
             
             delete app;

@@ -36,7 +36,7 @@ namespace BeeFishHTTPS {
         std::string _content;
         Index _bookmark;
         path    _filePath;
-        SSize _contentLength = 0;
+        Size _contentLength = Size(-1);
         Size _bytesTransferred = 0;
     public:
         App(
@@ -182,7 +182,7 @@ cerr << "getFilePath fullWebRequestPath: " <<  fullWebRequestPath << endl;
         const BString origin() const;
         
 
-        virtual ssize_t contentLength()
+        virtual Size contentLength()
         {
             switch (serve())
             {

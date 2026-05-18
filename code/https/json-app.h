@@ -58,6 +58,7 @@ using namespace BeeFishWeb;
                 request()->url();
                 
             const BString& origin = _session->origin();
+            const BString& host = _session->host();
 
                 /*
             const BString& userId =
@@ -78,7 +79,7 @@ using namespace BeeFishWeb;
             try {
                 jsonPath = JSONPath::fromString(
                     *database,
-                    origin,
+                    host,
                     url,
                     method
                 );
@@ -101,43 +102,43 @@ using namespace BeeFishWeb;
                 _status = 200;
                 return;
             }
-            
-                
-            if (method == "GET") {
+            else if (method == "GET") {
+
                 // Check for HTTP field
-                // This is a special casw for serving
+                // This is a special case for serving
                 // HTTP content
                 if (jsonPath.contains("{HTTP}") &&
                     jsonPath["{HTTP}"].contains("content-type") &&
                     jsonPath["{HTTP}"]["content-type"].type() == Type::STRING)
                 {
+                    
+    
+                    BString contentType = 
+                    jsonPath
+                        ["{HTTP}"]
+                        ["content-type"]
+                        .getString();
+                        
                     _responseHeaders.replace(
                         "content-type",
-                        jsonPath
-                            ["{HTTP}"]
-                            ["content-type"]
-                            .getString()
+                        contentType
                     );
                     
                     if (jsonPath["{HTTP}"].contains("content-length") &&
                         jsonPath["{HTTP}"]["content-length"].type() == Type::INTEGER)
                     {
-                        stringstream stream;
                         _contentLength =
                             jsonPath
                             ["{HTTP}"]
                             ["content-length"]
                             .getInteger();
-                            
-                        stream << _contentLength;
                         
-                        _responseHeaders.replace(
-                            "content-length",
-                            stream.str()
-                        );
                     }
+                    else
+                        _contentLength = -1;
+                        
                     _serve = App::SERVE_HTTP;
-            
+
                 }
                 else {
                     _responseHeaders.replace(
@@ -148,6 +149,7 @@ using namespace BeeFishWeb;
                 }
                 
                 _status = 200;
+                return;
             }
             else if (method == "POST")
             {
@@ -157,62 +159,18 @@ using namespace BeeFishWeb;
                     "application/json; charset=utf-8"
                 );
                 
+                // Save the parent
+                JSONPath parent = jsonPath.parent();
                 
-                std::vector paths = request()->url().paths();
                 BString contentType;
                 if (request()->headers().contains("content-type"))
                     contentType = request()->headers()["content-type"];
                 else
                     contentType = "text/plain; charset=utf-8";
                     
- 
-                if (paths.size() > 0 &&
-                    paths[paths.size() - 1] == "{HTTP}" &&
-                    !contentType.startsWith("application/json"))
+                if (contentType.startsWith("application/json"))
                 {
 
-                    jsonPath.deleteProperty("content");
-                    JSONPath content = jsonPath["content"];
-                    
-                    WebRequest postRequest(false);
-                    BeeFishParser::Parser parser(postRequest);
-                    
-                    Index contentLength = 0;
-                    Size pageIndex = 0;
-                    BString text;
-                    
-                    postRequest.setOnData(
-                        [&pageIndex, &contentLength, &contentType, &content, &text](const BString& data) {
-                            contentLength += data.size();
-                            if (contentType.startsWith("text/"))
-                                text += data;
-                            else {
-                                BString base64 = data.toBase64();
-                                content[++pageIndex].setString(base64, false);
-                            }
-                        }
-                    );
-                    
-                    if (!parseWebRequest(parser)) {
-                        throw std::runtime_error("Invalid input post to json-app.h");
-                    }
-
-                    postRequest.flush();
-
-                    if ( contentLength == 0 )
-                        jsonPath.setUndefined();
-                    else {
-                        jsonPath["content-type"].setString(contentType);
-                        jsonPath["content-length"].setInteger(contentLength);
-                        if (contentType.startsWith("text/"))
-                            jsonPath["content"].setString(text);
-                    }
-
-                }
-                else {
-                    // Save the parent
-                    JSONPath parent = jsonPath.parent();
-                    
                     // Posting JSON, remove {HTTP}
                     jsonPath.deleteProperty("{HTTP}");
                     
@@ -245,15 +203,69 @@ using namespace BeeFishWeb;
                         jsonPath = parent;
                     }
                 }
-                
-                
+                else {
+
+                    JSONPath http = jsonPath["{HTTP}"];
+    
+                    JSONPath content = 
+                        http["content"];
                     
+                    WebRequest postRequest(false);
+                    BeeFishParser::Parser parser(postRequest);
+                    
+                    Index contentLength = 0;
+                    Index pageIndex = 0;
+                    BString text;
+                    
+                    postRequest.setOnData(
+                        [&pageIndex, &contentLength, &contentType, &content, &text](const BString& data) {
+                            contentLength += data.size();
+                            if (contentType.startsWith("text/"))
+                                text += data;
+                            else {
+                                BString base64 = 
+                                    BString("data:") + 
+                                    BString(";base64,") +
+                                    data.toBase64();
+                                    
+                                assert(base64.startsWith("data:"));
+                                ++pageIndex;
+                                content[pageIndex].setString(base64);
+    cerr << "POSTED PAGE " 
+        << pageIndex
+        << " LENGTH "
+        << data.size()
+        << " TOTAL "
+        << contentLength
+        << endl;
+                            }
+                        }
+                    );
+                    
+                    if (!parseWebRequest(parser)) {
+                        throw std::runtime_error("Invalid input post to json-app.h");
+                    }
+
+                    postRequest.flush();
+                    
+                    http["content-type"].setString(contentType);
+                    http["content-length"].setInteger(contentLength);
+                    if (contentType.startsWith("text/"))
+                        http["content"].setString(text);
+                    else
+                        content.truncateArray(pageIndex);
+                    
+                }
+                
                 _content = BString("\"") + jsonPath.toString().escape() + BString("\"");
                 _serve = App::SERVE_CONTENT;
                 _status = 200;
                 _statusText = "ok";
+                return;
                     
             }
+            
+            assert(false);
             
         }
         

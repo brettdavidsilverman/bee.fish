@@ -24,7 +24,7 @@
                     <label for="pathInput">Path</label>
                 </div>
                 <input type="text" id="pathInput"/>
-                <button id="fetchButton" onclick="loadJSON()">Fetch</button>
+                <button id="fetchButton">Fetch</button>
                 <br/>
             </form>
             <br/>
@@ -102,15 +102,14 @@ title.innerText = origin;
 
 fetchButton.disabled = true;
 
-authenticate();
+//authenticate();
 
 async function fetchLines(url, f) {
     var parameters = {
         mode: "cors",
         method: "GET",
         credentials: "include"
-    }    
-console.log("Getting " + url);
+    }
     var response;
     
     try {
@@ -122,12 +121,11 @@ console.log("Getting " + url);
         return;
     }
     
-console.log(response.status);
     if (response.status == 401) // Unauthorised 
     {
-        var json = await response.text();
+        var json = await response.json();
         
-        redirect(JSON.parse(json));
+        redirect(unescape(json));
         return;
     }
     
@@ -181,13 +179,13 @@ function redirect(path)
     document.location.replace(url);
 }
 
-async function loadJSON() {
+async function downloadJSON() {
     var url = new URL(pathInput.value);
     
     fetchButton.disabled = true;
     editor.value = "Loading....";
     
-    localStorage.setItem("path", pathInput.value);
+    
     
     var firstLine = true;
     
@@ -220,6 +218,7 @@ pathInput.onblur =
         {
             pathInput.value = document.location.origin + "/";
         }
+        localStorage.setItem("path", pathInput.value);
         
         setLinks();
     }
@@ -229,15 +228,6 @@ pathInput.onblur =
 
 async function uploadData(path, data, contentType, contentLength, halfDuplex = false)
 {
-    if (!contentType.startsWith("application/json") &&
-        !path.endsWith("{HTTP}"))
-    {
-        if (path.endsWith("/"))
-            path = path + "{HTTP}";
-        else
-            path = path + "/{HTTP}";
-    }
-
 
     var parameters = {
         mode: "cors",
@@ -254,12 +244,16 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
         
     saveButton.disabled = true;
     fileInput.disabled = true;
-    
+       
+    if (path.endsWith("/"))
+        path = path.substr(0, path.length - 1);
+      
     
     var status;
         
     try
     {
+        await authenticate();
         var response = await fetch(
             path,
             parameters
@@ -268,26 +262,17 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
         var status = response.status;
         if (status == 401) // Unauthorised 
         {
-            var json = await response.text();
-            redirect(JSON.parse(json));
+            var json = await response.json();
+            redirect(unescape(json));
             return;
         }
                 
         if (status == 200) {
             var json = await response.json();
-            json = decodeURIComponent(json);
-            
-            if (json.endsWith("{HTTP}") &&
-                !pathInput.value.endsWith("{HTTP}"))
-            {
-                json = json.substr(
-                    0,
-                    json.length - "{HTTP}".length
-                );
-            }
+            json = unescape(json);
             alert(json);
             pathInput.value = json;
-            
+            localStorage.setItem("path", pathInput.value);
         }
         else {
             throw new Error(
@@ -312,7 +297,6 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
     
 saveButton.onclick = async function() {
 
-    localStorage.setItem("path", pathInput.value);
     
     var json = editor.value;
     var path = pathInput.value;
@@ -329,8 +313,6 @@ saveButton.onclick = async function() {
     
     
     localStorage.setItem("contentType", contentType.value);
-    localStorage.setItem("editor", editor.value);
-    
     await uploadData(path, editor.value, contentType.value, editor.value.length);
 };
 
@@ -338,11 +320,8 @@ fileInput.onchange = async function(event)
 {
     var path = pathInput.value;
     
-    if (path.endsWith("/"))
-        path = path.substr(0, path.length - 1);
-        
+  
     var file = fileInput.files[0];
-    localStorage.setItem("path", pathInput.value);
     
     await uploadData(path, file, file.type, file.size, true);
     fileInput.value = "";
@@ -351,7 +330,7 @@ fileInput.onchange = async function(event)
 fetchButton.onclick =
     function() {
 
-        loadJSON();
+        downloadJSON();
 
     }
     
@@ -401,20 +380,18 @@ function setLinks() {
     pathInput.value =
         localStorage.getItem("path");
         
-    setLinks();
-    
     fetchButton.disabled = false;
 }
+
 if (localStorage.getItem("contentType")) {
 
     contentType.value =
         localStorage.getItem("contentType");
     
 }
-
+setLinks();
 
 fetchButton.disabled = false;
-
 
         </script>
 

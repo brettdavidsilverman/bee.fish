@@ -22,7 +22,7 @@ void start(
 
 std::mutex _wait;
 #ifdef DEBUG
-const Size _threadCount = 1;
+const Size _threadCount = 4;
 #else
 const Size _threadCount = 20;
 #endif
@@ -57,15 +57,9 @@ int main(int argc, const char* argv[])
               << logFile
               << std::endl;
 
-        bool unlock =
-            (hasArg(argc, argv, "-unlock") != -1);
-            
-        if (unlock)
-        {
-            cout << "Unlocking " << DATABASE_FILENAME << endl;
-            Database db(DATABASE_FILENAME);
-            db.unlock();
-        }
+        cout << "Unlocking database" << endl;
+        LockFile::unlock(DATABASE_FILENAME);
+        cout << "Unlocked" << endl;
         
         unsigned int port = 443;
         int portArg;

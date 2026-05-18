@@ -198,13 +198,15 @@ namespace BeeFishJSON {
                 new BeeFishParser::
                     Character('\\'),
                 new Or(
+                    new CaptureCharacter(this, '0', '\0'),
+                    new CaptureCharacter(this, '\"', '\"'),
                     new CaptureCharacter(this, '\\', '\\'),
                     new CaptureCharacter(this, 'b', '\b'),
                     new CaptureCharacter(this, 'f', '\f'),
                     new CaptureCharacter(this, 'r', '\r'),
                     new CaptureCharacter(this, 'n', '\n'),
                     new CaptureCharacter(this, 't', '\t'),
-                    new CaptureCharacter(this, '\"', '\"'),
+                    new CaptureCharacter(this, 'v', '\v'),
                     new And(
                         new PlainCharacter(),
                         new Not(new Hex())
@@ -300,9 +302,9 @@ namespace BeeFishJSON {
         StringCharacters*
             _stringCharacters = nullptr;
         BString _value;
-        
     public:
-        String() : Match()
+        String() :
+            Match()
         {
         }
         
@@ -318,18 +320,35 @@ namespace BeeFishJSON {
                     if (this->_onbuffer) {
                         this->_onbuffer(buffer);
                     }
+                    onpartstring(buffer);
                 };
 
 
             _match = new And(
-                new Quote(),
+                new Invoke(
+                    new Quote(),
+                    [this](Match* match)
+                    {
+                        onbeginstring(this);
+                        return true;
+                    }
+                ),
                 _stringCharacters,
-                new Quote()
+                new Invoke(
+                    new Quote(),
+                    [this](Match* match)
+                    {
+                        _stringCharacters->flush();
+                        onendstring(this);
+                        return true;
+                    }
+                )
             );
 
 
             Match::setup(parser);
         }
+        
         
         virtual BString& value()
         override
@@ -343,12 +362,18 @@ namespace BeeFishJSON {
             return _value;
         }
         
-        virtual void success() {
-            _stringCharacters->flush();
-            Match::success();
-        }
+        // Defined in json-parser.h
+        virtual void onbeginstring(String* match);
+        virtual void onpartstring(const BString& match);
+        virtual void onendstring(String* match);
         
     protected:
+        
+        JSONParser* jsonParser()
+        {
+            assert(_parser && _parser->isJSONParser());
+            return (JSONParser*)_parser;
+        }
         
     };
 

@@ -213,6 +213,13 @@ public:
         return true;
 
     }
+    
+    bool isData() const
+    {
+        return 
+            startsWith("data:") &&
+            find(",") != std::string::npos;
+    }
 
     vector<BString> tokenise() const
     {

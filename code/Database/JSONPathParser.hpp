@@ -21,7 +21,6 @@ namespace BeeFishDatabase {
         vector<Index> _indexStack;
         vector<BString> _keyStack;
         vector<Type> _typeStack;
-        Index _stringPageIndex = 0;
         JSONPath _string;
         ostream& _log;
         
@@ -150,7 +149,7 @@ namespace BeeFishDatabase {
                 if (topType() == Type::OBJECT)
                     path = path[topKey()];
                 else {
-                    path = path[topIndex()];
+                    path = path[topIndex() + 1];
                 }
                 
             }
@@ -164,7 +163,7 @@ namespace BeeFishDatabase {
                 
             _pathStack.push_back(path);
             if (type == Type::ARRAY)
-                _indexStack.push_back(1);
+                _indexStack.push_back(0);
             _typeStack.push_back(type);
         
         }
@@ -251,7 +250,7 @@ namespace BeeFishDatabase {
             
                 Index& index = topIndex();
                 
-                path = path[index++];
+                path = path[++index];
                 
                 setVariable(path, json->type(), json->value());
             }
@@ -261,7 +260,7 @@ namespace BeeFishDatabase {
         override
         {
 
-            Index length = topIndex() - 1;
+            Index length = topIndex();
 
             topPath().truncateArray(length);
         
@@ -283,14 +282,14 @@ namespace BeeFishDatabase {
                 else if (topType() == Type::ARRAY)
                 {
                     Index& index = topIndex();
-                    _string = path[index++];
+                    _string = path[++index];
                 }
             }
         }
         
         virtual void onpartstring(const BString& partString)
         {
-            _string.setString(partString);
+            _string.setString(partString, false);
         }
         
         virtual void onendstring(BeeFishJSON::String* match)
