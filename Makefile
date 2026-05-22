@@ -1,5 +1,5 @@
 ifeq ("$(PORT)","")
-	PORT=8000
+	PORT=443
 endif
 
 all:	https
