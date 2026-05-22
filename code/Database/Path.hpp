@@ -277,7 +277,7 @@ public:
 
 
 
-    bool isRoot()
+    bool isRoot() const
     {
         return
             index() == _database->rootIndex() ||
@@ -285,7 +285,7 @@ public:
     }
 
     template<typename T>
-    Path parent(T& value)
+    Path parent(T& value) const
     {
         assert(!isRoot());
 
@@ -300,12 +300,12 @@ public:
         return parent;
     }
 
-    Path parent() {
+    Path parent() const {
         Stack stack;
         return parent(stack);
     }
 
-    Path parent(Stack& stack) {
+    Path parent(Stack& stack) const {
         Index count = 0;
         Index rootIndex = _database->rootIndex();
         Branch branch = getBranch();
@@ -569,17 +569,11 @@ public:
 
 
 
-    Branch getBranch()
+    Branch getBranch() const
     {
         return
             getBranch(_index);
 
-    }
-
-    const Branch getBranch() const
-    {
-        return
-            _database->getBranch(_index);
     }
 
     void setBranch(const Branch& branch)
@@ -588,7 +582,7 @@ public:
     }
 
 
-    Branch getBranch(Index index)
+    Branch getBranch(Index index) const
     {
         return
             _database->getBranch(index);

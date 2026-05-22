@@ -278,7 +278,7 @@ namespace BeeFishDatabase {
             }
         }
         
-        virtual Index rootIndex() {
+        virtual Index rootIndex() const {
             return 0;
         }
 

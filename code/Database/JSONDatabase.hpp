@@ -50,7 +50,7 @@ namespace BeeFishDatabase
         
         }
 
-        virtual Index rootIndex() 
+        virtual Index rootIndex() const
         override
         {
             return _json.index();

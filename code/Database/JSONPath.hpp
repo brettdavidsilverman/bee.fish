@@ -159,6 +159,11 @@ public:
     {
         return database().words();
     }
+    
+    bool isUserRoot() const
+    {
+        return isRoot() || parent().isRoot();
+    }
 
 
     JSONPath operator [] (const BString& property)
@@ -248,8 +253,7 @@ public:
                 path.setData(true);
 
                 JSONPath json = *this;
-                while (!json.isRoot() &&
-                       !json.parent().isRoot())
+                while (!json.isUserRoot())
                 {
                     BString property;
                     json = json.parent(property);
@@ -578,12 +582,12 @@ public:
         assert(children.getData<Index>() == size);
     }
 
-    JSONPath parent() {
+    JSONPath parent() const {
         BString key;
         return parent(key, false);
     }
 
-    JSONPath parent(BString& key, bool fetchKey = true) {
+    JSONPath parent(BString& key, bool fetchKey = true) const {
         Path path = *this;
 
         Index position = -1;
@@ -1012,8 +1016,7 @@ public:
         // Remove parent properties
         JSONPath path = json;
 
-        while (!path.isRoot() &&
-               !path.parent().isRoot())
+        while (!path.isUserRoot())
         {
             BString property;
             path = path.parent(property);
@@ -1068,8 +1071,7 @@ private:
 
             if (addToParents)
             {
-                while (!json.isRoot() &&
-                       !json.parent().isRoot())
+                while (!json.isUserRoot())
                 {
                     ++wordPath[json.id()];
                     json = json.parent();
@@ -1102,8 +1104,7 @@ private:
 
                 if (removeFromParents)
                 {
-                    while  (!json.isRoot() &&
-                            !json.parent().isRoot())
+                    while  (!json.isUserRoot())
                     {
 
                         if (wordPath.contains(json.id()))
