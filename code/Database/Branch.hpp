@@ -3,7 +3,7 @@
 
 #include <iomanip>
 #include "../Script/Variable.hpp"
-#include "Index.hpp"
+#include "../Size.hpp"
 
 using namespace std;
 

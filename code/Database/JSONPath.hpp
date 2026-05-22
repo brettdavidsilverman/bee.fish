@@ -37,10 +37,10 @@ public:
 #else
     typedef BeeFishId::Id Id;
 #endif
-    
+
     using Path::contains;
     using Path::clear;
-    
+
 
 
     JSONPath()
@@ -52,13 +52,13 @@ public:
     {
 
     }
-    
+
 #ifndef JSON_INDEX
     JSONPath(JSONDatabase& database, Id id) :
         Path(
-            database, 
+            database,
             database.objects()
-                [id].getData<Index>()
+            [id].getData<Index>()
         )
     {
 
@@ -81,7 +81,7 @@ public:
     {
 
     }
-    
+
     virtual PathBase* copy() const
     override
     {
@@ -97,29 +97,29 @@ public:
     Id id() const
     {
         //return index();
-        
+
         Path path = *this;
         path = path[ID];
-        
+
         assert(path.hasData());
 #ifdef JSON_INDEX
         return path.getData<Index>();
 #else
         Id id;
         path.getData(id);
-        
+
         return id;
 #endif
-        
+
     }
-    
+
 #ifdef JSON_INDEX
     Id setId()
     {
         Id id = index();
         return setId(id);
     }
-    
+
     Id setId(const Id& id)
     {
         Path path = *this;
@@ -127,10 +127,10 @@ public:
         assert(!path.hasData());
 
         path.setData<Id>(id);
-        
+
         return id;
     }
-    
+
 #else
     Id setId(const Id& id = Id(""))
     {
@@ -139,18 +139,18 @@ public:
         assert(!path.hasData());
 
         path.setData<Id>(id);
-        
+
         return id;
     }
 #endif
-    
+
     bool hasId()
     {
         Path path = *this;
         path = path[ID];
         return path.hasData();
     }
-    
+
 
     Path properties()
     {
@@ -161,11 +161,11 @@ public:
     {
         return database().words();
     }
-    
+
 
     JSONPath operator [] (const BString& property)
     {
-       // LockFile::ScopedLock lock(database());
+        // LockFile::ScopedLock lock(database());
         setType(Type::OBJECT);
 
 
@@ -176,7 +176,7 @@ public:
 
         JSONPath json = getChildren()[position];
 
-       // json.cascadeProperties();
+        // json.cascadeProperties();
 
         return json;
 
@@ -184,7 +184,7 @@ public:
 
     JSONPath operator [] (const Index& index)
     {
-       // LockFile::ScopedLock lock(database());
+        // LockFile::ScopedLock lock(database());
         if (index < 1)
         {
             throw runtime_error("Index out of bounds");
@@ -200,14 +200,14 @@ public:
 
         if (children.hasData())
             count = children.getData<Index>();
-            
+
         if (index > count)
         {
             LockFile::ScopedLock lock(database());
-            
+
             if (children.hasData())
                 count = children.getData<Index>();
-                
+
             if (index > count)
             {
                 if (type() == Type::ARRAY)
@@ -215,10 +215,10 @@ public:
                     while (index > count)
                     {
                         JSONPath child = children[++count];
-                        
+
                         if (!child.hasId())
                             child.setId();
-                        
+
                         child.cascadeProperties();
                     }
                 }
@@ -231,7 +231,7 @@ public:
 
         JSONPath json = getChildren()[index];
 
-    
+
         return json;
     }
 
@@ -263,7 +263,7 @@ public:
                                 property.substr(1, property.length() - 2)
                                 .unescape();
                         }
-            
+
                         addWords(property, true);
                     }
                 }
@@ -273,15 +273,15 @@ public:
     }
 
 protected:
-    
+
     void addObject()
     {
-        
+
         Id id = JSONPath::id();
 
         Path objects =
             database().objects();
-            
+
         // Add this child to all parents
         JSONPath json = *this;
         while (!json.isRoot())
@@ -289,10 +289,10 @@ protected:
             objects[json.id()][id];
             json = json.parent();
         }
-        
+
         objects[id].setData<Index>(index());
     }
-    
+
     void removeObject()
     {
 
@@ -300,9 +300,9 @@ protected:
 
         Path objects =
             database().objects();
-            
+
         JSONPath json = *this;
-        
+
         // Remove this child from its parents
         while (!json.isRoot() )
         {
@@ -313,7 +313,7 @@ protected:
         // Remove this child
         objects.clear(id);
     }
-    
+
     void setType(Type type)
     {
         LockFile::ScopedLock lock(database());
@@ -324,31 +324,31 @@ protected:
 
             if (!hasId())
                 setId();
-                
+
             addObject();
-                
+
         }
         else if (JSONPath::type() != type)
         {
             Id id = JSONPath::id();
-            
+
             clear();
             assert(isDeadEnd());
             setData<Type>(type);
 
             setId(id);
-            
+
             addObject();
         }
 
         assert(JSONPath::type() == type);
-        
+
         assert(hasId());
 
-        
+
 
     }
-    
+
 
 public:
 
@@ -360,13 +360,13 @@ public:
         if (type() == Type::UNDEFINED) {
             return;
         }
-        
+
         if (!isRoot())
         {
             BString property;
             JSONPath parent =
                 JSONPath::parent(property);
-            if (parent.type() == Type::OBJECT) 
+            if (parent.type() == Type::OBJECT)
             {
                 parent.deleteProperty(property);
             }
@@ -375,7 +375,7 @@ public:
             else
                 setType(Type::UNDEFINED);
         }
-        
+
     }
 
     void setNull()
@@ -400,7 +400,7 @@ public:
         setType(Type::INTEGER);
         path[VALUE].setData<BString>(value);
     }
-    
+
     void setInteger(const Index& value)
     {
         stringstream stream;
@@ -415,7 +415,7 @@ public:
         setType(Type::NUMBER);
         path[VALUE].setData<BString>(value);
     }
-    
+
     Index getInteger()
     {
         assert(type() == Type::INTEGER);
@@ -426,63 +426,63 @@ public:
         stream >> number;
         return number;
     }
-    
+
     void setString(const BString& value, Index pageIndex = 1, bool indexData = true, bool finalPart = true)
     {
         assert(pageIndex > 0);
-        
+
         LockFile::ScopedLock lock(database());
         Path path = *this;
         setType(Type::STRING);
-        
+
         bool partChanged = false;
         Index max = 0;
         if (!path[VALUE].isDeadEnd())
             max = path[VALUE].max<Index>();
         else
             partChanged = true;
-            
+
         BString current;
         if (pageIndex <= max &&
-            (current = path[VALUE][pageIndex].getStringData())
+                (current = path[VALUE][pageIndex].getStringData())
                 != value)
         {
             if (path[VALUE].hasData() &&
-                path[VALUE].getData<bool>())
+                    path[VALUE].getData<bool>())
             {
                 removeWords(current, true);
             }
             partChanged = true;
         }
-        
-        
-        
+
+
+
         path[VALUE][pageIndex].setData<BString>(value);
-        
+
         if (indexData && partChanged)
             addWords(value, true);
-            
+
         if (finalPart)
             endString(1, indexData);
 
     }
-    
+
     void endString(Index pageIndex, bool indexData)
     {
         Path path = *this;
         path = path[VALUE];
         Index max = 0;
-        
+
         if (!path.isDeadEnd())
             max = path.max<Index>();
-            
+
         bool currentIndexData =
             path.hasData() &&
             path.getData<bool>();
-            
+
         for (Index i = pageIndex + 1;
-            i <= max;
-            ++i)
+                i <= max;
+                ++i)
         {
             if (currentIndexData)
             {
@@ -492,36 +492,36 @@ public:
             }
             path.clear(i);
         }
-        
+
         path.setData<bool>(indexData);
-        
+
     }
-    
+
     void removeWords() {
-        
+
         Path path = *this;
         Path strings = path[VALUE];
-        bool remove = 
+        bool remove =
             strings.hasData() &&
             strings.getData<bool>();
-                
+
         if (remove) {
             Iterable<Index> parts(strings);
-            
-            
+
+
             for (const auto index : parts)
             {
                 BString current =
                     strings[index].getStringData();
-                    
+
                 removeWords(current, true);
-                
+
             }
-        
+
         }
     }
-    
-    
+
+
     BString getString() const
     {
         assert(type() == Type::STRING);
@@ -530,7 +530,7 @@ public:
             return "";
         return path[VALUE][1].getStringData();
     }
-    
+
     BString getValue() const
     {
         Path path = *this;
@@ -544,7 +544,7 @@ public:
         LockFile::ScopedLock lock(database());
 
         setType(Type::OBJECT);
-        
+
     };
 
     void setArray()
@@ -553,7 +553,7 @@ public:
         setType(Type::ARRAY);
 
     }
-    
+
     void truncateArray(Index size)
     {
         assert(type() == Type::ARRAY);
@@ -570,11 +570,11 @@ public:
             }
         }
         children.setData<Index>(size);
-        
+
         bool ok = (
-            (size == 0 && children.isDeadEnd()) ||
-            (children.max<Index>() == size)
-        );
+                      (size == 0 && children.isDeadEnd()) ||
+                      (children.max<Index>() == size)
+                  );
         assert(ok);
         assert(children.getData<Index>() == size);
     }
@@ -634,42 +634,45 @@ public:
     bool isUserRoot() const
     {
         return
-            isRoot() || 
-            parent().isRoot();// || 
-           // parent().parent().isRoot();
+            isRoot() ||
+            parent().isRoot();// ||
+        // parent().parent().isRoot();
     }
-    
-    
+
+
 
     BString toString(Authentication& auth) {
         JSONPath path = *this;
         BString string;
         BString key;
         const BString& userId = auth.userId();
-        
+
         while (!path.isRoot())
         {
-            
+
             path = path.parent(key);
-                
+
             if (path.isUserRoot())
             {
                 if (key == userId)
                 {
                     key = "my";
                 }
-                else if (!path.isRoot())
+                else if ( database()
+                        .users()
+                        .contains(key) )
+                {
                     return "";
-                
+                }
+
             }
-            
+
             string =
-                key + 
-                BString("/") + 
+                key +
+                BString("/") +
                 string;
-           // string = newString;
         }
-        
+
         if (string.size())
             string.pop_back();
 
@@ -679,11 +682,11 @@ public:
         if (string.contains(http))
         {
             string = string.substr(
-                0,
-                string.find(http) - 1
-            );
+                         0,
+                         string.find(http) - 1
+                     );
         }
-        
+
 
         return string;
     }
@@ -705,55 +708,66 @@ public:
         }
     };
 
-    static JSONPath fromString(JSONDatabase& database, const BeeFishWeb::URL& url, Authentication& auth, const BString& method = "GET")
+    static JSONPath fromString(
+        Authentication& auth,
+        JSONDatabase& database,
+        const BeeFishWeb::URL& url,
+        const BString& method = "GET"
+    )
     {
         return fromString(
-            database,
-            url.origin(),
-            url,
-            auth,
-            method
-        );
+                   auth,
+                   database,
+                   url.origin(),
+                   url,
+                   method
+               );
     }
-    
-    static JSONPath fromString(JSONDatabase& database, const BString& origin, const BeeFishWeb::URL& url, Authentication& auth, const BString& method = "GET")
+
+    static JSONPath fromString(
+        Authentication& auth,
+        JSONDatabase& database,
+        const BString& origin,
+        const BeeFishWeb::URL& url,
+        const BString& method = "GET"
+    )
     {
-        
+
         assert(auth.authenticated());
-        
+
         JSONPath originPath =
             database.origin(origin);
 
         std::vector<BString> paths =
             url.paths();
-        
+
         // Loop through all tokens
         JSONPath path = originPath;
         bool success = true;
         Index count = 0;
-        
+
         const BString& userId = auth.userId();
-        
+
         for (BString key : paths)
         {
-            if (++count == 1) {
-                if (key == "my" || key == userId)
-                {
-                    if (path.contains(userId) || method == "POST")
-                        path = path[userId];
-                    else 
-                    {
-                        success = false;
-                        break;
-                    }
+
+            if ((++count == 1) &&
+                (key == "my" || key == userId))
+            {
+                if (path.contains(userId) || method == "POST") {
+                    path = path[userId];
+                    continue;
                 }
-                else
-                {
-                    success = false;
-                    break;
-                }
+
             }
-            else if (key.isDigitsOnly()) {
+            
+            if ( database.users().contains(key) && key != userId)
+            {
+                success = false;
+                break;
+            }
+            
+            if (key.isDigitsOnly()) {
                 Index index = atol(key.c_str());
                 if (path.contains(index))
                     path = path[index];
@@ -764,8 +778,8 @@ public:
             }
             else {
                 if (key.startsWith("\"") &&
-                    key.endsWith("\"")
-                )
+                        key.endsWith("\"")
+                   )
                 {
                     key =
                         key.substr(
@@ -777,7 +791,7 @@ public:
                 {
                     key = key.decodeURI();
                 }
-                
+
                 if (path.contains(key) || method == "POST")
                     path = path[key];
                 else {
@@ -793,7 +807,7 @@ public:
         if (!success) {
             throw PathNotFoundException(url);
         }
-        
+
         return path;
     }
 
@@ -820,12 +834,12 @@ public:
         return contains;
 
     }
-    
+
     bool contains(const char* property)
     {
         return contains(BString(property));
     }
-    
+
     bool contains(const Index& index)
     {
         if ((type() != Type::ARRAY) &&
@@ -872,9 +886,9 @@ public:
 
                 getPositions()[position].setData<Index>(propertyPath.index());
                 objectPropertyPath.setData<Index>(position);
-                
+
                 assert(!getChildren().contains(position));
-                
+
                 JSONPath childPath = getChildren()[position];
                 childPath.setId();
 
@@ -886,7 +900,7 @@ public:
 
         position = objectPropertyPath.getData<Index>();
 
-        
+
         return position;
     }
 
@@ -1014,7 +1028,7 @@ public:
                 item.clear();
                 clearChildren.clear(index);
             }
-            
+
             assert(getChildren().isDeadEnd());
             break;
         }
@@ -1036,16 +1050,16 @@ public:
             throw runtime_error("Unknown type");
         }
 
-        
+
         removeObject();
-        
+
         assert(getChildren().isDeadEnd());
 
 
         Path::clear();
         assert(isDeadEnd());
-        
-        
+
+
     }
 
 public:
@@ -1054,7 +1068,7 @@ public:
 
         if (!contains(property))
             return;
-            
+
         JSONPath json = (*this)[property];
 
 
@@ -1111,7 +1125,7 @@ private:
         for (auto word : tokens)
         {
             Path wordPath = words[word];
-            
+
             JSONPath json = *this;
 
             if (addToParents)
@@ -1154,9 +1168,9 @@ private:
 
                         if (wordPath.contains(json.id()))
                         {
-                        
+
                             Index count = --wordPath[json.id()];
-                        
+
                             if (count == 0)
                             {
                                 wordPath.clear(json.id());
@@ -1172,7 +1186,7 @@ private:
 
                     if (wordPath.contains(json.id()))
                     {
-                    
+
                         Index count = --wordPath[json.id()];
 
                         if (count == 0)
@@ -1224,17 +1238,17 @@ public:
         {
             Path strings = path[VALUE];
             Iterable<Index> iterable(strings);
-            
+
             out << "\"";
-            
+
             for (const auto index : iterable)
             {
                 BString string =
                     strings[index].getStringData();
-                    
+
                 out << string.escape();
             }
-            
+
             out << "\"";
 
             break;

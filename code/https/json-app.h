@@ -67,10 +67,10 @@ using namespace BeeFishWeb;
             
             try {
                 jsonPath = JSONPath::fromString(
+                    *this,
                     database,
                     host,
                     url,
-                    *this,
                     method
                 );
                 _bookmark = jsonPath.index();
@@ -170,9 +170,9 @@ using namespace BeeFishWeb;
                     
                     BeeFishDatabase::JSONPathParser
                         parser(
+                            *this,
                             jsonPath,
                             postRequest,
-                            *this,
                             clog
                         );
 

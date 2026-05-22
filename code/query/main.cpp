@@ -53,8 +53,12 @@ int main(int argc, const char* argv[]) {
     }
     
     BeeFishWeb::URL url(origin);
-    
+    BeeFishAuthentication::Authentication
+        auth(url.origin(), database.filename());
+    auth.logon("boo");
+        
     JSONPath path = JSONPath::fromString(
+        auth,
         database,
         url
     );
@@ -62,7 +66,7 @@ int main(int argc, const char* argv[]) {
     cout << "Using origin " << origin << endl;
  
     auto displayResults =
-    [&database, display](Expression& expression)
+    [&database, display, &auth](Expression& expression)
     {
     
         AndPath path =
@@ -73,6 +77,7 @@ int main(int argc, const char* argv[]) {
         
         BeeFishQuery::Iterable
             jsonMatches(
+                auth,
                 database,
                 path
             );

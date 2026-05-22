@@ -39,11 +39,7 @@ public:
     }
 
 
-    inline static const size_t
-    SESSION_ID_SIZE = 32;
-
-    inline static const size_t
-    USER_ID_SIZE = 32;
+    
 
 public:
     Authentication(
@@ -135,8 +131,6 @@ public:
 
         // Set the user data path
         Path userData = database.userData(_userId);
-
-
 
         // Create the session id
         // (Note, we use toHex, not toBase64 due to

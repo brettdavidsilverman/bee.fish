@@ -30,7 +30,7 @@
 
 #include "../Miscellaneous/Base64.hpp"
 #include "../power-encoding/power-encoding.h"
-#include "../Database/Index.hpp"
+#include "../Size.hpp"
 
 
 #include "locale.hpp"
@@ -43,7 +43,6 @@ using namespace std::filesystem;
 namespace BeeFishBString
 {
 
-using namespace BeeFishDatabase;
 using namespace BeeFishMisc;
 
 //typedef vector<Char> BStringBase;
@@ -223,6 +222,22 @@ public:
         return 
             startsWith("data:") &&
             find(",") != std::string::npos;
+    }
+    
+    bool isUserId() const
+    {
+        if (size() != USER_ID_SIZE)
+            return false;
+            
+        return
+            std::all_of(
+                begin(), 
+                end(), 
+                [](unsigned char c) {
+                    return std::isxdigit(c);
+                }
+            );
+            
     }
 
     vector<BString> tokenise() const

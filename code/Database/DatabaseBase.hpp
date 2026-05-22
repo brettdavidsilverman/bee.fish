@@ -27,10 +27,10 @@
 
 #include "../Miscellaneous/Debug.hpp"
 #include "../b-string/b-string.h"
+#include "../Size.hpp"
 #include "Version.hpp"
 #include "File.hpp"
 #include "LockFile.hpp"
-#include "Index.hpp"
 #include "Branch.hpp"
 #include "LockFile.hpp"
 

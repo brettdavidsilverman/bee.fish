@@ -24,7 +24,7 @@ namespace BeeFishDatabase
     inline bool testSubArray2Path();
     inline bool testComplexArrays();
     inline bool testAllFiles(std::filesystem::path directory);
-    inline bool testFile(JSONPath root, std::filesystem::path file, bool expect);
+    inline bool testFile(BeeFishAuthentication:: Authentication& auth, JSONPath root, std::filesystem::path file, bool expect);
     inline bool testIterator();
     inline bool testReverseIterator();
     inline bool testPartIterator();
@@ -208,9 +208,16 @@ namespace BeeFishDatabase
         
         if (success) {
             JSONDatabase db;
+            
+            BeeFishAuthentication::Authentication
+                auth("https://test", db.filename());
+                
+            auth.logon("boo");
+            
+            
             JSONPath path = db.origin("https://test");
 
-            JSONPathParser parser(path);
+            JSONPathParser parser(auth, path);
             parser.read("101");
             parser.eof();
             assert(parser.matched());
@@ -789,6 +796,11 @@ namespace BeeFishDatabase
         cout << "\tTest type" << endl;
         JSONDatabase database;
         
+        BeeFishAuthentication::Authentication
+            auth("https://test", database.filename());
+                
+        auth.logon("boo");
+            
         JSONPath start = database.origin("https://test");
         JSONPath test =start["test"];
         
@@ -824,7 +836,7 @@ namespace BeeFishDatabase
         if (success)
         {
             JSONPath path = root["string"];
-            JSONPathParser parser(path);
+            JSONPathParser parser(auth, path);
             cout << "\t\tParse string 2" << flush;
             parser.read("\"Hello World\"");
             parser.eof();
@@ -869,7 +881,7 @@ namespace BeeFishDatabase
         if (success)
         {
             JSONPath path = root["array"];
-            JSONPathParser parser(path);
+            JSONPathParser parser(auth, path);
             parser.read("[1,[]]");
             parser.eof();
           
@@ -954,7 +966,7 @@ namespace BeeFishDatabase
         if (success) {
             cout << "\tInteger" << flush;
             JSONPath path = root["integer"];
-            JSONPathParser parser(path);
+            JSONPathParser parser(auth, path);
             parser.read("1234");
             parser.eof();
             success = (parser.result() == true);
@@ -1000,7 +1012,11 @@ namespace BeeFishDatabase
         
         cout << "\tTest id" << endl;
         JSONDatabase database;
-        
+        BeeFishAuthentication::Authentication
+            auth("https://test", database.filename());
+                
+        auth.logon("boo");
+            
         JSONPath start = database.origin("https://test");
         JSONPath test = start["test"];
         
@@ -1076,7 +1092,7 @@ cerr << "Child count " << count << endl;
         
         if (success)
         {
-            JSONPathParser parser(start);
+            JSONPathParser parser(auth, start);
             parser.read("{\"a\":1}");
             test = start["a"];
             BString key;
@@ -1099,11 +1115,10 @@ cerr << "Child count " << count << endl;
             cout << test.parent() << endl;
             outputSuccess(success);
             cout << "\tTesting toString after clear " << flush;
-            BString str = test.toString();
+            BString str = test.toString(auth);
             success = str == "https://test/a";
             if (!success)
-                cout << str << endl;
-                
+                cout << "*" << str << "*" << endl;
             outputSuccess(success);
         }
         
@@ -1119,13 +1134,17 @@ cerr << "Child count " << count << endl;
         bool success = true;
         
         JSONDatabase database;
-        
+        BeeFishAuthentication::Authentication
+            auth("https://test", database.filename());
+                
+        auth.logon("boo");
+            
         JSONPath start = database.origin("https://test");
     
         if (success)
         {
             JSONPath path = start["tobecleared"];
-            JSONPathParser parser(path);
+            JSONPathParser parser(auth, path);
             cout << "\tParse string 3" << flush;
             parser.read("\"Hello World\"");
             parser.eof();
@@ -1135,7 +1154,7 @@ cerr << "Child count " << count << endl;
             BeeFishMisc::outputSuccess(success);
             
             
-            BString string1 = path.toString();
+            BString string1 = path.toString(auth);
 
             path.setNull();
 
@@ -1150,7 +1169,7 @@ cerr << "Child count " << count << endl;
 
             cerr << "\tGet toString after clear " << flush;
 
-            BString string2 = path.toString();
+            BString string2 = path.toString(auth);
 
             success = success &&
                 testValue(
@@ -1172,10 +1191,16 @@ cerr << "Child count " << count << endl;
         cout << "Test Array 2 Path \"[[]]\" " << endl;
  
         JSONDatabase database;
+        
+        BeeFishAuthentication::Authentication
+            auth("https://test", database.filename());
+                
+        auth.logon("boo");
+            
         JSONPath json =
             database.json()["array"];
         JSONPath _path = database.json()["array"];
-        JSONPathParser parser(_path);
+        JSONPathParser parser(auth, _path);
         Path path = _path;
         parser.read("[[]]");
         parser.eof();
@@ -1233,8 +1258,14 @@ cerr << "Child count " << count << endl;
         cout << "Test Sub Array 2 Path: ";
         
         JSONDatabase database;
+        
+        BeeFishAuthentication::Authentication
+            auth("https://test", database.filename());
+                
+        auth.logon("boo");
+            
         JSONPath _path = database.origin("https://test");
-        JSONPathParser parser(_path);
+        JSONPathParser parser(auth, _path);
         parser.read("[[1]]");
         Path path = _path;
         bool success = true;
@@ -1341,8 +1372,13 @@ cerr << "Child count " << count << endl;
             cout << json << endl;
             
             JSONDatabase database;
+            BeeFishAuthentication::Authentication
+                auth("https://test", database.filename());
+                
+            auth.logon("boo");
+            
             JSONPath path = database.json();
-            JSONPathParser parser(path);
+            JSONPathParser parser(auth, path);
         
             parser.read(json);
             parser.eof();
@@ -1435,10 +1471,14 @@ assert(success);
 
         // Test direct to database
         JSONDatabase tempDB;
+        BeeFishAuthentication::Authentication
+            auth("https://test", tempDB.filename());
+                
+        auth.logon("boo");
             
         for (auto file : files) {
             if (success)
-                success = testFile(tempDB.origin("https://test"), file, true);
+                success = testFile(auth, tempDB.origin("https://test"), file, true);
             else
                 break;
         }
@@ -1448,7 +1488,7 @@ assert(success);
         return success;
     }
     
-    inline bool testFile(JSONPath root, std::filesystem::path file, bool expect)
+    inline bool testFile(BeeFishAuthentication:: Authentication& auth, JSONPath root, std::filesystem::path file, bool expect)
     {
         cout << "\t" << file.filename() << " " << flush;
         
@@ -1461,7 +1501,7 @@ assert(success);
         
         ifstream inputFile(file);
         JSONPath path = root[file.filename()];
-        JSONPathParser parser(path);
+        JSONPathParser parser(auth, path);
         parser.read(inputFile);
         parser.eof();
         inputFile.close();
@@ -1946,9 +1986,13 @@ assert(success);
         bool success = true;
  
         JSONDatabase database;
-        
+        BeeFishAuthentication::Authentication
+            auth("https://test", database.filename());
+                
+        auth.logon("boo");
+            
         JSONPath start = database.origin("https://test");
-        JSONPathParser parser1(start);
+        JSONPathParser parser1(auth, start);
         parser1.read("[1,2,3]");
         JSONPath path = start[1];
 
@@ -1972,7 +2016,7 @@ assert(success);
 
         start.setNull();
 
-        JSONPathParser parser2(start);
+        JSONPathParser parser2(auth, start);
         parser2.read("{\"hello\":\"world\"}");
         
 
@@ -2070,12 +2114,18 @@ assert(success);
             cout << "\t " << json << endl;
             
             JSONDatabase database;
+            
+            BeeFishAuthentication::Authentication
+                auth("https://test", database.filename());
+                
+            auth.logon("boo");
+        
             Path objects = database.objects();
             Index startCount = objects.childCount();
             JSONPath start = database.origin("http://test");
             
             
-            JSONPathParser parser(start);
+            JSONPathParser parser(auth, start);
             parser.read(json);
             parser.eof();
             
@@ -2131,10 +2181,14 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         bool success = true;
  
         JSONDatabase database;
+        BeeFishAuthentication::Authentication
+            auth("https://test", database.filename());
+                
+        auth.logon("boo");
         
         JSONPath start = database.origin("https://test");
         
-        JSONPathParser parser(start);
+        JSONPathParser parser(auth, start);
         parser.read("{\"a\":\"b\"}");
         parser.eof();
         
@@ -2201,9 +2255,13 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         cout << endl;
         
         JSONDatabase database2;
+        BeeFishAuthentication::Authentication
+            auth2("https://test", database2.filename());
+                
+        auth2.logon("boo");
         
         JSONPath start2 = database2.origin("https://test");
-        JSONPathParser parser2(start2);
+        JSONPathParser parser2(auth2, start2);
         parser2.read("{\"a\":{\"b\":\"c\"}}");
         parser2.eof();
         
@@ -2292,8 +2350,12 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
 
             
         JSONDatabase database3;
+        BeeFishAuthentication::Authentication
+            auth3("https://test", database3.filename());
+                
+        auth3.logon("boo");
         JSONPath start3 = database3.origin("https://test");
-        JSONPathParser parser3(start3);
+        JSONPathParser parser3(auth3, start3);
         parser3.read("{\"a\":{\"b\":\"c\"}}");
         parser3.eof();
         
@@ -2339,8 +2401,12 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         
 
         JSONDatabase database4;
+        BeeFishAuthentication::Authentication
+            auth4("https://test", database4.filename());
+                
+        auth3.logon("boo");
         JSONPath start4 = database4.origin("https://test");
-        JSONPathParser parser4(start4);
+        JSONPathParser parser4(auth4, start4);
         parser4.read("{\"a\":{\"a\":\"a\"}}");
         parser4.eof();
         
@@ -2383,6 +2449,10 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         cout << "Delete property thats array " << endl;
             
         JSONDatabase database5;
+        BeeFishAuthentication::Authentication
+            auth5("https://test", database5.filename());
+                
+        auth5.logon("boo");
         JSONPath start5 = database4.origin("https://test");
         JSONPath test = start5["test"];
         for (Index i = 1; i <= 10; ++i)
@@ -2415,13 +2485,17 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         cout << "Delete property then get parent" << endl;
             
         JSONDatabase database6;
+        BeeFishAuthentication::Authentication
+            auth6("https://test", database6.filename());
+                
+        auth6.logon("boo");
         JSONPath start6 = database5.origin("https://test");
         JSONPath hello = start6["hello"];
         hello.setString("world");
         JSONPath parent = hello.parent();
-        cout << hello.toString() << endl;
+        cout << hello.toString(auth6) << endl;
         hello.setUndefined();
-        parent.toString();
+        parent.toString(auth);
 
         BeeFishMisc::outputSuccess(success);
 
@@ -2436,12 +2510,19 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
 #ifdef JSON_INDEX
         // When compiled with this flag,
         // sizes are consistent
-        const Index SIZE =  1244208;
+        const Index SIZE =   1266768;
 #else
         const Index SIZE = 0;
 #endif
+
+        File authFile;
+            
+        BeeFishAuthentication::Authentication
+            auth("https://test", authFile.filename());
+        auth.logon("boo");
+        
         auto test =
-        [SIZE](std::filesystem::path file, bool readOnly, bool getSuccess = false)
+        [SIZE, &auth](std::filesystem::path file, bool readOnly, bool getSuccess = false)
         {
             
             static Index size = 0;
@@ -2463,10 +2544,11 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
             cout << "\tThread " << std::this_thread::get_id() << endl;
             
             JSONDatabase db(file, readOnly);
+
             
             JSONPath path = db.origin("https://test");
             ifstream input(TEST_DIRECTORY "/90-Sample.json");
-            JSONPathParser parser(path);
+            JSONPathParser parser(auth, path);
             parser.read(input);
             input.close();
             success = testValue(
@@ -2510,11 +2592,12 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
         };
         
         bool success = true;
-        
+ 
         {
             cout <<"\tTesting read only " << flush;
             File tempFile;
-        
+            
+            
             test(tempFile.filename(), false);
             test(tempFile.filename(), true);
             success = test("", true, true);

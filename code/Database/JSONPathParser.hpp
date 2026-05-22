@@ -20,9 +20,9 @@ namespace BeeFishDatabase {
         public JSONParser
     {
     private:
+        Authentication& _auth;
         JSONPath _start;
         ostream& _log;
-        Authentication& _auth;
         vector<JSONPath> _pathStack;
         vector<Index> _indexStack;
         vector<BString> _keyStack;
@@ -35,19 +35,19 @@ namespace BeeFishDatabase {
     public:
         using JSONParser::read;
 
-        JSONPathParser(JSONPath path, Match& match, Authentication& auth, ostream& log = cnull) :
+        JSONPathParser(Authentication& auth, JSONPath path, Match& match, ostream& log = cnull) :
             JSONParser(match),
+            _auth(auth),
             _start(path),
-            _log(log),
-            _auth(auth)
+            _log(log)
         {
         }
           
-        JSONPathParser(JSONPath path, Authentication& auth, ostream& log = cnull) :
+        JSONPathParser(Authentication& auth, JSONPath path, ostream& log = cnull) :
             JSONParser(),
+            _auth(auth),
             _start(path),
-            _log(log),
-            _auth(auth)
+            _log(log)
         {
         }
 
@@ -188,7 +188,10 @@ namespace BeeFishDatabase {
         
         void push_back_key(BString& key)
         {
-            _keyStack.push_back(key);
+            if (key == "my")
+                _keyStack.push_back(_auth.userId());
+            else
+                _keyStack.push_back(key);
         }
         
         void pop_back_key()

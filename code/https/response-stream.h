@@ -132,9 +132,9 @@ public:
 
             BeeFishQuery::Iterable
                 matches(
+                    *app,
                     database,
-                    path,
-                    *app
+                    path
                 );
 
             for (auto it = matches.begin();

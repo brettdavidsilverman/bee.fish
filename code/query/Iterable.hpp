@@ -14,28 +14,31 @@ using namespace BeeFishAuthentication;
     class Iterable
     {
     protected:
-        JSONDatabase* _database;
-        PathBase* _path;
         BeeFishAuthentication::
             Authentication& _auth;
+        JSONDatabase* _database;
+        PathBase* _path;
+
     public:
 
         Iterable(
-            JSONDatabase& database,
-            PathBase& path,
             BeeFishAuthentication::
-                Authentication& auth
+                Authentication& auth,
+            JSONDatabase& database,
+            PathBase& path
+            
         ) :
+            _auth(auth),
             _database(&database),
-            _path(path.copy()),
-            _auth(auth)
+            _path(path.copy())
+            
         {
         }
         
         Iterable(const Iterable& source) :
+            _auth(source._auth),
             _database(source._database),
-            _path(source._path->copy()),
-            _auth(source._auth)
+            _path(source._path->copy())
         {
         }
         

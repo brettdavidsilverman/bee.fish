@@ -1,7 +1,7 @@
 #ifndef BEE_FISH_DATABASE__JSON_INDEX_HPP
 #define BEE_FISH_DATABASE__JSON_INDEX_HPP
 
-#include "Index.hpp"
+#include "../Size.hpp"
 
 namespace BeeFishDatabase {
 

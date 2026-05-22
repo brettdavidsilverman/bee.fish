@@ -93,6 +93,12 @@ int main(int argc, const char* argv[])
     
     
     BeeFishWeb::URL url(origin);
+    
+    BeeFishAuthentication::Authentication
+        auth(url.origin(), database.filename());
+
+    auth.logon("boo");
+        
     JSONPath path =
             database.origin(url.origin());
             
@@ -147,7 +153,7 @@ int main(int argc, const char* argv[])
         JSONPath inputPath =
             path["deaths"];
             
-        JSONPathParser parser(inputPath, clog);
+        JSONPathParser parser(auth, inputPath, clog);
         clog << "Loading deaths.json" << endl;
         
         ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");
@@ -167,7 +173,7 @@ int main(int argc, const char* argv[])
     if (input)
     {
         
-        JSONPathParser parser(path, clog);
+        JSONPathParser parser(auth, path, clog);
         parser.read(cin);
     }
     

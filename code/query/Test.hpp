@@ -1066,8 +1066,13 @@ namespace BeeFishQuery {
         filesystem::path json = TEST_DIRECTORY "/45-Object.json";
         
         JSONDatabase database;
+        
+        BeeFishAuthentication::Authentication
+            auth("https://test", database.filename());
+        auth.logon("boo");
+        
         JSONPath root = database.origin("https://test")[json.filename()];
-        JSONPathParser parser(root);
+        JSONPathParser parser(auth, root);
         Path objects = database.objects()[root.id()];
         Path words = database.words();
             
@@ -1078,14 +1083,11 @@ namespace BeeFishQuery {
         
         JSONDatabase readOnlyDatabase(database.filename(), true);
         auto test =
-        [&readOnlyDatabase, &words, &objects, &ok](BString query, vector<BString> check) {
+        [&readOnlyDatabase, &words, &objects, &ok, &auth](BString query, vector<BString> check) {
             
             cout << "\t" << query << flush;
 
             JSONDatabase& db = readOnlyDatabase;
-            
-            
-        
             
             Expression expression(db, words, objects);
             if (ok)
@@ -1106,7 +1108,7 @@ namespace BeeFishQuery {
                     expression
                     .getPath();
                 
-                BeeFishQuery::Iterable iterable(db, pathBase);
+                BeeFishQuery::Iterable iterable(auth, db, pathBase);
                 
                 for (auto value : iterable)
                 {
