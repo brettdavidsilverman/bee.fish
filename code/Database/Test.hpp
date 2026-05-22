@@ -2436,7 +2436,7 @@ cerr << "Cleared objects count " << objects.childCount()  << endl;
 #ifdef JSON_INDEX
         // When compiled with this flag,
         // sizes are consistent
-        const Index SIZE =  1182952;
+        const Index SIZE =  1244208;
 #else
         const Index SIZE = 0;
 #endif
