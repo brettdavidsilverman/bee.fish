@@ -261,22 +261,20 @@ public:
             {
                 // Add token and type
                 BString character = it->str();
-                if (character == "." || character == "_")
+                if (character == "." || 
+                    character == "_" ||
+                    character == "~")
                 {
                     if (split.size())
-                        tokens.push_back(
-                    {
-                        Type::Word,
-                        split.toLower()
-                    }
-                    );
+                        tokens.push_back({
+                            Type::Word,
+                            split.toLower()
+                        });
 
-                    tokens.push_back(
-                    {
+                    tokens.push_back({
                         Type::Punctuation,
                         character
-                    }
-                    );
+                    });
 
                     split = "";
                 }
@@ -286,12 +284,10 @@ public:
             }
 
             if (split.size())
-                tokens.push_back(
-            {
-                Type::Word,
-                split
-            }
-            );
+                tokens.push_back({
+                    Type::Word,
+                    split
+                });
 
         };
 

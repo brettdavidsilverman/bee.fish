@@ -184,7 +184,9 @@ public:
                 Path stringPath = content;
                 stringPath =stringPath[JSONPath::VALUE];
                 Iterable<Index> strings(stringPath);
+                
                 Base64DecodeStream decoder(*this);
+                bool isData = false;
                 
                 for (auto index : strings)
                 {
@@ -199,9 +201,13 @@ public:
                         data = data.substr(
                             data.find(",") + 1
                         );
+                        isData = true;
                     }
                     
-                    decoder << data;
+                    if (isData)
+                        decoder << data;
+                    else
+                        *this << data;
                 }
                 
                 flush();
