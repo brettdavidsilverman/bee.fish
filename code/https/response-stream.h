@@ -186,7 +186,6 @@ public:
                 Iterable<Index> strings(stringPath);
                 Base64DecodeStream decoder(*this);
                 
-#warning need to handle base64 decode
                 for (auto index : strings)
                 {
                     

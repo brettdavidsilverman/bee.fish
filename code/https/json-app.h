@@ -219,7 +219,6 @@ using namespace BeeFishWeb;
                     
                     bool indexData = contentType.startsWith("text");
 
-#warning need to stream on data to base64 encoded strings
                     PagedStream pagedStream(
                         [&content, &contentType, &pageIndex](const BString& encoded)
                         {
