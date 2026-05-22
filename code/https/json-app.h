@@ -217,20 +217,44 @@ using namespace BeeFishWeb;
                     Index pageIndex = 0;
                     BString text;
                     
-                    postRequest.setOnData(
-                        [&pageIndex, &contentLength, &contentType, &content, &text](const BString& data) {
-                            contentLength += data.size();
-                            if (contentType.startsWith("text/"))
-                                text += data;
-                            else {
-                                BString base64 = 
+                    bool indexData = contentType.startsWith("text");
+
+#warning need to stream on data to base64 encoded strings
+                    PagedStream pagedStream(
+                        [&content, &contentType, &pageIndex](const BString& encoded)
+                        {
+                            ++pageIndex;
+                            
+                            if (pageIndex == 1)
+                            {
+                                BString header = 
                                     BString("data:") + 
+                                    contentType +
                                     BString(";base64,") +
-                                    data.toBase64();
-                                    
-                                assert(base64.isData());
-                                ++pageIndex;
-                                content[pageIndex].setString(base64);
+                                    encoded;
+                                content.setString(header, pageIndex, false, false);
+                            }
+                            else 
+                            {
+                                content.setString(encoded, pageIndex, false, false);
+                            }
+                        }
+                    );
+                    
+                    BeeFishMisc::Base64EncodeStream
+                        base64(pagedStream);
+                        
+                    postRequest.setOnData(
+                        [&pageIndex, &contentLength, &contentType, &content, &base64](const BString& data) {
+                            contentLength += data.size();
+
+                            if (contentType.startsWith("text"))
+                            {
+                                content.setString(data, ++pageIndex, true, false);
+                            }
+                            else {
+                                base64 << data;
+                            }
     cerr << "POSTED PAGE " 
         << pageIndex
         << " LENGTH "
@@ -238,7 +262,6 @@ using namespace BeeFishWeb;
         << " TOTAL "
         << contentLength
         << endl;
-                            }
                         }
                     );
                     
@@ -248,12 +271,13 @@ using namespace BeeFishWeb;
 
                     postRequest.flush();
                     
+                    if (!contentType.startsWith("text"))
+                        base64.flush();
+                
+                    http["content"].endString(pageIndex, indexData);
                     http["content-type"].setString(contentType);
                     http["content-length"].setInteger(contentLength);
-                    if (contentType.startsWith("text/"))
-                        http["content"].setString(text);
-                    else
-                        content.truncateArray(pageIndex);
+                    
                     
                 }
                 

@@ -21,10 +21,6 @@ using namespace BeeFishJSON;
 class JSONPath :
     public Path
 {
-private:
-    bool _indexString = false;
-    Index _stringPageIndex = 0;
-    
 public:
     inline static const Index VALUE = 0;
     inline static const Index PROPERTIES = 1;
@@ -430,86 +426,95 @@ public:
         return number;
     }
     
-    void setString(const BString& value, bool finalPart = true)
+    void setString(const BString& value, Index pageIndex = 1, bool indexData = true, bool finalPart = true)
     {
+        assert(pageIndex > 0);
+        
         LockFile::ScopedLock lock(database());
         Path path = *this;
         setType(Type::STRING);
         
-        
-        if (_stringPageIndex == 0)
-        {
-            _indexString = !value.isData();
-        }
+        bool partChanged = false;
+        Index max = 0;
+        if (!path[VALUE].isDeadEnd())
+            max = path[VALUE].max<Index>();
         else
-            assert(!value.isData());
+            partChanged = true;
             
-        ++_stringPageIndex;
-        
-        bool indexPart = false;
         BString current;
-        if (_indexString &&
-            (current = path[VALUE][_stringPageIndex].getStringData())
-               != value)
+        if (pageIndex <= max &&
+            (current = path[VALUE][pageIndex].getStringData())
+                != value)
         {
-            removeWords(current, true);
-            indexPart = true;
+            if (path[VALUE].hasData() &&
+                path[VALUE].getData<bool>())
+            {
+                removeWords(current, true);
+            }
+            partChanged = true;
         }
         
-        path[VALUE][_stringPageIndex].setData<BString>(value);
         
-        if (_indexString && indexPart)
+        
+        path[VALUE][pageIndex].setData<BString>(value);
+        
+        if (indexData && partChanged)
             addWords(value, true);
             
         if (finalPart)
-            endString();
+            endString(1, indexData);
 
     }
     
-    void endString()
+    void endString(Index pageIndex, bool indexData)
     {
         Path path = *this;
         path = path[VALUE];
         Index max = 0;
+        
         if (!path.isDeadEnd())
             max = path.max<Index>();
-        
-        for (Index i = _stringPageIndex + 1;
+            
+        bool currentIndexData =
+            path.hasData() &&
+            path.getData<bool>();
+            
+        for (Index i = pageIndex + 1;
             i <= max;
             ++i)
         {
+            if (currentIndexData)
+            {
+                BString current =
+                    path[i].getStringData();
+                removeWords(current, true);
+            }
             path.clear(i);
         }
         
-        _indexString = false;
-        _stringPageIndex = 0;
+        path.setData<bool>(indexData);
+        
     }
     
     void removeWords() {
         
         Path path = *this;
-        if (!path[VALUE].isDeadEnd())
-        {
+        Path strings = path[VALUE];
+        bool remove = 
+            strings.hasData() &&
+            strings.getData<bool>();
+                
+        if (remove) {
+            Iterable<Index> parts(strings);
             
-            Path values = path[VALUE];
-            Path strings = values;
-            Iterable<Index> parts(values);
-            bool isData = false;
-            bool isFirst = true;
+            
             for (const auto index : parts)
             {
                 BString current =
                     strings[index].getStringData();
                     
-                if (isFirst)
-                {
-                    isData = current.isData();
-                    isFirst = false;
-                }
+                removeWords(current, true);
                 
-                if (!isData) {
-                    removeWords(current, true);
-                }
             }
         
         }
@@ -635,11 +640,27 @@ public:
         {
             path = path.parent(key);
             BString newString =
-                key + BString("/") + string;
+                key + 
+                BString("/") + 
+                string;
             string = newString;
         }
         if (string.size())
             string.pop_back();
+
+        const BString http =
+            BString("{HTTP}").encodeURI();
+
+        if (string.contains(http) &&
+            !string.endsWith(http))
+        {
+            string = string.substr(
+                0,
+                string.find(http) - 1
+            );
+            cerr << "WITHOUT HTTP: " << string << endl;
+        }
+            
         return string;
     }
 
@@ -1165,6 +1186,7 @@ public:
             {
                 BString string =
                     strings[index].getStringData();
+                    
                 out << string.escape();
             }
             

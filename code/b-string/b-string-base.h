@@ -28,8 +28,11 @@
 #include <filesystem>
 #endif
 
+#include "../Miscellaneous/Base64.hpp"
 #include "../power-encoding/power-encoding.h"
 #include "../Database/Index.hpp"
+
+
 #include "locale.hpp"
 #include "char.h"
 
@@ -41,6 +44,7 @@ namespace BeeFishBString
 {
 
 using namespace BeeFishDatabase;
+using namespace BeeFishMisc;
 
 //typedef vector<Char> BStringBase;
 typedef uint8_t Byte;
@@ -475,10 +479,31 @@ public:
         return segments;
     }
 
-#ifdef SERVER
 
     BString toBase64() const
     {
+        // Set up input and output streams
+        std::ostringstream output;
+
+        // Create the encoder object
+        BeeFishMisc::Base64EncodeStream
+            encoder(output);
+        
+        // Decode the input stream to the output stream
+        encoder << *this;
+        encoder << flush;
+    
+        return output.str();
+        
+        /*
+        std::stringstream stream;
+        Base64OutputStream base64(stream);
+        base64 << *this;
+        base64.flush();
+        
+        return stream.str();
+        */
+        /*
         const std::string& data = *this;
         BString encoded;
         CryptoPP::StringSource(
@@ -490,10 +515,38 @@ public:
             )
         );
         return encoded;
+        */
     }
 
     BString fromBase64() const
     {
+         
+        const std::string base64 = *this;
+        std::stringstream output;
+        Base64DecodeStream decoder(output);
+        decoder << base64;
+
+        return output.str();
+    
+    /*
+    
+        // The Base64 encoded string
+        const std::string&
+            encoded_string = *this;
+            
+        // Set up input and output streams
+        std::istringstream iss(encoded_string);
+        std::ostringstream oss;
+
+        // Create the libb64 decoder object
+        base64::decoder decoder;
+
+        // Decode the input stream to the output stream
+        decoder.decode(iss, oss);
+    
+        return oss.str();
+        */
+        /*
         const BString& base64 = *this;
         BString decoded;
 
@@ -505,8 +558,10 @@ public:
             )
         );
         return decoded;
+        */
+        
     }
-
+#ifdef SERVER
     BString sha3() const
     {
         using namespace CryptoPP;
@@ -671,7 +726,8 @@ public:
     {
         return ltrim().rtrim();
     }
-
+    
+    
     bool contains(const Char& character) const
     {
         if (find(character) != std::string::npos)
@@ -715,7 +771,7 @@ public:
             char c = (*i);
 
             // Keep alphanumeric and other accepted characters intact
-            if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+            if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c == '{' || c == '}') {
                 escaped << c;
                 continue;
             }

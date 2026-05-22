@@ -1101,7 +1101,9 @@ cerr << "Child count " << count << endl;
             cout << "\tTesting toString after clear " << flush;
             BString str = test.toString();
             success = str == "https://test/a";
-
+            if (!success)
+                cout << str << endl;
+                
             outputSuccess(success);
         }
         

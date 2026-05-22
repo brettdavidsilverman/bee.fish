@@ -1,7 +1,7 @@
 BUILD  = ../../build
 OUTPUT = $(BUILD)/b-string
 CFLAGS = -std=c++17 -Wall -fmax-errors=1
-DEPS   = char.h b-string.h b-string-base.h stream.h test.h locale.hpp main.cpp Makefile
+DEPS   = char.h b-string.h b-string-base.h stream.h test.h locale.hpp ../Miscellaneous/Base64.hpp ../Miscellaneous/PagedStream.hpp main.cpp Makefile
 
 all:	$(OUTPUT)
 

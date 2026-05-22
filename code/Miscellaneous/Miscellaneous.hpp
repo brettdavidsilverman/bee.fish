@@ -6,6 +6,8 @@
 #include "Log.hpp"
 #include "Optional.hpp"
 #include "Date.hpp"
+#include "PagedStream.hpp"
+#include "Base64.hpp"
 #include "../Config.hpp"
 
 #endif

@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <ctime>
 #include <sstream>
-#include "../b-string/b-string.h"
+#include "../b-string/b-string-base.h"
 
 namespace BeeFishDate
 {

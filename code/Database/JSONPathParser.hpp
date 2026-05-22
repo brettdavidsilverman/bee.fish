@@ -23,6 +23,8 @@ namespace BeeFishDatabase {
         vector<Type> _typeStack;
         JSONPath _string;
         ostream& _log;
+        Index _stringPageIndex;
+        bool _indexString;
         
     public:
         using JSONParser::read;
@@ -285,16 +287,21 @@ namespace BeeFishDatabase {
                     _string = path[++index];
                 }
             }
+            _stringPageIndex = 0;
         }
         
         virtual void onpartstring(const BString& partString)
         {
-            _string.setString(partString, false);
+            ++_stringPageIndex;
+            if (_stringPageIndex == 1)
+                _indexString = !partString.isData();
+
+            _string.setString(partString, _stringPageIndex, _indexString, false);
         }
         
         virtual void onendstring(BeeFishJSON::String* match)
         {
-            _string.endString();
+            _string.endString(_stringPageIndex, _indexString);
             log(_string);
 
         }

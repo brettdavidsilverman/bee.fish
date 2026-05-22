@@ -365,8 +365,7 @@ inline bool testData()
               "From unsigned long to data and back",
               ulongCompare == ulong
           );
-
-
+          
     BString dataStart = "Hello World";
     BString base64 = dataStart.toBase64();
     BString dataEnd = base64.fromBase64();
@@ -375,7 +374,35 @@ inline bool testData()
               "From data to base64 and back",
               (dataStart == dataEnd)
           );
-assert(ok);
+    assert(ok);
+
+    std::string data;
+    
+    BeeFishMisc::PagedStream output(
+        [&data](const std::string& encoded)
+        {
+            data = encoded;
+        }
+    );
+    
+    BeeFishMisc::Base64EncodeStream
+        encoder(output);
+        
+    encoder << "a";
+    
+    ok = ok && testResult(
+        "Encoder before flush",
+        data == ""
+    );
+    
+    encoder << flush;
+    
+    ok = ok && testResult(
+        "Encoder with flush",
+        data == "YQ=="
+    );
+    
+    assert(ok);
 
 #ifdef SERVER
     BString message = "Hello World";
@@ -415,6 +442,23 @@ inline bool testEncodeURI()
               (decodedURI == string)
           );
 
+
+    BString string2 = "{braces}";
+    BString uri2 = string2.encodeURI();
+
+    ok &= testResult(
+              "Encode {braces}",
+              (uri2 == "{braces}")
+          );
+
+
+    BString decodedURI2 = uri2.decodeURI();
+
+    ok &= testResult(
+              "Decode {braces}",
+              (decodedURI2 == string2)
+          );
+          
     cout << endl;
 
     return ok;

@@ -179,109 +179,32 @@ public:
                 ["{HTTP}"]
                 ["content"];
 
-            BString data;
-
-            if (content.type() == Type::ARRAY)
+            if (content.type() == Type::STRING)
             {
-
-                Path contentPath = content;
-                contentPath = contentPath[JSONPath::CHILDREN];
-
-                Iterable<Index> contents(contentPath);
-
-                for (auto pageIndex : contents)
-                {
-
-                    assert(content.contains(pageIndex));
-
-                    if (content[pageIndex].type() == Type::STRING)
-                    {
-
-                        Path stringPath = content[pageIndex];
-                        stringPath = stringPath[JSONPath::VALUE];
-                        Iterable<Index> strings(stringPath);
-                        bool first = true;
-                        for (auto index : strings)
-                        {
-                            BString string =
-                                stringPath[index].getStringData();
-
-                            if (first)
-                            {
-                                assert(string.isData());
-
-                                Index dataStart =
-                                    string.find(",") + 1;
-
-                                string = string.substr(
-                                             dataStart
-                                         );
-
-                                first = false;
-                            }
-                            else
-                                assert(!string.isData());
-
-                            data = string.fromBase64();
-
-                            write(
-                                data.data(),
-                                data.size()
-                            );
-
-                            bytesTransferred += data.size();
-
-                            /*
-                            cerr << "BYTES TRANSFERED "
-                                 << data.size()
-                                 << " TOTAL "
-                                 << bytesTransferred
-                                 << " OF "
-                                 << contentLength
-                                 << " IN PAGE "
-                                 << pageIndex
-                                 << endl;
-                            */
-                        }
-
-
-                    }
-                    else {
-                        break;
-                    }
-
-
-                }
-                cerr << "FLUSH" << endl;
-                flush();
-                return;
-            }
-            else if (content.type() == Type::STRING)
-            {
-                Path path = content;
-                path = path[JSONPath::VALUE];
-                Iterable<Index> strings(path);
-                Path stringPath = path;
+                Path stringPath = content;
+                stringPath =stringPath[JSONPath::VALUE];
+                Iterable<Index> strings(stringPath);
+                Base64DecodeStream decoder(*this);
+                
+#warning need to handle base64 decode
                 for (auto index : strings)
                 {
-                    data =
+                    
+                    BString data =
                         stringPath[index]
                         .getStringData();
-
-                    write(
-                        data.data(),
-                        data.size()
-                    );
-
-                    bytesTransferred += data.size();
-                    cerr << "BYTES TRANSFERED "
-                         << data.size()
-                         << " TOTAL "
-                         << bytesTransferred
-                         << " OF "
-                         << contentLength
-                         << endl;
+                        
+                    if (index == 1 &&
+                        data.isData())
+                    {
+                        data = data.substr(
+                            data.find(",") + 1
+                        );
+                    }
+                    
+                    decoder << data;
                 }
+                
                 flush();
                 return;
             }

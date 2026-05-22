@@ -137,11 +137,18 @@ using namespace BeeFishDatabase;
                     IdIterator iterator = *_iterator;
                     assert(!iterator._isEnd);
                     ++iterator;
-                    //assert(!iterator._isEnd);
                     if (!iterator._isEnd) {
                         _value = toString(iterator);
                         _jsonPath = jsonPath(iterator);
-                        if (_value.startsWith(_parentValue + BString("/")))
+                        if (
+                            (
+                                _value +
+                                BString("/")
+                            ).startsWith(
+                                _parentValue + 
+                                BString("/")
+                            )
+                        )
                         {
                             _parentValue = _value;
                             _parentPath = _jsonPath;
@@ -150,14 +157,12 @@ using namespace BeeFishDatabase;
                         else {
                             _value = _parentValue;
                             _jsonPath = _parentPath;
-                          //  restore();
                             break;
                         }
                     }
                     else {
                         _value = _parentValue;
                         _jsonPath = _parentPath;
-                       // restore();
                         break;
                     }
                 }
