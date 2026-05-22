@@ -76,6 +76,7 @@ namespace BeeFishHTTPS {
                 databaseCount
             ),
             thread_pool(threadCount),
+            _port(port),
             _ioContext(ioContext),
             _acceptor(
                 ioContext,
@@ -126,6 +127,11 @@ namespace BeeFishHTTPS {
         // Defined in session.h
         virtual ~Server();
         
+        const unsigned short port() const
+        {
+            return _port;
+        }
+        
         static BString password()
         {
             return "test";
@@ -166,6 +172,7 @@ namespace BeeFishHTTPS {
         }
 
     private:
+        unsigned short _port;
         boost::asio::io_context& _ioContext;
         boost::asio::ip::tcp::acceptor _acceptor;
         boost::asio::ssl::context _context;

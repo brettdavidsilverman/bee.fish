@@ -23,9 +23,10 @@ private:
 
 protected:
     Server* _server;
+    bool _deleteServer = false;
+    BString _sessionId;
     BString _origin;
     BString _ipAddress;
-    BString _sessionId;
     BString _userId;
     
 public:
@@ -52,14 +53,45 @@ public:
         BString sessionId = ""
     ) :
         _server(server),
+        _sessionId(sessionId),
         _origin(origin),
-        _ipAddress(ipAddress),
-        _sessionId(sessionId)
+        _ipAddress(ipAddress)
+        
     {
         _authenticated = false;
 
         if (_sessionId.size())
             authenticate();
+    }
+    
+    Authentication(
+        BString origin,
+        BString databaseFilename = DATABASE_FILENAME,
+        BString sessionId = "",
+        BString ipAddress = "127.0.0.1"
+        
+    ) :
+        _server(
+            new BeeFishAuthentication::Server(
+                origin,
+                databaseFilename
+            )
+        ),
+        _deleteServer(true),
+        _sessionId(sessionId),
+        _origin(origin),
+        _ipAddress(ipAddress)
+    {
+        _authenticated = false;
+
+        if (_sessionId.size())
+            authenticate();
+    }
+    
+    virtual ~Authentication()
+    {
+        if (_deleteServer)
+            delete _server;
     }
 
 public:

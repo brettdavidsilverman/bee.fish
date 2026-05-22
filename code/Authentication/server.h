@@ -41,7 +41,7 @@ public:
             const BString& databaseFile,
             Index databaseCount
           ) :
-        _port(port),
+        
         _databaseFile(databaseFile),
         _databaseCount(databaseCount),
         _databaseLocks(_databaseCount)
@@ -50,11 +50,34 @@ public:
         stringstream stream;
         stream << "https://" + hostName;
             
-        if (_port != 443)
-            stream << ":" << _port;
+        if (port != 443)
+            stream << ":" << port;
                 
         _origin = stream.str();
         
+        setupDatabase();
+
+    }
+    
+    Server( const BString& origin,
+            const BString& databaseFile,
+            Index databaseCount = 1
+          ) :
+        _origin(origin),
+        _databaseFile(databaseFile),
+        _databaseCount(databaseCount),
+        _databaseLocks(_databaseCount)
+    {
+        setupDatabase();
+    }
+
+    virtual ~Server()
+    {
+        for (Index i = 0; i < _databaseCount; ++i)
+            delete _databases[i];
+    }
+    
+    void setupDatabase() {
         std::cout << "Setting up database..." << std::endl;
 
         for (Size i = 0; i < _databaseCount ; ++i)
@@ -63,14 +86,6 @@ public:
                 new JSONDatabase(_databaseFile)
             );
         }
-
-    }
-
-    virtual ~Server()
-    {
-        for (Index i = 0; i < _databaseCount; ++i)
-            delete _databases[i];
-
     }
 
     const BString& origin() const
@@ -84,12 +99,7 @@ public:
         return _databaseFile;
     }
 
-    const unsigned short port() const
-    {
-
-        return _port;
-    }
-
+    
     std::vector<JSONDatabase*>& databases()
     {
         return _databases;
@@ -126,7 +136,6 @@ public:
 
 protected:
     BString _origin;
-    unsigned short _port;
     BString _databaseFile;
     Size _databaseCount;
     std::vector<JSONDatabase*> _databases;
