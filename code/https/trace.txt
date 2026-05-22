@@ -1,0 +1,14 @@
+==302965== Memcheck, a memory error detector
+==302965== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==302965== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==302965== Command: ../../build/https -port 8000 -test
+==302965== Parent PID: 302964
+==302965== 
+==302965== 
+==302965== HEAP SUMMARY:
+==302965==     in use at exit: 0 bytes in 0 blocks
+==302965==   total heap usage: 809,751 allocs, 809,751 frees, 88,962,726 bytes allocated
+==302965== 
+==302965== All heap blocks were freed -- no leaks are possible
+==302965== 
+==302965== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

@@ -651,8 +651,7 @@ public:
         const BString http =
             BString("{HTTP}").encodeURI();
 
-        if (string.contains(http) &&
-            !string.endsWith(http))
+        if (string.contains(http))
         {
             string = string.substr(
                 0,
