@@ -17,7 +17,7 @@ using namespace BeeFishHTTPS;
 
 void start(
     boost::asio::io_context& io_context,
-    Server& server
+    BeeFishHTTPS::Server& server
 );
 
 std::mutex _wait;
@@ -157,7 +157,7 @@ int main(int argc, const char* argv[])
 
 void start(
     boost::asio::io_context& io_context,
-    Server& server
+    BeeFishHTTPS::Server& server
 )
 {
         

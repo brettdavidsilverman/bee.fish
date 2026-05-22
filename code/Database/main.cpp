@@ -103,7 +103,7 @@ int main(int argc, const char* argv[])
         path = path[p];
     }
             
-    clog << "Using origin " << path.toString() << endl;
+    clog << "Using origin " << url << endl;
     
     bool propertiesArg =
         (hasArg(argc, argv, "-properties") != -1);

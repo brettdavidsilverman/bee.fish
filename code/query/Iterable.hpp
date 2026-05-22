@@ -2,32 +2,40 @@
 #define BEE_FISH__QUERY__ITERABLE_HPP
 
 #include "../Database/Database.hpp"
+#include "../Authentication/authentication.h"
 
 namespace BeeFishQuery {
 
 using namespace std;
 using namespace BeeFishPowerEncoding;
 using namespace BeeFishDatabase;
+using namespace BeeFishAuthentication;
 
     class Iterable
     {
     protected:
         JSONDatabase* _database;
         PathBase* _path;
+        BeeFishAuthentication::
+            Authentication& _auth;
     public:
 
         Iterable(
             JSONDatabase& database,
-            PathBase& path
+            PathBase& path,
+            BeeFishAuthentication::
+                Authentication& auth
         ) :
             _database(&database),
-            _path(path.copy())
+            _path(path.copy()),
+            _auth(auth)
         {
         }
         
         Iterable(const Iterable& source) :
             _database(source._database),
-            _path(source._path->copy())
+            _path(source._path->copy()),
+            _auth(source._auth)
         {
         }
         
@@ -40,9 +48,9 @@ using namespace BeeFishDatabase;
         protected:
             typedef BeeFishDatabase::Iterable<JSONPath::Id>::Iterator IdIterator;
             typedef BeeFishDatabase::Iterable<JSONPath::Id> IdIterable;
+            const Iterable* _container = nullptr;
             IdIterable* _iterable = nullptr;
             IdIterator* _iterator = nullptr;
-            JSONDatabase* _database = nullptr;
             BString _parentValue;
             BString _value;
             JSONPath _parentPath;
@@ -59,16 +67,17 @@ using namespace BeeFishDatabase;
             Iterator(
                 const Iterable& iterable
             ) :
+                _container(&iterable),
                 _iterable(new IdIterable(*iterable._path)),
-                _iterator(new IdIterator(*_iterable)),
-                _database(iterable._database)
+                _iterator(new IdIterator(*_iterable))
             {
                 setValue();
             }
             
             Iterator(
                 const Iterator& source
-            )
+            ) :
+                _container(source._container)
             {
                 _iterable = nullptr;
                     
@@ -77,7 +86,6 @@ using namespace BeeFishDatabase;
                 else
                     _iterator = nullptr;
                     
-                _database = source._database;
                 _parentValue = source._parentValue;
                 _value = source._value;
                 _parentPath = source._parentPath;
@@ -100,6 +108,7 @@ using namespace BeeFishDatabase;
             
             Iterator& operator = (const Iterator& source)
             {
+    
                 if (_iterator)
                     delete _iterator;
                     
@@ -113,7 +122,8 @@ using namespace BeeFishDatabase;
                 else
                     _iterator = nullptr;
                     
-                _database = source._database;
+                _container = source._container;
+                    
                 _parentValue = source._parentValue;
                 _value = source._value;
                 _parentPath = source._parentPath;
@@ -147,24 +157,26 @@ using namespace BeeFishDatabase;
                             ).startsWith(
                                 _parentValue + 
                                 BString("/")
-                            )
+                            ) 
                         )
                         {
                             _parentValue = _value;
                             _parentPath = _jsonPath;
-                            *_iterator = iterator;
+                            
                         }
-                        else {
+                        else if (_parentValue != "") {
                             _value = _parentValue;
                             _jsonPath = _parentPath;
                             break;
                         }
                     }
-                    else {
+                    else if (_parentValue != "") {
                         _value = _parentValue;
                         _jsonPath = _parentPath;
                         break;
                     }
+                    
+                    *_iterator = iterator;
                 }
                 
                 
@@ -173,17 +185,17 @@ using namespace BeeFishDatabase;
             BString toString(IdIterator& iterator) 
             {
                 
-                return jsonPath(iterator).toString();
+                return jsonPath(iterator).toString(_container->_auth);
             }
             
             JSONPath jsonPath(IdIterator& iterator)
             {
-                Path path = _database->objects()[*iterator];
+                Path path = _container->_database->objects()[*iterator];
                 
                 Index index = path.getData<Index>();
                 
                 return JSONPath(
-                    *_database,
+                    *_container->_database,
                     index
                 );
                 
@@ -224,17 +236,7 @@ using namespace BeeFishDatabase;
                 ++(*this);
                 return tmp;
             }
-/*
-            void save()
-            {
-                _iterator.save();
-            }
             
-            void restore()
-            {
-                _iterator.restore();
-            }
-*/
             friend bool operator == (
                 const Iterator& a,
                 const Iterator& b
@@ -273,7 +275,7 @@ using namespace BeeFishDatabase;
         
         };
         
-        
+        /*
         class ReverseIterator {
         protected:
             typedef BeeFishDatabase::Iterable<JSONPath::Id>::ReverseIterator IdIterator;
@@ -487,7 +489,7 @@ using namespace BeeFishDatabase;
 
         
         };
-   
+   */
         virtual Iterator begin() 
         {
             return Iterator(*this);
@@ -499,7 +501,7 @@ using namespace BeeFishDatabase;
             return Iterator();
         }
         
-        
+        /*
         virtual ReverseIterator rbegin() 
         {
             return ReverseIterator(*this);
@@ -510,7 +512,7 @@ using namespace BeeFishDatabase;
         { 
             return ReverseIterator();
         }
-        
+        */
     };
 
 }

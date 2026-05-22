@@ -2,6 +2,9 @@
 #define BEE_FISH_DATABASE_JSON_PATH_PARSER_HPP
 #include "../json/json.h"
 #include "../json/json-parser.h"
+
+#include "../Authentication/authentication.h"
+
 #include "JSONDatabase.hpp"
 #include "JSONPath.hpp"
 #include "NullStream.hpp"
@@ -11,35 +14,40 @@ namespace BeeFishDatabase {
     using namespace BeeFishParser;
     using namespace BeeFishScript;
     using namespace BeeFishJSON;
-     
+    using namespace BeeFishAuthentication;
+    
     class JSONPathParser :
         public JSONParser
     {
     private:
         JSONPath _start;
+        ostream& _log;
+        Authentication& _auth;
         vector<JSONPath> _pathStack;
         vector<Index> _indexStack;
         vector<BString> _keyStack;
         vector<Type> _typeStack;
         JSONPath _string;
-        ostream& _log;
+        
         Index _stringPageIndex;
         bool _indexString;
         
     public:
         using JSONParser::read;
 
-        JSONPathParser(JSONPath path, Match& match, ostream& log = cnull) :
+        JSONPathParser(JSONPath path, Match& match, Authentication& auth, ostream& log = cnull) :
             JSONParser(match),
             _start(path),
-            _log(log)
+            _log(log),
+            _auth(auth)
         {
         }
           
-        JSONPathParser(JSONPath path, ostream& log = cnull) :
+        JSONPathParser(JSONPath path, Authentication& auth, ostream& log = cnull) :
             JSONParser(),
             _start(path),
-            _log(log)
+            _log(log),
+            _auth(auth)
         {
         }
 
@@ -332,7 +340,7 @@ namespace BeeFishDatabase {
             if (&_log != &cnull) {
                 BeeFishDate::writeDateTime(_log);
                 _log << " "
-                     << path.toString()
+                     << path.toString(_auth)
                      << endl;
             }
         }

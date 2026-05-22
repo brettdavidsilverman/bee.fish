@@ -92,9 +92,9 @@ public:
 
         App::ScopedDatabase scoped(app);
 
-        JSONDatabase* database = scoped;
-        BeeFishQuery::Words words = database->words();
-        Path bookmark(*database, app->_bookmark);
+        JSONDatabase& database = scoped;
+        BeeFishQuery::Words words = database.words();
+        Path bookmark(database, app->_bookmark);
         Size bytesTransferred = 0;
         Size pageSize = getPageSize();
         Size contentLength = app->contentLength();
@@ -131,10 +131,11 @@ public:
                 .getPath();
 
             BeeFishQuery::Iterable
-            matches(
-                *database,
-                path
-            );
+                matches(
+                    database,
+                    path,
+                    *app
+                );
 
             for (auto it = matches.begin();
                     it != matches.end();

@@ -571,9 +571,7 @@ namespace BeeFishHTTPS {
         if (_newSession)
             delete _newSession;
             
-        for (Size i = 0; i < _databaseCount; ++i)
-            delete _databases[i];
-
+        
     }
     
     // Declared in server.h
@@ -619,10 +617,10 @@ namespace BeeFishHTTPS {
     
 
     // Declared in authentication.h
-    inline Authentication::Authentication(
+    inline BeeFishHTTPS::Authentication::Authentication(
         Session* session
-    ) : Authentication(
-            session,
+    ) : BeeFishAuthentication::Authentication(
+            session->server(),
             session->origin(),
             session->ipAddress(),
             session->
@@ -632,11 +630,7 @@ namespace BeeFishHTTPS {
     {
     }
     
-    inline Server* Authentication::server()
-    {
-        return _session->server();
-    }
-
+    
     // Defined in app.h
     inline bool App:: parseWebRequest(
         Parser& parser

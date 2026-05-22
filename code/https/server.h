@@ -32,6 +32,7 @@
 #include "../Database/Database.hpp"
 #include "../b-string/b-string.h"
 #include "../Miscellaneous/Date.hpp"
+#include "../Authentication/server.h"
 
 #include "date.h"
 
@@ -54,7 +55,9 @@ namespace BeeFishHTTPS {
         boost::asio::ssl::context::password_purpose purpose
     );
     
-    class Server : public thread_pool
+    class Server :
+        public BeeFishAuthentication::Server,
+        public thread_pool
     {
     public:
         Server( const BString& hostName,
@@ -66,8 +69,13 @@ namespace BeeFishHTTPS {
                   Size threadCount,
                   Size databaseCount
         ) :
+            BeeFishAuthentication::Server(
+                hostName,
+                port,
+                databaseFile,
+                databaseCount
+            ),
             thread_pool(threadCount),
-            _port(port),
             _ioContext(ioContext),
             _acceptor(
                 ioContext,
@@ -78,18 +86,9 @@ namespace BeeFishHTTPS {
             ),
             _context(boost::asio::ssl::context::sslv23),
             _threadCount(threadCount),
-            _newSession(nullptr),
-            _databaseCount(databaseCount),
-            _databaseLocks(_databaseCount)
+            _newSession(nullptr)
         {
-            stringstream stream;
-            stream << "https://" + hostName;
-            
-            if (_port != 443)
-                stream << ":" << _port;
-                
-            _origin = stream.str();
-            
+
             std::cout << "Opening transaction file " << std::endl;
     
             _transactionFile.open(
@@ -116,17 +115,7 @@ namespace BeeFishHTTPS {
             _context.use_private_key_file(KEY_FILE, boost::asio::ssl::context::file_format::pem);
   
             _context.use_tmp_dh_file(TMP_DH_FILE);
-
-            std::cout << "Setting up database..." << std::endl;
-
-            _databaseFile = databaseFile;
-            for (Size i = 0; i < _databaseCount ; ++i)
-            {
-                _databases.push_back(
-                    new JSONDatabase(_databaseFile)
-                );
-            }
-            
+  
             std::cout << "Start accepting..." << std::endl;
 
             startAccept();
@@ -135,61 +124,11 @@ namespace BeeFishHTTPS {
         }
 
         // Defined in session.h
-        ~Server();
-    
+        virtual ~Server();
+        
         static BString password()
         {
             return "test";
-        }
-    
-        const BString origin() const
-        {
-             
-            return _origin;
-        }
-        
-        const BString databaseFile() const
-        {
-            return _databaseFile;
-        }
-        
-        const unsigned short port() const
-        {
-             
-            return _port;
-        }
-        
-        std::vector<JSONDatabase*>& databases()
-        {
-            return _databases;
-        }
-        
-        JSONDatabase* requestDatabase()
-        {
-            while (1) {
-                for (Size i = 0; i < _databaseCount; ++i)
-                {
-                    if (_databaseLocks[i].try_lock())
-                    {
-                        JSONDatabase*
-                            database = 
-                            _databases[i];
-                        return database;
-                    }
-                }
-                _databaseLock.lock();
-            }
-        }
-        
-        void releaseDatabase(JSONDatabase* database) {
-            for (Index i = 0; i < _databaseCount; ++i)
-            {
-                if (_databases[i] == database) {
-                    _databaseLocks[i].unlock();
-                    _databaseLock.unlock();
-                    return;
-                }
-            }
         }
         
         // Defined in session.h
@@ -227,20 +166,14 @@ namespace BeeFishHTTPS {
         }
 
     private:
-        BString _origin;
-        unsigned short _port;
         boost::asio::io_context& _ioContext;
         boost::asio::ip::tcp::acceptor _acceptor;
         boost::asio::ssl::context _context;
-        BString _databaseFile;
         std::ofstream _transactionFile;
         std::mutex _mutex;
         Size _threadCount;
         Session* _newSession;
-        Size _databaseCount;
-        std::vector<JSONDatabase*> _databases;
-        std::vector<std::mutex> _databaseLocks;
-        std::mutex _databaseLock;
+        
     };
     
     inline std::string my_password_callback(

@@ -155,7 +155,7 @@ namespace BeeFishHTTPS {
 
         stream << 
             "curl -X POST " <<
-            origin << "/" <<
+            origin << "/my/" <<
             file.filename() << " "
             << "-c cookies -b cookies " <<
             "-H \"Content-Type: application/json; charset=utf-8\" " <<
@@ -173,7 +173,7 @@ namespace BeeFishHTTPS {
             stringstream stream1;
             stream1
                 << "curl "
-                << origin  << "/" << file.filename() << " "
+                << origin  << "/my/" << file.filename() << " "
                 << "-c cookies -b cookies "
                 << " -s -k > "
                 << tempFile;

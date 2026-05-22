@@ -59,28 +59,18 @@ using namespace BeeFishWeb;
                 
             const BString& origin = _session->origin();
             const BString& host = _session->host();
-
-                /*
-            const BString& userId =
-                Authentication::userId();
-                */
-                /*
-            const BString& search =
-                request()->search();
-            */
-        
-            
             
             ScopedDatabase scoped(this);
             
-            JSONDatabase* database = scoped;
+            JSONDatabase& database = scoped;
             JSONPath jsonPath;
             
             try {
                 jsonPath = JSONPath::fromString(
-                    *database,
+                    database,
                     host,
                     url,
+                    *this,
                     method
                 );
                 _bookmark = jsonPath.index();
@@ -182,6 +172,7 @@ using namespace BeeFishWeb;
                         parser(
                             jsonPath,
                             postRequest,
+                            *this,
                             clog
                         );
 
@@ -254,13 +245,6 @@ using namespace BeeFishWeb;
                             else {
                                 base64 << data;
                             }
-    cerr << "POSTED PAGE " 
-        << pageIndex
-        << " LENGTH "
-        << data.size()
-        << " TOTAL "
-        << contentLength
-        << endl;
                         }
                     );
                     
@@ -280,7 +264,7 @@ using namespace BeeFishWeb;
                     
                 }
                 
-                _content = BString("\"") + jsonPath.toString().escape() + BString("\"");
+                _content = BString("\"") + jsonPath.toString(*this).escape() + BString("\"");
                 _serve = App::SERVE_CONTENT;
                 _status = 200;
                 _statusText = "ok";

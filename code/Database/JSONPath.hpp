@@ -6,6 +6,8 @@
 #include "../Database/DatabaseBase.hpp"
 #include "../Database/Path.hpp"
 #include "../web-request/web-request.h"
+#include "../Authentication/authentication.h"
+
 #include "NullStream.hpp"
 #include "JSONIndex.hpp"
 
@@ -15,7 +17,7 @@ using namespace BeeFishPowerEncoding;
 using namespace BeeFishParser;
 using namespace BeeFishScript;
 using namespace BeeFishJSON;
-
+using namespace BeeFishAuthentication;
 
 
 class JSONPath :
@@ -160,11 +162,6 @@ public:
         return database().words();
     }
     
-    bool isUserRoot() const
-    {
-        return isRoot() || parent().isRoot();
-    }
-
 
     JSONPath operator [] (const BString& property)
     {
@@ -634,21 +631,45 @@ public:
         return path;
     }
 
+    bool isUserRoot() const
+    {
+        return
+            isRoot() || 
+            parent().isRoot();// || 
+           // parent().parent().isRoot();
+    }
+    
+    
 
-
-    BString toString() {
+    BString toString(Authentication& auth) {
         JSONPath path = *this;
         BString string;
         BString key;
+        const BString& userId = auth.userId();
+        
         while (!path.isRoot())
         {
+            
             path = path.parent(key);
-            BString newString =
+                
+            if (path.isUserRoot())
+            {
+                if (key == userId)
+                {
+                    key = "my";
+                }
+                else if (!path.isRoot())
+                    return "";
+                
+            }
+            
+            string =
                 key + 
                 BString("/") + 
                 string;
-            string = newString;
+           // string = newString;
         }
+        
         if (string.size())
             string.pop_back();
 
@@ -661,9 +682,9 @@ public:
                 0,
                 string.find(http) - 1
             );
-            cerr << "WITHOUT HTTP: " << string << endl;
         }
-            
+        
+
         return string;
     }
 
@@ -684,17 +705,22 @@ public:
         }
     };
 
-    static JSONPath fromString(JSONDatabase& database, const BeeFishWeb::URL& url, const BString& method = "GET")
+    static JSONPath fromString(JSONDatabase& database, const BeeFishWeb::URL& url, Authentication& auth, const BString& method = "GET")
     {
         return fromString(
             database,
             url.origin(),
-            url
+            url,
+            auth,
+            method
         );
     }
     
-    static JSONPath fromString(JSONDatabase& database, const BString& origin, const BeeFishWeb::URL& url, const BString& method = "GET")
+    static JSONPath fromString(JSONDatabase& database, const BString& origin, const BeeFishWeb::URL& url, Authentication& auth, const BString& method = "GET")
     {
+        
+        assert(auth.authenticated());
+        
         JSONPath originPath =
             database.origin(origin);
 
@@ -704,11 +730,30 @@ public:
         // Loop through all tokens
         JSONPath path = originPath;
         bool success = true;
+        Index count = 0;
+        
+        const BString& userId = auth.userId();
         
         for (BString key : paths)
         {
-
-            if (key.isDigitsOnly()) {
+            if (++count == 1) {
+                if (key == "my" || key == userId)
+                {
+                    if (path.contains(userId) || method == "POST")
+                        path = path[userId];
+                    else 
+                    {
+                        success = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    success = false;
+                    break;
+                }
+            }
+            else if (key.isDigitsOnly()) {
                 Index index = atol(key.c_str());
                 if (path.contains(index))
                     path = path[index];

@@ -34,8 +34,7 @@ public:
 
         if (!authenticated())
         {
-return;
-            throw std::runtime_error("Not authenticated");
+            return;
         }
 
 
@@ -75,10 +74,10 @@ return;
 
         ScopedDatabase scoped(this);
 
-        JSONDatabase* database = scoped;
+        JSONDatabase& database = scoped;
         
         Path userData =
-            database->userData(_userId);
+            database.userData(_userId);
             
         Path bookmark = userData[URLS];
         
