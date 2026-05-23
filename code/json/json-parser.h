@@ -260,6 +260,8 @@ namespace BeeFishJSON
         
         parser.read(in);
         
+        parser.eof();
+        
         return in;
     }
 

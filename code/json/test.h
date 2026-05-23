@@ -24,6 +24,7 @@ inline bool testSets();
 inline bool testKeyedSets();
 inline bool testArrays();
 inline bool testObjects();
+inline bool testErrors();
 inline bool testAllFiles(std::filesystem::path directory);
 inline bool testFile(Parser& parser, std::filesystem::path file, bool expect);
 
@@ -59,7 +60,8 @@ inline bool test()
 #endif
     ok = ok && testEmojis();
     ok = ok && testTypes();
-
+    ok = ok && testErrors();
+    
     ok = ok && testAllFiles(TEST_DIRECTORY);
 
     if (ok)
@@ -587,7 +589,23 @@ inline bool testObjects()
 
 }
 
+inline bool testErrors()
+{
+    cout << "Emojis" << endl;
 
+    bool ok = true;
+    JSONParser parser;
+    parser.read("\"");
+    parser.eof();
+    
+    ok = parser.result() != true;
+    
+    cerr << parser.getError() << endl;
+    
+
+    return ok;
+        
+}
 
 inline bool testEmojis()
 {

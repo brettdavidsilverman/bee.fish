@@ -82,9 +82,9 @@ namespace BeeFishWeb {
                     this->_value
                 ),
                 
-                new Optional(
-                    new NewLine()
-                )
+        
+                new NewLine()
+                
                 
             );
             

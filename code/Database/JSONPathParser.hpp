@@ -55,10 +55,12 @@ namespace BeeFishDatabase {
         {
 
 #ifdef DEBUG
+/*
             assert(_pathStack.size() == 0);
             assert(_indexStack.size() == 0);
             assert(_keyStack.size() == 0);
             assert(_typeStack.size() == 0);
+*/
 #endif
 
         }

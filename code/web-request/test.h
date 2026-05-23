@@ -359,7 +359,7 @@ using namespace BeeFishTest;
         
         ok = ok && test(
             "Simplest get",
-            "GET / HTTP/1.1",
+            "GET / HTTP/1.1\r\n",
             "/"
         );
         
@@ -446,7 +446,7 @@ using namespace BeeFishTest;
         bool ok = true;
         
         auto testRequest =
-        [](string label, string request, bool parseJSON = true, bool testHeaders = false, bool testBody = false)
+        [](string label, string request, bool parseJSON = true, bool testHeaders = false, bool testBody = false, bool expectResult = true)
         {
             cout << "\t" << label << ":" << endl;
             
@@ -456,7 +456,7 @@ using namespace BeeFishTest;
             parser.eof();
     
             
-            bool ok = webRequest.result() == true;
+            bool ok = webRequest.result() == expectResult;
             BeeFishMisc::outputSuccess(ok);
 
             if (ok && testHeaders)
@@ -491,7 +491,13 @@ using namespace BeeFishTest;
         ok = ok && testRequest(
             "get simplest",
             
-            "GET / HTTP/1.1"
+            "GET / HTTP/1.1\r\n"
+            "\r\n",
+            
+            false,
+            false,
+            false,
+            true
         );
         
         
@@ -499,20 +505,35 @@ using namespace BeeFishTest;
             "get next simplest",
             
             "GET /sample/ HTTP/1.1\r\n"
+            "\r\n",
+            
+            false,
+            false,
+            false,
+            true
         );
         
         ok = ok && testRequest(
             "get simplest correct",
             
             "GET /sample/ HTTP/1.1\r\n"
-            "\r\n"
+            "\r\n",
+            
+            false,
+            false,
+            false,
+            true
         );
 
         ok = ok && testRequest(
             "get with simplest header",
             
             "GET /sample/ HTTP/1.1\r\n"
-            "Host: bee.fish",
+            "Host: bee.fish\r\n"
+            "\r\n",
+            
+            false,
+            true,
             false,
             true
         );
@@ -521,9 +542,14 @@ using namespace BeeFishTest;
             "get with next simplest header",
             
             "GET /sample/ HTTP/1.1\r\n"
-            "Host: bee.fish\r\n",
+            "Host: bee.fish\r\n"
+            "\r\n",
+            
+            false,
+            true,
             false,
             true
+            
         );
         
         ok = ok && testRequest(
@@ -531,6 +557,9 @@ using namespace BeeFishTest;
             "GET /sample/?key= HTTP/1.1\r\n"
             "Host: bee.fish\r\n"
             "\r\n",
+            
+            false,
+            true,
             false,
             true
         );
@@ -540,6 +569,8 @@ using namespace BeeFishTest;
             "GET /sample/?key HTTP/1.1\r\n"
             "Host: bee.fish\r\n"
             "\r\n",
+            false,
+            true,
             false,
             true
         );
@@ -552,6 +583,7 @@ using namespace BeeFishTest;
             "Host: bee.fish\r\n"
             "\r\n"
             "{}",
+            true,
             true,
             true,
             true
@@ -567,6 +599,7 @@ using namespace BeeFishTest;
             "{}\r\n",
             true,
             true,
+            true,
             true
         );
 
@@ -577,6 +610,7 @@ using namespace BeeFishTest;
             "Host: bee.fish\r\n"
             "\r\n"
             "{\"method\":\"logon\",\"name\":\"Brett\",\"secret\":\"XATG4YZdKVn145VtbCZNl0DcNu/uh/UtnbebTOsSkfUHemzptLOb8lTYmo6JnhLhovGtgXXO1KSeXYIyRfsTtw==\"}",
+            true,
             true,
             true,
             true
@@ -592,10 +626,23 @@ using namespace BeeFishTest;
             "1234",
             true,
             true,
+            true,
             true
         );
         
-        
+        ok = ok && testRequest(
+            "post invalid string",
+            
+            "POST /sample/ HTTP/1.1\r\n"
+            "Host: bee.fish\r\n"
+            "Content-length: 6\r\n"
+            "\r\n"
+            "\"hello",
+            true,
+            true,
+            false,
+            false
+        );
         
         if (ok)
         {
@@ -631,7 +678,7 @@ using namespace BeeFishTest;
         if (ok)
         {
             string request =
-            "GET /client/storage/?id=/jHJPjHicH8TkfE4yfE4fEyfEx8R8OTjJ8OTifDkx8OR8OMnw4x8OHwyfDHwnweTjJ5OMeTieTHjHJIA HTTP/1.1";
+            "GET /client/storage/?id=/jHJPjHicH8TkfE4yfE4fEyfEx8R8OTjJ8OTifDkx8OR8OMnw4x8OHwyfDHwnweTjJ5OMeTieTHjHJIA HTTP/1.1\r\n\r\n";
             WebRequest webRequest(false);
             JSONParser parser(webRequest);
             parser.read(request);

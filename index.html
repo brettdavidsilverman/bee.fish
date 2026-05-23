@@ -275,19 +275,20 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
             localStorage.setItem("path", pathInput.value);
         }
         else {
+            var json = await response.json();
+            
             throw new Error(
-                decodeURIComponent(
-                    response.statusText
-                ),
-                "Save JSON"
+                json.error
             );
         }
         
     }
+    /*
     catch (error)
     {
         alert(error);
     }
+    */
     finally {
         saveButton.disabled = false;
         fileInput.disabled = false;

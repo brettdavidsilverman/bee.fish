@@ -27,8 +27,8 @@ namespace BeeFishParser {
             override
             {
 
-                if (_function) {
-                    if (!_function(_match))
+                if (_onsuccess) {
+                    if (!_onsuccess(_match))
                     {
                         fail();
                         return;

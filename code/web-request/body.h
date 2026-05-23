@@ -63,8 +63,15 @@ public:
     virtual void eof(Parser* parser)
     override
     {
-        if (_parseJSON)
-            Match::eof(parser);
+        if (_parseJSON) {
+            if (_contentCount == _contentLength &&
+                _contentLength == 0)
+            {
+                success();
+            }
+            else
+                Match::eof(parser);
+        }
         else if (!_parseJSON && 
                   _contentCount != _contentLength)
             Match::fail();

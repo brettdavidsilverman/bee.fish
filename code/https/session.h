@@ -99,7 +99,6 @@ namespace BeeFishHTTPS {
             catch (...)
             {
                 logException("Session::start", "Invalid ipAddress");
-                delete this;
                 return;
             }
             
@@ -388,12 +387,14 @@ namespace BeeFishHTTPS {
                         {"ipAddress", ipAddress()},
                         {"who", getPointerString()},
                         {"when", Server::getDateTime()},
-                        {"origin", origin()}
+                        {"origin", origin()},
+                        {"request", host() + _request->url()}
                     }
                 }
             };
             
             cerr << error << endl;
+delete this;
         }
 
         BString getPointerString() {
@@ -565,7 +566,7 @@ namespace BeeFishHTTPS {
     };
     
     // Declared in server.h
-    Server::~Server()
+    BeeFishHTTPS::Server::~Server()
     {
         _transactionFile.close();
         if (_newSession)
@@ -644,14 +645,8 @@ namespace BeeFishHTTPS {
         
         input.close();
 
-        if (parser.result() == true) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return (parser.result() == true);
 
-        throw std::logic_error("Should not reach here in session.h");        
     }
 
     WebRequest* App::request() {

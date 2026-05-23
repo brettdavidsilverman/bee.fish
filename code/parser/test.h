@@ -1121,7 +1121,7 @@ assert(ok);
         
         Parser parserError(error);
         parserError.read("az");
- 
+
         ok &= testResult(
             "Parser Error result",
                 parserError.result() == false

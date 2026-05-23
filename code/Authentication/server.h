@@ -78,7 +78,6 @@ public:
     }
     
     void setupDatabase() {
-        std::cout << "Setting up database..." << std::endl;
 
         for (Size i = 0; i < _databaseCount ; ++i)
         {

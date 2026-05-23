@@ -58,7 +58,7 @@ public:
         BString _method;
         URL*     _url = nullptr;
         BString _version;
-        NewLine* _newLine;
+
     public:
         FirstLine() : Match()
         {
@@ -80,21 +80,19 @@ public:
                         new Method(),
                         _method
                     ),
-            [this](Match* match) {
-                _method = _method.toUpper();
-                return true;
-            }
+                    [this](Match* match) {
+                        _method = _method.toUpper();
+                        return true;
+                    }
                 ),
-            new Blankspaces(1),
-            _url = new URL(),
-            new Blankspaces(1),
-            new Capture(
-                new Version(),
-                _version
-            ),
-            new Optional(
-                _newLine = new NewLine()
-            )
+                new Blankspaces(1),
+                _url = new URL(),
+                new Blankspaces(1),
+                new Capture(
+                    new Version(),
+                    _version
+                ),
+                new NewLine()
             );
 
             Match::setup(parser);
@@ -134,15 +132,21 @@ public:
         auto onheaders =
             [this](Match* match)
         {
-
             if (method() == "GET")
                 success();
-            else {
-                Size contentLength = 0;
+            else if (method() == "POST")
+            {
+                Size contentLength =
+                    getContentLength();
+                
+                _body->setup(
+                    contentLength,
+                    _ondata
+                );
                 
                 if (!_parseJSON) {
-                    contentLength =
-                        getContentLength();
+                   // contentLength =
+                   //     getContentLength();
 
                     if (contentLength == 0) {
                         success();
@@ -151,30 +155,25 @@ public:
                  
                 }
                 
-                _body->setup(
-                    contentLength,
-                    _ondata
-                );
+                
             }
 
             return true;
         };
 
+        
+        
 
+        
         _match = new BeeFishParser::And(
             _firstLine,
-            new Optional(
-                new NewLine()
-            ),
             new Optional(
                 new Invoke(
                     _headers,
                     onheaders
                 )
             ),
-            new Optional(
-                new NewLine()
-            ),
+            new NewLine(),
             _optionalBody = new Optional(
                 _body
             )
@@ -190,7 +189,22 @@ public:
     }
 
 
-
+    virtual void eof(Parser* parser)
+    override
+    {
+        _headers->eof(parser);
+        
+        if (_parseJSON) {
+            _body->eof(parser);
+            if (_body->result() != true) {
+                Match::fail();
+                return;
+            }
+        }
+        
+        Match::eof(parser);
+    }
+    
     virtual void setOnData(BStream::OnBuffer ondata)
     {
         _ondata = ondata;

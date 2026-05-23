@@ -18,20 +18,18 @@ using namespace std;
     public:
     
         typedef std::function<bool(Match*)> Function;
-        Function _function = nullptr;
-
+        Function _onsuccess = nullptr;
+        Function _onfail = nullptr;
     public:
     
-        Invoke(Match* match) : Match(match) {
-
-        }
-
         Invoke(
             Match* match,
-            Function func
+            Function onsuccess = nullptr,
+            Function onfail = nullptr
         ) :
             Match(match),
-            _function(func)
+            _onsuccess(onsuccess),
+            _onfail(onfail)
         {
         }
 
@@ -42,8 +40,8 @@ using namespace std;
         override
         {
 
-            if (_function) {
-                if (!_function(_match))
+            if (_onsuccess) {
+                if (!_onsuccess(_match))
                 {
                     fail();
                     return;
@@ -51,6 +49,18 @@ using namespace std;
             }
             
             Match::success();
+            
+        }
+        
+        virtual void fail()
+        override
+        {
+
+            if (_onfail) {
+                _onfail(_match);
+            }
+            
+            Match::fail();
             
         }
         
