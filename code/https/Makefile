@@ -1,4 +1,4 @@
-CFLAGS = -std=c++17 -Wall -fmax-errors=1
+CFLAGS = -std=c++17 -Wall -fmax-errors=1 -g
 OPTIMISATION = -Ofast
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
