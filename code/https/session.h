@@ -445,9 +445,12 @@ namespace BeeFishHTTPS {
         
         const BString origin() const
         {
-            const BeeFishWeb::Headers*
+            BeeFishWeb::Headers*
+                requestHeaders = nullptr;
+                
+            if (_request)
                 requestHeaders =
-                    _request->_headers;
+                _request->_headers;
                     
             BString origin;
             
@@ -473,9 +476,12 @@ namespace BeeFishHTTPS {
         
         const BString host() const
         {
-            const BeeFishWeb::Headers*
+            BeeFishWeb::Headers*
+                requestHeaders = nullptr;
+                
+            if (_request)
                 requestHeaders =
-                    _request->_headers;
+                _request->_headers;
                     
             BString host;
             
