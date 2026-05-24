@@ -261,6 +261,7 @@ pathInput.onblur =
         localStorage.setItem("path", pathInput.value);
         
         setLinks();
+        
     }
 
 
@@ -357,9 +358,24 @@ fileInput.onchange = async function(event)
 
 fetchButton.onclick =
     function() {
-
+        window.location.hash =
+            encodeURIComponent(
+                pathInput.value
+            );
+            
         downloadJSON(pathInput.value.indexOf("?") != -1);
 
+    }
+    
+window.onhashchange =
+    function() {
+        if (!window.location.hash)
+            return;
+        pathInput.value = decodeURIComponent(
+            window.location.hash.substr(1)
+        );
+        fetchButton.focus();
+        fetchButton.click();
     }
     
 editor.onclick =
@@ -367,8 +383,13 @@ editor.onclick =
         if (searchResults.length) {
             var position =
                 getCursorLineAndColumn(editor);
-            document.location.href =
-                searchResults[position.line - 1];
+            if (position.line <= searchResults.length)
+            {
+                window.location.hash =
+                    encodeURIComponent(
+                        searchResults[position.line - 1]
+                    );
+            }
         }
     }
 
@@ -429,6 +450,7 @@ if (localStorage.getItem("contentType")) {
 setLinks();
 
 fetchButton.disabled = false;
+window.onhashchange();
 
         </script>
 
