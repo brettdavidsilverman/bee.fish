@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <boost/locale.hpp>
 #include "../Miscellaneous/Miscellaneous.hpp"
 #include "parser.h"
 #include "test.h"
@@ -93,6 +94,7 @@ namespace Test {
     
     
 int main(int argc, const char* argv[]) {
+    
     
     using namespace Test;
     

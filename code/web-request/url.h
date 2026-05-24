@@ -226,6 +226,13 @@ namespace BeeFishWeb {
             Search() : Repeat<KeyValuePair>() { 
                     
             }
+            
+            virtual void success()
+            override
+            {
+                _value = _value.decodeURI();
+                Repeat<KeyValuePair>::success();
+            }
 
             virtual void matchedItem(KeyValuePair* item) {
                 BString key = item->_key.decodeURI();
@@ -374,7 +381,7 @@ namespace BeeFishWeb {
             if (search().matched())
                 string +=
                         BString("?") +
-                        search().value();
+                        search().value().encodeURI();
                         
             if (string == "")
                 string = "/";

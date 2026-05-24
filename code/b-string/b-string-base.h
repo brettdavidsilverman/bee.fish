@@ -84,7 +84,7 @@ public:
     }
 
     // repeated character
-    BString(size_t length, char c) :
+    BString(Index length, char c) :
         BStringBase(length, c)
     {
     }
@@ -216,7 +216,42 @@ public:
         return true;
 
     }
+/*
+    bool isValidCharacter() const
+    {
+        // Create a segment index for characters
+        boost::locale::boundary::ssegment_index map(
+            boost::locale::boundary::character, 
+            begin(),
+            end(),
+            _locale._locale
+        );
+        
+        for (auto it = map.begin();
+                    it != map.end();
+                    ++it)
+        {
+            BString token = it->str();
+            if (it->rule() & boost::locale::boundary::word_letter ||
+                it->rule() & boost::locale::boundary::word_number)
+            {
+            }
+            else if (token.isSpace())
+            {
+    
+            }
+            else if (token.isPunctuation())
+            {
+                
+            }
+            else
+                return false;
 
+        }
+        
+        return true;
+    }
+*/
     bool isData() const
     {
         return
@@ -881,9 +916,44 @@ public:
     BString escape() const
     {
         std::stringstream stream;
-        for (char c : *this) {
+        for (Index i = 0; i < size(); ++i)
+        {
+            char c = (*this)[i];
+            Index expectedBytes;
+            if ((c &      0b11110000) == 0b11110000)
+                expectedBytes = 4;
+            else if ((c & 0b11100000) == 0b11100000)
+                expectedBytes = 3;
+            else if ((c & 0b11000000) == 0b11000000)
+                expectedBytes = 2;
+            else
+                expectedBytes = 1;
 
-            stream << BString::escape(c);
+            BString character;
+
+            while (1)
+            {
+
+                character.push_back(c);
+
+                if (--expectedBytes > 0)
+                {
+                    if (++i >= size())
+                        break;
+
+                    c = (*this)[i];
+
+                    if ((c & 0b10111111) == c)
+                    {
+                        ++expectedBytes;
+                    }
+                }
+
+                if (expectedBytes == 0)
+                    break;
+            }
+
+            stream << BString::escape(character);
 
         }
 
@@ -891,38 +961,61 @@ public:
     }
 
     static BString escape(
-        char c
+        const BString& c
     )
     {
-        switch (c)
-        {
-        case '\0':
+
+        if (c == "\0")
             return "\\0";
-        case '\"':
+
+        if (c == "\"")
             return "\\\"";
-        case '\\':
+
+        if (c == "\\")
             return "\\\\";
-        case '\b':
+
+        if (c == "\b")
             return "\\b";
-        case '\f':
+
+        if (c == "\f")
             return "\\f";
-        case '\r':
+
+        if (c == "\r")
             return "\\r";
-        case '\n':
+
+        if (c == "\n")
             return "\\n";
-        case '\t':
+
+        if (c == "\t")
             return "\\t";
-        case '\v':
+
+        if (c == "\v")
             return "\\v";
-        default:
-            BString string;
-            string = c;
-            //stream << "\\x" << setw(2) << setfill('0') << hex << (int)(unsigned char)c;
-            return string;
+
+        if (c.size() == 1 && c[0] >= 0)
+            return c;
+        else if (c.size() == 1 && c[0] < 0)
+        {
+            BString unicode;
+            if (c.size() % 2 > 0)
+                unicode = BString(2 - c.size() % 2, char(0)) + c;
+            else
+                unicode = c;
+
+            assert(unicode.size() % 2 == 0);
+
+            stringstream stream;
+            for (Index i = 0; i < unicode.size(); i += 2)
+            {
+                assert(i < unicode.size() - 1);
+                stream << "\\u";
+                stream << setfill('0') << setw(2) << hex << (int)(unsigned char)unicode[i];
+                stream << setfill('0') << setw(2) << hex << (int)(unsigned char)unicode[i + 1];
+            }
+
+            return stream.str();
         }
-
-
-
+        return c;
 
     }
 
@@ -931,15 +1024,28 @@ public:
     {
         const BString& input = *this;
         stringstream stream;
-        for (Index i = 0; i < input.size(); ++i) {
-            char c = input[i];
+        for (Index i = 0; i < input.size();) {
+            char c = input[i++];
             if (c == '\\' && i < input.size()) {
-                char c2 = input[++i];
-                if (c2 == 'x' && i < input.size() - 1)
+                char c2 = input[i++];
+                if (c2 == 'u')
                 {
+
+                    Index count = 0;
+                    while (count < 2 &&
+                            i < input.size() &&
+                            input[i] == '0')
+                    {
+                        ++count;
+                        ++i;
+                    }
+
                     BString str;
-                    str = input[++i];
-                    str += input[++i];
+                    for (; count < 4 && i < input.size(); ++count)
+                    {
+                        str += input[i++];
+                    }
+
                     stream << str.fromHex();
 
                 }
@@ -1004,9 +1110,9 @@ inline bool operator!=(const BStringBase& _1, const char *_2)
 }
 
 
-inline BString operator + (const char* bstr1, const BString& bstr2) {
-    BString _bstr = bstr1;
-    return _bstr + bstr2;
+inline BString operator + (const char* str1, const BString& bstr2) {
+    BString bstr1 = str1;
+    return bstr1 + bstr2;
 }
 
 inline BString operator + (const BString& bstr1, const char* str2) {

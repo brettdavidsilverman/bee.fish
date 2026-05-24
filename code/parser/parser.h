@@ -34,354 +34,379 @@
 
 namespace BeeFishParser
 {
-    using namespace BeeFishBString;
-    using namespace BeeFishScript;
+using namespace BeeFishBString;
+using namespace BeeFishScript;
 
-    class Match;
-    
-    class Parser
+class Match;
+
+class Parser
+{
+
+protected:
+
+
+    Size _charCount = 0;
+    Size _offsetCharCount = 0;
+    Size _dataBytes = Size(-1);
+    String _error;
+    optional<bool> _result = nullopt;
+
+public:
+    Match* _match;
+    Match* _byteMatch = nullptr;
+    Char _character = "";
+    bool _deleteMatch = false;
+    int  _expectedBytes = 0;
+protected:
+
+    Parser() : _match(nullptr)
     {
-        
-    protected:
 
-        
-        Size _charCount = 0;
-        Size _dataBytes = Size(-1);
-        String _error;
-        optional<bool> _result = nullopt;
-        
-    public:
-        Match* _match;
-        Match* _byteMatch = nullptr;
-        Char _character = "";
-        Char _lastCharacter = "";
-        bool _deleteMatch = false;
-        
-    protected:
-                  
-        Parser() : _match(nullptr)
-        {
+    }
 
-        }
-        
-    public:
-        
-        Parser(Match* match) :
-             _match(match)
-        {
+public:
 
-        }
+    Parser(Match* match) :
+        _match(match)
+    {
 
-        Parser(Match& match) :
-             Parser(&match)
-        {
-        }
-        
-        
-        void setMatch(Match& match, bool deleteMatch) {
-             if (_match && _deleteMatch)
-                 delete _match;
-             _match = &match;
-             _charCount = 0;
-             _dataBytes = Size(-1);
-             
-             _deleteMatch = deleteMatch;
-        }
+    }
 
-        virtual ~Parser()
-        {
-             if (_deleteMatch) {
-                 delete _match;
-                 _match = nullptr;
-             }
-        }
-        
-        Match* getMatch() {
-             return _match;
-        }
+    Parser(Match& match) :
+        Parser(&match)
+    {
+    }
 
-        unsigned long now()
-        {
-             return
-                 std::chrono::duration_cast
-                 <std::chrono::milliseconds>
-                 (
-                     std::chrono::system_clock
-                          ::now()
-                              .time_since_epoch()
-                 ).count();
-        }
 
-        virtual optional<bool>
-        read(
-             istream& input
-        )
-        {
-          
+    void setMatch(Match& match, bool deleteMatch) {
+        if (_match && _deleteMatch)
+            delete _match;
+        _match = &match;
+        _charCount = 0;
+        _dataBytes = Size(-1);
+
+        _deleteMatch = deleteMatch;
+    }
+
+    virtual ~Parser()
+    {
+        if (_deleteMatch) {
+            delete _match;
+            _match = nullptr;
+        }
+    }
+
+    Match* getMatch() {
+        return _match;
+    }
+
+    unsigned long now()
+    {
+        return
+            std::chrono::duration_cast
+            <std::chrono::milliseconds>
+            (
+                std::chrono::system_clock
+                ::now()
+                .time_since_epoch()
+            ).count();
+    }
+
+    virtual optional<bool>
+    read(
+        istream& input
+    )
+    {
+
 #ifdef TIME
 //             cout << "Chars" << "\t" << "Matches" << "\t" << "Time" << endl;
-             unsigned long start = now();
+        unsigned long start = now();
 #endif
 
-             if (!_match->_parser)
-                 _match->setup(this);
-                 
-             int i = 0;
-             uint8_t c;
-             bool matched = true;
-             while (
-                     matched &&
-                     (
-                          (i = input.get()) != -1
-                     )
-                    )
-             {
-                 
-                 c = (char)i;
-                 
+        if (!_match->_parser)
+            _match->setup(this);
 
-                 if (_dataBytes >= 0 && _dataBytes != Size(-1))
-                 {
-    
-                     --_dataBytes;
-                     
-                    // matched =
-                     _byteMatch->match(c);
-                     
-                     if (_dataBytes == 0)
-                     {
-                          _dataBytes = Size(-1);
-                          success();
-                          return true;
-                     }
-                 }
-                 else {
-                     while (c < 0) {
-                     
-                          _character.push_back(c);
-                          
-                          if ((i = input.get()) == -1)
-                              break;
-                     
-                          c = (char)i;
-                     
-                     
-                     }
-                 
-                     _character.push_back(c);
-                     ++_charCount;
+        int i = 0;
+        char c;
+
+        bool matched = true;
+        while (
+            matched &&
+            (
+                (i = input.get()) != -1
+            )
+        )
+        {
+
+            c = (char)i;
+
+
+            if (_dataBytes > 0 && _dataBytes != Size(-1))
+            {
+
+                --_dataBytes;
+
+                // matched =
+                _byteMatch->match((uint8_t)i);
+
+                if (_dataBytes == 0)
+                {
+                    _dataBytes = Size(-1);
+                    success();
+                    return true;
+                }
+            }
+            else {
+
+                if ((c &      0b11110000) == 0b11110000)
+                    _expectedBytes = 4;
+                else if ((c & 0b11100000) == 0b11100000)
+                    _expectedBytes = 3;
+                else if ((c & 0b11000000) == 0b11000000)
+                    _expectedBytes = 2;
+                else 
+                    _expectedBytes = 1;
+                    
+                _character.clear();
+                
+                while (1) 
+                {
+
+                    _character.push_back(c);
+                    
+                    if (--_expectedBytes > 0)
+                    {
+                        if ((i = input.get()) == -1)
+                            break;
+
+                        c = (char)i;
+                        
+                        if ((c & 0b10111111) == c)
+                        {
+                            ++_expectedBytes;
+                        }
+                    }
+                    
+                    if (_expectedBytes == 0)
+                        break;
+                }
+
+                ++_charCount;
 #if defined(DEBUG) && !defined(TIME)
-    // cout << _character;
+    //cout << "{" << _character << "}";
 #endif
-                     _lastCharacter = _character;
-                     
-                     matched =
-                         _match->match(this, _character);
-                          
-                     _character.clear();
-                 
-                 }
-                 
-                 if (i == -1)
-                     break;
-                     
-                 if (_match->result() != nullopt)
-                     break;
-                     
-                     
-             
 
-                                       
+                matched =
+                    _match->match(this, _character);
+
+                
+
+            }
+
+            if (i == -1)
+                break;
+
+            if (_match->result() != nullopt)
+                break;
+
+
+
+
+
 #ifdef TIME
-                 if (_charCount % 100000 == 0)
-                 {
-                     unsigned long time =
-                          now() - start;
-                     
-                     cout 
-                          << _charCount << " (char count)\t"
-                          << Match::matchInstanceCount() << " (instances)\t" 
-                          << time << " (milliseconds)\t"
-                          << 100000.0 / (float)time << " (k chars per second)" 
-                          << endl;
+            if (_charCount % 100000 == 0)
+            {
+                unsigned long time =
+                    now() - start;
 
-                     start = now();
-                 }
+                cout
+                        << _charCount << " (char count)\t"
+                        << Match::matchInstanceCount() << " (instances)\t"
+                        << time << " (milliseconds)\t"
+                        << 100000.0 / (float)time << " (k chars per second)"
+                        << endl;
+
+                start = now();
+            }
 #endif
 
-                 
-                     
-             }
 
-             if (_match->result() == true)
-                 success();
-             else if (_match->result() == false)
-                 fail();
 
-/*
-cerr << "PARSER I: " << -1 << endl;
-cerr << "PARSER RESULT: " << result() << endl;
-cerr << "MATCH RESULT: " << _match->result() << endl;
-*/
-   
-
-             return result();
-        }
-    
-        virtual optional<bool> read(const string& str)
-        {
-        
-             istringstream input(str);
-        
-             return read(input);
-        
-        }
-        
-        virtual optional<bool> read(const BeeFishBString::BString& string)
-        {
-
-             istringstream input(string);
-        
-             return read(input);
-        
-        }
-        
-        virtual optional<bool> read(const char* string) {
-             return read(BeeFishBString::BString(string));
-        }
-        
-        virtual optional<bool> read(const char* string, Size length) {
-             return read(BeeFishBString::BString(string, length));
         }
 
-        
-        
-        virtual optional<bool> read(const char c)
-        {
+        if (_match->result() == true)
+            success();
+        else if (_match->result() == false)
+            fail();
 
-             BeeFishBString::BString bstring;
-             bstring.push_back(c);
-             return read(bstring);
-        
-        }
-        
-        optional<bool> result() const
-        {
-             return _result;
-        }
-        
-        bool matched() const
-        {
-             return result() == true;
-        }
-        
-        
-        virtual bool isJSONParser() {
-             return false;
-        }
+        /*
+        cerr << "PARSER I: " << -1 << endl;
+        cerr << "PARSER RESULT: " << result() << endl;
+        cerr << "MATCH RESULT: " << _match->result() << endl;
+        */
 
-        virtual bool isBScriptParser() {
-             return false;
-        }
 
-        void setDataBytes(Match* byteMatch, Size dataBytes) {
-             _dataBytes = dataBytes;
-             _byteMatch = byteMatch;
-        }
-        
-       
-        virtual void eof() {
-
-            if (result() != nullopt)
-                return;
-
-            if (_match)
-                _match->eof(this);
-             
-            if (_match->result() == false)
-            {
-                fail();
-            }
-            else if (_match->result() == true)
-            {
-                success();
-            }
-       
-        }
-
-        virtual void success()
-        {
-             _result = true;
-             _error.clear();
-        }
-        
-        virtual void fail() {
-              
-             _result = false;
-             setError();
-        }
-        
-    public:
-          
-        virtual void setError(BString error = "")
-        {
-             if (_error.length() == 0)
-                 _error = error;
-                 
-             if (_error.length() == 0) {
-                 
-                 stringstream stream;
-                 
-                 stream << "Invalid Content '" << BString(_lastCharacter).escape() << "' at position "
-                       << _charCount;
-                       
-                 _error = stream.str();
-             
-             }
-             
-        }
-        
-        virtual const BString& getError() const
-        {
-             return _error;
-        }
-        
-        
-        virtual Match* match()
-        {
-             if (_match)
-                 return _match->match();
-                 
-             return nullptr;
-        }
-    };
-    
-    
-    
-    // Declared in match.h
-    const Char& Match::character() const {
-        return _parser->_character;
+        return result();
     }
-    
-    ostream& operator << (ostream& out, const Match& match)
+
+    virtual optional<bool> read(const string& str)
     {
-        match.write(out);
-        return out;
+
+        istringstream input(str);
+
+        return read(input);
+
     }
-    
-    istream& operator >> (istream& in, Match& match)
+
+    virtual optional<bool> read(const BeeFishBString::BString& string)
     {
-        Parser parser(match);
-        parser.read(in);
-        parser.eof();
-        
-        if (!parser.matched())
-            throw runtime_error(parser.getError());
-            
-        return in;
+
+        istringstream input(string);
+
+        return read(input);
+
     }
-    
-                 
+
+    virtual optional<bool> read(const char* string) {
+        return read(BeeFishBString::BString(string));
+    }
+
+    virtual optional<bool> read(const char* string, Size length) {
+        return read(BeeFishBString::BString(string, length));
+    }
+
+
+
+    virtual optional<bool> read(const char c)
+    {
+
+        BeeFishBString::BString bstring;
+        bstring.push_back(c);
+        return read(bstring);
+
+    }
+
+    optional<bool> result() const
+    {
+        return _result;
+    }
+
+    bool matched() const
+    {
+        return result() == true;
+    }
+
+
+    virtual bool isJSONParser() {
+        return false;
+    }
+
+    virtual bool isBScriptParser() {
+        return false;
+    }
+
+    void setDataBytes(Match* byteMatch, Size dataBytes) {
+        _dataBytes = dataBytes;
+        _byteMatch = byteMatch;
+    }
+
+    void markOffsetCharacterCount()
+    {
+        _offsetCharCount = _charCount;
+    }
+
+    virtual void eof() {
+
+        if (result() != nullopt)
+            return;
+
+        if (_match)
+            _match->eof(this);
+
+        if (_match->result() == false)
+        {
+            fail();
+        }
+        else if (_match->result() == true)
+        {
+            success();
+        }
+
+    }
+
+    virtual void success()
+    {
+        _result = true;
+        _error.clear();
+    }
+
+    virtual void fail() {
+
+        _result = false;
+        setError();
+    }
+
+public:
+
+    virtual void setError(BString error = "")
+    {
+        if (_error.length() == 0)
+            _error = error;
+
+        if (_error.length() == 0) {
+
+            stringstream stream;
+
+            stream << "Invalid Content '" << _character << "' at position "
+                   << (_charCount - _offsetCharCount);
+
+            _error = stream.str();
+
+        }
+
+    }
+
+    virtual const BString& getError() const
+    {
+        return _error;
+    }
+
+
+    virtual Match* match()
+    {
+        if (_match)
+            return _match->match();
+
+        return nullptr;
+    }
+};
+
+
+
+// Declared in match.h
+const Char& Match::character() const {
+    return _parser->_character;
+}
+
+ostream& operator << (ostream& out, const Match& match)
+{
+    match.write(out);
+    return out;
+}
+
+istream& operator >> (istream& in, Match& match)
+{
+    Parser parser(match);
+    parser.read(in);
+    parser.eof();
+
+    if (!parser.matched())
+        throw runtime_error(parser.getError());
+
+    return in;
+}
+
+
 
 }
 

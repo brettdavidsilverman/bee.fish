@@ -80,7 +80,7 @@ public:
     virtual bool match(Byte b)
     override
     {
-
+            
         if (_contentCount >= _contentLength)
             return false;
             
@@ -99,6 +99,13 @@ public:
     )
     override
     {
+
+        if (_contentCount++ == 0)
+        {
+
+            _parser->markOffsetCharacterCount();
+        }
+        
         if (Match::match(parser, character))
         {
             for (const char c : character)

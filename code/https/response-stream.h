@@ -112,7 +112,7 @@ public:
         else if (app->serve() == App::SERVE_QUERY)
         {
             BString search =
-                app->request()->search().decodeURI();
+                app->request()->search();
 
             bool getCount = false;
             if (search.endsWith("$"))
@@ -155,7 +155,7 @@ public:
 
                     *this << endl;
 
-                    //  flush();
+                    flush();
                 }
                 else {
                     ++it;

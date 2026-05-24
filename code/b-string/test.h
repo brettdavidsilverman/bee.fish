@@ -839,8 +839,9 @@ inline bool testEscape()
     }
     
     BString data = stream.str();
-
+    
     BString escaped = data.escape();
+
     BString unescaped = escaped.unescape();
 
     for (unsigned int i = 0; i < 256; ++i)
@@ -848,6 +849,7 @@ inline bool testEscape()
         char c = unescaped[i];
         if ((unsigned char)c != i)
         {
+            cerr << "Failed " << (char)i << " at position " << i << endl;
             ok = false;
             break;
         }

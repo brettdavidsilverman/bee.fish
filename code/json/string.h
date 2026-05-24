@@ -111,7 +111,7 @@ namespace BeeFishJSON {
         {
              _match = new Capture(
                  new Repeat<HexCharacter>(
-                     4, 4
+                     2, 4
                  )
              );
         }
@@ -119,12 +119,24 @@ namespace BeeFishJSON {
         virtual void success()
         override
         {
-            std::stringstream stream;
-            stream << std::hex << value();
-            uint32_t u32;
-            stream >> u32;
-            _hexValue = Char(u32);
-
+            BString hex = value();
+            
+            Index i = 0;
+            while (i < 2 && 
+                   hex[i] == '0')
+            {
+                ++i;
+            }
+            
+            for (;i < hex.length(); i += 2) 
+            {
+                // Extract 2-character chunk
+                BString part = hex.substr(i, 2);
+                // Convert hex part to integer and cast to char
+                char c = static_cast<char>(std::stoi(part, nullptr, 16));
+                _hexValue += c;
+            }
+    
             CharacterBase::success();
 
         }

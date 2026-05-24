@@ -642,8 +642,8 @@ public:
 
         while (!path.isRoot())
         {
-            Type type;
-            path = path.parent(key, type);
+            Type keyType;
+            path = path.parent(key, keyType);
 
             if (path.isUserRoot())
             {
@@ -661,10 +661,10 @@ public:
             }
             
             if (key != "my" && !path.isRoot()) {
-                if (path.type() != Type::ARRAY &&
+                if (keyType == Type::STRING &&
                     key.isDigitsOnly())
                 {
-                    key = BString("'") + key + BString("'");
+                    key = BString("\"") + key + BString("\"");
                 }
                 else
                     key = key.encodeURI();
@@ -783,8 +783,8 @@ public:
                 }
             }
             else {
-                if (key.startsWith("'") &&
-                    key.endsWith("'") &&
+                if (key.startsWith("\"") &&
+                    key.endsWith("\"") &&
                     key.length() > 1
                    )
                 {
