@@ -367,7 +367,8 @@ editor.onclick =
         if (searchResults.length) {
             var position =
                 getCursorLineAndColumn(editor);
-            alert(searchResults[position.line - 1]);
+            document.location.href =
+                searchResults[position.line - 1];
         }
     }
 

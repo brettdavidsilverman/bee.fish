@@ -155,7 +155,7 @@ public:
 
                     *this << endl;
 
-                    flush();
+                  //  flush();
                 }
                 else {
                     ++it;

@@ -55,6 +55,7 @@ public:
     Match* _match;
     Match* _byteMatch = nullptr;
     Char _character = "";
+    Char _lastCharacter;
     bool _deleteMatch = false;
     int  _expectedBytes = 0;
 protected:
@@ -167,6 +168,7 @@ public:
                 else 
                     _expectedBytes = 1;
                     
+                _lastCharacter = _character;
                 _character.clear();
                 
                 while (1) 
@@ -190,14 +192,19 @@ public:
                     if (_expectedBytes == 0)
                         break;
                 }
-
-                ++_charCount;
+                
+                if (i != -1) {
+                    ++_charCount;
+                    _lastCharacter = _character;
+                    matched =
+                        _match->match(this, _character);
+                }
+                
 #if defined(DEBUG) && !defined(TIME)
     //cout << "{" << _character << "}";
 #endif
 
-                matched =
-                    _match->match(this, _character);
+                
 
                 
 
@@ -357,8 +364,8 @@ public:
 
             stringstream stream;
 
-            stream << "Invalid Content '" << _character << "' at position "
-                   << (_charCount - _offsetCharCount);
+            stream << "Invalid Content '" << _lastCharacter << "' at position "
+                   << (_charCount - _offsetCharCount + 1);
 
             _error = stream.str();
 

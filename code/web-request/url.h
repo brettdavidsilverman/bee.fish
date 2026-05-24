@@ -381,7 +381,7 @@ namespace BeeFishWeb {
             if (search().matched())
                 string +=
                         BString("?") +
-                        search().value().encodeURI();
+                        search().value();
                         
             if (string == "")
                 string = "/";
