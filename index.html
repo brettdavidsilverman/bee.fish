@@ -105,6 +105,9 @@ fetchButton.disabled = true;
 //authenticate();
 
 async function fetchLines(url, f) {
+    
+    fetchButton.disabled = true;
+    
     var parameters = {
         mode: "cors",
         method: "GET",
@@ -114,25 +117,31 @@ async function fetchLines(url, f) {
     
     try {
         response = await fetch(url, parameters);
+        if (response.status == 401) // Unauthorised 
+        {
+            var json = await response.json();
+            redirect(json);
+            return;
+        }
+        else if (response.status != 200) {
+            var json = await response.json();
+            throw new Error(
+                json
+            );
+        }
     }
     catch (error)
     {
-        alert(error);
+        editor.value = error;
         return;
     }
+    finally {
+        fetchButton.disabled = false;
+    }
     
-    if (response.status == 401) // Unauthorised 
-    {
-        var json = await response.json();
         
-        redirect(unescape(json));
-        return;
-    }
     
-    if (!response.ok) {
-        throw new Error(`HTTP error, status = ${response.status}`);
-    }
-    
+        
     contentType.value =
         response.headers.get("content-type");
     
@@ -166,6 +175,8 @@ async function fetchLines(url, f) {
     if (lineBuffer) {
         f(lineBuffer);
     }
+    
+    fetchButton.disabled = false;
 }
 
 // Example usage:
@@ -200,7 +211,7 @@ async function downloadJSON() {
         }
     );
     
-    fetchButton.disabled = false;
+    
 }
 
 
@@ -260,35 +271,30 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
         );
         
         var status = response.status;
-        if (status == 401) // Unauthorised 
-        {
-            var json = await response.json();
-            redirect(unescape(json));
-            return;
-        }
-                
         if (status == 200) {
             var json = await response.json();
-            json = unescape(json);
             alert(json);
             pathInput.value = json;
             localStorage.setItem("path", pathInput.value);
         }
+        else if (status == 401) // Unauthorised 
+        {
+            var json = await response.json();
+            redirect(json);
+            return;
+        }
         else {
             var json = await response.json();
-            
             throw new Error(
-                json.error
+                json
             );
         }
         
     }
-    /*
     catch (error)
     {
-        alert(error);
+        //alert(error);
     }
-    */
     finally {
         saveButton.disabled = false;
         fileInput.disabled = false;

@@ -30,7 +30,8 @@ protected:
     BString _userId;
     
 public:
-
+    
+    
     static time_t epoch_seconds()
     {
         std::time_t result = std::time(nullptr);
@@ -91,6 +92,8 @@ public:
     }
 
 public:
+    
+    
     virtual void logon(const BString& secret)
     {
 
@@ -106,10 +109,9 @@ public:
         BString hashSecret =
             secret.sha3();
 
-        ScopedDatabase scoped(this);
-        JSONDatabase& database = scoped;
-
-        Path rootPath = database.authentication();
+        ScopedDatabase database(*this);
+        
+        Path rootPath = database->authentication();
 
         Path secrets = rootPath
                        [SECRETS]
@@ -130,7 +132,7 @@ public:
         }
 
         // Set the user data path
-        Path userData = database.userData(_userId);
+        Path userData = database->userData(_userId);
 
         // Create the session id
         // (Note, we use toHex, not toBase64 due to
@@ -142,7 +144,7 @@ public:
 
         // get the session data
         Path sessionData =
-            database.sessionData(_ipAddress, _sessionId);
+            database->sessionData(_ipAddress, _sessionId);
 
 
         // Save the user id
@@ -165,11 +167,10 @@ public:
     {
         if (_authenticated)
         {
-            ScopedDatabase scoped(this);
-            JSONDatabase& database = scoped;
+            ScopedDatabase database(*this);
 
             Path sessionData =
-                database.sessionData(
+                database->sessionData(
                     _ipAddress,
                     _sessionId
                 );
@@ -184,22 +185,18 @@ public:
 
     }
 
-protected:
-
     virtual bool authenticate() {
 
         _authenticated = false;
-
-        ScopedDatabase scoped(this);
-        JSONDatabase& database =
-            scoped;
+        
+        ScopedDatabase database(*this);
 
         if ( _ipAddress.size() &&
                 _sessionId.size() )
         {
 
             Path sessionData =
-                database.sessionData(
+                database->sessionData(
                     _ipAddress,
                     _sessionId
                 );
@@ -230,7 +227,7 @@ protected:
 
                     // Set the user data path
                     Path userData =
-                        database.userData(_userId);
+                        database->userData(_userId);
 
                 }
             }
@@ -242,11 +239,11 @@ protected:
 
 public:
 
-    Server* server()
+    Server* server() const
     {
         return _server;
     }
-
+    
     virtual void write(BeeFishScript::Object& object) const {
         object["authenticated"] = _authenticated;
         if (_authenticated)
@@ -289,22 +286,26 @@ public:
     class ScopedDatabase
     {
     private:
-        Authentication* _authentication;
+        Authentication& _authentication;
         JSONDatabase* _database;
     public:
-        ScopedDatabase(Authentication* authentication) :
+        ScopedDatabase(Authentication& authentication) :
             _authentication(authentication)
         {
             _database =
-                _authentication->server()->requestDatabase();
+                _authentication.server()->requestDatabase();
         }
-
+        
         ~ScopedDatabase()
         {
-            _authentication->server()->releaseDatabase(_database);
+            _authentication.server()->releaseDatabase(_database);
         }
 
-        operator JSONDatabase&() {
+        JSONDatabase* operator -> () {
+            return _database;
+        }
+        
+        JSONDatabase& operator * () {
             return *_database;
         }
     };

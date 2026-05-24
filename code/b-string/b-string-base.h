@@ -1009,7 +1009,10 @@ inline BString operator + (const char* bstr1, const BString& bstr2) {
     return _bstr + bstr2;
 }
 
-
+inline BString operator + (const BString& bstr1, const char* str2) {
+    BString bstr2 = str2;
+    return bstr1 + bstr2;
+}
 
 }
 

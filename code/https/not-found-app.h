@@ -18,8 +18,9 @@ using namespace BeeFishWeb;
     public:
         NotFoundApp(
             Session* session,
-            ResponseHeaders& responseHeaders
-        ) : App(session, responseHeaders)
+            ResponseHeaders& responseHeaders,
+            BeeFishHTTPS::Authentication& authentication
+        ) : App(session, responseHeaders, authentication)
         {
         }
 
@@ -31,22 +32,18 @@ using namespace BeeFishWeb;
                 "content-type",
                 "application/json; charset=utf-8"
             );
-            _content = "undefined";
-            _serve = App::SERVE_CONTENT;
             
-            _status = 200;
-            /*
-            BeeFishScript::Object object
-            {
-                {"error", "Not found"}
-            };
+            _content = "\"" +
+                session()->host() +
+                request()->url().toString().escape() +
+                " Not found" +
+                "\"";
                 
-            _content = object.str();
             _serve = App::SERVE_CONTENT;
             
             _status = 404;
             _statusText = "Not found";
-            */
+            
         }
         
         virtual BString name()

@@ -18,8 +18,10 @@ using namespace BeeFishWeb;
     public:
         OptionsApp(
             Session* session,
-            ResponseHeaders& responseHeaders
-        ) : App(session, responseHeaders)
+            ResponseHeaders& responseHeaders,
+            BeeFishHTTPS::Authentication& authentication
+            
+        ) : App(session, responseHeaders, authentication)
         {
         }
 

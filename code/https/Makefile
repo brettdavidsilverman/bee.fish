@@ -1,7 +1,7 @@
-CFLAGS = -std=c++17 -Wall -fmax-errors=1
+CFLAGS = -std=c++17 -Wall -fmax-errors=1 -Ofast
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
-DEPS=server.h session.h response.h response-headers.h response-stream.h app.h json-app.h file-system-app.h error-app.h storage-app.h not-found-app.h options-app.h test.h authentication.h version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h Makefile
+DEPS=server.h session.h response.h response-headers.h response-stream.h app.h json-app.h file-system-app.h storage-app.h not-found-app.h options-app.h test.h authentication.h ../Authentication/authentication.h ../Authentication/server.h version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h Makefile
 
 ifeq ("$(PORT)","")
 	PORT=8000

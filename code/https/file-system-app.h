@@ -191,8 +191,9 @@ public:
 public:
     FileSystemApp(
         Session* session,
-        ResponseHeaders& responseHeaders
-    ) : App(session, responseHeaders)
+        ResponseHeaders& responseHeaders,
+        BeeFishHTTPS::Authentication& authentication
+    ) : App(session, responseHeaders, authentication)
     {
 
     }
@@ -212,7 +213,6 @@ public:
         // Get the file path from the request path
         try
         {
-            //if (authenticate())
             _filePath =
                 getFilePath(requestPath);
 
@@ -437,8 +437,7 @@ public:
 
                 if (search.length())
                     newPath += BString("?") + search;
-cerr << "REDIRECT PATH " << path << endl;
-cerr << "NEW REDIRECT PATH " << newPath << endl;
+
                 redirect(newPath, false);
                 return true;
             }
@@ -453,7 +452,7 @@ cerr << "NEW REDIRECT PATH " << newPath << endl;
         output["status"] = status;
         output["statusText"] = statusText;
 
-        Authentication::write(output);
+        _authentication.write(output);
 
         output["requestPath"] = requestPath;
 

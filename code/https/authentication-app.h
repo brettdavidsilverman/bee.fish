@@ -6,167 +6,169 @@
 
 namespace BeeFishHTTPS {
 
-   using namespace BeeFishDatabase;
-   using namespace BeeFishPowerEncoding;
-   using namespace BeeFishHTTPS;
-   using namespace BeeFishJSON;
-   using namespace BeeFishWeb;
-   
-   class AuthenticationApp :
-      public App
-   {
-   protected:
-      inline static vector<BString>
-      
-         _privileged
-         {
-            "/authenticate",
-            "/favicon.ico",
-            "/feebee.jpg",
-            "/feebee-small.jpg",
-            "/head.js",
-            "/body.js",
-            "/style.css",
-            "/client/style.css",
-            "/client/fetch.js",
-            "/client/evaluate.js",
-            "/client/punycode.js",
-            "/client/console/console.js",
-            "/client/logon/",
-            "/client/logon/index.html",
-            "/client/logon/style.css",
-            "/client/logon/sha512.js",
-            "/client/logon/hash-secret.js",
-            "/client/logon/authentication.js",
-            "/client/storage/storage.js"
-         };
+using namespace BeeFishDatabase;
+using namespace BeeFishPowerEncoding;
+using namespace BeeFishHTTPS;
+using namespace BeeFishJSON;
+using namespace BeeFishWeb;
 
-   public:
-      AuthenticationApp(
-         Session* session,
-         ResponseHeaders& responseHeaders
-      ) : App(session, responseHeaders)
-      {
-      
-      }
+class AuthenticationApp :
+    public App
+{
+protected:
+    inline static vector<BString>
 
-      virtual void handleResponse() {
+    _privileged
+    {
+        "/authenticate",
+        "/favicon.ico",
+        "/feebee.jpg",
+        "/feebee-small.jpg",
+        "/head.js",
+        "/body.js",
+        "/style.css",
+        "/client/style.css",
+        "/client/fetch.js",
+        "/client/evaluate.js",
+        "/client/punycode.js",
+        "/client/console/console.js",
+        "/client/logon/",
+        "/client/logon/index.html",
+        "/client/logon/style.css",
+        "/client/logon/sha512.js",
+        "/client/logon/hash-secret.js",
+        "/client/logon/authentication.js",
+        "/client/storage/storage.js"
+    };
 
-         _status = -1;
-         
-         WebRequest* request = _session->request();
-         
-         if (request->result() == nullopt)
-         {
-             request->eof(_session->parser());
-             if (request->result() != true)
-                 return;
-         }
+public:
+    AuthenticationApp(
+        Session* session,
+        ResponseHeaders& responseHeaders,
+        BeeFishHTTPS::Authentication& authentication
+    ) : App(session, responseHeaders, authentication)
+    {
 
-         const BString path = request->path();
-         const BString& webMethod = request->method();
-         const BString& search = request->search();
-         
-         if (path == "/authenticate")
-         {
-    
+    }
+
+    virtual void handleResponse() {
+
+        _status = -1;
+
+        WebRequest* request = _session->request();
+
+        if (request->result() == nullopt)
+        {
+            request->eof(_session->parser());
+            if (request->result() != true)
+                return;
+        }
+
+        const BString path = request->path();
+        const BString& webMethod = request->method();
+        const BString& search = request->search();
+
+        if (path == "/authenticate")
+        {
+
             BeeFishMisc::optional<BString> method;
             BeeFishMisc::optional<BString> secret;
 
             if (webMethod == "GET")
             {
-               method = "getStatus";
+                method = "getStatus";
             }
             else if (webMethod == "POST")
             {
-               WebRequest request(true);
-               JSONParser parser(request);
-               parser.captureValue("method", method);
-               parser.captureValue("secret", secret);
+                WebRequest request(true);
+                JSONParser parser(request);
+                parser.captureValue("method", method);
+                parser.captureValue("secret", secret);
 
-               parseWebRequest(parser);
+                parseWebRequest(parser);
 
             }
-         
+
             if ( method.has_value() )
             {
 
-               if ( method.value() == "getStatus" )
-               {
-                  authenticate();
-                  _status = 200;
-               }
-               else if ( method.value() == "logon" && secret.has_value() )
-               {
-                  logon(
-                     secret.value()
-                  );
-                  _status = 200;
-               }
-               else if ( method.value() == "logoff" )
-               {
-                  logoff();
-                  _status = 200;
-               }
-               else
-               {
-                  return;
-               }
+                if ( method.value() == "getStatus" )
+                {
+                    _authentication.authenticate();
+                    _status = 200;
+                }
+                else if ( method.value() == "logon" && secret.has_value() )
+                {
+                    _authentication.logon(
+                        secret.value()
+                    );
+                    _status = 200;
+                }
+                else if ( method.value() == "logoff" )
+                {
+                    _authentication.logoff();
+                    _status = 200;
+                }
+                else
+                {
+                    return;
+                }
             }
             else
             {
-               return;
+                return;
             }
-         }
-         else
-         {
-            authenticate();
-         }
-        
-         if (authenticated())
-         {
+        }
+        else
+        {
+            if (!_authentication.authenticated())
+                _authentication.authenticate();
+        }
+
+        if (_authentication.authenticated())
+        {
             _responseHeaders.emplace(
-               "set-cookie",
-               BString("sessionId=") +
-               _sessionId +
-              BString(
-                  ";path=/;"
-                  "max-age=3600;"
-                  "secure=true;"
-                  "httponly=false;"
-                  "samesite=None;"
-                  "Domain=")
-              
+                "set-cookie",
+                BString("sessionId=") +
+                _authentication.sessionId() +
+                BString(
+                    ";path=/;"
+                    "max-age=3600;"
+                    "secure=true;"
+                    "httponly=false;"
+                    "samesite=None;"
+                    "Domain=")
+
             );
-         }
-         else
-         {
-             _responseHeaders.emplace(
-               "set-cookie",
-               BString(
-                   "sessionId=;"
-                   "path=/;"
-                   "secure=true;"
-                   "httponly=false;"
-                   "samesite=None;"
-                   "Domain=")
+        }
+        else
+        {
+            _responseHeaders.emplace(
+                "set-cookie",
+                BString(
+                    "sessionId=;"
+                    "path=/;"
+                    "secure=true;"
+                    "httponly=false;"
+                    "samesite=None;"
+                    "Domain=")
             );
-         }
+        }
 
 
-         _responseHeaders.replace(
+        _responseHeaders.replace(
             "cache-control",
             "no-store"
-         );
-         
-         if ( !authenticated() && (
-               !isPrivileged(
-                  path,
-                  webMethod
-               ) ||
-               search.size() )
-            )
-         {
+        );
+
+        if ( !_authentication.authenticated() && (
+                    !isPrivileged(
+                        path,
+                        webMethod
+                    ) ||
+                    search.size() )
+           )
+        {
             //_status = 401;
             // Setting this to 200 so fetch can read
             // the status text
@@ -178,67 +180,66 @@ namespace BeeFishHTTPS {
                 _status = 401;
                 _statusText = "Unauthorised";
                 _serve = App::SERVE_CONTENT;
-            
+
                 _responseHeaders.replace(
-                   "content-type",
-                   "application/json; charset=utf-8"
+                    "content-type",
+                    "application/json; charset=utf-8"
                 );
-         
-                BString output = 
+
+                BString output =
                     session()->host() +
                     BString("/client/logon/index.html");
-            
+
                 _content = BString("\"") + output + BString("\"");
-            
+
             }
             else
             {
-                 // Non fetch client
+                // Non fetch client
                 _status = 401;
                 _statusText = "Unauthorised";
                 _filePath = getFilePath("/client/logon/index.html");
                 _serve = App::SERVE_FILE;
             }
-            
+
             return;
-         }
-         
-         if (_status != -1) 
-         {
+        }
+
+        if (_status != -1)
+        {
             _responseHeaders.replace(
-               "content-type",
-               "application/json; charset=utf-8"
+                "content-type",
+                "application/json; charset=utf-8"
             );
-         
+
             BeeFishScript::Object output;
 
-            Authentication
-               ::write(output);
-            
+            _authentication.write(output);
+
             _serve = App::SERVE_CONTENT;
 
             _content = output.str();
-         }
+        }
 
-      }
-      
-      bool isPrivileged(const BString& path, const BString& webMethod)
-      {
-         return
+    }
+
+    bool isPrivileged(const BString& path, const BString& webMethod)
+    {
+        return
             ( std::find(
-                _privileged.begin(),
-                _privileged.end(),
-                path )
-             != _privileged.end() );
-      }
-      
-      virtual BString name()
-      {
-         return "HTTPS Authentication App";
-      }
-   };
-   
-   
+                  _privileged.begin(),
+                  _privileged.end(),
+                  path )
+              != _privileged.end() );
+    }
+
+    virtual BString name()
+    {
+        return "HTTPS Authentication App";
+    }
+};
+
+
 
 };
 

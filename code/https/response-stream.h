@@ -2,6 +2,7 @@
 #define BEE_FISH_HTTPS__RESPONSE_STREAM_H
 
 #include <filesystem>
+#include "../query/Query.hpp"
 #include "session.h"
 #include "app.h"
 #include "response.h"
@@ -89,12 +90,13 @@ public:
 
     void writeContent(App* app)
     {
+        
+        assert(app);
 
-        App::ScopedDatabase scoped(app);
+        Authentication::ScopedDatabase database(app->authentication());
 
-        JSONDatabase& database = scoped;
-        BeeFishQuery::Words words = database.words();
-        Path bookmark(database, app->_bookmark);
+        BeeFishQuery::Words words = database->words();
+        Path bookmark(*database, app->_bookmark);
         Size bytesTransferred = 0;
         Size pageSize = getPageSize();
         Size contentLength = app->contentLength();
@@ -132,8 +134,8 @@ public:
 
             BeeFishQuery::Iterable
                 matches(
-                    *app,
-                    database,
+                    app->authentication(),
+                    *database,
                     path
                 );
 

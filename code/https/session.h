@@ -445,18 +445,22 @@ namespace BeeFishHTTPS {
         
         const BString origin() const
         {
-            const BeeFishWeb::Headers&
+            const BeeFishWeb::Headers*
                 requestHeaders =
-                    _request->headers();
+                    _request->_headers;
                     
             BString origin;
             
-            if (requestHeaders.contains("origin")) {
-                origin = requestHeaders["origin"];
+            if (requestHeaders &&
+                requestHeaders->contains("origin")) 
+            {
+                origin = (*requestHeaders)["origin"];
             }
-            else if (requestHeaders.contains("host")) {
-                BString host = requestHeaders["host"];
-                origin = BString("https://") + host;
+            else if (requestHeaders &&
+                    requestHeaders->contains("host")) 
+            {
+                BString host = (*requestHeaders)["host"];
+                origin = "https://" + host;
             }
             else {
                 origin = server()->origin();
@@ -469,18 +473,22 @@ namespace BeeFishHTTPS {
         
         const BString host() const
         {
-            const BeeFishWeb::Headers&
+            const BeeFishWeb::Headers*
                 requestHeaders =
-                    _request->headers();
+                    _request->_headers;
                     
             BString host;
             
-            if (requestHeaders.contains("host")) {
-                host = BString("https://") + 
-                    requestHeaders["host"];
+            if (requestHeaders &&
+                requestHeaders->contains("host"))
+            {
+                host = "https://" + 
+                    (*requestHeaders)["host"];
             }
-            else if (requestHeaders.contains("origin")) {
-                host = requestHeaders["origin"];
+            else if (requestHeaders &&
+                     requestHeaders->contains("origin")) 
+            {
+                host = (*requestHeaders)["origin"];
             }
             else {
                 host = server()->origin();

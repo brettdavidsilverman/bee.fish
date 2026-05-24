@@ -16,9 +16,11 @@ namespace BeeFishHTTPS {
     class Session;
     class ResponseStream;
     
-    class App : public Authentication {
+    class App  {
     protected:
+        Authentication& _authentication;
         Session* _session;
+        
     public:
         
         enum Serve {
@@ -41,9 +43,10 @@ namespace BeeFishHTTPS {
     public:
         App(
             Session* session,
-            ResponseHeaders& responseHeaders
+            ResponseHeaders& responseHeaders,
+            Authentication& authentication
         ) :
-            Authentication(session),
+            _authentication(authentication),
             _session(session),
             _responseHeaders(responseHeaders)
         {
@@ -159,6 +162,11 @@ namespace BeeFishHTTPS {
         // Defined in session.h
         const BString origin() const;
         
+        BeeFishHTTPS::Authentication& authentication() const
+        {
+            return _authentication;
+        }
+        
 
         virtual Size contentLength()
         {
@@ -195,7 +203,8 @@ namespace BeeFishHTTPS {
         
         virtual App* create(
             Session* session,
-            ResponseHeaders& headers
+            ResponseHeaders& headers,
+            Authentication& authentication
         ) = 0;
         
     };
@@ -208,9 +217,12 @@ namespace BeeFishHTTPS {
         {
         }
         
-        virtual App* create(Session* session, ResponseHeaders& headers)
+        virtual App* create(
+            Session* session,
+            ResponseHeaders& headers,
+            BeeFishHTTPS::Authentication& authentication)
         {
-            return new T(session, headers);
+            return new T(session, headers, authentication);
         }
     };
     

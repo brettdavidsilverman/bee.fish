@@ -21,8 +21,9 @@ using namespace BeeFishWeb;
     public:
         JSONApp(
             Session* session,
-            ResponseHeaders& responseHeaders
-        ) : App(session, responseHeaders)
+            ResponseHeaders& responseHeaders,
+            BeeFishHTTPS::Authentication& authentication
+        ) : App(session, responseHeaders, authentication)
         {
         }
 
@@ -31,9 +32,7 @@ using namespace BeeFishWeb;
         override
         {
             
-            authenticate();
-
-            if (!authenticated())
+            if (!authentication().authenticated())
             {
                 return;
                 //throw std::runtime_error("Not authenticated");
@@ -61,15 +60,14 @@ using namespace BeeFishWeb;
             const BString& origin = _session->origin();
             const BString& host = _session->host();
             
-            ScopedDatabase scoped(this);
+            Authentication::ScopedDatabase database(authentication());
             
-            JSONDatabase& database = scoped;
             JSONPath jsonPath;
             
             try {
                 jsonPath = JSONPath::fromString(
-                    *this,
-                    database,
+                    authentication(),
+                    *database,
                     host,
                     url,
                     method
@@ -175,7 +173,7 @@ using namespace BeeFishWeb;
                     
                     BeeFishDatabase::JSONPathParser
                         parser(
-                            *this,
+                            authentication(),
                             jsonPath,
                             postRequest,
                             clog
@@ -267,7 +265,7 @@ using namespace BeeFishWeb;
                     
                 }
                 
-                _content = BString("\"") + jsonPath.toString(*this).escape() + BString("\"");
+                _content = BString("\"") + jsonPath.toString(authentication()).escape() + BString("\"");
                 _serve = App::SERVE_CONTENT;
                 _status = 200;
                 _statusText = "ok";

@@ -22,17 +22,16 @@ class StorageApp : public App {
 public:
     StorageApp(
         Session* session,
-        ResponseHeaders& responseHeaders
-    ) : App(session, responseHeaders)
+        ResponseHeaders& responseHeaders,
+        BeeFishHTTPS::Authentication& authentication
+    ) : App(session, responseHeaders, authentication)
     {
     }
 
 
     virtual void handleResponse() {
 
-        authenticate();
-
-        if (!authenticated())
+        if (!authentication().authenticated())
         {
             return;
         }
@@ -72,12 +71,10 @@ public:
 
         const BString& method = request->method();
 
-        ScopedDatabase scoped(this);
+        Authentication::ScopedDatabase database(authentication());
 
-        JSONDatabase& database = scoped;
-        
         Path userData =
-            database.userData(_userId);
+            database->userData(authentication().userId());
             
         Path bookmark = userData[URLS];
         

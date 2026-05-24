@@ -4,50 +4,56 @@
 #include <filesystem>
 
 #include "app.h"
-#include "error-app.h"
 
 using namespace std;
 using namespace std::filesystem;
 
 namespace BeeFishHTTPS {
 
-   class Session;
-   
-   class Response {
-   protected:
-      const bool _log = true;
+class Session;
 
-      Session* _session;
-      Size _bytesTransferred = 0;
-      Size _contentLength = 0;
-      const Size _pageSize = getPageSize();
-     // App*      _app = nullptr;
-   public:
-      Response(
-         Session* session
-      ) :
-         _session(session)
-      {
-      }
-      
-      virtual void handleResponse()
-      {
+class Response {
+protected:
+    const bool _log = true;
 
-         ResponseHeaders headers(_session);
-         App* app = nullptr;
+    Session* _session;
+    Size _bytesTransferred = 0;
+    Size _contentLength = 0;
+    const Size _pageSize = getPageSize();
+    BeeFishHTTPS::Authentication* _authentication;
 
-         for ( auto factory : appFactories )
-         {
+    // App*      _app = nullptr;
+public:
+    Response(
+        Session* session
+    ) :
+        _session(session)
+    {
+
+        _authentication =
+            new BeeFishHTTPS::Authentication(_session);
+
+    }
+
+    virtual void handleResponse()
+    {
+
+        ResponseHeaders headers(_session);
+        App* app = nullptr;
+
+        for ( auto factory : appFactories )
+        {
 
             app = factory->create(
-               _session,
-               headers
-            );
-            
+                      _session,
+                      headers,
+                      *_authentication
+                  );
+
             try {
-          
+
                 app->handleResponse();
-            
+
             }
             catch (const std::exception& exception)
             {
@@ -55,85 +61,86 @@ namespace BeeFishHTTPS {
                 delete app;
                 logException(
                     BString("Response::handleResponse:") +
-                        name,
+                    name,
                     exception
                 );
-        
+
                 // Should never reach here
                 assert(false);
             }
-            
+
             if (app->status() != -1)
-               break;
-  
+                break;
+
             delete app;
-            
+
             app = nullptr;
 
-         }
+        }
 
-         if (app)
-         {
+        if (app)
+        {
             if (_log) {
-               clog << BeeFishDate::getDateTime()
-                  << " " << ipAddress()
-                  << " " << app->status()
-                  << " " << app->statusText()
-                  << " Served by "
-                  << app->name()
-                  << endl;
+                clog << BeeFishDate::getDateTime()
+                     << " " << ipAddress()
+                     << " " << app->status()
+                     << " " << app->statusText()
+                     << " Served by "
+                     << app->name()
+                     << endl;
             }
-                 
+
             _contentLength = app->contentLength();
 
             if (_contentLength == Size(-1)) {
-               headers.erase("content-length");
-               headers.replace(
-                  "transfer-encoding",
-                  "chunked"
-               );
+                headers.erase("content-length");
+                headers.replace(
+                    "transfer-encoding",
+                    "chunked"
+                );
             }
             else {
-               headers.replace(
-                  "content-length",
-                  std::to_string(_contentLength)
-               );
+                headers.replace(
+                    "content-length",
+                    std::to_string(_contentLength)
+                );
             }
-            
+
             write(app);
-            
+
             delete app;
             app = nullptr;
-            
-            closeOrRestart();
-            
-         }
-         
-         
-            
-      }
-      
-      // Defined in session.h
-      void logException(const BString& where, const std::exception& exception);
-      
-      
-      virtual ~Response()
-      {
-      }
-      
-      // Defined in session.h
-      const BString& ipAddress() const;
-      
-      // Defined in session.h
-      void closeOrRestart();
-      
-     
-      // Defined in response-stream.h
-      void write(App* app);
-      
 
-   };
-   
+            closeOrRestart();
+
+        }
+
+
+
+    }
+
+    // Defined in session.h
+    void logException(const BString& where, const std::exception& exception);
+
+
+    virtual ~Response()
+    {
+        delete _authentication;
+    }
+
+    // Defined in session.h
+    const BString& ipAddress() const;
+
+    // Defined in session.h
+    void closeOrRestart();
+
+
+    // Defined in response-stream.h
+    void write(App* app);
+
+
+};
+
 }
 
 #endif
