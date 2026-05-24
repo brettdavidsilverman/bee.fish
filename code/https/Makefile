@@ -1,13 +1,14 @@
-CFLAGS = -std=c++17 -Wall -fmax-errors=1 -Ofast
+CFLAGS = -std=c++17 -Wall -fmax-errors=1
+OPTIMISATION = -Ofast
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
-DEPS=server.h session.h response.h response-headers.h response-stream.h app.h json-app.h file-system-app.h storage-app.h not-found-app.h options-app.h test.h authentication.h ../Authentication/authentication.h ../Authentication/server.h version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h Makefile
+DEPS=server.h session.h response.h response-headers.h response-stream.h app.h json-app.h file-system-app.h storage-app.h not-found-app.h options-app.h test.h authentication.h ../Authentication/authentication.h ../Authentication/server.h version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h $(BUILD)/web-request $(BUILD)/query Makefile
 
 ifeq ("$(PORT)","")
 	PORT=8000
 endif
 	
-$(OUTPUT):	$(DEPS) $(BUILD)/web-request $(BUILD)/query
+$(OUTPUT):	$(DEPS)
 	@echo "Linking Web Server"
 	g++ main.cpp $(CFLAGS) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lboost_locale -lboost_regex -licuuc -lcryptopp
 	@if [ "$(PORT)" = "443" ]; then \
@@ -15,6 +16,9 @@ $(OUTPUT):	$(DEPS) $(BUILD)/web-request $(BUILD)/query
 		sudo setcap cap_net_bind_service=ep $(OUTPUT); \
 	fi
 
+
+all:	CFLAGS += $(OPTIMISATION)
+all:	$(OUTPUT)
 
 $(BUILD):
 	mkdir $(BUILD)
@@ -59,6 +63,7 @@ stop:
 
 
 debug:	DEBUG=debug
+debug:	OPTIMISATION=
 debug:	CFLAGS += -g -D DEBUG
 debug:	$(OUTPUT)
 

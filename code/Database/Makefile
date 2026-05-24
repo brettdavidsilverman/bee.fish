@@ -2,10 +2,11 @@ BUILD=../../build
 OUTPUT_INDEX=$(BUILD)/DatabaseIndex
 OUTPUT=$(BUILD)/Database
 CFLAGS=-std=c++17 -Wall -fmax-errors=1
+OPTIMISATION=-Ofast
 DEPS=$(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp LeastRecentlyUsedCache.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Locks.hpp Version.hpp Branch.hpp Path.hpp PathBase.hpp PathBase.hpp Iterable.hpp Makefile JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp JSONIndex.hpp NullStream.hpp ../Size.hpp Makefile
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) -Ofast main.cpp -o $(OUTPUT) -lboost_locale -lboost_regex -licuuc -lcryptopp
+	g++ $(CFLAGS) $(OPTIMISATION) main.cpp -o $(OUTPUT) -lboost_locale -lboost_regex -licuuc -lcryptopp
 
 $(OUTPUT_INDEX): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT_INDEX) -D JSON_INDEX -lboost_locale -lboost_regex -licuuc -lcryptopp
@@ -29,6 +30,7 @@ testId:	$(OUTPUT)
 
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
+debug:	OPTIMISATION=
 debug:	$(OUTPUT_INDEX)
 debug:	$(OUTPUT)
 
