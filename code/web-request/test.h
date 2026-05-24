@@ -306,7 +306,21 @@ using namespace BeeFishTest;
             
         }
         
-        assert(ok);
+        BeeFishWeb::URL url5;
+        JSONParser urlWithSingleQuote(url5);
+        urlWithSingleQuote.read("https://dev.bee.fish:8000/'?hello");
+        urlWithSingleQuote.eof();
+        
+        ok = ok && testResult(
+                "URL search with quote",
+                url5.search().value() == "hello"
+            );
+            
+        ok = ok && testResult(
+                "URL path with quote",
+                url5.path() == "/'"
+            );
+            
         
         return ok;
 

@@ -188,7 +188,7 @@ namespace BeeFishHTTPS {
                     session()->host() +
                     BString("/client/logon/index.html");
             
-                _content = BString("\"") + output.escape() + BString("\"");
+                _content = BString("\"") + output + BString("\"");
             
             }
             else

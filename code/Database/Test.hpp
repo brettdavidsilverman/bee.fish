@@ -36,7 +36,7 @@ inline bool testObjects();
 inline bool testDeleteProperty();
 inline bool testErrors();
 inline bool testMultiThreaded();
-
+inline bool testFromString();
 inline bool test()
 {
     bool success = true;
@@ -101,6 +101,10 @@ inline bool test()
 
     success = success &&
               testErrors();
+              
+    success = success &&
+              testFromString();
+              
 
     success = success &&
               testAllFiles(TEST_DIRECTORY);
@@ -2505,6 +2509,73 @@ inline bool testDeleteProperty()
     return success;
 }
 
+inline bool testErrors()
+{
+    cout << "Test errors" << endl;
+
+    
+    bool ok = true;
+    
+    
+    JSONDatabase database;
+    BeeFishAuthentication::Authentication
+        auth("https://test", database.filename());
+
+    auth.logon("boo");
+    
+    JSONPath start = database.origin("https://test");
+    
+    JSONPathParser parser(auth, start);
+    
+    stringstream input("\"");
+        
+    parser.read(input);
+    
+    parser.eof();
+
+    bool parsed = parser.result() == true;
+
+    cerr << parser.getError() << endl;
+
+    ok = !parsed;
+    
+    outputSuccess(ok);
+
+    return ok;
+
+}
+
+inline bool testFromString()
+{
+    cout << "Test from string" << endl;
+
+    
+    bool ok = false;
+    
+    
+    JSONDatabase database;
+    BeeFishAuthentication::Authentication
+        auth("https://test", database.filename());
+
+    auth.logon("boo");
+    
+    try {
+        JSONPath path = JSONPath::fromString(
+            auth,
+            database,
+            "https://test/'?"
+        );
+    }
+    catch (JSONPath::PathNotFoundException& ex)
+    {
+        ok = true;
+    }
+    
+    outputSuccess(ok);
+
+    return ok;
+
+}
 
 inline bool testMultiThreaded()
 {
@@ -2638,41 +2709,7 @@ inline bool testMultiThreaded()
 }
 
 
-inline bool testErrors()
-{
-    cout << "Test errors" << endl;
 
-    
-    bool ok = true;
-    
-    
-    JSONDatabase database;
-    BeeFishAuthentication::Authentication
-        auth("https://test", database.filename());
-
-    auth.logon("boo");
-    
-    JSONPath start = database.origin("https://test");
-    
-    JSONPathParser parser(auth, start);
-    
-    stringstream input("\"");
-        
-    parser.read(input);
-    
-    parser.eof();
-
-    bool parsed = parser.result() == true;
-
-    cerr << parser.getError() << endl;
-
-    ok = !parsed;
-    
-    assert(ok);
-
-    return ok;
-
-}
 
 }
 

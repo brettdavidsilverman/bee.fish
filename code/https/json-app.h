@@ -52,11 +52,12 @@ using namespace BeeFishWeb;
             const BString& clientIPAddress = 
                 session()->ipAddress();
                 */
+
             const BString& method =
                 request()->method();
             URL& url =
                 request()->url();
-                
+
             const BString& origin = _session->origin();
             const BString& host = _session->host();
             
@@ -73,6 +74,7 @@ using namespace BeeFishWeb;
                     url,
                     method
                 );
+
                 _bookmark = jsonPath.index();
             }
             catch (JSONPath::PathNotFoundException& exception)
@@ -90,6 +92,8 @@ using namespace BeeFishWeb;
             
                 _serve = App::SERVE_QUERY;
                 _status = 200;
+
+
                 return;
             }
             else if (method == "GET") {
@@ -143,6 +147,7 @@ using namespace BeeFishWeb;
             }
             else if (method == "POST")
             {
+
                 
                 _responseHeaders.replace(
                     "content-type",
@@ -177,11 +182,9 @@ using namespace BeeFishWeb;
                         );
 
                     if (!parseWebRequest(parser)) {
-                        BeeFishScript::Object object
-                        {
-                            {"error", parser.getError()}
-                        };
-                        _content = object.str();
+                        _content = BString("\"") + 
+                            parser.getError().escape() +
+                            BString("\"");
                         _serve = App::SERVE_CONTENT;
                         _status = 500;
                         _statusText = "JSONPathParser error";

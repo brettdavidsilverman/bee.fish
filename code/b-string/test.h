@@ -331,19 +331,18 @@ inline bool testHex()
               (endData == start)
           );
 
-#ifdef SERVER
+
     const int SESSION_ID_SIZE = 32;
 
     BString random = BString::createRandom(SESSION_ID_SIZE);
     
-    cout << "\tRandom hex: " << random << endl;
+    cout << "\tRandom string: " << random << endl;
 
     ok &= testResult(
-              "Random hex",
-              (random.size() == SESSION_ID_SIZE * 2)
+              "Random string",
+              (random.size() == SESSION_ID_SIZE)
           );
 
-#endif
 
     cout << endl;
 

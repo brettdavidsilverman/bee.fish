@@ -46,7 +46,7 @@ namespace BeeFishParser
 
         
         Size _charCount = 0;
-        SSize _dataBytes = -1;
+        Size _dataBytes = Size(-1);
         String _error;
         optional<bool> _result = nullopt;
         
@@ -83,7 +83,7 @@ namespace BeeFishParser
                  delete _match;
              _match = &match;
              _charCount = 0;
-             _dataBytes = -1;
+             _dataBytes = Size(-1);
              
              _deleteMatch = deleteMatch;
         }
@@ -140,7 +140,7 @@ namespace BeeFishParser
                  c = (char)i;
                  
 
-                 if (_dataBytes >= 0)
+                 if (_dataBytes >= 0 && _dataBytes != Size(-1))
                  {
     
                      --_dataBytes;
@@ -150,7 +150,7 @@ namespace BeeFishParser
                      
                      if (_dataBytes == 0)
                      {
-                          _dataBytes = -1;
+                          _dataBytes = Size(-1);
                           success();
                           return true;
                      }
@@ -284,7 +284,7 @@ cerr << "MATCH RESULT: " << _match->result() << endl;
              return false;
         }
 
-        void setDataBytes(Match* byteMatch, SSize dataBytes) {
+        void setDataBytes(Match* byteMatch, Size dataBytes) {
              _dataBytes = dataBytes;
              _byteMatch = byteMatch;
         }

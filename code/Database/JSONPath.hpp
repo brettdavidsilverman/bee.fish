@@ -176,7 +176,7 @@ public:
 
         JSONPath json = getChildren()[position];
 
-        // json.cascadeProperties();
+        // json.indexProperties();
 
         return json;
 
@@ -219,7 +219,7 @@ public:
                         if (!child.hasId())
                             child.setId();
 
-                        child.cascadeProperties();
+                        child.indexProperties();
                     }
                 }
                 else
@@ -235,7 +235,7 @@ public:
         return json;
     }
 
-    void cascadeProperties()
+    void indexProperties()
     {
 
         Path path = *this;
@@ -253,19 +253,13 @@ public:
                 while (!json.isUserRoot())
                 {
                     BString property;
-                    json = json.parent(property);
-                    if (!property.isDigitsOnly())
-                    {
-                        if (property.startsWith("\"") &&
-                                property.endsWith("\""))
-                        {
-                            property =
-                                property.substr(1, property.length() - 2)
-                                .unescape();
-                        }
+                    Type keyType;
+                    json = json.parent(property, keyType);
 
+                    if (keyType == Type::STRING) {
                         addWords(property, true);
                     }
+                    
                 }
             }
 
@@ -581,10 +575,17 @@ public:
 
     JSONPath parent() const {
         BString key;
-        return parent(key, false);
+        Type type;
+        return parent(key, type, false);
+    }
+    
+    JSONPath parent(BString& key, bool fetchKey = true) const
+    {
+        Type type;
+        return parent(key, type, fetchKey);
     }
 
-    JSONPath parent(BString& key, bool fetchKey = true) const {
+    JSONPath parent(BString& key, Type& keyType, bool fetchKey = true) const {
         Path path = *this;
 
         Index position = -1;
@@ -599,7 +600,7 @@ public:
 
         path = path.parent(seperator);
         assert(seperator == CHILDREN);
-
+        
         Type type =
             path.getData<Type>();
 
@@ -607,22 +608,14 @@ public:
         {
             if (type == Type::ARRAY)
             {
-                stringstream stream;
-                stream << position;
-                key = stream.str();
+                key = std::to_string(position);
+                keyType = Type::INTEGER;
             }
             else if (type == Type::OBJECT)
             {
                 JSONPath object = path;
                 key = object.getObjectProperty(position);
-                if (key.isDigitsOnly())
-                {
-                    key = BString("\"") + key + BString("\"");
-                }
-                else if (!object.isRoot())
-                {
-                    key = key.encodeURI();
-                }
+                keyType = Type::STRING;
             }
             else
                 assert(false);
@@ -649,8 +642,8 @@ public:
 
         while (!path.isRoot())
         {
-
-            path = path.parent(key);
+            Type type;
+            path = path.parent(key, type);
 
             if (path.isUserRoot())
             {
@@ -665,6 +658,17 @@ public:
                     return "";
                 }
 
+            }
+            
+            if (key != "my" && !path.isRoot()) {
+                if (path.type() != Type::ARRAY &&
+                    key.isDigitsOnly())
+                {
+                    key = BString("'") + key + BString("'");
+                }
+                else
+                    key = key.encodeURI();
+                
             }
 
             string =
@@ -750,7 +754,8 @@ public:
 
         for (BString key : paths)
         {
-
+            key = key.decodeURI();
+            
             if ((++count == 1) &&
                 (key == "my" || key == userId))
             {
@@ -767,6 +772,7 @@ public:
                 break;
             }
             
+            
             if (key.isDigitsOnly()) {
                 Index index = atol(key.c_str());
                 if (path.contains(index))
@@ -777,8 +783,9 @@ public:
                 }
             }
             else {
-                if (key.startsWith("\"") &&
-                        key.endsWith("\"")
+                if (key.startsWith("'") &&
+                    key.endsWith("'") &&
+                    key.length() > 1
                    )
                 {
                     key =
@@ -787,17 +794,14 @@ public:
                             key.length() - 2
                         );
                 }
-                else
-                {
-                    key = key.decodeURI();
-                }
-
+            
                 if (path.contains(key) || method == "POST")
                     path = path[key];
                 else {
                     success = false;
                     break;
                 }
+                
             }
 
 
@@ -892,7 +896,7 @@ public:
                 JSONPath childPath = getChildren()[position];
                 childPath.setId();
 
-                childPath.cascadeProperties();
+                childPath.indexProperties();
 
             }
 
@@ -1078,18 +1082,11 @@ public:
         while (!path.isUserRoot())
         {
             BString property;
-            path = path.parent(property);
-            if (!property.isDigitsOnly())
-            {
-                if (property.startsWith("\"") &&
-                        property.endsWith("\""))
-                {
-                    property = property.substr(1, property.size() - 2);
-                    property = property.unescape();
-                }
+            Type keyType;
+            path = path.parent(property, keyType);
 
+            if (keyType == Type::STRING)
                 json.removeWords(property, true);
-            }
 
         }
 

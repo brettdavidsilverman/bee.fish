@@ -12,7 +12,7 @@
 #include <locale>
 #include <codecvt>
 #include <filesystem>
-#include <cryptopp/base64.h>
+#include <random>
 #include <cryptopp/filters.h>
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/sha3.h>
@@ -216,28 +216,28 @@ public:
         return true;
 
     }
-    
+
     bool isData() const
     {
-        return 
+        return
             startsWith("data:") &&
             find(",") != std::string::npos;
     }
-    
+
     bool isUserId() const
     {
         if (size() != USER_ID_SIZE)
             return false;
-            
+
         return
             std::all_of(
-                begin(), 
-                end(), 
-                [](unsigned char c) {
-                    return std::isxdigit(c);
-                }
+                begin(),
+                end(),
+        [](unsigned char c) {
+            return std::isxdigit(c);
+        }
             );
-            
+
     }
 
     vector<BString> tokenise() const
@@ -276,15 +276,15 @@ public:
             {
                 // Add token and type
                 BString character = it->str();
-                if (character == "." || 
-                    character == "_" ||
-                    character == "~")
+                if (character == "." ||
+                        character == "_" ||
+                        character == "~")
                 {
                     if (split.size())
                         tokens.push_back({
-                            Type::Word,
-                            split.toLower()
-                        });
+                        Type::Word,
+                        split.toLower()
+                    });
 
                     tokens.push_back({
                         Type::Punctuation,
@@ -300,9 +300,9 @@ public:
 
             if (split.size())
                 tokens.push_back({
-                    Type::Word,
-                    split
-                });
+                Type::Word,
+                split
+            });
 
         };
 
@@ -498,20 +498,20 @@ public:
 
         // Create the encoder object
         BeeFishMisc::Base64EncodeStream
-            encoder(output);
-        
+        encoder(output);
+
         // Decode the input stream to the output stream
         encoder << *this;
         encoder << flush;
-    
+
         return output.str();
-        
+
         /*
         std::stringstream stream;
         Base64OutputStream base64(stream);
         base64 << *this;
         base64.flush();
-        
+
         return stream.str();
         */
         /*
@@ -531,32 +531,32 @@ public:
 
     BString fromBase64() const
     {
-         
+
         const std::string base64 = *this;
         std::stringstream output;
         Base64DecodeStream decoder(output);
         decoder << base64;
 
         return output.str();
-    
-    /*
-    
-        // The Base64 encoded string
-        const std::string&
-            encoded_string = *this;
-            
-        // Set up input and output streams
-        std::istringstream iss(encoded_string);
-        std::ostringstream oss;
 
-        // Create the libb64 decoder object
-        base64::decoder decoder;
+        /*
 
-        // Decode the input stream to the output stream
-        decoder.decode(iss, oss);
-    
-        return oss.str();
-        */
+            // The Base64 encoded string
+            const std::string&
+                encoded_string = *this;
+
+            // Set up input and output streams
+            std::istringstream iss(encoded_string);
+            std::ostringstream oss;
+
+            // Create the libb64 decoder object
+            base64::decoder decoder;
+
+            // Decode the input stream to the output stream
+            decoder.decode(iss, oss);
+
+            return oss.str();
+            */
         /*
         const BString& base64 = *this;
         BString decoded;
@@ -570,7 +570,7 @@ public:
         );
         return decoded;
         */
-        
+
     }
 #ifdef SERVER
     BString sha3() const
@@ -597,27 +597,26 @@ public:
 
         return digest;
     }
-
-    static BString createRandom(Index length)
-    {
-        using namespace CryptoPP;
-
-        // 1. Create a cryptographically secure ra
-        AutoSeededRandomPool prng;
-
-        // 2. Define how many bytes of randomness you want (e.g., 16 bytes = 32 hex chars)
-        CryptoPP::byte randomBytes[length];
-        prng.GenerateBlock(randomBytes, sizeof(randomBytes));
-
-        // 3. Encode the bytes into a hexadecimal string
-        BString hexString;
-        HexEncoder encoder(new StringSink(hexString), false);
-        encoder.Put(randomBytes, sizeof(randomBytes));
-        encoder.MessageEnd();
-
-        return hexString;
-    }
 #endif
+
+    static BString createRandom(int length) {
+        const std::string charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+        // Seed with a real hardware entropy source if available
+        std::random_device rd;
+        // Initialize Mersenne Twister engine
+        std::mt19937 generator(rd());
+        // Define the range [0, charset.size() - 1]
+        std::uniform_int_distribution<> distribution(0, charset.size() - 1);
+
+        BString randomString;
+        for (int i = 0; i < length; ++i) {
+            randomString += charset[distribution(generator)];
+        }
+
+        return randomString;
+    }
+
 
     BString toHex() const
     {
@@ -642,7 +641,7 @@ public:
     BString fromHex() const
     {
         const BString& hex = *this;
-        
+
         BString result(hex.length() / 2, '\0');
 
         for (size_t i = 0; i < hex.length(); i += 2)
@@ -737,8 +736,8 @@ public:
     {
         return ltrim().rtrim();
     }
-    
-    
+
+
     bool contains(const Char& character) const
     {
         if (find(character) != std::string::npos)
@@ -782,7 +781,7 @@ public:
             char c = (*i);
 
             // Keep alphanumeric and other accepted characters intact
-            if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c == '{' || c == '}') {
+            if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c == '{' || c == '}' || c == '\'') {
                 escaped << c;
                 continue;
             }
@@ -878,7 +877,7 @@ public:
         return upper;
 
     }
-    
+
     BString escape() const
     {
         std::stringstream stream;
@@ -918,13 +917,13 @@ public:
         default:
             BString string;
             string = c;
-           //stream << "\\x" << setw(2) << setfill('0') << hex << (int)(unsigned char)c;
+            //stream << "\\x" << setw(2) << setfill('0') << hex << (int)(unsigned char)c;
             return string;
         }
-        
-        
 
-    
+
+
+
     }
 
 
@@ -942,7 +941,7 @@ public:
                     str = input[++i];
                     str += input[++i];
                     stream << str.fromHex();
-                    
+
                 }
                 else
                     stream << BString::unescape(c2);
@@ -953,7 +952,7 @@ public:
 
         return stream.str();
     }
-    
+
     static char unescape(
         char c
     )
@@ -981,10 +980,10 @@ public:
         default:
             return c;
         }
-        
-        
+
+
     }
-    
+
 
 
 };

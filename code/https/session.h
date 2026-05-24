@@ -170,7 +170,6 @@ namespace BeeFishHTTPS {
                 if (error.value() != END_OF_FILE)
                 {
                     logException("handleRead", error);
-                    delete this;
                 }
                 return;
             }
@@ -201,7 +200,6 @@ namespace BeeFishHTTPS {
             if (_parser->result() == false)
             {
                 logException("handleRead", BString("Parser match error: ") + _parser->getError());
-                delete this;
                 return;
             }
                 
@@ -220,9 +218,12 @@ namespace BeeFishHTTPS {
                 {
                     openTempFile();
                 }
-                catch (...)
+                catch (std::exception& exception)
                 {
-                    delete this;
+                    logException(
+                        "Session::threadedHandleRead",
+                        exception.what()
+                    );
                     return;
                 }
                 
@@ -290,8 +291,6 @@ namespace BeeFishHTTPS {
             }
             catch (std::exception& ex) {
                 logException("Session::handleResponse", ex.what());
-                delete this;
-                return;
             }
             
         }
@@ -375,7 +374,8 @@ namespace BeeFishHTTPS {
         
         virtual void logException(
             const BString& where,
-            const BString& what
+            const BString& what,
+            bool deleteThis = true
         )
         {
             
@@ -394,7 +394,10 @@ namespace BeeFishHTTPS {
             };
             
             cerr << error << endl;
-delete this;
+
+            if (deleteThis)
+                delete this;
+            
         }
 
         BString getPointerString() {
@@ -521,7 +524,7 @@ delete this;
             }
             else
             {
-                delete this;
+                logException("Session::handleHandshake", error);
             }
         }
 
@@ -639,9 +642,15 @@ delete this;
     {
         ifstream input(_session->tempFileName());
         
-        parser.read(input);
-        
-        parser.eof();
+        try {
+            parser.read(input);
+            parser.eof();
+        }
+        catch (const std::exception& ex)
+        {
+            session()->logException("App::parseWebRequest", ex.what(), false);
+            throw ex;
+        }
         
         input.close();
 
@@ -682,6 +691,13 @@ delete this;
     void Response::closeOrRestart()
     {
         _session->closeOrRestart();
+    }
+    
+    // Declared in response.h
+    void Response::logException(const BString& where, const std::exception& ex)
+    {
+        _session->logException(where, ex.what(), false);
+        throw ex;
     }
     
     // Declared in app.h

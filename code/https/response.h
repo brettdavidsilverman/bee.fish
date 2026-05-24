@@ -43,8 +43,25 @@ namespace BeeFishHTTPS {
                _session,
                headers
             );
+            
+            try {
           
-            app->handleResponse();
+                app->handleResponse();
+            
+            }
+            catch (const std::exception& exception)
+            {
+                BString name = app->name();
+                delete app;
+                logException(
+                    BString("Response::handleResponse:") +
+                        name,
+                    exception
+                );
+        
+                // Should never reach here
+                assert(false);
+            }
             
             if (app->status() != -1)
                break;
@@ -95,6 +112,9 @@ namespace BeeFishHTTPS {
          
             
       }
+      
+      // Defined in session.h
+      void logException(const BString& where, const std::exception& exception);
       
       
       virtual ~Response()
