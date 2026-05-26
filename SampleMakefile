@@ -3,7 +3,7 @@ live:
 	make -C bee.fish/code PORT=443
 	
 stop:
-	make -C bee.fish/code/https stop PORT=443
+	make -C bee.fish/code/https stop PORT=$(PORT)
 
 clean:
 	make -C bee.fish/code clean
