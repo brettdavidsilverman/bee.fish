@@ -50,6 +50,7 @@
                         <option value="text/html; charset=utf-8">HTML</option>
                         <option value="text/css; charset=utf-8">CSS</option>
                         <option value="text/javascript; charset=utf-8">Javascript</option>
+                        <option value="image/jpeg">Image</option>
                     </select>                </div>
                 <textarea id="editor"></textarea>
                 <div>
@@ -127,6 +128,7 @@ var controller;
 async function fetchLines(url, f) {
     
     fetchButton.disabled = true;
+    saveButton.disabled = true;
     
     controller = new AbortController();
     
@@ -152,6 +154,16 @@ async function fetchLines(url, f) {
                 json
             );
         }
+        
+        contentType.value =
+            response.headers.get("content-type");
+        /*
+        if (contentType.value == "image/jpeg")
+        {
+            const imageBlob = await response.blob();
+            image.src = URL.createObjectURL(imageBloob);
+        }
+    */
     }
     catch (error)
     {
@@ -164,11 +176,8 @@ async function fetchLines(url, f) {
     
         
     
-        
-    contentType.value =
-        response.headers.get("content-type");
     
-
+    
     // Get the response body as a ReadableStream
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -200,6 +209,7 @@ async function fetchLines(url, f) {
     }
     
     fetchButton.disabled = false;
+    saveButton.disabled = false;
 }
 
 // Example usage:
@@ -217,6 +227,8 @@ async function downloadJSON(decode = false) {
     var url = new URL(pathInput.value);
     
     fetchButton.disabled = true;
+    saveButton.disabled = true;
+    
     editor.value = "Loading....";
     
     
@@ -248,12 +260,14 @@ async function downloadJSON(decode = false) {
         }
     );
     
+    saveButton.disabled = false;
+    
     
 }
 
 
 if (!pathInput.value)
-    pathInput.value = document.location.origin + "/";
+    pathInput.value = document.location.origin + defaultPath;
     
 pathInput.onfocus = 
     function() {
@@ -343,8 +357,11 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
     
 clearButton.onclick =
     () => {
-        controller.abort();
+        if (controller)
+            controller.abort();
+        saveButton.disabled = false;
     }
+    
 saveButton.onclick = async function() {
 
     

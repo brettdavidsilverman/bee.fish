@@ -393,7 +393,8 @@ namespace BeeFishWeb {
         const BString origin() const
         {
 
-            if (_origin->_domain->matched())
+            if (_origin && 
+                _origin->_domain->matched())
             {
                 BString origin = 
                     protocol() + 
@@ -417,6 +418,7 @@ namespace BeeFishWeb {
         const BString& port() const
         {
             static const BString emptyPort = "";
+            
             Port* port = _origin->_port;
             if (port->matched()) {
                 if (protocol() == "https" && 

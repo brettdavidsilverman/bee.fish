@@ -307,8 +307,11 @@ namespace BeeFishHTTPS {
                     "Session::handleWrite",
                     error
                 );
-                delete _response;
-                _response = nullptr;
+/*
+delete _response;
+_response = nullptr;
+*/
+delete this;
                 return;
             }
             
@@ -375,7 +378,8 @@ namespace BeeFishHTTPS {
         
         virtual void logException(
             const BString& where,
-            const BString& what
+            const BString& what,
+            const BString& request
         )
         {
             
@@ -388,12 +392,31 @@ namespace BeeFishHTTPS {
                         {"who", getPointerString()},
                         {"when", Server::getDateTime()},
                         {"origin", origin()},
-                        {"request", host() + (
-                            _request && _request->url().matched() ?
-                                _request->url().toString() :
-                                BString("")
-                            )
-                        }
+                        {"request", request}
+                    }
+                }
+            };
+            
+            cerr << error << endl;
+            
+        }
+        
+                
+        virtual void logException(
+            const BString& where,
+            const BString& what
+        )
+        {
+            
+            BeeFishScript::Object error = {
+                {
+                    "exception", BeeFishScript::Object {
+                        {"where", where},
+                        {"what", what},
+                        {"ipAddress", ipAddress()},
+                        {"who", getPointerString()},
+                        {"when", Server::getDateTime()},
+                        {"origin", origin()}
                     }
                 }
             };
@@ -704,7 +727,12 @@ namespace BeeFishHTTPS {
     // Declared in response.h
     void Response::logException(const BString& where, const BString& what)
     {
-        _session->logException(where, what);
+        _session->logException(
+            where, 
+            what,
+            _session->host() +
+            _session->_request->url().toString()
+        );
     }
     
     // Declared in app.h
