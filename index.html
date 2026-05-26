@@ -53,6 +53,7 @@
                     </select>                </div>
                 <textarea id="editor"></textarea>
                 <div>
+                    <button id="clearButton" type="reset">Clear</button>
                     <button id="saveButton">Save</button>
                     <input type="file" id="file"></input>
                 </div>
@@ -77,6 +78,8 @@
         <br />
         <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
         <script type="module">
+        
+const defaultPath = "/my";
 
 var console = new Console();
 console.log("Hello world");
@@ -85,7 +88,8 @@ logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
 var pathInput = document.getElementById("pathInput");
 var result = document.getElementById("result");
-var editor = document.getElementById("editor");var html = document.getElementById("html");var fetchButton = document.getElementById("fetchButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");//var goLink = document.getElementById("goLink");
+var editor = document.getElementById("editor");var html = document.getElementById("html");var fetchButton = document.getElementById("fetchButton");
+var clearButton = document.getElementById("clearButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");//var goLink = document.getElementById("goLink");
 var dataLink = document.getElementById("dataLink");
 var header = document.getElementById("h1");
 var title = document.getElementById("title");
@@ -118,15 +122,19 @@ function getCursorLineAndColumn(textarea) {
   return { line: currentLine, column: currentColumn };
 }
 
+var controller;
 
 async function fetchLines(url, f) {
     
     fetchButton.disabled = true;
     
+    controller = new AbortController();
+    
     var parameters = {
         mode: "cors",
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        signal: controller.signal
     }
     var response;
     
@@ -256,7 +264,7 @@ pathInput.onblur =
     function() {
         if (pathInput.value == "")
         {
-            pathInput.value = document.location.origin + "/";
+            pathInput.value = document.location.origin + defaultPath;
         }
         localStorage.setItem("path", pathInput.value);
         
@@ -333,6 +341,10 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
         
 }
     
+clearButton.onclick =
+    () => {
+        controller.abort();
+    }
 saveButton.onclick = async function() {
 
     
@@ -450,7 +462,6 @@ if (localStorage.getItem("contentType")) {
 setLinks();
 
 fetchButton.disabled = false;
-window.onhashchange();
 
         </script>
 

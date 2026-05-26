@@ -392,7 +392,7 @@ namespace BeeFishWeb {
         
         const BString origin() const
         {
-    
+
             if (_origin->_domain->matched())
             {
                 BString origin = 

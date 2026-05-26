@@ -2,7 +2,7 @@
 #define BEE_FISH_HTTPS__RESPONSE_H
 
 #include <filesystem>
-
+#include <boost/exception/all.hpp>
 #include "app.h"
 
 using namespace std;
@@ -50,25 +50,8 @@ public:
                       *_authentication
                   );
 
-            try {
-
-                app->handleResponse();
-
-            }
-            catch (const std::exception& exception)
-            {
-                BString name = app->name();
-                delete app;
-                logException(
-                    BString("Response::handleResponse:") +
-                    name,
-                    exception
-                );
-
-                // Should never reach here
-                assert(false);
-            }
-
+            app->handleResponse();
+            
             if (app->status() != -1)
                 break;
 
@@ -105,9 +88,18 @@ public:
                     std::to_string(_contentLength)
                 );
             }
-
-            write(app);
-
+            
+            try {
+                write(app);
+            }
+            catch(const boost::exception &ex)
+            {
+                logException(
+                    "Response::handleResponse", 
+                    "Error writing https response" + app->name()
+                );
+            }
+            
             delete app;
             app = nullptr;
 
@@ -120,7 +112,7 @@ public:
     }
 
     // Defined in session.h
-    void logException(const BString& where, const std::exception& exception);
+    void logException(const BString& where, const BString& what);
 
 
     virtual ~Response()

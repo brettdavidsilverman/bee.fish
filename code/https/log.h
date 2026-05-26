@@ -3,33 +3,31 @@
 #include <fstream>
 #include "../Config.hpp"
 #include "../Miscellaneous/Miscellaneous.hpp"
+#include "../Database/NullStream.hpp"
 
 inline std::ofstream &logfile()
 {
-   static std::ofstream file(BEE_FISH_SERVER_LOG_FILE, std::ios::out | std::ios::app);
-   return file;
+    static std::ofstream file(BEE_FISH_SERVER_LOG_FILE, std::ios::out | std::ios::app);
+    return file;
 }
 
 inline std::ofstream &errfile()
 {
-   static std::ofstream file (BEE_FISH_SERVER_ERR_FILE, std::ios::out | std::ios::app);
-   return file;
+    static std::ofstream file (BEE_FISH_SERVER_ERR_FILE, std::ios::out | std::ios::app);
+    return file;
 }
 
 inline void initializeLogs() {
 
-   using namespace std;
-   using namespace BeeFishMisc;
-   
+    using namespace std;
+    using namespace BeeFishMisc;
+
+
+    // Redirect log  to files
+    clog.rdbuf(logfile().rdbuf());
 #ifndef DEBUG
-   // Redirect log  to files
-   clog.rdbuf(logfile().rdbuf());
-   
-   // Redirecr error to files
-   cerr.rdbuf(errfile().rdbuf());
+    // Redirecr error to files
+    cerr.rdbuf(errfile().rdbuf());
 #endif
-
-
-   
 }
 #endif

@@ -99,12 +99,12 @@ namespace BeeFishHTTPS {
             catch (...)
             {
                 logException("Session::start", "Invalid ipAddress");
+                delete this;
                 return;
             }
             
             _request = new BeeFishWeb::WebRequest(false);
             _parser = new Parser(*_request);
-            
             
             asyncRead();
         }
@@ -167,10 +167,8 @@ namespace BeeFishHTTPS {
             
             if (error)
             {
-                if (error.value() != END_OF_FILE)
-                {
-                    logException("handleRead", error);
-                }
+                logException("handleRead", error);
+                delete this;
                 return;
             }
             
@@ -200,6 +198,7 @@ namespace BeeFishHTTPS {
             if (_parser->result() == false)
             {
                 logException("handleRead", BString("Parser match error: ") + _parser->getError());
+                delete this;
                 return;
             }
                 
@@ -224,6 +223,7 @@ namespace BeeFishHTTPS {
                         "Session::threadedHandleRead",
                         exception.what()
                     );
+                    delete this;
                     return;
                 }
                 
@@ -289,7 +289,8 @@ namespace BeeFishHTTPS {
                 _response->handleResponse();
                 
             }
-            catch (std::exception& ex) {
+            catch (std::exception& ex)
+            {
                 logException("Session::handleResponse", ex.what());
             }
             
@@ -387,14 +388,17 @@ namespace BeeFishHTTPS {
                         {"who", getPointerString()},
                         {"when", Server::getDateTime()},
                         {"origin", origin()},
-                        {"request", host() + (_request ? _request->url().toString() : BString(""))}
+                        {"request", host() + (
+                            _request && _request->url().matched() ?
+                                _request->url().toString() :
+                                BString("")
+                            )
+                        }
                     }
                 }
             };
             
             cerr << error << endl;
-
-//delete this;
             
         }
 
@@ -698,9 +702,9 @@ namespace BeeFishHTTPS {
     }
     
     // Declared in response.h
-    void Response::logException(const BString& where, const std::exception& ex)
+    void Response::logException(const BString& where, const BString& what)
     {
-        _session->logException(where, ex.what());
+        _session->logException(where, what);
     }
     
     // Declared in app.h
