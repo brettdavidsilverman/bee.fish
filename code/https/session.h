@@ -374,8 +374,7 @@ namespace BeeFishHTTPS {
         
         virtual void logException(
             const BString& where,
-            const BString& what,
-            bool deleteThis = true
+            const BString& what
         )
         {
             
@@ -388,15 +387,14 @@ namespace BeeFishHTTPS {
                         {"who", getPointerString()},
                         {"when", Server::getDateTime()},
                         {"origin", origin()},
-                        {"request", host() + _request->url()}
+                        {"request", host() + (_request ? _request->url().toString() : BString(""))}
                     }
                 }
             };
             
             cerr << error << endl;
 
-            if (deleteThis)
-                delete this;
+//delete this;
             
         }
 
@@ -656,16 +654,8 @@ namespace BeeFishHTTPS {
     {
         ifstream input(_session->tempFileName());
         
-        try {
-            parser.read(input);
-            parser.eof();
-        }
-        catch (const std::exception& ex)
-        {
-            session()->logException("App::parseWebRequest", ex.what(), false);
-            throw ex;
-        }
-        
+        parser.read(input);
+        parser.eof();
         input.close();
 
         return (parser.result() == true);
@@ -710,8 +700,7 @@ namespace BeeFishHTTPS {
     // Declared in response.h
     void Response::logException(const BString& where, const std::exception& ex)
     {
-        _session->logException(where, ex.what(), false);
-        throw ex;
+        _session->logException(where, ex.what());
     }
     
     // Declared in app.h
