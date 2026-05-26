@@ -96,7 +96,7 @@ public:
             {
                 logException(
                     "Response::handleResponse", 
-                    "Error writing https response" + app->name()
+                    "Error writing https response using the " + app->name()
                 );
             }
             
