@@ -727,12 +727,21 @@ delete this;
     // Declared in response.h
     void Response::logException(const BString& where, const BString& what)
     {
-        _session->logException(
-            where, 
-            what,
-            _session->host() +
-            _session->_request->url().toString()
-        );
+        if (!_session->_request)
+            _session->logException(
+                where, 
+                what
+            );
+        else {
+            
+            URL url(_session->_request->url(), _session->host());
+        
+            _session->logException(
+                where, 
+                what,
+                url.toString()
+            );
+        }
     }
     
     // Declared in app.h

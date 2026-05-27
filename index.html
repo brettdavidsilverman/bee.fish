@@ -12,12 +12,19 @@
         <script src="/client/evaluate.js"></script>        <script src="/client/logon/authentication.js"></script>
         <script src="/client/punycode.js"></script>
         <link rel="stylesheet" type="text/css" href="style.css"/>
-        <script>
+        <style>
+#image {
+    width: 100px;
+    height: 100px;
+    display: none;
+}
 
-        </script>
+        </style>
     </head>
     <body>
         <h1 id="h1">bee.fish</h1>
+        <a href="https://share.google/aimode/AZu4GrtYiQZJTAMt2">JSON Beginners Guide</a>
+        
         <div>
             <form onsubmit="return false;">
                 <div style="text-align:left;">
@@ -46,13 +53,16 @@
                         Content type
                     </label>
                     <select id="contentType">
-                        <option value="application/json; charset=utf-8">JSON</option>
+                        <option value="application/json; charset=utf-8" selected>JSON</option>
                         <option value="text/html; charset=utf-8">HTML</option>
                         <option value="text/css; charset=utf-8">CSS</option>
                         <option value="text/javascript; charset=utf-8">Javascript</option>
                         <option value="image/jpeg">Image</option>
+                        <option value="audio/mpeg">Audio</option>
                     </select>                </div>
                 <textarea id="editor"></textarea>
+                <img id="image"></img>
+                <audio id="audio" controls></audio>
                 <div>
                     <button id="clearButton" type="reset">Clear</button>
                     <button id="saveButton">Save</button>
@@ -81,6 +91,7 @@
         <script type="module">
         
 const defaultPath = "/my";
+const defaultContentType = "application/json; charset=utf-8";
 
 var console = new Console();
 console.log("Hello world");
@@ -97,6 +108,11 @@ var title = document.getElementById("title");
 var fileInput = document.getElementById("file");
 var contentType = document.getElementById("contentType");
 
+var image = document.getElementById("image");
+var audio = document.getElementById("audio");
+
+var controller;
+var blob;
 var searchResults = [];
 
 var origin =
@@ -123,9 +139,8 @@ function getCursorLineAndColumn(textarea) {
   return { line: currentLine, column: currentColumn };
 }
 
-var controller;
 
-async function fetchLines(url, f) {
+async function fetchContent(url, f) {
     
     fetchButton.disabled = true;
     saveButton.disabled = true;
@@ -155,15 +170,28 @@ async function fetchLines(url, f) {
             );
         }
         
-        contentType.value =
+        var contentTypeHeader =
             response.headers.get("content-type");
-        /*
-        if (contentType.value == "image/jpeg")
+            
+        setContentTypeValue(contentTypeHeader);
+        
+        
+        if (contentType.value.startsWith("image"))
         {
-            const imageBlob = await response.blob();
-            image.src = URL.createObjectURL(imageBloob);
+            blob = await response.blob();
+            image.src = URL.createObjectURL(blob);
+            return;
         }
-    */
+        
+        if (contentType.value.startsWith("audio"))
+        {
+            blob = await response.blob();
+            audio.src = URL.createObjectURL(blob);
+            return;
+        }
+        
+        blob = undefined;
+    
     }
     catch (error)
     {
@@ -192,7 +220,6 @@ async function fetchLines(url, f) {
             break;
         }
 
-        // Decode the chunk and add to buffer
         lineBuffer += decoder.decode(value, { stream: true });
 
         // Process lines when a newline character is found
@@ -213,7 +240,7 @@ async function fetchLines(url, f) {
 }
 
 // Example usage:
-//fetchLines('https://dev.bee.fish:8000/?deaths+data').catch(console.error);
+//fetchContent('https://dev.bee.fish:8000/?deaths+data').catch(console.error);
 
 function redirect(path)
 {
@@ -236,7 +263,7 @@ async function downloadJSON(decode = false) {
     
     var firstLine = true;
     
-    await fetchLines(
+    await fetchContent(
         url,
         (line) => {
             if (firstLine) {
@@ -360,6 +387,8 @@ clearButton.onclick =
         if (controller)
             controller.abort();
         saveButton.disabled = false;
+        setContentTypeValue(defaultContentType);
+        contentType.onchange();
     }
     
 saveButton.onclick = async function() {
@@ -368,10 +397,22 @@ saveButton.onclick = async function() {
     var json = editor.value;
     var path = pathInput.value;
         // UTF-8 is the default
-    const encoder = new TextEncoder(); 
-    const data = encoder.encode(editor.value);
-    localStorage.setItem("contentType", contentType.value);
-    await uploadData(path, data, contentType.value, editor.value.length);
+        
+    var data;
+    var length;
+    if (blob) {
+        data = blob;
+        length = blob.size;
+    }
+    else {
+// const encoder = new TextEncoder(); 
+console.log("not using encoder");
+        data = editor.value;//encoder.encode(editor.value);
+        length = data.length;
+    }
+    
+  //  localStorage.setItem("contentType", contentType.value);
+    await uploadData(path, data, contentType.value, length);
 };
 
 fileInput.onchange = async function(event)
@@ -421,6 +462,26 @@ editor.onclick =
             }
         }
     }
+    
+contentType.onchange =
+    () => {
+        console.log("onchange: " + contentType.value);
+        if (contentType.value.startsWith("image")) {
+            image.style.display = "block";
+            editor.style.display = "none";
+            audio.style.display = "none";
+        }
+        else if (contentType.value.startsWith("audio")) {
+            image.style.display = "none";
+            editor.style.display = "none";
+            audio.style.display = "block";
+        }
+        else {
+            image.style.display = "none";
+            editor.style.display = "block";
+            audio.style.display = "none";
+        }
+    }
 
 function switchFunctions(showFunctions)
 {
@@ -462,23 +523,42 @@ function setLinks() {
         dataLink.href = pathInput.value;
     }
 }
+
+function setContentTypeValue(value)
+{
+    contentType.value = value;
+            
+    if (contentType.value != value)
+    {
+        var option = document.createElement("option");
+           
+        option.value = value;
+        option.textContent = value;
+        contentType.appendChild(option);
+        contentType.value = value;
+    }
+    contentType.onchange();
+}
 if (localStorage.getItem("path")) {
 
     pathInput.value =
         localStorage.getItem("path");
         
-    fetchButton.disabled = false;
 }
 
 if (localStorage.getItem("contentType")) {
 
-    contentType.value =
+    var contentTypeValue = 
         localStorage.getItem("contentType");
+        
+    setContentTypeValue(contentTypeValue);
+    
     
 }
 setLinks();
 
 fetchButton.disabled = false;
+contentType.onchange();
 
         </script>
 

@@ -96,7 +96,7 @@ public:
             {
                 logException(
                     "Response::handleResponse", 
-                    "Error writing https response using the " + app->name()
+                    "Error writing https response " + BString( boost::diagnostic_information(ex)) + " using the " + app->name()
                 );
             }
             
