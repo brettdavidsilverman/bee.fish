@@ -92,11 +92,11 @@ public:
             try {
                 write(app);
             }
-            catch(const boost::exception &ex)
+            catch(const std::exception &ex)
             {
                 logException(
                     "Response::handleResponse", 
-                    "Error writing https response " + BString( boost::diagnostic_information(ex)) + " using the " + app->name()
+                    "Error writing https response " + BString(ex.what()) + " using the " + app->name()
                 );
             }
             

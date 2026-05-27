@@ -18,7 +18,8 @@ $(OUTPUT):	$(DEPS)
 
 
 all:	$(OUTPUT)
-
+	$(OUTPUT) -port $(PORT) &
+	
 $(BUILD):
 	mkdir $(BUILD)
 
@@ -39,7 +40,7 @@ test:	$(OUTPUT)
 test:	stop
 	@echo "Testing on port $(PORT)"
 	$(OUTPUT) -port $(PORT) -test
-	$(OUTPUT) -port $(PORT) &
+	
 
 trace:	$(OUTPUT)
 trace:	stop

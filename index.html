@@ -64,7 +64,7 @@
                 <img id="image"></img>
                 <audio id="audio" controls></audio>
                 <div>
-                    <button id="clearButton" type="reset">Clear</button>
+                    <button id="resetButton" type="reset">Reset</button>
                     <button id="saveButton">Save</button>
                     <input type="file" id="file"></input>
                 </div>
@@ -101,7 +101,7 @@ logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 var pathInput = document.getElementById("pathInput");
 var result = document.getElementById("result");
 var editor = document.getElementById("editor");var html = document.getElementById("html");var fetchButton = document.getElementById("fetchButton");
-var clearButton = document.getElementById("clearButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");//var goLink = document.getElementById("goLink");
+var resetButton = document.getElementById("resetButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");//var goLink = document.getElementById("goLink");
 var dataLink = document.getElementById("dataLink");
 var header = document.getElementById("h1");
 var title = document.getElementById("title");
@@ -382,7 +382,7 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
         
 }
     
-clearButton.onclick =
+resetButton.onclick =
     () => {
         if (controller)
             controller.abort();
@@ -405,9 +405,9 @@ saveButton.onclick = async function() {
         length = blob.size;
     }
     else {
-// const encoder = new TextEncoder(); 
-console.log("not using encoder");
-        data = editor.value;//encoder.encode(editor.value);
+console.log("using encoder");
+        const encoder = new TextEncoder(); 
+        data = encoder.encode(editor.value);
         length = data.length;
     }
     
@@ -459,6 +459,7 @@ editor.onclick =
                     encodeURIComponent(
                         searchResults[position.line - 1]
                     );
+                
             }
         }
     }
@@ -545,7 +546,7 @@ function setContentTypeValue(value)
         localStorage.getItem("path");
         
 }
-
+/*
 if (localStorage.getItem("contentType")) {
 
     var contentTypeValue = 
@@ -555,10 +556,10 @@ if (localStorage.getItem("contentType")) {
     
     
 }
-setLinks();
-
-fetchButton.disabled = false;
+*/setLinks();
+contentType.value = defaultContentType;
 contentType.onchange();
+fetchButton.disabled = false;;
 
         </script>
 
