@@ -7,10 +7,11 @@
         <script src="../console/console.js"></script>
         <script src="../coordinates/script.js"></script>
         <script src="../movable/script.js"></script>
+        
         <title>Audio</title>
         <style>
 #setup, #start, #stop{
-    width: calc(100% / 3);;
+    width: calc(100% / 3);
     aspect-ratio: 1;
 }
 
@@ -24,6 +25,13 @@
 
 #stop {
     background-color: red;
+}
+
+#frequency {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: blue;
 }
 
 #processor
@@ -56,7 +64,9 @@
 class Processor extends
     AudioWorkletProcessor
 {
-    f(i) {
+    // Amplitude as a function of time
+    // and inputs
+    f(t) {
         var sin = Math.sin(this.phase);
                     
         this.phase += 
@@ -69,7 +79,9 @@ class Processor extends
     process(inputs, outputs, parameters) {
         
         const output = outputs[0];
+        const input = inputs[0];
         
+        const fInputs[]:
 
         for (let channel = 0;
              channel < output.length; 
@@ -78,15 +90,30 @@ class Processor extends
         {
             const channelOutput = 
                 output[channel];
+                
+            var channelInput;
+            
+            if (channel < input.length)
+                channelnput =
+                    input[channel];
+                
             for (let i = 0; 
                  i < channelOutput.length;
                  ++i
                 ) 
             {
-                var f = this.f(i);
+                this.t++;
+                
+                for (let input = 0;
+                     input < inputs.length; 
+                     ++input
+                    ) 
+                {
+                    fInputs[input] =
+                        inputs[input][channel][i];
+                }
+                var f = this.f(this.t, fInputs);
                 channelOutput[i] = f;
-                if (i % 1000 === 0)
-                    this.port.postMessage(f);
             }
         }
         return true;
@@ -95,11 +122,12 @@ class Processor extends
     constructor() {
         super();
         this.phase = 0;
+        this.frequency = 100; // hz
+        this.t = 0;
         var self = this;
         this.port.onmessage =
         (event) => {
-            Object.assign(self, event.data);
-            self.phase = 0;
+            Object.assign(this, event.data);
         };
     }
     
@@ -113,8 +141,9 @@ registerProcessor('processor', Processor);
                 <div id="start"></div>
                 <div id="stop"></div>
             </div>
-            <canvas id="canvas" class="canvas">
+            <canvas id="canvas" class="canvas"/>
         </div>
+        <div id="frequency" class="movable"></div>
         <script type="module">
 var console = new Console();
 console.log("Hello world");
@@ -124,6 +153,34 @@ var processor;
 var analyser
 
 var initialSetup = false;
+
+var move = document.getElementById("frequency");
+
+var startPoint;
+var scale = 2;
+var defaultFrequency = 200; // Hertz
+
+move.onstartmove =
+(event) => {
+    startPoint = event.point;
+}
+
+move.onmoving =
+(event) =>
+{
+    const a = event.point;
+    const b = startPoint;
+    
+    const distance =
+        Math.sqrt(
+            (b.x - a.x) ** 2 +
+            (b.y - a.y) ** 2
+        );
+        
+    processor.port.postMessage(
+        {frequency: distance * scale}
+    );
+}
 
 async function setup() {
     
@@ -225,7 +282,12 @@ async function setup() {
     
     draw();
     
-
+    alert("Setup");
+    
+    processor.port.postMessage({
+        sampleRate: audioContext.sampleRate,
+        frequency: defaultFrequency
+    });
 }
 
 var processorTextArea = document.getElementById("processor");
@@ -238,11 +300,11 @@ function redirect(path)
     document.location.replace(url);
 }
 
-async function  saveProcessor(event) {
+async function  saveProcessor(process) {
     
     var path = document.location.origin +
         document.location.pathname +
-        "processor";
+        "my/processor";
 
     var parameters = {
         mode: "cors",
@@ -251,17 +313,27 @@ async function  saveProcessor(event) {
         headers: {
             "content-type": "text/javascript; charset=utf-8"
         },
-        body: event.target.value
+        body: process
     }
     
     var response;
     var text;
     
     try {
+        
         response = await fetch(
             path,
             parameters
         );
+        
+        var status = response.status;
+        if (status == 401) // Unauthorised 
+        {
+            var url = await response.json();
+            redirect(url);
+            return;
+        }
+        
         text = await response.text();
     }
     catch (error)
@@ -270,44 +342,36 @@ async function  saveProcessor(event) {
         return;
     }
     
-    
-    var status = response.status;
-    if (status == 401) // Unauthorised 
-    {
-        var json  = await response.text();
-        var url = JSON.parse(json);
-        redirect(url);
-        return;
-    }
-    
     await setup();
     
-    alert("Setup");
+    
     
 }
     
-processorTextArea.onblur = saveProcessor;
-processorTextArea.focus();
+processorTextArea.onblur =
+(event) => {
+    saveProcessor(event.target.value)
+}
+
+await saveProcessor(processorTextArea.value);
+
 
 document.getElementById("setup")
     .onclick =
     async (event) => {
         
-        processor.port.postMessage({
-            sampleRate: audioContext.sampleRate,
-            frequency: Number(prompt("Frequency?"))
-        });
+        
     }
           
 document.getElementById("start")
-    .ontouchstart =
+    .onclick =
     (event) => {
         audioContext.resume();
     }
 
 
 document.getElementById("stop")
-    .ontouchstart =
+    .onclick =
     (event) => {
         audioContext.suspend();
     }

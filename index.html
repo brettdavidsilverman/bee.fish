@@ -11,6 +11,9 @@
         <script src="/client/console/console.js"></script>
         <script src="/client/evaluate.js"></script>        <script src="/client/logon/authentication.js"></script>
         <script src="/client/punycode.js"></script>
+        <script src="/client/coordinates/script.js"></script>
+        <script src="/client/movable/script.js"></script>
+       
         <link rel="stylesheet" type="text/css" href="style.css"/>
         <style>
 #image {
@@ -140,6 +143,21 @@ function getCursorLineAndColumn(textarea) {
 }
 
 
+async function checkResponse(response) {
+    if (response.status == 401) // Unauthorised 
+    {
+        var json = await response.json();
+        redirect(json);
+        return;
+    }
+    else if (response.status != 200) {
+        var json = await response.json();
+        throw new Error(
+            json
+        );
+    }
+}
+
 async function fetchContent(url, f) {
     
     fetchButton.disabled = true;
@@ -157,18 +175,7 @@ async function fetchContent(url, f) {
     
     try {
         response = await fetch(url, parameters);
-        if (response.status == 401) // Unauthorised 
-        {
-            var json = await response.json();
-            redirect(json);
-            return;
-        }
-        else if (response.status != 200) {
-            var json = await response.json();
-            throw new Error(
-                json
-            );
-        }
+        await checkResponse(response);
         
         var contentTypeHeader =
             response.headers.get("content-type");
@@ -250,7 +257,7 @@ function redirect(path)
     document.location.replace(url);
 }
 
-async function downloadJSON(decode = false) {
+async function downloadJSON() {
     var url = new URL(pathInput.value);
     
     fetchButton.disabled = true;
@@ -262,7 +269,9 @@ async function downloadJSON(decode = false) {
     searchResults = [];
     
     var firstLine = true;
-    
+    var decode =
+        (pathInput.value.indexOf("?") != -1);
+        
     await fetchContent(
         url,
         (line) => {
@@ -349,6 +358,8 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
             parameters
         );
         
+        await checkResponse(response);
+        
         var status = response.status;
         if (status == 200) {
             var json = await response.json();
@@ -356,18 +367,6 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
             alert(json);
             pathInput.value = json;
             localStorage.setItem("path", pathInput.value);
-        }
-        else if (status == 401) // Unauthorised 
-        {
-            var json = await response.json();
-            redirect(json);
-            return;
-        }
-        else {
-            var json = await response.json();
-            throw new Error(
-                json
-            );
         }
         
     }
@@ -433,7 +432,7 @@ fetchButton.onclick =
                 pathInput.value
             );
             
-        downloadJSON(pathInput.value.indexOf("?") != -1);
+        downloadJSON();
 
     }
     
