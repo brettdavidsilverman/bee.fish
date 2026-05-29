@@ -9,12 +9,13 @@
         <script src="/client/power-encoding/power-encoding.js"></script>
         <script src="/client/id/id.js"></script>
         <script src="/client/console/console.js"></script>
-        <script src="/client/evaluate.js"></script>        <script src="/client/logon/authentication.js"></script>
+        <script src="/client/evaluate.js"></script>
+        <script src="/client/logon/authentication.js"></script>
         <script src="/client/punycode.js"></script>
         <script src="/client/coordinates/script.js"></script>
         <script src="/client/movable/script.js"></script>
        
-        <link rel="stylesheet" type="text/css" href="style.css"/>
+        <link rel="stylesheet" type="text/css" href="/style.css"/>
         <style>
 #image {
     width: 100px;
@@ -56,20 +57,21 @@
                         Content type
                     </label>
                     <select id="contentType">
-                        <option value="application/json; charset=utf-8" selected>JSON</option>
+                        <option value="application/json; charset=utf-8">JSON</option>
                         <option value="text/html; charset=utf-8">HTML</option>
                         <option value="text/css; charset=utf-8">CSS</option>
                         <option value="text/javascript; charset=utf-8">Javascript</option>
                         <option value="image/jpeg">Image</option>
                         <option value="audio/mpeg">Audio</option>
-                    </select>                </div>
+                    </select>
+                </div>
                 <textarea id="editor"></textarea>
-                <img id="image"></img>
+                <img id="image" src="/favicon.ico" alt="image" />
                 <audio id="audio" controls></audio>
                 <div>
                     <button id="resetButton" type="reset">Reset</button>
                     <button id="saveButton">Save</button>
-                    <input type="file" id="file"></input>
+                    <input type="file" id="file" />
                 </div>
             </form>
             
@@ -98,13 +100,19 @@ const defaultContentType = "application/json; charset=utf-8";
 
 var console = new Console();
 console.log("Hello world");
-var logon = document.getElementById("logon");
+
+var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
 
 var pathInput = document.getElementById("pathInput");
 var result = document.getElementById("result");
-var editor = document.getElementById("editor");var html = document.getElementById("html");var fetchButton = document.getElementById("fetchButton");
-var resetButton = document.getElementById("resetButton");var saveButton = document.getElementById("saveButton");var functionCheckbox = document.getElementById("functionCheckbox");//var goLink = document.getElementById("goLink");
+var editor = document.getElementById("editor");
+var html = document.getElementById("html");
+var fetchButton = document.getElementById("fetchButton");
+var resetButton = document.getElementById("resetButton");
+var saveButton = document.getElementById("saveButton");
+var functionCheckbox = document.getElementById("functionCheckbox");
+//var goLink = document.getElementById("goLink");
 var dataLink = document.getElementById("dataLink");
 var header = document.getElementById("h1");
 var title = document.getElementById("title");
@@ -162,7 +170,11 @@ async function fetchContent(url, f) {
     
     fetchButton.disabled = true;
     saveButton.disabled = true;
+    editor.value = "Loading....";
     
+    if (controller)
+       controller.abort();
+       
     controller = new AbortController();
     
     var parameters = {
@@ -171,6 +183,7 @@ async function fetchContent(url, f) {
         credentials: "include",
         signal: controller.signal
     }
+    
     var response;
     
     try {
@@ -187,6 +200,7 @@ async function fetchContent(url, f) {
         {
             blob = await response.blob();
             image.src = URL.createObjectURL(blob);
+            editor.value = "";
             return;
         }
         
@@ -194,6 +208,7 @@ async function fetchContent(url, f) {
         {
             blob = await response.blob();
             audio.src = URL.createObjectURL(blob);
+            editor.value = "";
             return;
         }
         
@@ -207,6 +222,7 @@ async function fetchContent(url, f) {
     }
     finally {
         fetchButton.disabled = false;
+        
     }
     
         
@@ -257,13 +273,13 @@ function redirect(path)
     document.location.replace(url);
 }
 
-async function downloadJSON() {
+async function downloadJSON() {
+
     var url = new URL(pathInput.value);
     
     fetchButton.disabled = true;
     saveButton.disabled = true;
     
-    editor.value = "Loading....";
     
     
     searchResults = [];
@@ -387,7 +403,6 @@ resetButton.onclick =
             controller.abort();
         saveButton.disabled = false;
         setContentTypeValue(defaultContentType);
-        contentType.onchange();
     }
     
 saveButton.onclick = async function() {
@@ -404,7 +419,6 @@ saveButton.onclick = async function() {
         length = blob.size;
     }
     else {
-console.log("using encoder");
         const encoder = new TextEncoder(); 
         data = encoder.encode(editor.value);
         length = data.length;
@@ -427,6 +441,9 @@ fileInput.onchange = async function(event)
 
 fetchButton.onclick =
     function() {
+        if (controller)
+            controller.abort();
+            
         window.location.hash =
             encodeURIComponent(
                 pathInput.value
@@ -443,7 +460,7 @@ window.onhashchange =
         pathInput.value = decodeURIComponent(
             window.location.hash.substr(1)
         );
-        fetchButton.focus();
+        setLinks();
         fetchButton.click();
     }
     
@@ -465,7 +482,6 @@ editor.onclick =
     
 contentType.onchange =
     () => {
-        console.log("onchange: " + contentType.value);
         if (contentType.value.startsWith("image")) {
             image.style.display = "block";
             editor.style.display = "none";
@@ -481,6 +497,9 @@ contentType.onchange =
             editor.style.display = "block";
             audio.style.display = "none";
         }
+        
+        localStorage.setItem("contentType", contentType.value);
+    
     }
 
 function switchFunctions(showFunctions)
@@ -495,8 +514,10 @@ function switchFunctions(showFunctions)
         json = hideFunctions(json);
         json = JSON.stringify(json, null, "    ");
     }
-    editor.value = json;
-}
+    editor.value = json;
+
+}
+
 
 function getJSON()
 {
@@ -510,7 +531,8 @@ function getJSON()
     );
     json = f();
     return json;
-}
+}
+
 function setLinks() {
     if (pathInput.value == "")
     {
@@ -537,15 +559,17 @@ function setContentTypeValue(value)
         contentType.appendChild(option);
         contentType.value = value;
     }
+    
     contentType.onchange();
 }
-if (localStorage.getItem("path")) {
+
+if (localStorage.getItem("path")) {
 
     pathInput.value =
         localStorage.getItem("path");
         
 }
-/*
+
 if (localStorage.getItem("contentType")) {
 
     var contentTypeValue = 
@@ -555,10 +579,10 @@ if (localStorage.getItem("contentType")) {
     
     
 }
-*/setLinks();
-contentType.value = defaultContentType;
+
+setLinks();
 contentType.onchange();
-fetchButton.disabled = false;;
+fetchButton.disabled = false;
 
         </script>
 

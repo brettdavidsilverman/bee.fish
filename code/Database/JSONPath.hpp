@@ -165,18 +165,16 @@ public:
 
     JSONPath operator [] (const BString& property)
     {
-        // LockFile::ScopedLock lock(database());
         setType(Type::OBJECT);
 
-
+        // This creates the child and
+        // indexes its properties
         Index position =
             getObjectPropertyPosition(property);
 
         assert(position > 0);
 
         JSONPath json = getChildren()[position];
-
-        // json.indexProperties();
 
         return json;
 

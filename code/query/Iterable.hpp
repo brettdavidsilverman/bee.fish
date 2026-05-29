@@ -154,13 +154,11 @@ using namespace BeeFishAuthentication;
                         _value = toString(iterator);
                         _jsonPath = jsonPath(iterator);
                         if (
-                            (
-                                _value +
-                                BString("/")
-                            ).startsWith(
-                                _parentValue + 
-                                BString("/")
-                            ) 
+                            (_value + "/")
+                            .startsWith(
+                                _parentValue +  "/"
+                            ) &&
+                            ! _jsonPath.contains("{HTTP}")
                         )
                         {
                             _parentValue = _value;
@@ -187,7 +185,6 @@ using namespace BeeFishAuthentication;
             
             BString toString(IdIterator& iterator) 
             {
-                
                 return jsonPath(iterator).toString(_container->_auth);
             }
             

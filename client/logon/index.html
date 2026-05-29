@@ -19,9 +19,10 @@
       <a href="/client/logon/authentication.js">authentication.js</a>
       <form id="form" onsubmit="onsubmit()">
          <label for="secretFile">
-            <img id="thumbnail" width="100" height="100" onclick="return thumbnailClicked(event)">Secret</img>
+            <img id="thumbnail" width="100" height="100" onclick="return thumbnailClicked(event)" src="/favicon.ico" alt="secret"/>
+            Secret
          </label>
-         <input type="file" id="secretFile" onchange="createSecret(this.files[0]);" accept="image/*" style="display:none;" ></input>
+         <input type="file" id="secretFile" onchange="createSecret(this.files[0]);" accept="image/*" style="display:none;" />
          <canvas id="canvas" width="100" height="100" style="display:none;"></canvas>
          <script>
 var h1 = document.getElementById("h1");
