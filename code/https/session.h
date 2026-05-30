@@ -165,9 +165,9 @@ namespace BeeFishHTTPS {
 
             
             
-            if (error)
+            if (error && error.value() != END_OF_FILE)
             {
-                logException("handleRead", error);
+                logException("Session::handleRead", error);
                 delete this;
                 return;
             }
@@ -197,7 +197,7 @@ namespace BeeFishHTTPS {
             
             if (_parser->result() == false)
             {
-                logException("handleRead", BString("Parser match error: ") + _parser->getError());
+                logException("Session::threadedHandleRead", BString("Parser match error: ") + _parser->getError());
                 delete this;
                 return;
             }
