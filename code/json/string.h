@@ -333,14 +333,7 @@ namespace BeeFishJSON {
                         this->_onbuffer(buffer);
                     }
 
-                    char c = _parser->c();
-                    bool isFinalPart = 
-                        c ==  '\"' ;
-                        
-                    onpartstring(
-                        buffer, 
-                        isFinalPart
-                    );
+                    onpartstring(buffer);
                 };
 
 
@@ -384,7 +377,7 @@ namespace BeeFishJSON {
         
         // Defined in json-parser.h
         virtual void onbeginstring(String* match);
-        virtual void onpartstring(const BString& match, bool finalPart);
+        virtual void onpartstring(const BString& match);
         virtual void onendstring(String* match);
         
     protected:

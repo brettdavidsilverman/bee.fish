@@ -2585,7 +2585,7 @@ inline bool testMultiThreaded()
 #ifdef JSON_INDEX
     // When compiled with this flag,
     // sizes are consistent
-    const Index SIZE =   1266768;
+    const Index SIZE = 1138960;
 #else
     const Index SIZE = 0;
 #endif

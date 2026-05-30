@@ -176,7 +176,7 @@ public:
     }
 
     bool isPunctuation() const {
-
+/*
         boost::u32regex pattern =
             boost::make_u32regex(
                 L"[[:punct:]]+"
@@ -191,16 +191,44 @@ public:
                             );
 
 
-        return boost::u32regex_match(
-                   wstr,
-                   pattern
-               );
+        if (boost::u32regex_match(
+                wstr,
+                pattern
+            )
+        )
+        {
+            return true;
+        }
+        */
+        
+        if (!size())
+            return false;
+            
+        const BString punctuation =
+            ".,@#$_&-+()/*\"':;!?~`|^={}\\%[]<>";
+            
+        return (
+            punctuation.find(
+                (*this)[0]
+            ) != BString::npos
+        );
 
 
     }
 
     bool isSpace() const {
-
+        if (!size())
+            return false;
+            
+        const BString space =
+            " \t\r\n\v";
+            
+        return (
+            space.find(
+                (*this)[0]
+            ) != BString::npos
+        );
+/*
         std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(
                                 *this,
                                 _locale._locale
@@ -214,6 +242,7 @@ public:
         }
 
         return true;
+*/
 
     }
 /*
@@ -294,7 +323,6 @@ public:
             BString _word;
         };
 
-
         auto splitOnDot =
             [](
                 BString word,
@@ -302,40 +330,33 @@ public:
             )
         {
 
-            boost::locale::boundary::ssegment_index map(
-                boost::locale::boundary::character,
-                word.begin(),
-                word.end()
-            );
-
-            // Iterate over words correctly
-            // utf-8 aligned
+            
             BString split;
-            for (auto it = map.begin();
-                    it != map.end();
+            for (auto it = word.begin();
+                    it != word.end();
                     ++it)
             {
                 // Add token and type
-                BString character = it->str();
-                if (character == "." ||
-                        character == "_" ||
-                        character == "~")
+                char character = *it;
+                if (character == '.' ||
+                        character == '_' ||
+                        character == '~')
                 {
                     if (split.size())
                         tokens.push_back({
-                        Type::Word,
-                        split.toLower()
-                    });
+                            Type::Word,
+                            split.toLower()
+                        });
 
                     tokens.push_back({
                         Type::Punctuation,
-                        character
+                        BString(character)
                     });
 
                     split = "";
                 }
                 else
-                    split += character;
+                    split.push_back(character);
 
             }
 
@@ -377,18 +398,23 @@ public:
                 // next page
                 partWord = token;
                 
-cerr << "PART WORD *" << partWord << "*" << endl;
-
                 break;
             }
             
             if (it->rule() & boost::locale::boundary::word_letter ||
                     it->rule() & boost::locale::boundary::word_number)
             {
+                
                 splitOnDot(
                     token,
                     tokens
                 );
+                
+                tokens.push_back
+                ({
+                    Type::Word,
+                    token
+                });
             }
             else if (token.isSpace())
             {
@@ -419,6 +445,18 @@ cerr << "PART WORD *" << partWord << "*" << endl;
 
         }
         
+        std::vector<BString> words;
+        
+        for (auto token : tokens)
+        {
+            if (token._type == Type::Word)
+            {
+                words.push_back(
+                    token._word.toLower()
+                );
+            }
+        }
+        /*
         Index i = 0;
 
         std::vector<BString> words;
@@ -500,6 +538,8 @@ cerr << "PART WORD *" << partWord << "*" << endl;
 
 
         }
+        
+        */
 
         // 1. Sort words
         std::sort(words.begin(), words.end());

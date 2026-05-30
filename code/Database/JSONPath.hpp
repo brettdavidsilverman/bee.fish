@@ -481,17 +481,18 @@ public:
         }
 
         if (finalPart)
-            endString(pageIndex, indexData);
+            endString(pageIndex, indexData, partWord);
 
     }
 
-protected:
-
-    void endString(Index pageCount, bool indexData)
+    void endString(Index pageCount, bool indexData, BString& partWord)
     {
         LockFile::ScopedLock lock(database());
 
         Path path = *this;
+        
+        addWords("", partWord, true);
+        
         path = path[VALUE];
         Index max = 0;
 
@@ -502,8 +503,6 @@ protected:
             path.hasData() &&
             path.getData<bool>();
 
-        BString partWord;
-        
         for (Index i = pageCount + 1;
                 i <= max;
                 ++i)

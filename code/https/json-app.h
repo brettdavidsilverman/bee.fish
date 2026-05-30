@@ -218,9 +218,6 @@ using namespace BeeFishWeb;
                         {
                             ++pageIndex;
                             
-                            bool isFinalPart = 
-                                (parser.peek() == -1);
-
                             if (pageIndex == 1)
                             {
                                 BString header = 
@@ -228,11 +225,11 @@ using namespace BeeFishWeb;
                                     contentType +
                                     BString(";base64,") +
                                     encoded;
-                                content.setString(header, pageIndex, false, isFinalPart, partWord);
+                                content.setString(header, pageIndex, false, false, partWord);
                             }
                             else 
                             {
-                                content.setString(encoded, pageIndex, false, isFinalPart, partWord);
+                                content.setString(encoded, pageIndex, false, false, partWord);
                             }
                         }
                     );
@@ -243,15 +240,12 @@ using namespace BeeFishWeb;
                     postRequest.setOnData(
                         [&parser, &partWord, &pageIndex, &contentLength, &contentType, &content, &base64EncodeData, &base64](const BString& data) {
                             contentLength += data.size();
-                            bool isFinalPart = 
-                                (parser.peek() == -1);
-
                             if (base64EncodeData)
                             {
                                 base64 << data;
                             }
                             else {
-                                content.setString(data, ++pageIndex, true, isFinalPart, partWord);
+                                content.setString(data, ++pageIndex, true, false, partWord);
                             }
                         }
                     );
@@ -267,7 +261,7 @@ using namespace BeeFishWeb;
                         base64.flush();
                     }
                 
-                   // http["content"].endString(pageIndex, indexData);
+                    http["content"].endString(pageIndex, !base64EncodeData, partWord);
                     http["content-type"].setString(contentType);
                     http["content-length"].setInteger(contentLength);
                     

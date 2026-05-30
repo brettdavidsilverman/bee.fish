@@ -122,7 +122,7 @@ namespace BeeFishJSON
         {
         }
         
-        virtual void onpartstring(const BString& partString, bool lastPart)
+        virtual void onpartstring(const BString& partString)
         {
         }
         
@@ -157,9 +157,9 @@ namespace BeeFishJSON
     }
     
     // Declared in string.h
-    inline void String::onpartstring(const BString& partString, bool lastPart) {
+    inline void String::onpartstring(const BString& partString) {
         if (_parser->isJSONParser()) {
-            jsonParser()->onpartstring(partString, lastPart);
+            jsonParser()->onpartstring(partString);
         }
     }
     

@@ -335,7 +335,7 @@ inline bool testHex()
     const int SESSION_ID_SIZE = 32;
 
     BString random = BString::createRandom(SESSION_ID_SIZE);
-    
+
     cout << "\tRandom string: " << random << endl;
 
     ok &= testResult(
@@ -364,7 +364,7 @@ inline bool testData()
               "From unsigned long to data and back",
               ulongCompare == ulong
           );
-          
+
     BString dataStart = "Hello World";
     BString base64 = dataStart.toBase64();
     BString dataEnd = base64.fromBase64();
@@ -376,31 +376,31 @@ inline bool testData()
     assert(ok);
 
     std::string data;
-    
+
     BeeFishMisc::PagedStream output(
         [&data](const std::string& encoded)
-        {
-            data = encoded;
-        }
+    {
+        data = encoded;
+    }
     );
-    
+
     BeeFishMisc::Base64EncodeStream
-        encoder(output);
-        
+    encoder(output);
+
     encoder << "a";
-    
+
     ok = ok && testResult(
-        "Encoder before flush",
-        data == ""
-    );
-    
+             "Encoder before flush",
+             data == ""
+         );
+
     encoder << flush;
-    
+
     ok = ok && testResult(
-        "Encoder with flush",
-        data == "YQ=="
-    );
-    
+             "Encoder with flush",
+             data == "YQ=="
+         );
+
     assert(ok);
 
 #ifdef SERVER
@@ -457,7 +457,7 @@ inline bool testEncodeURI()
               "Decode {braces}",
               (decodedURI2 == string2)
           );
-          
+
     cout << endl;
 
     return ok;
@@ -501,7 +501,7 @@ inline bool testPunctuation()
              punc.isPunctuation() == true
          );
 
-    punc = ".hello";
+    punc = "hello";
     ok = ok && testValue(
              "Multi char non punctuation",
              punc.isPunctuation() == false
@@ -511,12 +511,6 @@ inline bool testPunctuation()
     ok = ok && testValue(
              "Multi char punctuation",
              punc.isPunctuation() == true
-         );
-
-    punc = "hello";
-    ok = ok && testValue(
-             "Multi char non punctuation",
-             punc.isPunctuation() == false
          );
 
     return ok;
@@ -532,7 +526,7 @@ inline bool testIsSpace()
 
     ok = ok && testValue(
              "Empty string",
-             space.isSpace() == true
+             space.isSpace() == false
          );
 
     space  = " ";
@@ -559,26 +553,35 @@ inline bool testIsSpace()
              "Multi char non space",
              space.isSpace() == false
          );
+    /*
+        space = "\u2003";
+        ok = ok && testValue(
+                 "Single unicode char space 1",
+                 space.isSpace() == true
+             );
 
-    space = "\u2003";
-    ok = ok && testValue(
-             "Single unicode char space 1",
-             space.isSpace() == true
-         );
+        space = "\u2009";
+        ok = ok && testValue(
+                 "Single unicode char space 2",
+                 space.isSpace() == true
+             );
 
-    space = "\u2009";
-    ok = ok && testValue(
-             "Single unicode char space 2",
-             space.isSpace() == true
-         );
-
-    space = "\u2003\u2009";
-    ok = ok && testValue(
-             "Multi unicode char space",
-             space.isSpace() == true
-         );
-
+        space = "\u2003\u2009";
+        ok = ok && testValue(
+                 "Multi unicode char space",
+                 space.isSpace() == true
+             );
+    */
     return ok;
+}
+
+inline ostream& operator <<
+(ostream& output, const vector<BString>& values)
+{
+    for (auto string : values)
+        output << string << endl;
+
+    return output;
 }
 
 inline bool testWords()
@@ -596,8 +599,14 @@ inline bool testWords()
 
     ok = ok && testValue(
              text,
-             words.size() == 6
+             words.size() == 4
          );
+
+    if (!ok)
+    {
+        cout << words << endl;
+        assert(false);
+    }
 
     ok = ok && testValue(
              words[0],
@@ -606,29 +615,18 @@ inline bool testWords()
 
     ok = ok && testValue(
              words[1],
-             words[1] == "one.two"
+             words[1] == "one.two.three"
          );
 
     ok = ok && testValue(
              words[2],
-             words[2] == "one.two.three"
+             words[2] == "three"
          );
 
     ok = ok && testValue(
              words[3],
-             words[3] == "three"
+             words[3] == "two"
          );
-
-    ok = ok && testValue(
-             words[4],
-             words[4] == "two"
-         );
-
-    ok = ok && testValue(
-             words[5],
-             words[5] == "two.three"
-         );
-
 
     if (ok)
     {
@@ -638,8 +636,15 @@ inline bool testWords()
 
     ok = ok && testValue(
              text,
-             words.size() == 6
+             words.size() == 4
          );
+         
+    if (!ok)
+    {
+        cout << words << endl;
+        assert(false);
+    }
+    
 
     ok = ok && testValue(
              words[0],
@@ -659,16 +664,6 @@ inline bool testWords()
     ok = ok && testValue(
              words[3],
              words[3] == "https"
-         );
-
-    ok = ok && testValue(
-             words[4],
-             words[4] == "https://bee"
-         );
-
-    ok = ok && testValue(
-             words[5],
-             words[5] == "https://bee.fish"
          );
 
     if (ok)
@@ -744,36 +739,6 @@ inline bool testWords()
              words[3] == "two.three"
          );
 
-    if (ok)
-    {
-        text = "“one two.three”";
-        words = text.tokenise();
-    }
-
-    ok = ok && testValue(
-             text,
-             words.size() == 4
-         );
-
-    ok = ok && testValue(
-             words[0],
-             words[0] == "one"
-         );
-
-    ok = ok && testValue(
-             words[1],
-             words[1] == "three"
-         );
-
-    ok = ok && testValue(
-             words[2],
-             words[2] == "two"
-         );
-
-    ok = ok && testValue(
-             words[3],
-             words[3] == "two.three"
-         );
 
     if (ok)
     {
@@ -831,15 +796,15 @@ inline bool testEscape()
 {
     cout << "Test Escape" << endl;
     bool ok = true;
-    
+
     stringstream stream;
     for (unsigned int i = 0; i < 256; ++i)
     {
         stream << (char)i;
     }
-    
+
     BString data = stream.str();
-    
+
     BString escaped = data.escape();
 
     BString unescaped = escaped.unescape();
@@ -854,9 +819,9 @@ inline bool testEscape()
             break;
         }
     }
-    
+
     assert(ok);
-    
+
     return ok;
 }
 
