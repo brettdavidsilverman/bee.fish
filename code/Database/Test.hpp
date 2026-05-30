@@ -132,6 +132,7 @@ inline bool testFile()
     file.unlock();
 
     BString test = "Hello world";
+    cout << "\tWriting" << endl;
     file.write(test.data(), test.size());
 
     file.seek(0);

@@ -165,7 +165,7 @@ namespace BeeFishHTTPS {
 
             
             
-            if (error && error.value() != END_OF_FILE)
+            if (error)// && error.value() != END_OF_FILE)
             {
                 logException("Session::handleRead", error);
                 delete this;
@@ -204,7 +204,11 @@ namespace BeeFishHTTPS {
                 
             if ( _request->_headers &&
                   _request->headers().result() == true && 
-                  _request->method() == "GET" )
+                 (
+                     _request->method() == "GET" ||
+                     _request->method() == "OPTIONS"
+                 )
+            )
             {
                 handleResponse();
                 return;
@@ -229,15 +233,19 @@ namespace BeeFishHTTPS {
                 
             }
             
+            
             _tempFile.write((const char*)_data.data(), bytesTransferred);
-
+            _tempFile.flush();
+            
             // Check if finished request
             if ( _parser->result() == true )
             {
+                
                 _tempFile.close();
 
                 _server->appendToTransactionFile(_tempFileName);
 
+            
                 handleResponse();
                 return;
             }
@@ -253,17 +261,7 @@ namespace BeeFishHTTPS {
             ifstream input(_tempFileName);
 
             std::cout << "File Dump of " << _tempFileName << std::endl;
-
-            int c;
-            while (!input.eof()) {
-                c = input.get();
-                if (c == -1)
-                    break;
-                std::cout << (char)c;
-            }
-
-            std::cout << std::endl;
-
+            std::cout << input.rdbuf();
             input.close();
 
         }
@@ -307,11 +305,8 @@ namespace BeeFishHTTPS {
                     "Session::handleWrite",
                     error
                 );
-/*
-delete _response;
-_response = nullptr;
-*/
-delete this;
+                
+                delete this;
                 return;
             }
             
@@ -392,6 +387,7 @@ delete this;
                         {"who", getPointerString()},
                         {"when", Server::getDateTime()},
                         {"origin", origin()},
+                        {"host", host()},
                         {"request", request}
                     }
                 }
@@ -407,21 +403,30 @@ delete this;
             const BString& what
         )
         {
-            
-            BeeFishScript::Object error = {
-                {
-                    "exception", BeeFishScript::Object {
-                        {"where", where},
-                        {"what", what},
-                        {"ipAddress", ipAddress()},
-                        {"who", getPointerString()},
-                        {"when", Server::getDateTime()},
-                        {"origin", origin()}
+            if (_request) {
+                logException(
+                    where, 
+                    what,
+                    _request->url()
+                );
+            }
+            else {
+                BeeFishScript::Object error = {
+                    {
+                        "exception", BeeFishScript::Object {
+                            {"where", where},
+                            {"what", what},
+                            {"ipAddress", ipAddress()},
+                            {"who", getPointerString()},
+                            {"when", Server::getDateTime()},
+                            {"origin", origin()}
+                        }
                     }
-                }
-            };
+                };
+                cerr << error << endl;
+            }
             
-            cerr << error << endl;
+            
             
         }
 
@@ -708,8 +713,7 @@ delete this;
                 { "access-control-allow-origin", session->origin() },
                 { "access-control-allow-credentials", "true" },
                 { "access-control-allow-methods", "GET, POST, DELETE, OPTIONS" },
-                { "access-control-allow-headers", "origin, content-type, x-auth-token, authorization" },
-                { "access-control-expose-headers", "x-auth-token" },
+                { "access-control-allow-headers", "origin, content-type, content-length, authorization" },
                 { "connection", "keep-alive" },
                 { "keep-alive", "max=5" }
             }

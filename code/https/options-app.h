@@ -29,19 +29,12 @@ using namespace BeeFishWeb;
         virtual void handleResponse()
         override
         {
+            
             const BString& method =
                 _session->request()->method();
-           /* const URL& url =
-                _session->request()->url();
-                */
+
             if (method == "OPTIONS") 
             {
-                /*
-                _responseHeaders.replace(
-                    "content-type",
-                    "application/json; charset=utf-8"
-                );
-                */
                 
                 _responseHeaders.replace(
                     "access-control-allow-methods",
@@ -58,13 +51,7 @@ using namespace BeeFishWeb;
                     _session->origin()
                 );
     
-            /*
-                BeeFishScript::Object object
-                {
-                    {"options", (BeeFishScript::String)url}
-                };
-                */
-                _content = "";//object.str();
+                _content = "";
                 _contentLength = 0;
                 _serve = App::SERVE_CONTENT;
                 _status = 204;
