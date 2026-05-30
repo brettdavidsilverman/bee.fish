@@ -80,7 +80,7 @@ public:
     {
     }
     
-    virtual void onpartstring(const BString& match)
+    virtual void onpartstring(const BString& match, bool finalPart)
     override
     {
     }

@@ -274,8 +274,14 @@ public:
             );
 
     }
-
+    
     vector<BString> tokenise() const
+    {
+        BString partWord;
+        return tokenise(true, partWord);
+    }
+
+    vector<BString> tokenise(bool finalWord, BString& partWord) const
     {
         enum class Type {
             Blankspace,
@@ -343,10 +349,14 @@ public:
 
         std::vector<Token> tokens;
 
+        BString value = partWord + *this;
+            
+        partWord = "";
+        
         boost::locale::boundary::ssegment_index map(
             boost::locale::boundary::word,
-            begin(),
-            end()
+            value.begin(),
+            value.end()
         );
 
         // Iterate over words correctly
@@ -358,10 +368,22 @@ public:
             // Add token and type
             BString token = it->str();
 
+            auto itTestEnd = it;
+            ++itTestEnd;
+            if (!finalWord &&
+                itTestEnd == map.end())
+            {
+                // last word or part of
+                // next page
+                partWord = token;
+                
+cerr << "PART WORD *" << partWord << "*" << endl;
+
+                break;
+            }
+            
             if (it->rule() & boost::locale::boundary::word_letter ||
                     it->rule() & boost::locale::boundary::word_number)
-                /*
-                it->rule() & boost::locale::boundary::character)*/
             {
                 splitOnDot(
                     token,
@@ -371,38 +393,32 @@ public:
             else if (token.isSpace())
             {
                 tokens.push_back
-                (
-                {
+                ({
                     Type::Blankspace,
                     token
-                }
-                );
+                });
             }
             else if (token.isPunctuation())
             {
                 tokens.push_back
-                (
-                {
+                ({
                     Type::Punctuation,
                     token
-                }
-                );
+                });
             }
             else
             {
                 tokens.push_back
-                (
-                {
+                ({
                     Type::Word,
                     token
-                }
-                );
+                });
             }
 
 
 
         }
-
+        
         Index i = 0;
 
         std::vector<BString> words;

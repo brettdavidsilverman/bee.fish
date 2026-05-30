@@ -11,6 +11,7 @@
 #include "Database.hpp"
 #include "Path.hpp"
 #include "Test.hpp"
+#include "LoadFiles.hpp"
 
 using namespace BeeFishDatabase;
 using namespace BeeFishMisc;
@@ -43,12 +44,10 @@ int main(int argc, const char* argv[])
     bool unlock =
         (hasArg(argc, argv, "-unlock") != -1);
         
-    if (unlock)
+    if (unlock || true)
     {
         clog << "Unlocking" << endl;
         LockFile::unlock(filename);
-    
-        return 0;
     }
     
     bool test =
@@ -77,7 +76,7 @@ int main(int argc, const char* argv[])
     }
     
     int originArg =
-    hasArg(argc, argv, "-origin");
+        hasArg(argc, argv, "-origin");
     BString origin = ORIGIN;
 #ifdef DEBUG
     {
@@ -85,7 +84,10 @@ int main(int argc, const char* argv[])
     }
 #endif
 
-    if (originArg != -1 && argc > (originArg + 1))
+    if (originArg != -1 && 
+        argc > (originArg + 1) &&
+        !BString(argv[originArg + 1]).startsWith("-")
+    )
     {
         origin = argv[originArg + 1];
     }
@@ -160,6 +162,29 @@ int main(int argc, const char* argv[])
         
         parser.read(file);
     }
+    
+    BString loadDirectory = WWW_ROOT_DIRECTORY;
+    int loadFilesArg =
+        hasArg(argc, argv, "-files");
+        
+    if (loadFilesArg != -1 && 
+        argc > (loadFilesArg + 1) &&
+        !BString(argv[loadFilesArg + 1]).startsWith("-")
+    )
+    {
+        loadDirectory = argv[loadFilesArg + 1];
+    }
+    
+    bool loadFiles = loadFilesArg != -1;
+    
+    if (loadFiles) {
+        BeeFishDatabase::loadFiles(
+            auth,
+            path,
+            loadDirectory
+        );
+    }
+    
 
     bool input =
         (hasArg(argc, argv, "-input") != -1);

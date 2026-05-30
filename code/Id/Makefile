@@ -1,6 +1,6 @@
 BUILD  = ../../build
 OUTPUT = $(BUILD)/Id
-CFLAGS = -std=c++17 -Wall -fmax-errors=1 -Ofast
+CFLAGS = -std=c++17 -Wall -fmax-errors=1
 DEPS= $(BUILD)/power-encoding Id.hpp Test.hpp main.cpp Makefile
 
 $(OUTPUT): $(DEPS)

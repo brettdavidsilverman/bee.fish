@@ -50,14 +50,15 @@ protected:
     Size _dataBytes = Size(-1);
     String _error;
     optional<bool> _result = nullopt;
-
 public:
     Match* _match;
     Match* _byteMatch = nullptr;
     Char _character = "";
     Char _lastCharacter;
     bool _deleteMatch = false;
-    int  _expectedBytes = 0;
+    Index  _expectedBytes = 0;
+    int _c = -1;
+    int  _peek = -1;
 protected:
 
     Parser() : _match(nullptr)
@@ -127,19 +128,20 @@ public:
         if (!_match->_parser)
             _match->setup(this);
 
-        int i = 0;
         char c;
 
         bool matched = true;
+        
+        
         while (
             matched &&
             (
-                (i = input.get()) != -1
+                (_c = input.get()) != -1
             )
         )
         {
-
-            c = (char)i;
+            _peek = input.peek();
+            c = (char)_c;
 
 
             if (_dataBytes > 0 && _dataBytes != Size(-1))
@@ -148,7 +150,7 @@ public:
                 --_dataBytes;
 
                 // matched =
-                _byteMatch->match((uint8_t)i);
+                _byteMatch->match((uint8_t)_c);
 
                 if (_dataBytes == 0)
                 {
@@ -178,10 +180,12 @@ public:
                     
                     if (--_expectedBytes > 0)
                     {
-                        if ((i = input.get()) == -1)
+                        if ((_c = input.get()) == -1)
                             break;
-
-                        c = (char)i;
+                            
+                        _peek = input.peek();
+                        
+                        c = (char)_c;
                         
                         if ((c & 0b10111111) == c)
                         {
@@ -193,7 +197,7 @@ public:
                         break;
                 }
                 
-                if (i != -1) {
+                if (_c != -1) {
                     ++_charCount;
                     _lastCharacter = _character;
                     matched =
@@ -204,22 +208,14 @@ public:
     //cout << "{" << _character << "}";
 #endif
 
-                
-
-                
-
             }
 
-            if (i == -1)
+            if (_c == -1)
                 break;
 
             if (_match->result() != nullopt)
                 break;
-
-
-
-
-
+                
 #ifdef TIME
             if (_charCount % 100000 == 0)
             {
@@ -246,14 +242,17 @@ public:
         else if (_match->result() == false)
             fail();
 
-        /*
-        cerr << "PARSER I: " << -1 << endl;
-        cerr << "PARSER RESULT: " << result() << endl;
-        cerr << "MATCH RESULT: " << _match->result() << endl;
-        */
-
-
         return result();
+    }
+    
+    int peek() const
+    {
+        return _peek;
+    }
+    
+    int c() const
+    {
+        return _c;
     }
 
     virtual optional<bool> read(const string& str)

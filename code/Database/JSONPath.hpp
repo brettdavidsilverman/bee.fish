@@ -246,7 +246,7 @@ public:
             if (!path.hasData())
             {
                 path.setData(true);
-
+                BString partWord;
                 JSONPath json = *this;
                 while (!json.isUserRoot())
                 {
@@ -255,9 +255,9 @@ public:
                     json = json.parent(property, keyType);
 
                     if (keyType == Type::STRING) {
-                        addWords(property, true);
+                        addWords(property, partWord, true);
                     }
-                    
+
                 }
             }
 
@@ -419,9 +419,23 @@ public:
         return number;
     }
 
-    void setString(const BString& value, Index pageIndex = 1, bool indexData = true, bool finalPart = true)
+    void setString(const BString& value)
+    {
+        BString partWord;
+        setString(
+            value,
+            1,
+            true,
+            true,
+            partWord
+        );
+    }
+
+    void setString(const BString& value, Index pageIndex, bool indexData, bool finalPart, BString& partWord)
     {
         assert(pageIndex > 0);
+        if (pageIndex == 0)
+            partWord = "";
 
         LockFile::ScopedLock lock(database());
         Path path = *this;
@@ -442,7 +456,18 @@ public:
             if (path[VALUE].hasData() &&
                     path[VALUE].getData<bool>())
             {
-                removeWords(current, true);
+                BString partRemoveWord = partWord;
+                
+                for (Index i = pageIndex;
+                     i <= max;
+                     ++i)
+                {
+                    BString current =
+                    path[VALUE][i].getStringData();
+                    removeWords(current, partRemoveWord, i == max);
+                    path[VALUE].clear(i);
+                }
+
             }
             partChanged = true;
         }
@@ -451,16 +476,21 @@ public:
 
         path[VALUE][pageIndex].setData<BString>(value);
 
-        if (indexData && partChanged)
-            addWords(value, true);
+        if (indexData && partChanged) {
+            addWords(value, partWord, finalPart);
+        }
 
         if (finalPart)
-            endString(1, indexData);
+            endString(pageIndex, indexData);
 
     }
 
-    void endString(Index pageIndex, bool indexData)
+protected:
+
+    void endString(Index pageCount, bool indexData)
     {
+        LockFile::ScopedLock lock(database());
+
         Path path = *this;
         path = path[VALUE];
         Index max = 0;
@@ -472,7 +502,9 @@ public:
             path.hasData() &&
             path.getData<bool>();
 
-        for (Index i = pageIndex + 1;
+        BString partWord;
+        
+        for (Index i = pageCount + 1;
                 i <= max;
                 ++i)
         {
@@ -480,7 +512,7 @@ public:
             {
                 BString current =
                     path[i].getStringData();
-                removeWords(current, true);
+                removeWords(current, partWord, i == max);
             }
             path.clear(i);
         }
@@ -489,31 +521,8 @@ public:
 
     }
 
-    void removeWords() {
-
-        Path path = *this;
-        Path strings = path[VALUE];
-        bool remove =
-            strings.hasData() &&
-            strings.getData<bool>();
-
-        if (remove) {
-            Iterable<Index> parts(strings);
-
-
-            for (const auto index : parts)
-            {
-                BString current =
-                    strings[index].getStringData();
-
-                removeWords(current, true);
-
-            }
-
-        }
-    }
-
-
+public:
+    
     BString getString() const
     {
         assert(type() == Type::STRING);
@@ -576,7 +585,7 @@ public:
         Type type;
         return parent(key, type, false);
     }
-    
+
     JSONPath parent(BString& key, bool fetchKey = true) const
     {
         Type type;
@@ -598,7 +607,7 @@ public:
 
         path = path.parent(seperator);
         assert(seperator == CHILDREN);
-        
+
         Type type =
             path.getData<Type>();
 
@@ -650,23 +659,23 @@ public:
                     key = "my";
                 }
                 else if ( database()
-                        .users()
-                        .contains(key) )
+                          .users()
+                          .contains(key) )
                 {
                     return "";
                 }
 
             }
-            
+
             if (key != "my" && !path.isRoot()) {
                 if (keyType == Type::STRING &&
-                    key.isDigitsOnly())
+                        key.isDigitsOnly())
                 {
                     key = BString("\"") + key + BString("\"");
                 }
                 else
                     key = key.encodeURI();
-                
+
             }
 
             string =
@@ -753,9 +762,9 @@ public:
         for (BString key : paths)
         {
             key = key.decodeURI();
-            
+
             if ((++count == 1) &&
-                (key == "my" || key == userId))
+                    (key == "my" || key == userId))
             {
                 if (path.contains(userId) || method == "POST") {
                     path = path[userId];
@@ -763,14 +772,14 @@ public:
                 }
 
             }
-            
+
             if ( database.users().contains(key) && key != userId)
             {
                 success = false;
                 break;
             }
-            
-            
+
+
             if (key.isDigitsOnly()) {
                 Index index = atol(key.c_str());
                 if (path.contains(index))
@@ -782,8 +791,8 @@ public:
             }
             else {
                 if (key.startsWith("\"") &&
-                    key.endsWith("\"") &&
-                    key.length() > 1
+                        key.endsWith("\"") &&
+                        key.length() > 1
                    )
                 {
                     key =
@@ -792,14 +801,14 @@ public:
                             key.length() - 2
                         );
                 }
-            
+
                 if (path.contains(key) || method == "POST")
                     path = path[key];
                 else {
                     success = false;
                     break;
                 }
-                
+
             }
 
 
@@ -1076,7 +1085,8 @@ public:
 
         // Remove parent properties
         JSONPath path = json;
-
+        BString dummy;
+        
         while (!path.isUserRoot())
         {
             BString property;
@@ -1084,7 +1094,7 @@ public:
             path = path.parent(property, keyType);
 
             if (keyType == Type::STRING)
-                json.removeWords(property, true);
+                json.removeWords(property, dummy, true);
 
         }
 
@@ -1108,75 +1118,76 @@ public:
     }
 
 private:
-    void addWords(const BString& word, bool addToParents)
+    void addWords(const BString& word, BString& partWord, bool finalWord = false)
     {
 
         Path words = database().words();
 
         std::vector<BString> tokens =
-            word.tokenise();
-
+            word.tokenise(finalWord, partWord);
 
         for (auto word : tokens)
         {
+
             Path wordPath = words[word];
 
             JSONPath json = *this;
 
-            if (addToParents)
+            while (!json.isUserRoot())
             {
-                while (!json.isUserRoot())
-                {
-                    ++wordPath[json.id()];
-                    json = json.parent();
-                }
-            }
-            else {
                 ++wordPath[json.id()];
+                json = json.parent();
+            }
+
+
+        }
+    }
+
+    void removeWords() {
+
+        Path path = *this;
+        Path strings = path[VALUE];
+        bool remove =
+            strings.hasData() &&
+            strings.getData<bool>();
+
+        if (remove) {
+            Iterable<Index> parts(strings);
+
+            
+            BString partRemoveWords;
+            
+            for (auto it = parts.begin(); it != parts.end(); )
+            {
+                BString current =
+                    strings[*it].getStringData();
+                    
+                ++it;
+                
+                removeWords(current, partRemoveWords, it == parts.end());
+
             }
 
         }
     }
 
-    void removeWords(const BString& value, bool removeFromParents)
+    void removeWords(const BString& value, BString& partRemoveWords, bool isFinalPart)
     {
         Path words = database().words();
         Path objects = database().objects();
 
         std::vector<BString> tokens =
-            value.tokenise();
+            value.tokenise(isFinalPart, partRemoveWords);
 
         for (auto word : tokens)
         {
             if (words.contains(word))
             {
-
                 Path wordPath = words[word];
 
                 JSONPath json = (*this);
 
-
-                if (removeFromParents)
-                {
-                    while  (!json.isUserRoot())
-                    {
-
-                        if (wordPath.contains(json.id()))
-                        {
-
-                            Index count = --wordPath[json.id()];
-
-                            if (count == 0)
-                            {
-                                wordPath.clear(json.id());
-                            }
-                        }
-
-                        json = json.parent();
-                    }
-
-                }
-                else
+                while  (!json.isUserRoot())
                 {
 
                     if (wordPath.contains(json.id()))
@@ -1186,17 +1197,17 @@ private:
 
                         if (count == 0)
                         {
+
                             wordPath.clear(json.id());
+                            if (wordPath.isDeadEnd())
+                                words.clear(word);
                         }
                     }
 
+                    json = json.parent();
                 }
 
 
-                if (wordPath.isDeadEnd())
-                {
-                    words.clear(word);
-                }
 
             }
 

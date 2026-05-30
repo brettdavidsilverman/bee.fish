@@ -28,7 +28,7 @@ namespace BeeFishDatabase {
         vector<BString> _keyStack;
         vector<Type> _typeStack;
         JSONPath _string;
-        
+        BString _partWord;
         Index _stringPageIndex;
         bool _indexString;
         
@@ -284,6 +284,7 @@ namespace BeeFishDatabase {
         }
 
         virtual void onbeginstring(BeeFishJSON::String* match)
+        override
         {
             if (_pathStack.size() == 0)
                 _string = _start;
@@ -303,18 +304,20 @@ namespace BeeFishDatabase {
             _stringPageIndex = 0;
         }
         
-        virtual void onpartstring(const BString& partString)
+        virtual void onpartstring(const BString& partString, bool finalPart)
+        override
         {
             ++_stringPageIndex;
             if (_stringPageIndex == 1)
                 _indexString = !partString.isData();
 
-            _string.setString(partString, _stringPageIndex, _indexString, false);
+            _string.setString(partString, _stringPageIndex, _indexString, finalPart, _partWord);
         }
         
         virtual void onendstring(BeeFishJSON::String* match)
+        override
         {
-            _string.endString(_stringPageIndex, _indexString);
+            //_string.endString(_stringPageIndex, _indexString, _partWord);
             log(_string);
 
         }
