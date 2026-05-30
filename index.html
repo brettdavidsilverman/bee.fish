@@ -36,6 +36,7 @@
                 </div>
                 <input type="text" id="pathInput"/>
                 <button id="fetchButton">Fetch</button>
+                <button id="cancelButton">Cancel</button>
                 <br/>
             </form>
             <br/>
@@ -109,6 +110,7 @@ var result = document.getElementById("result");
 var editor = document.getElementById("editor");
 var html = document.getElementById("html");
 var fetchButton = document.getElementById("fetchButton");
+var cancelButton = document.getElementById("cancelButton");
 var resetButton = document.getElementById("resetButton");
 var saveButton = document.getElementById("saveButton");
 var functionCheckbox = document.getElementById("functionCheckbox");
@@ -122,7 +124,10 @@ var contentType = document.getElementById("contentType");
 var image = document.getElementById("image");
 var audio = document.getElementById("audio");
 
-var controller;
+var controller = new AbortController();
+
+var downloading = false;
+
 var blob;
 var searchResults = [];
 
@@ -135,6 +140,7 @@ header.innerText = origin;
 title.innerText = origin;
 
 fetchButton.disabled = true;
+cancelButton.disabled = true;
 
 //authenticate();
 function getCursorLineAndColumn(textarea) {
@@ -168,27 +174,28 @@ async function checkResponse(response) {
 
 async function fetchContent(url, f) {
     
-    fetchButton.disabled = true;
     saveButton.disabled = true;
     editor.value = "Loading....";
-    
-    if (controller)
-       controller.abort();
-       
-    controller = new AbortController();
-    
-    var parameters = {
-        mode: "cors",
-        method: "GET",
-        credentials: "include",
-        signal: controller.signal
-    }
+    fetchButton.disabled = true;
     
     var response;
+    var decode =
+        (pathInput.value.indexOf("?") != -1);
+        
     
     try {
+        
+         var parameters = {
+            mode: "cors",
+            method: "GET",
+            credentials: "include",
+            signal: controller.signal
+        }
+        
+        cancelButton.disabled = false;
         response = await fetch(url, parameters);
         await checkResponse(response);
+        
         
         var contentTypeHeader =
             response.headers.get("content-type");
@@ -212,54 +219,66 @@ async function fetchContent(url, f) {
             return;
         }
         
+        if (!decode)
+        {
+            editor.value = await response.text();
+            return;
+        }
+    
+        
         blob = undefined;
+        
+        // Get the response body as a ReadableStream
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        var lineBuffer = '';
+
+        while (true) {
+        
+            const { done, value } =
+                await reader.read();
+            
+            if (done) {
+                break;
+            }
+
+            lineBuffer += decoder.decode(value, { stream: true });
+
+            // Process lines when a newline character is found
+            const lines = lineBuffer.split('\n');
+            for (let i = 0; i < lines.length - 1; i++) {
+                const line = lines[i];
+                f(line + "\n");
+            }
+            lineBuffer = lines[lines.length - 1];
+        }
+    
+        if (lineBuffer) {
+            f(lineBuffer);
+        }
+    
+        
     
     }
     catch (error)
     {
-        editor.value = error;
+        if (error.name != "AbortError") 
+        {
+            //alert(error);
+        }
         return;
     }
     finally {
         fetchButton.disabled = false;
-        
+        saveButton.disabled = false;
+        downloading = false;
+        cancelButton.disabled = true;
+        fetchButton.disabled = false;
+        controller = new AbortController();
     }
     
         
     
-    
-    
-    // Get the response body as a ReadableStream
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    var lineBuffer = '';
-
-    while (true) {
-        
-        const { done, value } =
-            await reader.read();
-            
-        if (done) {
-            break;
-        }
-
-        lineBuffer += decoder.decode(value, { stream: true });
-
-        // Process lines when a newline character is found
-        const lines = lineBuffer.split('\n');
-        for (let i = 0; i < lines.length - 1; i++) {
-            const line = lines[i];
-            f(line + "\n");
-        }
-        lineBuffer = lines[lines.length - 1];
-    }
-    
-    if (lineBuffer) {
-        f(lineBuffer);
-    }
-    
-    fetchButton.disabled = false;
-    saveButton.disabled = false;
 }
 
 // Example usage:
@@ -276,11 +295,8 @@ function redirect(path)
 async function downloadJSON() {
 
     var url = new URL(pathInput.value);
-    
-    fetchButton.disabled = true;
+
     saveButton.disabled = true;
-    
-    
     
     searchResults = [];
     
@@ -313,18 +329,13 @@ async function downloadJSON() {
     );
     
     saveButton.disabled = false;
-    
+    document.body.focus();
     
 }
 
 
 if (!pathInput.value)
     pathInput.value = document.location.origin + defaultPath;
-    
-pathInput.onfocus = 
-    function() {
-    };
-    
     
 pathInput.onblur =
     function() {
@@ -397,10 +408,16 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
         
 }
     
+cancelButton.onclick =
+    () => {
+        controller.abort("User cancelled");
+        downloading = false;
+        cancelButton.disabled = true;
+        fetchButton.disabled = false;
+    }
+    
 resetButton.onclick =
     () => {
-        if (controller)
-            controller.abort();
         saveButton.disabled = false;
         setContentTypeValue(defaultContentType);
     }
@@ -440,17 +457,17 @@ fileInput.onchange = async function(event)
 }
 
 fetchButton.onclick =
-    function() {
-        if (controller)
-            controller.abort();
+    async function() {
+
             
         window.location.hash =
             encodeURIComponent(
                 pathInput.value
             );
             
-        downloadJSON();
+        setLinks();
 
+        await downloadJSON();
     }
     
 window.onhashchange =

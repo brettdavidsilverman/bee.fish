@@ -103,8 +103,8 @@ public:
                     "Response::handleResponse", 
                     what
                 );
-               // delete app;
-               // throw std::runtime_error(what.str());
+                delete app;
+                throw std::runtime_error(what.str());
             }
             
             delete app;

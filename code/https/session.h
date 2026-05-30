@@ -753,7 +753,7 @@ namespace BeeFishHTTPS {
             _session->logException(
                 where, 
                 what,
-                url.toString()
+                _session->_request->url().toString()
             );
         }
     }
