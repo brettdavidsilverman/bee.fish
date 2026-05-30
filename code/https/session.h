@@ -99,8 +99,7 @@ namespace BeeFishHTTPS {
             catch (...)
             {
                 logException("Session::start", "Invalid ipAddress");
-                delete this;
-                return;
+                throw std::runtime_error("Couldn't get ip address");
             }
             
             _request = new BeeFishWeb::WebRequest(false);
@@ -247,6 +246,7 @@ namespace BeeFishHTTPS {
 
             
                 handleResponse();
+                
                 return;
             }
             
@@ -290,7 +290,10 @@ namespace BeeFishHTTPS {
             catch (std::exception& ex)
             {
                 logException("Session::handleResponse", ex.what());
+                delete this;
+                return;
             }
+            
             
         }
         
@@ -564,11 +567,19 @@ namespace BeeFishHTTPS {
 
             if (!error)
             {
-                start();
+                try {
+                    start();
+                }
+                catch (const std::exception& ex)
+                {
+                    logException("Session::handleHandshake", ex.what());
+                    delete this;
+                }
             }
             else
             {
                 logException("Session::handleHandshake", error);
+                delete this;
             }
         }
 
@@ -650,8 +661,11 @@ namespace BeeFishHTTPS {
         const boost::system::error_code& error
     )
     {
+        Session* oldSession = _newSession;
+        assert(oldSession == newSession);
+        
         startAccept();
-
+        
         if (!error)
         {
             newSession->handshake();
@@ -660,6 +674,7 @@ namespace BeeFishHTTPS {
         {
             delete newSession;
         }
+        
 
     }
     
@@ -721,12 +736,7 @@ namespace BeeFishHTTPS {
     {
     }
     
-    
-    // Declared in response.h
-    void Response::closeOrRestart()
-    {
-        _session->closeOrRestart();
-    }
+
     
     // Declared in response.h
     void Response::logException(const BString& where, const BString& what)
@@ -746,6 +756,12 @@ namespace BeeFishHTTPS {
                 url.toString()
             );
         }
+    }
+    
+    // Declared in response.h
+    void Response::closeOrRestart()
+    {
+        _session->closeOrRestart();
     }
     
     // Declared in app.h

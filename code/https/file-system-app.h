@@ -4,8 +4,9 @@
 #include <filesystem>
 #include <algorithm>
 #include "../Config.hpp"
-#include "session.h"
+#include "../Miscellaneous/MimeTypes.hpp"
 #include "../web-request/web-request.h"
+#include "session.h"
 #include "response.h"
 #include "authentication.h"
 #include "app.h"
@@ -17,6 +18,7 @@ namespace BeeFishHTTPS {
 using namespace std;
 using namespace std::filesystem;
 using namespace BeeFishWeb;
+using namespace BeeFishMiscellaneous;
 
 class FileSystemApp : public App {
 
@@ -35,155 +37,7 @@ class FileSystemApp : public App {
     }
 
 public:
-    struct MimeType
-    {
-        string contentType;
-        string cacheControl;
-    };
-
-    inline static string _noCacheControl =
-        "no-store, max-age=0";
-
-#if defined(DEBUG) || defined(DISABLE_CACHE)
-    inline static string _defaultCacheControl =
-        _noCacheControl;
-
-#else
-    inline static string _defaultCacheControl =
-        "public, max-age=60";
-#endif
-
-    inline static std::map<string, MimeType>
-    _mimeTypes{
-        {
-            ".txt",
-            {
-                "text/plain; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".html",
-            {
-                "text/html; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-
-        {
-            ".xhtml",
-            {
-                "application/xhtml+xml; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".js",
-            {
-                "text/javascript; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".json",
-            {
-                "application/json; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".css",
-            {
-                "text/css; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".jpg",
-            {
-                "image/jpeg",
-                "public, max-age=31536000, immutable"
-            }
-        },
-        {
-            ".png",
-            {
-                "image/png",
-                "public, max-age=31536000, immutable"
-            }
-        },
-        {
-            ".gif",
-            {
-                "image/gif",
-                "public, max-age=31536000, immutable"
-            }
-        },
-        {
-            ".ico",
-            {
-                "image/x-icon",
-                "public, max-age=31536000, immutable"
-            }
-        },
-        {
-            ".h",
-            {
-                "text/plain; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".hpp",
-            {
-                "text/plain; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".cpp",
-            {
-                "text/plain; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-
-        {
-            ".c",
-            {
-                "text/plain; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".ino",
-            {
-                "text/plain; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".bin",
-            {
-                "application/octet-stream",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".sh",
-            {
-                "application/json; charset=utf-8",
-                _defaultCacheControl
-            }
-        },
-        {
-            ".wav",
-            {
-                "audio/wav",
-                _defaultCacheControl
-            }
-        }
-    };
+    
 
 
 
@@ -204,8 +58,7 @@ public:
 
         WebRequest* request = _session->request();
 
-        if (request->path() == "/" &&
-                request->search().length())
+        if (request->search().length())
             return;
 
         BString requestPath = request->path();
@@ -257,8 +110,11 @@ public:
         }
 
         string contentType = "text/plain; charset=utf-8";
-        string cacheControl = _defaultCacheControl;
-
+        string cacheControl = BeeFishMiscellaneous::_defaultCacheControl;
+        string extension = _filePath.extension();
+        if (!extension.length())
+            extension = _filePath.filename();
+            
         if (is_directory(_filePath) )
         {
             // Directory listing
@@ -271,8 +127,9 @@ public:
 
         }
         else if ( _mimeTypes.count(
-                _filePath.extension()
-                ) )
+                    extension
+                )
+        )
         {
             // File content
             MimeType mimeType = 
@@ -283,30 +140,10 @@ public:
             cacheControl = mimeType.cacheControl;
             _serve = SERVE_FILE;
         }
-        else if ( (std::string)_filePath.filename() ==
-            "Makefile" )
-        {
-            _serve = SERVE_FILE;
-        }
         else
         {
             return;
         }
-/*
-        if ( _status != 200 )
-        {
-
-            stringstream contentStream;
-
-            write(contentStream, _status, _statusText, requestPath, _filePath);
-
-            contentType = "application/json; charset=utf-8";
-            _content = contentStream.str();
-            _serve = App::SERVE_CONTENT;
-
-        }
-        
-*/
 
         _responseHeaders.replace(
             "content-type",
@@ -367,7 +204,9 @@ public:
             const path& file = entry;
             string filename = file.filename();
             string extension = file.extension();
-
+            if (!extension.length())
+                extension = filename;
+                
             if (filename[0] == '\"')
                 filename = filename.substr(0, filename.size() - 2);
 
@@ -376,8 +215,7 @@ public:
 
 
             if ( is_directory(file) ||
-                    _mimeTypes.count(extension) ||
-                    filename == "Makefile" )
+                 _mimeTypes.count(extension))
             {
                 stream
                         << "<a href=\"" << filename << "\">";

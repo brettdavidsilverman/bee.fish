@@ -94,15 +94,22 @@ public:
             }
             catch(const std::exception &ex)
             {
+                BString what =
+                    app->name() +
+                    " error writing https response " + 
+                    BString(ex.what());
+                    
                 logException(
                     "Response::handleResponse", 
-                    "Error writing https response " + BString(ex.what()) + " using the " + app->name()
+                    what
                 );
+               // delete app;
+               // throw std::runtime_error(what.str());
             }
             
             delete app;
             app = nullptr;
-
+            
             closeOrRestart();
 
         }
@@ -113,7 +120,10 @@ public:
 
     // Defined in session.h
     void logException(const BString& where, const BString& what);
-
+    
+    // Defined in session.h
+    void closeOrRestart();
+    
 
     virtual ~Response()
     {
@@ -123,8 +133,6 @@ public:
     // Defined in session.h
     const BString& ipAddress() const;
 
-    // Defined in session.h
-    void closeOrRestart();
 
 
     // Defined in response-stream.h

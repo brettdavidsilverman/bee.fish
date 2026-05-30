@@ -40,7 +40,7 @@ using namespace BeeFishWeb;
             
             _responseHeaders.replace(
               "cache-control",
-                FileSystemApp::_noCacheControl
+                BeeFishMiscellaneous::_noCacheControl
             );
 
             _contentLength = -1;
@@ -208,14 +208,19 @@ using namespace BeeFishWeb;
                     Index contentLength = 0;
                     Index pageIndex = 0;
                     BString text;
+                    BString partWord;
+                    bool base64EncodeData =
+                        contentType.startsWith("image") ||
+                        contentType.startsWith("audio");
                     
-                    bool indexData = contentType.startsWith("text");
-
                     PagedStream pagedStream(
-                        [&content, &contentType, &pageIndex](const BString& encoded)
+                        [&parser, &partWord, &content, &contentType, &pageIndex](const BString& encoded)
                         {
                             ++pageIndex;
                             
+                            bool isFinalPart = 
+                                (parser.peek() == -1);
+
                             if (pageIndex == 1)
                             {
                                 BString header = 
@@ -223,11 +228,11 @@ using namespace BeeFishWeb;
                                     contentType +
                                     BString(";base64,") +
                                     encoded;
-                                content.setString(header, pageIndex, false, false);
+                                content.setString(header, pageIndex, false, isFinalPart, partWord);
                             }
                             else 
                             {
-                                content.setString(encoded, pageIndex, false, false);
+                                content.setString(encoded, pageIndex, false, isFinalPart, partWord);
                             }
                         }
                     );
@@ -236,15 +241,17 @@ using namespace BeeFishWeb;
                         base64(pagedStream);
                         
                     postRequest.setOnData(
-                        [&pageIndex, &contentLength, &contentType, &content, &base64](const BString& data) {
+                        [&parser, &partWord, &pageIndex, &contentLength, &contentType, &content, &base64EncodeData, &base64](const BString& data) {
                             contentLength += data.size();
+                            bool isFinalPart = 
+                                (parser.peek() == -1);
 
-                            if (contentType.startsWith("text"))
+                            if (base64EncodeData)
                             {
-                                content.setString(data, ++pageIndex, true, false);
+                                base64 << data;
                             }
                             else {
-                                base64 << data;
+                                content.setString(data, ++pageIndex, true, isFinalPart, partWord);
                             }
                         }
                     );
@@ -255,10 +262,12 @@ using namespace BeeFishWeb;
 
                     postRequest.flush();
                     
-                    if (!contentType.startsWith("text"))
+                    if (base64EncodeData)
+                    {
                         base64.flush();
+                    }
                 
-                    http["content"].endString(pageIndex, indexData);
+                   // http["content"].endString(pageIndex, indexData);
                     http["content-type"].setString(contentType);
                     http["content-length"].setInteger(contentLength);
                     

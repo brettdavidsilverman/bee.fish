@@ -35,9 +35,10 @@ int main(int argc, const char* argv[])
   
     try
     {
-        BString databaseFile     = BEE_FISH_DATABASE_FILE;
-        BString transactionFile = BEE_FISH_TRANSACTION_FILE;
+        BString databaseFile       = BEE_FISH_DATABASE_FILE;
+        BString transactionFile    = BEE_FISH_TRANSACTION_FILE;
         BString logFile            = BEE_FISH_SERVER_LOG_FILE;
+        BString errorFile          = BEE_FISH_SERVER_ERR_FILE;
         
         std::cout << "HTTPS Secure Server" << std::endl;
         std::cout 
@@ -55,7 +56,10 @@ int main(int argc, const char* argv[])
               << std::endl
           << "Log file: "
               << logFile
-              << std::endl;
+              << std::endl
+          << "Error file: "
+              << errorFile
+              << endl;
 
         cout << "Unlocking database" << endl;
         LockFile::unlock(DATABASE_FILENAME);
