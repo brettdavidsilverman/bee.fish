@@ -116,6 +116,7 @@ using namespace BeeFishWeb;
                         contentType
                     );
                     
+                
                     if (jsonPath["{HTTP}"].contains("content-length") &&
                         jsonPath["{HTTP}"]["content-length"].type() == Type::INTEGER)
                     {
@@ -160,7 +161,7 @@ using namespace BeeFishWeb;
                     contentType = request()->headers()["content-type"];
                 else
                     contentType = "text/plain; charset=utf-8";
-                    
+
                 if (contentType.startsWith("application/json"))
                 {
 
@@ -225,11 +226,23 @@ using namespace BeeFishWeb;
                                     contentType +
                                     BString(";base64,") +
                                     encoded;
-                                content.setString(header, pageIndex, false, false, partWord);
+                                    
+                                content.setString(
+                                    header,
+                                    pageIndex, 
+                                    false, 
+                                    false,
+                                    partWord);
                             }
                             else 
                             {
-                                content.setString(encoded, pageIndex, false, false, partWord);
+                                content.setString(
+                                    encoded, 
+                                    pageIndex,
+                                    false, 
+                                    false, 
+                                    partWord
+                                );
                             }
                         }
                     );
@@ -238,7 +251,7 @@ using namespace BeeFishWeb;
                         base64(pagedStream);
                         
                     postRequest.setOnData(
-                        [&parser, &partWord, &pageIndex, &contentLength, &contentType, &content, &base64EncodeData, &base64](const BString& data) {
+                        [&parser, &partWord, &pageIndex, &contentLength, &content, &base64EncodeData, &base64](const BString& data) {
                             contentLength += data.size();
                             if (base64EncodeData)
                             {
@@ -264,6 +277,10 @@ using namespace BeeFishWeb;
                     http["content"].endString(pageIndex, !base64EncodeData, partWord);
                     http["content-type"].setString(contentType);
                     http["content-length"].setInteger(contentLength);
+                    
+                    assert(jsonPath.contains("{HTTP}"));
+                    assert(jsonPath["{HTTP}"].contains("content-type"));
+                    assert(jsonPath["{HTTP}"]["content-type"].getString() == contentType);
                     
                     
                 }

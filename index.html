@@ -199,7 +199,7 @@ async function fetchContent(url, f) {
         
         var contentTypeHeader =
             response.headers.get("content-type");
-            
+
         setContentTypeValue(contentTypeHeader);
         
         
@@ -394,6 +394,7 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
             alert(json);
             pathInput.value = json;
             localStorage.setItem("path", pathInput.value);
+            setLinks()
         }
         
     }

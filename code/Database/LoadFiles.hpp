@@ -93,9 +93,10 @@ void loadFile(
 )
 {
     BString extension = path.extension();
-    if (!extension.length())
+    if (!extension.length()) {
         extension = path.filename();
-        
+    }
+    
     if (!_mimeTypes.count(
             extension
         ) ||
@@ -132,7 +133,7 @@ void loadFile(
         start.setString(page, ++pageIndex, true, finalPart, partWord);
         
     }
-    
+
     assert(total == input.size());
     
     input.close();

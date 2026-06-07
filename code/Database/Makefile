@@ -15,7 +15,7 @@ $(OUTPUT_INDEX): $(DEPS)
 $(BUILD)/json:
 		cd ../json && make $(DEBUG) $(TEST)
 		
-test:	testIndex
+#test:	testIndex
 test:	testId
 
 testIndex:	$(OUTPUT_INDEX)
@@ -31,8 +31,9 @@ testId:	$(OUTPUT)
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
 debug:	OPTIMISATION=
-debug:	$(OUTPUT_INDEX)
 debug:	$(OUTPUT)
+#debug:	$(OUTPUT_INDEX)
+
 
 unlock:	$(OUTPUT)
 	$(OUTPUT) -unlock

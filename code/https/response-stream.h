@@ -155,12 +155,15 @@ public:
 
                     *this << endl;
 
-                  //  flush();
                 }
                 else {
                     ++it;
-                    ++count;
                 }
+                
+                ++count;
+                
+                if (count == 1)
+                    flush();
 
             }
 

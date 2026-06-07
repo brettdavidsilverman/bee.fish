@@ -51,6 +51,7 @@ typedef uint8_t Byte;
 typedef std::string BStringBase;
 
 class BString;
+class Iterator;
 
 // A string of variable length characters.
 // Can be created from wide string format,
@@ -176,42 +177,42 @@ public:
     }
 
     bool isPunctuation() const {
-/*
-        boost::u32regex pattern =
-            boost::make_u32regex(
-                L"[[:punct:]]+"
-            );
+        /*
+                boost::u32regex pattern =
+                    boost::make_u32regex(
+                        L"[[:punct:]]+"
+                    );
 
-        if (length() < 1)
-            return false;
+                if (length() < 1)
+                    return false;
 
-        std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(
-                                *this,
-                                _locale._locale
-                            );
+                std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(
+                                        *this,
+                                        _locale._locale
+                                    );
 
 
-        if (boost::u32regex_match(
-                wstr,
-                pattern
-            )
-        )
-        {
-            return true;
-        }
-        */
-        
+                if (boost::u32regex_match(
+                        wstr,
+                        pattern
+                    )
+                )
+                {
+                    return true;
+                }
+                */
+
         if (!size())
             return false;
-            
+
         const BString punctuation =
-            ".,@#$_&-+()/*\"':;!?~`|^={}\\%[]<>";
-            
+            ",@#$&+()/*\"':;!?~`|^={}\\%[]<>";
+
         return (
-            punctuation.find(
-                (*this)[0]
-            ) != BString::npos
-        );
+                   punctuation.find(
+                       (*this)[0]
+                   ) != BString::npos
+               );
 
 
     }
@@ -219,68 +220,68 @@ public:
     bool isSpace() const {
         if (!size())
             return false;
-            
+
         const BString space =
             " \t\r\n\v";
-            
+
         return (
-            space.find(
-                (*this)[0]
-            ) != BString::npos
-        );
-/*
-        std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(
-                                *this,
-                                _locale._locale
-                            );
+                   space.find(
+                       (*this)[0]
+                   ) != BString::npos
+               );
+        /*
+                std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(
+                                        *this,
+                                        _locale._locale
+                                    );
 
 
-        for (const auto& wch : wstr)
-        {
-            if (!std::iswspace(wch))
-                return false;
-        }
+                for (const auto& wch : wstr)
+                {
+                    if (!std::iswspace(wch))
+                        return false;
+                }
 
-        return true;
-*/
+                return true;
+        */
 
     }
-/*
-    bool isValidCharacter() const
-    {
-        // Create a segment index for characters
-        boost::locale::boundary::ssegment_index map(
-            boost::locale::boundary::character, 
-            begin(),
-            end(),
-            _locale._locale
-        );
-        
-        for (auto it = map.begin();
-                    it != map.end();
-                    ++it)
+    /*
+        bool isValidCharacter() const
         {
-            BString token = it->str();
-            if (it->rule() & boost::locale::boundary::word_letter ||
-                it->rule() & boost::locale::boundary::word_number)
-            {
-            }
-            else if (token.isSpace())
-            {
-    
-            }
-            else if (token.isPunctuation())
-            {
-                
-            }
-            else
-                return false;
+            // Create a segment index for characters
+            boost::locale::boundary::ssegment_index map(
+                boost::locale::boundary::character,
+                begin(),
+                end(),
+                _locale._locale
+            );
 
+            for (auto it = map.begin();
+                        it != map.end();
+                        ++it)
+            {
+                BString token = it->str();
+                if (it->rule() & boost::locale::boundary::word_letter ||
+                    it->rule() & boost::locale::boundary::word_number)
+                {
+                }
+                else if (token.isSpace())
+                {
+
+                }
+                else if (token.isPunctuation())
+                {
+
+                }
+                else
+                    return false;
+
+            }
+
+            return true;
         }
-        
-        return true;
-    }
-*/
+    */
     bool isData() const
     {
         return
@@ -303,259 +304,24 @@ public:
             );
 
     }
-    
+
     vector<BString> tokenise() const
     {
         BString partWord;
-        return tokenise(true, partWord);
+        auto result =
+            tokenise(
+                true, 
+                partWord
+            );
+            
+        assert(!partWord.size());
+        
+        return result;
     }
 
-    vector<BString> tokenise(bool finalWord, BString& partWord) const
-    {
-        enum class Type {
-            Blankspace,
-            Punctuation,
-            Word
-        };
+    // Defined below
+    vector<BString> tokenise(bool finalWord, BString& partWord) const;
 
-        struct Token {
-            Type _type;
-            BString _word;
-        };
-
-        auto splitOnDot =
-            [](
-                BString word,
-                std::vector<Token>& tokens
-            )
-        {
-
-            
-            BString split;
-            for (auto it = word.begin();
-                    it != word.end();
-                    ++it)
-            {
-                // Add token and type
-                char character = *it;
-                if (character == '.' ||
-                        character == '_' ||
-                        character == '~')
-                {
-                    if (split.size())
-                        tokens.push_back({
-                            Type::Word,
-                            split.toLower()
-                        });
-
-                    tokens.push_back({
-                        Type::Punctuation,
-                        BString(character)
-                    });
-
-                    split = "";
-                }
-                else
-                    split.push_back(character);
-
-            }
-
-            if (split.size())
-                tokens.push_back({
-                Type::Word,
-                split
-            });
-
-        };
-
-        std::vector<Token> tokens;
-
-        BString value = partWord + *this;
-            
-        partWord = "";
-        
-        boost::locale::boundary::ssegment_index map(
-            boost::locale::boundary::word,
-            value.begin(),
-            value.end()
-        );
-
-        // Iterate over words correctly
-        // utf-8 aligned
-        for (auto it = map.begin();
-                it != map.end();
-                ++it)
-        {
-            // Add token and type
-            BString token = it->str();
-
-            auto itTestEnd = it;
-            ++itTestEnd;
-            if (!finalWord &&
-                itTestEnd == map.end())
-            {
-                // last word or part of
-                // next page
-                partWord = token;
-                
-                break;
-            }
-            
-            if (it->rule() & boost::locale::boundary::word_letter ||
-                    it->rule() & boost::locale::boundary::word_number)
-            {
-                
-                splitOnDot(
-                    token,
-                    tokens
-                );
-                
-                tokens.push_back
-                ({
-                    Type::Word,
-                    token
-                });
-            }
-            else if (token.isSpace())
-            {
-                tokens.push_back
-                ({
-                    Type::Blankspace,
-                    token
-                });
-            }
-            else if (token.isPunctuation())
-            {
-                tokens.push_back
-                ({
-                    Type::Punctuation,
-                    token
-                });
-            }
-            else
-            {
-                tokens.push_back
-                ({
-                    Type::Word,
-                    token
-                });
-            }
-
-
-
-        }
-        
-        std::vector<BString> words;
-        
-        for (auto token : tokens)
-        {
-            if (token._type == Type::Word)
-            {
-                words.push_back(
-                    token._word.toLower()
-                );
-            }
-        }
-        /*
-        Index i = 0;
-
-        std::vector<BString> words;
-        while (i < tokens.size())
-        {
-            Token token = tokens[i];
-
-            // strip leading non-words
-            while (token._type != Type::Word)
-            {
-                if (++i >= tokens.size())
-                    break;
-                token = tokens[i];
-            }
-
-            // No words
-            if (token._type != Type::Word)
-                break;
-
-            // Find next blank space
-            Index nextBlankspace = i;
-
-
-            while (nextBlankspace < tokens.size())
-            {
-                token = tokens[nextBlankspace];
-
-
-                if (token._type == Type::Blankspace)
-                    break;
-
-                ++nextBlankspace;
-
-            }
-
-            Index trailingPunctuation = nextBlankspace;
-            token = tokens[trailingPunctuation - 1];
-            while (token._type == Type::Punctuation)
-            {
-                --trailingPunctuation;
-                token = tokens[trailingPunctuation - 1];
-            }
-
-            // Add combinations of words
-            for (Index j = i; j < trailingPunctuation; ++j)
-            {
-                token = tokens[j];
-
-                // Skip start punctuation
-
-                while (token._type == Type::Punctuation &&
-                        j < trailingPunctuation)
-                {
-                    token = tokens[++j];
-                }
-
-
-                assert(token._type == Type::Word);
-
-                BString word;
-                for (Index k = j; k < trailingPunctuation; ++k)
-                {
-
-                    token = tokens[k];
-                    word += token._word;
-
-                    if (token._type == Type::Word)
-                    {
-                        words.push_back(word.toLower());
-                    }
-                }
-
-
-
-
-            }
-
-            i = nextBlankspace + 1;
-
-
-        }
-        
-        */
-
-        // 1. Sort words
-        std::sort(words.begin(), words.end());
-
-        // 2. Remove consecutive duplicates: v becomes {1, 2, 3, 4, 5, ?, ?, ?, ?, ?}
-        //    'last' points to the first '?'
-        auto last = std::unique(words.begin(), words.end());
-
-        // 3. Erase the extra elements
-        words.erase(last, words.end());
-
-        return words;
-
-
-
-    }
 
     vector<BString> split(
         const char character
@@ -845,7 +611,7 @@ public:
         return false;
     }
 
-    BString substr(size_t pos, size_t len = 0) const
+    BString substr(Index pos, Index len = Index(-1)) const
     {
         BStringBase::const_iterator
         start = cbegin() + pos;
@@ -853,7 +619,7 @@ public:
         BStringBase::const_iterator
         end;
 
-        if (len)
+        if (len != Index(-1))
             end = start + len;
         else
             end = cend();
@@ -972,48 +738,39 @@ public:
     BString escape() const
     {
         std::stringstream stream;
-        for (Index i = 0; i < size(); ++i)
+        Index position = 0;
+        BString partUTF8;
+        
+        while (position < size())
         {
-            char c = (*this)[i];
-            Index expectedBytes;
-            if ((c &      0b11110000) == 0b11110000)
-                expectedBytes = 4;
-            else if ((c & 0b11100000) == 0b11100000)
-                expectedBytes = 3;
-            else if ((c & 0b11000000) == 0b11000000)
-                expectedBytes = 2;
-            else
-                expectedBytes = 1;
-
-            BString character;
-
-            while (1)
-            {
-
-                character.push_back(c);
-
-                if (--expectedBytes > 0)
-                {
-                    if (++i >= size())
-                        break;
-
-                    c = (*this)[i];
-
-                    if ((c & 0b10111111) == c)
-                    {
-                        ++expectedBytes;
-                    }
-                }
-
-                if (expectedBytes == 0)
-                    break;
-            }
-
-            stream << BString::escape(character);
-
+            BString utf8 = nextUTF8(
+                position,
+                partUTF8
+            );
+            if (partUTF8.size() == 0)
+               stream << escape(utf8);
         }
-
+        
         return stream.str();
+    }
+    
+    void escape(ostream& out, BString& partUTF8) const
+    {
+        Index position = 0;
+        BString value = partUTF8 + *this;
+        
+        while (position < value.size())
+        {
+            BString utf8 = value.nextUTF8(
+                position,
+                partUTF8
+            );
+            if (partUTF8.size() == 0)
+               out << escape(utf8);
+        }
+        
+        assert(partUTF8 == "");
+        
     }
 
     static BString escape(
@@ -1145,10 +902,365 @@ public:
 
 
     }
+    
+    BString nextUTF8(
+        Index& position
+    ) const
+    {
+        BString partUTF8;
+        BString utf8 = nextUTF8(
+            position,
+            partUTF8
+        );
+        assert(partUTF8.size() == 0);
+        
+        return utf8;
+    }
+    
+    inline static Index expectedBytes(char c)
+    {
+        if ((c &      0b11110000) == 0b11110000)
+            return 4;
+        else if ((c & 0b11100000) == 0b11100000)
+            return 3;
+        else if ((c & 0b11000000) == 0b11000000)
+            return 2;
+        else if ((c & 0b10000000) == 0b10000000)
+            return 1;
+        else
+            return 0;
+    }
+    
+    inline static bool expectNextByte(char c)
+    {
+        return ((c & 0b10111111) == c);
+    }
 
+    BString nextUTF8(
+        Index& position, 
+        BString& partUTF8
+    )
+    const
+    {
+        BString value =
+            partUTF8 +
+            *this;
+            
+        if (!value.size())
+            return "";
+            
+            
+        partUTF8 = "";
+        
+        char c = value[position++];
+    
+        Index expectedBytes = 
+            BString::expectedBytes(c);
+        
+        partUTF8.push_back(c);
+
+        while (expectedBytes &&
+               --expectedBytes > 0 &&
+               position < value.size())
+        {
+
+            c = value[position++];
+
+            partUTF8.push_back(c);
+
+            if (BString::expectNextByte(c))
+            {
+                ++expectedBytes;
+            }
+            
+
+        }
+
+        if (expectedBytes == 0)
+        {
+            BString completeUTF8 = partUTF8;
+            partUTF8 = "";
+            return completeUTF8;
+            
+        }
+       
+        position += partUTF8.size();
+            
+        return "";
+
+    }
+
+
+    // Defined below
+    Iterator u8begin(
+        BString& partUTF8
+    ) const;
+    
+    // Defined below
+    Iterator u8end() const;
+
+};
+
+
+class Iterator {
+protected:
+    const BString& _bString;
+    BString _value;
+    bool _isEnd = true;
+    Index _position = 0;
+    BString& _partU8;
+public:
+
+
+    // Iterator traits (required for STL compatibility in C++17 and earlier)
+    using iterator_category = std::forward_iterator_tag;
+    using value_type        = BString;
+    using difference_type   = std::ptrdiff_t;
+    using pointer           = const BString*;
+    using reference         = const BString&;
+
+    Iterator(const BString& string, BString& partUTF8, bool isEnd = false)
+        : _bString(string),
+        _partU8(partUTF8)
+    {
+
+        if (isEnd) {
+            _isEnd = true;
+        }
+        else {
+            _isEnd = !setValue();
+        }
+    }
+
+
+    bool setValue() {
+
+        BString word;
+
+        // Skip blanks and punctuation
+        while (_position < _bString.size())
+        {
+            BString read =
+                _bString.nextUTF8(
+                    _position,
+                    _partU8
+                );
+                
+            if (_partU8.size() == 0)
+            {
+                if (!read.isSpace() &&
+                    !read.isPunctuation())
+                {
+                    word += read;
+                    break;
+                }
+            }
+            
+        }
+
+        // Read the rest of the word
+        while (_position < _bString.size())
+        {
+            BString read =
+                _bString.nextUTF8(
+                    _position,
+                    _partU8
+                );
+
+            if (_partU8.size() == 0)
+            {
+                if (read.isSpace() ||
+                    read.isPunctuation())
+                {
+                    break;
+                }
+
+                word += read;
+            }
+        }
+        
+
+        if (_partU8.size() == 0 &&
+            word.length())
+        {
+            _value = word;
+            return true;
+        }
+
+        return false;
+
+    }
+
+
+
+    // Dereference operator (*)
+    reference operator*() const
+    {
+        return _value;
+    }
+
+    // Reference operator -*.
+    pointer operator -> () const
+    {
+        return &_value;
+    }
+
+    // Prefix increment operator (++)
+    Iterator& operator++() {
+
+        _isEnd = _isEnd or not
+                 setValue();
+
+        return *this;
+    }
+
+    // Postfix increment operator (++)
+    Iterator operator++(int) {
+        Iterator tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+
+    friend bool operator == (
+        const Iterator& a,
+        const Iterator& b
+    )
+    {
+        return  (a._isEnd == b._isEnd &&
+                 &a._bString == &b._bString);
+    }
+
+    friend bool operator != (
+        const Iterator& a,
+        const Iterator& b
+    )
+    {
+        return (a._isEnd != b._isEnd ||
+                &a._bString != &b._bString);
+    }
+
+    Index position() const {
+        return _position;
+    }
 
 
 };
+
+// Declared above
+Iterator BString::u8begin(
+    BString& partUTF8
+) const
+{
+    return Iterator(*this, partUTF8);
+}
+
+// Declared above
+Iterator BString::u8end() const
+{
+    static BString partUTF8 = "";
+    
+    return Iterator(*this, partUTF8, true);
+}
+
+// Declared above
+vector<BString> BString::tokenise(
+    bool finalWord, 
+    BString& partWord
+) const
+{
+    std::vector<BString> words;
+
+    auto splitOnDot =
+        [&words](BString word)
+    {
+        BString split;
+        Index index = 0;
+        
+        while (index < word.size())
+        {
+            // Add token and type
+            BString character = word.nextUTF8(index);
+
+            if (character == "." ||
+                    character == "_" ||
+                    character == "-")
+            {
+                if (split.size())
+                    words.push_back(
+                        split.toLower()
+                    );
+
+                split = "";
+            }
+            else
+                split.push_back(character);
+
+        }
+
+        if (split.size())
+            words.push_back(
+                split.toLower()
+            );
+
+    };
+
+    std::vector<BString> tokens;
+
+    BString value = partWord + *this;
+
+    partWord = "";
+
+    Iterator end = value.u8end();
+    BString partUTF8;
+    
+    // Iterate over words correctly
+    // utf-8 aligned
+    for (auto it = value.u8begin(partUTF8);
+            it != end;
+            ++it)
+    {
+        assert(partUTF8.size() == 0);
+        
+        // Add token and type
+        BString token = *it;
+
+        auto itTestEnd = it;
+        ++itTestEnd;
+        if (!finalWord &&
+            itTestEnd == end)
+        {
+            // last word or part of
+            // next page
+            partWord = token;
+
+            break;
+        }
+
+
+        splitOnDot(
+            token
+        );
+
+        words.push_back(token.toLower());
+
+
+    }
+    
+    partWord += partUTF8;
+
+
+    // 1. Sort words
+    std::sort(words.begin(), words.end());
+
+    // 2. Remove consecutive duplicates: v becomes {1, 2, 3, 4, 5, ?, ?, ?, ?, ?}
+    //    'last' points to the first '?'
+    auto last = std::unique(words.begin(), words.end());
+
+    // 3. Erase the extra elements
+    words.erase(last, words.end());
+
+    return words;
+}
 
 inline bool operator==(const char* _1, const BStringBase& _2)
 {

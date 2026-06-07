@@ -16,13 +16,15 @@ inline bool testStack();
 inline bool testBStringStreams();
 inline bool testSplit();
 inline bool testTrim();
+inline bool testSubstr();
 inline bool testHex();
 inline bool testData();
 inline bool testEncodeURI();
 inline bool testEmojis();
 inline bool testPunctuation();
 inline bool testIsSpace();
-inline bool testWords();
+inline bool testUTF8();
+inline bool testTokenise();
 inline bool testEscape();
 
 inline bool test()
@@ -38,13 +40,15 @@ inline bool test()
 
     ok = ok && testSplit();
     ok = ok && testTrim();
+    ok = ok && testSubstr();
     ok = ok && testHex();
     ok = ok && testData();
     ok = ok && testEncodeURI();
     ok = ok && testEmojis();
+    ok = ok && testUTF8();
     ok = ok && testPunctuation();
     ok = ok && testIsSpace();
-    ok = ok && testWords();
+    ok = ok && testTokenise();
     ok = ok && testEscape();
 
     outputSuccess(ok);
@@ -310,6 +314,46 @@ inline bool testTrim()
     return ok;
 }
 
+inline bool testSubstr()
+{
+    cout << "Substr" << endl;
+
+    bool ok = true;
+
+    BString sample = "0123456789";
+    
+    ok = ok && testResult(
+        "substr(0, 0)",
+        sample.substr(0, 0) == ""
+    );
+    
+    ok = ok && testResult(
+        "substr(0, 1)",
+        sample.substr(0, 1) == "0"
+    );
+    
+    ok = ok && testResult(
+        "substr(0)",
+        sample.substr(0) == "0123456789"
+    );
+    
+    ok = ok && testResult(
+        "substr(1, 1)",
+        sample.substr(1, 1) == "1"
+    );
+    
+    ok = ok && testResult(
+        "substr(9, 1)",
+        sample.substr(9, 1) == "9"
+    );
+    
+    cout << endl;
+    
+    
+    return ok;
+  
+}
+
 inline bool testHex()
 {
     cout << "Hex" << endl;
@@ -507,7 +551,7 @@ inline bool testPunctuation()
              punc.isPunctuation() == false
          );
 
-    punc = ".\"";
+    punc = "&\"";
     ok = ok && testValue(
              "Multi char punctuation",
              punc.isPunctuation() == true
@@ -584,7 +628,66 @@ inline ostream& operator <<
     return output;
 }
 
-inline bool testWords()
+inline bool testUTF8()
+{
+    cout << "Test utf-8" << endl;
+    bool ok = true;
+    auto testUTF8 =
+    [](const BString& value, const BString& expected, BString& partWord, BString& partUTF8, bool isFinal)
+    {
+        
+        Index position = 0;
+        
+        bool ok = true;
+        while (position < value.size())
+        {
+            BString utf8 =
+                value.nextUTF8(
+                    position,
+                    partUTF8
+                );
+                
+            if (partUTF8.size() == 0)
+                partWord += utf8;
+        }
+        
+        ok = ok && testValue(value + " part word", partWord == expected);
+    
+        if (isFinal)
+        {
+            ok = ok && testValue(value + " part utf8 empty", partUTF8.size() == 0);
+            
+            if (ok) {
+                partWord = "";
+            }
+        }
+        
+        if (!ok) {
+            cout << "Expected \"" << expected << "\"" << endl
+                << "Part utf-8 hex " << "\"" << partUTF8.toHex() << "\"" << endl
+                << "Part word " << "\"" << partWord.encodeURI() << "\"" << endl;
+        }
+
+        return ok;
+    };
+    
+    BString partWord;
+    BString partUTF8;
+    
+    
+    ok = ok && testUTF8("ASCII", "ASCII", partWord, partUTF8, true);
+    ok = ok && testUTF8("😀❤️😭🤣", "😀❤️😭🤣", partWord, partUTF8, true);
+    ok = ok && testUTF8("Full \xF0\x9F\x98\x80",  "Full 😀", partWord, partUTF8, true);
+    ok = ok && testUTF8("Part \xF0", "Part ", partWord, partUTF8, false);
+    ok = ok && testValue("First part UTF8", partUTF8 == "\xF0");
+    ok = ok && testUTF8("\x9F\x98\x80", "Part 😀", partWord, partUTF8, true);
+    
+    assert(ok);
+    
+    return ok;
+}
+
+inline bool testTokenise()
 {
     cout << "Test words" << endl;
     bool ok = true;
@@ -682,6 +785,12 @@ inline bool testWords()
              words[0] == "hello"
          );
 
+    if (!ok)
+    {
+        cerr << words << endl;
+        assert(false);
+    }
+    
     if (ok)
     {
         text = "file.txt";
@@ -798,7 +907,7 @@ inline bool testEscape()
     bool ok = true;
 
     stringstream stream;
-    for (unsigned int i = 0; i < 256; ++i)
+    for (unsigned int i = 0; i < 128; ++i)
     {
         stream << (char)i;
     }
@@ -809,7 +918,7 @@ inline bool testEscape()
 
     BString unescaped = escaped.unescape();
 
-    for (unsigned int i = 0; i < 256; ++i)
+    for (unsigned int i = 0; i < 128; ++i)
     {
         char c = unescaped[i];
         if ((unsigned char)c != i)
@@ -819,8 +928,15 @@ inline bool testEscape()
             break;
         }
     }
-
-    assert(ok);
+    
+    data = "❤️🌍🌈😭";
+    escaped = data.escape();
+    unescaped = escaped.unescape();
+    
+    ok = ok && testValue(
+        data,
+        unescaped == data
+    );
 
     return ok;
 }

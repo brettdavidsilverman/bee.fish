@@ -307,17 +307,26 @@ namespace BeeFishDatabase {
         virtual void onpartstring(const BString& partString)
         override
         {
-            ++_stringPageIndex;
-            if (_stringPageIndex == 1)
+            if (_stringPageIndex == 0)
                 _indexString = !partString.isData();
 
-            _string.setString(partString, _stringPageIndex, _indexString, false, _partWord);
+            _string.setString(
+                partString, 
+                ++_stringPageIndex, 
+                _indexString, 
+                false,
+                _partWord
+            );
         }
         
         virtual void onendstring(BeeFishJSON::String* match)
         override
         {
-            _string.endString(_stringPageIndex, _indexString, _partWord);
+            _string.endString(
+                _stringPageIndex,
+                _indexString,
+                _partWord
+            );
             log(_string);
 
         }

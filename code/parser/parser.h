@@ -131,8 +131,8 @@ public:
         char c;
 
         bool matched = true;
-        
-        
+
+
         while (
             matched &&
             (
@@ -160,52 +160,68 @@ public:
                 }
             }
             else {
+                _expectedBytes =
+                    BString::expectedBytes(c);
 
-                if ((c &      0b11110000) == 0b11110000)
-                    _expectedBytes = 4;
-                else if ((c & 0b11100000) == 0b11100000)
-                    _expectedBytes = 3;
-                else if ((c & 0b11000000) == 0b11000000)
-                    _expectedBytes = 2;
-                else 
-                    _expectedBytes = 1;
-                    
                 _lastCharacter = _character;
                 _character.clear();
-                
-                while (1) 
+                _character.push_back(c);
+
+                while (_expectedBytes &&
+                        --_expectedBytes > 0)
+                {
+                    if ((_c = input.get()) == -1)
+                        break;
+
+                    _peek = input.peek();
+
+                    c = (char)_c;
+
+                    _character.push_back(c);
+
+                    if (BString::expectNextByte(c))
+                    {
+                        ++_expectedBytes;
+                    }
+
+
+                }
+/*
+                while (_expectedBytes &&
+                        --_expectedBytes > 0)
                 {
 
                     _character.push_back(c);
-                    
+
                     if (--_expectedBytes > 0)
                     {
                         if ((_c = input.get()) == -1)
                             break;
-                            
+
                         _peek = input.peek();
-                        
+
                         c = (char)_c;
-                        
+
                         if ((c & 0b10111111) == c)
                         {
                             ++_expectedBytes;
                         }
                     }
-                    
+
                     if (_expectedBytes == 0)
                         break;
                 }
-                
+*/
+
                 if (_c != -1) {
                     ++_charCount;
                     _lastCharacter = _character;
                     matched =
                         _match->match(this, _character);
                 }
-                
+
 #if defined(DEBUG) && !defined(TIME)
-    //cout << "{" << _character << "}";
+                //cout << "{" << _character << "}";
 #endif
 
             }
@@ -215,7 +231,7 @@ public:
 
             if (_match->result() != nullopt)
                 break;
-                
+
 #ifdef TIME
             if (_charCount % 100000 == 0)
             {
@@ -244,12 +260,12 @@ public:
 
         return result();
     }
-    
+
     int peek() const
     {
         return _peek;
     }
-    
+
     int c() const
     {
         return _c;

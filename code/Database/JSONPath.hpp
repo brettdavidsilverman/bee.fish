@@ -246,7 +246,6 @@ public:
             if (!path.hasData())
             {
                 path.setData(true);
-                BString partWord;
                 JSONPath json = *this;
                 while (!json.isUserRoot())
                 {
@@ -255,7 +254,7 @@ public:
                     json = json.parent(property, keyType);
 
                     if (keyType == Type::STRING) {
-                        addWords(property, partWord, true);
+                        addWords(property);
                     }
 
                 }
@@ -421,20 +420,28 @@ public:
 
     void setString(const BString& value)
     {
+        Index expectedBytes = 0;
         BString partWord;
         setString(
             value,
-            1,
+            0,
             true,
             true,
             partWord
         );
+        
+        assert(expectedBytes == 0);
     }
 
-    void setString(const BString& value, Index pageIndex, bool indexData, bool finalPart, BString& partWord)
+    void setString(
+        const BString& value, 
+        Index pageIndex, 
+        bool indexData,
+        bool finalPart,
+        BString& partWord
+    )
     {
-        assert(pageIndex > 0);
-        if (pageIndex == 0)
+        if (pageIndex == 1)
             partWord = "";
 
         LockFile::ScopedLock lock(database());
@@ -456,6 +463,7 @@ public:
             if (path[VALUE].hasData() &&
                     path[VALUE].getData<bool>())
             {
+        
                 BString partRemoveWord = partWord;
                 
                 for (Index i = pageIndex;
@@ -485,7 +493,11 @@ public:
 
     }
 
-    void endString(Index pageCount, bool indexData, BString& partWord)
+    void endString(
+        Index pageCount,
+        bool indexData,
+        BString& partWord
+    )
     {
         LockFile::ScopedLock lock(database());
 
@@ -502,6 +514,7 @@ public:
         bool currentIndexData =
             path.hasData() &&
             path.getData<bool>();
+            
 
         for (Index i = pageCount + 1;
                 i <= max;
@@ -517,6 +530,8 @@ public:
         }
 
         path.setData<bool>(indexData);
+        
+        partWord = "";
 
     }
 
@@ -528,7 +543,7 @@ public:
         Path path = *this;
         if (path[VALUE].isDeadEnd())
             return "";
-        return path[VALUE][1].getStringData();
+        return path[VALUE][0].getStringData();
     }
 
     BString getValue() const
@@ -1081,10 +1096,8 @@ public:
 
         JSONPath json = (*this)[property];
 
-
         // Remove parent properties
         JSONPath path = json;
-        BString dummy;
         
         while (!path.isUserRoot())
         {
@@ -1093,7 +1106,7 @@ public:
             path = path.parent(property, keyType);
 
             if (keyType == Type::STRING)
-                json.removeWords(property, dummy, true);
+                json.removeWords(property);
 
         }
 
@@ -1117,6 +1130,13 @@ public:
     }
 
 private:
+    void addWords(const BString& word)
+    {
+        BString partWord = "";
+        addWords(word, partWord, true);
+        assert(partWord == "");
+    }
+    
     void addWords(const BString& word, BString& partWord, bool finalWord = false)
     {
 
@@ -1153,7 +1173,6 @@ private:
         if (remove) {
             Iterable<Index> parts(strings);
 
-            
             BString partRemoveWords;
             
             for (auto it = parts.begin(); it != parts.end(); )
@@ -1168,6 +1187,15 @@ private:
             }
 
         }
+    }
+    
+    void removeWords(const BString& value)
+    {
+        
+        BString partRemoveWords;
+        removeWords(value, partRemoveWords, true);
+        assert(partRemoveWords == "");
+        
     }
 
     void removeWords(const BString& value, BString& partRemoveWords, bool isFinalPart)
@@ -1245,13 +1273,13 @@ public:
             Iterable<Index> iterable(strings);
 
             out << "\"";
-
+            BString partWord;
             for (const auto index : iterable)
             {
                 BString string =
                     strings[index].getStringData();
 
-                out << string.escape();
+                string.escape(out, partWord);
             }
 
             out << "\"";
