@@ -166,7 +166,7 @@ inline bool testFile()
         }
 
 
-        cout << "\tLock index3" << flush;
+        cout << "\tLock index 3" << flush;
         Path path1 = db;
         Path path2 = db2;
         {
@@ -871,12 +871,12 @@ inline bool testJSONPath()
         cout << "\tString value ";
         Path path = root["string"];
         success = success &&
-                  path[JSONPath::VALUE][1].hasData();
+                  path[JSONPath::VALUE][0].hasData();
 
         if (success)
         {
             BString value =
-                path[JSONPath::VALUE][1].getStringData();
+                path[JSONPath::VALUE][0].getStringData();
 
             success = testValue("Hello World", value);
         }

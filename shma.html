@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="he">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Author" content="Tex Texin">
+<meta name="copyright" content="&copy; 2005-2010 Tex Texin">
+<meta http-equiv="Content-Language" content="he, en">
+<meta name="keywords" lang="en-US" content="Hebrew, Yiddish, Ladino, Judizmo, internationalization, localization, globalization, i18n, l10n, g11n, unicode, utf-8, utf-16, w3c, character, Texin, I18nGuy, XenCraft">
+<meta name="keywords" lang="en-GB" content="internationalisation, localisation, globalisation">
+<meta name="keywords" lang="he" content="שְׁמַע | יִשְׂרָאֵל, יְיָ | אֱלֹהֵינוּ, יְיָ | אֶחָֽד:">
+<meta name="robots" content="all">
+<meta name="description" lang="en" content="This page demonstrates that a Web page with Hebrew text, a bidirectional language can be simple.">
+<meta name="description" lang="he" content="שְׁמַע | יִשְׂרָאֵל, יְיָ | אֱלֹהֵינוּ, יְיָ | אֶחָֽד:">
+
+<title lang="en">Example Hebrew Web page - Prayer Shema Yisrael</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link href="http://www.i18nguy.com/css/tex-story.css" rel="stylesheet" type="text/css">
+
+<style type="text/css">
+body {
+	font-family : arial, verdana, helvetica, sans-serif;
+	width : 800px;
+	margin : 1em auto;
+}
+.he, .he p {
+	font-family : Ezra Sil, Ezra Sil SR, CODE2000, Times New Roman, times, serif;
+	direction : rtl;
+}
+
+div.he, .he p {
+	font-size : x-large;
+	margin : 0px auto;
+}
+div.he {
+	padding : 6px;
+}
+table {
+border : 1px #FF9900 solid;
+border-collapse : collapse;
+}
+h3 {
+text-align: center;
+background-color : #FFFFCC;
+width:100%;
+margin-top :1em;
+padding : 4px;
+}
+p.intro span.he {
+	font-weight : bold;
+	font-size : large;
+}
+</style>
+</head>
+<body id="top">
+<div lang="en">
+<a href="../index.html"><img src="../images/i18nguy-logo.png" align="left"
+ border="0" width="125" height="104" alt="I18n Guy, your I18n advisor"></a>
+
+<div style="text-align:center;width:650px;margin: 4px auto;">
+<h1>Example Hebrew Web Page</h1>
+<h2 style="color:blue">Prayer: Shema Yisrael</h2>
+<!--p>(Sephardic version)</p-->
+</div>
+
+<p class="intro">I am often asked for examples of how to produce a Web page for bidirectional languages such
+as Hebrew or Arabic. This page contains one of the central prayers in the monotheistic Jewish religion, known as Shema Yisrael (or Shma Yisrael). It is named for
+the opening two words. The prayer declares that there is one and only one God.
+<br><br>The page displays properly on modern browsers, providing you have a good quality Hebrew font. On poorer quality fonts, the spacing of the vowels
+and other characters may not be esthetic. For example, the following table compares the Ezra font with the Times New Roman font. 
+The Meteg vowel "<span class="he"> &#x05BD; </span>"
+moves between two characters rather than aligning under the character "<span class="he">ח</span>".</p>
+<table cellspacing="0" cellpadding="4" border="1" style="border:1px #999 solid;padding : 4px 8px;text-align:center;margin:15px auto;">
+<tr><th>Ezra font</th><th>Times New Roman Font</th></tr>
+<tr><td><img src="ezra.gif" alt="Example using the Ezra font" width="80" height="40"></td><td><img src="timesnr.gif" alt="Example using the Times New Roman font" width="75" height="33"></td></tr>
+</table>
+<p class="intro">Look at the source for this page, to see how it is implemented. I specified in the style section, some fonts that I have that 
+support Hebrew followed by some more traditional fonts.
+I also specified the right to left direction with the CSS command "direction:rtl" for elements with the class = "he".
+I entered the Hebrew characters in an editor that supports Unicode UTF-8. For example, Microsoft Notepad.
+<br><br>
+When you view the source, you will note that the characters are in a different order than when they are displayed on the Web page.
+This is because the editor (unless you instruct it to do otherwise) defaults to a Left to right direction. The Hebrew characters will flow right to left, but punctuation and some
+other characters that are not strongly right to left, may assume a left-to-right ordering. Of course, English characters (as used in HTML elements) are strongly left-to-right.
+Move your cursor thru the Hebrew and English text (for example where I use the span="nobrk" to prevent a linebreak in the middle of a hyphenated word) and don't think about
+left and right, but moving forward (with the cursor arrow) through the text.
+For more details, see the Unicode Bidirectional Algorithm.
+<br><br>
+In creating this page, I looked in several prayer books and noted differences. The consonants and vowels were the same, but punctuation varied. 
+Not all the prayer books used the 
+Paseq  "<span class="he">|</span>" character. There were additional commas "<span class="he">,</span>" in some versions, and the character 
+Sof Pasuq "<span class="he">׃</span>" and semi-colon "<span class="he">;</span>" would be replaced by period "<span class="he">.</span>" 
+and comma "<span class="he">,</span>" respectively.
+<br><br>Note that since this text is a prayer and references the name of God, if you print this page, you are expected to treat it respectfully.</p>
+
+<div class="leftbar" style="width:200px">
+To display the Hebrew characters you need an
+appropriate font. <a href="http://www.sil.org/computing/fonts/silhebruni/index.htm"
+target="_blank">Ezra SIL font</a>
+shows almost all of the Hebrew characters.
+Other Hebrew fonts, supporting not only Hebrew characters but punctuation, vowel and cantillation marks,
+are discussed on <a href="http://www.mechon-mamre.org/c/c.htm" target="_blank">Mechon Mamre's font page</a>.
+</div>
+
+
+<h1 class="he">שְׁמַע | יִשְׂרָאֵל, יְיָ | אֱלֹהֵינוּ, יְיָ | אֶחָֽד:</h1>
+<div style="text-align:center;font-size : small;color:#006;">
+Shema Yisrael Adonai Eloheinu Adonai Echad.
+</div>
+
+<p style="text-align:center;font-size:small;color:#006;">
+Hear O Israel, the Lord is our God, the Lord is One.
+</p>
+</div>
+
+<div class="he">
+<h1 class="he" style="font-size: 90%">
+בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם וָעֶד.
+</h1>
+</div>
+<div class="he" style="clear:both">
+<p>
+וְאָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, וּבְכָל-נַפְשְׁךָ, וּבְכָל-מְאֹדֶֽךָ. וְהָיוּ הַדְּבָרִים הָאֵלֶּה, אֲשֶׁר | אָֽנֹכִי מְצַוְּךָ הַיּוֹם, עַל-לְבָבֶֽךָ:  וְשִׁנַּנְתָּם לְבָנֶיךָ, וְדִבַּרְתָּ בָּם בְּשִׁבְתְּךָ בְּבֵיתֶךָ, וּבְלֶכְתְּךָ בַדֶּרֶךְ וּֽבְשָׁכְבְּךָ, וּבְקוּמֶֽךָ. וּקְשַׁרְתָּם לְאוֹת | <span class="nobrk">עַל-יָדֶךָ,</span> וְהָיוּ לְטֹטָפֹת בֵּין | עֵינֶֽיךָ, וּכְתַבְתָּם | עַל מְזֻזֹת בֵּיתֶךָ וּבִשְׁעָרֶֽיךָ:
+</p>
+<p>
+וְהָיָה אִם-שָׁמֹעַ תִּשְׁמְעוּ אֶל-מִצְוֹתַי, אֲשֶׁר | אָנֹכִי מְצַוֶּה | אֶתְכֶם הַיּוֹם, לְאַהֲבָה אֶת יְיָ | אֱלֹֽהֵיכֶם, וּלְעָבְדוֹ בְּכָל-לְבַבְכֶם וּבְכָל נַפְשְׁכֶם. וְנָֽתַתִּי מְטַֽר-אַרְצְכֶם בְּעִתּוֹ, יוֹרֶה וּמַלְקוֹשׁ, וְאָֽסַפְתָּ דְגָנֶךָ וְתִירֽשְׁךָ וְיִצְהָרֶֽךָ. וְנָֽתַתִּי | עֵשֶׂב | בְּשָֽׂדְךָ לִבְהֶמְתֶּךָ, וְאָֽכַלְתָּ וְשָׂבָֽעְתָּ. הִשָּֽׁמְרוּ לָכֶם פֶּן-יִפְתֶּה לְבַבְכֶם, וְסַרְתֶּם וַעֲבַדְתֶּם |  אֱלֹהִים | אֲחֵרִים וְהִשְׁתַּחֲוִיתֶם לָהֶם.  וְחָרָה | אַף-יְיָ בָּכֶם, וְעָצַר |  אֶת-הַשָּׁמַיִם וְלֹא-יִהְיֶה מָטָר, וְהָאֲדָמָה לֹא תִתֵּן אֶת-יְבוּלָהּ וַאֲבַדְתֶּם | מְהֵרָה מֵעַל הָאָרֶץ הַטֹּבָה | אֲשֶׁר | יְיָ נֹתֵן לָכֶם:  וְשַׂמְתֶּם | אֶת דְּבָרַי | אֵלֶּה עַל-לְבַבְכֶם <span class="nobrk">וְעַל-נַפְשְׁכֶם</span> וּקְשַׁרְתֶּם |  אֹתָם לְאוֹת | עַל-יֶדְכֶם, וְהָיוּ לְטוֹטָפֹת בֵּין | עֵינֵיכֶם:  וְלִמַּדְתֶּם |  אֹתָם | אֶת-בְּנֵיכֶם, לְדַבֵּר בָּם, בְּשִׁבְתְּךָ בְּבֵיתֶךָ, וּבְלֶכְתְּךָ בַדֶּרֶךְ, וּבְשָׁכְבְּךָ וּבְקוּמֶֽךָ: וּכְתַבְתָּם | עַל-מְזוּזוֹת בֵּיתֶךָ וּבִשְׁעָרֶֽיךָ:  
+לְמַעַן | יִרְבּוּ | יְמֵיכֶם וִימֵי בְנֵיכֶם עַל הָֽאֲדָמָה | אֲשֶׁר נִשְׁבַּע | יְיָ לַאֲבֹֽתֵיכֶם לָתֵת לָהֶם, כִּימֵי הַשָּׁמַיִם | עַל-הָאָֽרֶץ:
+</p><p>
+וַיֹּאמֶר | יְיָ | אֶל-מֹשֶׁה לֵּאמֹֽר: דַּבֵּר | אֶל-בְּנֵי | יִשְׂרָאֵל וְאָֽמַרְתָּ אֲלֵהֶם: וְעָשׂוּ לָהֶם צִיצִת עַל-כַּנְפֵי בִגְדֵיהֶם לְדֹֽרֹתָם, וְנָֽתְנוּ | עַל-צִיצִת הַכָּנָף פְּתִיל תְּכֵֽלֶת. וְהָיָה לָכֶם לְצִיצִת, וּרְאִיתֶם | אֹתוֹ וּזְכַרְתֶּם | אֶת-כָּל-מִצְוֹת | יְיָ, וַֽעֲשִׂיתֶם | אֹתָם, וְלֹא תָתוּרוּ | אַֽחֲרֵי לְבַבְכֶם וְאַֽחֲרֵי | עֵינֵיכֶם, אֲשֶׁר-אַתֶּם זֹנִים | אַחֲרֵיהֶֽם:  לְמַעַן תִּזְכְּרוּ וַעֲשִׂיתֶם | אֶת-כָּל-מִצְוֹתָי, וִהְיִיתֶם קְדֹשִים לֵאלֹֽהֵיכֶֽם: אֲנִי יְיְ | אֱלֹֽהֵיכֶם, אֲשֶׁר הוֹצֵאתִי | אֶתְכֶם | מֵאֶרֶץ מִצְרַיִם, לִהְיוֹת לָכֶם לֵאלֹהִים, אֲנִי | יְיָ | אֱלֹהֵיכֶם:  אֱמֶת
+</p>
+</div>
+<div lang="en">
+<h3 id="graphic" lang="en">Graphic Of Shema Yisrael</h3>
+<p lang="en">In case you don't have an appropriate font or a browser that supports bidirectional languages or Unicode UTF-8 properly, here is a (slightly reduced) graphic image of
+the above text in IE 6.0 using the Ezra font.</p>
+<img src="shema.gif" alt="Hebrew Prayer: Shema Yisrael" width="793" height="545">
+
+<h3 id="links">Related Links</h3>
+<div style="line-height : 130%">
+<a href="hebrew.html" target="_blank">Easy-to-use Unicode Table for Hebrew Characters (Alef-bet)</a>
+<br><a href="../markup/right-to-left.html" target="_blank">Right-to-Left Text in Markup Languages</a>
+<br><a href="../MiddleEastUI.html" target="_blank">User Interfaces For Right-to-Left Languages</a>
+<br>HTML 4.01
+<a href="http://www.w3.org/TR/REC-html40/struct/dirlang.html#h-8.2" target="_blank">8.2 Specifying the direction of text and tables: the dir attribute</a>
+<br><a href="http://www.jewishgen.org/infofiles/tombstones.html"  target="_blank">Reading Hebrew Tombstones</a>
+
+<br>Unicode Consortium's <a href="http://www.unicode.org/charts/PDF/U0590.pdf" target="_blank">Hebrew Code Chart</a> (Acrobat PDF file)
+<br>Unicode Consortium's <a href="http://www.unicode.org/charts/PDF/UFB00.pdf" target="_blank">Alphabetic Presentation Forms Code Chart</a> (Acrobat PDF file)
+<br>Unicode Consortium's <a href="http://www.unicode.org/unicode/reports/tr9/" target="_blank">Unicode Standard Annex #9, The Bidirectional Algorithm</a>
+<br>I18nGuy's <a href="codepages.html">Code Pages At The Push Of A Button</a>.
+<br>Jewish Encyclopedia's <a href="http://www.jewishencyclopedia.com/view.jsp?artid=1308&amp;letter=A" target="_blank">The Hebrew Alphabet</a>
+<br>Judaism 101 <a href="http://www.jewfaq.org/alephbet.htm" target="_blank">Hebrew Alphabet</a>
+<br>Jony Rosene's <a href="http://www.qsm.co.il/Hebrew/ab.htm" target="_blank">The Hebrew Alphabet</a>
+<br>Omniglot's <a href="http://www.omniglot.com/writing/hebrew.htm" target="_blank">Hebrew Script</a>
+<br>Safrus <a href="http://www.safrus.com/alephbet.html" target="_blank">Hebrew Alphabet used in writing STA"M (Sifrei Torah,Tefillin,and Mezuzos)</a>
+<br>Boker Tov <a href="http://www2t.biglobe.ne.jp/~BokerTov/semitic/alphabet.htm" target="_blank">The Alphabets of Hebrew and Arabic</a> (Japanese site)
+<br>British and Foreign Bible Society's <a href="http://www.bfbs.org.uk/documents/Masoretes.pdf" target="_blank">The Masoretes and the Punctuation of Biblical Hebrew</a> (PDF)
+(Nice explanation for each Hebrew character).
+<br><a href="http://www.jewfaq.org/prayer/shema.htm" target="_blank">Judaism 101 - Shema</a>
+<br><a href="http://en.wikipedia.org/wiki/Shema_Yisrael" target="_blank">Wikipedia - Shema Yisrael</a>
+<br><a href="http://www.hebrewletters.com/item.cfm?itemid=950" target="_blank">Hebrew Letters - Shema</a>
+<br><a href="http://www.jewishvirtuallibrary.org/jsource/Judaism/shema.html" target="_blank">Jewish Virtual Library - The Shema</a>
+<br><!--a href="http://en.wikipedia.org/wiki/Shema_Yisrael" target="_blank">Wikipedia - Shema Yisrael</a-->
+
+
+</div>
+
+<p class="copyright">Copyright &copy; 2005 (&#x05EA;&#x05E9;&#x05E1;&#x05D4;) Tex Texin. All rights reserved.
+<br><a href="#top">Top of page</a>
+</p>
+</div>
+
+<!-- WiredMinds eMetrics tracking with Enterprise Edition V5.4 START -->
+<script type='text/javascript' src='https://count.carrierzone.com/app/count_server/count.js'></script>
+<script type='text/javascript'><!--
+wm_custnum='ad8a74762b04d8a7';
+wm_page_name='shma.html';
+wm_group_name='/services/webpages/i/1/i18nguy.com/public/unicode';
+wm_campaign_key='campaign_id';
+wm_track_alt='';
+wiredminds.count();
+// -->
+</script>
+<!-- WiredMinds eMetrics tracking with Enterprise Edition V5.4 END -->
+</body>
+</html>

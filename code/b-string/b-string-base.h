@@ -14,6 +14,8 @@
 #include <codecvt>
 #include <filesystem>
 #include <random>
+#include <uchar.h>
+
 #include <cryptopp/filters.h>
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/sha3.h>
@@ -176,53 +178,53 @@ public:
 
         if (!size())
             return false;
-            
+
         std::wstring wvalue =
             utf8_to_wstring();
-            
-        return 
-            std::iswpunct(wvalue[0]) && 
+
+        return
+            std::iswpunct(wvalue[0]) &&
             !isEmoji();
 
-    
+
     }
 
     bool isSpace() const {
         if (!size())
             return false;
-            
+
         const std::wstring wvalue =
             utf8_to_wstring();
-            
+
         return std::iswspace(wvalue[0]);
-    
+
     }
-    
+
     bool isEmoji() const {
-        
+
         if (!size())
             return false;
             
         std::wstring wvalue =
             utf8_to_wstring();
-        
+
         wchar_t codepoint = wvalue[0];
-        
-        return 
-           (codepoint >= 0x1F600 && codepoint <= 0x1F64F) || // Emoticons
-           (codepoint >= 0x1F300 && codepoint <= 0x1F5FF) || // Misc Symbols & Pictographs
-           (0x1F680 <= codepoint && codepoint <= 0x1F6FF) || // Transport/Map
-           (0x1F900 <= codepoint && codepoint <= 0x1F9FF) || // Supplemental Symbols
-           (0x2600  <= codepoint && codepoint <= 0x26FF);   // Misc Symbols
+
+        return
+            (codepoint >= 0x1F600 && codepoint <= 0x1F64F) || // Emoticons
+            (codepoint >= 0x1F300 && codepoint <= 0x1F5FF) || // Misc Symbols & Pictographs
+            (0x1F680 <= codepoint && codepoint <= 0x1F6FF) || // Transport/Map
+            (0x1F900 <= codepoint && codepoint <= 0x1F9FF) || // Supplemental Symbols
+            (0x2600  <= codepoint && codepoint <= 0x26FF);   // Misc Symbols
     }
-    
+
     bool isSeperator() const
     {
         if (!size())
             return false;
-            
+
         char c = (*this)[0];
-        
+
         return
             (c == '.') ||
             (c == '-') ||
@@ -257,17 +259,17 @@ public:
         BString partWord;
         auto result =
             tokenise(
-                true, 
-                partWord
+                partWord,
+                true
             );
-            
+
         assert(!partWord.size());
-        
+
         return result;
     }
 
     // Defined below
-    vector<BString> tokenise(bool finalWord, BString& partWord) const;
+    vector<BString> tokenise(BString& partWord, bool finalWord) const;
 
 
     vector<BString> split(
@@ -310,27 +312,7 @@ public:
 
         return output.str();
 
-        /*
-        std::stringstream stream;
-        Base64OutputStream base64(stream);
-        base64 << *this;
-        base64.flush();
 
-        return stream.str();
-        */
-        /*
-        const std::string& data = *this;
-        BString encoded;
-        CryptoPP::StringSource(
-            data,
-            true,
-            new CryptoPP::Base64Encoder(
-                new CryptoPP::StringSink(encoded),
-                false // Do not insert line breaks
-            )
-        );
-        return encoded;
-        */
     }
 
     BString fromBase64() const
@@ -343,37 +325,7 @@ public:
 
         return output.str();
 
-        /*
 
-            // The Base64 encoded string
-            const std::string&
-                encoded_string = *this;
-
-            // Set up input and output streams
-            std::istringstream iss(encoded_string);
-            std::ostringstream oss;
-
-            // Create the libb64 decoder object
-            base64::decoder decoder;
-
-            // Decode the input stream to the output stream
-            decoder.decode(iss, oss);
-
-            return oss.str();
-            */
-        /*
-        const BString& base64 = *this;
-        BString decoded;
-
-        CryptoPP::StringSource(
-            base64,
-            true,
-            new CryptoPP::Base64Decoder(
-                new CryptoPP::StringSink(decoded)
-            )
-        );
-        return decoded;
-        */
 
     }
 #ifdef SERVER
@@ -463,7 +415,8 @@ public:
         ostream &out
     ) const
     {
-        out << escape();
+        BString partWord;
+        escape(out, partWord);
     }
 
 
@@ -646,11 +599,105 @@ public:
         return in;
     }
 
-    // convert UTF-8 string to wstring
-    std::wstring utf8_to_wstring () const
+    static wchar_t utf8towchar(const BString& utf8)
     {
+        std::string hex = utf8.toHex();
+        // Can also be just "0041"
+
+        // Convert base-16 string to unsigned long, then cast to wchar_t
+        wchar_t wc = static_cast<wchar_t>(std::stoul(hex, nullptr, 16));
+
+        return wc;
+    }
+
+    static std::wstring hexToWString(const BString& utf8) {
+        std::wstring result;
+        std::string hex = utf8.toHex();
+        for (size_t i = 0; i < hex.length(); i += 2) {
+            std::string byteString = hex.substr(i, 2);
+            wchar_t byte = static_cast<wchar_t>(std::stoul(byteString, nullptr, 16));
+            result += byte;
+        }
+        return result;
+    }
+
+    // convert UTF-8 string to wstring
+    std::wstring utf8_to_wstring() const
+    {
+        /*
+        return hexToWString(*this);
+        
+        std::wstringstream wstream;
+        BString utf8;
+        Index position = 0;
+        // mbstate_t state = {0};
+
+        while (position < size())
+        {
+            utf8 = nextUTF8(position);
+            assert(utf8.size());
+
+            wstream << hexToWString(utf8);
+
+
+            
+            if (utf8 == "💜") {
+                cerr << "SIZE " << utf8.size() << endl;
+            }
+
+            //  std::reverse(utf8.begin(), utf8.end());
+
+            switch (utf8.size())
+            {
+            case 0:
+                assert(false);
+                break;
+            case 1:
+                utf8 = BString(3, '\0') + utf8;
+                break;
+            case 2:
+                utf8 = BString(2, '\0') + utf8;
+                break;
+            case 3:
+                utf8 = BString(1, '\0') + utf8;
+                break;
+            case 4:
+                break;
+            default:
+                assert(false);
+            }
+
+
+            assert(utf8.size() == 4);
+            assert(sizeof(wchar_t) == 4);
+
+            // uint32_t ui32;
+            wstream.write((const wchar_t*)(const byte*)utf8.data(), 1);
+
+            // wstream << (wchar_t)ui32;
+
+            //cerr << to_string(ui32) << endl;
+            
+        }
+
+        // cerr << endl;
+
+        return wstream.str();
+        */
+        std::wstring output;
         std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
-        return myconv.from_bytes(*this);
+        
+        try {
+            output = myconv.from_bytes(data(), data() + size());
+        }
+        catch(const std::range_error& ex)
+        {
+            cerr << "BSTRING BASE CONV ERROR " << endl;
+            cerr << *this << ":" << encodeURI() << endl;
+            throw ex;
+        }
+        
+        return output;
     }
 
     // convert wstring to UTF-8 string
@@ -662,14 +709,14 @@ public:
 
     BString toLower() const {
         wstring wvalue = utf8_to_wstring();
-        
+
         std::transform(
-            wvalue.begin(), 
-            wvalue.end(), 
             wvalue.begin(),
-            [](wchar_t c) {
-                return std::towlower(c);
-            }
+            wvalue.end(),
+            wvalue.begin(),
+        [](wchar_t c) {
+            return std::towlower(c);
+        }
         );
         return wstring_to_utf8(wvalue);
     }
@@ -677,14 +724,14 @@ public:
     BString toUpper() const {
 
         wstring wvalue = utf8_to_wstring();
-        
+
         std::transform(
-            wvalue.begin(), 
-            wvalue.end(), 
             wvalue.begin(),
-            [](wchar_t c) {
-                return std::towupper(c);
-            }
+            wvalue.end(),
+            wvalue.begin(),
+        [](wchar_t c) {
+            return std::towupper(c);
+        }
         );
         return wstring_to_utf8(wvalue);
 
@@ -695,37 +742,35 @@ public:
         std::stringstream stream;
         Index position = 0;
         BString partUTF8;
-        
+
         while (position < size())
         {
             BString utf8 = nextUTF8(
-                position,
-                partUTF8
-            );
+                               position,
+                               partUTF8
+                           );
             if (partUTF8.size() == 0)
-               stream << escape(utf8);
+                stream << escape(utf8);
         }
-        
+
         return stream.str();
     }
-    
+
     void escape(ostream& out, BString& partUTF8) const
     {
         Index position = 0;
         BString value = partUTF8 + *this;
-        
+
         while (position < value.size())
         {
             BString utf8 = value.nextUTF8(
-                position,
-                partUTF8
-            );
+                               position,
+                               partUTF8
+                           );
             if (partUTF8.size() == 0)
-               out << escape(utf8);
+                out << escape(utf8);
         }
-        
-        assert(partUTF8 == "");
-        
+
     }
 
     static BString escape(
@@ -857,21 +902,21 @@ public:
 
 
     }
-    
+
     BString nextUTF8(
         Index& position
     ) const
     {
         BString partUTF8;
         BString utf8 = nextUTF8(
-            position,
-            partUTF8
-        );
+                           position,
+                           partUTF8
+                       );
         assert(partUTF8.size() == 0);
-        
+
         return utf8;
     }
-    
+
     inline static Index expectedBytes(char c)
     {
         if ((c &      0b11110000) == 0b11110000)
@@ -885,14 +930,14 @@ public:
         else
             return 0;
     }
-    
+
     inline static bool expectNextByte(char c)
     {
         return ((c & 0b10111111) == c);
     }
 
     BString nextUTF8(
-        Index& position, 
+        Index& position,
         BString& partUTF8
     )
     const
@@ -900,18 +945,18 @@ public:
         BString value =
             partUTF8 +
             *this;
-            
+
         if (!value.size())
             return "";
-            
-            
+
+
         partUTF8 = "";
-        
+
         char c = value[position++];
-    
-        Index expectedBytes = 
+
+        Index expectedBytes =
             BString::expectedBytes(c);
-        
+
         partUTF8.push_back(c);
 
         while (expectedBytes &&
@@ -927,7 +972,7 @@ public:
             {
                 ++expectedBytes;
             }
-            
+
 
         }
 
@@ -936,11 +981,11 @@ public:
             BString completeUTF8 = partUTF8;
             partUTF8 = "";
             return completeUTF8;
-            
+
         }
-       
+
         position += partUTF8.size();
-            
+
         return "";
 
     }
@@ -950,7 +995,7 @@ public:
     Iterator utf8Begin(
         BString& partUTF8
     ) const;
-    
+
     // Defined below
     Iterator utf8End() const;
 
@@ -976,7 +1021,7 @@ public:
 
     Iterator(const BString& string, BString& partUTF8, bool isEnd = false)
         : _bString(string),
-        _partU8(partUTF8)
+          _partU8(partUTF8)
     {
 
         if (isEnd) {
@@ -1002,6 +1047,7 @@ public:
                     _partU8
                 );
                 
+
             if (_partU8.size() == 0)
             {
                 if (character.isEmoji())
@@ -1009,23 +1055,23 @@ public:
                     _value = character;
                     return true;
                 }
-                
+
                 if (!character.isSpace() &&
                     !character.isPunctuation())
                 {
-                    word += character;
+                    word = character;
                     break;
                 }
-            
+
             }
-            
+
         }
 
         // Read the rest of the word
         while (_position < _bString.size())
         {
             Index lastPosition = _position;
-            
+
             BString character =
                 _bString.nextUTF8(
                     _position,
@@ -1034,32 +1080,34 @@ public:
 
             if (_partU8.size() == 0)
             {
-                bool isEmoji = false;
-                if ( (isEmoji = character.isEmoji()) ||
-                     character.isSpace() ||
-                    (   character.isPunctuation() &&
-                       !character.isSeperator()  )
-                   
-                )
+                if (character.isEmoji())
                 {
+                    if (word.size())
+                        // Emoji split us,
+                        // revert position so we can
+                        // consume the character later
+                        _position = lastPosition;
+                    else 
+                        // First emoji
+                        // consider as word
+                        word = character;
                     
-                    if (isEmoji) {
-                        if (word.length())
-                            _position = lastPosition;
-                        else
-                            word = character;
-                    }
-                    
+                    break;
+                }
+                else if ( character.isSpace() ||
+                     ( character.isPunctuation() &&
+                       !character.isSeperator() )
+                   )
+                {
                     break;
                 }
 
                 word += character;
             }
         }
-        
 
         if (_partU8.size() == 0 &&
-            word.length())
+            word.size())
         {
             _value = word;
             return true;
@@ -1136,14 +1184,14 @@ Iterator BString::utf8Begin(
 Iterator BString::utf8End() const
 {
     static BString partUTF8 = "";
-    
+
     return Iterator(*this, partUTF8, true);
 }
 
 // Declared above
 vector<BString> BString::tokenise(
-    bool finalWord, 
-    BString& partWord
+    BString& partWord,
+    bool finalWord
 ) const
 {
     std::vector<BString> words;
@@ -1153,7 +1201,7 @@ vector<BString> BString::tokenise(
     {
         BString split;
         Index index = 0;
-        
+
         while (index < word.size())
         {
             // Add token and type
@@ -1188,7 +1236,7 @@ vector<BString> BString::tokenise(
 
     Iterator end = value.utf8End();
     BString partUTF8;
-    
+
     // Iterate over words correctly
     // utf-8 aligned
     for (auto it = value.utf8Begin(partUTF8);
@@ -1196,14 +1244,14 @@ vector<BString> BString::tokenise(
             ++it)
     {
         assert(partUTF8.size() == 0);
-        
+
         // Add token and type
         BString token = *it;
 
         auto itTestEnd = it;
         ++itTestEnd;
         if (!finalWord &&
-            itTestEnd == end)
+                itTestEnd == end)
         {
             // last word or part of
             // next page
@@ -1221,7 +1269,7 @@ vector<BString> BString::tokenise(
 
 
     }
-    
+
     partWord += partUTF8;
 
 

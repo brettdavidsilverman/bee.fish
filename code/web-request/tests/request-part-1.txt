@@ -1,6 +1,6 @@
 {
    "method": "setItem",
-   "key": "響ꓩꚚ掦驩飩Ꚛ䞙铦改飦掙蹥乥乥乥乥㦓餹鎕乕㥔厔哕㔴퍍⪐",
+   "key": "this key has no relevance to anything in the universe 🌍",
    "value": {
       "strokeStyle": "blue",
       "lineWidth": 1,

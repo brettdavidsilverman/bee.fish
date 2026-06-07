@@ -217,9 +217,7 @@ using namespace BeeFishWeb;
                     PagedStream pagedStream(
                         [&parser, &partWord, &content, &contentType, &pageIndex](const BString& encoded)
                         {
-                            ++pageIndex;
-                            
-                            if (pageIndex == 1)
+                            if (pageIndex == 0)
                             {
                                 BString header = 
                                     BString("data:") + 
@@ -229,19 +227,19 @@ using namespace BeeFishWeb;
                                     
                                 content.setString(
                                     header,
-                                    pageIndex, 
+                                    pageIndex++, 
                                     false, 
-                                    false,
-                                    partWord);
+                                    partWord,
+                                    false);
                             }
                             else 
                             {
                                 content.setString(
                                     encoded, 
-                                    pageIndex,
+                                    pageIndex++,
                                     false, 
-                                    false, 
-                                    partWord
+                                    partWord,
+                                    false
                                 );
                             }
                         }
@@ -258,7 +256,7 @@ using namespace BeeFishWeb;
                                 base64 << data;
                             }
                             else {
-                                content.setString(data, ++pageIndex, true, false, partWord);
+                                content.setString(data, pageIndex++, true, partWord, false);
                             }
                         }
                     );

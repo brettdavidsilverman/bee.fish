@@ -24,8 +24,10 @@ inline bool testEmojis();
 inline bool testPunctuation();
 inline bool testIsSpace();
 inline bool testUTF8();
+inline bool testIterator();
 inline bool testTokenise();
 inline bool testEscape();
+inline bool testHebrew();
 
 inline bool test()
 {
@@ -45,11 +47,13 @@ inline bool test()
     ok = ok && testData();
     ok = ok && testEncodeURI();
     ok = ok && testUTF8();
+    ok = ok && testEmojis();
     ok = ok && testPunctuation();
     ok = ok && testIsSpace();
-    ok = ok && testEmojis();
+    ok = ok && testIterator();
     ok = ok && testTokenise();
     ok = ok && testEscape();
+    ok = ok && testHebrew();
 
     outputSuccess(ok);
 
@@ -187,7 +191,11 @@ inline bool testBStrings()
 
     BString mixedCase = "I 💜 Rock and roll";
 
+    std::wstring wstring =
+        mixedCase.utf8_to_wstring();
+
     BString lowerCase = mixedCase.toLower();
+
     ok &= testResult(
               lowerCase,
               lowerCase == "i 💜 rock and roll"
@@ -208,17 +216,17 @@ inline bool testBStrings()
               "Original unchanged 2",
               mixedCase == "I 💜 Rock and roll"
           );
-          
+
     ok &= testResult(
               "Unicode 🌍 to lower",
               "🌍" == BString("🌍").toLower()
           );
-          
+
     ok &= testResult(
               "Unicode 🌍 to upper",
               "🌍" == BString("🌍").toUpper()
           );
-          
+
     cout << endl;
 
     BString digits = "0123";
@@ -555,7 +563,7 @@ inline bool testPunctuation()
              "Unicode quote “ punctuation",
              punc.isPunctuation() == true
          );
-         
+
 
     ok &= testResult(
               "Unicode 🌍 non punctuation",
@@ -620,11 +628,11 @@ inline bool testIsSpace()
              "Multi unicode char space",
              space.isSpace() == true
          );
-         
+
     ok &= testResult(
               "Unicode 🌍 non space",
               BString("🌍").isSpace() == false
-        );
+          );
 
     return ok;
 }
@@ -692,6 +700,45 @@ inline bool testUTF8()
     ok = ok && testValue("First part UTF8", partUTF8 == "\xF0");
     ok = ok && testUTF8("\x9F\x98\x80", "Part 😀", partWord, partUTF8, true);
 
+
+    BString test = "🌍A🌍B";
+    vector<BString> characters;
+    Index position = 0;
+    partUTF8 = "";
+    while (position < test.size())
+    {
+        BString character =
+            test.nextUTF8(
+                position,
+                partUTF8
+            );
+
+        if (partUTF8.size() == 0) {
+            cerr << character << endl;
+            characters.push_back(character);
+        }
+    }
+
+    ok = ok && testValue(
+             "🌍",
+             characters[0] == "🌍"
+         );
+
+    ok = ok && testValue(
+             "A",
+             characters[1] == "A"
+         );
+
+    ok = ok && testValue(
+             "🌍",
+             characters[2] == "🌍"
+         );
+
+    ok = ok && testValue(
+             "B",
+             characters[3] == "B"
+         );
+
     assert(ok);
 
     return ok;
@@ -703,31 +750,88 @@ inline bool testEmojis()
 
     bool ok = true;
 
-    std::string str = "Emoji 😀";
-    BString bstr(str);
-    std::string str2 = bstr;
     ok &= testResult(
-              "Emoji 😀",
-              (str == str2)
+              "Emoji 🌍",
+              BString("🌍").isEmoji()
           );
 
     ok &= testResult(
-        "Emoji 🌍",
-        BString("🌍").isEmoji()
-    );
-    
+              "Emoji 😀",
+              BString("😀").isEmoji()
+          );
+    /*
     ok &= testResult(
-        "Non Emoji A️",
-        !BString("A️").isEmoji()
+        "Emoji ❤️",
+        BString("❤️").isEmoji()
     );
-    
+    */
+    ok &= testResult(
+              "Non Emoji A️",
+              !BString("A️").isEmoji()
+          );
+
     cout << endl;
-    
+
     assert(ok);
-    
+
     return ok;
 }
 
+bool testText(const BString& text, const std::vector<BString> expected)
+{
+    bool ok = true;
+    BString partUTF8;
+    vector<BString> words;
+    for (auto it = text.utf8Begin(partUTF8);
+            it != text.utf8End();
+            ++it)
+    {
+        words.push_back(*it);
+    }
+
+    ok = ok && testValue(
+             text,
+             words == expected
+         );
+
+    if (!ok) {
+        cout << "Expected " << expected << endl;
+        cout << "Got " << words << endl;
+    }
+
+    return ok;
+};
+
+
+inline bool testIterator()
+{
+    cout << "Test iterator" << endl;
+    bool ok = true;
+
+
+
+    ok = ok && testText(
+        "sample🌍word",
+        {"sample", "🌍", "word"}
+    );
+
+    ok = ok && testText(
+        "false",
+        {"false"}
+    );
+
+    ok = ok && testText(
+             "hello to the 🌍 world",
+    {"hello", "to", "the", "🌍", "world"}
+         );
+
+
+    assert(ok);
+
+    return ok;
+
+
+}
 
 inline bool testTokenise()
 {
@@ -901,7 +1005,7 @@ inline bool testTokenise()
              text,
              words.size() == 3
          );
-         
+
     if (!ok) {
         cerr << words;
         assert(false);
@@ -921,7 +1025,7 @@ inline bool testTokenise()
              words[2],
              words[2] == "🌎"
          );
-         
+
     if (ok)
     {
         text = "Hello🌎";
@@ -932,7 +1036,7 @@ inline bool testTokenise()
              text,
              words.size() == 2
          );
-         
+
 
     ok = ok && testValue(
              words[0],
@@ -943,13 +1047,13 @@ inline bool testTokenise()
              words[1],
              words[1] == "🌎"
          );
-         
+
     if (!ok) {
         cerr << words;
         assert(false);
     }
-    
-         
+
+
     if (ok)
     {
         text = "🌎";
@@ -966,8 +1070,8 @@ inline bool testTokenise()
              words[0],
              words[0] == "🌎"
          );
-         
-        
+
+
     if (ok)
     {
         text = "Hello🌎World";
@@ -978,7 +1082,7 @@ inline bool testTokenise()
              text,
              words.size() == 3
          );
-         
+
     if (!ok) {
         cerr << words;
         assert(false);
@@ -998,8 +1102,8 @@ inline bool testTokenise()
              words[2],
              words[2] == "🌎"
          );
-         
-    
+
+
     if (ok)
     {
         text = "🌎World";
@@ -1010,7 +1114,7 @@ inline bool testTokenise()
              text,
              words.size() == 2
          );
-         
+
 
     ok = ok && testValue(
              words[0],
@@ -1021,13 +1125,13 @@ inline bool testTokenise()
              words[1],
              words[1] == "🌎"
          );
-         
+
     if (!ok) {
         cerr << words;
         assert(false);
     }
-    
-    
+
+
     if (ok)
     {
         text = "🌎🌈";
@@ -1038,25 +1142,25 @@ inline bool testTokenise()
              text,
              words.size() == 2
          );
-         
+
     ok = ok && testValue(
              words[0],
              words[0] == "🌈"
          );
-         
+
     ok = ok && testValue(
              words[1],
              words[1] == "🌎"
          );
 
 
-         
+
     if (!ok) {
         cerr << words;
         assert(false);
     }
-    
-         
+
+
     if (ok)
     {
         text = " ";
@@ -1078,6 +1182,40 @@ inline bool testTokenise()
              text,
              words.size() == 0
          );
+
+
+    BString partWord;
+
+    if (ok)
+    {
+        text = "part";
+
+        words = text.tokenise(partWord, false);
+
+        ok = ok && testValue(
+                 "Part word non final",
+                 words.size() == 0
+             );
+
+        text = "word";
+
+        words = text.tokenise(partWord, true);
+
+        ok = ok && testValue(
+                 "Part word final",
+                 words.size() == 1
+             );
+
+        ok = ok && testValue(
+                 "partword",
+                 words[0] == "partword"
+             );
+
+        ok = ok && testValue(
+                 "Part word is blank",
+                 partWord == ""
+             );
+    }
 
     return ok;
 
@@ -1121,6 +1259,37 @@ inline bool testEscape()
          );
 
     return ok;
+}
+
+inline bool testHebrew()
+{
+    cout << "Test Hebrew" << endl;
+    bool ok = true;
+    
+    BString text =
+            "בָּרוּךְ שֵׁם כְּבוֹד מַלְכוּתוֹ לְעוֹלָם";
+            
+    ok = ok && testText(
+        text,
+        {
+            "בָּרוּךְ",
+            "שֵׁם", 
+            "כְּבוֹד", 
+            "מַלְכוּתוֹ", 
+            "לְעוֹלָם"
+        }
+        
+    );
+    
+    ok = ok && testValue(
+        text,
+        text.toLower() == text
+    );
+    
+    assert(ok);
+    
+    return ok;
+
 }
 
 }

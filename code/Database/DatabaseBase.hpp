@@ -117,6 +117,9 @@ namespace BeeFishDatabase {
         {
 
             Index dataIndex = size();
+            
+            seek(dataIndex);
+            
 
             Index dataSize = data.size();
             write(&dataSize, sizeof(Index));

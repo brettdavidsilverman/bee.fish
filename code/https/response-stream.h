@@ -347,6 +347,9 @@ public:
         {
 
             std::stringstream stream;
+            
+            stream.imbue(std::locale("C"));
+            
             stream << std::hex << std::uppercase << _count << std::dec << "\r\n";
             std::string str = stream.str();
             _write(str.data(), str.size());

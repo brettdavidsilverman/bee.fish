@@ -435,8 +435,8 @@ public:
             value,
             0,
             true,
-            true,
-            partWord
+            partWord,
+            true
         );
         
         assert(expectedBytes == 0);
@@ -446,8 +446,8 @@ public:
         const BString& value, 
         Index pageIndex, 
         bool indexData,
-        bool finalPart,
-        BString& partWord
+        BString& partWord,
+        bool finalPart
     )
     {
         if (pageIndex == 1)
@@ -494,7 +494,7 @@ public:
         path[VALUE][pageIndex].setData<BString>(value);
 
         if (indexData && partChanged) {
-            addWords(value, partWord, false, finalPart);
+            addWords(value, partWord, false, false);
         }
 
         if (finalPart)
@@ -1152,7 +1152,10 @@ private:
         Path words = database().words();
 
         std::vector<BString> tokens =
-            word.tokenise(finalWord, partWord);
+            word.tokenise(
+                partWord,
+                finalWord
+            );
         
         if (wholeWord && 
             find(
@@ -1161,7 +1164,7 @@ private:
                 word.toLower()
             ) == tokens.end())
         {
-            tokens.push_back(word);
+            tokens.push_back(word.toLower());
         }
 
         for (auto word : tokens)
@@ -1227,7 +1230,10 @@ private:
         Path objects = database().objects();
 
         std::vector<BString> tokens =
-            value.tokenise(isFinalPart, partRemoveWords);
+            value.tokenise(
+                partRemoveWords,
+                isFinalPart
+            );
 
         if (wholeWord && 
             find(
@@ -1236,7 +1242,7 @@ private:
                 value.toLower()
             ) == tokens.end())
         {
-            tokens.push_back(value);
+            tokens.push_back(value.toLower());
         }
         
         for (auto word : tokens)
@@ -1314,9 +1320,13 @@ public:
 
                 string.escape(out, partWord);
             }
-
+            
+            assert(partWord == "");
+            
             out << "\"";
-
+            
+            
+            
             break;
         }
         case Type::ARRAY:

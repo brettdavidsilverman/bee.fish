@@ -108,18 +108,31 @@ void loadFile(
                 
     cout << start.toString(auth) << endl;
     
-    File input(path);
+    start._onword =
+    [&auth](JSONPath& path, const BString& word)
+    {
+        cout 
+            << path.toString(auth)
+            << "#" 
+            << word 
+            << endl;
+    };
+    
+
+    File input(path.string(), true);
     
     Index pageSize = getPageSize();
-    BString buffer('\0', pageSize);
+    BString buffer(pageSize, '\0');
+    assert(buffer.size() == pageSize);
     Index size = 0;
     Index total = 0;
+    Index fileSize = input.size();
     Index pageIndex = 0;
     BString partWord;
-    while (total < input.size())
+    while (total < fileSize)
     {
-        if (total + pageSize > input.size())
-            size = input.size() - total;
+        if (total + pageSize > fileSize)
+            size = fileSize - total;
         else
             size = pageSize;
             
@@ -128,13 +141,19 @@ void loadFile(
         
         const BString page = buffer.substr(0, size);
         
-        bool finalPart = (total == input.size());
-        
-        start.setString(page, ++pageIndex, true, finalPart, partWord);
-        
+        try {
+            start.setString(page, pageIndex++, true,  partWord, false);
+        }
+        catch (const std::range_error& ex)
+        {
+            cerr << "WSTRING CONV ERROR" << endl;
+            assert(false);
+        }
     }
+    
+    start.endString(pageIndex, true, partWord);
 
-    assert(total == input.size());
+    assert(total == fileSize);
     
     input.close();
 }

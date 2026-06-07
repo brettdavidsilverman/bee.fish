@@ -317,14 +317,12 @@ namespace BeeFishDatabase {
             if (_stringPageIndex == 0)
                 _indexString = !partString.isData();
                 
-
-            
             _string.setString(
                 partString, 
-                ++_stringPageIndex, 
+                _stringPageIndex++, 
                 _indexString, 
-                false,
-                _partWord
+                _partWord,
+                false
             );
         }
         

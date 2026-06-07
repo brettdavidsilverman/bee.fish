@@ -191,7 +191,13 @@ namespace BeeFishDatabase {
         
         Size size() const
         {
-            return seek(0, SEEK_END);
+            Size pos = seek(0, SEEK_CUR);
+            
+            Size size = seek(0, SEEK_END);
+            
+            seek(pos, SEEK_SET);
+            
+            return size;
         }
         
     protected:
