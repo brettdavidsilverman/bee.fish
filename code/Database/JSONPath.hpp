@@ -481,7 +481,7 @@ public:
                 {
                     BString current =
                     path[VALUE][i].getStringData();
-                    removeWords(current, partRemoveWord, i == max);
+                    removeWords(current, partRemoveWord, false, i == max);
                     path[VALUE].clear(i);
                 }
 
@@ -494,7 +494,7 @@ public:
         path[VALUE][pageIndex].setData<BString>(value);
 
         if (indexData && partChanged) {
-            addWords(value, partWord, finalPart);
+            addWords(value, partWord, false, finalPart);
         }
 
         if (finalPart)
@@ -512,7 +512,7 @@ public:
 
         Path path = *this;
         
-        addWords("", partWord, true);
+        addWords("", partWord, false, true);
         
         path = path[VALUE];
         Index max = 0;
@@ -533,7 +533,7 @@ public:
             {
                 BString current =
                     path[i].getStringData();
-                removeWords(current, partWord, i == max);
+                removeWords(current, partWord, false, i == max);
             }
             path.clear(i);
         }
@@ -1115,7 +1115,7 @@ public:
             path = path.parent(property, keyType);
 
             if (keyType == Type::STRING)
-                json.removeWords(property);
+                json.removeWords(property, true);
 
         }
 
@@ -1139,20 +1139,30 @@ public:
     }
 
 private:
-    void addWords(const BString& word)
+    void addWords(const BString& word, bool wholeWord = true)
     {
         BString partWord = "";
-        addWords(word, partWord, true);
+        addWords(word, partWord, wholeWord, true);
         assert(partWord == "");
     }
     
-    void addWords(const BString& word, BString& partWord, bool finalWord = false)
+    void addWords(const BString& word, BString& partWord, bool wholeWord = false, bool finalWord = false)
     {
 
         Path words = database().words();
 
         std::vector<BString> tokens =
             word.tokenise(finalWord, partWord);
+        
+        if (wholeWord && 
+            find(
+                tokens.begin(),
+                tokens.end(),
+                word.toLower()
+            ) == tokens.end())
+        {
+            tokens.push_back(word);
+        }
 
         for (auto word : tokens)
         {
@@ -1195,23 +1205,23 @@ private:
                     
                 ++it;
                 
-                removeWords(current, partRemoveWords, it == parts.end());
+                removeWords(current, partRemoveWords, false, it == parts.end());
 
             }
 
         }
     }
     
-    void removeWords(const BString& value)
+    void removeWords(const BString& value, bool wholeWord)
     {
         
         BString partRemoveWords;
-        removeWords(value, partRemoveWords, true);
+        removeWords(value, partRemoveWords, wholeWord, true);
         assert(partRemoveWords == "");
         
     }
 
-    void removeWords(const BString& value, BString& partRemoveWords, bool isFinalPart)
+    void removeWords(const BString& value, BString& partRemoveWords, bool wholeWord, bool isFinalPart)
     {
         Path words = database().words();
         Path objects = database().objects();
@@ -1219,6 +1229,16 @@ private:
         std::vector<BString> tokens =
             value.tokenise(isFinalPart, partRemoveWords);
 
+        if (wholeWord && 
+            find(
+                tokens.begin(),
+                tokens.end(),
+                value.toLower()
+            ) == tokens.end())
+        {
+            tokens.push_back(value);
+        }
+        
         for (auto word : tokens)
         {
             if (words.contains(word))

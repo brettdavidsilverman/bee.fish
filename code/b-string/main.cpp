@@ -13,7 +13,28 @@ using namespace BeeFishMisc;
 using namespace BeeFishBString;
 
 int main(int argc, const char* argv[]) {
-
+/*
+    BString heart = "❤️";
+    Index pos = 0;
+    
+    BString part1 = heart.nextUTF8(pos);
+    BString part2 = heart.nextUTF8(pos);
+    
+    cout << part1.toHex() << endl;
+    cout << part2.toHex() << endl;
+    
+    if (part1.isEmoji())
+        cout << "1 😀😀😀😀" << endl;
+    else
+        cout << "1 😭😭😭😭" << endl;
+        
+    if (part2.isEmoji())
+        cout << "2 😀😀😀😀" << endl;
+    else
+        cout << "2 😭😭😭😭" << endl;
+        
+    assert(false);
+    */
     cout << "bee.fish.b-string"
          << endl
          << "C++ run time: "

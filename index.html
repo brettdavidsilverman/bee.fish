@@ -318,7 +318,7 @@ async function downloadJSON() {
                 {
                     line = line.substr(0, line.length - 1);
                 }
-                searchResults.push(JSON.parse(line));
+                searchResults.push(decodeURIComponent(JSON.parse(line)));
                 line = decodeURIComponent(JSON.parse(line));
                 line += "\n";
                 editor.value += line;

@@ -70,7 +70,7 @@ namespace BeeFishHTTPS {
         {
             // Create the temp file name.
             stringstream stream;
-            stream << "bee.fish." << (void*)this;
+            stream << "bee.fish." << getPointerString();
             _tempFileName =
                 string(TEMP_DIRECTORY) +
                 stream.str();
@@ -435,7 +435,8 @@ namespace BeeFishHTTPS {
 
         BString getPointerString() {
             stringstream stream;
-            stream << this;
+            stream.imbue(std::locale("C"));
+            stream << static_cast<const void*>(this);
             return stream.str();
         }
         

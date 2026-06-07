@@ -1011,10 +1011,6 @@ inline bool testTokenise()
              words.size() == 2
          );
          
-    if (!ok) {
-        cerr << words;
-        assert(false);
-    }
 
     ok = ok && testValue(
              words[0],
@@ -1030,7 +1026,36 @@ inline bool testTokenise()
         cerr << words;
         assert(false);
     }
+    
+    
+    if (ok)
+    {
+        text = "🌎🌈";
+        words = text.tokenise();
+    }
+
+    ok = ok && testValue(
+             text,
+             words.size() == 2
+         );
          
+    ok = ok && testValue(
+             words[0],
+             words[0] == "🌈"
+         );
+         
+    ok = ok && testValue(
+             words[1],
+             words[1] == "🌎"
+         );
+
+
+         
+    if (!ok) {
+        cerr << words;
+        assert(false);
+    }
+    
          
     if (ok)
     {
