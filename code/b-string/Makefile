@@ -6,7 +6,7 @@ DEPS   = char.h b-string.h b-string-base.h stream.h test.h locale.hpp ../Miscell
 all:	$(OUTPUT)
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lboost_locale -lboost_regex -licuuc -lcryptopp
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lcryptopp
 	
 	
 trace:	$(OUTPUT)

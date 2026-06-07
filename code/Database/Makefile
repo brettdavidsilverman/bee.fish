@@ -6,10 +6,10 @@ OPTIMISATION=-Ofast
 DEPS=$(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp LeastRecentlyUsedCache.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Locks.hpp Version.hpp Branch.hpp Path.hpp PathBase.hpp PathBase.hpp Iterable.hpp Makefile JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp JSONIndex.hpp NullStream.hpp LoadFiles.hpp ../Size.hpp Makefile
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) $(OPTIMISATION) main.cpp -o $(OUTPUT) -lboost_locale -lboost_regex -licuuc -lcryptopp
+	g++ $(CFLAGS) $(OPTIMISATION) main.cpp -o $(OUTPUT) -lcryptopp
 
 $(OUTPUT_INDEX): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT_INDEX) -D JSON_INDEX -lboost_locale -lboost_regex -licuuc -lcryptopp
+	g++ $(CFLAGS) main.cpp -o $(OUTPUT_INDEX) -D JSON_INDEX -lcryptopp
 	
 
 $(BUILD)/json:

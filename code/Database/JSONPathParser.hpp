@@ -111,7 +111,7 @@ namespace BeeFishDatabase {
                     throw std::logic_error("JSONPathParser::setVariable");
             }
             
-            log(start);
+            log(start, value);
             
 
             
@@ -302,6 +302,13 @@ namespace BeeFishDatabase {
                 }
             }
             _stringPageIndex = 0;
+            
+            _string.setOnWord(
+                [this](JSONPath& path, const BString& word)
+                {
+                    log(path, word);
+                }
+            );
         }
         
         virtual void onpartstring(const BString& partString)
@@ -309,7 +316,9 @@ namespace BeeFishDatabase {
         {
             if (_stringPageIndex == 0)
                 _indexString = !partString.isData();
+                
 
+            
             _string.setString(
                 partString, 
                 ++_stringPageIndex, 
@@ -327,7 +336,6 @@ namespace BeeFishDatabase {
                 _indexString,
                 _partWord
             );
-            log(_string);
 
         }
         
@@ -352,13 +360,20 @@ namespace BeeFishDatabase {
                 
         }
         
-        void log(JSONPath path)
+        void log(JSONPath path, const BString& value)
         {
             if (&_log != &cnull) {
                 BeeFishDate::writeDateTime(_log);
                 _log << " "
-                     << path.toString(_auth)
-                     << endl;
+                     << path.toString(_auth);
+                     
+                if (value.size()) {
+                    _log
+                        << "#"
+                        << value;
+                }
+                
+                _log << endl;
             }
         }
                           

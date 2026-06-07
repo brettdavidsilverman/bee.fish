@@ -9,6 +9,7 @@
 #include <cstring>
 #include <algorithm>
 #include <cctype>
+#include <cwctype>
 #include <locale>
 #include <codecvt>
 #include <filesystem>
@@ -18,11 +19,6 @@
 #include <cryptopp/sha3.h>
 #include <cryptopp/hex.h>
 #include <cryptopp/osrng.h>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/locale.hpp>
-#include <boost/regex.hpp>
-#include <boost/regex/icu.hpp>
 
 #ifdef SERVER
 #include <filesystem>
@@ -177,111 +173,62 @@ public:
     }
 
     bool isPunctuation() const {
-        /*
-                boost::u32regex pattern =
-                    boost::make_u32regex(
-                        L"[[:punct:]]+"
-                    );
-
-                if (length() < 1)
-                    return false;
-
-                std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(
-                                        *this,
-                                        _locale._locale
-                                    );
-
-
-                if (boost::u32regex_match(
-                        wstr,
-                        pattern
-                    )
-                )
-                {
-                    return true;
-                }
-                */
 
         if (!size())
             return false;
+            
+        std::wstring wvalue =
+            utf8_to_wstring();
+            
+        return 
+            std::iswpunct(wvalue[0]) && 
+            !isEmoji();
 
-        const BString punctuation =
-            ",@#$&+()/*\"':;!?~`|^={}\\%[]<>";
-
-        return (
-                   punctuation.find(
-                       (*this)[0]
-                   ) != BString::npos
-               );
-
-
+    
     }
 
     bool isSpace() const {
         if (!size())
             return false;
-
-        const BString space =
-            " \t\r\n\v";
-
-        return (
-                   space.find(
-                       (*this)[0]
-                   ) != BString::npos
-               );
-        /*
-                std::wstring wstr = boost::locale::conv::to_utf<wchar_t>(
-                                        *this,
-                                        _locale._locale
-                                    );
-
-
-                for (const auto& wch : wstr)
-                {
-                    if (!std::iswspace(wch))
-                        return false;
-                }
-
-                return true;
-        */
-
+            
+        const std::wstring wvalue =
+            utf8_to_wstring();
+            
+        return std::iswspace(wvalue[0]);
+    
     }
-    /*
-        bool isValidCharacter() const
-        {
-            // Create a segment index for characters
-            boost::locale::boundary::ssegment_index map(
-                boost::locale::boundary::character,
-                begin(),
-                end(),
-                _locale._locale
-            );
+    
+    bool isEmoji() const {
+        
+        if (!size())
+            return false;
+            
+        std::wstring wvalue =
+            utf8_to_wstring();
+        
+        wchar_t codepoint = wvalue[0];
+        
+        return 
+           (codepoint >= 0x1F600 && codepoint <= 0x1F64F) || // Emoticons
+           (codepoint >= 0x1F300 && codepoint <= 0x1F5FF) || // Misc Symbols & Pictographs
+           (0x1F680 <= codepoint && codepoint <= 0x1F6FF) || // Transport/Map
+           (0x1F900 <= codepoint && codepoint <= 0x1F9FF) || // Supplemental Symbols
+           (0x2600  <= codepoint && codepoint <= 0x26FF);   // Misc Symbols
+    }
+    
+    bool isSeperator() const
+    {
+        if (!size())
+            return false;
+            
+        char c = (*this)[0];
+        
+        return
+            (c == '.') ||
+            (c == '-') ||
+            (c == '_');
+    }
 
-            for (auto it = map.begin();
-                        it != map.end();
-                        ++it)
-            {
-                BString token = it->str();
-                if (it->rule() & boost::locale::boundary::word_letter ||
-                    it->rule() & boost::locale::boundary::word_number)
-                {
-                }
-                else if (token.isSpace())
-                {
-
-                }
-                else if (token.isPunctuation())
-                {
-
-                }
-                else
-                    return false;
-
-            }
-
-            return true;
-        }
-    */
     bool isData() const
     {
         return
@@ -700,7 +647,7 @@ public:
     }
 
     // convert UTF-8 string to wstring
-    std::wstring utf8_to_wstring ()
+    std::wstring utf8_to_wstring () const
     {
         std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
         return myconv.from_bytes(*this);
@@ -714,24 +661,32 @@ public:
     }
 
     BString toLower() const {
-        std::string lower =
-            boost::locale::to_lower(
-                *this,
-                _locale._locale
-            );
-        return lower;
+        wstring wvalue = utf8_to_wstring();
+        
+        std::transform(
+            wvalue.begin(), 
+            wvalue.end(), 
+            wvalue.begin(),
+            [](wchar_t c) {
+                return std::towlower(c);
+            }
+        );
+        return wstring_to_utf8(wvalue);
     }
 
     BString toUpper() const {
 
-        std::string upper =
-
-            boost::locale::to_upper(
-                *this,
-                _locale._locale
-            );
-
-        return upper;
+        wstring wvalue = utf8_to_wstring();
+        
+        std::transform(
+            wvalue.begin(), 
+            wvalue.end(), 
+            wvalue.begin(),
+            [](wchar_t c) {
+                return std::towupper(c);
+            }
+        );
+        return wstring_to_utf8(wvalue);
 
     }
 
@@ -992,12 +947,12 @@ public:
 
 
     // Defined below
-    Iterator u8begin(
+    Iterator utf8Begin(
         BString& partUTF8
     ) const;
     
     // Defined below
-    Iterator u8end() const;
+    Iterator utf8End() const;
 
 };
 
@@ -1038,9 +993,10 @@ public:
         BString word;
 
         // Skip blanks and punctuation
+        // testing for emojis along the way
         while (_position < _bString.size())
         {
-            BString read =
+            BString character =
                 _bString.nextUTF8(
                     _position,
                     _partU8
@@ -1048,12 +1004,19 @@ public:
                 
             if (_partU8.size() == 0)
             {
-                if (!read.isSpace() &&
-                    !read.isPunctuation())
+                if (character.isEmoji())
                 {
-                    word += read;
+                    _value = character;
+                    return true;
+                }
+                
+                if (!character.isSpace() &&
+                    !character.isPunctuation())
+                {
+                    word += character;
                     break;
                 }
+            
             }
             
         }
@@ -1061,7 +1024,9 @@ public:
         // Read the rest of the word
         while (_position < _bString.size())
         {
-            BString read =
+            Index lastPosition = _position;
+            
+            BString character =
                 _bString.nextUTF8(
                     _position,
                     _partU8
@@ -1069,13 +1034,26 @@ public:
 
             if (_partU8.size() == 0)
             {
-                if (read.isSpace() ||
-                    read.isPunctuation())
+                bool isEmoji = false;
+                if ( (isEmoji = character.isEmoji()) ||
+                     character.isSpace() ||
+                    (   character.isPunctuation() &&
+                       !character.isSeperator()  )
+                   
+                )
                 {
+                    
+                    if (isEmoji) {
+                        if (word.length())
+                            _position = lastPosition;
+                        else
+                            word = character;
+                    }
+                    
                     break;
                 }
 
-                word += read;
+                word += character;
             }
         }
         
@@ -1147,7 +1125,7 @@ public:
 };
 
 // Declared above
-Iterator BString::u8begin(
+Iterator BString::utf8Begin(
     BString& partUTF8
 ) const
 {
@@ -1155,7 +1133,7 @@ Iterator BString::u8begin(
 }
 
 // Declared above
-Iterator BString::u8end() const
+Iterator BString::utf8End() const
 {
     static BString partUTF8 = "";
     
@@ -1181,9 +1159,7 @@ vector<BString> BString::tokenise(
             // Add token and type
             BString character = word.nextUTF8(index);
 
-            if (character == "." ||
-                    character == "_" ||
-                    character == "-")
+            if (character.isSeperator())
             {
                 if (split.size())
                     words.push_back(
@@ -1210,12 +1186,12 @@ vector<BString> BString::tokenise(
 
     partWord = "";
 
-    Iterator end = value.u8end();
+    Iterator end = value.utf8End();
     BString partUTF8;
     
     // Iterate over words correctly
     // utf-8 aligned
-    for (auto it = value.u8begin(partUTF8);
+    for (auto it = value.utf8Begin(partUTF8);
             it != end;
             ++it)
     {

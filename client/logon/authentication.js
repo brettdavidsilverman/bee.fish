@@ -72,6 +72,7 @@ class Authentication
          .then(
             function(text)
             {
+
                return JSON.parse(text);
             }
          )

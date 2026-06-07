@@ -32,6 +32,7 @@
 namespace BeeFishAuthentication {
 
 using namespace BeeFishDatabase;
+using namespace BeeFishWeb;
 
 class Server
 {
@@ -41,17 +42,18 @@ public:
             const BString& databaseFile,
             Index databaseCount
           ) :
-        
+        _port(port),
         _databaseFile(databaseFile),
         _databaseCount(databaseCount),
         _databaseLocks(_databaseCount)
     {
         
+        
         stringstream stream;
         stream << "https://" + hostName;
             
         if (port != 443)
-            stream << ":" << port;
+            stream << ":" << std::to_string(port);
                 
         _origin = stream.str();
         
@@ -68,6 +70,16 @@ public:
         _databaseCount(databaseCount),
         _databaseLocks(_databaseCount)
     {
+        URL url(origin);
+        if (url.port().size())
+            _port = atol(url.port().c_str());
+        else
+#ifdef DEBUG
+            _port = 8000;
+#else
+            _port = 443;
+#endif
+
         setupDatabase();
     }
 
@@ -134,6 +146,7 @@ public:
 
 
 protected:
+    unsigned short _port;
     BString _origin;
     BString _databaseFile;
     Size _databaseCount;

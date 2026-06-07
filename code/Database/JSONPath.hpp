@@ -32,11 +32,15 @@ public:
     inline static const Index INDEXED = 5;
     inline static const Index CHILDREN = 6;
 public:
+    
 #ifdef JSON_INDEX
     typedef Index Id;
 #else
     typedef BeeFishId::Id Id;
 #endif
+
+    typedef std::function<void(JSONPath& path, const BString& word)> OnWord;
+    OnWord _onword = nullptr;
 
     using Path::contains;
     using Path::clear;
@@ -92,6 +96,11 @@ public:
     {
         return (JSONDatabase&)
                Path::database();
+    }
+    
+    void setOnWord(OnWord onword)
+    {
+        _onword = onword;
     }
 
     Id id() const
@@ -1157,7 +1166,11 @@ private:
                 ++wordPath[json.id()];
                 json = json.parent();
             }
-
+            
+            if (_onword)
+            {
+                _onword(*this, word);
+            }
 
         }
     }

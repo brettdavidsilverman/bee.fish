@@ -354,7 +354,7 @@ pathInput.onblur =
 
 async function uploadData(path, data, contentType, contentLength, halfDuplex = false)
 {
-
+    
     var parameters = {
         mode: "cors",
         method: "POST",
@@ -437,8 +437,8 @@ saveButton.onclick = async function() {
         length = blob.size;
     }
     else {
-        const encoder = new TextEncoder(); 
-        data = encoder.encode(editor.value);
+      //  const encoder = new TextEncoder(); 
+        data = editor.value;
         length = data.length;
     }
     
