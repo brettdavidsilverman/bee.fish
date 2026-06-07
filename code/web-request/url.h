@@ -394,6 +394,8 @@ namespace BeeFishWeb {
         {
 
             if (_origin && 
+                _origin->matched() &&
+                _origin->_domain &&
                 _origin->_domain->matched())
             {
                 BString origin = 
