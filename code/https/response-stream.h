@@ -201,7 +201,7 @@ public:
                         stringPath[index]
                         .getStringData();
                         
-                    if (index == 1 &&
+                    if (index == 0 &&
                         data.isData())
                     {
                         data = data.substr(
