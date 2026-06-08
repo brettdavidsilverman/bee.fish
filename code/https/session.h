@@ -406,31 +406,21 @@ namespace BeeFishHTTPS {
             const BString& what
         )
         {
-            if (_request) {
-                logException(
-                    where, 
-                    what,
-                    _request->url()
-                );
-            }
-            else {
-                BeeFishScript::Object error = {
-                    {
-                        "exception", BeeFishScript::Object {
-                            {"where", where},
-                            {"what", what},
-                            {"ipAddress", ipAddress()},
-                            {"who", getPointerString()},
-                            {"when", Server::getDateTime()},
-                            {"origin", origin()}
-                        }
+            
+            BeeFishScript::Object error = {
+                {
+                    "exception", BeeFishScript::Object {
+                        {"where", where},
+                        {"what", what},
+                        {"ipAddress", ipAddress()},
+                        {"who", getPointerString()},
+                        {"when", Server::getDateTime()},
+                        {"origin", origin()}
                     }
-                };
-                cerr << error << endl;
-            }
+                }
+            };
             
-            
-            
+            cerr << error << endl;
         }
 
         BString getPointerString() {

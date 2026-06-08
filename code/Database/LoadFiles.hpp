@@ -31,6 +31,10 @@ void loadFiles(
         ".git",
         "build"
     };
+    
+    const std::vector<BString> ignoreFiles {
+        "deaths.json"
+    };
 
     // Create the iterator explicitly
     auto it = filesystem::recursive_directory_iterator(
@@ -44,6 +48,17 @@ void loadFiles(
     while (it != end_it) {
         
         const BString path = it->path();
+        const BString filename = it->path().filename();
+        if (find(
+                ignoreFiles.begin(),
+                ignoreFiles.end(),
+                filename
+            ) != ignoreFiles.end())
+        {
+            ++it;
+            continue;
+        }
+        
         const BString relative =
             path.substr(
                 directory.length() + 1
@@ -51,7 +66,7 @@ void loadFiles(
             
         const std::vector segments =
             relative.split('/');
-            
+
         JSONPath databasePath = start;
         bool skip = false;
         
@@ -79,7 +94,7 @@ void loadFiles(
         }
     
         if (!skip) {
-            loadFile(auth, databasePath, it->path());
+            loadFile(auth, databasePath, path.str());
         }
         
         ++it;
@@ -108,12 +123,14 @@ void loadFile(
                 
     cout << start.toString(auth) << endl;
     
+    Index pageIndex = 0;
+    
     start._onword =
-    [&auth](JSONPath& path, const BString& word)
+    [&auth, &pageIndex](JSONPath& path, const BString& word)
     {
         cout 
             << path.toString(auth)
-            << "#" 
+            << "#"
             << word 
             << endl;
     };
@@ -124,10 +141,10 @@ void loadFile(
     Index pageSize = getPageSize();
     BString buffer(pageSize, '\0');
     assert(buffer.size() == pageSize);
+    Index fileSize = input.size();
     Index size = 0;
     Index total = 0;
-    Index fileSize = input.size();
-    Index pageIndex = 0;
+    
     BString partWord;
     while (total < fileSize)
     {
@@ -140,21 +157,22 @@ void loadFile(
         total += size;
         
         const BString page = buffer.substr(0, size);
-        
+
         try {
-            start.setString(page, pageIndex++, true,  partWord, false);
+            start.setString(page, pageIndex++, true,  partWord);
         }
         catch (const std::range_error& ex)
         {
             cerr << "WSTRING CONV ERROR" << endl;
             assert(false);
         }
+        
     }
-    
+
     start.endString(pageIndex, true, partWord);
 
     assert(total == fileSize);
-    
+    assert(total == input.size());
     input.close();
 }
 

@@ -321,8 +321,7 @@ namespace BeeFishDatabase {
                 partString, 
                 _stringPageIndex++, 
                 _indexString, 
-                _partWord,
-                false
+                _partWord
             );
         }
         

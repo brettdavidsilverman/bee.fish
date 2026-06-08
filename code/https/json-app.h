@@ -229,8 +229,7 @@ using namespace BeeFishWeb;
                                     header,
                                     pageIndex++, 
                                     false, 
-                                    partWord,
-                                    false);
+                                    partWord);
                             }
                             else 
                             {
@@ -238,8 +237,7 @@ using namespace BeeFishWeb;
                                     encoded, 
                                     pageIndex++,
                                     false, 
-                                    partWord,
-                                    false
+                                    partWord
                                 );
                             }
                         }
@@ -256,7 +254,7 @@ using namespace BeeFishWeb;
                                 base64 << data;
                             }
                             else {
-                                content.setString(data, pageIndex++, true, partWord, false);
+                                content.setString(data, pageIndex++, true, partWord);
                             }
                         }
                     );

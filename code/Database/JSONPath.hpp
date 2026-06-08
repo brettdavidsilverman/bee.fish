@@ -403,9 +403,7 @@ public:
 
     void setInteger(const Index& value)
     {
-        stringstream stream;
-        stream << value;
-        setInteger(stream.str());
+        setInteger(std::to_string(value));
     }
 
     void setNumber(const BString& value)
@@ -435,9 +433,10 @@ public:
             value,
             0,
             true,
-            partWord,
-            true
+            partWord
         );
+        
+        endString(1, true, partWord);
         
         assert(expectedBytes == 0);
     }
@@ -446,12 +445,9 @@ public:
         const BString& value, 
         Index pageIndex, 
         bool indexData,
-        BString& partWord,
-        bool finalPart
+        BString& partWord
     )
     {
-        if (pageIndex == 1)
-            partWord = "";
 
         LockFile::ScopedLock lock(database());
         Path path = *this;
@@ -461,34 +457,37 @@ public:
         Index max = 0;
         if (!path[VALUE].isDeadEnd())
             max = path[VALUE].max<Index>();
-        else
-            partChanged = true;
 
         BString current;
         if (pageIndex <= max &&
-                (current = path[VALUE][pageIndex].getStringData())
-                != value)
+            !path[VALUE].isDeadEnd())
         {
-            if (path[VALUE].hasData() &&
-                    path[VALUE].getData<bool>())
+            if ((current = path[VALUE][pageIndex].getStringData())
+                != value)
             {
-        
-                BString partRemoveWord = partWord;
-                
-                for (Index i = pageIndex;
-                     i <= max;
-                     ++i)
+                if (path[VALUE].hasData() &&
+                    path[VALUE].getData<bool>())
                 {
-                    BString current =
-                    path[VALUE][i].getStringData();
-                    removeWords(current, partRemoveWord, false, i == max);
-                    path[VALUE].clear(i);
+        
+                    BString partRemoveWord = partWord;
+                
+                    for (Index i = pageIndex;
+                         i <= max;
+                         ++i)
+                    {
+                        BString current =
+                        path[VALUE][i].getStringData();
+                        removeWords(current, partRemoveWord, false, i == max);
+                        path[VALUE].clear(i);
+                    }
+
                 }
-
+                partChanged = true;
             }
-            partChanged = true;
+            
         }
-
+        else
+            partChanged = true;
 
 
         path[VALUE][pageIndex].setData<BString>(value);
@@ -497,8 +496,6 @@ public:
             addWords(value, partWord, false, false);
         }
 
-        if (finalPart)
-            endString(pageIndex, indexData, partWord);
 
     }
 
@@ -525,7 +522,7 @@ public:
             path.getData<bool>();
             
 
-        for (Index i = pageCount + 1;
+        for (Index i = pageCount;
                 i <= max;
                 ++i)
         {
@@ -1146,25 +1143,25 @@ private:
         assert(partWord == "");
     }
     
-    void addWords(const BString& word, BString& partWord, bool wholeWord = false, bool finalWord = false)
+    void addWords(const BString& value, BString& partWord, bool isWholeWord = false, bool isFinalWord = false)
     {
 
         Path words = database().words();
-
-        std::vector<BString> tokens =
-            word.tokenise(
-                partWord,
-                finalWord
-            );
         
-        if (wholeWord && 
+        std::vector<BString> tokens =
+            value.tokenise(
+                partWord,
+                isFinalWord
+            );
+            
+        if (isWholeWord && 
             find(
                 tokens.begin(),
                 tokens.end(),
-                word.toLower()
+                value.toLower()
             ) == tokens.end())
         {
-            tokens.push_back(word.toLower());
+            tokens.push_back(value.toLower());
         }
 
         for (auto word : tokens)

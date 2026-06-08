@@ -1008,7 +1008,7 @@ protected:
     BString _value;
     bool _isEnd = true;
     Index _position = 0;
-    BString& _partU8;
+    BString& _partUTF8;
 public:
 
 
@@ -1021,7 +1021,7 @@ public:
 
     Iterator(const BString& string, BString& partUTF8, bool isEnd = false)
         : _bString(string),
-          _partU8(partUTF8)
+          _partUTF8(partUTF8)
     {
 
         if (isEnd) {
@@ -1044,11 +1044,11 @@ public:
             BString character =
                 _bString.nextUTF8(
                     _position,
-                    _partU8
+                    _partUTF8
                 );
                 
 
-            if (_partU8.size() == 0)
+            if (_partUTF8.size() == 0)
             {
                 if (character.isEmoji())
                 {
@@ -1075,10 +1075,10 @@ public:
             BString character =
                 _bString.nextUTF8(
                     _position,
-                    _partU8
+                    _partUTF8
                 );
 
-            if (_partU8.size() == 0)
+            if (_partUTF8.size() == 0)
             {
                 if (character.isEmoji())
                 {
@@ -1106,7 +1106,7 @@ public:
             }
         }
 
-        if (_partU8.size() == 0 &&
+        if (_partUTF8.size() == 0 &&
             word.size())
         {
             _value = word;
@@ -1191,7 +1191,7 @@ Iterator BString::utf8End() const
 // Declared above
 vector<BString> BString::tokenise(
     BString& partWord,
-    bool finalWord
+    bool isFinalWord
 ) const
 {
     std::vector<BString> words;
@@ -1227,16 +1227,14 @@ vector<BString> BString::tokenise(
             );
 
     };
-
-    std::vector<BString> tokens;
-
+    
     BString value = partWord + *this;
 
     partWord = "";
 
     Iterator end = value.utf8End();
     BString partUTF8;
-
+    
     // Iterate over words correctly
     // utf-8 aligned
     for (auto it = value.utf8Begin(partUTF8);
@@ -1247,10 +1245,10 @@ vector<BString> BString::tokenise(
 
         // Add token and type
         BString token = *it;
-
+        
         auto itTestEnd = it;
         ++itTestEnd;
-        if (!finalWord &&
+        if (!isFinalWord &&
                 itTestEnd == end)
         {
             // last word or part of
@@ -1270,8 +1268,8 @@ vector<BString> BString::tokenise(
 
     }
 
-    partWord += partUTF8;
 
+    partWord += partUTF8;
 
     // 1. Sort words
     std::sort(words.begin(), words.end());
