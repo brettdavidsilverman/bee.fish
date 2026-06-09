@@ -59,6 +59,7 @@
                     </label>
                     <select id="contentType">
                         <option value="application/json; charset=utf-8">JSON</option>
+                        <option value="text/plain; charset=utf-8">Text</option>
                         <option value="text/html; charset=utf-8">HTML</option>
                         <option value="text/css; charset=utf-8">CSS</option>
                         <option value="text/javascript; charset=utf-8">Javascript</option>
@@ -97,14 +98,14 @@
         <script type="module">
         
 const defaultPath = "/my";
-const defaultContentType = "application/json; charset=utf-8";
+const defaultContentType = "text/plain; charset=utf-8";
 
 var console = new Console();
 console.log("Hello world");
-
+/*
 var logon = document.getElementById("logon");
 logon.href += "?redirect=" + encodeURIComponent(window.location.href);
-
+*/
 var pathInput = document.getElementById("pathInput");
 var result = document.getElementById("result");
 var editor = document.getElementById("editor");
@@ -175,12 +176,12 @@ async function checkResponse(response) {
 async function fetchContent(url, f) {
     
     saveButton.disabled = true;
-    editor.value = "Loading....";
     fetchButton.disabled = true;
     
     var response;
     var decode =
-        (pathInput.value.indexOf("?") != -1);
+        (pathInput.value.indexOf("?") != -1 &&
+         !pathInput.endsWith("$"));
         
     
     try {
@@ -264,9 +265,8 @@ async function fetchContent(url, f) {
     {
         if (error.name != "AbortError") 
         {
-            //alert(error);
+            alert(error);
         }
-        return;
     }
     finally {
         fetchButton.disabled = false;

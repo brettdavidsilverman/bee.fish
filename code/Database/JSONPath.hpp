@@ -427,6 +427,8 @@ public:
 
     void setString(const BString& value)
     {
+        LockFile::ScopedLock lock(database());
+        
         Index expectedBytes = 0;
         BString partWord;
         setString(
