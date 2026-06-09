@@ -58,8 +58,7 @@ public:
 
         WebRequest* request = _session->request();
 
-        if (request->search().length())
-            return;
+
 
         BString requestPath = request->path();
 
