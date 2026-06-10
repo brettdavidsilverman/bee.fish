@@ -58,8 +58,8 @@
                         Content type
                     </label>
                     <select id="contentType">
-                        <option value="application/json; charset=utf-8">JSON</option>
                         <option value="text/plain; charset=utf-8">Text</option>
+                        <option value="application/json; charset=utf-8">JSON</option>
                         <option value="text/html; charset=utf-8">HTML</option>
                         <option value="text/css; charset=utf-8">CSS</option>
                         <option value="text/javascript; charset=utf-8">Javascript</option>
@@ -181,7 +181,7 @@ async function fetchContent(url, f) {
     var response;
     var decode =
         (pathInput.value.indexOf("?") != -1 &&
-         !pathInput.endsWith("$"));
+         !pathInput.value.endsWith("$"));
         
     
     try {
@@ -265,7 +265,7 @@ async function fetchContent(url, f) {
     {
         if (error.name != "AbortError") 
         {
-            alert(error);
+          //  alert(error);
         }
     }
     finally {

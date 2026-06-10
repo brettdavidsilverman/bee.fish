@@ -57,6 +57,9 @@ public:
     {
 
         WebRequest* request = _session->request();
+        
+        if (request->search().size())
+            return;
 
 
 
