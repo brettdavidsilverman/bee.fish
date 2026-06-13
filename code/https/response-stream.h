@@ -162,7 +162,7 @@ public:
                 
                 ++count;
                 
-                if (count == 1)
+                if (!getCount && count == 1)
                     flush();
 
             }

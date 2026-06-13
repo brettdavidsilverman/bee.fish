@@ -106,6 +106,7 @@ namespace BeeFishDatabase {
                     std::strerror(errno);
 
                 stringstream stream;
+                stream.imbue(std::locale::classic());
                 stream
                     << "Error seeking file." << endl
                     << "\tSize: " << size() << endl

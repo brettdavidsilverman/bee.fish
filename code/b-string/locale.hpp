@@ -7,8 +7,9 @@ struct Locale
 {
     Locale()
     {
+       
         std::locale::global(
-            std::locale("en_US.UTF-8")
+           std::locale("en_US.UTF-8")
         );
         
     }

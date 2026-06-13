@@ -13,6 +13,7 @@
 #setup, #start, #stop{
     width: calc(100% / 3);
     aspect-ratio: 1;
+    float: right;
 }
 
 #setup {
@@ -36,9 +37,8 @@
 
 #processor
 {
-    float: right;
-    width: 70%;
-    height: 100%;
+    width: 100%;
+    height: 400px;
 }
 
 #canvas {
@@ -53,7 +53,6 @@
     left: 50px;
     top: 50px;
     width: 300px;
-    height: 300px;
 }
         </style>
     </head>
@@ -61,64 +60,10 @@
         <h1>Audio</h1>
         <div class="audio movable">
             <textarea id="processor">
-class Processor extends
+// sine-processor.js
+class SineProcessor extends
     AudioWorkletProcessor
 {
-    // Amplitude as a function of time
-    // and inputs
-    f(t) {
-        var sin = Math.sin(this.phase);
-                    
-        this.phase += 
-            (2 * Math.PI * this.frequency)
-            / this.sampleRate;
-            
-        return sin;
-    }
-    
-    process(inputs, outputs, parameters) {
-        
-        const output = outputs[0];
-        const input = inputs[0];
-        
-        const fInputs[]:
-
-        for (let channel = 0;
-             channel < output.length; 
-             ++channel
-            ) 
-        {
-            const channelOutput = 
-                output[channel];
-                
-            var channelInput;
-            
-            if (channel < input.length)
-                channelnput =
-                    input[channel];
-                
-            for (let i = 0; 
-                 i < channelOutput.length;
-                 ++i
-                ) 
-            {
-                this.t++;
-                
-                for (let input = 0;
-                     input < inputs.length; 
-                     ++input
-                    ) 
-                {
-                    fInputs[input] =
-                        inputs[input][channel][i];
-                }
-                var f = this.f(this.t, fInputs);
-                channelOutput[i] = f;
-            }
-        }
-        return true;
-    }
-    
     constructor() {
         super();
         this.phase = 0;
@@ -130,11 +75,39 @@ class Processor extends
             Object.assign(this, event.data);
         };
     }
+
+    process(inputs, outputs, parameters) {
+        const output = outputs[0];
+        
+
+        for (let channel = 0;
+             channel < output.length; 
+             ++channel
+            ) 
+        {
+            const outputChannel = 
+                output[channel];
+                
+            for (let i = 0; 
+                 i < outputChannel.length;
+                 ++i
+                ) 
+            {
+                outputChannel[i] =
+                    Math.sin(this.phase);
+
+                this.phase += 
+                    (2 * Math.PI * this.frequency)
+                    / this.sampleRate;
+            }
+        }
+        return true;
+    }
     
-
+    
 }
+registerProcessor("processor", SineProcessor);
 
-registerProcessor('processor', Processor);
             </textarea>
             <div>
                 <div id="setup"></div>
@@ -150,7 +123,7 @@ console.log("Hello world");
 
 var audioContext;
 var processor;
-var analyser
+var analyser;
 
 var initialSetup = false;
 
@@ -196,21 +169,23 @@ async function setup() {
     
     await audioContext
         .audioWorklet
-        .addModule('processor');
+        .addModule("my/processor");
         
     processor = await
         new AudioWorkletNode(
             audioContext, 
-            'processor'
+            "processor"
         );
-        
-    
     
     processor.port.onmessage = (event) => {
         console.log(event.data);
     }
-
-
+    
+    processor.port.postMessage({
+        sampleRate: audioContext.sampleRate,
+        frequency: defaultFrequency
+    });
+    
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 4096; // Small size for faster, less detailed data
     processor.connect(analyser);
@@ -284,10 +259,7 @@ async function setup() {
     
     alert("Setup");
     
-    processor.port.postMessage({
-        sampleRate: audioContext.sampleRate,
-        frequency: defaultFrequency
-    });
+    
 }
 
 var processorTextArea = document.getElementById("processor");
@@ -375,6 +347,8 @@ document.getElementById("stop")
     (event) => {
         audioContext.suspend();
     }
+    
+
     
         </script>
     </body>

@@ -564,7 +564,6 @@ inline bool testPunctuation()
              punc.isPunctuation() == true
          );
 
-
     ok &= testResult(
               "Unicode 🌍 non punctuation",
               BString("🌍").isPunctuation() == false
