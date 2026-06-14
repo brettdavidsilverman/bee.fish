@@ -673,21 +673,18 @@ public:
         {
             Type keyType;
             path = path.parent(key, keyType);
-
-            if (path.isUserRoot())
+            
+            if (key == userId)
             {
-                if (key == userId)
-                {
-                    key = "my";
-                }
-                else if ( database()
-                          .users()
-                          .contains(key) )
-                {
-                    return "";
-                }
-
+                key = "my";
             }
+            else if ( database()
+                      .users()
+                      .contains(key) )
+            {
+                return "";
+            }
+
 
             if (key != "my" && !path.isRoot()) {
                 if (keyType == Type::STRING &&
@@ -777,7 +774,6 @@ public:
         // Loop through all tokens
         JSONPath path = originPath;
         bool success = true;
-        Index count = 0;
 
         const BString& userId = auth.userId();
 
@@ -785,8 +781,7 @@ public:
         {
             key = key.decodeURI();
 
-            if ((++count == 1) &&
-                    (key == "my" || key == userId))
+            if (key == "my" || key == userId)
             {
                 if (path.contains(userId) || method == "POST") {
                     path = path[userId];

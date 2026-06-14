@@ -73,13 +73,13 @@ class SineProcessor extends
     }
 
     // frequency as a function of time
-    f(index, inputs)
+    f(time, inputs)
     {
         return Math.sin(
             2 *
             Math.PI * 
             this.frequency * 
-            (index / this.sampleRate)
+            time
         );
 
     }

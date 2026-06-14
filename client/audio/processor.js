@@ -11,11 +11,10 @@ export class Processor extends
     }
     
     // Override this in derived class
-    /*
     f(timer, inputs)
     {
     }
-*/
+
     process(inputs, outputs, parameters) {
 
         const output = outputs[0];
@@ -50,7 +49,7 @@ export class Processor extends
 
                 }
                 outputChannel[i] = 
-                    this.f(this.index++, _inputs);
+                    this.f(this.index++ / this.sampleRate, _inputs);
             }
 
         }
