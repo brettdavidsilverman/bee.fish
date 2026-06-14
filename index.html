@@ -265,7 +265,7 @@ async function fetchContent(url, f) {
     {
         if (error.name != "AbortError") 
         {
-          //  alert(error);
+            alert(error);
         }
     }
     finally {
@@ -400,7 +400,7 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
     }
     catch (error)
     {
-        //alert(error);
+        alert(error);
     }
     finally {
         saveButton.disabled = false;
@@ -437,8 +437,9 @@ saveButton.onclick = async function() {
         length = blob.size;
     }
     else {
-      //  const encoder = new TextEncoder(); 
-        data = editor.value;
+        const encoder = new TextEncoder(); 
+        data = encoder.encode(editor.value);
+       // data = editor.value;
         length = data.length;
     }
     
@@ -517,7 +518,7 @@ contentType.onchange =
         }
         
         localStorage.setItem("contentType", contentType.value);
-    
+        blob = null;
     }
 
 function switchFunctions(showFunctions)
@@ -579,6 +580,7 @@ function setContentTypeValue(value)
     }
     
     contentType.onchange();
+
 }
 
 if (localStorage.getItem("path")) {

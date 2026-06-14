@@ -74,7 +74,7 @@ function Error(error, f)
         return error + (where ? " " + where : "");
     }
     
-    alert(this.toString());
+  //  alert(this.toString());
     
 }
 
