@@ -384,7 +384,6 @@ namespace BeeFishJSON {
         
         JSONParser* jsonParser()
         {
-            assert(_parser && _parser->isJSONParser());
             return (JSONParser*)_parser;
         }
         

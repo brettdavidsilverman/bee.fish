@@ -436,7 +436,6 @@ inline bool testData()
               "From data to base64 and back",
               (dataStart == dataEnd)
           );
-    assert(ok);
 
     std::string data;
 
@@ -464,7 +463,6 @@ inline bool testData()
              data == "YQ=="
          );
 
-    assert(ok);
 
 #ifdef SERVER
     BString message = "Hello World";
@@ -738,7 +736,6 @@ inline bool testUTF8()
              characters[3] == "B"
          );
 
-    assert(ok);
 
     return ok;
 }
@@ -771,7 +768,6 @@ inline bool testEmojis()
 
     cout << endl;
 
-    assert(ok);
 
     return ok;
 }
@@ -825,7 +821,6 @@ inline bool testIterator()
          );
 
 
-    assert(ok);
 
     return ok;
 
@@ -853,7 +848,6 @@ inline bool testTokenise()
     if (!ok)
     {
         cout << words << endl;
-        assert(false);
     }
 
     ok = ok && testValue(
@@ -890,7 +884,6 @@ inline bool testTokenise()
     if (!ok)
     {
         cout << words << endl;
-        assert(false);
     }
 
 
@@ -933,7 +926,6 @@ inline bool testTokenise()
     if (!ok)
     {
         cerr << words << endl;
-        assert(false);
     }
 
     if (ok)
@@ -1007,7 +999,6 @@ inline bool testTokenise()
 
     if (!ok) {
         cerr << words;
-        assert(false);
     }
 
     ok = ok && testValue(
@@ -1049,7 +1040,6 @@ inline bool testTokenise()
 
     if (!ok) {
         cerr << words;
-        assert(false);
     }
 
 
@@ -1084,7 +1074,6 @@ inline bool testTokenise()
 
     if (!ok) {
         cerr << words;
-        assert(false);
     }
 
     ok = ok && testValue(
@@ -1127,7 +1116,6 @@ inline bool testTokenise()
 
     if (!ok) {
         cerr << words;
-        assert(false);
     }
 
 
@@ -1156,7 +1144,6 @@ inline bool testTokenise()
 
     if (!ok) {
         cerr << words;
-        assert(false);
     }
 
 
@@ -1285,7 +1272,6 @@ inline bool testHebrew()
         text.toLower() == text
     );
     
-    assert(ok);
     
     return ok;
 

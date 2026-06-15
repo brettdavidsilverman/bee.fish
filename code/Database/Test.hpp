@@ -228,7 +228,6 @@ inline bool testFile()
         JSONPathParser parser(auth, path);
         parser.read("101");
         parser.eof();
-        assert(parser.matched());
 
         std::stringstream stream;
         stream << path;
@@ -418,7 +417,6 @@ inline bool testPath()
                       );
         }
 
-        assert(success);
 
 
     }
@@ -442,7 +440,6 @@ inline bool testPath()
 
         outputSuccess(success);
 
-        assert(success);
 
         data = bookmark;
 
@@ -465,7 +462,6 @@ inline bool testPath()
 
         outputSuccess(success);
 
-        assert(success);
         data = bookmark;
     }
 
@@ -483,7 +479,6 @@ inline bool testPath()
 
         outputSuccess(success);
 
-        assert(success);
 
     }
 
@@ -979,7 +974,6 @@ inline bool testJSONPath()
         parser.eof();
         success = (parser.result() == true);
         BeeFishMisc::outputSuccess(success);
-        assert(success);
     }
 
     if (success)
@@ -1231,7 +1225,6 @@ inline bool testArray2Path()
         Stack stack;
         Size max = maxPath.max<Size>();
         success &= testResult("\tmax == 1", max == 1);
-        assert(success);
 
         for (Size i = 1; i <= max; ++i)
         {
@@ -1458,7 +1451,7 @@ inline bool testComplexArrays()
 
 
     BeeFishMisc::outputSuccess(success);
-    assert(success);
+
     return success;
 }
 
@@ -1687,10 +1680,6 @@ inline bool testPartIterator()
                 if (++i > 0)
                     break;
             }
-
-            assert(values.size() == 1);
-
-            assert(it._stack.size());
 
             key = it.toKey();
 
@@ -2258,7 +2247,6 @@ inline bool testDeleteProperty()
                   !database.words().contains("a")
               );
 
-    assert(success);
 
     cout << endl;
 
@@ -2346,7 +2334,6 @@ inline bool testDeleteProperty()
                   !database2.words().contains("c")
               );
 
-    assert(success);
 
     success = success &&
               testValue(

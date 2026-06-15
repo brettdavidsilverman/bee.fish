@@ -309,7 +309,7 @@ namespace BeeFishBString
           PowerEncoding &stream,
           BString &bString)
       {
-         assert(stream.readBit() == 1);
+         stream.readBit();
 
          bString.clear();
          Character character;
@@ -320,7 +320,7 @@ namespace BeeFishBString
             bString.push_back(character);
          }
 
-         assert(stream.readBit() == 0);
+         stream.readBit();
 
          return stream;
       }

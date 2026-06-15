@@ -12,7 +12,6 @@
 #include <iterator>
 #include <algorithm>
 #include <vector>
-#include <cassert>
 #include "Log.hpp"
 #include "Optional.hpp"
 #include "../Size.hpp"

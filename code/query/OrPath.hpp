@@ -142,8 +142,6 @@ using namespace BeeFishDatabase;
         virtual void goUp()
         override
         {
-            assert(_aDepth > 0 || _bDepth > 0);
-            
             if (_aDepth == _bDepth)
             {
                 _a->goUp();
@@ -161,40 +159,11 @@ using namespace BeeFishDatabase;
                 _b->goUp();
                 --_bDepth;
             }
-            else
-                assert(false);
             
             
         }
         
-/*
-        virtual void save()
-        override
-        {
-            _a->save();
-            _b->save();
-            
-            _saveADepth = _aDepth;
-            _saveBDepth = _bDepth;
-            
-            _bounds->save();
-            
-        }
-        
-        virtual void restore()
-        override
-        {
-            _a->restore();
-            _b->restore();
-            
-            _aDepth = _saveADepth;
-            _bDepth = _saveBDepth;
-            
-            _bounds->restore();
-            
-        }
-*/
-    
+
     };
 
 }

@@ -22,7 +22,6 @@ namespace BeeFishJSON {
       class Minus : public BeeFishParser::Character {
       public:
          Minus() : Character('-') {
-            assert(this);
          }
       };
 

@@ -44,7 +44,6 @@ inline bool test()
     EscapedCharacter backSlash;
     ok &= testMatch("Escaped character back slash", &backSlash, "\\\\", true);
     ok &= testResult("Escaped character back slash value", (backSlash.character() == "\\"));
-    assert(ok);
 
     ok = ok && testBlankSpace();
     ok = ok && testIntrinsics();
@@ -147,7 +146,6 @@ inline bool testNumbers()
     ok &= testMatchDelete("Full exponent json", new JSON(), "800E-10", true, "800E-10");
     ok &= testMatchDelete("False positive json", new JSON(), "+800", false);
 
-    assert(ok);
 
     cout << endl;
 
@@ -194,7 +192,6 @@ inline bool testStrings()
     ok &= testMatchDelete("Single quote", new JSON(), "\"", false);
     ok &= testMatchDelete("Escaped quote", new JSON(), "\"\\\"\"", true, "\"");
 
-    assert(ok);
     cout << endl;
 
     return ok;
@@ -300,7 +297,6 @@ inline bool testSets()
     ok &= testMatchDelete("Set empty", new Capture(new _Set()), "{}", true, "{}");
     ok &= testMatchDelete("Set blanks", new Capture(new _Set()), "{item, item ,item }", true);
 
-    assert(ok);
 
     Capture object(
         new Set<OpenBrace, LoadOnDemand<Item>, Seperator, CloseBrace>()
@@ -359,7 +355,6 @@ inline bool testSets()
 
     BeeFishMisc::outputSuccess(ok);
 
-    assert(ok);
 
     cout << endl;
 
@@ -387,7 +382,6 @@ inline bool testArrays()
     ok &= testMatchDelete("Embedded array json", new Capture(new JSON()), "[0,[]]", true, "[0,[]]");
     ok &= testMatchDelete("Array with blanks json", new Capture(new JSON()), " [ 1, true , null , false]", true, " [ 1, true , null , false]" );
 
-    assert(ok);
 
     cout << endl;
 
@@ -668,7 +662,6 @@ inline bool testTypes()
     ok &= testMatch("object", &object, "{}", true);
     ok &= testResult("object type", object.type() == Type::OBJECT);
 
-    assert(ok);
 
     cout << endl;
 

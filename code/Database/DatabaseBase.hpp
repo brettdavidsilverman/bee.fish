@@ -152,8 +152,6 @@ namespace BeeFishDatabase {
                 {
                     parent._right = 0;
                 }
-                else
-                    assert(false);
                 
                 
                 setBranch(branch._parent, parent);

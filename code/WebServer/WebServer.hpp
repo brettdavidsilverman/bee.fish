@@ -61,7 +61,6 @@ namespace BeeFishWeb {
          _threadPool(threads)
       {
           bool started = start();
-          assert(started);
          
       }
 

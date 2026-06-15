@@ -263,8 +263,6 @@ public:
                 true
             );
 
-        assert(!partWord.size());
-
         return result;
     }
 
@@ -624,66 +622,7 @@ public:
     // convert UTF-8 string to wstring
     std::wstring utf8_to_wstring() const
     {
-        /*
-        return hexToWString(*this);
-        
-        std::wstringstream wstream;
-        BString utf8;
-        Index position = 0;
-        // mbstate_t state = {0};
 
-        while (position < size())
-        {
-            utf8 = nextUTF8(position);
-            assert(utf8.size());
-
-            wstream << hexToWString(utf8);
-
-
-            
-            if (utf8 == "💜") {
-                cerr << "SIZE " << utf8.size() << endl;
-            }
-
-            //  std::reverse(utf8.begin(), utf8.end());
-
-            switch (utf8.size())
-            {
-            case 0:
-                assert(false);
-                break;
-            case 1:
-                utf8 = BString(3, '\0') + utf8;
-                break;
-            case 2:
-                utf8 = BString(2, '\0') + utf8;
-                break;
-            case 3:
-                utf8 = BString(1, '\0') + utf8;
-                break;
-            case 4:
-                break;
-            default:
-                assert(false);
-            }
-
-
-            assert(utf8.size() == 4);
-            assert(sizeof(wchar_t) == 4);
-
-            // uint32_t ui32;
-            wstream.write((const wchar_t*)(const byte*)utf8.data(), 1);
-
-            // wstream << (wchar_t)ui32;
-
-            //cerr << to_string(ui32) << endl;
-            
-        }
-
-        // cerr << endl;
-
-        return wstream.str();
-        */
         std::wstring output;
         std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
         
@@ -814,13 +753,10 @@ public:
                 unicode = BString(2 - c.size() % 2, char(0)) + c;
             else
                 unicode = c;
-
-            assert(unicode.size() % 2 == 0);
-
+                
             stringstream stream;
             for (Index i = 0; i < unicode.size(); i += 2)
             {
-                assert(i < unicode.size() - 1);
                 stream << "\\u";
                 stream << setfill('0') << setw(2) << hex << (int)(unsigned char)unicode[i];
                 stream << setfill('0') << setw(2) << hex << (int)(unsigned char)unicode[i + 1];
@@ -912,7 +848,6 @@ public:
                            position,
                            partUTF8
                        );
-        assert(partUTF8.size() == 0);
 
         return utf8;
     }
@@ -1241,7 +1176,6 @@ vector<BString> BString::tokenise(
             it != end;
             ++it)
     {
-        assert(partUTF8.size() == 0);
 
         // Add token and type
         BString token = *it;

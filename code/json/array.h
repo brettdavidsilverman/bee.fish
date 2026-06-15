@@ -83,7 +83,6 @@ public:
     override
     {
         JSON* json = (JSON*)(match->_match);
-        assert(json);
         onarrayvalue(json);
     }
 

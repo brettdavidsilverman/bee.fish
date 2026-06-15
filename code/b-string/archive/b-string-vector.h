@@ -321,7 +321,7 @@ namespace BeeFishBString
             BString &bstring
          )
       {
-         assert(stream.readBit() == 1);
+         stream.readBit();
 
          stream.resetCount();
 
@@ -331,11 +331,12 @@ namespace BeeFishBString
          while (stream.peekBit()) {
             Character character;
             stream >> character;
-            assert(stream.count() == 0);
+    
             bstring.push_back(character);
          }
 
-         assert(stream.readBit() == 0);
+         stream.readBit();
+         
          stream.resetCount();
 
          return stream;

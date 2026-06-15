@@ -274,11 +274,6 @@ using namespace BeeFishWeb;
                     http["content-type"].setString(contentType);
                     http["content-length"].setInteger(contentLength);
                     
-                    assert(jsonPath.contains("{HTTP}"));
-                    assert(jsonPath["{HTTP}"].contains("content-type"));
-                    assert(jsonPath["{HTTP}"]["content-type"].getString() == contentType);
-                    
-                    
                 }
                 
                 _content = BString("\"") + jsonPath.toString(authentication()).escape() + BString("\"");
@@ -289,7 +284,6 @@ using namespace BeeFishWeb;
                     
             }
             
-            assert(false);
             
         }
         

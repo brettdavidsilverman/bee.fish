@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <tgmath.h>
-#include <cassert>
 
 using namespace std;
 
@@ -135,7 +134,6 @@ namespace BeeFishPowerEncoding
       virtual bool peekBit() const
       {
          throw logic_error("peekBit");
-         assert(false);
       }
 
    };

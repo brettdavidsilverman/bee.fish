@@ -163,14 +163,17 @@ async function checkResponse(response) {
     {
         var json = await response.json();
         redirect(json);
-        return;
+        return false;
     }
     else if (response.status != 200) {
         var json = await response.json();
         throw new Error(
             json
         );
+        return false;
     }
+    
+    return true;
 }
 
 async function fetchContent(url, f) {
@@ -178,7 +181,6 @@ async function fetchContent(url, f) {
     saveButton.disabled = true;
     fetchButton.disabled = true;
     
-    var response;
     var decode =
         (pathInput.value.indexOf("?") != -1 &&
          !pathInput.value.endsWith("$"));
@@ -194,8 +196,9 @@ async function fetchContent(url, f) {
         }
         
         cancelButton.disabled = false;
-        response = await fetch(url, parameters);
-        await checkResponse(response);
+        var response = await fetch(url, parameters);
+        if (!await checkResponse(response))
+            return;
         
         
         var contentTypeHeader =

@@ -63,7 +63,7 @@ namespace BeeFishParser {
         ok &= testLoadOnDemand();
         ok &= testOrderOfPrecedence();
         ok &= testMisc();
-assert(ok);
+
         if (ok)
             cout << "SUCCESS";
         else
@@ -194,7 +194,6 @@ assert(ok);
         
         BeeFishMisc::outputSuccess(ok);
         
-        assert(ok);
         
         return ok;
     }
@@ -441,11 +440,6 @@ assert(ok);
             )
             {
             }
-            /*
-            virtual void fail() {
-                assert(false);
-            }
-            */
         };
 
         Match* testNot = new Not(new ABC());
@@ -459,7 +453,6 @@ assert(ok);
             parser.eof();
             ok &= testResult("one character ", parser.result() == true && test->result() == true);
             delete test;
-            assert(ok);
         }
         
         {
@@ -469,7 +462,6 @@ assert(ok);
             parser.eof();
             ok &= testResult("All characters", parser.result() == true && test->result() == true);
             delete test;
-            assert(ok);
         }
         
         
@@ -480,7 +472,6 @@ assert(ok);
             parser.eof();
             ok &= testResult("Read all", parser.result() == false && test->result() == false);
             delete test;
-            assert(ok);
         }
         
         class Notatoz : public Not {
@@ -973,7 +964,6 @@ assert(ok);
 
         delete test;
         
-        assert(ok);
         
         BeeFishMisc::outputSuccess(ok);
         
@@ -1067,7 +1057,6 @@ assert(ok);
                 
         delete test;
         
-        assert(ok);
 
         return ok;
         

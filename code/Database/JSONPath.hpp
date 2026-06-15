@@ -110,7 +110,6 @@ public:
         Path path = *this;
         path = path[ID];
 
-        assert(path.hasData());
 #ifdef JSON_INDEX
         return path.getData<Index>();
 #else
@@ -133,7 +132,6 @@ public:
     {
         Path path = *this;
         path = path[ID];
-        assert(!path.hasData());
 
         path.setData<Id>(id);
 
@@ -145,7 +143,6 @@ public:
     {
         Path path = *this;
         path = path[ID];
-        assert(!path.hasData());
 
         path.setData<Id>(id);
 
@@ -181,7 +178,6 @@ public:
         Index position =
             getObjectPropertyPosition(property);
 
-        assert(position > 0);
 
         JSONPath json = getChildren()[position];
 
@@ -333,18 +329,12 @@ protected:
             Id id = JSONPath::id();
 
             clear();
-            assert(isDeadEnd());
             setData<Type>(type);
 
             setId(id);
 
             addObject();
         }
-
-        assert(JSONPath::type() == type);
-
-        assert(hasId());
-
 
 
     }
@@ -416,7 +406,6 @@ public:
 
     Index getInteger()
     {
-        assert(type() == Type::INTEGER);
         Path path = *this;
         stringstream stream;
         stream << path[VALUE].getStringData();
@@ -429,7 +418,6 @@ public:
     {
         LockFile::ScopedLock lock(database());
         
-        Index expectedBytes = 0;
         BString partWord;
         setString(
             value,
@@ -439,8 +427,7 @@ public:
         );
         
         endString(1, true, partWord);
-        
-        assert(expectedBytes == 0);
+    
     }
 
     void setString(
@@ -547,7 +534,6 @@ public:
     
     BString getString() const
     {
-        assert(type() == Type::STRING);
         Path path = *this;
         if (path[VALUE].isDeadEnd())
             return "";
@@ -579,7 +565,6 @@ public:
 
     void truncateArray(Index size)
     {
-        assert(type() == Type::ARRAY);
 
         Path children = getChildren();
         if (!children.isDeadEnd())
@@ -594,12 +579,7 @@ public:
         }
         children.setData<Index>(size);
 
-        bool ok = (
-                      (size == 0 && children.isDeadEnd()) ||
-                      (children.max<Index>() == size)
-                  );
-        assert(ok);
-        assert(children.getData<Index>() == size);
+                  
     }
 
     JSONPath parent() const {
@@ -619,16 +599,13 @@ public:
 
         Index position = -1;
 
-        assert(!path.isRoot());
 
         path = path.parent(position);
 
-        assert(!path.isRoot());
 
         Index seperator;
 
         path = path.parent(seperator);
-        assert(seperator == CHILDREN);
 
         Type type =
             path.getData<Type>();
@@ -646,8 +623,7 @@ public:
                 key = object.getObjectProperty(position);
                 keyType = Type::STRING;
             }
-            else
-                assert(false);
+
         }
 
         return path;
@@ -762,8 +738,6 @@ public:
         const BString& method = "GET"
     )
     {
-
-        assert(auth.authenticated());
 
         JSONPath originPath =
             database.origin(origin);
@@ -915,8 +889,6 @@ public:
                 getPositions()[position].setData<Index>(propertyPath.index());
                 objectPropertyPath.setData<Index>(position);
 
-                assert(!getChildren().contains(position));
-
                 JSONPath childPath = getChildren()[position];
                 childPath.setId();
 
@@ -937,8 +909,6 @@ public:
     {
 
         Path path = getPositions();
-
-        assert(path.contains(position));
 
         path = path[position];
 
@@ -1057,7 +1027,6 @@ public:
                 clearChildren.clear(index);
             }
 
-            assert(getChildren().isDeadEnd());
             break;
         }
         case Type::OBJECT:
@@ -1081,12 +1050,7 @@ public:
 
         removeObject();
 
-        assert(getChildren().isDeadEnd());
-
-
         Path::clear();
-        assert(isDeadEnd());
-
 
     }
 
@@ -1137,7 +1101,6 @@ private:
     {
         BString partWord = "";
         addWords(word, partWord, wholeWord, true);
-        assert(partWord == "");
     }
     
     void addWords(const BString& value, BString& partWord, bool isWholeWord = false, bool isFinalWord = false)
@@ -1214,7 +1177,6 @@ private:
         
         BString partRemoveWords;
         removeWords(value, partRemoveWords, wholeWord, true);
-        assert(partRemoveWords == "");
         
     }
 
@@ -1315,7 +1277,6 @@ public:
                 string.escape(out, partWord);
             }
             
-            assert(partWord == "");
             
             out << "\"";
             

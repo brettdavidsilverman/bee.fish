@@ -658,7 +658,6 @@ namespace BeeFishQuery {
                     "OrPath Minimum", 
                     min == ids[0]
                 );
-            assert(ok);
         }
         
         if (ok) 
@@ -672,9 +671,7 @@ namespace BeeFishQuery {
                     max == ids[2]
                 );
         }
-        
-        assert(ok);
-        
+    
         if (ok) 
         {
             Stack stack;
@@ -1051,8 +1048,6 @@ namespace BeeFishQuery {
         ok = ok && test("not not two", ids, {2,3,4});
         ok = ok && test("not (not two)", ids, {2,3,4});
         ok = ok && test("three", ids, {});
-        
-        assert(ok);
         
         return ok;
         

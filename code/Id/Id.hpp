@@ -247,7 +247,6 @@ using namespace BeeFishScript;
         BString toData() {
             Stack bits;
             bits << *this;
-            assert(bits.count() == 0);
             return bits.toData();
         }
         
@@ -415,7 +414,6 @@ using namespace BeeFishScript;
         BString toData() const {
             Stack bits;
             bits << *this;
-            assert(bits.count() == 0);
             return bits.toData();
         }
         
@@ -424,7 +422,6 @@ using namespace BeeFishScript;
             Stack bits(data);
             Id id;
             bits >> id;
-            assert(bits.count() == 0);
             return id;
         }
         

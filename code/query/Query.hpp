@@ -348,8 +348,6 @@ class Expression : public BeeFishParser::Match
             Item(Item::Type::Expression)
         {
         
-            assert(bracketedExpression->_stack.size() == 1);
-            
             IterableItem* item =
                  (IterableItem*)
                  bracketedExpression->_stack[0];
@@ -493,8 +491,9 @@ class Expression : public BeeFishParser::Match
     {
 
     public:
+    
         TokenAndBlankspace() {
-            assert(false);
+            throw logic_error("Query::TokenAndBlankspace private constructor");
         }
 
         TokenAndBlankspace(Expression* expression) : And(
@@ -565,7 +564,7 @@ public:
     
     Expression()
     {
-        assert(false);
+        throw logic_error("Query::Expression private constructor");
     }
     
     Expression(JSONDatabase& database, Path words, Path bounds) :
@@ -782,12 +781,6 @@ public:
     AndPath getPath()
     {
 
-        assert(_stack.size() == 1);
-        assert(
-            _stack[_stack.size() - 1]
-            ->_type == Item::Type::Iterable
-        );
-        
         IterableItem* item =
             (IterableItem*)
             _stack[_stack.size() - 1];

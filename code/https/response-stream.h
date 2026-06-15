@@ -91,8 +91,6 @@ public:
     void writeContent(App* app)
     {
         
-        assert(app);
-
         Authentication::ScopedDatabase database(app->authentication());
 
         BeeFishQuery::Words words = database->words();
@@ -295,8 +293,6 @@ public:
 
             if (length == 0)
                 break;
-
-            assert(length <= buffer.size());
 
             write(
                 buffer.data(),

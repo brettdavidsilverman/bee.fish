@@ -119,13 +119,11 @@ namespace BeeFishParser {
         
         virtual void success()
         {
-//assert(_result == nullopt);
             setResult(true);
         }
         
         virtual void fail()
         {
-//assert(_result == nullopt);
             setResult(false);
         }
         

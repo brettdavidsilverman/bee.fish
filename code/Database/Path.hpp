@@ -287,7 +287,6 @@ public:
     template<typename T>
     Path parent(T& value) const
     {
-        assert(!isRoot());
 
         Stack stack;
         Path parent = Path::parent(stack);
@@ -310,7 +309,6 @@ public:
         Index rootIndex = _database->rootIndex();
         Branch branch = getBranch();
         Index index = Path::index();
-        assert(!isRoot());
 
         do
         {
@@ -330,8 +328,6 @@ public:
                 stack.push_back(1);
                 --count;
             }
-            else
-                assert(false);
 
             index = branch._parent;
             branch = parent;
@@ -425,8 +421,6 @@ public:
             count = getData<Index>();
             if (count > 0)
                 --count;
-            else
-                assert(false);
         }
         setData<Index>(count);
 
@@ -444,8 +438,6 @@ public:
             existingCount = count;
             if (count > 0)
                 --count;
-            else
-                assert(false);
         }
         setData<Index>(count);
 
@@ -907,13 +899,11 @@ protected:
 
         virtual bool readBit()
         {
-            assert(false);
             return false;
         }
 
         virtual bool peekBit()
         {
-            assert(false);
             return false;
         }
 

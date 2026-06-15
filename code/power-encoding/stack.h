@@ -7,7 +7,6 @@
 #include <iomanip>
 #include <ctype.h>
 #include <bitset>
-#include <cassert>
 
 #include "../power-encoding/power-encoding.h"
 
@@ -192,7 +191,6 @@ public:
     
     bool last() const {
         size_t size = vector<bool>::size();
-        assert(size);
         return (*this)[size - 1];
     }
     

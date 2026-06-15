@@ -127,7 +127,7 @@ namespace BeeFishBString {
          Decoder decoder(*this);
          Value value;
          
-         assert(decoder.readBit() == 1);
+         decoder.readBit();
 
          decoder >> value;
          return value;

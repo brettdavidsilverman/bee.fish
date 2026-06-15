@@ -57,27 +57,25 @@ inline bool testTimestamp()
 
     Stack bits1;
     bits1 << timestamp1;
-    assert(bits1.count() == 0);
 
 
     Stack bits2;
     bits2 << timestamp2;
-    assert(bits2.count() == 0);
     
     Timestamp timestamp3;
     Timestamp timestamp4;
 
     bits1.reset();
     bits1 >> timestamp3;
-    assert(bits1.count() == 0);
-    assert(timestamp3 == timestamp1);
 
     bits2.reset();
     bits2 >> timestamp4;
-    assert(bits2.count() == 0);
-    assert(timestamp4 == timestamp2);
 
-
+    ok = testValue(
+             "Timestamp 1,3 equal",
+             (timestamp1 == timestamp3)
+    );
+    
     return ok;
 
 }

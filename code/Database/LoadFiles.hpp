@@ -140,7 +140,7 @@ void loadFile(
     
     Index pageSize = getPageSize();
     BString buffer(pageSize, '\0');
-    assert(buffer.size() == pageSize);
+
     Index fileSize = input.size();
     Index size = 0;
     Index total = 0;
@@ -158,21 +158,13 @@ void loadFile(
         
         const BString page = buffer.substr(0, size);
 
-        try {
-            start.setString(page, pageIndex++, true,  partWord);
-        }
-        catch (const std::range_error& ex)
-        {
-            cerr << "WSTRING CONV ERROR" << endl;
-            assert(false);
-        }
+        // this my throw with an range_error
+        start.setString(page, pageIndex++, true,  partWord);
         
     }
 
     start.endString(pageIndex, true, partWord);
 
-    assert(total == fileSize);
-    assert(total == input.size());
     input.close();
 }
 

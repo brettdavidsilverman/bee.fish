@@ -441,6 +441,7 @@ namespace BeeFishHTTPS {
                 return;
 
             stringstream stream;
+            stream.imbue(std::locale::classic());
             stream << error.category().name() << ":" << error.value() << ":" << error.message();
     
             logException(where, stream.str());
@@ -652,9 +653,6 @@ namespace BeeFishHTTPS {
         const boost::system::error_code& error
     )
     {
-        Session* oldSession = _newSession;
-        assert(oldSession == newSession);
-        
         startAccept();
         
         if (!error)

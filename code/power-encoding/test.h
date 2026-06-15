@@ -215,7 +215,6 @@ inline bool testStack() {
 
     BeeFishMisc::outputSuccess(ok);
 
-    assert(ok);
     cout << endl;
 
     return ok;

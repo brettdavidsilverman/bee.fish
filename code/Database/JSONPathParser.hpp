@@ -54,14 +54,6 @@ namespace BeeFishDatabase {
         virtual ~JSONPathParser()
         {
 
-#ifdef DEBUG
-/*
-            assert(_pathStack.size() == 0);
-            assert(_indexStack.size() == 0);
-            assert(_keyStack.size() == 0);
-            assert(_typeStack.size() == 0);
-*/
-#endif
 
         }
         
@@ -99,7 +91,6 @@ namespace BeeFishDatabase {
                     start.setNumber(value);
                     break;
                 case Type::STRING:
-                    assert(false);
                     break;
                 case Type::ARRAY:
                     start.setArray();
@@ -170,8 +161,6 @@ namespace BeeFishDatabase {
                 path.setObject();
             else if (type == Type::ARRAY)
                 path.setArray();
-            else
-                assert(false);
                 
             _pathStack.push_back(path);
             if (type == Type::ARRAY)

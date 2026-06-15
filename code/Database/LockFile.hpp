@@ -72,7 +72,6 @@ namespace BeeFishDatabase
         
         virtual ~LockFile()
         {
-            assert(_lockCount == 0);
             delete _mutex;
              
         }

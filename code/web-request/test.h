@@ -175,7 +175,7 @@ using namespace BeeFishTest;
                 line.url().search()["key"] == "&"
             );
             
-            assert(ok);
+
         }
         
         if (ok) {
@@ -205,7 +205,6 @@ using namespace BeeFishTest;
                 url.path() == "/path"
             );
             
-            assert(ok);
         }
         
         if (ok) {

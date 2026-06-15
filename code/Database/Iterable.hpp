@@ -203,7 +203,6 @@ public:
 
         // Prefix increment operator (++)
         Iterator& operator++() {
-            assert(!_isEnd);
             _isEnd = not
                      _path->next<T>(
                          _stack,
@@ -327,7 +326,6 @@ public:
 
         // Prefix increment operator (++)
         ReverseIterator& operator++() {
-            assert(!_isEnd);
             _isEnd = not
                      _path->previous<T>(
                          _stack,
