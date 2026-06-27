@@ -663,7 +663,7 @@ public:
 
         while (!path.isRoot())
         {
-            Type keyType;
+            Type keyType = Type::STRING;
             path = path.parent(key, keyType);
             
             if (path.isUserRoot())
