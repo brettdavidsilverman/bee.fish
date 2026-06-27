@@ -335,7 +335,7 @@ public:
     virtual void flush()
     {
 
-        std::ostream::flush();
+// std::ostream::flush();
 
 
         if (chunkedEncoding() &&

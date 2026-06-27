@@ -58,10 +58,9 @@ public:
 
         WebRequest* request = _session->request();
         
-        if (request->search().size())
+        if (request->search().size() &&
+            !request->searchObject().contains("redirect"))
             return;
-
-
 
         BString requestPath = request->path();
 

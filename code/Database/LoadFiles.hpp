@@ -12,13 +12,14 @@ using namespace BeeFishMiscellaneous;
 void loadFile(
     BeeFishAuthentication::Authentication& auth,
     JSONPath start,
+    std::filesystem::path directory,
     std::filesystem::path path
 );
 
 void loadFiles(
     BeeFishAuthentication::Authentication& auth,
     JSONPath start,
-    const BString& directory
+    std::filesystem::path directory
 )
 {
 
@@ -27,18 +28,22 @@ void loadFiles(
             << directory
             << endl;
             
-    const std::vector<BString> ignoreDirectories {
-        ".git",
-        "build"
-    };
-    
+    loadFile(
+            auth,
+            start,
+            directory,
+            "/home/brettdavidsilverman/bee.fish/dev.bee.fish/art-small.jpg"
+        );
+        
+    return;
+            
     const std::vector<BString> ignoreFiles {
         "deaths.json"
     };
 
     // Create the iterator explicitly
     auto it = filesystem::recursive_directory_iterator(
-        directory.str(), 
+        directory, 
         filesystem::directory_options::skip_permission_denied
     );
         
@@ -47,8 +52,9 @@ void loadFiles(
     
     while (it != end_it) {
         
-        const BString path = it->path();
-        const BString filename = it->path().filename();
+        const std::filesystem::path
+            path = it->path();
+        const BString filename = path.filename();
         if (find(
                 ignoreFiles.begin(),
                 ignoreFiles.end(),
@@ -58,44 +64,14 @@ void loadFiles(
             ++it;
             continue;
         }
-        
-        const BString relative =
-            path.substr(
-                directory.length() + 1
-            );
-            
-        const std::vector segments =
-            relative.split('/');
-
-        JSONPath databasePath = start;
-        bool skip = false;
-        
-        for (const auto& segment : segments)
-        {
-            const BString pathSegment = segment;
-            if (pathSegment != "/")
-            {
-                if (find(
-                        ignoreDirectories.begin(),
-                        ignoreDirectories.end(),
-                        pathSegment
-                    ) != ignoreDirectories.end()
-                )
-                {
-                    skip = true;
-                    break;
-                }
-                
-                databasePath = databasePath[
-                    pathSegment
-                ];
-            }
-            
-        }
     
-        if (!skip) {
-            loadFile(auth, databasePath, path.str());
-        }
+
+        loadFile(
+            auth,
+            start,
+            directory,
+            path
+        );
         
         ++it;
     }
@@ -104,9 +80,60 @@ void loadFiles(
 void loadFile(
     BeeFishAuthentication::Authentication& auth,
     JSONPath start,
+    std::filesystem::path directory,
     std::filesystem::path path
 )
 {
+    const std::vector<BString> ignoreDirectories {
+        ".git",
+        "build"
+    };
+    
+    std::filesystem::path relativePath =
+        std::filesystem::relative(
+            path, 
+            directory
+        ); 
+
+    BString relative = relativePath.string();
+
+    const std::vector segments =
+        relative.split('/');
+        
+    auto onword =
+    [&auth](JSONPath& path, const BString& word)
+    {
+        cout 
+            << path.toString(auth)
+            << "#"
+            << word 
+            << endl;
+    };
+    
+        
+        
+    for (const auto& segment : segments)
+    {
+        
+        if (find(
+                ignoreDirectories.begin(),
+                ignoreDirectories.end(),
+                segment
+            ) != ignoreDirectories.end()
+        )
+        {
+            return;
+        }
+        
+       // cerr << segment << endl;
+        start._onword = onword;
+        start = start[segment];
+        
+            
+    }
+    
+    cout << start.toString(auth) << " " << start.index() << endl;
+    
     BString extension = path.extension();
     if (!extension.length()) {
         extension = path.filename();
@@ -120,21 +147,10 @@ void loadFile(
     {
         return;
     }
-                
-    cout << start.toString(auth) << endl;
-    
+
     Index pageIndex = 0;
     
-    start._onword =
-    [&auth, &pageIndex](JSONPath& path, const BString& word)
-    {
-        cout 
-            << path.toString(auth)
-            << "#"
-            << word 
-            << endl;
-    };
-    
+    start._onword = onword;
 
     File input(path.string(), true);
     
@@ -158,7 +174,7 @@ void loadFile(
         
         const BString page = buffer.substr(0, size);
 
-        // this my throw with an range_error
+        // this may throw with an range_error
         start.setString(page, pageIndex++, true,  partWord);
         
     }
@@ -166,6 +182,8 @@ void loadFile(
     start.endString(pageIndex, true, partWord);
 
     input.close();
+    
+    
 }
 
 }

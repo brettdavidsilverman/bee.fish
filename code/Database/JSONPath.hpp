@@ -629,12 +629,28 @@ public:
         return path;
     }
 
-    bool isUserRoot() const
+    bool isUserRoot()
     {
-        return
-            isRoot() ||
-            parent().isRoot();// ||
-        // parent().parent().isRoot();
+        if (!isRoot()) {
+            BString userId;
+        
+            JSONPath parent =
+                JSONPath::parent(userId);
+        
+            if (
+                database()
+                .users()
+                .contains(userId)
+            )
+            {
+                return true;
+            }
+            else
+                return parent.isRoot();
+        }
+        
+        return true;
+            
     }
 
 
@@ -650,15 +666,18 @@ public:
             Type keyType;
             path = path.parent(key, keyType);
             
-            if (key == userId)
+            if (path.isUserRoot())
             {
-                key = "my";
-            }
-            else if ( database()
+                if (key == userId)
+                {
+                    key = "my";
+                }
+                else if ( database()
                       .users()
                       .contains(key) )
-            {
-                return "";
+                {
+                    return "";
+                }
             }
 
 
@@ -677,6 +696,7 @@ public:
                 key +
                 BString("/") +
                 string;
+                
         }
 
         if (string.size())
@@ -748,14 +768,15 @@ public:
         // Loop through all tokens
         JSONPath path = originPath;
         bool success = true;
-
+        bool first = true;
+        
         const BString& userId = auth.userId();
 
         for (BString key : paths)
         {
             key = key.decodeURI();
 
-            if (key == "my" || key == userId)
+            if (first && (key == "my" || key == userId))
             {
                 if (path.contains(userId) || method == "POST") {
                     path = path[userId];
@@ -801,6 +822,8 @@ public:
                 }
 
             }
+            
+            first = false;
 
 
 
@@ -891,7 +914,7 @@ public:
 
                 JSONPath childPath = getChildren()[position];
                 childPath.setId();
-
+                childPath._onword = _onword;
                 childPath.indexProperties();
 
             }
@@ -1134,6 +1157,7 @@ private:
             while (!json.isUserRoot())
             {
                 ++wordPath[json.id()];
+            
                 json = json.parent();
             }
             

@@ -19,12 +19,12 @@
       <a href="/client/logon/authentication.js">authentication.js</a>
       <form id="form" onsubmit="onsubmit()">
          <label for="secretFile">
-            <img id="thumbnail" width="100" height="100" onclick="return thumbnailClicked(event)" src="/favicon.ico" alt="secret"/>
+            <img id="thumbnail" width="100" height="100" src="/favicon.ico" alt="secret"/>
             Secret
          </label>
-         <input type="file" id="secretFile" onchange="createSecret(this.files[0]);" accept="image/*" style="display:none;" />
+         <input type="file" id="secretFile" accept="image/*" style="display:none;" />
          <canvas id="canvas" width="100" height="100" style="display:none;"></canvas>
-         <script>
+         <script type="module">
 var h1 = document.getElementById("h1");
 var title = document.getElementById("title");
 title.innerText = document.location.hostname;
@@ -55,192 +55,229 @@ var canvas =
 var thumbnail =
    document
    .getElementById("thumbnail");
+   
+var fileInput = document.getElementById("secretFile");
 
-function thumbnailClicked(event)
-{
-   if (authentication.authenticated) {
-      event.preventDefault();
-      if (confirm("Logoff?"))
-         logoff();
-   }
-   else
-      return true;
+
+thumbnail.onclick = 
+    async function thumbnailClicked(event)
+    {
+        if (authentication.authenticated) {
+            event.preventDefault();
+        if (confirm("Logoff?"))
+            logoff();
+    }
+    else
+        return true;
 }
 
-function logon(secret)
+async function logon(secret)
 {
  
-   thumbnail.classList.add("pressed");
+    thumbnail.classList.add("pressed");
   
-   authentication.logon(secret).then(
-      function(response) {
-         if (authentication.authenticated) {
-            const params = new URL(document.location.href).searchParams;
-            if (params.has("redirect")) {
-                redirect = params.get("redirect");
-                var url = new URL(decodeURIComponent(redirect));
-                document.location.href = url;
-            }
-            else {
-               // document.location.reload();
-                document.location.href = "/"
-            }
-         }
-         else {
-            alert(response);
-         }
-      }
-   ).then(
-      function() {
-         updateForm();
-      }
-   ).catch(
-      function(error) {
-         alert(error);
-         updateForm();
-      }
-   ); 
-   
-   
-   
-}
+    var response =
+       await authentication.logon(secret);
 
-function logoff()
-{
+    if (authentication.authenticated) {
 
-   thumbnail.classList.remove("pressed");
-   authentication.logoff().then(
-      function(response) {
-         form.reset();
-         updateForm();
-      }
-   )
+        const params = new URLSearchParams(window.location.search);
 
-   
-}
-
-function getFileHash(file) {
-    const sha = new jsSHA("SHA-512", "ARRAYBUFFER");
-    var fileReader = new FileReader();
-    const promise = new Promise(
-        function(resolve, reject) {
-            fileReader.onloadend = function(event) {
-                const fileReader = event.target;
-                var result = fileReader.result;
-                var arrayBuffer = result;
-                var view = new Uint8Array(arrayBuffer);
-                sha.update(view);
-                //var hash = sha.getHash("B64");
-                var hash = sha.getHash("HEX");
-                resolve(hash);
-            }
-            fileReader.readAsArrayBuffer(file);
+        if (params.has("redirect")) {
+            var redirect = params.get("redirect");
+            var url = new URL(decodeURIComponent(redirect));
+            document.location.href = url;
         }
-    );
+        else {
+            document.location.href = "/"
+        }
+    }
+    else {
+        alert(response);
+    }
 
-    return promise;
-
+    updateForm();
+    
+   
+   
 }
 
-function createSecret(file)
+async function logoff()
 {
-   thumbnail.classList.remove("pressed");
-   
-   if (!file)
-      return;
 
-   thumbnail.style.filter = "grayscale(100%)";
-   thumbnail.src = null;
- 
-   createThumbnail(file);
-
-   getFileHash(file)
-   .then(
-      function(secret) {
-         thumbnail.style.filter = "none";
-         return logon(secret);
-      }
-   );
+    thumbnail.classList.remove("pressed");
+    await authentication.logoff();
+    form.reset();
+    updateForm();
    
 }
+/*
+async function calculateFileSHA256(file) {
+    const reader = file.stream().getReader();
+
+    // SHA-3 in the browser supports 'SHA-3-224', 'SHA-3-256', 'SHA-3-384', 'SHA-3-512'
+    const cryptoHash = await window.crypto.subtle.digest('SHA-3-256', new ReadableStream({
+        async start(controller) {
+            while (true) {
+                const { done, value } = 
+                    await reader.read();
+                if (done) 
+                    break;
+                controller.enqueue(value);
+            }
+            controller.close();
+        }
+    }));
+    
+    const hashBuffer = cryptoHash;
+    const hashHex = Array.from(
+        new Uint8Array(hashBuffer)
+    ).map(
+        b => b.toString(16).padStart(2, '0')
+    ).join('');
+        
+    return hashHex;
+}
+*/
+
+
+async function calculateFileSHA256(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        // Read file contents as an ArrayBuffer
+        reader.readAsArrayBuffer(file);
+        
+        reader.onload = async (event) => {
+            try {
+                const arrayBuffer = event.target.result;
+                
+                // Calculate SHA-256 hash
+                const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+                
+                // Convert ArrayBuffer to hex string
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                resolve(hashHex);
+            } catch (error) {
+                reject(error);
+            }
+        };
+        
+        reader.onerror = (error) => reject(error);
+    });
+}
+
+
+async function createSecret(file)
+{
+    thumbnail.classList.remove("pressed");
+   
+    if (!file)
+        return;
+
+    thumbnail.style.filter = "grayscale(100%)";
+    thumbnail.src = URL.createObjectURL(file);
+    
+ 
+    await createThumbnail(file);
+
+    var secret = await calculateFileSHA256(file)
+   
+    thumbnail.style.filter = "none";
+    
+    return logon(secret);
+   
+}
+
+fileInput.onchange = 
+    (event) => {
+        createSecret(fileInput.files[0]);
+    }
 
 function createThumbnail(file)
 {
 
-   // Create a thumbail copy from
-   // secret file and draw it
-   // on the canvas.
-   thumbnail.src = "";
+    return new Promise((resolve, reject) => {
+        
+        // Create a thumbail copy from
+        // secret file and draw it
+        // on the canvas.
+        thumbnail.src = "";
    
-   var _this = this;
+        var _this = this;
      
-   prepareCanvas(canvas);
+        prepareCanvas(canvas);
       
-   var image;
+        var image;
       
       
-   // Read the secretFile
-   var fileReader = new FileReader();
+        // Read the secretFile
+        var fileReader = new FileReader();
       
-   // onload fires after reading is complete
-   fileReader.onload = createImage;
+        // onload fires after reading is complete
+        fileReader.onload = createImage;
       
-   // begin reading
-   fileReader.readAsDataURL(file);
+        // begin reading
+        fileReader.readAsDataURL(file);
       
     
-   function createImage()
-   {
-      image = new Image();
+        function createImage()
+        {
+            image = new Image();
          
-      image.width = 100;
+            image.width = 100;
             
-      image.height = 100;
+            image.height = 100;
             
-      image.onload = imageLoaded;
+            image.onload = imageLoaded;
       
-      image.src = fileReader.result;
+            image.src = URL.createObjectURL(file);
          
-   }
+        }
       
-   function imageLoaded()
-   {
+        function imageLoaded()
+        {
    
-      var context = canvas.getContext("2d");
+            var context = canvas.getContext("2d");
       
-      // draw the image
-      context.drawImage(
-         image, 0, 0, canvas.width, canvas.height
-      );         
+            // draw the image
+            context.drawImage(
+                image, 0, 0, canvas.width, canvas.height
+            );         
 
-      // get the image
-      var jpeg =
-         canvas.toDataURL("image/jpeg", 1.0);
+            // get the image
+            var jpeg =
+                canvas.toDataURL("image/jpeg", 1.0);
      
-      // set the thumbnail
-      thumbnail.src = jpeg;
+            // set the thumbnail
+            thumbnail.src = jpeg;
       
-      localStorage.setItem(
-         "authentication.thumbnail",
-         thumbnail.src
-      );
-   }
-      
-   function prepareCanvas(canvas)
-   {
-      canvas.width = 100;    
-      canvas.height = 100;
-      
-      var context = canvas.getContext("2d");
-         
-      // draw the image
-      context.clearRect(
-         0, 0, canvas.width, canvas.height
-      );         
-   }
-      
+            localStorage.setItem(
+               "authentication.thumbnail",
+               thumbnail.src
+            );
+            resolve();
+        }
+           
 
+        function prepareCanvas(canvas)
+        {
+            canvas.width = 100;    
+            canvas.height = 100;
+      
+            var context = canvas.getContext("2d");
+         
+            // draw the image
+            context.clearRect(
+                 0, 0, canvas.width, canvas.height
+            );         
+        }
+
+    });
 }
+      
 
 
 function updateForm()

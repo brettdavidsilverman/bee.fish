@@ -107,7 +107,7 @@ namespace BeeFishDatabase
             ptime now = second_clock::universal_time();
 
             // 2. Define the duration to add (e.g., 5 seconds)
-            time_duration diff = seconds(5);
+            time_duration diff = seconds(30);
 
             // 3. Add the duration to the current time
             ptime timeout = now + diff;

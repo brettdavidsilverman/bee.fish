@@ -102,10 +102,10 @@ const defaultContentType = "text/plain; charset=utf-8";
 
 var console = new Console();
 console.log("Hello world");
-/*
+
 var logon = document.getElementById("logon");
-logon.href += "?redirect=" + encodeURIComponent(window.location.href);
-*/
+logon.href = "/client/logon?redirect=" + encodeURIComponent(window.location.href);
+
 var pathInput = document.getElementById("pathInput");
 var result = document.getElementById("result");
 var editor = document.getElementById("editor");
@@ -168,7 +168,7 @@ async function checkResponse(response) {
     else if (response.status != 200) {
         var json = await response.json();
         throw new Error(
-            json
+            decodeURIComponent(json)
         );
         return false;
     }
@@ -379,6 +379,7 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
       
     
     var status;
+    localStorage.setItem("path", pathInput.value);
         
     try
     {
@@ -396,7 +397,7 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
             json = decodeURI(json);
             alert(json);
             pathInput.value = json;
-            localStorage.setItem("path", pathInput.value);
+            
             setLinks()
         }
         
