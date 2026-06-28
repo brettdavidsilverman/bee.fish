@@ -109,8 +109,20 @@ public:
         }
         else if (app->serve() == App::SERVE_QUERY)
         {
-            BString search =
-                app->request()->search();
+            BString search;
+            BeeFishWeb::URL::Search& searchObject =
+                app->request()->searchObject();
+                
+            if (searchObject.contains("q"))
+            {
+                search = 
+                    searchObject["q"];
+            }
+            else
+            {
+                search = 
+                    app->request()->search();
+            }
 
             bool getCount = false;
             if (search.endsWith("$"))
@@ -120,7 +132,7 @@ public:
             }
 
             BeeFishQuery::Expression
-            expression(bookmark, search);
+                expression(bookmark, search);
 
             Index count = 0;
             if (!getCount)
@@ -136,10 +148,15 @@ public:
                     *database,
                     path
                 );
+                
+            auto it = 
+                searchObject.contains("next") ?
+                    matches.begin(searchObject["next"])
+                :
+                    matches.begin();
 
-            for (auto it = matches.begin();
-                    it != matches.end();
-                )
+            while (it != matches.end() &&
+                   count < 10)
             {
 
                 if (!getCount)
@@ -148,7 +165,7 @@ public:
                           << it->escape()
                           << "\"";
 
-                    if (++it != matches.end())
+                    if (++it != matches.end() && count < 10)
                         *this << ",";
 
                     *this << endl;
@@ -164,6 +181,21 @@ public:
                     flush();
                 */
 
+            }
+            
+            if (it != matches.end())
+            {
+                *this << "   \""
+                      << JSONPath(bookmark).toString(
+                             app->authentication()
+                         ) 
+                      << "?q="
+                      << search.encodeURI()
+                      << "&next="
+                      << it.toKey()
+                      << "\""
+                      << endl;
+                      
             }
 
             if (!getCount)

@@ -23,6 +23,10 @@ namespace BeeFishDatabase
         
 
     public:
+        
+        typedef std::function<void(JSONPath& path, const BString& word)> OnWord;
+        OnWord _onword = nullptr;
+
 
         JSONDatabase(
             const BString& filePath = "",
@@ -114,7 +118,7 @@ namespace BeeFishDatabase
         // defined in JSONPath
         JSONPath origin(const BString& origin) const;
         
-
+        
         
         
         

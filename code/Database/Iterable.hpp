@@ -217,19 +217,7 @@ public:
             ++(*this);
             return tmp;
         }
-
-        /*
-
-        void save()
-        {
-            _iterable->save();
-        }
-
-        void restore()
-        {
-            _iterable->restore();
-        }
-        */
+        
         friend bool operator == (
             const Iterator& a,
             const Iterator& b

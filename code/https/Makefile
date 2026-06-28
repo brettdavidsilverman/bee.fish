@@ -10,7 +10,7 @@ endif
 	
 $(OUTPUT):	$(DEPS)
 	@echo "Linking Web Server"
-	g++ main.cpp $(CFLAGS) $(OPTIMISATION) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lcryptopp
+	g++ main.cpp $(CFLAGS) $(OPTIMISATION) $(JSON_INDEX) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lcryptopp
 	@if [ "$(PORT)" = "443" ]; then \
 		echo "Allowing port $(PORT)"; \
 		sudo setcap cap_net_bind_service=ep $(OUTPUT); \
@@ -63,6 +63,7 @@ stop:
 
 
 debug:	DEBUG=debug
+debug:	JSON_INDEX=-D JSON_INDEX
 debug:	OPTIMISATION=
 debug:	CFLAGS += -g -D DEBUG
 debug:	$(OUTPUT)
@@ -71,7 +72,7 @@ debug:	$(OUTPUT)
 
 run_debug:	debug
 run_debug:	stop
-	gdb --args $(OUTPUT) -port $(PORT) -unlock
+	gdb --args $(OUTPUT) -port $(PORT) -test
 
 clean:
 	rm -f session.log

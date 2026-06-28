@@ -255,19 +255,7 @@ public:
 
         return (bool)branch._right;
     }
-/*
-    virtual void save()
-    override
-    {
-        _savedIndex = _index;
-    }
 
-    virtual void restore()
-    override
-    {
-        _index = _savedIndex;
-    }
-    */
     virtual PathBase* copy() const
     {
         return new Path(*this);

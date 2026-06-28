@@ -125,8 +125,6 @@ void loadFile(
             return;
         }
         
-       // cerr << segment << endl;
-        start._onword = onword;
         start = start[segment];
         
             
@@ -150,7 +148,7 @@ void loadFile(
 
     Index pageIndex = 0;
     
-    start._onword = onword;
+    start.database()._onword = onword;
 
     File input(path.string(), true);
     

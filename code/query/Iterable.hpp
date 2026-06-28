@@ -93,8 +93,32 @@ using namespace BeeFishAuthentication;
                 _value = source._value;
                 _parentPath = source._parentPath;
                 _jsonPath = source._jsonPath;
-                
+            
             }
+            
+            Iterator(const Iterable& iterable, 
+                     const Stack& stack) :
+                _container(&iterable),
+                _iterable(new IdIterable(*iterable._path)),
+               // _iterator(new IdIterator(*_iterable)),
+                _iterator(new IdIterator(*_iterable, stack))
+            {
+                /*
+                for (const auto bit : stack)
+                {
+                    if (bit == 0 && _iterable->canGoLeft())
+                        _iterable->goLeft();
+                    else if (bit == 1 && _iterable->canGoRight())
+                        _iterable->goRight();
+                    else {
+                        throw runtime_error("Invalid iterator stack");
+                    }
+                }
+                */
+
+                setValue();
+            }
+        
             
             Iterator() 
             {
@@ -132,7 +156,7 @@ using namespace BeeFishAuthentication;
                 _parentPath = source._parentPath;
                 _jsonPath = source._jsonPath;
                 
-                 return *this;
+                return *this;
             }
             
             
@@ -206,6 +230,11 @@ using namespace BeeFishAuthentication;
             {
                 return _jsonPath;
             }
+            
+            BString toKey()
+            {
+                return _iterator->toKey();
+            }
         
             // Dereference operator (*)
             reference operator*() const
@@ -277,6 +306,18 @@ using namespace BeeFishAuthentication;
         {
             return Iterator(*this);
         }
+        
+        virtual Iterator begin(
+            const BString& key
+        ) const 
+        {
+
+            Stack stack = Stack::fromData(key.fromBase64());
+
+            return Iterator(*this, stack);
+        }
+        
+        
     
         // Points one past the last element
         Iterator end()
