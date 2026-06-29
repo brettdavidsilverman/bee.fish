@@ -33,732 +33,750 @@ using namespace BeeFishScript;
 
 namespace BeeFishHTTPS {
 
-    class Response;
-    class Server;
- 
-    class Session : public SSLSocket
+class Response;
+class Server;
+
+class Session : public SSLSocket
+{
+protected:
+    Server* _server;
+    size_t _maxLength;
+    std::string _data;
+    WebRequest* _request;
+    Parser* _parser;
+    Response* _response;
+    string _tempFileName;
+    std::fstream _tempFile;
+    bool _isStillPosting = false;
+    BString _exception;
+    
+    // End Of File error value
+    const int END_OF_FILE = 2;
+public:
+    BString _ipAddress;
+    friend class Response;
+
+    Session(
+        Server* server,
+        boost::asio::io_context& ioContext,
+        boost::asio::ssl::context& sslContext
+    ) :
+        SSLSocket(ioContext, sslContext),
+        _server(server),
+        _maxLength(getPageSize()),
+        _data(_maxLength, '\0'),
+        _request(nullptr),
+        _parser(nullptr),
+        _response(nullptr)
     {
-    protected:
-        Server* _server;
-        size_t _maxLength;
-        std::string _data;
-        WebRequest* _request;
-        Parser* _parser;
-        Response* _response;
-        string _tempFileName;
-        std::fstream _tempFile;
-        bool _isStillPosting = false;
-        BString _exception;
-        BString _ipAddress;
-        // End Of File error value
-        const int END_OF_FILE = 2;
-    public:
-        friend class Response;
-        
-        Session(
-            Server* server,
-            boost::asio::io_context& ioContext,
-            boost::asio::ssl::context& sslContext
-        ) :
-            SSLSocket(ioContext, sslContext),
-            _server(server),
-            _maxLength(getPageSize()),
-            _data(_maxLength, '\0'),
-            _request(nullptr),
-            _parser(nullptr),
-            _response(nullptr)
-        {
-            // Create the temp file name.
-            stringstream stream;
-            stream << "bee.fish." << getPointerString();
-            _tempFileName =
-                string(TEMP_DIRECTORY) +
-                stream.str();
-            
-        }
-  
-  
-        virtual ~Session()
-        {
-            clear();
-        }
-        
-        virtual void start()
-        {
-                
-            clear();
-            
-            try
-            {
-                _ipAddress =  
-                    lowest_layer()
-                        .remote_endpoint()
-                        .address()
-                        .to_string();
-            }
-            catch (...)
-            {
-                logException("Session::start", "Invalid ipAddress");
-                throw std::runtime_error("Couldn't get ip address");
-            }
-            
-            _request = new BeeFishWeb::WebRequest(false);
-            _parser = new Parser(*_request);
-            
-            asyncRead();
-        }
-    
-        virtual void clear()
-        {
-            if (_request)
-            {
-                delete _request;
-                _request = nullptr;
-            }
-            
-            if (_parser)
-            {
-                delete _parser;
-                _parser = nullptr;
-            }
-            
-            if (_response)
-            {
-                delete _response;
-                _response = nullptr;
-            }
-            
-            if (_tempFile.is_open())
-            {
-                _tempFile.close();
-            }
-          
-            if (filesystem::exists(_tempFileName))
-                 remove(_tempFileName);
-         
-            _exception = "";
-            
-        }
+        // Create the temp file name.
+        stringstream stream;
+        stream << "bee.fish." << getPointerString();
+        _tempFileName =
+            string(TEMP_DIRECTORY) +
+            stream.str();
 
-        virtual void closeOrRestart()
-        {
-            
-            if (_request->headers()["connection"] != "keep-alive")
-            {
-                // Close
-                delete this;
-                return;
-            }
-              
-            // Restart
-            start();
-
-        }
-
-        virtual void handleRead(
-            const boost::system::error_code& error,
-            size_t bytesTransferred
-        )
-        {
-             
-
-            
-            
-            if (error)// && error.value() != END_OF_FILE)
-            {
-                logException("Session::handleRead", error);
-                delete this;
-                return;
-            }
-            
-
-            boost::asio::post(
-                *_server,
-                [this, bytesTransferred]() {
-                    threadedHandleRead(bytesTransferred);
-                }
-            );
-        }
-        
-        void threadedHandleRead(Size bytesTransferred)
-        {
-            
-            if (bytesTransferred > 0)
-            {
-                if (_parser->result() == nullopt)
-                    _parser->read(_data.data(), bytesTransferred);
-            }
-            else {
-                if (_parser->result() == nullopt)
-                    _parser->eof();
-            }
-            
-            
-            if (_parser->result() == false)
-            {
-                logException("Session::threadedHandleRead", BString("Parser match error: ") + _parser->getError());
-                delete this;
-                return;
-            }
-                
-            if ( _request->_headers &&
-                  _request->headers().result() == true && 
-                 (
-                     _request->method() == "GET" ||
-                     _request->method() == "OPTIONS"
-                 )
-            )
-            {
-                handleResponse();
-                return;
-            }
-
-            // Write current session data to file
-            if (!_tempFile.is_open())
-            {
-                try
-                {
-                    openTempFile();
-                }
-                catch (std::exception& exception)
-                {
-                    logException(
-                        "Session::threadedHandleRead",
-                        exception.what()
-                    );
-                    delete this;
-                    return;
-                }
-                
-            }
-            
-            
-            _tempFile.write((const char*)_data.data(), bytesTransferred);
-            _tempFile.flush();
-            
-            // Check if finished request
-            if ( _parser->result() == true )
-            {
-                
-                _tempFile.close();
-
-                _server->appendToTransactionFile(_tempFileName);
-
-            
-                handleResponse();
-                
-                return;
-            }
-            
-            // More data to come...
-            asyncRead();
-        }
-        
-
-        void dumpTempFile()
-        {
-
-            ifstream input(_tempFileName);
-
-            std::cout << "File Dump of " << _tempFileName << std::endl;
-            std::cout << input.rdbuf();
-            input.close();
-
-        }
-
-        void handleResponse() 
-        {
-
-            try {
-
-                // All input is now in
-                clog  << BeeFishDate::getDateTime()
-                      << ' '
-                      << ipAddress()          << ' '
-                      << _request->method()   << ' '
-                      << host()
-                           << _request->url() << ' '
-                      << std::endl;
-                      
-                _response = new Response(
-                    this
-                );
-                
-                _response->handleResponse();
-                
-            }
-            catch (std::exception& ex)
-            {
-                logException("Session::handleResponse", ex.what());
-                delete this;
-                return;
-            }
-            
-            
-        }
-        
-        void handleWrite(
-            const boost::system::error_code&
-                error
-        )
-        {
-            if (error)
-            {
-                logException(
-                    "Session::handleWrite",
-                    error
-                );
-                
-                delete this;
-                return;
-            }
-            
-        }
-        
-        void openTempFile()
-        {
-            _tempFile.open(
-                _tempFileName,
-                std::fstream::in  |
-                std::fstream::out |
-                std::fstream::trunc
-            );
-
-            if (_tempFile.fail())
-            {
-                BString what = "Failed to open file: ";
-                what += _tempFileName;
-  
-                logException(
-                    "Session::Start",
-                    what
-                );
-                
-                throw runtime_error("Failed to open temp file");
-            }
-            
-            std::filesystem::permissions(
-                _tempFileName,
-                    perms::group_read  |
-                    perms::group_write |
-                    perms::others_read |
-                    perms::others_write,
-                perm_options::remove
-            );
-            
-            std::filesystem::permissions(
-                _tempFileName,
-                    perms::owner_read |
-                    perms::owner_write,
-                perm_options::replace
-            );
- 
-        }
-        
-        virtual void asyncRead()
-        {
-            async_read_some(
-                boost::asio::buffer(
-                    _data.data(),
-                    _maxLength
-                ),
-                boost::bind(
-                    &Session::handleRead,
-                    this,
-                    boost::asio::placeholders::error,
-                    boost::asio::placeholders::bytes_transferred
-                )
-            );
-
-            
-        }
-
-        
-        virtual void logException(
-            const BString& where,
-            const BString& what,
-            const BString& request
-        )
-        {
-            
-            BeeFishScript::Object error = {
-                {
-                    "exception", BeeFishScript::Object {
-                        {"where", where},
-                        {"what", what},
-                        {"ipAddress", ipAddress()},
-                        {"who", getPointerString()},
-                        {"when", Server::getDateTime()},
-                        {"origin", origin()},
-                        {"host", host()},
-                        {"request", request}
-                    }
-                }
-            };
-            
-            cerr << error << endl;
-            
-        }
-        
-                
-        virtual void logException(
-            const BString& where,
-            const BString& what
-        )
-        {
-            
-            BeeFishScript::Object error = {
-                {
-                    "exception", BeeFishScript::Object {
-                        {"where", where},
-                        {"what", what},
-                        {"ipAddress", ipAddress()},
-                        {"who", getPointerString()},
-                        {"when", Server::getDateTime()},
-                        {"origin", origin()}
-                    }
-                }
-            };
-            
-            cerr << error << endl;
-        }
-
-        BString getPointerString() {
-            stringstream stream;
-            stream.imbue(std::locale("C"));
-            stream << static_cast<const void*>(this);
-            return stream.str();
-        }
-        
-        virtual void logException(
-            const BString& where,
-            const boost::system::error_code& error
-        )
-        {
-        
-            if (error.value() == 1)
-                // session connection truncated
-                return;
-
-            stringstream stream;
-            stream.imbue(std::locale::classic());
-            stream << error.category().name() << ":" << error.value() << ":" << error.message();
-    
-            logException(where, stream.str());
-        }
-        
-        virtual void logException(
-            const BString& where
-        )
-        {
-            stringstream stream;
-            stream << strerror(errno);
-    
-            logException(where, stream.str());
-        }
-    
-        SSLSocket::lowest_layer_type& socket()
-        {
-            return lowest_layer();
-        }
-
-        const BString& ipAddress() const
-        {
-            return _ipAddress;
-        }
-        
-        
-        const BString origin() const
-        {
-            BeeFishWeb::Headers*
-                requestHeaders = nullptr;
-                
-            if (_request)
-                requestHeaders =
-                _request->_headers;
-                    
-            BString origin;
-            
-            if (requestHeaders &&
-                requestHeaders->contains("origin")) 
-            {
-                origin = (*requestHeaders)["origin"];
-            }
-            else if (requestHeaders &&
-                    requestHeaders->contains("host")) 
-            {
-                BString host = (*requestHeaders)["host"];
-                origin = "https://" + host;
-            }
-            else {
-                origin = server()->origin();
-            }
- 
-            
-            return origin;
-                
-        }
-        
-        const BString host() const
-        {
-            BeeFishWeb::Headers*
-                requestHeaders = nullptr;
-                
-            if (_request)
-                requestHeaders =
-                _request->_headers;
-                    
-            BString host;
-            
-            if (requestHeaders &&
-                requestHeaders->contains("host"))
-            {
-                host = "https://" + 
-                    (*requestHeaders)["host"];
-            }
-            else if (requestHeaders &&
-                     requestHeaders->contains("origin")) 
-            {
-                host = (*requestHeaders)["origin"];
-            }
-            else {
-                host = server()->origin();
-            }
- 
-            
-            return host;
-                
-        }
-    
-        BString domain() const
-        {
-            
-            // Use url to extract the domain
-            URL url = Session::host();
-            
-            BString domain = url.domain();
-
-            return domain;
-        }
-    
-        void handshake()
-        {
-            SSLSocket::async_handshake(
-                boost::asio::ssl::stream_base::server,
-                boost::bind(
-                    &Session::handleHandshake,
-                    this,
-                    boost::asio::placeholders::error
-                )
-            );
-        }
-
-
-        void handleHandshake(const boost::system::error_code& error)
-        {
-
-            if (!error)
-            {
-                try {
-                    start();
-                }
-                catch (const std::exception& ex)
-                {
-                    logException("Session::handleHandshake", ex.what());
-                    delete this;
-                }
-            }
-            else
-            {
-                logException("Session::handleHandshake", error);
-                delete this;
-            }
-        }
-
-        Server* server()
-        {
-            return _server;
-        }
-        
-        const Server* server() const
-        {
-            return _server;
-        }
-        
-        WebRequest* request()
-        {
-            return _request;
-        }
-
-        void setWebRequest(WebRequest* request) {
-            if (_request)
-                delete _request;
-            _request = request;
-        }
-        
-        Response* response()
-        {
-            return _response;
-        }
-
-        Parser* parser() {
-            return _parser;
-        }
-  
-        string tempFileName() {
-            return this->_tempFileName;
-        }
-        
-        const BString& exception() const
-        {
-            return _exception;
-        }
-    };
-    
-    // Declared in server.h
-    BeeFishHTTPS::Server::~Server()
-    {
-        _transactionFile.close();
-        if (_newSession)
-            delete _newSession;
-            
-        
     }
-    
-    // Declared in server.h
-    inline void Server::startAccept()
+
+
+    virtual ~Session()
+    {
+        clear();
+    }
+
+    virtual void start()
     {
 
-        _newSession =
-            new Session(
-                this, 
-              _ioContext,
-              _context
-          );
-    
-        _acceptor.async_accept(
-            _newSession->socket(),
-            boost::bind(
-              &Server::handleAccept,
-              this,
-              _newSession,
-              boost::asio::placeholders::error
-            )
+        clear();
+        /*
+        try
+        {
+            _ipAddress =
+                lowest_layer()
+                    .remote_endpoint()
+                    .address()
+                    .to_string();
+        }
+        catch (...)
+        {
+            logException("Session::start", "Invalid ipAddress");
+            throw std::runtime_error("Couldn't get ip address");
+        }
+        */
+        _request = new BeeFishWeb::WebRequest(false);
+        _parser = new Parser(*_request);
+
+        asyncRead();
+    }
+
+    virtual void clear()
+    {
+        if (_request)
+        {
+            delete _request;
+            _request = nullptr;
+        }
+
+        if (_parser)
+        {
+            delete _parser;
+            _parser = nullptr;
+        }
+
+        if (_response)
+        {
+            delete _response;
+            _response = nullptr;
+        }
+
+        if (_tempFile.is_open())
+        {
+            _tempFile.close();
+        }
+
+        if (filesystem::exists(_tempFileName))
+            remove(_tempFileName);
+
+        _exception = "";
+
+    }
+
+    virtual void closeOrRestart()
+    {
+
+        if (_request->headers()["connection"] != "keep-alive")
+        {
+            // Close
+            delete this;
+            return;
+        }
+
+        // Restart
+        start();
+
+    }
+
+    virtual void handleRead(
+        const boost::system::error_code& error,
+        size_t bytesTransferred
+    )
+    {
+
+
+
+
+        if (error)// && error.value() != END_OF_FILE)
+        {
+            logException("Session::handleRead", error);
+            delete this;
+            return;
+        }
+
+
+        boost::asio::post(
+            *_server,
+        [this, bytesTransferred]() {
+            threadedHandleRead(bytesTransferred);
+        }
         );
     }
-    
-    // Declared in server.h
-    inline void Server::handleAccept(
-        Session* newSession,
+
+    void threadedHandleRead(Size bytesTransferred)
+    {
+
+        if (bytesTransferred > 0)
+        {
+            if (_parser->result() == nullopt)
+                _parser->read(_data.data(), bytesTransferred);
+        }
+        else {
+            if (_parser->result() == nullopt)
+                _parser->eof();
+        }
+
+
+        if (_parser->result() == false)
+        {
+            logException("Session::threadedHandleRead", BString("Parser match error: ") + _parser->getError());
+            delete this;
+            return;
+        }
+
+        if ( _request->_headers &&
+                _request->headers().result() == true &&
+                (
+                    _request->method() == "GET" ||
+                    _request->method() == "OPTIONS"
+                )
+           )
+        {
+            handleResponse();
+            return;
+        }
+
+        // Write current session data to file
+        if (!_tempFile.is_open())
+        {
+            try
+            {
+                openTempFile();
+            }
+            catch (std::exception& exception)
+            {
+                logException(
+                    "Session::threadedHandleRead",
+                    exception.what()
+                );
+                delete this;
+                return;
+            }
+
+        }
+
+
+        _tempFile.write((const char*)_data.data(), bytesTransferred);
+        _tempFile.flush();
+
+        // Check if finished request
+        if ( _parser->result() == true )
+        {
+
+            _tempFile.close();
+
+            _server->appendToTransactionFile(_tempFileName);
+
+
+            handleResponse();
+
+            return;
+        }
+
+        // More data to come...
+        asyncRead();
+    }
+
+
+    void dumpTempFile()
+    {
+
+        ifstream input(_tempFileName);
+
+        std::cout << "File Dump of " << _tempFileName << std::endl;
+        std::cout << input.rdbuf();
+        input.close();
+
+    }
+
+    void handleResponse()
+    {
+
+        try {
+
+            // All input is now in
+            clog  << BeeFishDate::getDateTime()
+                  << ' '
+                  << ipAddress()          << ' '
+                  << _request->method()   << ' '
+                  << host()
+                  << _request->url() << ' '
+                  << std::endl;
+
+            _response = new Response(
+                this
+            );
+
+            _response->handleResponse();
+
+        }
+        catch (std::exception& ex)
+        {
+            logException("Session::handleResponse", ex.what());
+            delete this;
+            return;
+        }
+
+
+    }
+
+    void handleWrite(
+        const boost::system::error_code&
+        error
+    )
+    {
+        if (error)
+        {
+            logException(
+                "Session::handleWrite",
+                error
+            );
+
+            delete this;
+            return;
+        }
+
+    }
+
+    void openTempFile()
+    {
+        _tempFile.open(
+            _tempFileName,
+            std::fstream::in  |
+            std::fstream::out |
+            std::fstream::trunc
+        );
+
+        if (_tempFile.fail())
+        {
+            BString what = "Failed to open file: ";
+            what += _tempFileName;
+
+            logException(
+                "Session::Start",
+                what
+            );
+
+            throw runtime_error("Failed to open temp file");
+        }
+
+        std::filesystem::permissions(
+            _tempFileName,
+            perms::group_read  |
+            perms::group_write |
+            perms::others_read |
+            perms::others_write,
+            perm_options::remove
+        );
+
+        std::filesystem::permissions(
+            _tempFileName,
+            perms::owner_read |
+            perms::owner_write,
+            perm_options::replace
+        );
+
+    }
+
+    virtual void asyncRead()
+    {
+        async_read_some(
+            boost::asio::buffer(
+                _data.data(),
+                _maxLength
+            ),
+            boost::bind(
+                &Session::handleRead,
+                this,
+                boost::asio::placeholders::error,
+                boost::asio::placeholders::bytes_transferred
+            )
+        );
+
+
+    }
+
+
+    virtual void logException(
+        const BString& where,
+        const BString& what,
+        const BString& request
+    )
+    {
+
+        BeeFishScript::Object error = {
+            {
+                "exception", BeeFishScript::Object {
+                    {"where", where},
+                    {"what", what},
+                    {"ipAddress", ipAddress()},
+                    {"who", getPointerString()},
+                    {"when", Server::getDateTime()},
+                    {"origin", origin()},
+                    {"host", host()},
+                    {"request", request}
+                }
+            }
+        };
+
+        cerr << error << endl;
+
+    }
+
+
+    virtual void logException(
+        const BString& where,
+        const BString& what
+    )
+    {
+
+        BeeFishScript::Object error = {
+            {
+                "exception", BeeFishScript::Object {
+                    {"where", where},
+                    {"what", what},
+                    {"ipAddress", ipAddress()},
+                    {"who", getPointerString()},
+                    {"when", Server::getDateTime()},
+                    {"origin", origin()}
+                }
+            }
+        };
+
+        cerr << error << endl;
+    }
+
+    BString getPointerString() {
+        stringstream stream;
+        stream.imbue(std::locale("C"));
+        stream << static_cast<const void*>(this);
+        return stream.str();
+    }
+
+    virtual void logException(
+        const BString& where,
         const boost::system::error_code& error
     )
     {
-        startAccept();
-        
+
+        if (error.value() == 1)
+            // session connection truncated
+            return;
+
+        stringstream stream;
+        stream.imbue(std::locale::classic());
+        stream << error.category().name() << ":" << error.value() << ":" << error.message();
+
+        logException(where, stream.str());
+    }
+
+    virtual void logException(
+        const BString& where
+    )
+    {
+        stringstream stream;
+        stream << strerror(errno);
+
+        logException(where, stream.str());
+    }
+
+    SSLSocket::lowest_layer_type& socket()
+    {
+        return lowest_layer();
+    }
+
+    const BString& ipAddress() const
+    {
+        return _ipAddress;
+    }
+
+
+    const BString origin() const
+    {
+        BeeFishWeb::Headers*
+        requestHeaders = nullptr;
+
+        if (_request)
+            requestHeaders =
+                _request->_headers;
+
+        BString origin;
+
+        if (requestHeaders &&
+                requestHeaders->contains("origin"))
+        {
+            origin = (*requestHeaders)["origin"];
+        }
+        else if (requestHeaders &&
+                 requestHeaders->contains("host"))
+        {
+            BString host = (*requestHeaders)["host"];
+            origin = "https://" + host;
+        }
+        else {
+            origin = server()->origin();
+        }
+
+
+        return origin;
+
+    }
+
+    const BString host() const
+    {
+        BeeFishWeb::Headers*
+        requestHeaders = nullptr;
+
+        if (_request)
+            requestHeaders =
+                _request->_headers;
+
+        BString host;
+
+        if (requestHeaders &&
+                requestHeaders->contains("host"))
+        {
+            host = "https://" +
+                   (*requestHeaders)["host"];
+        }
+        else if (requestHeaders &&
+                 requestHeaders->contains("origin"))
+        {
+            host = (*requestHeaders)["origin"];
+        }
+        else {
+            host = server()->origin();
+        }
+
+
+        return host;
+
+    }
+
+    BString domain() const
+    {
+
+        // Use url to extract the domain
+        URL url = Session::host();
+
+        BString domain = url.domain();
+
+        return domain;
+    }
+
+    void handshake()
+    {
+        SSLSocket::async_handshake(
+            boost::asio::ssl::stream_base::server,
+            boost::bind(
+                &Session::handleHandshake,
+                this,
+                boost::asio::placeholders::error
+            )
+        );
+    }
+
+
+    void handleHandshake(const boost::system::error_code& error)
+    {
+
         if (!error)
         {
-            newSession->handshake();
+            try {
+                start();
+            }
+            catch (const std::exception& ex)
+            {
+                logException("Session::handleHandshake", ex.what());
+                delete this;
+            }
         }
         else
         {
+            logException("Session::handleHandshake", error);
+            delete this;
+        }
+    }
+
+    Server* server()
+    {
+        return _server;
+    }
+
+    const Server* server() const
+    {
+        return _server;
+    }
+
+    WebRequest* request()
+    {
+        return _request;
+    }
+
+    void setWebRequest(WebRequest* request) {
+        if (_request)
+            delete _request;
+        _request = request;
+    }
+
+    Response* response()
+    {
+        return _response;
+    }
+
+    Parser* parser() {
+        return _parser;
+    }
+
+    string tempFileName() {
+        return this->_tempFileName;
+    }
+
+    const BString& exception() const
+    {
+        return _exception;
+    }
+};
+
+// Declared in server.h
+BeeFishHTTPS::Server::~Server()
+{
+    _transactionFile.close();
+    if (_newSession)
+        delete _newSession;
+
+
+}
+
+// Declared in server.h
+inline void Server::startAccept()
+{
+
+    _newSession =
+        new Session(
+        this,
+        _ioContext,
+        _context
+    );
+
+
+    _acceptor.async_accept(
+        _newSession->socket(),
+        boost::bind(
+            &Server::handleAccept,
+            this,
+            _newSession,
+            boost::asio::placeholders::error
+        )
+    );
+}
+
+// Declared in server.h
+inline void Server::handleAccept(
+    Session* newSession,
+    const boost::system::error_code& error
+)
+{
+    startAccept();
+
+    if (!error)
+    {
+        try
+        {
+            newSession->_ipAddress =
+                newSession->lowest_layer()
+                .remote_endpoint()
+                .address()
+                .to_string();
+        }
+        catch (...)
+        {
+            newSession->logException("Server::handleAccept", "Invalid ipAddress");
             delete newSession;
-        }
-        
-
-    }
-    
-
-    // Declared in authentication.h
-    inline BeeFishHTTPS::Authentication::Authentication(
-        Session* session
-    ) : BeeFishAuthentication::Authentication(
-            session->server(),
-            session->origin(),
-            session->ipAddress(),
-            session->
-                request()->
-                getCookie("sessionId")
-        )
-    {
-    }
-    
-    
-    // Defined in app.h
-    inline bool App:: parseWebRequest(
-        Parser& parser
-    )
-    {
-        ifstream input(_session->tempFileName());
-        
-        parser.read(input);
-        parser.eof();
-        input.close();
-
-        return (parser.result() == true);
-
-    }
-
-    WebRequest* App::request() {
-        return _session->request();
-    }
-    
-    // Declared in response.h
-    const BString& Response::ipAddress() const
-    {
-        return _session->ipAddress();
-    }
-    
-    // Declared in response-headers.h
-    ResponseHeaders::ResponseHeaders(
-        Session* session
-    ) :
-        ResponseHeadersBase(
-            {
-                { "access-control-allow-origin", session->origin() },
-                { "access-control-allow-credentials", "true" },
-                { "access-control-allow-methods", "GET, POST, DELETE, OPTIONS" },
-                { "access-control-allow-headers", "origin, content-type, content-length, authorization" },
-                { "connection", "keep-alive" },
-                { "keep-alive", "max=5" }
-            }
-        )
-    {
-    }
-    
-
-    
-    // Declared in response.h
-    void Response::logException(const BString& where, const BString& what)
-    {
-        if (!_session->_request)
-            _session->logException(
-                where, 
-                what
-            );
-        else {
             
-            URL url(_session->_request->url(), _session->host());
-        
-            _session->logException(
-                where, 
-                what,
-                _session->_request->url().toString()
-            );
+            throw std::runtime_error("Couldn't get ip address");
         }
+
+        newSession->handshake();
     }
-    
-    // Declared in response.h
-    void Response::closeOrRestart()
+    else
     {
-        _session->closeOrRestart();
+        delete newSession;
     }
-    
-    // Declared in app.h
-    const BString App::origin() const
-    {
-        return _session->origin();
+
+
+}
+
+
+// Declared in authentication.h
+inline BeeFishHTTPS::Authentication::Authentication(
+    Session* session
+) : BeeFishAuthentication::Authentication(
+        session->server(),
+        session->origin(),
+        session->ipAddress(),
+        session->
+        request()->
+        getCookie("sessionId")
+    )
+{
+}
+
+
+// Defined in app.h
+inline bool App:: parseWebRequest(
+    Parser& parser
+)
+{
+    ifstream input(_session->tempFileName());
+
+    parser.read(input);
+    parser.eof();
+    input.close();
+
+    return (parser.result() == true);
+
+}
+
+WebRequest* App::request() {
+    return _session->request();
+}
+
+// Declared in response.h
+const BString& Response::ipAddress() const
+{
+    return _session->ipAddress();
+}
+
+// Declared in response-headers.h
+ResponseHeaders::ResponseHeaders(
+    Session* session
+) :
+    ResponseHeadersBase(
+{
+    { "access-control-allow-origin", session->origin() },
+    { "access-control-allow-credentials", "true" },
+    { "access-control-allow-methods", "GET, POST, DELETE, OPTIONS" },
+    { "access-control-allow-headers", "origin, content-type, content-length, authorization" },
+    { "connection", "keep-alive" },
+    { "keep-alive", "max=5" }
+}
+)
+{
+}
+
+
+
+// Declared in response.h
+void Response::logException(const BString& where, const BString& what)
+{
+    if (!_session->_request)
+        _session->logException(
+            where,
+            what
+        );
+    else {
+
+        URL url(_session->_request->url(), _session->host());
+
+        _session->logException(
+            where,
+            what,
+            _session->_request->url().toString()
+        );
     }
-    
+}
+
+// Declared in response.h
+void Response::closeOrRestart()
+{
+    _session->closeOrRestart();
+}
+
+// Declared in app.h
+const BString App::origin() const
+{
+    return _session->origin();
+}
+
 
 }
 

@@ -1,3 +1,4 @@
+all:	live
 
 live:
 	make -C bee.fish/code PORT=443
@@ -5,11 +6,28 @@ live:
 stop:
 	make -C bee.fish/code/https stop PORT=$(PORT)
 
+start:
+	make -C bee.fish/code/https start PORT=$(PORT)
+
 clean:
 	make -C bee.fish/code clean
 	
 debug:
 	make -C dev.bee.fish/code debug PORT=8000
 
+start_debug:
+	-mkdir dev.bee.fish/build
+	make -C dev.bee.fish/code/https start PORT=8000
+
 clean_debug:
 	make -C dev.bee.fish/code clean
+	
+run:	live
+	make -C bee.fish/code/https stop PORT=443
+	sudo gdb --args bee.fish/build/https -port 443
+
+run_debug:	debug
+	make -C dev.bee.fish/code/https debug stop PORT=8000
+	sudo gdb --args dev.bee.fish/build/https -port 8000
+
+	

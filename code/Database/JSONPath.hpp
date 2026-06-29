@@ -257,7 +257,9 @@ public:
                     json = json.parent(property, keyType);
 
                     if (keyType == Type::STRING) {
-                        addWords(property);
+                        BString partWord;
+                        addWords(property, partWord, true, true, false);
+                       // addWords(property);
                     }
 
                 }
@@ -482,7 +484,7 @@ public:
         path[VALUE][pageIndex].setData<BString>(value);
 
         if (indexData && partChanged) {
-            addWords(value, partWord, false, false);
+            addWords(value, partWord, false, false, true);
         }
 
 
@@ -496,7 +498,7 @@ public:
     {
         Path path = *this;
 
-        addWords("", partWord, false, true);
+        addWords("", partWord, false, true, true);
 
         path = path[VALUE];
         Index max = 0;
@@ -1124,28 +1126,21 @@ private:
     void addWords(const BString& word, bool wholeWord = true)
     {
         BString partWord = "";
-        addWords(word, partWord, wholeWord, true);
+        addWords(word, partWord, wholeWord, true, true);
     }
 
-    void addWords(const BString& value, BString& partWord, bool isWholeWord = false, bool isFinalWord = false)
+    void addWords(const BString& value, BString& partWord, bool isWholeWord = false, bool isFinalWord = false, bool useCallback = true)
     {
         Path words = database().words();
 
         std::vector<BString> tokens =
             value.tokenise(
                 partWord,
-                isFinalWord
+                isFinalWord,
+                isWholeWord
             );
 
-        if (isWholeWord &&
-                find(
-                    tokens.begin(),
-                    tokens.end(),
-                    value.toLower()
-                ) == tokens.end())
-        {
-            tokens.push_back(value.toLower());
-        }
+
 
         for (auto word : tokens)
         {
@@ -1161,7 +1156,7 @@ private:
                 json = json.parent();
             }
 
-            if (database()._onword)
+            if (useCallback && database()._onword)
             {
                 database()._onword(*this, word);
             }
@@ -1212,18 +1207,9 @@ private:
         std::vector<BString> tokens =
             value.tokenise(
                 partRemoveWords,
-                isFinalPart
+                isFinalPart,
+                wholeWord
             );
-
-        if (wholeWord &&
-                find(
-                    tokens.begin(),
-                    tokens.end(),
-                    value.toLower()
-                ) == tokens.end())
-        {
-            tokens.push_back(value.toLower());
-        }
 
         for (auto word : tokens)
         {

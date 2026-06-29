@@ -35,18 +35,18 @@ private:
 
 public:
     using JSONParser::read;
-
+    
     JSONPathParser(Authentication& auth, JSONPath path, Match& match, ostream& log = cnull) :
         JSONParser(match),
         _auth(auth),
         _start(path),
         _log(log)
     {
-        path.database()._onword =
-        [this, &auth, &log](JSONPath& path, const BString& word)
+        JSONDatabase& database = path.database();
+        database._onword =
+        [this](JSONPath& path, const BString& word)
         {
-
-            JSONPathParser::log(log, auth, path, word);
+            JSONPathParser::log(path, word);
         };
     }
 
@@ -56,10 +56,11 @@ public:
         _start(path),
         _log(log)
     {
-        path.database()._onword =
-        [this, &auth, &log](JSONPath& path, const BString& word)
+        JSONDatabase& database = path.database();
+        database._onword =
+        [this](JSONPath& path, const BString& word)
         {
-            JSONPathParser::log(log, auth, path, word);
+            JSONPathParser::log(path, word);
         };
     }
 
@@ -81,8 +82,6 @@ private:
     {
 
 
-        JSONPath path = start;
-
         switch (type)
         {
         case Type::UNDEFINED:
@@ -103,6 +102,7 @@ private:
             start.setNumber(value);
             break;
         case Type::STRING:
+            // String logs itself, simply return
             return;
         case Type::ARRAY:
             start.setArray();
@@ -114,10 +114,7 @@ private:
             throw std::logic_error("JSONPathParser::setVariable");
         }
 
-        database()._onword(start, value);
-
-        log(_log, _auth, start, value);
-
+        log(start, value);
 
 
     }
@@ -361,20 +358,21 @@ private:
 
     }
 
-    void log(ostream& log, Authentication& auth, JSONPath& path, const BString& value)
+    void log(JSONPath& path, const BString& value)
     {
-        if (&log != &cnull) {
-            BeeFishDate::writeDateTime(log);
-            log << " "
-                << path.toString(auth);
-
-            if (value.size()) {
-                log
-                    << "#"
-                    << value;
+        if (&_log != &cnull) {
+            
+            _log << BeeFishDate::getDateTime()
+                 << " "
+                 << path.toString(_auth);
+                 
+            if (value.size())
+            {
+                _log << "#"
+                     << value;
             }
-
-            log << endl;
+            
+            _log << endl;
         }
     }
 

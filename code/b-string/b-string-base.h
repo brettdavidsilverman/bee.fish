@@ -260,14 +260,15 @@ public:
         auto result =
             tokenise(
                 partWord,
-                true
+                true,
+                false
             );
 
         return result;
     }
 
     // Defined below
-    vector<BString> tokenise(BString& partWord, bool finalWord) const;
+    vector<BString> tokenise(BString& partWord, bool finalWord, bool useWholeWord = false) const;
 
 
     vector<BString> split(
@@ -1126,7 +1127,8 @@ Iterator BString::utf8End() const
 // Declared above
 vector<BString> BString::tokenise(
     BString& partWord,
-    bool isFinalWord
+    bool isFinalWord,
+    bool useWholeWord
 ) const
 {
     std::vector<BString> words;
@@ -1162,6 +1164,11 @@ vector<BString> BString::tokenise(
             );
 
     };
+    
+    if (useWholeWord)
+    {
+        words.push_back(toLower());
+    }
     
     BString value = partWord + *this;
 

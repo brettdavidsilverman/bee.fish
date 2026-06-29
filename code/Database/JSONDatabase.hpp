@@ -63,12 +63,6 @@ namespace BeeFishDatabase
         {
             return _json.index();
         }
-        /*
-        Path root()
-        {
-            return _root;
-        }
-        */
 
         Path authentication()
         {

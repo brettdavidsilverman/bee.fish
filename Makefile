@@ -27,7 +27,8 @@ restart:	stop start
 debug:	DEBUG = debug
 debug:	CFLAGS += -g -DDEBUG
 debug:	PORT=8000
-debug:	all
+debug:	https
+
 
 load:
 		make -C code load

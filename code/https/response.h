@@ -104,7 +104,7 @@ public:
                     what
                 );
                 delete app;
-                throw std::runtime_error(what.str());
+// throw std::runtime_error(what.str());
             }
             
             delete app;

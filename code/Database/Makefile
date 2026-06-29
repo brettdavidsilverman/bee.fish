@@ -41,7 +41,7 @@ run:	$(OUTPUT)
 	$(OUTPUT) -input
 	
 run_debug:	debug
-	gdb --args $(OUTPUT) -deaths
+	gdb --args $(OUTPUT) -test
 	
 	
 trace:	$(OUTPUT)

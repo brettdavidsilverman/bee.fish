@@ -1492,7 +1492,7 @@ inline bool testAllFiles(std::filesystem::path directory)
 inline bool testFile(BeeFishAuthentication:: Authentication& auth, JSONPath root, std::filesystem::path file, bool expect)
 {
     cout << "\t" << file.filename() << " " << flush;
-
+        
     std::stringstream stream;
     stream << TEMP_DIRECTORY << &root << "test.json";
 
