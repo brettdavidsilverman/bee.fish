@@ -1,10 +1,10 @@
 all:	start
 
 stop:
-	make -C bee.fish/code/https stop PORT=$(PORT)
+	make -C bee.fish/code/https stop PORT=443
 
 start:
-	make -C bee.fish/code/https start PORT=$(PORT)
+	make -C bee.fish/code/https start PORT=443
 
 clean:
 	make -C bee.fish/code clean
@@ -14,8 +14,11 @@ debug:
 
 start_debug:
 	-mkdir dev.bee.fish/build
-	make -C dev.bee.fish/code/https start PORT=8000
-
+	make -C dev.bee.fish/code/https debug start PORT=8000
+	
+stop_debug:
+	make -C dev.bee.fish/code/https stop PORT=8000
+	
 clean_debug:
 	make -C dev.bee.fish/code clean
 	

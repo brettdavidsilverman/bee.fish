@@ -48,7 +48,8 @@ trace:	stop
 	$(OUTPUT) -port $(PORT) &
 	cat trace.txt
 
-start:	CFLAGS += -Ofast
+start:	CFLAGS+=-Ofast
+
 start:	$(OUTPUT)
 start:	test
 	$(OUTPUT) -port $(PORT) &
@@ -65,6 +66,7 @@ debug:	DEBUG=debug
 debug:	JSON_INDEX=-D JSON_INDEX
 debug:	OPTIMISATION=
 debug:	CFLAGS += -g -D DEBUG
+
 debug:	$(OUTPUT)
 
 
