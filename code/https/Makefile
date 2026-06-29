@@ -35,7 +35,6 @@ install:	start
 time:	CFLAGS += -Ofast
 time:	install
 
-test:	TEST=test
 test:	$(OUTPUT)
 test:	stop
 	@echo "Testing on port $(PORT)"
