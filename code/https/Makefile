@@ -50,7 +50,7 @@ trace:	stop
 
 start:	CFLAGS += -Ofast
 start:	$(OUTPUT)
-start:	stop
+start:	test
 	$(OUTPUT) -port $(PORT) &
 
 stop:

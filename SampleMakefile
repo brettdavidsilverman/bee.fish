@@ -1,8 +1,5 @@
-all:	live
+all:	start
 
-live:
-	make -C bee.fish/code PORT=443
-	
 stop:
 	make -C bee.fish/code/https stop PORT=$(PORT)
 
