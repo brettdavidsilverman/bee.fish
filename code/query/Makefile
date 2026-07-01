@@ -4,7 +4,7 @@ CFLAGS=-std=c++17 -Wall -fmax-errors=1
 DEPS=main.cpp Query.hpp NotPath.hpp AndPath.hpp OrPath.hpp Iterable.hpp Test.hpp version.h Makefile $(BUILD)/Database
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lcryptopp
+	g++ $(CFLAGS) main.cpp $(JSON_INDEX) -o $(OUTPUT) -lcryptopp
 	
 $(BUILD):
 		mkdir $(BUILD)
@@ -22,6 +22,8 @@ time:	$(OUTPUT)
 
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
+debug:	JSON_INDEX=-D JSON_INDEX
+
 debug:	$(OUTPUT)
 
 

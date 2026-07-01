@@ -100,22 +100,8 @@ using namespace BeeFishAuthentication;
                      const Stack& stack) :
                 _container(&iterable),
                 _iterable(new IdIterable(*iterable._path)),
-               // _iterator(new IdIterator(*_iterable)),
                 _iterator(new IdIterator(*_iterable, stack))
             {
-                /*
-                for (const auto bit : stack)
-                {
-                    if (bit == 0 && _iterable->canGoLeft())
-                        _iterable->goLeft();
-                    else if (bit == 1 && _iterable->canGoRight())
-                        _iterable->goRight();
-                    else {
-                        throw runtime_error("Invalid iterator stack");
-                    }
-                }
-                */
-
                 setValue();
             }
         

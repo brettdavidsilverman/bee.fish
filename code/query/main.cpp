@@ -32,12 +32,6 @@ int main(int argc, const char* argv[]) {
     
     JSONDatabase database(DATABASE_FILENAME);
     
-    bool display = true;
-    if (hasArg(argc, argv, "-count") >= 0)
-    {
-        display = false;
-    }
-    
     int originArg =
     hasArg(argc, argv, "-origin");
     BString origin = ORIGIN;
@@ -64,12 +58,20 @@ int main(int argc, const char* argv[]) {
     );
     
     cout << "Using origin " << origin << endl;
- 
-    auto displayResults =
-    [&database, display, &auth](Expression& expression)
-    {
     
-        AndPath path =
+    
+    BString line;
+    auto displayResults =
+    [&database, &line, &auth, &path](Expression& expression)
+    {
+        
+        cout << "Querying " 
+             << path.toString(auth) 
+             << "?" 
+             << line
+             << endl;
+    
+        AndPath query =
             expression
             .getPath();
             
@@ -79,18 +81,33 @@ int main(int argc, const char* argv[]) {
             jsonMatches(
                 auth,
                 database,
-                path
+                query
             );
             
-        for (auto string : jsonMatches)
+        auto it = jsonMatches.begin();
+        assert(it != jsonMatches.end());
+        
+        for (;
+             it != jsonMatches.end();
+             ++it)
         {
-            if (display) {
-                cout << string << endl;
-            }
-            ++count;
+            cout << *it << endl;
+            
+            if (++count == 10)
+                break;
         }
         
-        cout << "Total count: " << count << endl;
+        if (it != jsonMatches.end())
+        {
+            cout << path.toString(auth)
+                 << "?q="
+                 << line.encodeURI()
+                 << "&next="
+                 << it.toKey()
+                 << endl;
+        }
+        
+       // cout << "Total count: " << count << endl;
             
     };
     
@@ -98,7 +115,7 @@ int main(int argc, const char* argv[]) {
     int queryArg = hasArg(argc, argv, "-query");
     if (queryArg >= 0 && argc > queryArg + 1)
     {
-        string line;
+        
         line = argv[queryArg + 1];
         
         Expression expression(path);
@@ -114,16 +131,20 @@ int main(int argc, const char* argv[]) {
         cout << "Expression: ";
         
         try {
-             
-            Statement statement(path);
-            cin >> statement;
-        
-            if (statement.value().trim() == "exit")
+            
+            std::getline(std::cin, line);
+            
+            line = line.trim();
+            
+            if (line == "exit")
             {
                 break;
             }
+            
+            BeeFishQuery::Expression
+                expression(path, line);
                     
-            displayResults(*statement._expression);
+            displayResults(expression);
             
             cout << "ok" << endl;
         

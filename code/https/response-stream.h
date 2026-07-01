@@ -176,10 +176,6 @@ public:
                 }
                 
                 ++count;
-                /*
-                if (!getCount && count == 1)
-                    flush();
-                */
 
             }
             
