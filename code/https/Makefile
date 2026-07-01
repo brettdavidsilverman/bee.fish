@@ -65,7 +65,7 @@ stop:
 
 debug:	DEBUG=debug
 debug:	JSON_INDEX=-D JSON_INDEX
-debug:	OPTIMISATION=-Ofast
+debug:	OPTIMISATION=
 debug:	CFLAGS += -g -D DEBUG
 
 debug:	$(OUTPUT)
@@ -74,7 +74,7 @@ debug:	$(OUTPUT)
 
 run_debug:	debug
 run_debug:	stop
-	gdb --args $(OUTPUT) -port $(PORT) -test
+	gdb --args $(OUTPUT) -port $(PORT)
 
 clean:
 	rm -f session.log

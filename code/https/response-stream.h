@@ -135,8 +135,7 @@ public:
                 expression(bookmark, search);
 
             Index count = 0;
-            if (!getCount)
-                *this << "[" << endl;
+
 
             BeeFishQuery::AndPath path =
                 expression
@@ -149,11 +148,28 @@ public:
                     path
                 );
                 
-            auto it = 
-                searchObject.contains("next") ?
-                    matches.begin(searchObject["next"])
-                :
-                    matches.begin();
+            BeeFishQuery::Iterable::Iterator it;
+            
+            if (searchObject.contains("next")) {
+                try
+                {
+                    it =
+                        matches.begin(searchObject["next"]);
+                }
+                catch (const BeeFishDatabase::InvalidStackException& exception)
+                {
+                    *this << "\""
+                          << "Invalid query parameters"
+                          << "\"";
+                    flush();
+                    return;
+                }
+            }
+            else
+                it = matches.begin();
+                
+            if (!getCount)
+                *this << "[" << endl;
 
             while (it != matches.end() &&
                    count < 10)
