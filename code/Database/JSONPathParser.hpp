@@ -80,6 +80,7 @@ private:
 
     virtual void setVariable(JSONPath start, const Type type, const BString& value)
     {
+        BString hash = value;
 
 
         switch (type)
@@ -91,6 +92,7 @@ private:
             return;
         case Type::NULL_:
             start.setNull();
+            hash = "null";
             break;
         case Type::BOOLEAN:
             start.setBoolean(value);
@@ -114,7 +116,7 @@ private:
             throw std::logic_error("JSONPathParser::setVariable");
         }
 
-        log(start, value);
+        log(start, hash);
 
 
     }

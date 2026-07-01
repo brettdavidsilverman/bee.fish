@@ -89,7 +89,7 @@ async function logon(secret)
             document.location.href = url;
         }
         else {
-            document.location.href = "/"
+            window.location.reload();
         }
     }
     else {
@@ -111,34 +111,7 @@ async function logoff()
     updateForm();
    
 }
-/*
-async function calculateFileSHA256(file) {
-    const reader = file.stream().getReader();
 
-    // SHA-3 in the browser supports 'SHA-3-224', 'SHA-3-256', 'SHA-3-384', 'SHA-3-512'
-    const cryptoHash = await window.crypto.subtle.digest('SHA-3-256', new ReadableStream({
-        async start(controller) {
-            while (true) {
-                const { done, value } = 
-                    await reader.read();
-                if (done) 
-                    break;
-                controller.enqueue(value);
-            }
-            controller.close();
-        }
-    }));
-    
-    const hashBuffer = cryptoHash;
-    const hashHex = Array.from(
-        new Uint8Array(hashBuffer)
-    ).map(
-        b => b.toString(16).padStart(2, '0')
-    ).join('');
-        
-    return hashHex;
-}
-*/
 
 
 async function calculateFileSHA256(file) {
