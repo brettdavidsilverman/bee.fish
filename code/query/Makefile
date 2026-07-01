@@ -20,7 +20,7 @@ time:	CFLAGS += -Ofast -D DEBUG
 time:	TIME = time
 time:	$(OUTPUT)
 
-debug:	CFLAGS += -g -D DEBUG -Ofast
+debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
 debug:	JSON_INDEX=-D JSON_INDEX
 

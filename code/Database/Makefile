@@ -19,7 +19,7 @@ test:	$(OUTPUT)
 
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
-debug:	OPTIMISATION=-Ofast
+debug:	OPTIMISATION=
 debug:	JSON_INDEX = -D JSON_INDEX
 
 debug:	$(OUTPUT)

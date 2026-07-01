@@ -13,6 +13,16 @@ using namespace BeeFishPowerEncoding;
 
 namespace BeeFishDatabase {
 
+class InvalidStackException :
+    public runtime_error
+{
+public:
+    InvalidStackException() :
+        runtime_error("Invalid stack")
+    {
+    }
+};
+
 template<typename T>
 class Iterable :
     public PathBase
@@ -91,6 +101,8 @@ public:
 
 
 public:
+
+
     class Iterator {
     public:
         const Iterable<T>* _iterable = nullptr;
@@ -136,9 +148,13 @@ public:
                 else if (bit == 1 && _path->canGoRight())
                     _path->goRight();
                 else {
-                    throw runtime_error("Invalid iterator stack");
+                    throw InvalidStackException();
                 }
             }
+            
+            if (!_path->isDeadEnd())
+                throw InvalidStackException();
+            
 
             _isEnd = !_path->next<T>(_stack, _item);
 
@@ -217,7 +233,7 @@ public:
             ++(*this);
             return tmp;
         }
-        
+
         friend bool operator == (
             const Iterator& a,
             const Iterator& b
