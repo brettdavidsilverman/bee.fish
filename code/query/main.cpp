@@ -85,8 +85,7 @@ int main(int argc, const char* argv[]) {
             );
             
         auto it = jsonMatches.begin();
-        assert(it != jsonMatches.end());
-        
+
         for (;
              it != jsonMatches.end();
              ++it)
