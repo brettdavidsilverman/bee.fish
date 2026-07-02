@@ -2,7 +2,7 @@ BUILD=../../build
 OUTPUT=$(BUILD)/json
 DEATHS=$(BUILD)/../deaths.json
 CC=g++
-OPTIMISER=-Ofast
+OPTIMISER=
 CFLAGS=-std=c++17 -Wall -fmax-errors=1 $(OPTIMISER)
 DEPS=main.cpp json.h string.h number.h array.h object.h boolean.h null.h blank-space.h set.h keyed-set.h test.h version.h json-parser.h Makefile $(BUILD)/parser
 

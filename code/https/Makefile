@@ -64,7 +64,7 @@ stop:
 
 
 debug:	DEBUG=debug
-debug:	JSON_INDEX=-D JSON_INDEX
+debug:	JSON_INDEX=
 debug:	OPTIMISATION=
 debug:	CFLAGS += -g -D DEBUG
 

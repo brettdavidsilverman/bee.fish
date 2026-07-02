@@ -133,7 +133,13 @@ public:
     }
 
 #else
-    Id setId(const Id& id = Id(""))
+    Id setId()
+    {
+        const Id id("");
+        return setId(id);
+    }
+    
+    Id setId(const Id& id)
     {
         Path path = *this;
         path = path[ID];

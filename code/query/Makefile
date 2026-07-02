@@ -22,7 +22,7 @@ time:	$(OUTPUT)
 
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
-debug:	JSON_INDEX=-D JSON_INDEX
+debug:	JSON_INDEX=
 
 debug:	$(OUTPUT)
 
