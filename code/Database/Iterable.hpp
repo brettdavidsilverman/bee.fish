@@ -23,6 +23,7 @@ public:
     }
 };
 
+
 template<typename T>
 class Iterable :
     public PathBase
@@ -140,21 +141,28 @@ public:
             _path(iterable._path->copy()),
             _stack(stack)
         {
+            Index count = 0;
+            
 
             for (const auto bit : stack)
             {
                 if (bit == 0 && _path->canGoLeft())
+                {
                     _path->goLeft();
+                    --count;
+                }
                 else if (bit == 1 && _path->canGoRight())
+                {
                     _path->goRight();
+                    ++count;
+                }
                 else {
                     throw InvalidStackException();
                 }
             }
             
-            if (!_path->isDeadEnd())
+            if (count != 0)
                 throw InvalidStackException();
-            
 
             _isEnd = !_path->next<T>(_stack, _item);
 
@@ -374,6 +382,10 @@ public:
     virtual Iterator begin(const BString& key) const {
 
         Stack stack = Stack::fromData(key.fromBase64());
+        
+        if (stack.count() != 0)
+            throw InvalidStackException();
+            
 
         return Iterator(*this, stack);
 

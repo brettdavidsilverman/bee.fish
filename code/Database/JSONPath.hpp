@@ -23,9 +23,6 @@ using namespace BeeFishAuthentication;
 class JSONPath :
     public Path
 {
-protected:
-    LockFile::ScopedLock* _lock = nullptr;
-
 public:
     inline static const Index VALUE = 0;
     inline static const Index PROPERTIES = 1;
@@ -437,9 +434,7 @@ public:
         BString& partWord
     )
     {
-
-        if (!_lock)
-            _lock = new LockFile::ScopedLock(database());
+        LockFile::ScopedLock lock(database());
 
         Path path = *this;
         setType(Type::STRING);
@@ -453,6 +448,7 @@ public:
         if (pageIndex <= max &&
                 !path[VALUE].isDeadEnd())
         {
+
             if ((current = path[VALUE][pageIndex].getStringData())
                     != value)
             {
@@ -477,13 +473,17 @@ public:
             }
 
         }
-        else
-            partChanged = true;
+        else 
+        {
 
+            partChanged = true;
+        }
 
         path[VALUE][pageIndex].setData<BString>(value);
 
-        if (indexData && partChanged) {
+        if (indexData && partChanged) 
+        {
+
             addWords(value, partWord, false, false, true);
         }
 
@@ -496,6 +496,7 @@ public:
         BString& partWord
     )
     {
+        LockFile::ScopedLock lock(database());
         Path path = *this;
 
         addWords("", partWord, false, true, true);
@@ -527,9 +528,6 @@ public:
         path.setData<bool>(indexData);
 
         partWord = "";
-
-        delete _lock;
-        _lock = nullptr;
 
     }
 
@@ -1131,6 +1129,8 @@ private:
 
     void addWords(const BString& value, BString& partWord, bool isWholeWord = false, bool isFinalWord = false, bool useCallback = true)
     {
+        
+
         Path words = database().words();
 
         std::vector<BString> tokens =
@@ -1139,8 +1139,6 @@ private:
                 isFinalWord,
                 isWholeWord
             );
-
-
 
         for (auto word : tokens)
         {

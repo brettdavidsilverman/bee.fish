@@ -671,8 +671,7 @@ inline void Server::handleAccept(
         {
             newSession->logException("Server::handleAccept", "Invalid ipAddress");
             delete newSession;
-            
-            throw std::runtime_error("Couldn't get ip address");
+            return;
         }
 
         newSession->handshake();

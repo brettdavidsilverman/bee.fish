@@ -27,7 +27,7 @@ void loadFiles(
             << "Loading directory "
             << directory
             << endl;
-            
+/*
     loadFile(
             auth,
             start,
@@ -36,6 +36,7 @@ void loadFiles(
         );
         
     return;
+*/
             
     const std::vector<BString> ignoreFiles {
         "deaths.json"
@@ -143,6 +144,13 @@ void loadFile(
         !_mimeTypes[extension].index
     )
     {
+        if (_mimeTypes.count(extension))
+        {
+
+            start.setString(
+                _mimeTypes[extension].contentType
+            );
+        }
         return;
     }
 
