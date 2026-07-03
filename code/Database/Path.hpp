@@ -454,6 +454,7 @@ public:
 
     }
     
+    template <typename T = BString>
     void getData(BString& destination) const
     {
         Path path = *this;
@@ -466,7 +467,7 @@ public:
         getData(data);
         return data;
     }
-
+    
     template<typename T>
     T getData() const
     {
@@ -475,6 +476,17 @@ public:
         return *(T*)data.data();
     }
     
+
+    template<typename T>
+    void getData(T& value) const
+    {
+        BString data;
+        getData(data);
+        value = *(T*)data.data();
+    }
+    
+    
+    template<typename T = BeeFishId::Id>
     void getData(BeeFishId::Id& id) const
     {
         BString data = getStringData();

@@ -253,6 +253,11 @@ public:
             );
 
     }
+    
+    const BString& toString() const
+    {
+        return *this;
+    }
 
     vector<BString> tokenise() const
     {

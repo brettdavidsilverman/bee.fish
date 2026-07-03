@@ -514,14 +514,19 @@ namespace BeeFishQuery {
         words = words["words"];
         JSONPath::Id ids[5];
         
-#ifdef JSON_INDEX
+
         Index count = 0;
         for (auto& id : ids)
         {
+#ifdef JSON_INDEX
             id = count++;
+#else
+            stringstream stream;
+            stream << std::hex << count++;
+            id = stream.str();
+#endif
         }
         
-#endif
 
         words["one"][ids[0]];
         words["one"][ids[1]];
@@ -584,7 +589,7 @@ namespace BeeFishQuery {
             {
                 array.push_back(value);
             }
-        
+
             ok = ok &&
                 testResult("AndPath result size",
                     array.size() == 2
@@ -622,11 +627,18 @@ namespace BeeFishQuery {
 
         JSONPath::Id ids[3];
         
-#ifdef JSON_INDEX
         Index count = 0;
         for (auto& id : ids)
-            id = ++count;
+        {
+#ifdef JSON_INDEX
+            id = count++;
+#else
+            stringstream stream;
+            stream << std::hex << count++;
+            id = stream.str();
 #endif
+        }
+        
         words["one"][ids[0]];
         words["two"][ids[1]];
         words["three"][ids[2]];
@@ -784,13 +796,17 @@ namespace BeeFishQuery {
         
         JSONPath::Id ids[3];
         
-#ifdef JSON_INDEX
         Index count = 0;
         for (auto& id : ids)
-            id = ++count;
-
-            
+        {
+#ifdef JSON_INDEX
+            id = count++;
+#else
+            stringstream stream;
+            stream << std::hex << count++;
+            id = stream.str();
 #endif
+        }
         words["one"][ids[0]];
         words["one"][ids[2]];
         words["two"][ids[1]];
@@ -1018,11 +1034,17 @@ namespace BeeFishQuery {
         };
         
         JSONPath::Id ids[5];
-#ifdef JSON_INDEX
-        Index count = 0;
+Index count = 0;
         for (auto& id : ids)
-            id = ++count;
+        {
+#ifdef JSON_INDEX
+            id = count++;
+#else
+            stringstream stream;
+            stream << std::hex << count++;
+            id = stream.str();
 #endif
+        }
         
         words["one"][ids[0]];
         words["one"][ids[1]];

@@ -2095,11 +2095,7 @@ inline bool testObjects()
                 it != iterable.end();
                 ++it)
         {
-#ifdef JSON_INDEX
             cerr << "Id " << *it << endl;
-#else
-            cerr << "Id " << it->toString() << endl;
-#endif
             ++count;
         }
         cerr << "Count " << count << endl;
@@ -2143,12 +2139,15 @@ inline bool testObjects()
         if (success)
             start.setUndefined();
         cerr << "Cleared objects count " << objects.childCount()  << endl;
+        
+
         success = success &&
                   testValue(
                       "Cleared objects count",
                       objects.childCount() == 1
                   );
 
+                  
         if (!success)
             listObjects(objects);
 
@@ -2161,7 +2160,6 @@ inline bool testObjects()
               test("{\"a\":{\"a\":\"a\"}}", 3);
     success = success &&
               test("[1,2,3]", 4);
-
 
     BeeFishMisc::outputSuccess(success);
 
@@ -2574,7 +2572,7 @@ inline bool testMultiThreaded()
     // sizes are consistent
     const Index SIZE = 1135312;
 #else
-    const Index SIZE = 0;
+    const Index SIZE = 4158629;
 #endif
 
     File authFile;

@@ -36,7 +36,8 @@ public:
 #ifdef JSON_INDEX
     typedef Index Id;
 #else
-    typedef BeeFishId::Id Id;
+   // typedef BeeFishId::Id Id;
+   typedef BString Id;
 #endif
 
 
@@ -103,42 +104,24 @@ public:
 
         Path path = *this;
         path = path[ID];
-
-#ifdef JSON_INDEX
-        return path.getData<Index>();
-#else
         Id id;
-        path.getData(id);
-
+        path.getData<Id>(id);
+        
         return id;
-#endif
-
     }
 
+
+    Id setId()
+    {
 #ifdef JSON_INDEX
-    Id setId()
-    {
-        Id id = index();
-        return setId(id);
-    }
-
-    Id setId(const Id& id)
-    {
-        Path path = *this;
-        path = path[ID];
-
-        path.setData<Id>(id);
-
-        return id;
-    }
-
+        const Id id = index();
 #else
-    Id setId()
-    {
-        const Id id("");
+        const Id id = toKey();
+#endif
         return setId(id);
     }
-    
+
+
     Id setId(const Id& id)
     {
         Path path = *this;
@@ -148,7 +131,6 @@ public:
 
         return id;
     }
-#endif
 
     bool hasId()
     {
@@ -723,7 +705,52 @@ public:
 
         return string;
     }
+    
+protected:
+    BString toKey() {
+        
+        LockFile::ScopedLock lock(database());
+        
+        JSONPath path = *this;
+        BString string;
+        BString key;
 
+        while (!path.isRoot())
+        {
+            Type keyType = Type::STRING;
+            path = path.parent(key, keyType);
+
+            if (keyType == Type::INTEGER)
+            {
+                Index index = std::stol(key);
+                Stack stack;
+                stack << index;
+                key =
+                    BString(
+                        std::to_string((Index)Type::INTEGER)
+                    ) +
+                    BString(stack.toData());
+            }
+            else {
+                key = 
+                    BString(
+                        std::to_string((Index)Type::STRING)
+                    ) +
+                    key.toLower();
+            }
+
+            string =
+                key +
+                BString("/") +
+                string;
+        }
+
+
+        return string;
+    }
+    
+
+public:
     class PathNotFoundException : public std::runtime_error
     {
         const BString _url;

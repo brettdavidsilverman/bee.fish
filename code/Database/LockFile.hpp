@@ -77,6 +77,7 @@ namespace BeeFishDatabase
         }
 
         void lock() {
+
             
             if (_lockCount++ == 0) {
                // flock(_fileNumber, LOCK_EX);
