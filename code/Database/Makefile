@@ -9,7 +9,7 @@ $(OUTPUT): $(DEPS)
 
 
 $(BUILD)/json:
-		cd ../json && make $(DEBUG) $(TEST)
+	cd ../json && make $(DEBUG) $(TEST)
 		
 
 test:	$(OUTPUT)
