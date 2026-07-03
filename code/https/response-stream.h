@@ -154,7 +154,7 @@ public:
                 try
                 {
                     it =
-                        matches.begin(searchObject["next"]);
+                        matches.begin(std::stol(searchObject["next"]));
                 }
                 catch (const BeeFishDatabase::InvalidStackException& exception)
                 {
@@ -204,7 +204,7 @@ public:
                       << "?q="
                       << search.encodeURI()
                       << "&next="
-                      << it.toKey()
+                      << to_string(it._jsonPath.index())
                       << "\""
                       << endl;
                       

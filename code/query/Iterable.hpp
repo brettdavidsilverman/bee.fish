@@ -57,8 +57,9 @@ using namespace BeeFishAuthentication;
             BString _parentValue;
             BString _value;
             JSONPath _parentPath;
-            JSONPath _jsonPath;
         public:
+            JSONPath _jsonPath;
+
             // Iterator traits (required for STL compatibility in C++17 and earlier)
             using iterator_category = std::forward_iterator_tag;
             using value_type        = BString;
@@ -97,11 +98,19 @@ using namespace BeeFishAuthentication;
             }
             
             Iterator(const Iterable& iterable, 
-                     const Stack& stack) :
+                     Index from) :
                 _container(&iterable),
-                _iterable(new IdIterable(*iterable._path)),
-                _iterator(new IdIterator(*_iterable, stack))
+                _iterable(new IdIterable(*iterable._path))
             {
+                JSONPath json(*_container->_database, from);
+                JSONPath::Id id = json.id();
+                
+                Stack stack;
+                stack << id;
+                
+                _iterator =
+                    new IdIterator(*_iterable, stack);
+                    
                 setValue();
             }
         
@@ -294,13 +303,10 @@ using namespace BeeFishAuthentication;
         }
         
         virtual Iterator begin(
-            const BString& key
+            Index from
         ) const 
         {
-
-            Stack stack = Stack::fromData(key.fromBase64());
-
-            return Iterator(*this, stack);
+            return Iterator(*this, from);
         }
         
         

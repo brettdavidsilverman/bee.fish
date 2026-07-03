@@ -98,11 +98,12 @@ int main(int argc, const char* argv[]) {
         
         if (it != jsonMatches.end())
         {
+
             cout << path.toString(auth)
                  << "?q="
                  << line.encodeURI()
                  << "&next="
-                 << it.toKey()
+                 << to_string(it._jsonPath.index())
                  << endl;
         }
         
