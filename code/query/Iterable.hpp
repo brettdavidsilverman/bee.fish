@@ -196,6 +196,8 @@ using namespace BeeFishAuthentication;
                         break;
                     }
                     
+                    
+                    
                     *_iterator = iterator;
                 }
                 
@@ -204,7 +206,14 @@ using namespace BeeFishAuthentication;
             
             BString toString(IdIterator& iterator) 
             {
-                return jsonPath(iterator).toString(_container->_auth);
+                Stack stack = iterator._stack;
+                stack.reset();
+                BString key;
+                stack >> key;
+            
+                return JSONPath::keyToString(key);
+                
+               // return jsonPath(iterator).toString(_container->_auth);
             }
             
             JSONPath jsonPath(IdIterator& iterator)

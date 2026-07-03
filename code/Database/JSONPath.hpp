@@ -424,10 +424,9 @@ public:
     )
     {
         
-        /*
         if (!_lock)
             _lock = new LockFile::ScopedLock(database());
-        */
+        
         LockFile::ScopedLock lock(database());
         
         Path path = *this;
@@ -490,7 +489,6 @@ public:
         BString& partWord
     )
     {
-        LockFile::ScopedLock lock(database());
         Path path = *this;
 
         addWords("", partWord, false, true, true);
@@ -522,10 +520,9 @@ public:
         path.setData<bool>(indexData);
 
         partWord = "";
-        /*
+        
         delete _lock;
         _lock = nullptr;
-        */
 
     }
 
@@ -740,25 +737,67 @@ protected:
                     BString(stack.toData());
             }
             else {
+                if (key.startsWith("https://"))
+                    key = key.substr(8);
+                    
                 key = 
                     BString(
                         std::to_string((Index)Type::STRING)
                     ) +
-                    key.toLower();
+                    key;
+                   // key.toLower();
             }
+            
 
             string =
                 key +
                 BString("/") +
                 string;
         }
+        
+        if (string.size())
+            string.pop_back();
 
 
         return string;
     }
     
-
 public:
+    
+    static BString keyToString(const BString& key)
+    {
+        
+        BString string;
+        
+        vector<BString> segments = key.split('/');
+        for (auto segment : segments)
+        {
+            BString sType = segment.substr(0, 1);
+            
+            Type type = (Type)stol(sType);
+            if (type == Type::INTEGER)
+            {
+                Stack stack =
+                    Stack::fromData(segment.substr(1));
+                Index index;
+                stack >> index;
+                string += to_string(index);
+            }
+            else
+            {
+                string += segment.substr(1);
+            }
+            string += "/";
+        }
+        
+        string = 
+            BString("https://") + string.substr(0, string.size() - 1);
+
+        return string;
+    }
+    
+
+
     class PathNotFoundException : public std::runtime_error
     {
         const BString _url;
