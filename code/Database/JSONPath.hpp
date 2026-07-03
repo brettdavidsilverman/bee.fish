@@ -36,8 +36,8 @@ public:
 #ifdef JSON_INDEX
     typedef Index Id;
 #else
-   // typedef BeeFishId::Id Id;
-   typedef BString Id;
+    // typedef BeeFishId::Id Id;
+    typedef BString Id;
 #endif
 
 
@@ -45,7 +45,8 @@ public:
     using Path::clear;
     using Path::write;
 
-
+    LockFile::ScopedLock* _lock = nullptr;
+    
     JSONPath()
     {
     }
@@ -422,7 +423,8 @@ public:
         BString& partWord
     )
     {
-        LockFile::ScopedLock lock(database());
+        if (!_lock)
+            _lock = new LockFile::ScopedLock(database());
 
         Path path = *this;
         setType(Type::STRING);
@@ -516,6 +518,9 @@ public:
         path.setData<bool>(indexData);
 
         partWord = "";
+        
+        delete _lock;
+        _lock = nullptr;
 
     }
 
@@ -708,8 +713,6 @@ public:
     
 protected:
     BString toKey() {
-        
-        LockFile::ScopedLock lock(database());
         
         JSONPath path = *this;
         BString string;
