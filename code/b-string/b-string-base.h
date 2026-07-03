@@ -163,12 +163,13 @@ public:
         return *this;
     }
 
-
+/*
     virtual BString& operator = (const BString& rhs) {
         BStringBase::operator = (rhs);
         //_utf8 = rhs._utf8;
         return *this;
     }
+*/
 
     bool startsWith(const BString& prefix) const {
         return (rfind(prefix, 0) == 0);

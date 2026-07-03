@@ -37,6 +37,8 @@ private:
     
 public:
     
+    using PowerEncoding::write;
+    
     
 
     Path()
@@ -902,7 +904,7 @@ protected:
             return false;
         }
 
-        virtual bool peekBit()
+        virtual bool peekBit() const
         {
             return false;
         }

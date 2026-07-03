@@ -43,7 +43,7 @@ public:
 
     using Path::contains;
     using Path::clear;
-
+    using Path::write;
 
 
     JSONPath()

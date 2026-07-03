@@ -549,6 +549,8 @@ class Expression : public BeeFishParser::Match
 
 public:
     
+    using Match::write;
+    
     class Items : public vector<Item*>
     {
     public:
