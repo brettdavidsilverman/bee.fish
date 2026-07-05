@@ -68,7 +68,6 @@ using namespace BeeFishWeb;
                 jsonPath = JSONPath::fromString(
                     authentication(),
                     *database,
-                    host,
                     url,
                     method
                 );
@@ -81,7 +80,8 @@ using namespace BeeFishWeb;
             }
             
             if (method == "GET" && 
-                request()->search().length())
+                url.search().value().length() &&
+                !url.search().contains("index"))
             {
                 _responseHeaders.replace(
                     "content-type",

@@ -495,6 +495,13 @@ public:
         id = BeeFishId::Id::fromData(data);
     }
     
+    template<typename T = Stack>
+    void getData(Stack& stack) const
+    {
+        BString data = getStringData();
+        stack = Stack::fromData(data);
+    }
+    
 
     template<typename T>
     bool setData(const T& source)
@@ -511,9 +518,23 @@ public:
         BString data = id.toData();
         return setData<BString>(data);
     }
+    
+    template<typename T = Stack>
+    bool setData(const Stack& stack)
+    {
+        BString data = stack.toData();
+        return setData<BString>(data);
+    }
+    
+    template<typename T = std::string>
+    bool setData(const std::string& value)
+    {
+        return setData<BString>(BString(value));
+    }
 
     template<typename T = BString>
-    bool setData(const BString& value) {
+    bool setData(const BString& value) 
+    {
         
         LockFile::ScopedLock lock(database());
         

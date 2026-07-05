@@ -3,8 +3,7 @@
 
 #include <map>
 #include <iomanip>
-#include "../Miscellaneous/Optional.hpp"
-
+#include <optional>
 #include "../parser/parser.h"
 
 using namespace BeeFishParser;

@@ -510,8 +510,7 @@ namespace BeeFishQuery {
         bool ok  = true;
         
         JSONDatabase db;
-        Words words(db);
-        words = words["words"];
+        Words words = db.words();
         JSONPath::Id ids[5];
         
 
@@ -521,11 +520,13 @@ namespace BeeFishQuery {
 #ifdef JSON_INDEX
             id = count++;
 #else
-            stringstream stream;
-            stream << std::hex << count++;
-            id = stream.str();
+            Stack stack;
+            stack << count++;
+            stack.reset();
+            id = stack;
 #endif
         }
+        
         
 
         words["one"][ids[0]];
@@ -536,10 +537,11 @@ namespace BeeFishQuery {
         words["two"][ids[3]];
         words["two"][ids[4]];
         
+        
         JSONDatabase dbReadOnly(db.filename(), true);
         
         words = dbReadOnly;
-        words = words["words"];
+        words = dbReadOnly.words();
 
         Path one = words["one"];
         Path two = words["two"];
@@ -560,6 +562,9 @@ namespace BeeFishQuery {
                     "AndPath Minimum", 
                     min == ids[2]
                 );
+                
+            
+        
         }
         
         if (ok) 
@@ -577,15 +582,15 @@ namespace BeeFishQuery {
 
         }
         
-            
-        
         if (ok)
         {
             vector<JSONPath::Id> array;
+            
+            
             BeeFishDatabase::Iterable<JSONPath::Id>
                 iterable(andPath);
                 
-            for (auto value : iterable)
+            for (const JSONPath::Id& value : iterable)
             {
                 array.push_back(value);
             }
@@ -605,6 +610,7 @@ namespace BeeFishQuery {
                     array[1] == ids[3]
                     
                 );
+                
                 
         }
         
@@ -633,9 +639,10 @@ namespace BeeFishQuery {
 #ifdef JSON_INDEX
             id = count++;
 #else
-            stringstream stream;
-            stream << std::hex << count++;
-            id = stream.str();
+            Stack stack;
+            stack << count++;
+            stack.reset();
+            id = stack;
 #endif
         }
         
@@ -802,11 +809,13 @@ namespace BeeFishQuery {
 #ifdef JSON_INDEX
             id = count++;
 #else
-            stringstream stream;
-            stream << std::hex << count++;
-            id = stream.str();
+            Stack stack;
+            stack << count++;
+            stack.reset();
+            id = stack;
 #endif
         }
+        
         words["one"][ids[0]];
         words["one"][ids[2]];
         words["two"][ids[1]];
@@ -1040,9 +1049,10 @@ namespace BeeFishQuery {
 #ifdef JSON_INDEX
             id = count++;
 #else
-            stringstream stream;
-            stream << std::hex << count++;
-            id = stream.str();
+            Stack stack;
+            stack << count++;
+            stack.reset();
+            id = stack;
 #endif
         }
         

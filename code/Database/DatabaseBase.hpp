@@ -25,14 +25,15 @@
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/sync/interprocess_sharable_mutex.hpp>
 
-#include "../Miscellaneous/Miscellaneous.hpp"
 #include "../b-string/b-string.h"
+#include "../Miscellaneous/Stack.hpp"
 #include "../Size.hpp"
 #include "Version.hpp"
 #include "File.hpp"
 #include "LockFile.hpp"
 #include "Branch.hpp"
 #include "LockFile.hpp"
+
 
 using namespace std;
 using namespace std::literals;

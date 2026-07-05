@@ -2,7 +2,7 @@ BUILD=../../build
 OUTPUT=$(BUILD)/Database
 CFLAGS=-std=c++17 -Wall -fmax-errors=1
 OPTIMISATION=-Ofast
-DEPS=$(BUILD)/json main.cpp Database.hpp DatabaseBase.hpp LeastRecentlyUsedCache.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Locks.hpp Version.hpp Branch.hpp Path.hpp PathBase.hpp PathBase.hpp Iterable.hpp Makefile JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp JSONIndex.hpp NullStream.hpp LoadFiles.hpp ../Size.hpp Makefile
+DEPS=$(BUILD)/json main.cpp ../Miscellaneous/Stack.hpp Database.hpp DatabaseBase.hpp LeastRecentlyUsedCache.hpp Version.hpp Test.hpp File.hpp LockFile.hpp Locks.hpp Version.hpp Branch.hpp Path.hpp PathBase.hpp PathBase.hpp Iterable.hpp Makefile JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp JSONIndex.hpp NullStream.hpp LoadFiles.hpp ../Size.hpp Makefile
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) $(OPTIMISATION) main.cpp $(JSON_INDEX) -o $(OUTPUT) -lcryptopp

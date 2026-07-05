@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <ctype.h>
 #include <bitset>
+#include <assert.h>
 
 #include "../power-encoding/power-encoding.h"
 #include "../b-string/b-string.h"
@@ -29,7 +30,7 @@ class Stack :
 private:
     vector<bool>::const_iterator _it;
     typedef unsigned char Byte;
-    
+
 public:
 
     Stack()
@@ -41,6 +42,13 @@ public:
         vector<bool>(bitStream)
     {
         _it = cbegin();
+    }
+    
+    Stack& operator = (const Stack& rhs)
+    {
+        vector<bool>::operator = (rhs);
+        _it = cbegin();
+        return *this;
     }
 
 
@@ -83,6 +91,17 @@ public:
 
         _it = cbegin();
 
+    }
+    
+    bool isEOF() const {
+        return _it == cend();
+    }
+    
+    friend bool operator == (const Stack& lhs, const Stack& rhs)
+    {
+        return 
+            (vector<bool>&)(lhs) ==
+            (vector<bool>&)(rhs);
     }
 
     static Stack fromData(const std::string& data)
@@ -132,14 +151,14 @@ public:
         push_back(bit);
 
         PowerEncoding::writeBit(bit);
-        
+
     }
 
     virtual bool readBit()
     {
 
         bool bit = peekBit();
-        
+
         PowerEncoding::readBit();
 
         if (_it != cend())
@@ -165,11 +184,33 @@ public:
         _it = cbegin();
         PowerEncoding::reset();
     }
-    
+
     virtual void clear()
     {
         reset();
         vector<bool>::clear();
+    }
+    
+    template<typename T>
+    bool contains(const T& value)
+    {
+        Stack temp;
+        temp << value;
+        temp.reset();
+        
+        vector<bool>::const_iterator
+            it = _it;
+        for (const auto bit : temp)
+        {
+            if (it == cend())
+                return false;
+                
+            if (*it != bit)
+                return false;
+            ++it;
+        }
+        
+        return true;
     }
 
     friend ostream& operator << (ostream& out, const Stack& bitStream) {
@@ -190,12 +231,12 @@ public:
         }
         return string;
     }
-    
+
     bool last() const {
         size_t size = vector<bool>::size();
         return (*this)[size - 1];
     }
-    
+
     virtual void push_back(bool bit)
     {
 
@@ -207,7 +248,8 @@ public:
         vector<bool>::push_back(
             bit
         );
-    
+        
+
 
     }
 
@@ -224,16 +266,43 @@ public:
         vector<bool>::pop_back();
 
     }
-    
+
     void append(const Stack& stack)
     {
         reserve(size() + stack.size());
 
         insert(end(), stack.begin(), stack.end());
     }
-    
+
+
 
 };
+
+PowerEncoding& operator << (PowerEncoding& out, const Stack& stack)
+{
+    for (auto bit : stack)
+    {
+        out.writeBit(bit);
+    }
+        
+    return out;
+}
+
+PowerEncoding& operator >> (PowerEncoding& in, Stack& stack)
+{
+    stack = Stack();
+    
+    do
+    {
+        bool bit = in.readBit();
+        stack.push_back(bit);
+        
+    } while(in.count() > 0);
+    
+    stack.reset();
+    
+    return in;
+}
 
 }
 

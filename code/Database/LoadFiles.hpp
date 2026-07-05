@@ -131,12 +131,14 @@ void loadFile(
             
     }
     
-    cout << start.toString(auth) << " " << start.index() << endl;
+    cout << start.toString(auth) << endl;
     
     BString extension = path.extension();
     if (!extension.length()) {
         extension = path.filename();
     }
+    
+                   
     
     if (!_mimeTypes.count(
             extension
@@ -160,6 +162,16 @@ void loadFile(
 
     File input(path.string(), true);
     
+    JSONPath http = start["{HTTP}"];
+    
+    http["content-type"].setString(
+        _mimeTypes[extension].contentType
+    );
+                    
+    http["content-length"].setInteger(input.size());
+     
+    JSONPath content = http["content"];
+    
     Index pageSize = getPageSize();
     BString buffer(pageSize, '\0');
 
@@ -181,12 +193,12 @@ void loadFile(
         const BString page = buffer.substr(0, size);
 
         // this may throw with an range_error
-        start.setString(page, pageIndex++, true,  partWord);
+        content.setString(page, pageIndex++, true,  partWord);
         
     }
 
-    start.endString(pageIndex, true, partWord);
 
+    content.endString(pageIndex, true, partWord);
     input.close();
     
     

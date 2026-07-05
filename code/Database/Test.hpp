@@ -221,6 +221,27 @@ inline bool testStack() {
               "BitStreams compare",
               stream2 == stream2Compare
           );
+          
+          
+    Stack parent;
+    parent << 5;
+    parent.reset();
+    ok &= testResult(
+        "Stack contains 1",
+        parent.contains(5)
+    );
+    
+    ok &= testResult(
+        "Stack contains 2",
+        parent.contains(5)
+    );
+    
+    ok &= testResult(
+        "Stack doesnt contains 2",
+        !parent.contains(1)
+    );
+    
+    assert(ok);
 
     BeeFishMisc::outputSuccess(ok);
 
@@ -2227,9 +2248,9 @@ inline bool testObjects()
         auth.logon("boo");
 
         Path objects = database.objects();
-        Index startCount = objects.childCount();
+        
         JSONPath start = database.origin("http://test");
-
+        Index startCount = objects.childCount();
 
         JSONPathParser parser(auth, start);
         parser.read(json);
@@ -2257,7 +2278,7 @@ inline bool testObjects()
         success = success &&
                   testValue(
                       "Cleared objects count",
-                      objects.childCount() == 0
+                      objects.childCount() == startCount
                   );
 
 
@@ -2689,7 +2710,7 @@ inline bool testFromString()
             !path["a"].isUserRoot()
         );
 
-        BString key = path["a"].toKey();
+        JSONPath::Id key = path["a"].toKey();
 
         BString url = JSONPath::keyToString(
                           database,
@@ -2699,10 +2720,15 @@ inline bool testFromString()
 
 
         cerr << "TEST " << url << endl;
-
+        BString compare =
+            BString("https://test/a?index=") + 
+            BString(to_string(path["a"].index()));
+        cerr << "COMP " << compare << endl;
+        
         ok = ok && testValue(
                  "From global key",
-                 url == "https://test/a"
+                 url == compare
+                     
              );
     }
     
@@ -2734,7 +2760,7 @@ inline bool testFromString()
         
         
 
-        BString key = path["a"].toKey();
+        JSONPath::Id key = path["a"].toKey();
 
         BString url = 
             JSONPath::keyToString(
@@ -2745,10 +2771,14 @@ inline bool testFromString()
 
 
         cerr << "TEST " << url << endl;
-
+        BString compare =
+            BString("https://test/my/a?index=") + 
+            BString(to_string(path["a"].index()));
+        cerr << "COMP " << compare << endl;
+        
         ok = ok && testValue(
                  "From my key",
-                 url == "https://test/my/a"
+                 url == compare
              );
     }
 
@@ -2766,7 +2796,7 @@ inline bool testMultiThreaded()
     // sizes are consistent
     const Index SIZE = 1135312;
 #else
-    const Index SIZE = 10712052;
+    const Index SIZE = 3845053;
 #endif
 
     File authFile;

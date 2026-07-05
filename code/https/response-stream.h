@@ -240,6 +240,7 @@ public:
                 for (auto index : strings)
                 {
                     
+
                     BString data =
                         stringPath[index]
                         .getStringData();
@@ -256,7 +257,9 @@ public:
                     if (isData)
                         decoder << data;
                     else
+                    {
                         *this << data;
+                    }
                 }
                 
                 flush();

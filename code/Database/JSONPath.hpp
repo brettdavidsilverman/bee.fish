@@ -37,7 +37,7 @@ public:
     typedef Index Id;
 #else
     // typedef BeeFishId::Id Id;
-    typedef BString Id;
+    typedef Stack Id;
 #endif
 
 
@@ -722,13 +722,13 @@ public:
     }
     
 public:
-    BString toKey() const {
+    Stack toKey() const {
         
         JSONPath path = *this;
         BString string;
         
         Stack stack;
-        
+    
         BString userId;
     
         while (!path.isUserRoot(userId))
@@ -781,9 +781,19 @@ public:
         
         stack << false;
         
+        stack << index();
+        
         assert(stack.count() == 0);
         
-        return stack.toData();
+        // Prefix stack with 1;
+        Stack temp;
+        
+        temp.writeBit(1);
+        temp.append(stack);
+        temp.writeBit(0);
+        temp.reset();
+        
+        return temp;
     }
     
 public:
@@ -791,16 +801,16 @@ public:
     static BString keyToString(
         JSONDatabase& database,
         Authentication& auth,
-        const BString& key
+        Stack& stack
     )
     {
+        
+        stack.readBit();
         
         BString string;
         
         Index count = 0;
         
-        Stack stack = Stack::fromData(key);
-    
         bool next;
         stack >> next;
         
@@ -853,6 +863,10 @@ public:
     
         }
         
+        Index index;
+        stack >> index;
+        
+        stack.readBit();
         
         assert(stack.count() == 0);
         
@@ -867,7 +881,9 @@ public:
         string = 
             auth.origin() +
             slash +
-            string;
+            string +
+            BString("?index=") +
+            BString(to_string(index));
             
         return string;
     }
@@ -892,31 +908,34 @@ public:
         }
     };
 
-    static JSONPath fromString(
-        Authentication& auth,
-        JSONDatabase& database,
-        const BeeFishWeb::URL& url,
-        const BString& method = "GET"
-    )
-    {
-        return fromString(
-                   auth,
-                   database,
-                   url.origin(),
-                   url,
-                   method
-               );
-    }
 
     static JSONPath fromString(
         Authentication& auth,
         JSONDatabase& database,
-        const BString& origin,
-        const BeeFishWeb::URL& url,
+        BeeFishWeb::URL url,
         const BString& method = "GET"
     )
     {
+        const BString& origin =
+            url.origin().size() ?
+                url.origin() :
+                auth.origin();
 
+        if (url.search().contains("index"))
+        {
+            Index index = stol(url.search()["index"]);
+            
+            JSONPath path(database, index);
+            URL compareURL(path.toString(auth));
+
+            if (compareURL.path().toLower() ==
+                url.path().toLower())
+            {
+                return path;
+            }
+            throw PathNotFoundException(url);
+        }
+        
         JSONPath originPath =
             database.origin(origin);
 
@@ -982,8 +1001,6 @@ public:
             }
 
             first = false;
-
-
 
         }
 
