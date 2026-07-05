@@ -690,11 +690,12 @@ inline BeeFishHTTPS::Authentication::Authentication(
     Session* session
 ) : BeeFishAuthentication::Authentication(
         session->server(),
-        session->origin(),
+//session->origin(),
+session->host(),
         session->ipAddress(),
         session->
-        request()->
-        getCookie("sessionId")
+            request()->
+            getCookie("sessionId")
     )
 {
 }

@@ -59,7 +59,7 @@ using namespace BeeFishWeb;
 
             const BString& origin = _session->origin();
             const BString& host = _session->host();
-            
+
             Authentication::ScopedDatabase database(authentication());
             
             JSONPath jsonPath;

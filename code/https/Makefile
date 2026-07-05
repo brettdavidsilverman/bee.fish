@@ -52,7 +52,6 @@ start:	$(OUTPUT)
 	@if [ "$$(sudo lsof -t -i :$(PORT))" != "" ]; then \
 		sudo kill -9 $$(sudo lsof -t -i :$(PORT)); \
 	fi
-	$(OUTPUT) -port $(PORT) -test
 	$(OUTPUT) -port $(PORT) &
 
 stop:
