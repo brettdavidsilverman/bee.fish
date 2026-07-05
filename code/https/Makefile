@@ -36,10 +36,10 @@ time:	CFLAGS += -Ofast
 time:	install
 
 test:	$(OUTPUT)
-test:	stop
+	make -C . stop
 	@echo "Testing on port $(PORT)"
 	$(OUTPUT) -port $(PORT) -test
-	
+	$(OUTPUT) -port $(PORT) &
 
 trace:	$(OUTPUT)
 trace:	stop
@@ -69,11 +69,13 @@ debug:	OPTIMISATION=
 debug:	CFLAGS += -g -D DEBUG
 
 debug:	$(OUTPUT)
+	make -C . stop
+	$(OUTPUT) -port $(PORT) &
 
 
 
 run_debug:	debug
-run_debug:	stop
+	make -C . stop
 	gdb --args $(OUTPUT) -port $(PORT)
 
 clean:

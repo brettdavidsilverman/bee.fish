@@ -65,22 +65,20 @@ namespace BeeFishScript {
       return out;
    }
    
-   /*
-
    PowerEncoding& operator << (PowerEncoding& out, const Type& type)
    {
-      out << (unsigned int)type;
+      out << (Index)type;
       return out;
    }
 
    PowerEncoding& operator >> (PowerEncoding& in, Type& value)
    {
-      unsigned int type;
+      Index type;
       in >> type;
       value = (Type)type;
       return in;
    }
-   */
+   
 
 }
 

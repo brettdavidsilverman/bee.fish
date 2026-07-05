@@ -726,7 +726,7 @@ public:
         return contains(key.index());
     }
 
-    Database& database()
+    Database& database() const
     {
         return *_database;
     }

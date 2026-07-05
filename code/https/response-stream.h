@@ -172,7 +172,7 @@ public:
                 *this << "[" << endl;
 
             while (it != matches.end() &&
-                   count < 10)
+                   (getCount || count < 100))
             {
 
                 if (!getCount)
@@ -204,7 +204,7 @@ public:
                       << "?q="
                       << search.encodeURI()
                       << "&next="
-                      << to_string(it._jsonPath.index())
+                      << to_string(it.index())
                       << "\""
                       << endl;
                       

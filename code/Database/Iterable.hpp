@@ -4,7 +4,7 @@
 #include <iostream>
 #include <iterator>
 #include <cstddef>
-#include "../power-encoding/stack.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "Path.hpp"
 
 
@@ -46,6 +46,9 @@ public:
 
     Iterable& operator = (const Iterable& source)
     {
+        if (_path)
+            delete _path;
+            
         if (source._path)
             _path = source._path->copy();
         else

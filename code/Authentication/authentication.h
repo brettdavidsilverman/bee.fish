@@ -282,7 +282,12 @@ public:
     {
         return _userId;
     }
-
+    
+    const BString& origin() const
+    {
+        return _origin;
+    }
+    
     class ScopedDatabase
     {
     private:

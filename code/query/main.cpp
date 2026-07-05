@@ -103,7 +103,7 @@ int main(int argc, const char* argv[]) {
                  << "?q="
                  << line.encodeURI()
                  << "&next="
-                 << to_string(it._jsonPath.index())
+                 << to_string(it.index())
                  << endl;
         }
         

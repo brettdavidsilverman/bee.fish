@@ -1,5 +1,5 @@
-#ifndef BEE_FISH_POWER_ENCODING__STACK_H
-#define BEE_FISH_POWER_ENCODING__STACK_H
+#ifndef BEE_FISH_POWER_ENCODING__STACK_HPP
+#define BEE_FISH_POWER_ENCODING__STACK_HPP
 
 #include <iostream>
 #include <string>
@@ -9,8 +9,10 @@
 #include <bitset>
 
 #include "../power-encoding/power-encoding.h"
+#include "../b-string/b-string.h"
 
 namespace BeeFishPowerEncoding {
+using namespace BeeFishBString;
 
 // A byte aligned stream of bits
 // using a vector<bool> as storage
@@ -88,7 +90,7 @@ public:
         return Stack(data);
     }
 
-    std::string toData() const
+    BString toData() const
     {
         std::vector<Byte> bytes;
         int count = 0;
@@ -221,6 +223,13 @@ public:
 
         vector<bool>::pop_back();
 
+    }
+    
+    void append(const Stack& stack)
+    {
+        reserve(size() + stack.size());
+
+        insert(end(), stack.begin(), stack.end());
     }
     
 

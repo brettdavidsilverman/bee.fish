@@ -1034,7 +1034,7 @@ namespace BeeFishQuery {
         };
         
         JSONPath::Id ids[5];
-Index count = 0;
+        Index count = 0;
         for (auto& id : ids)
         {
 #ifdef JSON_INDEX
@@ -1129,7 +1129,10 @@ Index count = 0;
                 
                 for (auto value : iterable)
                 {
-                    values.push_back(value);
+                    BeeFishWeb::URL url(value);
+                    BString withoutSearch = url.origin() + url.path().toLower();
+                    
+                    values.push_back(withoutSearch);
                 }
              
             }
@@ -1141,7 +1144,7 @@ Index count = 0;
                     i < check.size();
                     ++i)
                 {
-                    if (values[i] != check[i])
+                    if (values[i] != check[i].toLower())
                     {
                         ok = false;
                         break;

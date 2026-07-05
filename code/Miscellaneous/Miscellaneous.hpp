@@ -7,6 +7,7 @@
 #include "Optional.hpp"
 #include "Date.hpp"
 #include "PagedStream.hpp"
+#include "Stack.hpp"
 #include "Base64.hpp"
 #include "../Config.hpp"
 

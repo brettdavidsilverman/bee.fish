@@ -31,7 +31,9 @@ int main(int argc, const char* argv[])
       return 1;
    }
    
-   EncodeToStream encoding(cin, cout);
+   stringstream inout;
+   
+   EncodeToStream encoding(inout, inout);
    
    while (!cin.eof())
    {
@@ -43,13 +45,13 @@ int main(int argc, const char* argv[])
       if (line.size() == 0)
          break;
       
-      Stack stream = Stack::fromData(line);
+      encoding << line;
       
-      BString string;
-      stream >> string;
+      BString line2;
       
-      cout << string
-           << endl;
+      encoding >> line2;
+      
+      cout << line2 << endl;
       
    }
    

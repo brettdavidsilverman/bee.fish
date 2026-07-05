@@ -25,7 +25,7 @@
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/sync/interprocess_sharable_mutex.hpp>
 
-#include "../Miscellaneous/Debug.hpp"
+#include "../Miscellaneous/Miscellaneous.hpp"
 #include "../b-string/b-string.h"
 #include "../Size.hpp"
 #include "Version.hpp"

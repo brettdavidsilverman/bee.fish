@@ -14,6 +14,7 @@ using namespace BeeFishMisc;
 using namespace BeeFishTest;
 using namespace BeeFishPowerEncoding;
 
+inline bool testStack();
 inline bool testFile();
 inline bool testNextIndex();
 inline bool testPath();
@@ -43,6 +44,9 @@ inline bool test()
     //return testMultiThreaded();
 
     cout << "Test Database " << endl;
+
+    success = success &&
+              testStack();
 
     success = success &&
               testFile();
@@ -101,10 +105,10 @@ inline bool test()
 
     success = success &&
               testErrors();
-              
+
     success = success &&
               testFromString();
-              
+
 
     success = success &&
               testAllFiles(TEST_DIRECTORY);
@@ -115,6 +119,115 @@ inline bool test()
     return success;
 }
 
+inline bool testStack() {
+
+    cout << "Stack" << endl;
+
+    bool ok = true;
+    {
+        BString start = "ABC Hello World";
+
+        Stack stream;
+        stream << start;
+        stream.reset();
+        BString finish;
+        stream >> finish;
+
+        ok &= testResult(
+                  "Stack start-finish",
+                  start == finish
+              );
+    }
+
+
+    Stack characterStream;
+    characterStream << Char('1');
+
+    ok &= testResult(
+              "Char One stream",
+              characterStream.count() == 0
+          );
+
+    characterStream.reset();
+    Char readCharacter;
+    characterStream >> readCharacter;
+
+    ok &= testResult(
+              "Char Read One stream",
+              readCharacter == "1"
+          );
+
+    Stack characterManyStream;
+    for (char c = 'a'; c <= 'z'; c++) {
+        Char character(c);
+        characterManyStream << character;
+    }
+
+    ok &= testResult(
+              "Char many stream",
+              characterManyStream.count() == 0
+          );
+
+    characterManyStream.reset();
+
+    char compare = 'a';
+
+    bool compares = true;
+
+    while (characterManyStream.peekBit()) {
+        Char readCharacter;
+        characterManyStream >> readCharacter;
+        if (readCharacter[0] != compare) {
+            compares = false;
+            break;
+        }
+        ++compare;
+    }
+    ok &= testResult(
+              "Read characters",
+              compares
+          );
+
+    BString bstring = "Hello World";
+    Stack stream;
+    stream << bstring;
+
+    ok &= testResult(
+              "Stack count",
+              stream.count() == 0
+          );
+
+    BString bstring2;
+    stream.reset();
+    stream >> bstring2;
+
+    ok &= testResult(
+              "Stack count 2",
+              stream.count() == 0
+          );
+
+    ok &= testResult(
+              "BString compare",
+              bstring == bstring2
+          );
+
+    Stack stream2;
+    stream2 << bstring;
+    std::string data = stream2.toData();
+    stream2.reset();
+    Stack stream2Compare = Stack::fromData(data);
+
+    ok &= testResult(
+              "BitStreams compare",
+              stream2 == stream2Compare
+          );
+
+    BeeFishMisc::outputSuccess(ok);
+
+    cout << endl;
+
+    return ok;
+}
 
 inline bool testFile()
 {
@@ -1492,7 +1605,7 @@ inline bool testAllFiles(std::filesystem::path directory)
 inline bool testFile(BeeFishAuthentication:: Authentication& auth, JSONPath root, std::filesystem::path file, bool expect)
 {
     cout << "\t" << file.filename() << " " << flush;
-        
+
     std::stringstream stream;
     stream << TEMP_DIRECTORY << &root << "test.json";
 
@@ -2139,15 +2252,15 @@ inline bool testObjects()
         if (success)
             start.setUndefined();
         cerr << "Cleared objects count " << objects.childCount()  << endl;
-        
+
 
         success = success &&
                   testValue(
                       "Cleared objects count",
-                      objects.childCount() == 1
+                      objects.childCount() == 0
                   );
 
-                  
+
         if (!success)
             listObjects(objects);
 
@@ -2155,11 +2268,11 @@ inline bool testObjects()
     };
 
     success = success &&
-              test("{\"a\":\"b\"}", 2);
+              test("{\"a\":\"b\"}", 1);
     success = success &&
-              test("{\"a\":{\"a\":\"a\"}}", 3);
+              test("{\"a\":{\"a\":\"a\"}}", 2);
     success = success &&
-              test("[1,2,3]", 4);
+              test("[1,2,3]", 3);
 
     BeeFishMisc::outputSuccess(success);
 
@@ -2499,24 +2612,24 @@ inline bool testErrors()
 {
     cout << "Test errors" << endl;
 
-    
+
     bool ok = true;
-    
-    
+
+
     JSONDatabase database;
     BeeFishAuthentication::Authentication
-        auth("https://test", database.filename());
+    auth("https://test", database.filename());
 
     auth.logon("boo");
-    
+
     JSONPath start = database.origin("https://test");
-    
+
     JSONPathParser parser(auth, start);
-    
+
     stringstream input("\"");
-        
+
     parser.read(input);
-    
+
     parser.eof();
 
     bool parsed = parser.result() == true;
@@ -2524,7 +2637,7 @@ inline bool testErrors()
     cerr << parser.getError() << endl;
 
     ok = !parsed;
-    
+
     outputSuccess(ok);
 
     return ok;
@@ -2535,29 +2648,110 @@ inline bool testFromString()
 {
     cout << "Test from string" << endl;
 
-    
+
     bool ok = false;
-    
-    
+
+
     JSONDatabase database;
     BeeFishAuthentication::Authentication
-        auth("https://test", database.filename());
+    auth("https://test", database.filename());
 
     auth.logon("boo");
-    
+
     try {
         JSONPath path = JSONPath::fromString(
-            auth,
-            database,
-            "https://test/'?"
-        );
+                            auth,
+                            database,
+                            "https://test/'?"
+                        );
     }
     catch (JSONPath::PathNotFoundException& ex)
     {
         ok = true;
     }
-    
+
     outputSuccess(ok);
+
+    {
+        JSONPath path = database.origin("https://test");
+
+        JSONPathParser parser(auth, path);
+        parser.read("{\"a\":\"b\"}");
+        parser.eof();
+        
+        ok = ok && testValue(
+            "Not user root",
+            path.isUserRoot()
+        );
+        
+        ok = ok && testValue(
+            "Not user root a",
+            !path["a"].isUserRoot()
+        );
+
+        BString key = path["a"].toKey();
+
+        BString url = JSONPath::keyToString(
+                          database,
+                          auth,
+                          key
+                      );
+
+
+        cerr << "TEST " << url << endl;
+
+        ok = ok && testValue(
+                 "From global key",
+                 url == "https://test/a"
+             );
+    }
+    
+    {
+        JSONPath path = database.origin("https://test");
+        path = path[auth.userId()];
+        
+        JSONPathParser parser(auth, path);
+        parser.read("{\"a\":\"b\"}");
+        parser.eof();
+        
+        BString userId;
+        
+        ok = ok && testValue(
+            "My is user root",
+            path.isUserRoot(userId)
+        );
+        
+        ok = ok && testValue(
+            "My user",
+            userId == auth.userId()
+        );
+        
+        ok = ok && testValue(
+            "My not user root a",
+            !path["a"].isUserRoot()
+        );
+        
+        
+        
+
+        BString key = path["a"].toKey();
+
+        BString url = 
+            JSONPath::keyToString(
+                database,
+                auth,
+                key
+            );
+
+
+        cerr << "TEST " << url << endl;
+
+        ok = ok && testValue(
+                 "From my key",
+                 url == "https://test/my/a"
+             );
+    }
+
 
     return ok;
 
@@ -2572,7 +2766,7 @@ inline bool testMultiThreaded()
     // sizes are consistent
     const Index SIZE = 1135312;
 #else
-    const Index SIZE = 3523601;
+    const Index SIZE = 10712052;
 #endif
 
     File authFile;

@@ -1,7 +1,7 @@
 #ifndef BEE_FISH__DATABASE__PATH_BASE_HPP
 #define BEE_FISH__DATABASE__PATH_BASE_HPP
 
-#include "../power-encoding/stack.h"
+#include "../Miscellaneous/Miscellaneous.hpp"
 
 namespace BeeFishDatabase {
 

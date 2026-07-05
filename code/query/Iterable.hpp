@@ -54,12 +54,10 @@ using namespace BeeFishAuthentication;
             const Iterable* _container = nullptr;
             IdIterable* _iterable = nullptr;
             IdIterator* _iterator = nullptr;
-            BString _parentValue;
             BString _value;
-            JSONPath _parentPath;
+            Index _index;
         public:
-            JSONPath _jsonPath;
-
+            
             // Iterator traits (required for STL compatibility in C++17 and earlier)
             using iterator_category = std::forward_iterator_tag;
             using value_type        = BString;
@@ -90,10 +88,8 @@ using namespace BeeFishAuthentication;
                 else
                     _iterator = nullptr;
                     
-                _parentValue = source._parentValue;
                 _value = source._value;
-                _parentPath = source._parentPath;
-                _jsonPath = source._jsonPath;
+                _index = source._index;
             
             }
             
@@ -145,11 +141,8 @@ using namespace BeeFishAuthentication;
                     _iterator = nullptr;
                     
                 _container = source._container;
-                    
-                _parentValue = source._parentValue;
                 _value = source._value;
-                _parentPath = source._parentPath;
-                _jsonPath = source._jsonPath;
+                _index = source._index;
                 
                 return *this;
             }
@@ -157,48 +150,57 @@ using namespace BeeFishAuthentication;
             
             void setValue()
             {
+                _value.clear();
                 
-                
-
                 while (!_iterator->_isEnd) {
-                    _parentValue = 
+                    
+                    BString parentValue =
                         toString(*_iterator);
-                    _parentPath =
-                        jsonPath(*_iterator);
-                        
+                    
                     IdIterator iterator = *_iterator;
     
                     ++iterator;
                     if (!iterator._isEnd) {
+                        
                         _value = toString(iterator);
-                        _jsonPath = jsonPath(iterator);
+                        
+                            
                         if (
-                            (_value + "/")
-                            .startsWith(
-                                _parentValue +  "/"
-                            ) &&
-                            ! _jsonPath.contains("{HTTP}")
+                            (_value + BString("/")).startsWith(
+                                parentValue + BString("/")
+                            )
+                            
                         )
                         {
-                            _parentValue = _value;
-                            _parentPath = _jsonPath;
+                            parentValue = _value;
                             
                         }
-                        else if (_parentValue != "") {
-                            _value = _parentValue;
-                            _jsonPath = _parentPath;
+                        else if (parentValue != "") {
+                            _value = parentValue;
                             break;
                         }
                     }
-                    else if (_parentValue != "") {
-                        _value = _parentValue;
-                        _jsonPath = _parentPath;
+                    else if (parentValue!= "") {
+                        _value = parentValue;
                         break;
                     }
                     
                     
-                    
                     *_iterator = iterator;
+                }
+                
+                if (!_iterator->_isEnd)
+                {
+                    Path path =
+                        _container
+                        ->_database
+                        ->objects()[**_iterator];
+                
+                    _index = path.getData<Index>();
+                
+                    _value += 
+                        BString("?index=") +
+                        BString(to_string(_index));
                 }
                 
                 
@@ -206,14 +208,28 @@ using namespace BeeFishAuthentication;
             
             BString toString(IdIterator& iterator) 
             {
-                Stack stack = iterator._stack;
+                Stack& stack = iterator._stack;
                 stack.reset();
                 BString key;
                 stack >> key;
             
-                return JSONPath::keyToString(key);
+                BString value =
+                    JSONPath::keyToString(
+                        *_container->_database,
+                        _container->_auth,
+                        key
+                    );
                 
-               // return jsonPath(iterator).toString(_container->_auth);
+                if (value.contains("{http}"))
+                {
+                    value = value.substr(
+                        0,
+                        value.find("{http}")
+                    );
+                }
+                
+                return value;
+                
             }
             
             JSONPath jsonPath(IdIterator& iterator)
@@ -230,11 +246,17 @@ using namespace BeeFishAuthentication;
                 
             }
             
+            Index index() const
+            {
+                return _index;
+            }
+            
+            /*
             JSONPath jsonPath()
             {
                 return _jsonPath;
             }
-            
+            */
             BString toKey()
             {
                 return _iterator->toKey();
