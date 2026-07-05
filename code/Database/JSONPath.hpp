@@ -1313,6 +1313,7 @@ private:
         {
 
             Path wordPath = words[word];
+            ++wordPath;
 
             JSONPath json = *this;
 

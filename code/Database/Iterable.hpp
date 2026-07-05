@@ -361,7 +361,7 @@ public:
             const ReverseIterator& b
         )
         {
-            return  (a._isEnd == b._isEnd);
+            return  (a._stack == b._stack);
         }
 
         friend bool operator != (
@@ -369,7 +369,7 @@ public:
             const ReverseIterator& b
         )
         {
-            return (a._isEnd != b._isEnd);
+            return (a._stack != b._stack);
         }
 
 

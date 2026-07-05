@@ -141,6 +141,42 @@ int main(int argc, const char* argv[])
         }
     }
     
+    bool topWordsArg =
+        (hasArg(argc, argv, "-top") != -1);
+    
+    if (topWordsArg)
+    {
+        clog << "Top Words: Sorting..." << endl;
+        Database temp;
+        Path sort(temp);
+        
+        Path wordsPath = database.words();
+        Iterable<BString> words(wordsPath);
+        for (auto word : words)
+        {
+            Index count;
+            
+            wordsPath[word].getData<Index>(count);
+            
+            sort[count][word];
+        }
+        
+        Index count = 0;
+        Iterable<Index> top(sort);
+        for (auto it = top.rbegin(); 
+             it != top.rend() && count < 100;
+             ++it)
+        {
+            Iterable<BString> words(sort[*it]);
+            for (auto word : words)
+            {
+                cout << ++count << "\t" << word << "\t" << *it << endl;
+            }
+        }
+        
+        
+    }
+    
     bool loadDeaths =
         (hasArg(argc, argv, "-deaths") != -1);
 
