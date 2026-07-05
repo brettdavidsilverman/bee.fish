@@ -75,7 +75,7 @@ debug:	$(OUTPUT)
 
 
 run_debug:	debug
-	make -C . stop
+	make -C . stop PORT=$(PORT)
 	gdb --args $(OUTPUT) -port $(PORT)
 
 clean:

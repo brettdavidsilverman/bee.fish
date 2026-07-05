@@ -806,7 +806,8 @@ public:
     
     static BString keyToString(
         Authentication& auth,
-        Stack& stack
+        Stack& stack,
+        Index& index
     )
     {
         
@@ -855,7 +856,6 @@ public:
     
         }
         
-        Index index;
         stack >> index;
         
         stack.readBit();

@@ -29,10 +29,10 @@ class Path :
 private:
     Database*  _database  = nullptr;
 
-    static const Index UNLOCKED = Index(-1);
+   // static const Index UNLOCKED = Index(-1);
 
     Index _index = 0;
-    Index _savedIndex = 0;
+    
     bool _locked = false;
     
 public:
@@ -49,16 +49,16 @@ public:
           Index index = Branch::Root ) :
         PowerEncoding(),
         _database(&database),
-        _index(index),
-        _savedIndex(index)
+        _index(index)
     {
+        if (_index > _database->size())
+            throw std::runtime_error("Invalid index");
     }
 
     Path(const Path& source) :
         PowerEncoding(),
         _database(source._database),
-        _index(source._index),
-        _savedIndex(_index)
+        _index(source._index)
     {
     }
 
@@ -66,9 +66,10 @@ public:
           Index index) :
         PowerEncoding(),
         _database(source._database),
-        _index(index),
-        _savedIndex(index)
+        _index(index)
     {
+        if (_index > _database->size())
+            throw std::runtime_error("Invalid index");
     }
 
     virtual ~Path()
@@ -95,8 +96,6 @@ public:
     {
         _database = rhs._database;
         _index = rhs._index;
-        _savedIndex = rhs._savedIndex;
-
         return *this;
     }
 

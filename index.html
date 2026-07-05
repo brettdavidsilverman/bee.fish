@@ -301,18 +301,19 @@ function redirect(path)
 
 async function downloadJSON() {
 
-    var url = new URL(pathInput.value);
-
+    var url = new URL(
+        pathInput.value, 
+        document.location
+    );
+    
     saveButton.disabled = true;
     
     searchResults = [];
     
     var firstLine = true;
     
-    const params = new URLSearchParams(url.search);
-
     var decode = url.search.length &&
-        !params.has("index") &&
+        !url.searchParams.has("index") &&
         !url.search.endsWith("$");
 
     await fetchContent(
@@ -329,8 +330,22 @@ async function downloadJSON() {
                 {
                     line = line.substr(0, line.length - 1);
                 }
-                searchResults.push(decodeURIComponent(JSON.parse(line)));
-                line = decodeURIComponent(JSON.parse(line));
+                var url = new URL(
+                    decodeURIComponent(JSON.parse(line))
+                );
+                
+                searchResults.push(url.toString());
+                if (url.searchParams.has("next"))
+                    line = "...";
+                else if (url.origin == document.location.origin)
+                {
+                    line = decodeURIComponent(
+                        url.pathname
+                    );
+                }
+                else
+                    line = url.toString();
+                    
                 line += "\n";
                 editor.value += line;
             }
@@ -346,13 +361,13 @@ async function downloadJSON() {
 
 
 if (!pathInput.value)
-    pathInput.value = document.location.origin + defaultPath;
+    pathInput.value =  defaultPath;
     
 pathInput.onblur =
     function() {
         if (pathInput.value == "")
         {
-            pathInput.value = document.location.origin + defaultPath;
+            pathInput.value = defaultPath;
         }
         localStorage.setItem("path", pathInput.value);
         
@@ -402,7 +417,7 @@ async function uploadData(path, data, contentType, contentLength, halfDuplex = f
         var status = response.status;
         if (status == 200) {
             var json = await response.json();
-            json = decodeURI(json);
+            json = decodeURIComponent(json);
             alert(json);
             pathInput.value = json;
             
@@ -488,26 +503,24 @@ window.onhashchange =
     function() {
         if (!window.location.hash)
             return;
-        pathInput.value = decodeURIComponent(
-            window.location.hash.substr(1)
-        );
+        pathInput.value =
+            decodeURIComponent(
+                window.location.hash.substr(1)
+            );
         setLinks();
         fetchButton.click();
     }
     
 editor.onclick =
     function() {
-        if (searchResults.length) {
-            var position =
-                getCursorLineAndColumn(editor);
-            if (position.line <= searchResults.length)
-            {
-                window.location.hash =
-                    encodeURIComponent(
-                        searchResults[position.line - 1]
-                    );
-                
-            }
+        var position =
+            getCursorLineAndColumn(editor);
+        if (position.line <= searchResults.length)
+        {
+            window.location.hash =
+                encodeURIComponent(
+                    searchResults[position.line - 1]
+                );
         }
     }
     

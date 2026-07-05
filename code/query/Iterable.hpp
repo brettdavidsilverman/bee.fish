@@ -173,16 +173,17 @@ public:
                        )
                     {
                         parent = child;
-
                     }
-                    else
+                    else if (isOurs(parent))
                     {
                         child = parent;
+                        _value = toString(child);
                         break;
                     }
                 }
-                else {
+                else if (isOurs(parent)) {
                     child = parent;
+                    _value = toString(child);
                     break;
                 }
 
@@ -190,12 +191,37 @@ public:
                 *_iterator = iterator;
             }
 
-            if (!_iterator->_isEnd)
-            {
-                _value = toString(child);
-            }
 
 
+        }
+        
+        bool isOurs(
+            Stack& key
+        )
+        {
+            key.reset();
+            if (!key.peekBit())
+                return true;
+                
+            key.readBit();
+            
+            bool next;
+            key >> next;
+            
+            if (!next)
+                return true;
+                
+            Type type;
+            key >> type;
+            
+            if (type != Type::USER)
+                return true;
+
+            BString userId;
+            key >> userId;
+            
+            return userId ==
+                _container->_auth.userId();
         }
 
         bool startsWith(
@@ -276,9 +302,10 @@ public:
             BString string =
                 JSONPath::keyToString(
                     _container->_auth,
-                    key
+                    key,
+                    _index
                 );
-
+                
             return string;
 
         }

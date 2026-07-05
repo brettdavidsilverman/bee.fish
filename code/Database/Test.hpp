@@ -2714,17 +2714,18 @@ inline bool testFromString()
         );
 
         JSONPath::Id key = path["a"].toKey();
-
+        Index index;
         BString url =
             JSONPath::keyToString(
                 auth,
-                key
+                key,
+                index
             );
 
 
         BString compare =
             BString("https://test/a?index=") + 
-            BString(to_string(path["a"].index()));
+            BString(to_string(index));
 
         ok = ok && testValue(
                  "From global key",
@@ -2762,17 +2763,18 @@ inline bool testFromString()
         
 
         JSONPath::Id key = path["a"].toKey();
-
+        Index index;
         BString url = 
             JSONPath::keyToString(
                 auth,
-                key
+                key,
+                index
             );
 
 
         BString compare =
             BString("https://test/my/a?index=") + 
-            BString(to_string(path["a"].index()));
+            BString(to_string(index));
 
         ok = ok && testValue(
                  "From my key",
