@@ -364,7 +364,7 @@ inline bool testFile()
         parser.eof();
 
         std::stringstream stream;
-        stream << path;
+        path.write(auth, stream);
 
         success = success &&
                   testValue(
@@ -1628,6 +1628,8 @@ inline bool testFile(BeeFishAuthentication:: Authentication& auth, JSONPath root
     cout << "\t" << file.filename() << " " << flush;
 
     std::stringstream stream;
+    stream.imbue(std::locale::classic());
+    
     stream << TEMP_DIRECTORY << &root << "test.json";
 
     string tempFile = stream.str();
@@ -1647,7 +1649,7 @@ inline bool testFile(BeeFishAuthentication:: Authentication& auth, JSONPath root
     {
         ofstream outputFile(tempFile);
         JSONPath path(root[file.filename()]);
-        outputFile << path;
+        path.write(auth, outputFile);
         outputFile.close();
 
         // Compare the files
@@ -2349,7 +2351,7 @@ inline bool testDeleteProperty()
         );
 
         stringstream stream;
-        stream << start;
+        start.write(auth, stream);
         success = success &&
                   testValue(
                       "Result {}",
@@ -2440,7 +2442,8 @@ inline bool testDeleteProperty()
                   );
 
         stringstream stream;
-        stream << start2["a"];
+        start2["a"].write(auth2, stream);
+        
         success = success &&
                   testValue(
                       "Result",
@@ -2516,7 +2519,7 @@ inline bool testDeleteProperty()
 
     {
         stringstream stream;
-        stream << start3;
+        start3.write(auth3, stream);
         success = success &&
                   testValue(
                       "Result {}",
@@ -2712,19 +2715,17 @@ inline bool testFromString()
 
         JSONPath::Id key = path["a"].toKey();
 
-        BString url = JSONPath::keyToString(
-                          database,
-                          auth,
-                          key
-                      );
+        BString url =
+            JSONPath::keyToString(
+                auth,
+                key
+            );
 
 
-        cerr << "TEST " << url << endl;
         BString compare =
             BString("https://test/a?index=") + 
             BString(to_string(path["a"].index()));
-        cerr << "COMP " << compare << endl;
-        
+
         ok = ok && testValue(
                  "From global key",
                  url == compare
@@ -2764,24 +2765,22 @@ inline bool testFromString()
 
         BString url = 
             JSONPath::keyToString(
-                database,
                 auth,
                 key
             );
 
 
-        cerr << "TEST " << url << endl;
         BString compare =
             BString("https://test/my/a?index=") + 
             BString(to_string(path["a"].index()));
-        cerr << "COMP " << compare << endl;
-        
+
         ok = ok && testValue(
                  "From my key",
                  url == compare
              );
     }
-
+    
+    outputSuccess(ok);
 
     return ok;
 
@@ -2796,7 +2795,7 @@ inline bool testMultiThreaded()
     // sizes are consistent
     const Index SIZE = 1135312;
 #else
-    const Index SIZE = 3845053;
+    const Index SIZE = 3858752;
 #endif
 
     File authFile;

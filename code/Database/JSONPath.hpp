@@ -101,8 +101,9 @@ public:
 
     Id id() const
     {
-        //return index();
-
+#ifndef JSON_INDEX
+        return toKey();
+#endif
         Path path = *this;
         path = path[ID];
         Id id;
@@ -125,11 +126,12 @@ public:
 
     Id setId(const Id& id)
     {
+#ifdef JSON_INDEX
         Path path = *this;
         path = path[ID];
 
         path.setData<Id>(id);
-
+#endif
         return id;
     }
 
@@ -739,6 +741,7 @@ public:
             
             Type type = Type::STRING;
             BString key;
+        
             path = path.parent(key, type);
             
             child << type;
@@ -754,8 +757,11 @@ public:
                 {
                     key = BString("\"") + key + BString("\"");
                 }
-                else
+                else {
                     key = key.toLower();
+                    if (key == "{http}")
+                        return path.parent().toKey();
+                }
                 
                 child << key;
                 
@@ -772,7 +778,7 @@ public:
         {
             Stack child;
             child << true;
-            child << Type::STRING;
+            child << Type::USER;
             child << userId;
             child.append(stack);
         
@@ -799,7 +805,6 @@ public:
 public:
     
     static BString keyToString(
-        JSONDatabase& database,
         Authentication& auth,
         Stack& stack
     )
@@ -828,33 +833,20 @@ public:
                 stack >> index;
                 string += to_string(index);
             }
-            else
+            else if (type == Type::STRING)
             {
-                bool found = false;
                 BString value;
-                
                 stack >> value;
-                
-                if (count == 1)
-                {
-                    if (value == auth.userId())
-                    {
-                        string += "my";
-                        found = true;
-                    }
-                    else if (database.users()
-                        .contains(
-                            value
-                        )
-                    )
-                    {
-                        return "";
-                    }
-                    
-                }
-                
-                if (!found)
-                    string += value;
+                string += value;
+            }
+            else if (type == Type::USER)
+            {
+                BString value;
+                stack >> value;
+                if (value == auth.userId())
+                    string += "my";
+                else
+                    return "";
             }
             
             string += "/";
@@ -1125,6 +1117,7 @@ public:
         return (*this)[BString(key)];
     }
 
+    /*
     friend ostream& operator << (ostream& out, const JSONPath& json)
     {
         JSONPath path(json);
@@ -1133,7 +1126,8 @@ public:
 
         return out;
     }
-
+    */
+    
     BString tabs(Index tabCount) const
     {
         return string(tabCount * TAB_SPACES, ' ');
@@ -1211,6 +1205,7 @@ public:
         case Type::BOOLEAN:
         case Type::INTEGER:
         case Type::NUMBER:
+        case Type::USER:
             break;
         case Type::ARRAY:
         {
@@ -1421,7 +1416,7 @@ private:
     }
 
 public:
-    virtual void write(ostream& out, Index tabCount = 0)
+    virtual void write(Authentication& auth, ostream& out, Index tabCount = 0)
     {
 
         Type type = JSONPath::type();
@@ -1500,6 +1495,7 @@ public:
                 else
                 {
                     item.write(
+                        auth,
                         out,
                         _tabCount
                     );
@@ -1539,6 +1535,17 @@ public:
             for (Iterator iterator = begin(); iterator != end();)
             {
                 key = *iterator;
+                
+                if (key == auth.userId())
+                {
+                    key = "my";
+                }
+                else if (database().users().contains(key))
+                {
+                    ++iterator;
+                    continue;
+                }
+                
 
                 ++count;
 
@@ -1548,9 +1555,9 @@ public:
                     << "\": ";
 
                 JSONPath value =
-                    (*this)[key];
+                    (*this)[*iterator];
 
-                value.write(out, tabCount + 1);
+                value.write(auth, out, tabCount + 1);
 
                 if (++iterator != end())
                     out << ",\n";

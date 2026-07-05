@@ -102,7 +102,8 @@ public:
 
         if (app->serve() == App::SERVE_JSON)
         {
-            *this << jsonPath;
+            jsonPath.write(app->authentication(), *this);
+            
             flush();
 
             return;

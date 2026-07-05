@@ -135,6 +135,9 @@ public:
             case Type::OBJECT:
                 new (&_object) ObjectPointer(source._object);
                 break;
+            case Type::USER:
+                new (&_string) String(source._string);
+                break;
             default:
                 throw std::logic_error("JSON::Variable::Value::copy constructor");
             }
@@ -173,6 +176,9 @@ public:
             break;
         case Type::OBJECT:
             new (&_value._object) ObjectPointer(new Object());
+            break;
+        case Type::USER:
+            new (&_value._string) String();
             break;
         case Type::UNKNOWN:
             break;
@@ -277,6 +283,9 @@ public:
             break;
         case Type::OBJECT:
             _value._object.~ObjectPointer();
+            break;
+        case Type::USER:
+            _value._string.~String();
             break;
         case Type::UNKNOWN:
             break;
@@ -421,9 +430,6 @@ public:
             }
             break;
         case Type::STRING:
-            // out << "\""_value._string;
-            //  break;
-
             out << "\"";
             out << _value._string.escape();
             out << "\"";
@@ -470,6 +476,11 @@ public:
             _value._object->write(out, blankSpace, tabIndex + 1);
             break;
         }
+        case Type::USER:
+            out << "\"";
+            out << _value._string.escape();
+            out << "\"";
+            break;
         default:
             throw std::logic_error("JSON::Variable::write");
             return;

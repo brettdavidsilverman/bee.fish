@@ -103,6 +103,13 @@ public:
             (vector<bool>&)(lhs) ==
             (vector<bool>&)(rhs);
     }
+    
+    friend bool operator != (const Stack& lhs, const Stack& rhs)
+    {
+        return 
+            (vector<bool>&)(lhs) !=
+            (vector<bool>&)(rhs);
+    }
 
     static Stack fromData(const std::string& data)
     {

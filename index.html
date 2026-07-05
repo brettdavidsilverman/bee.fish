@@ -181,11 +181,13 @@ async function fetchContent(url, f) {
     saveButton.disabled = true;
     fetchButton.disabled = true;
     
-    var decode =
-        (pathInput.value.indexOf("?") != -1 &&
-         !pathInput.value.endsWith("$"));
+
+    const params = new URLSearchParams(url.search);
+
+    var decode = url.search.length &&
+        !params.has("index") &&
+        !url.search.endsWith("$");
         
-    
     try {
         
          var parameters = {
@@ -223,11 +225,13 @@ async function fetchContent(url, f) {
             return;
         }
         
-        if (!decode)
+        if (!decode || contentType.value.startsWith("text"))
         {
-            editor.value = await response.text();
+            var text = await response.text();
+            editor.value = text;
             return;
         }
+        
     
         
         blob = undefined;
@@ -304,9 +308,13 @@ async function downloadJSON() {
     searchResults = [];
     
     var firstLine = true;
-    var decode =
-        (pathInput.value.indexOf("?") != -1);
-        
+    
+    const params = new URLSearchParams(url.search);
+
+    var decode = url.search.length &&
+        !params.has("index") &&
+        !url.search.endsWith("$");
+
     await fetchContent(
         url,
         (line) => {

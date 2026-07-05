@@ -756,7 +756,7 @@ public:
         return _database->pageSize();
     }
 
-
+/*
     friend ostream& operator <<
     (ostream& out, const Path& path)
     {
@@ -764,7 +764,7 @@ public:
         out << value;
         return out;
     }
-
+*/
     virtual Variable getVariable() const
     {
         BeeFishScript::Variable variable =
@@ -830,7 +830,7 @@ protected:
         }
     }
 
-
+/*
     virtual void write(ostream& out)
     {
         write(out, _index);
@@ -874,7 +874,7 @@ protected:
     }
 
 
-
+*/
 protected:
 
     class Contains :

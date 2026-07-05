@@ -250,7 +250,7 @@ public:
             const Iterator& b
         )
         {
-            return  (a._isEnd == b._isEnd);
+            return  (a._stack == b._stack);
         }
 
         friend bool operator != (
@@ -258,7 +258,7 @@ public:
             const Iterator& b
         )
         {
-            return (a._isEnd != b._isEnd);
+            return (a._stack != b._stack);
         }
 
 

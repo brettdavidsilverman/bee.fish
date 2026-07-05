@@ -275,7 +275,6 @@ public:
             key.reset();
             BString string =
                 JSONPath::keyToString(
-                    *_container->_database,
                     _container->_auth,
                     key
                 );

@@ -212,8 +212,7 @@ int main(int argc, const char* argv[])
     
     if (output)
     {
-        
-        cout << path << endl;
+        path.write(auth, cout);
     }
     
 
