@@ -51,8 +51,10 @@ public:
         _database(&database),
         _index(index)
     {
+        /*
         if (_index > _database->size())
             throw std::runtime_error("Invalid index");
+        */
     }
 
     Path(const Path& source) :
@@ -68,8 +70,10 @@ public:
         _database(source._database),
         _index(index)
     {
+        /*
         if (_index > _database->size())
             throw std::runtime_error("Invalid index");
+        */
     }
 
     virtual ~Path()
