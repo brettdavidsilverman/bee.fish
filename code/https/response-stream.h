@@ -90,7 +90,7 @@ public:
 
     void writeContent(App* app)
     {
-        
+
         Authentication::ScopedDatabase database(app->authentication());
 
         BeeFishQuery::Words words = database->words();
@@ -103,7 +103,7 @@ public:
         if (app->serve() == App::SERVE_JSON)
         {
             jsonPath.write(app->authentication(), *this);
-            
+
             flush();
 
             return;
@@ -113,15 +113,15 @@ public:
             BString search;
             BeeFishWeb::URL::Search& searchObject =
                 app->request()->searchObject();
-                
+
             if (searchObject.contains("q"))
             {
-                search = 
+                search =
                     searchObject["q"];
             }
             else
             {
-                search = 
+                search =
                     app->request()->search();
             }
 
@@ -133,7 +133,7 @@ public:
             }
 
             BeeFishQuery::Expression
-                expression(bookmark, search);
+            expression(bookmark, search);
 
             Index count = 0;
 
@@ -143,14 +143,25 @@ public:
                 .getPath();
 
             BeeFishQuery::Iterable
-                matches(
-                    app->authentication(),
-                    *database,
-                    path
-                );
-                
-            BeeFishQuery::Iterable::Iterator it;
+            matches(
+                app->authentication(),
+                *database,
+                path
+            );
             
+            if (getCount)
+            {
+                *this <<
+                    to_string(
+                        matches.count()
+                    );
+                
+                flush();
+                return;
+            }
+
+            BeeFishQuery::Iterable::Iterator it;
+
             if (searchObject.contains("next")) {
                 try
                 {
@@ -168,53 +179,44 @@ public:
             }
             else
                 it = matches.begin();
-                
-            if (!getCount)
-                *this << "[" << endl;
+
+            *this << "[" << endl;
 
             while (it != matches.end() &&
-                   (getCount || count < 100))
+                    (count < 100))
             {
 
-                if (!getCount)
-                {
-                    *this << "   \""
-                          << it->escape()
-                          << "\"";
+                *this << "   \""
+                      << it->escape()
+                      << "\"";
 
-                    if (++it != matches.end() && count < 10)
-                        *this << ",";
+                if (++it != matches.end() && count < 10)
+                    *this << ",";
 
-                    *this << endl;
+                *this << endl;
 
-                }
-                else {
-                    ++it;
-                }
-                
+
+
                 ++count;
 
             }
-            
+
             if (it != matches.end())
             {
                 *this << "   \""
                       << JSONPath(bookmark).toString(
-                             app->authentication()
-                         ) 
+                          app->authentication()
+                      )
                       << "?q="
                       << search.encodeURI()
                       << "&next="
                       << to_string(it.index())
                       << "\""
                       << endl;
-                      
+
             }
 
-            if (!getCount)
-                *this << "]";
-            else
-                *this << count;
+            *this << "]";
 
             flush();
 
@@ -234,27 +236,27 @@ public:
                 Path stringPath = content;
                 stringPath =stringPath[JSONPath::VALUE];
                 Iterable<Index> strings(stringPath);
-                
+
                 Base64DecodeStream decoder(*this);
                 bool isData = false;
-                
+
                 for (auto index : strings)
                 {
-                    
+
 
                     BString data =
                         stringPath[index]
                         .getStringData();
-                        
+
                     if (index == 0 &&
-                        data.isData())
+                            data.isData())
                     {
                         data = data.substr(
-                            data.find(",") + 1
-                        );
+                                   data.find(",") + 1
+                               );
                         isData = true;
                     }
-                    
+
                     if (isData)
                         decoder << data;
                     else
@@ -262,7 +264,7 @@ public:
                         *this << data;
                     }
                 }
-                
+
                 flush();
                 return;
             }
@@ -392,9 +394,9 @@ public:
         {
 
             std::stringstream stream;
-            
+
             stream.imbue(std::locale("C"));
-            
+
             stream << std::hex << std::uppercase << _count << std::dec << "\r\n";
             std::string str = stream.str();
             _write(str.data(), str.size());
