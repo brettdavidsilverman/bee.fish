@@ -55,6 +55,10 @@ using namespace BeeFishWeb;
                 request()->method();
             URL& url =
                 request()->url();
+                
+            if (url.paths().size() &&
+                url.paths()[0] == "index.html")
+                return;
 
             const BString& origin = _session->origin();
             const BString& host = _session->host();
