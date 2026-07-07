@@ -68,7 +68,8 @@ debug:	OPTIMISATION=
 debug:	CFLAGS += -g -D DEBUG
 
 debug:	$(OUTPUT)
-	make -C . stop
+	make -C . stop PORT=$(PORT)
+	$(OUTPUT) -port $(PORT) -test
 	$(OUTPUT) -port $(PORT) &
 
 

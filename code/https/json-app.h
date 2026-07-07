@@ -43,7 +43,6 @@ using namespace BeeFishWeb;
                 BeeFishMiscellaneous::_noCacheControl
             );
 
-            _contentLength = -1;
             
             BString error;
     
@@ -78,6 +77,9 @@ using namespace BeeFishWeb;
             {
                 return;
             }
+            
+            _contentLength = -1;
+            
             
             if (method == "GET" && 
                 url.search().value().length() &&
@@ -270,7 +272,7 @@ using namespace BeeFishWeb;
                         base64.flush();
                     }
                 
-                    http["content"].endString(pageIndex, !base64EncodeData, partWord);
+                    content.endString(pageIndex, !base64EncodeData, partWord);
                     http["content-type"].setString(contentType);
                     http["content-length"].setInteger(contentLength);
                     

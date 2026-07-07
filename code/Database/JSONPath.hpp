@@ -425,10 +425,10 @@ public:
         BString& partWord
     )
     {
-        
-        if (!_lock)
-            _lock = new LockFile::ScopedLock(database());
-        
+/*
+if (!_lock)
+    _lock = new LockFile::ScopedLock(database());
+*/
         LockFile::ScopedLock lock(database());
         
         Path path = *this;
@@ -491,6 +491,8 @@ public:
         BString& partWord
     )
     {
+        LockFile::ScopedLock lock(database());
+        
         Path path = *this;
 
         addWords("", partWord, false, true, true);
