@@ -2,7 +2,7 @@ CFLAGS = -std=c++17 -Wall -fmax-errors=1 -g
 OPTIMISATION = -Ofast
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
-DEPS=server.h session.h response.h response-headers.h response-stream.h app.h json-app.h file-system-app.h storage-app.h not-found-app.h options-app.h test.h authentication.h ../Authentication/authentication.h ../Authentication/server.h version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h $(BUILD)/web-request $(BUILD)/query Makefile
+DEPS=server.h session.h response.h response-headers.h response-stream.h app.h json-app.h file-system-app.h storage-app.h not-found-app.h options-app.h test.h authentication.h ../Authentication/authentication.h ../Authentication/server.h ../Miscellaneous/MimeTypes.hpp version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h $(BUILD)/web-request $(BUILD)/query Makefile
 
 ifeq ("$(PORT)","")
 	PORT=8000

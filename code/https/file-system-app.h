@@ -135,7 +135,7 @@ public:
             // File content
             MimeType mimeType = 
                 _mimeTypes[
-                    _filePath.extension()
+                    extension
                 ];
             contentType = mimeType.contentType;
             cacheControl = mimeType.cacheControl;
