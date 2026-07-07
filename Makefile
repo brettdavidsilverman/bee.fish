@@ -20,7 +20,7 @@ stop:
 	make -C code/https $(DEBUG) stop PORT=$(PORT)
 	
 start:
-	make -C code/https $(DEBUG) test start PORT=$(PORT)
+	make -C code/https $(DEBUG) test PORT=$(PORT)
 
 restart:	stop start
 
