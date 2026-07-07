@@ -57,9 +57,23 @@ using namespace BeeFishWeb;
                 request()->url();
                 
             if (url.paths().size() &&
-                url.paths()[0] == "index.html")
-                return;
-
+                url.paths()[0] == "x")
+            {
+                if (method == "POST")
+                {
+                    _content =
+                        BString("\"") +
+                        "No one can override x!" +
+                        BString("\"");
+                     _serve = App::SERVE_CONTENT;
+                     _status = 500;
+                     _statusText = "ok";
+                     return;
+                }
+                
+                
+            }
+            
             const BString& origin = _session->origin();
             const BString& host = _session->host();
 
@@ -74,6 +88,15 @@ using namespace BeeFishWeb;
                     url,
                     method
                 );
+                
+                if (method == "GET" &&
+                    jsonPath.type() == Type::UNDEFINED
+                )
+                {
+                    redirect("x");
+                    return;
+#warning redirect to x here
+                }
 
                 _bookmark = jsonPath.index();
             }

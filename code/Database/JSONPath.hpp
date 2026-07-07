@@ -426,10 +426,10 @@ public:
     )
     {
 
-//if (!_lock)
-//    _lock = new LockFile::ScopedLock(database());
+if (!_lock)
+    _lock = new LockFile::ScopedLock(database());
 
-        LockFile::ScopedLock lock(database());
+        //LockFile::ScopedLock lock(database());
         
         Path path = *this;
         setType(Type::STRING);
@@ -491,7 +491,7 @@ public:
         BString& partWord
     )
     {
-        LockFile::ScopedLock lock(database());
+       // LockFile::ScopedLock lock(database());
         
         Path path = *this;
 
@@ -524,10 +524,10 @@ public:
         path.setData<bool>(indexData);
 
         partWord = "";
-        /*
+        
         delete _lock;
         _lock = nullptr;
-         */
+         
     }
 
 public:

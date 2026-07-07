@@ -108,7 +108,7 @@ namespace BeeFishHTTPS {
         
         void redirect(
             BString path,
-            bool permanent,
+            bool permanent = false,
             BString from = ""
         )
         {
@@ -137,7 +137,13 @@ namespace BeeFishHTTPS {
                 "text/plain; charset=utf-8"
             );
 
-            _content = "redirecting...";
+            if (!_content.size())
+            {
+                _content = 
+                    BString("redirecting ") + 
+                        path + 
+                    BString("...");
+            }
             
             _serve = App::SERVE_CONTENT;
             

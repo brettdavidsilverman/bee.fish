@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title id="title">bee.fish</title>
+        <script src="/head.js"></script>
+        <script src="/client/stream/stream.js"></script>
+        <script src="/client/power-encoding/power-encoding.js"></script>
+        <script src="/client/id/id.js"></script>
+        <script src="/client/console/console.js"></script>
+        <script src="/client/evaluate.js"></script>
+        <script src="/client/logon/authentication.js"></script>
+        <script src="/client/punycode.js"></script>
+        <script src="/client/coordinates/script.js"></script>
+        <script src="/client/movable/script.js"></script>
+       
+        <link rel="stylesheet" type="text/css" href="/style.css"/>
+        <style>
+#image {
+    width: 100px;
+    height: 100px;
+    display: none;
+}
+
+        </style>
+    </head>
+    <body>
+        <h1 id="h1"><a id="a">bee.fish</a></h1>
+        <a href="https://share.google/aimode/AZu4GrtYiQZJTAMt2">JSON Beginners Guide</a>
+        
+        <div>
+            <form onsubmit="return false;">
+                <div style="text-align:left;">
+                    <label for="pathInput">Path</label>
+                </div>
+                <input type="text" id="pathInput"/>
+                <button id="fetchButton">Fetch</button>
+                <button id="cancelButton">Cancel</button>
+                <br/>
+            </form>
+            <br/>
+            <form onsubmit="return false;">
+                <div style="text-align:left;">
+                    <label for="editor">
+                        Editor
+                    </label>
+                    <br/>
+                    <label for="functionCheckbox">
+                        <i>f()</i>
+                    </label>
+                    <input type="checkbox"
+                             id="functionCheckbox"
+                             onclick="switchFunctions(this.checked)" 
+                    />
+                    
+                    <label for="contentType">
+                        Content type
+                    </label>
+                    <select id="contentType">
+                        <option value="text/plain; charset=utf-8">Text</option>
+                        <option value="application/json; charset=utf-8">JSON</option>
+                        <option value="text/html; charset=utf-8">HTML</option>
+                        <option value="text/css; charset=utf-8">CSS</option>
+                        <option value="text/javascript; charset=utf-8">Javascript</option>
+                        <option value="image/jpeg">Image</option>
+                        <option value="audio/mpeg">Audio</option>
+                    </select>
+                </div>
+                <textarea id="editor" wrap="off"></textarea>
+                <img id="image" src="/favicon.ico" alt="image" />
+                <audio id="audio" controls></audio>
+                <div>
+                    <button id="resetButton" type="reset">Reset</button>
+                    <button id="saveButton">Save</button>
+                    <input type="file" id="file" />
+                </div>
+            </form>
+            
+        </div>
+        <!--
+        <h2>
+            <a id="goLink" href="/go.html">App Link</a>
+        </h2>
+        -->
+        <h2>
+            <a id="dataLink" href="/">Data Link</a>
+        </h2>
+        <br />
+        <br />
+        <a href="/client/logon/" id="logon">Logon/Logoff</a>
+        <br />
+        <a href="/client/">Javascript client library</a>
+        <br />
+        <a href="/code/">Javascript server library</a>
+        <br />
+        <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
+        <script type="module">
+        
+
+const defaultContentType = "text/plain; charset=utf-8";
+
+var console = new Console();
+console.log("Hello world");
+
+var logon = document.getElementById("logon");
+logon.href = "/client/logon?redirect=" + encodeURIComponent(window.location.href);
+
+var pathInput = document.getElementById("pathInput");
+var result = document.getElementById("result");
+var editor = document.getElementById("editor");
+var html = document.getElementById("html");
+var fetchButton = document.getElementById("fetchButton");
+var cancelButton = document.getElementById("cancelButton");
+var resetButton = document.getElementById("resetButton");
+var saveButton = document.getElementById("saveButton");
+var functionCheckbox = document.getElementById("functionCheckbox");
+//var goLink = document.getElementById("goLink");
+var dataLink = document.getElementById("dataLink");
+var header = document.getElementById("h1");
+var a = document.getElementById("a");
+var title = document.getElementById("title");
+var fileInput = document.getElementById("file");
+var contentType = document.getElementById("contentType");
+
+var image = document.getElementById("image");
+var audio = document.getElementById("audio");
+
+var controller = new AbortController();
+
+var downloading = false;
+
+var blob;
+var searchResults = [];
+
+var origin = window.location.origin;
+
+title.innerText = origin;
+a.innerText = origin;
+a.href = origin;
+const defaultPath = origin;
+
+fetchButton.disabled = true;
+cancelButton.disabled = true;
+
+//authenticate();
+function getCursorLineAndColumn(textarea) {
+  // Get the text from the start up to the cursor position
+  const textUpToCaret = textarea.value.substr(0, textarea.selectionStart);
+  
+  // Split the substring by line breaks
+  const textLines = textUpToCaret.split('\n');
+  
+  const currentLine = textLines.length; // 1-indexed line number
+  const currentColumn = textLines[textLines.length - 1].length; // 0-indexed column
+
+  return { line: currentLine, column: currentColumn };
+}
+
+
+async function checkResponse(response) {
+    if (response.status == 401) // Unauthorised 
+    {
+        var json = await response.json();
+        redirect(json);
+        return false;
+    }
+    else if (response.status != 200) {
+        var json = await response.json();
+        throw new Error(
+            decodeURIComponent(json)
+        );
+        return false;
+    }
+    
+    return true;
+}
+
+async function fetchContent(url, f) {
+    
+    saveButton.disabled = true;
+    fetchButton.disabled = true;
+    
+
+    const params = new URLSearchParams(url.search);
+
+    var decode = url.search.length &&
+        !params.has("index") &&
+        !url.search.endsWith("$");
+        
+    try {
+        
+         var parameters = {
+            mode: "cors",
+            method: "GET",
+            credentials: "include",
+            signal: controller.signal
+        }
+        
+        cancelButton.disabled = false;
+        var response = await fetch(url, parameters);
+        if (!await checkResponse(response))
+            return;
+        
+        
+        var contentTypeHeader =
+            response.headers.get("content-type");
+
+        setContentTypeValue(contentTypeHeader);
+        
+        
+        if (contentType.value.startsWith("image"))
+        {
+            blob = await response.blob();
+            image.src = URL.createObjectURL(blob);
+            editor.value = "";
+            return;
+        }
+        
+        if (contentType.value.startsWith("audio"))
+        {
+            blob = await response.blob();
+            audio.src = URL.createObjectURL(blob);
+            editor.value = "";
+            return;
+        }
+        
+        if (!decode || contentType.value.startsWith("text"))
+        {
+            var text = await response.text();
+            editor.value = text;
+            return;
+        }
+        
+    
+        
+        blob = undefined;
+        
+        // Get the response body as a ReadableStream
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        var lineBuffer = '';
+
+        while (true) {
+        
+            const { done, value } =
+                await reader.read();
+            
+            if (done) {
+                break;
+            }
+
+            lineBuffer += decoder.decode(value, { stream: true });
+
+            // Process lines when a newline character is found
+            const lines = lineBuffer.split('\n');
+            for (let i = 0; i < lines.length - 1; i++) {
+                const line = lines[i];
+                f(line + "\n");
+            }
+            lineBuffer = lines[lines.length - 1];
+        }
+    
+        if (lineBuffer) {
+            f(lineBuffer);
+        }
+    
+        
+    
+    }
+    catch (error)
+    {
+        if (error.name != "AbortError") 
+        {
+            alert(error);
+        }
+    }
+    finally {
+        fetchButton.disabled = false;
+        saveButton.disabled = false;
+        downloading = false;
+        cancelButton.disabled = true;
+        fetchButton.disabled = false;
+        controller = new AbortController();
+    }
+    
+        
+    
+}
+
+// Example usage:
+//fetchContent('https://dev.bee.fish:8000/?deaths+data').catch(console.error);
+
+function redirect(path)
+{
+    var url = new URL(path);
+    url.search = "?redirect=" +
+        encodeURIComponent(document.location.href);
+    document.location.replace(url);
+}
+
+async function downloadJSON() {
+
+    var url = new URL(
+        pathInput.value, 
+        origin
+    );
+
+    saveButton.disabled = true;
+    
+    searchResults = [];
+    
+    var firstLine = true;
+    
+    var decode = url.search.length &&
+        !url.searchParams.has("index") &&
+        !url.search.endsWith("$");
+
+    await fetchContent(
+        url,
+        (line) => {
+            if (firstLine) {
+                editor.value = "";
+                firstLine = false;
+            }
+            if (decode && line != "[\n" && line != "]")
+            {
+                line = line.substr(0, line.length - 1);
+                if (line.endsWith(","))
+                {
+                    line = line.substr(0, line.length - 1);
+                }
+                var url = new URL(
+                    decodeURIComponent(JSON.parse(line))
+                );
+                
+                searchResults.push(url.toString());
+                if (url.searchParams.has("next"))
+                    line = "...";
+                else if (url.origin == document.location.origin)
+                {
+                    line = decodeURIComponent(
+                        url.pathname
+                    );
+                }
+                else
+                    line = url.toString();
+                    
+                line += "\n";
+                editor.value += line;
+            }
+            else if (!decode)
+                editor.value += line;
+        }
+    );
+    
+    saveButton.disabled = false;
+    fetchButton.focus();
+    
+}
+
+
+if (!pathInput.value)
+    pathInput.value =  defaultPath;
+    
+pathInput.onblur =
+    function() {
+        if (pathInput.value == "")
+        {
+            pathInput.value = defaultPath;
+        }
+        localStorage.setItem("path", pathInput.value);
+        
+        setLinks();
+        
+    }
+
+
+
+
+async function uploadData(path, data, contentType, contentLength, halfDuplex = false)
+{
+    
+    var parameters = {
+        mode: "cors",
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "content-type": contentType
+        },
+        body: data
+    }
+    
+    if (halfDuplex)
+        parameters["duplex"] = "half";
+        
+    saveButton.disabled = true;
+    fileInput.disabled = true;
+       
+    if (path.endsWith("/"))
+        path = path.substr(0, path.length - 1);
+      
+    
+    var status;
+    localStorage.setItem("path", pathInput.value);
+        
+    try
+    {
+        await authenticate();
+        var response = await fetch(
+            path,
+            parameters
+        );
+        
+        await checkResponse(response);
+        
+        var status = response.status;
+        if (status == 200) {
+            var json = await response.json();
+            json = decodeURIComponent(json);
+            alert(json);
+            pathInput.value = json;
+            
+            setLinks()
+        }
+        
+    }
+    catch (error)
+    {
+        alert(error);
+    }
+    finally {
+        saveButton.disabled = false;
+        fileInput.disabled = false;
+    }
+        
+}
+    
+cancelButton.onclick =
+    () => {
+        controller.abort("User cancelled");
+        downloading = false;
+        cancelButton.disabled = true;
+        fetchButton.disabled = false;
+    }
+    
+resetButton.onclick =
+    () => {
+        saveButton.disabled = false;
+        setContentTypeValue(defaultContentType);
+    }
+    
+saveButton.onclick = async function() {
+
+    
+    var json = editor.value;
+    var path = pathInput.value;
+        // UTF-8 is the default
+        
+    var data;
+    var length;
+    if (blob) {
+        data = blob;
+        length = blob.size;
+    }
+    else {
+        const encoder = new TextEncoder(); 
+        data = encoder.encode(editor.value);
+       // data = editor.value;
+        length = data.length;
+    }
+    
+  //  localStorage.setItem("contentType", contentType.value);
+    await uploadData(path, data, contentType.value, length);
+};
+
+fileInput.onchange = async function(event)
+{
+    var path = pathInput.value;
+    
+  
+    var file = fileInput.files[0];
+    
+    await uploadData(path, file, file.type, file.size, true);
+    fileInput.value = "";
+}
+
+fetchButton.onclick =
+    async function() {
+
+            
+        window.location.hash =
+            encodeURIComponent(
+                pathInput.value
+            );
+            
+        setLinks();
+
+        await downloadJSON();
+    }
+    
+window.onhashchange =
+    function() {
+        if (!window.location.hash)
+            return;
+        pathInput.value =
+            decodeURIComponent(
+                window.location.hash.substr(1)
+            );
+        setLinks();
+        fetchButton.click();
+    }
+    
+editor.onclick =
+    function() {
+        var position =
+            getCursorLineAndColumn(editor);
+        if (position.line <= searchResults.length)
+        {
+            window.location.hash =
+                encodeURIComponent(
+                    searchResults[position.line - 1]
+                );
+        }
+    }
+    
+contentType.onchange =
+    () => {
+        if (contentType.value.startsWith("image")) {
+            image.style.display = "block";
+            editor.style.display = "none";
+            audio.style.display = "none";
+        }
+        else if (contentType.value.startsWith("audio")) {
+            image.style.display = "none";
+            editor.style.display = "none";
+            audio.style.display = "block";
+        }
+        else {
+            image.style.display = "none";
+            editor.style.display = "block";
+            audio.style.display = "none";
+        }
+        
+        localStorage.setItem("contentType", contentType.value);
+        blob = null;
+    }
+
+function switchFunctions(showFunctions)
+{
+
+    var json = getJSON();
+    
+    if (showFunctions) {
+        json = displayFunctions(json);
+    }
+    else {
+        json = hideFunctions(json);
+        json = JSON.stringify(json, null, "    ");
+    }
+    editor.value = json;
+
+}
+
+
+function getJSON()
+{
+    var json = editor.value;
+    
+    if (json == "")
+        return undefined;
+        
+    var f = new Function(
+        "return (" + json + ")"
+    );
+    json = f();
+    return json;
+}
+
+function setLinks() {
+    if (pathInput.value == "")
+    {
+       // goLink.href = "";
+        dataLink.href = "";
+    }
+    else {
+
+       // goLink.href = "/go.html?" + encodeURIComponent(pathInput.value);
+        dataLink.href = pathInput.value;
+    }
+}
+
+function setContentTypeValue(value)
+{
+    contentType.value = value;
+            
+    if (contentType.value != value)
+    {
+        var option = document.createElement("option");
+           
+        option.value = value;
+        option.textContent = value;
+        contentType.appendChild(option);
+        contentType.value = value;
+    }
+    
+    contentType.onchange();
+
+}
+
+if (localStorage.getItem("path")) {
+
+    pathInput.value =
+        localStorage.getItem("path");
+        
+}
+
+if (localStorage.getItem("contentType")) {
+
+    var contentTypeValue = 
+        localStorage.getItem("contentType");
+        
+    setContentTypeValue(contentTypeValue);
+    
+    
+}
+
+setLinks();
+contentType.onchange();
+fetchButton.disabled = false;
+
+        </script>
+
+    </body>
+
+</html>

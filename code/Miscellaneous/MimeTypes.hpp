@@ -41,7 +41,14 @@ namespace BeeFishMiscellaneous
                 true
             }
         },
-
+        {
+            "x",
+            {
+                "text/html; charset=utf-8",
+                _defaultCacheControl,
+                true
+            }
+        },
         {
             ".xhtml",
             {
@@ -74,6 +81,7 @@ namespace BeeFishMiscellaneous
                 true
             }
         },
+        
         {
             ".css",
             {
