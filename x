@@ -503,7 +503,7 @@ window.onhashchange =
     function() {
         if (!window.location.hash)
             return;
-        pathInput.value =
+        var url =
             decodeURIComponent(
                 window.location.hash.substr(1)
             );
@@ -628,6 +628,8 @@ if (localStorage.getItem("contentType")) {
 setLinks();
 contentType.onchange();
 fetchButton.disabled = false;
+
+window.onhashchange();
 
         </script>
 
