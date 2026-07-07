@@ -95,7 +95,6 @@ using namespace BeeFishWeb;
                 {
                     redirect("x");
                     return;
-#warning redirect to x here
                 }
 
                 _bookmark = jsonPath.index();
