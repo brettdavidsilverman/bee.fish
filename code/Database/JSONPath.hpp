@@ -425,10 +425,10 @@ public:
         BString& partWord
     )
     {
-/*
-if (!_lock)
-    _lock = new LockFile::ScopedLock(database());
-*/
+
+//if (!_lock)
+//    _lock = new LockFile::ScopedLock(database());
+
         LockFile::ScopedLock lock(database());
         
         Path path = *this;
@@ -524,10 +524,10 @@ if (!_lock)
         path.setData<bool>(indexData);
 
         partWord = "";
-        
+        /*
         delete _lock;
         _lock = nullptr;
-
+         */
     }
 
 public:
@@ -637,8 +637,8 @@ public:
     
     bool isUserRoot(BString& userId)
     {
-        
-        if (isRoot())
+
+        if (isRoot() )
             return true;
             
         BString _userId;
@@ -878,8 +878,9 @@ public:
             string +
             BString("?index=") +
             BString(to_string(index));
-            
+        
         return string;
+        
     }
     
 

@@ -369,8 +369,11 @@ public:
                     key,
                     _index
                 );
-
-            return string;
+                
+                       
+            JSONPath path(*_container->_database, _index);
+        
+return path.toString(_container->_auth);
 
         }
 

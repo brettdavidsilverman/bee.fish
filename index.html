@@ -26,7 +26,7 @@
         </style>
     </head>
     <body>
-        <h1 id="h1">bee.fish</h1>
+        <h1 id="h1"><a id="a">bee.fish</a></h1>
         <a href="https://share.google/aimode/AZu4GrtYiQZJTAMt2">JSON Beginners Guide</a>
         
         <div>
@@ -118,6 +118,7 @@ var functionCheckbox = document.getElementById("functionCheckbox");
 //var goLink = document.getElementById("goLink");
 var dataLink = document.getElementById("dataLink");
 var header = document.getElementById("h1");
+var a = document.getElementById("a");
 var title = document.getElementById("title");
 var fileInput = document.getElementById("file");
 var contentType = document.getElementById("contentType");
@@ -132,13 +133,11 @@ var downloading = false;
 var blob;
 var searchResults = [];
 
-var origin =
-    punycode.toUnicode(
-        window.location.origin
-    );
+var origin = window.location.origin;
 
-header.innerText = origin;
 title.innerText = origin;
+a.innerText = origin;
+a.href = origin;
 
 fetchButton.disabled = true;
 cancelButton.disabled = true;

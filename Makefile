@@ -11,7 +11,8 @@ https:	build
 	make -C code $(DEBUG) $(TEST) PORT=$(PORT)
 
 test:	TEST=test
-test:	build https
+
+test:	https
 
 clean:
 	make -C code clean
