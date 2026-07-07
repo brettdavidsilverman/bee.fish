@@ -152,8 +152,6 @@ using namespace BeeFishWeb;
             }
             else if (method == "POST")
             {
-
-                
                 _responseHeaders.replace(
                     "content-type",
                     "application/json; charset=utf-8"

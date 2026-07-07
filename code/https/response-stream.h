@@ -183,7 +183,7 @@ public:
             *this << "[" << endl;
 
             while (it != matches.end() &&
-                    (count < 100))
+                    (count < 10))
             {
 
                 *this << "   \""
