@@ -305,7 +305,7 @@ async function downloadJSON() {
         pathInput.value, 
         origin
     );
-
+    
     saveButton.disabled = true;
     
     searchResults = [];
@@ -330,22 +330,26 @@ async function downloadJSON() {
                 {
                     line = line.substr(0, line.length - 1);
                 }
-                var url = new URL(
-                    decodeURIComponent(JSON.parse(line))
+                
+                line = JSON.parse(line.trim());
+
+                searchResults.push(
+                    line
                 );
                 
-                searchResults.push(url.toString());
+                var url = new URL(
+                    line
+                );
+                
                 if (url.searchParams.has("next"))
                     line = "...";
-                else if (url.origin == document.location.origin)
+                else if (url.origin == origin)
                 {
                     line = decodeURIComponent(
                         url.pathname
                     );
                 }
-                else
-                    line = url.toString();
-                    
+                
                 line += "\n";
                 editor.value += line;
             }
@@ -507,6 +511,7 @@ window.onhashchange =
             decodeURIComponent(
                 window.location.hash.substr(1)
             );
+        pathInput.value = url;
         setLinks();
         fetchButton.click();
     }

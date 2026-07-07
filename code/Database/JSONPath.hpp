@@ -695,8 +695,8 @@ public:
                 {
                     key = BString("\"") + key + BString("\"");
                 }
-                else
-                    key = key.encodeURI();
+//  else
+//     key = key.encodeURI();
 
             }
 
