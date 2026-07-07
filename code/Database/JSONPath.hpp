@@ -1319,7 +1319,7 @@ private:
 
             JSONPath json = *this;
 
-            while (!json.isUserRoot())
+while (!json.isRoot())
             {
                 ++wordPath[json.id()];
 
@@ -1389,7 +1389,7 @@ private:
 
                 JSONPath json = (*this);
 
-                while  (!json.isUserRoot())
+while  (!json.isRoot())
                 {
 
                     if (wordPath.contains(json.id()))

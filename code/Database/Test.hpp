@@ -2797,7 +2797,7 @@ inline bool testMultiThreaded()
     // sizes are consistent
     const Index SIZE = 1135312;
 #else
-    const Index SIZE = 3838992;
+    const Index SIZE = 3988768;
 #endif
 
     File authFile;
