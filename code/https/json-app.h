@@ -90,6 +90,7 @@ using namespace BeeFishWeb;
                 );
                 
                 if (method == "GET" &&
+                    url.search().value().size() &&
                     jsonPath.type() == Type::UNDEFINED
                 )
                 {

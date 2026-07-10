@@ -67,7 +67,7 @@
                         <option value="audio/mpeg">Audio</option>
                     </select>
                 </div>
-                <textarea id="editor" wrap="off"></textarea>
+                <textarea id="editor" wrap="on"></textarea>
                 <img id="image" src="/favicon.ico" alt="image" />
                 <audio id="audio" controls></audio>
                 <div>
@@ -135,9 +135,7 @@ var searchResults = [];
 
 var origin = window.location.origin;
 
-title.innerText = origin;
-a.innerText = origin;
-a.href = origin;
+
 const defaultPath = origin;
 
 fetchButton.disabled = true;
@@ -583,16 +581,10 @@ function getJSON()
 }
 
 function setLinks() {
-    if (pathInput.value == "")
-    {
-       // goLink.href = "";
-        dataLink.href = "";
-    }
-    else {
-
-       // goLink.href = "/go.html?" + encodeURIComponent(pathInput.value);
-        dataLink.href = pathInput.value;
-    }
+    dataLink.href = pathInput.value;
+    title.innerText = pathInput.value;
+    a.innerText = pathInput.value;
+    a.href = pathInput.value;
 }
 
 function setContentTypeValue(value)

@@ -28,8 +28,9 @@ using namespace BeeFishWeb;
         virtual void handleResponse()
         override
         {
-            URL& url = request()->url();
 /*
+            URL& url = request()->url();
+
             redirect(
                 BString("/x#") + 
                     url.path().encodeURI()
