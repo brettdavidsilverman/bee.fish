@@ -2,8 +2,13 @@
 #define BEE_FISH__DATABASE__BRANCH_HPP
 
 #include <iomanip>
+#include <iostream>
+#include <atomic>
+#include <boost/interprocess/managed_shared_memory.hpp>
 #include "../Script/Variable.hpp"
 #include "../Size.hpp"
+
+namespace bip = boost::interprocess;
 
 using namespace std;
 
@@ -11,6 +16,7 @@ namespace BeeFishDatabase
 {
 
     class Database;
+    
 
     using namespace BeeFishScript;
 
@@ -61,6 +67,23 @@ namespace BeeFishDatabase
             
     };
     
+    /*
+int main() {
+    
+        // 3. Perform atomic operations
+    // fetch_add returns the old value; the increment itself is strictly atomic
+    int old_val = shared_atomic->fetch_add(1, std::memory_order_relaxed);
+    
+    std::cout << "Previous value was: " << old_val << std::endl;
+    std::cout << "Current value is: " << shared_atomic->load() << std::endl;
+
+    // 4. (Optional) Remember to remove the segment when completely finished with IPC
+    // bip::shared_memory_object::remove(shm_name);
+
+    return 0;
+}
+
+    */
     
 }
 

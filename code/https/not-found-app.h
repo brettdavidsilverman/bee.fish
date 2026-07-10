@@ -29,14 +29,14 @@ using namespace BeeFishWeb;
         override
         {
             URL& url = request()->url();
-            
+/*
             redirect(
                 BString("/x#") + 
                     url.path().encodeURI()
             );
             
             return;
-                    
+*/
             _responseHeaders.replace(
                 "content-type",
                 "application/json; charset=utf-8"
