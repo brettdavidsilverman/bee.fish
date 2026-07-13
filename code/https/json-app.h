@@ -90,7 +90,7 @@ using namespace BeeFishWeb;
                 );
                 
                 if (method == "GET" &&
-                    url.search().value().size() &&
+                    !url.search().value().size() &&
                     jsonPath.type() == Type::UNDEFINED
                 )
                 {
@@ -105,12 +105,23 @@ using namespace BeeFishWeb;
                 return;
             }
             
+            
             _contentLength = -1;
-            
-            
-            if (method == "GET" && 
-                url.search().value().length() &&
-                !url.search().contains("index"))
+            if ((method == "GET") && 
+                url.search().contains("index") &&
+                url.search()["index"].size())
+            {
+                // Fetch by index
+                _responseHeaders.replace(
+                    "content-type",
+                    "application/json; charset=utf-8"
+                );
+                _serve = App::SERVE_JSON;
+            }
+            else if (
+                method == "GET" && 
+                url.search().value().length()
+            )
             {
                 _responseHeaders.replace(
                     "content-type",
@@ -193,7 +204,7 @@ using namespace BeeFishWeb;
                 {
 
                     // Posting JSON, remove {HTTP}
-                    jsonPath.deleteProperty("{HTTP}");
+//jsonPath.deleteProperty("{HTTP}");
                     
                     // Stream posted file to
                     // database
@@ -224,7 +235,7 @@ using namespace BeeFishWeb;
                     }
                 }
                 else {
-
+        
                     JSONPath http = jsonPath["{HTTP}"];
     
                     JSONPath content = 
@@ -287,6 +298,7 @@ using namespace BeeFishWeb;
                     );
                     
                     if (!parseWebRequest(parser)) {
+content.endString(pageIndex, !base64EncodeData, partWord);
                         throw std::runtime_error("Invalid input post to json-app.h");
                     }
 

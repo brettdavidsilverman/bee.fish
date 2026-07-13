@@ -29,8 +29,8 @@ private:
     vector<Type> _typeStack;
     JSONPath _string;
     BString _partWord;
-    Index _stringPageIndex;
-    bool _indexString;
+    Index _stringPageIndex = 0;
+    bool _indexString = true;
 
 
 public:
@@ -66,7 +66,12 @@ public:
 
     virtual ~JSONPathParser()
     {
-
+        if (_stringPageIndex != 0)
+            _string.endString(
+                _stringPageIndex,
+                _indexString,
+                _partWord
+            );
 
     }
 
@@ -336,6 +341,8 @@ private:
             _indexString,
             _partWord
         );
+        
+        _stringPageIndex = 0;
 
     }
 

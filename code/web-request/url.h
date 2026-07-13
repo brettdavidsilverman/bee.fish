@@ -83,9 +83,9 @@ namespace BeeFishWeb {
         class Origin : public Capture
         {
         public:
-            Protocol* _protocol = nullptr;
-            Domain* _domain = nullptr;
-            Port* _port = nullptr;
+            Protocol* _protocol = new Protocol();
+            Domain*   _domain   = new Domain();
+            Port*     _port     = new Port();
             
         public:
             Origin() : Capture(
@@ -94,15 +94,15 @@ namespace BeeFishWeb {
                 _match = new And(
                     new Optional(
                         new And(
-                            _protocol = new Protocol(),
+                            _protocol,
                             new Word("://")
                         )
                     ),
-                    _domain = new Domain(),
+                    _domain,
                     new Optional(
                         new And(
                             new Character(':'),
-                           _port = new Port()
+                           _port
                         )
                     )
                 );
@@ -134,8 +134,6 @@ namespace BeeFishWeb {
             
         };
 
-        class Search;
-            
         class KeyCharacter : public Not {
         public:
             KeyCharacter() : Not(
@@ -179,11 +177,11 @@ namespace BeeFishWeb {
             }
         };
             
-            
-
+        class KeyValues;
+        
         class KeyValuePair : public And {
         public:
-            friend class Search;
+            friend class KeyValues;
 
         protected:
             BString _key;
@@ -215,64 +213,71 @@ namespace BeeFishWeb {
                 
 
         };
-
-        class Search : 
+        
+        class KeyValues :
             public Repeat<KeyValuePair>,
             public std::map<BString, BString>
         {
-        protected:
-            BString _value;
         public:
-            Search() : Repeat<KeyValuePair>() { 
-                    
-            }
-            
-            virtual void success()
-            override
+            KeyValues() : Repeat<KeyValuePair>()
             {
-                _value = _value.decodeURI();
-                Repeat<KeyValuePair>::success();
             }
-
+                
             virtual void matchedItem(KeyValuePair* item) {
                 BString key = item->_key.decodeURI();
                 BString value = item->_value.decodeURI();
                 (*this)[key] = value;
                 Repeat<KeyValuePair>::matchedItem(item);
             }
-            
-            virtual bool match(Parser* parser, const Char& character)
-            override
-            {
-                bool matched =
-                    Repeat::match(parser, character);
-                    
-                if (matched)
-                    _value += character;
-                    
-                return matched;
+        };
+
+        class Search : 
+            public Capture
+        {
+        protected:
+            KeyValues* _keyValues;
                 
+            
+        public:
+            Search() : Capture(
+                new And(
+                    new Character('?'),
+                    _keyValues =
+                        new KeyValues()
+                )
+            )
+            {
+                assert(_keyValues);
             }
             
-            virtual const BString& value() const
+            virtual void success()
             override
             {
-                return _value;
+                _value = _value.decodeURI();
+                Capture::success();
             }
-        
-            virtual BString& value()
-            override
-            {
-                return _value;
-            }
-        
+            
             virtual operator const BString& () const
             {
                 return _value;
             }
             
-            virtual bool contains(const BString& test) {
-                return count(test) > 0;
+            KeyValues& items() const
+            {
+                assert(_keyValues);
+                return *_keyValues;
+            }
+            
+            virtual bool contains(const BString& key) {
+                assert(_keyValues);
+//cerr << "CONTAINS KEY " << key << ":" << _keyValues << ":" << typeid(*_keyValues).name() << endl;
+                return _keyValues->count(key) > 0;
+            }
+            
+            virtual BString& operator [] (const BString& key)
+            {
+                assert(_keyValues);
+                return (*_keyValues)[key];
             }
         
             
@@ -290,9 +295,10 @@ namespace BeeFishWeb {
         };
         
     public:
-        Origin* _origin = nullptr;
-        Path* _path = nullptr;
-        Search* _search = nullptr;
+        Origin* _origin = new Origin();
+        Path*   _path   = new Path();
+        Search* _search = new Search();
+        
         const URL* _baseURL = nullptr;
 
     public:
@@ -301,21 +307,15 @@ namespace BeeFishWeb {
         {
             _match = new And(
                 new Optional(
-                    _origin = new Origin()
+                    _origin
                 ),
                 new Optional(
-                    new And(
-                        _path = new Path(),
-                        new Optional(
-                            new And(
-                                new Character('?'),
-                                _search = new Search()
-                            )
-                        )
-                    )
+                    _path
+                ),
+                new Optional(
+                    _search
                 )
             );
-
         }
         
         
@@ -374,14 +374,9 @@ namespace BeeFishWeb {
         {
             BString string = origin();
             
-            BString path = URL::path();
+            string += path();
             
-            string += path;
-            
-            if (search().matched())
-                string +=
-                        BString("?") +
-                        search().value();
+            string += search();
                         
             if (string == "")
                 string = "/";

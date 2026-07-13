@@ -61,7 +61,7 @@ using namespace BeeFishTest;
         Parser pathParser(path);
         pathParser.read("Hello%20World%25");
         pathParser.eof();
-
+ 
         ok = ok && testResult("Path with escaped space is \"Hello World%\"",
             path.result() == true &&
             path.value().decodeURI() == "Hello World%"
@@ -74,15 +74,47 @@ using namespace BeeFishTest;
 
         if (ok) {
             cout << "Testing basic path" << endl;
-            BeeFishWeb::URL url;
-            Parser parser(url);
+            BeeFishWeb::URL::Path path;
+        
+            Parser parser(path);
             parser.read("/path");
+
             parser.eof();
-            
+
             ok =
                 testValue("Basic path result", parser.matched());
             ok = ok &&
-                testValue("Basic path value", url.path() == "/path");
+                testValue("Basic path value", path == "/path");
+                    }
+        
+        if (ok) {
+            cout << "Testing basic search" << endl;
+            BeeFishWeb::URL::Search search;
+        
+            Parser parser(search);
+            parser.read("?search");
+
+            parser.eof();
+
+            ok =
+                testValue("Basic search result", parser.matched());
+            ok = ok &&
+                testValue("Basic search value", search == "?search");
+                    }
+        
+        if (ok) {
+            cout << "Testing url path" << endl;
+            BeeFishWeb::URL url;
+        
+            Parser parser(url);
+            parser.read("/path");
+
+            parser.eof();
+
+            ok =
+                testValue("URL path result", parser.matched());
+            ok = ok &&
+                testValue("URL path value", url == "/path");
                     }
 
         BeeFishWeb::URL url;
@@ -102,7 +134,22 @@ using namespace BeeFishTest;
 
         ok = ok && testResult(
             "Path with search value",
-            url.search().value() == "key1=value1&key2=value2&key3"
+            url.search().value() == "?key1=value1&key2=value2&key3"
+        );
+        
+cerr << "WEB_REQUEST TEST "
+     << endl;
+     
+std::map<BString, BString>& map = 
+     url.search().items();
+for (auto pair : map)
+{
+    cout << pair.first << ":" << pair.second << endl;
+}
+
+        ok = ok && testResult(
+            "Path search contains key 1",
+            url.search().contains("key1")
         );
 
 
@@ -312,7 +359,7 @@ using namespace BeeFishTest;
         
         ok = ok && testResult(
                 "URL search with quote",
-                url5.search().value() == "hello"
+                url5.search() == "?hello"
             );
             
         ok = ok && testResult(
@@ -739,7 +786,7 @@ using namespace BeeFishTest;
             
             ok = ok && testResult(
                 "search is search",
-                webRequest.search() == "search"
+                webRequest.search() == "?search"
             );
             
             ok = ok && testResult(
@@ -933,7 +980,7 @@ using namespace BeeFishTest;
         
         ok = ok && testResult(
             "WebRequest escaped search is query<space>query",
-            escapedUrlWebRequest.search().decodeURI() == "query query"
+            escapedUrlWebRequest.search().decodeURI() == "?query query"
         );
 
         BeeFishWeb::WebRequest postWebRequest;

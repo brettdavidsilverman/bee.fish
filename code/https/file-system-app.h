@@ -275,7 +275,7 @@ public:
                 BString search = request.url().search().value();
 
                 if (search.length())
-                    newPath += BString("?") + search;
+newPath += search;
 
                 redirect(newPath, false);
                 return true;

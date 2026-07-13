@@ -121,8 +121,12 @@ public:
             }
             else
             {
+                // Remove preceeding ?
                 search =
-                    app->request()->search();
+                    app
+                    ->request()
+                    ->search()
+                    .substr(1);
             }
 
             bool getCount = false;

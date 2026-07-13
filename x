@@ -24,145 +24,168 @@
 }
 
         </style>
+
     </head>
     <body>
-        <h1 id="h1"><a id="a">bee.fish</a></h1>
-        <a href="https://share.google/aimode/AZu4GrtYiQZJTAMt2">JSON Beginners Guide</a>
+        <h1 id="h1">
+            <a id="a">bee.fish</a>
+        </h1>
         
-        <div>
-            <form onsubmit="return false;">
-                <div style="text-align:left;">
-                    <label for="pathInput">Path</label>
-                </div>
-                <input type="text" id="pathInput"/>
-                <button id="fetchButton">Fetch</button>
-                <button id="cancelButton">Cancel</button>
-                <br/>
-            </form>
-            <br/>
-            <form onsubmit="return false;">
-                <div style="text-align:left;">
-                    <label for="editor">
-                        Editor
-                    </label>
-                    <br/>
-                    <label for="functionCheckbox">
-                        <i>f()</i>
-                    </label>
-                    <input type="checkbox"
-                             id="functionCheckbox"
-                             onclick="switchFunctions(this.checked)" 
-                    />
-                    
-                    <label for="contentType">
-                        Content type
-                    </label>
-                    <select id="contentType">
-                        <option value="text/plain; charset=utf-8">Text</option>
-                        <option value="application/json; charset=utf-8">JSON</option>
-                        <option value="text/html; charset=utf-8">HTML</option>
-                        <option value="text/css; charset=utf-8">CSS</option>
-                        <option value="text/javascript; charset=utf-8">Javascript</option>
-                        <option value="image/jpeg">Image</option>
-                        <option value="audio/mpeg">Audio</option>
-                    </select>
-                </div>
-                <textarea id="editor" wrap="on"></textarea>
-                <img id="image" src="/favicon.ico" alt="image" />
-                <audio id="audio" controls></audio>
-                <div>
-                    <button id="resetButton" type="reset">Reset</button>
-                    <button id="saveButton">Save</button>
-                    <input type="file" id="file" />
-                </div>
-            </form>
-            
-        </div>
-        <!--
-        <h2>
-            <a id="goLink" href="/go.html">App Link</a>
-        </h2>
-        -->
-        <h2>
-            <a id="dataLink" href="/">Data Link</a>
-        </h2>
-        <br />
-        <br />
-        <a href="/client/logon/" id="logon">Logon/Logoff</a>
-        <br />
-        <a href="/client/">Javascript client library</a>
-        <br />
-        <a href="/code/">Javascript server library</a>
-        <br />
-        <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
+        <form id="download">
+            <input id="input" value="my"></input>
+            <button type="submit">fetch</button>
+        </form>
+        
+        <form id="upload">
+            <textarea id="editor">
+            </textarea>
+            <button type="submit">save</button>
+        </form>
+
+        
+        
+
         <script type="module">
+
+const download =
+    document.getElementById("download");
+    
+const input =
+    document
+    .getElementById("input");
+    
+const result =
+    document
+    .getElementById("result");
+
+const upload =
+    document
+    .getElementById("upload");
+    
+const editor =
+    document
+    .getElementById("editor");
+    
+
+download.onsubmit =
+async (event) => {
+    try{
+    
+        event.preventDefault();
         
+        if (download.controller)
+            download.controller.abort("User cancelled");
+            
+        download.controller = 
+           new AbortController();
+        
+        var url = new URL(
+            input.value,
+            document.location.origin
+        );
+        
+        var response = await
+            fetch(
+                url,
+                {
+                    mode: "cors",
+                    method: "GET",
+                    credentials: "include",
+                    signal: download.controller.signal
+                }
+            );
 
-const defaultContentType = "text/plain; charset=utf-8";
-
-var console = new Console();
-console.log("Hello world");
-
-var logon = document.getElementById("logon");
-logon.href = "/client/logon?redirect=" + encodeURIComponent(window.location.href);
-
-var pathInput = document.getElementById("pathInput");
-var result = document.getElementById("result");
-var editor = document.getElementById("editor");
-var html = document.getElementById("html");
-var fetchButton = document.getElementById("fetchButton");
-var cancelButton = document.getElementById("cancelButton");
-var resetButton = document.getElementById("resetButton");
-var saveButton = document.getElementById("saveButton");
-var functionCheckbox = document.getElementById("functionCheckbox");
-//var goLink = document.getElementById("goLink");
-var dataLink = document.getElementById("dataLink");
-var header = document.getElementById("h1");
-var a = document.getElementById("a");
-var title = document.getElementById("title");
-var fileInput = document.getElementById("file");
-var contentType = document.getElementById("contentType");
-
-var image = document.getElementById("image");
-var audio = document.getElementById("audio");
-
-var controller = new AbortController();
-
-var downloading = false;
-
-var blob;
-var searchResults = [];
-
-var origin = window.location.origin;
-
-
-const defaultPath = origin;
-
-fetchButton.disabled = true;
-cancelButton.disabled = true;
-
-//authenticate();
-function getCursorLineAndColumn(textarea) {
-  // Get the text from the start up to the cursor position
-  const textUpToCaret = textarea.value.substr(0, textarea.selectionStart);
-  
-  // Split the substring by line breaks
-  const textLines = textUpToCaret.split('\n');
-  
-  const currentLine = textLines.length; // 1-indexed line number
-  const currentColumn = textLines[textLines.length - 1].length; // 0-indexed column
-
-  return { line: currentLine, column: currentColumn };
+        // This checks for login
+        // or error
+        if (!await checkResponse(response))
+            return;
+            
+        var text = await response.text();
+        
+        if (text != undefined)
+            editor.value = text;
+        else
+            editor.value = "undefined";
+        
+        return false;
+    }
+    catch(error)
+    {
+        alert(error);
+    }
+    finally {
+        download.controller = undefined;
+    }
+}
+    
+upload.onsubmit =
+async (event) => {
+    try{
+        event.preventDefault();
+        
+        if (upload.controller)
+            upload.controller.abort("User cancelled");
+            
+        upload.controller =
+            new AbortController();
+        
+        var url = new URL(
+            input.value,
+            document.location.origin
+        );
+        
+        // Remove search from url
+        url = new URL(
+            url.origin +
+            url.pathname
+        );
+        
+        var response = await
+            fetch(
+                url,
+                {
+                    mode: "cors",
+                    method: "POST",
+                    credentials: "include",
+                    signal: upload.controller.signal,
+                    body: editor.value,
+                    headers: {
+                        "content-type": "text/plain charset=utf-8"
+                    }
+                }
+            );
+            
+        if (!await checkResponse(response))
+            return;
+            
+        var json = await response.json();
+        
+        alert(json);
+    }
+    catch(error) {
+        alert(error);
+    }
+    finally {
+        upload.controller = undefined;
+    }
 }
 
-
+// Check fetch response errors
+// and logon redirects
 async function checkResponse(response) {
-    if (response.status == 401) // Unauthorised 
+
+    
+    if (response.status == 200)
+        return true;
+        
+    // Unauthorised 
+    if (response.status == 401) 
     {
         var json = await response.json();
         redirect(json);
         return false;
     }
+    // Not ok
     else if (response.status != 200) {
         var json = await response.json();
         throw new Error(
@@ -170,466 +193,20 @@ async function checkResponse(response) {
         );
         return false;
     }
-    
-    return true;
-}
-
-async function fetchContent(url, f) {
-    
-    saveButton.disabled = true;
-    fetchButton.disabled = true;
-    
-
-    const params = new URLSearchParams(url.search);
-
-    var decode = url.search.length &&
-        !params.has("index") &&
-        !url.search.endsWith("$");
-        
-    try {
-        
-         var parameters = {
-            mode: "cors",
-            method: "GET",
-            credentials: "include",
-            signal: controller.signal
-        }
-        
-        cancelButton.disabled = false;
-        var response = await fetch(url, parameters);
-        if (!await checkResponse(response))
-            return;
-        
-        
-        var contentTypeHeader =
-            response.headers.get("content-type");
-
-        setContentTypeValue(contentTypeHeader);
-        
-        
-        if (contentType.value.startsWith("image"))
-        {
-            blob = await response.blob();
-            image.src = URL.createObjectURL(blob);
-            editor.value = "";
-            return;
-        }
-        
-        if (contentType.value.startsWith("audio"))
-        {
-            blob = await response.blob();
-            audio.src = URL.createObjectURL(blob);
-            editor.value = "";
-            return;
-        }
-        
-        if (!decode || contentType.value.startsWith("text"))
-        {
-            var text = await response.text();
-            editor.value = text;
-            return;
-        }
-        
-    
-        
-        blob = undefined;
-        
-        // Get the response body as a ReadableStream
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        var lineBuffer = '';
-
-        while (true) {
-        
-            const { done, value } =
-                await reader.read();
-            
-            if (done) {
-                break;
-            }
-
-            lineBuffer += decoder.decode(value, { stream: true });
-
-            // Process lines when a newline character is found
-            const lines = lineBuffer.split('\n');
-            for (let i = 0; i < lines.length - 1; i++) {
-                const line = lines[i];
-                f(line + "\n");
-            }
-            lineBuffer = lines[lines.length - 1];
-        }
-    
-        if (lineBuffer) {
-            f(lineBuffer);
-        }
-    
-        
-    
-    }
-    catch (error)
-    {
-        if (error.name != "AbortError") 
-        {
-            alert(error);
-        }
-    }
-    finally {
-        fetchButton.disabled = false;
-        saveButton.disabled = false;
-        downloading = false;
-        cancelButton.disabled = true;
-        fetchButton.disabled = false;
-        controller = new AbortController();
-    }
-    
-        
-    
-}
-
-// Example usage:
-//fetchContent('https://dev.bee.fish:8000/?deaths+data').catch(console.error);
-
-function redirect(path)
-{
-    var url = new URL(path);
-    url.search = "?redirect=" +
-        encodeURIComponent(document.location.href);
-    document.location.replace(url);
-}
-
-async function downloadJSON() {
-
-    var url = new URL(
-        pathInput.value, 
-        origin
-    );
-    
-    saveButton.disabled = true;
-    
-    searchResults = [];
-    
-    var firstLine = true;
-    
-    var decode = url.search.length &&
-        !url.searchParams.has("index") &&
-        !url.search.endsWith("$");
-
-    await fetchContent(
-        url,
-        (line) => {
-            if (firstLine) {
-                editor.value = "";
-                firstLine = false;
-            }
-            if (decode && line != "[\n" && line != "]")
-            {
-                line = line.substr(0, line.length - 1);
-                if (line.endsWith(","))
-                {
-                    line = line.substr(0, line.length - 1);
-                }
-                
-                line = JSON.parse(line.trim());
-
-                searchResults.push(
-                    line
-                );
-                
-                var url = new URL(
-                    line
-                );
-                
-                if (url.searchParams.has("next"))
-                    line = "...";
-                else if (url.origin == origin)
-                {
-                    line = decodeURIComponent(
-                        url.pathname
-                    );
-                }
-                
-                line += "\n";
-                editor.value += line;
-            }
-            else if (!decode)
-                editor.value += line;
-        }
-    );
-    
-    saveButton.disabled = false;
-    fetchButton.focus();
-    
-}
-
-
-if (!pathInput.value)
-    pathInput.value =  defaultPath;
-    
-pathInput.onblur =
-    function() {
-        if (pathInput.value == "")
-        {
-            pathInput.value = defaultPath;
-        }
-        localStorage.setItem("path", pathInput.value);
-        
-        setLinks();
-        
-    }
-
-
-
-
-async function uploadData(path, data, contentType, contentLength, halfDuplex = false)
-{
-    
-    var parameters = {
-        mode: "cors",
-        method: "POST",
-        credentials: "include",
-        headers: {
-            "content-type": contentType
-        },
-        body: data
-    }
-    
-    if (halfDuplex)
-        parameters["duplex"] = "half";
-        
-    saveButton.disabled = true;
-    fileInput.disabled = true;
-       
-    if (path.endsWith("/"))
-        path = path.substr(0, path.length - 1);
-      
-    
-    var status;
-    localStorage.setItem("path", pathInput.value);
-        
-    try
-    {
-        await authenticate();
-        var response = await fetch(
-            path,
-            parameters
-        );
-        
-        await checkResponse(response);
-        
-        var status = response.status;
-        if (status == 200) {
-            var json = await response.json();
-            json = decodeURIComponent(json);
-            alert(json);
-            pathInput.value = json;
-            
-            setLinks()
-        }
-        
-    }
-    catch (error)
-    {
-        alert(error);
-    }
-    finally {
-        saveButton.disabled = false;
-        fileInput.disabled = false;
-    }
-        
-}
-    
-cancelButton.onclick =
-    () => {
-        controller.abort("User cancelled");
-        downloading = false;
-        cancelButton.disabled = true;
-        fetchButton.disabled = false;
-    }
-    
-resetButton.onclick =
-    () => {
-        saveButton.disabled = false;
-        setContentTypeValue(defaultContentType);
-    }
-    
-saveButton.onclick = async function() {
-
-    
-    var json = editor.value;
-    var path = pathInput.value;
-        // UTF-8 is the default
-        
-    var data;
-    var length;
-    if (blob) {
-        data = blob;
-        length = blob.size;
-    }
-    else {
-        const encoder = new TextEncoder(); 
-        data = encoder.encode(editor.value);
-       // data = editor.value;
-        length = data.length;
-    }
-    
-  //  localStorage.setItem("contentType", contentType.value);
-    await uploadData(path, data, contentType.value, length);
-};
-
-fileInput.onchange = async function(event)
-{
-    var path = pathInput.value;
-    
-  
-    var file = fileInput.files[0];
-    
-    await uploadData(path, file, file.type, file.size, true);
-    fileInput.value = "";
-}
-
-fetchButton.onclick =
-    async function() {
-
-            
-        window.location.hash =
-            encodeURIComponent(
-                pathInput.value
-            );
-            
-        setLinks();
-
-        await downloadJSON();
-    }
-    
-window.onhashchange =
-    function() {
-        if (!window.location.hash)
-            return;
-        var url =
-            decodeURIComponent(
-                window.location.hash.substr(1)
-            );
-        pathInput.value = url;
-        setLinks();
-        fetchButton.click();
-    }
-    
-editor.onclick =
-    function() {
-        var position =
-            getCursorLineAndColumn(editor);
-        if (position.line <= searchResults.length)
-        {
-            window.location.hash =
-                encodeURIComponent(
-                    searchResults[position.line - 1]
-                );
-        }
-    }
-    
-contentType.onchange =
-    () => {
-        if (contentType.value.startsWith("image")) {
-            image.style.display = "block";
-            editor.style.display = "none";
-            audio.style.display = "none";
-        }
-        else if (contentType.value.startsWith("audio")) {
-            image.style.display = "none";
-            editor.style.display = "none";
-            audio.style.display = "block";
-        }
-        else {
-            image.style.display = "none";
-            editor.style.display = "block";
-            audio.style.display = "none";
-        }
-        
-        localStorage.setItem("contentType", contentType.value);
-        blob = null;
-    }
-
-function switchFunctions(showFunctions)
-{
-
-    var json = getJSON();
-    
-    if (showFunctions) {
-        json = displayFunctions(json);
-    }
-    else {
-        json = hideFunctions(json);
-        json = JSON.stringify(json, null, "    ");
-    }
-    editor.value = json;
 
 }
 
-
-function getJSON()
-{
-    var json = editor.value;
-    
-    if (json == "")
-        return undefined;
+document.
+    getElementById("a")
+    .innerText =
+        document
+        .location
+        .origin;
         
-    var f = new Function(
-        "return (" + json + ")"
-    );
-    json = f();
-    return json;
-}
+</script>
 
-function setLinks() {
-    dataLink.href = pathInput.value;
-    title.innerText = pathInput.value;
-    a.innerText = pathInput.value;
-    a.href = pathInput.value;
-}
-
-function setContentTypeValue(value)
-{
-    contentType.value = value;
-            
-    if (contentType.value != value)
-    {
-        var option = document.createElement("option");
-           
-        option.value = value;
-        option.textContent = value;
-        contentType.appendChild(option);
-        contentType.value = value;
-    }
-    
-    contentType.onchange();
-
-}
-
-if (localStorage.getItem("path")) {
-
-    pathInput.value =
-        localStorage.getItem("path");
-        
-}
-
-if (localStorage.getItem("contentType")) {
-
-    var contentTypeValue = 
-        localStorage.getItem("contentType");
-        
-    setContentTypeValue(contentTypeValue);
-    
-    
-}
-
-setLinks();
-contentType.onchange();
-fetchButton.disabled = false;
-
-window.onhashchange();
-
-        </script>
-
+             
     </body>
 
 </html>
+

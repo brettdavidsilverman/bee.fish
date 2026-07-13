@@ -44,6 +44,17 @@ namespace BeeFishParser {
         virtual ~Capture() {
         }        
         
+        operator const BString& () const
+        {
+            return _value;
+        }
+        
+        operator BString& ()
+        {
+            return _value;
+        }
+        
+        
         virtual bool match(
             Parser* parser,
             const Char& character

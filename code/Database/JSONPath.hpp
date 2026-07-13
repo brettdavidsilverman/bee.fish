@@ -916,10 +916,17 @@ public:
                 url.origin() :
                 auth.origin();
 
-        if (url.search().contains("index"))
+        if (url.search().contains("index") &&
+            url.search()["index"].size())
         {
-            Index index = stol(url.search()["index"]);
-            
+            Index index;
+            try {
+                index = stol(url.search()["index"]);
+            }
+            catch (...)
+            {
+                throw PathNotFoundException(url);
+            }
             JSONPath path(database, index);
             URL compareURL(path.toString(auth));
 

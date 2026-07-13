@@ -690,8 +690,7 @@ inline BeeFishHTTPS::Authentication::Authentication(
     Session* session
 ) : BeeFishAuthentication::Authentication(
         session->server(),
-//session->origin(),
-session->host(),
+        session->host(),
         session->ipAddress(),
         session->
             request()->
