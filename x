@@ -232,7 +232,7 @@ async (event) => {
                     if (params.has("next"))
                         text = "...";
                     
-                    a.href = "#" + url;
+                    a.href = "#" + getShortURL(url);
                     a.innerText = text;
                 }
             );
@@ -363,6 +363,12 @@ input.oninput =
 
     
 }
+
+input.onchange =
+() => {
+    window.location.hash =
+        "#" + getShortURL()
+}
         
 window.onhashchange =
 async () => {
@@ -374,6 +380,8 @@ async () => {
         
     if (hash.length)
         hash = hash.substr(1);
+    else
+        hash = "my";
         
     hash = decodeURIComponent(hash);
     
