@@ -389,7 +389,7 @@ async () => {
 var getShortURL =
 (url) => {
 
-    if (!url) {
+    if (url == undefined) {
         url = new URL(
             input.value,
             document.location
