@@ -223,7 +223,7 @@ async (event) => {
                     row.append(td);
                     td.append(a);
                     
-                    var text = url.toString();
+                    var text = getShortURL(url);
                     
                     var params = new URLSearchParams(
                         url.search
