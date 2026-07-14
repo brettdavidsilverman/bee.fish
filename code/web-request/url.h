@@ -372,15 +372,11 @@ namespace BeeFishWeb {
         
         BString toString() const
         {
-            BString string = origin();
-            
-            string += path();
-            
-            string += search();
+            BString string = 
+                origin() +
+                path() +
+                search();
                         
-            if (string == "")
-                string = "/";
-                
             return string;
         }
         
@@ -435,7 +431,7 @@ namespace BeeFishWeb {
         {
             const BString& path = _path->value();
 
-            if (path.length() > 0) {
+            if (path.length() > 1) {
                 return path;
             }
             else

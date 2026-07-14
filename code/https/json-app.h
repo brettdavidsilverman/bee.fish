@@ -39,7 +39,7 @@ using namespace BeeFishWeb;
             }
             
             _responseHeaders.replace(
-              "cache-control",
+                "cache-control",
                 BeeFishMiscellaneous::_noCacheControl
             );
 
@@ -56,8 +56,7 @@ using namespace BeeFishWeb;
             URL& url =
                 request()->url();
                 
-            if (url.paths().size() &&
-                url.paths()[0] == "x")
+            if (url.path() == "/x")
             {
                 if (method == "POST")
                 {
@@ -70,6 +69,10 @@ using namespace BeeFishWeb;
                      _statusText = "ok";
                      return;
                 }
+                
+                // Allow filesystem app
+                // to handle this
+                return;
                 
                 
             }
@@ -89,15 +92,6 @@ using namespace BeeFishWeb;
                     method
                 );
                 
-                if (method == "GET" &&
-                    !url.search().value().size() &&
-                    jsonPath.type() == Type::UNDEFINED
-                )
-                {
-                    redirect("x");
-                    return;
-                }
-
                 _bookmark = jsonPath.index();
             }
             catch (JSONPath::PathNotFoundException& exception)
@@ -173,13 +167,25 @@ using namespace BeeFishWeb;
                     _serve = App::SERVE_HTTP;
 
                 }
-                else {
+                else if (
+                    method == "GET" &&
+                    !url.search().value().size() &&
+                    jsonPath.type() == Type::UNDEFINED
+                )
+                {
+                    redirect("x");
+                    return;
+                }
+                else if (url.path().length())
+                {
+
                     _responseHeaders.replace(
                         "content-type",
                         "application/json; charset=utf-8"
                     );
                     _serve = App::SERVE_JSON;
                 }
+
                 
                 _status = 200;
                 return;

@@ -27,37 +27,74 @@
 
     </head>
     <body>
+    
         <h1 id="h1">
-            <a id="a">bee.fish</a>
+            <a id="a">
+                bee.fish
+            </a>
         </h1>
+
+        <table id="samples">
+            <tr>
+                <th>
+                    Sample queries
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    <a href="#?deaths and heroin and male">deaths and heroin and male</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href="#?deaths and heroin and female and not hospital">deaths and heroin and female and not hospital</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href="#?deaths and (alcohol or heroin)">deaths and (heroin or alcohol)</a>
+                </td>
+            </tr>
+        </table>
         
         <form id="download">
             <input id="input" value="my"></input>
             <button type="submit">fetch</button>
         </form>
         
-        <form id="upload">
-            <textarea id="editor">
-            </textarea>
+        <form id="upload" style="display:none" >
+            <textarea id="editor"></textarea>
             <button type="submit">save</button>
         </form>
+        
+        <form id="results">
+            <table id="table">
+            </table>
+        </form>
+
 
         
-        
-
         <script type="module">
-
+const a =
+    document
+    .getElementById("a");
+    
 const download =
-    document.getElementById("download");
+    document
+    .getElementById("download");
     
 const input =
     document
     .getElementById("input");
     
-const result =
+const results =
     document
-    .getElementById("result");
-
+    .getElementById("results");
+    
+const table =
+    document
+    .getElementById("table");
+    
 const upload =
     document
     .getElementById("upload");
@@ -67,11 +104,18 @@ const editor =
     .getElementById("editor");
     
 
+
+
+
 download.onsubmit =
 async (event) => {
-    try{
+    try {
     
+         
         event.preventDefault();
+        
+        table.innerHTML = "";
+        editor.value = "";
         
         if (download.controller)
             download.controller.abort("User cancelled");
@@ -83,7 +127,7 @@ async (event) => {
             input.value,
             document.location.origin
         );
-        
+
         var response = await
             fetch(
                 url,
@@ -94,18 +138,118 @@ async (event) => {
                     signal: download.controller.signal
                 }
             );
+            
+        upload.style.display = "block";
+        results.style.display = "none";
+            
+            
 
         // This checks for login
         // or error
         if (!await checkResponse(response))
             return;
             
-        var text = await response.text();
-        
-        if (text != undefined)
-            editor.value = text;
+        // Handle queries as array
+        // of urls
+        if (url.search.length)
+        {
+
+            upload.style.display = "none";
+            results.style.display = "block";
+
+            var json = await
+                response.json();
+                
+            if (typeof json == "number")
+            {
+            
+                var row =
+                    document
+                    .createElement("tr");
+                    
+                var tds = [
+                    document
+                    .createElement("td"),
+                    document
+                    .createElement("td")
+                ];
+                
+                var a =
+                    document
+                    .createElement("a");
+                        
+                    
+                table.append(row);
+                row.append(tds[0]);
+                row.append(tds[1]);
+                
+                a.href = "#" + input.value;
+                a.innerText = input.value;
+                    
+                tds[0].append(a);
+                
+                var number = json;
+                
+                tds[1].innerText = 
+                    String(number);
+                
+                    
+                return;
+            }
+            
+            var array = json;
+                
+            if (array.length == 0)
+            {
+                alert("No results");
+                return;
+            }
+                
+            array.forEach(
+                (item, key) => {
+                
+                    var url = 
+                        new URL(item);
+
+                    var a =
+                        document.createElement("a");
+                    var row =
+                        document.createElement("tr");
+                    var td =
+                        document.createElement("td");
+                        
+                    
+                    table.append(row);
+                    row.append(td);
+                    td.append(a);
+                    
+                    var text = url.toString();
+                    
+                    var params = new URLSearchParams(
+                        url.search
+                    );
+                    
+                    if (params.has("next"))
+                        text = "...";
+                    
+                    a.href = "#" + url;
+                    a.innerText = text;
+                }
+            );
+        }
         else
-            editor.value = "undefined";
+        {
+            upload.style.display = "block";
+            editor.style.display = "block";
+            results.style.display = "none";
+            
+            var text = await response.text();
+        
+            if (text != undefined)
+                editor.value = text;
+            else
+                editor.value = "undefined";
+        }
         
         return false;
     }
@@ -120,7 +264,7 @@ async (event) => {
     
 upload.onsubmit =
 async (event) => {
-    try{
+    try {
         event.preventDefault();
         
         if (upload.controller)
@@ -134,6 +278,8 @@ async (event) => {
             document.location.origin
         );
         
+
+
         // Remove search from url
         url = new URL(
             url.origin +
@@ -150,7 +296,8 @@ async (event) => {
                     signal: upload.controller.signal,
                     body: editor.value,
                     headers: {
-                        "content-type": "text/plain charset=utf-8"
+                        "content-type": 
+                        "text/html; charset=utf-8"
                     }
                 }
             );
@@ -196,13 +343,82 @@ async function checkResponse(response) {
 
 }
 
-document.
-    getElementById("a")
-    .innerText =
+input.oninput =
+() => {
+
+    var url = getShortURL();
+    a.href = url;
+    
+    var text = url;
+    if (text == "/") {
+        var url =
+            new URL(
+                input.value,
+                document.location
+            );
+        text = url.hostname;
+    }
+    
+    a.innerText = text;
+
+    
+}
+        
+window.onhashchange =
+async () => {
+
+    var hash =
         document
         .location
-        .origin;
+        .hash;
         
+    if (hash.length)
+        hash = hash.substr(1);
+        
+    hash = decodeURIComponent(hash);
+    
+    if (input.value != hash)
+    {
+        input.value = hash;
+    
+        download.requestSubmit();
+    }
+    
+}
+
+var getShortURL =
+(url) => {
+
+    if (!url) {
+        url = new URL(
+            input.value,
+            document.location
+        );
+    }
+    
+    if (url.pathname == "/x")
+        url.pathname = "/";
+    
+    if (url.origin == 
+            document
+            .location
+            .origin)
+    {
+        url =
+            url.pathname +
+            url.search;
+    }
+    else
+        url = url.toString();
+        
+    url = decodeURIComponent(url);
+        
+    return url;
+}
+
+window.onhashchange();
+input.oninput();
+
 </script>
 
              
