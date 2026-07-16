@@ -369,20 +369,16 @@ public:
                     _index
                 );
                 
-        //    BeeFishWeb::URL url(string);
-            
-
-//if (url.path() == "/")
-//    return "";
-                
-                       
             JSONPath path(
                 *_container
                 ->_database, 
                 _index
             );
         
-return path.toString(_container->_auth);
+            return 
+                path.toString(
+                    _container->_auth
+                );
 
         }
 

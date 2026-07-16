@@ -23,6 +23,11 @@
     display: none;
 }
 
+#console {
+    text-align: right;
+    z-index: 1;
+}
+
         </style>
 
     </head>
@@ -59,12 +64,12 @@
         
         <form id="download">
             <input id="input" value="my"></input>
-            <button type="submit">fetch</button>
+            <button type="submit" id="downloadButton">fetch</button>
         </form>
         
         <form id="upload" style="display:none" >
             <textarea id="editor"></textarea>
-            <button type="submit">save</button>
+            <button type="submit" id="uploadButton">save</button>
         </form>
         
         <form id="results">
@@ -75,6 +80,9 @@
 
         
         <script type="module">
+var console = new Console();
+console.log("Hello World");
+
 const a =
     document
     .getElementById("a");
@@ -103,183 +111,58 @@ const editor =
     document
     .getElementById("editor");
     
+const downloadButton =
+    document
+    .getElementById("downloadButton");
 
+const uploadButton =
+    document
+    .getElementById("uploadButton");
 
-
-
-download.onsubmit =
-async (event) => {
-    try {
-    
-         
-        event.preventDefault();
-        
-        table.innerHTML = "";
-        editor.value = "";
-        
-        if (download.controller)
-            download.controller.abort("User cancelled");
-            
-        download.controller = 
-           new AbortController();
-        
-        var url = new URL(
-            input.value,
-            document.location.origin
-        );
-
-        var response = await
-            fetch(
-                url,
-                {
-                    mode: "cors",
-                    method: "GET",
-                    credentials: "include",
-                    signal: download.controller.signal
-                }
-            );
-            
-        upload.style.display = "block";
-        results.style.display = "none";
-            
-            
-
-        // This checks for login
-        // or error
-        if (!await checkResponse(response))
-            return;
-            
-        // Handle queries as array
-        // of urls
-        if (url.search.length)
-        {
-
-            upload.style.display = "none";
-            results.style.display = "block";
-
-            var json = await
-                response.json();
-                
-            if (typeof json == "number")
-            {
-            
-                var row =
-                    document
-                    .createElement("tr");
-                    
-                var tds = [
-                    document
-                    .createElement("td"),
-                    document
-                    .createElement("td")
-                ];
-                
-                var a =
-                    document
-                    .createElement("a");
-                        
-                    
-                table.append(row);
-                row.append(tds[0]);
-                row.append(tds[1]);
-                
-                a.href = "#" + input.value;
-                a.innerText = input.value;
-                    
-                tds[0].append(a);
-                
-                var number = json;
-                
-                tds[1].innerText = 
-                    String(number);
-                
-                    
-                return;
-            }
-            
-            var array = json;
-                
-            if (array.length == 0)
-            {
-                alert("No results");
-                return;
-            }
-                
-            array.forEach(
-                (item, key) => {
-                
-                    var url = 
-                        new URL(item);
-
-                    var a =
-                        document.createElement("a");
-                    var row =
-                        document.createElement("tr");
-                    var td =
-                        document.createElement("td");
-                        
-                    
-                    table.append(row);
-                    row.append(td);
-                    td.append(a);
-                    
-                    var text = getShortURL(url);
-                    
-                    var params = new URLSearchParams(
-                        url.search
-                    );
-                    
-                    if (params.has("next"))
-                        text = "...";
-                    
-                    a.href = "#" + getShortURL(url);
-                    a.innerText = text;
-                }
-            );
-        }
-        else
-        {
-            upload.style.display = "block";
-            editor.style.display = "block";
-            results.style.display = "none";
-            
-            var text = await response.text();
-        
-            if (text != undefined)
-                editor.value = text;
-            else
-                editor.value = "undefined";
-        }
-        
-        return false;
-    }
-    catch(error)
-    {
-        alert(error);
-    }
-    finally {
-        download.controller = undefined;
-    }
-}
     
 upload.onsubmit =
 async (event) => {
+    
     try {
-        event.preventDefault();
+    
+        uploadButton.disabled = true;
+        /*
+        window.setTimeout(
+            () => {
+                uploadButton
+                    .disabled 
+                    = false;
+            },
+            200
+        );
+        */
         
+        event.preventDefault();
+        /*
         if (upload.controller)
             upload.controller.abort("User cancelled");
             
         upload.controller =
             new AbortController();
+            
+        const {signal} = upload.controller;
         
+        signal.addEventListener(
+            "abort", 
+            (event) => {
+                console.log(
+                    "Operation aborted! Reason:" + signal.reason
+                );
+                event.preventDefault();
+                
+            }
+        );
+            */
         var url = new URL(
             input.value,
             document.location.origin
         );
         
-
-
         // Remove search from url
         url = new URL(
             url.origin +
@@ -293,7 +176,7 @@ async (event) => {
                     mode: "cors",
                     method: "POST",
                     credentials: "include",
-                    signal: upload.controller.signal,
+                  //  signal: upload.controller.signal,
                     body: editor.value,
                     headers: {
                         "content-type": 
@@ -313,8 +196,205 @@ async (event) => {
         alert(error);
     }
     finally {
-        upload.controller = undefined;
+        //upload.controller = undefined;
+        uploadButton
+            .disabled 
+            = false;
     }
+}
+
+download.onsubmit =
+async (event) => {
+
+    try {
+
+        downloadButton.disabled = true;
+        
+        window.setTimeout(
+            () => {
+                downloadButton
+                    .disabled 
+                    = false;
+            },
+            200
+        );
+            
+        event.preventDefault();
+        
+        table.innerHTML = "";
+        editor.value = "";
+        
+        
+        if (document.location.hash !=
+            "#" + input.value)
+        {
+            document.location.hash =
+               "#" + input.value;
+        }
+        else if (document.location.hash == "")
+        {
+            document.location.hash = "#my";
+            input.value = "my";
+        }
+        
+        input.oninput();
+        
+        var url = new URL(
+            input.value,
+            document.location.origin
+        );
+        
+        if (download.controller) 
+            download.controller.abort("User cancelled");
+            
+        download.controller = 
+           new AbortController();
+           
+        const {signal} = download.controller;
+        
+        var response = await
+            fetch(
+                url,
+                {
+                    mode: "cors",
+                    method: "GET",
+                    credentials: "include",
+                    signal: signal
+                }
+            );
+            
+        upload.style.display = "block";
+        results.style.display = "none";
+            
+            
+        // This checks for login
+        // or error
+        if (!await checkResponse(response))
+            return;
+            
+        // Handle queries as array
+        // of urls
+        if (url.search.length)
+        {
+            upload.style.display = "none";
+            results.style.display = "block";
+    
+            if (url.search.endsWith("$"))
+                await downloadCountResults(response);
+            else
+                await downloadSearchResults(response);
+        }
+        else
+        {
+            await downloadData(response);
+        }
+        
+    }
+    catch(error)
+    {
+        alert(error);
+    }
+    finally {
+        
+        download.controller = undefined;
+        downloadButton
+            .disabled 
+            = false;
+    }
+}
+
+const downloadSearchResults =
+async (response) => {
+    
+    var json = await
+        response.json();
+
+    var array = json;
+                
+    if (array.length == 0)
+    {
+        alert("No results");
+        return;
+    }
+                
+    array.forEach(
+        (item, key) => {
+                
+            var url = 
+                new URL(item);
+
+            addSearchItem(url);
+        }
+    );
+}
+
+const addSearchItem =
+(url) => {
+    var a =
+        document.createElement("a");
+    var row =
+        document.createElement("tr");
+    var td =
+        document.createElement("td");
+                        
+    table.append(row);
+    row.append(td);
+    td.append(a);
+                    
+    var text = getShortURL(url);
+    if (url.searchParams.has("next"))
+        text = "Next...";
+                    
+    a.href = "#" + getShortURL(url);
+    a.innerText = text;
+}
+
+const downloadCountResults =
+async (response) => {
+    var number = await response.json();
+
+    var row =
+        document
+        .createElement("tr");
+                    
+    var tds = [
+        document
+        .createElement("td"),
+        document
+        .createElement("td")
+    ];
+                
+    var a =
+        document
+        .createElement("a");
+                        
+                    
+    table.append(row);
+    row.append(tds[0]);
+    row.append(tds[1]);
+                
+    a.href = "#" + input.value;
+    a.innerText = input.value;
+                    
+    tds[0].append(a);
+                
+    tds[1].innerText = 
+        String(number);
+                
+}
+
+const downloadData =
+async (response) => {
+    upload.style.display = "block";
+    editor.style.display = "block";
+    results.style.display = "none";
+            
+    var text = await response.text();
+        
+    if (text != undefined)
+        editor.value = text;
+    else
+        editor.value = "undefined";
 }
 
 // Check fetch response errors
@@ -343,33 +423,21 @@ async function checkResponse(response) {
 
 }
 
+input.onchange =
+async () => {
+    window.location.hash =
+        "#" + getShortURL();
+}
+    
 input.oninput =
 () => {
-
-    var url = getShortURL();
-    a.href = url;
     
-    var text = url;
-    if (text == "/") {
-        var url =
-            new URL(
-                input.value,
-                document.location
-            );
-        text = url.hostname;
-    }
-    
-    a.innerText = text;
-
-    
+    a.href = input.value;
+    a.innerText = getTextByURL(
+        input.value
+    );
 }
 
-input.onchange =
-() => {
-    window.location.hash =
-        "#" + getShortURL()
-}
-        
 window.onhashchange =
 async () => {
 
@@ -380,10 +448,18 @@ async () => {
         
     if (hash.length)
         hash = hash.substr(1);
-    else
-        hash = "my";
-        
+    
+    else if (input.value != "my") {
+        document.location.hash = "#my";
+        input.value = "my";
+        download.requestSubmit();
+        return;
+    }
+    
     hash = decodeURIComponent(hash);
+
+    a.href = hash;
+    a.innerText = getTextByURL(hash);
     
     if (input.value != hash)
     {
@@ -403,10 +479,7 @@ var getShortURL =
             document.location
         );
     }
-    
-    if (url.pathname == "/x")
-        url.pathname = "/";
-    
+
     if (url.origin == 
             document
             .location
@@ -424,8 +497,33 @@ var getShortURL =
     return url;
 }
 
+const getTextByURL =
+(url) => {
+    
+    if (url == "/") {
+        var url =
+            new URL(
+                input.value,
+                document.location
+            );
+        return url.hostname;
+    }
+    else if (url.startsWith("/"))
+        return url.substr(1);
+    else if (url.length)
+        return url;
+    else
+        return "my"
+}
+/*
 window.onhashchange();
-input.oninput();
+if (document.location.hash == "")
+{
+    input.value = "my";
+}
+*/
+download.requestSubmit();
+
 
 </script>
 
