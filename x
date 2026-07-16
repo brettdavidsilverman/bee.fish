@@ -119,26 +119,16 @@ const uploadButton =
     document
     .getElementById("uploadButton");
 
-    
 upload.onsubmit =
 async (event) => {
     
     try {
     
         uploadButton.disabled = true;
-        /*
-        window.setTimeout(
-            () => {
-                uploadButton
-                    .disabled 
-                    = false;
-            },
-            200
-        );
-        */
+        
         
         event.preventDefault();
-        /*
+        
         if (upload.controller)
             upload.controller.abort("User cancelled");
             
@@ -147,17 +137,6 @@ async (event) => {
             
         const {signal} = upload.controller;
         
-        signal.addEventListener(
-            "abort", 
-            (event) => {
-                console.log(
-                    "Operation aborted! Reason:" + signal.reason
-                );
-                event.preventDefault();
-                
-            }
-        );
-            */
         var url = new URL(
             input.value,
             document.location.origin
@@ -176,7 +155,7 @@ async (event) => {
                     mode: "cors",
                     method: "POST",
                     credentials: "include",
-                  //  signal: upload.controller.signal,
+                    signal: upload.controller.signal,
                     body: editor.value,
                     headers: {
                         "content-type": 
@@ -185,6 +164,8 @@ async (event) => {
                 }
             );
             
+        upload.controller = null;
+        
         if (!await checkResponse(response))
             return;
             
@@ -196,7 +177,6 @@ async (event) => {
         alert(error);
     }
     finally {
-        //upload.controller = undefined;
         uploadButton
             .disabled 
             = false;
@@ -207,7 +187,8 @@ download.onsubmit =
 async (event) => {
 
     try {
-
+        event.preventDefault();
+        
         downloadButton.disabled = true;
         
         window.setTimeout(
@@ -219,38 +200,25 @@ async (event) => {
             200
         );
             
-        event.preventDefault();
-        
         table.innerHTML = "";
         editor.value = "";
         
-        
-        if (document.location.hash !=
-            "#" + input.value)
-        {
-            document.location.hash =
-               "#" + input.value;
-        }
-        else if (document.location.hash == "")
-        {
-            document.location.hash = "#my";
-            input.value = "my";
-        }
-        
         input.oninput();
-        
+
         var url = new URL(
             input.value,
             document.location.origin
         );
         
-        if (download.controller) 
+        if (download.controller) {
             download.controller.abort("User cancelled");
-            
+        }
+        
         download.controller = 
            new AbortController();
            
-        const {signal} = download.controller;
+        const {signal} =
+            download.controller;
         
         var response = await
             fetch(
@@ -262,6 +230,8 @@ async (event) => {
                     signal: signal
                 }
             );
+            
+        download.controller = null;
             
         upload.style.display = "block";
         results.style.display = "none";
@@ -296,10 +266,12 @@ async (event) => {
     }
     finally {
         
-        download.controller = undefined;
+        download.controller = null;
+
         downloadButton
             .disabled 
             = false;
+            
     }
 }
 
@@ -416,7 +388,7 @@ async function checkResponse(response) {
     else if (response.status != 200) {
         var json = await response.json();
         throw new Error(
-            decodeURIComponent(json)
+            json
         );
         return false;
     }
@@ -431,7 +403,6 @@ async () => {
     
 input.oninput =
 () => {
-    
     a.href = input.value;
     a.innerText = getTextByURL(
         input.value
@@ -446,25 +417,42 @@ async () => {
         .location
         .hash;
         
+        
+    // Remove #
     if (hash.length)
         hash = hash.substr(1);
-    
-    else if (input.value != "my") {
-        document.location.hash = "#my";
-        input.value = "my";
-        download.requestSubmit();
-        return;
+
+    // Remove preceeding /
+    if (hash.startsWith("/") &&
+        hash != "/")
+    {
+        hash = hash.substr(1);
     }
     
-    hash = decodeURIComponent(hash);
-
-    a.href = hash;
-    a.innerText = getTextByURL(hash);
+    if (hash == "")
+        hash = "my";
     
-    if (input.value != hash)
+    hash = decodeURIComponent(hash);
+    
+    var oldURL = new URL(
+        input.value,
+        document.location
+    );
+    
+    var newURL = new URL(
+        hash,
+        document.location
+    );
+    
+    if (oldURL.toString() != 
+        newURL.toString()
+    )
     {
         input.value = hash;
-    
+
+        a.href = hash;
+        a.innerText = getTextByURL(hash);
+        
         download.requestSubmit();
     }
     
@@ -493,14 +481,14 @@ var getShortURL =
         url = url.toString();
         
     url = decodeURIComponent(url);
-        
+    
     return url;
 }
 
 const getTextByURL =
 (url) => {
     
-    if (url == "/") {
+    if (url == "/" || url == "") {
         var url =
             new URL(
                 input.value,
@@ -512,17 +500,10 @@ const getTextByURL =
         return url.substr(1);
     else if (url.length)
         return url;
-    else
-        return "my"
 }
-/*
-window.onhashchange();
-if (document.location.hash == "")
-{
-    input.value = "my";
-}
-*/
+
 download.requestSubmit();
+
 
 
 </script>
