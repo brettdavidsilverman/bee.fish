@@ -113,9 +113,11 @@ namespace BeeFishDatabase {
 
             return index;
         }
- 
+
         inline Index allocate(const BString& data)
         {
+            
+            ScopedLock lock(*this);
 
             Index dataIndex = size();
             
@@ -292,8 +294,6 @@ namespace BeeFishDatabase {
                  << db.version() << endl
                  << "Filename: "
                  << db._filename << endl
-                 << "LockFile: "
-                 << db._mutexName << endl
                  << "Branch size: "
                  << sizeof(Branch) << endl
                  << "Size: "

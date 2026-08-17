@@ -85,7 +85,7 @@ inline bool testTimestamps()
     cout << "Testing large array of timestamps " << endl;
     const int size = 1000;
     std::mutex mutex;
-    map<std::string, int> map;
+    std::map<std::string, int> map;
     auto loadMap =
     [size, &map, &mutex]() {
         vector<Timestamp> array(size);
@@ -152,7 +152,7 @@ inline bool testIds()
     cout << "Testing large array of ids " << endl;
     const int size = 1000;
     vector<Id> array(size);
-    map<std::string, int> map;
+    std::map<std::string, int> map;
 
     for (Id& id : array)
     {

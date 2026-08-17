@@ -56,6 +56,12 @@ using namespace BeeFishWeb;
             URL& url =
                 request()->url();
                 
+            if (url.path() == "/" &&
+                url.search() == "")
+            {
+                return;
+            }
+            
             if (url.path() == "/x")
             {
                 if (method == "POST")

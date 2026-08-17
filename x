@@ -47,17 +47,17 @@
             </tr>
             <tr>
                 <td>
-                    <a href="#?deaths and heroin and male">deaths and heroin and male</a>
+                    <a href="#?deaths and heroin and male">?deaths and heroin and male</a>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <a href="#?deaths and heroin and female and not hospital">deaths and heroin and female and not hospital</a>
+                    <a href="#?deaths and heroin and female and not hospital">?deaths and heroin and female and not hospital</a>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <a href="#?deaths and (alcohol or heroin)">deaths and (heroin or alcohol)</a>
+                    <a href="#?deaths and (alcohol or heroin)">?deaths and (heroin or alcohol)</a>
                 </td>
             </tr>
         </table>
@@ -393,6 +393,14 @@ async function checkResponse(response) {
         return false;
     }
 
+}
+
+function redirect(path)
+{
+    var url = new URL(path);
+    url.search = "?redirect=" +
+        encodeURIComponent(document.location.href);
+    document.location.replace(url);
 }
 
 input.onchange =

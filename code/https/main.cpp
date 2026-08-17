@@ -61,10 +61,13 @@ int main(int argc, const char* argv[])
               << errorFile
               << endl;
 
-        cout << "Unlocking database" << endl;
-        LockFile::unlock(DATABASE_FILENAME);
-        cout << "Unlocked" << endl;
-        
+        if (hasArg(argc, argv, "-reset"))
+        {
+            cout << "Reset database locks" << endl;
+            LockFile::reset(DATABASE_FILENAME);
+            cout << "Reset" << endl;
+        }
+
         unsigned int port = 443;
         int portArg;
         if ((portArg = hasArg(argc, argv, "-port")) >= 0)

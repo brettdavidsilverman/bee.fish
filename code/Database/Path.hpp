@@ -29,17 +29,27 @@ class Path :
 private:
     Database*  _database  = nullptr;
 
-   // static const Index UNLOCKED = Index(-1);
-
     Index _index = 0;
-    
-    bool _locked = false;
-    
 public:
     
     using PowerEncoding::write;
     
-    
+    struct ScopedLock
+    {
+        Path& _path;
+        Index _index;
+
+        ScopedLock(Path& path) :
+            _path(path),
+            _index(path.index())
+        {
+            _path.database().lock(_index);
+        }
+            
+        ~ScopedLock() {
+            _path.database().unlock(_index);
+        }
+    };
 
     Path()
     {
@@ -51,10 +61,6 @@ public:
         _database(&database),
         _index(index)
     {
-        /*
-        if (_index > _database->size())
-            throw std::runtime_error("Invalid index");
-        */
     }
 
     Path(const Path& source) :
@@ -70,32 +76,12 @@ public:
         _database(source._database),
         _index(index)
     {
-        /*
-        if (_index > _database->size())
-            throw std::runtime_error("Invalid index");
-        */
     }
 
     virtual ~Path()
     {
-        if (locked())
-            unlock();
     }
-    
-    void lock() {
-        _database->lock();
-        _locked = true;
-    }
-    
-    void unlock() {
-        _database->unlock();
-        _locked = false;
-    }
-    
-    bool locked() {
-        return _locked;
-    }
-    
+
     Path& operator = (const Path& rhs)
     {
         _database = rhs._database;
@@ -179,11 +165,11 @@ public:
         if (branch._left == 0)
         {
             
-            if (!locked())
-            {
-                lock();
-                branch = getBranch();
-            }
+            LockFile::ScopedLock lock(
+                database()
+            );
+            
+            branch = getBranch();
             
             if (branch._left == 0)
             {
@@ -209,12 +195,12 @@ public:
 
         if (branch._right == 0)
         {
+
+            LockFile::ScopedLock lock(
+                database()
+            );
             
-            if (!locked())
-            {
-                lock();
-                branch = getBranch();
-            }
+            branch = getBranch();
             
             if (branch._right == 0)
             {
@@ -341,24 +327,21 @@ public:
     friend
     Path& operator << (Path& path, const T& key)
     {
-
         PowerEncoding& encoding = path;
         encoding << key;
 
-        
+            
         return path;
     }
 
     template<typename T>
     Path operator [] (const T& key) const
     {
-
-        Path path(*this);
-
-        path << key;
         
-        if (path.locked())
-            path.unlock();
+        Path path(*this);
+        
+        
+        path << key;
 
         return path;
     }
@@ -538,9 +521,9 @@ public:
     template<typename T = BString>
     bool setData(const BString& value) 
     {
-        
-        LockFile::ScopedLock lock(database());
-        
+
+        Path::ScopedLock lock(*this);
+
         Branch branch = getBranch();
 
         BString current =
@@ -552,7 +535,6 @@ public:
             }
             return true;
         }
-
 
         if (branch._dataIndex && current.size() < value.size())
         {
@@ -759,15 +741,6 @@ public:
         return _database->pageSize();
     }
 
-/*
-    friend ostream& operator <<
-    (ostream& out, const Path& path)
-    {
-        Variable value = path.getVariable();
-        out << value;
-        return out;
-    }
-*/
     virtual Variable getVariable() const
     {
         BeeFishScript::Variable variable =
@@ -833,51 +806,7 @@ protected:
         }
     }
 
-/*
-    virtual void write(ostream& out)
-    {
-        write(out, _index);
-    }
 
-    static void writeBit(ostream& out, bool bit)
-    {
-        if (bit)
-            out << '1';
-        else
-            out << '0';
-    }
-
-    void write(ostream& out, Index index)
-    {
-        Branch branch =
-            _database->getBranch(index);
-
-        if (branch._left)
-        {
-            // Write the left branch
-            Path::writeBit(out, true);
-            write(out, branch._left);
-        }
-        else
-            // Deadend, close the branch
-            Path::writeBit(out, false);
-
-        if (branch._right)
-        {
-            // Write the right branch
-            Path::writeBit(out, true);
-            write(out, branch._right);
-        }
-        else
-            // Deadend, close the branch
-            Path::writeBit(out, false);
-
-        return;
-
-    }
-
-
-*/
 protected:
 
     class Contains :
@@ -952,6 +881,7 @@ PowerEncoding& operator << (PowerEncoding& out, const Path& path)
     out << path.index();
     return out;
 }
+
 }
 
 #endif

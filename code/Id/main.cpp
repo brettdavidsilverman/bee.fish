@@ -13,11 +13,7 @@ using namespace BeeFishBString;
 
 int main(int argc, const char* argv[])
 {
-/*
-    Id id("Id");
-    cerr << id.key() << endl;
-    return 0;
-*/
+
     cout << "bee.fish.id"
               << endl
           << "C++ run time: "
@@ -27,7 +23,8 @@ int main(int argc, const char* argv[])
               << ID_VERSION
               << endl;
               
-              
+    
+    
     if (hasArg(argc, argv, "-test") >= 0)
     {
         cout << "Testing Id..." << endl;

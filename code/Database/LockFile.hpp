@@ -2,290 +2,245 @@
 #define BEE_FISH__DATABASE__LOCK_FILE_HPP
 
 
+#include <utility>
+#include <thread>
+#include <boost/interprocess/sync/lock_options.hpp>
+
+#include "../Miscellaneous/SharedMemory.hpp"
+#include "../Id/Id.hpp"
+
 #include "File.hpp"
 
-#include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/interprocess/containers/map.hpp>
-#include <boost/interprocess/allocators/allocator.hpp>
-#include <boost/interprocess/sync/named_mutex.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
-#include <mutex>
-#include <atomic>
-#include <iostream>
-#include <utility>
 namespace BeeFishDatabase
 {
-    namespace bip = boost::interprocess;
-    
-    class LockFile : public File
-    {
-    protected:
-        Size _lockCount = 0;
-        BString _mutexName;
-        bip::named_mutex* _mutex;
-        
-        BString _sharedMemoryName;
-            bip::managed_shared_memory*
-                _sharedMemory;
-                
-        // 3. Define Types
-        // Key type can be a standard integer
-        typedef Index KeyType; 
-        
-        // Value type must be the atomic type
-        typedef std::atomic<Index> 
-            MappedType; 
-        
-        // The value type of the map allocator must pair a const key with the value
-        typedef std::pair<
-            const KeyType,
-            MappedType
-        > ValueType;
-
-        // 4. Define the Allocator type using Interprocess segment manager
-        typedef bip::allocator<ValueType, bip::managed_shared_memory::segment_manager> ShmemAllocator;
-
-        // 5. Define the Map type
-        typedef bip::map<KeyType, MappedType, std::less<KeyType>, ShmemAllocator> SharedMap;
-        
-        SharedMap* _sharedMap;
-        
-        
-    public:
-        struct ScopedLock
-        {
-            LockFile& _lockFile;
-            
-            
-            ScopedLock(LockFile& lockFile) :
-                _lockFile(lockFile)
-            {
-                _lockFile.lock();
-            }
-            
-            ~ScopedLock() {
-                _lockFile.unlock();
-            }
-        };
-        
-    public:
-    
-        LockFile(
-            const std::string& filename = "",
-            bool readOnly = false
-        ) :
-            File(filename, readOnly)
-        {
-            std::filesystem::path path(_filename);
-            
-            std::hash<std::string> hasher;
-
-            // Since path character '/' isnt allowed
-            // this will use the filename
-            // hash instead
-                
-            std::size_t hashedValue =
-                hasher(path.string());
-            std::stringstream stream;
-            stream << hashedValue;
-            
-            _mutexName =
-                BString(stream.str()) +
-                BString("LockFileMutex");
-            
-            _mutex = 
-                new bip::named_mutex(
-                    bip::open_or_create,
-                    _mutexName.c_str()
-                );
-                
-            _sharedMemoryName =
-                BString(stream.str()) +
-                BString("LockFileData");
-                
-            // 1. Create or Open the Shared Memory segment
-            _sharedMemory = new  bip::managed_shared_memory(
-                bip::open_or_create, 
-                _sharedMemoryName.c_str(),
-                65536
-            );
-            
-            //bip::shared_memory_object::remove(shm_name);
-
-            // 6. Initialize the allocator and construct the map in shared memory
-          //  ShmemAllocator alloc_inst(_sharedMemory->get_segment_manager());
-           // _sharedMap = _sharedMemory->construct<SharedMap>("AtomicMap")(std::less<KeyType>(), alloc_inst);
-/*
-        // 7. Inserting elements into the map
-        // Note: std::atomic is not copyable/movable, so you must use piecewise_construct or emplace
-        my_map->emplace(std::piecewise_construct, 
-                        std::forward_as_tuple(42), 
-                        std::forward_as_tuple(100)); // Key: 42, Value: 100
-
-        my_map->emplace(std::piecewise_construct, 
-                        std::forward_as_tuple(84), 
-                        std::forward_as_tuple(200)); // Key: 84, Value: 200
-
-        // 8. Safely manipulate atomic integers across processes
-        // Thread/Process 1
-        (*my_map)[42].fetch_add(5, std::memory_order_relaxed); 
-
-        // Thread/Process 2
-        int current_val = (*my_map)[42].load(std::memory_order_relaxed);
-        std::cout << "Value at key 42: " << current_val << std::endl; // Prints 105
-
-    } catch (const std::exception& ex) {
-        std::cout << "Exception: " << ex.what() << std::endl;
-        bip::shared_memory_object::remove(shm_name);
-        return 1;
-    }
-
-    bip::shared_memory_object::remove(shm_name);
-    return 0;
-    */
-                            
-
-        }
-        
-        virtual ~LockFile()
-        {
-            delete _mutex;
-            delete _sharedMemory;
-             
-        }
-
-        void lock() {
-
-            
-            if (_lockCount++ == 0) {
-               // flock(_fileNumber, LOCK_EX);
-                _mutex->lock();
-            }
-        }
-         
-        void unlock() {
-            
-            if (_lockCount > 0)
-                --_lockCount;
-                
-            if (_lockCount == 0)
-            {
-            //  flock(_fileNumber, LOCK_UN);
-                _mutex->unlock();
-            }
-            
-        }
-        
-        static void unlock(const std::string& filename)
-        {
-            LockFile file(filename);
-            
-            using namespace boost::posix_time;
-
-            // 1. Get the current local time
-            ptime now = second_clock::universal_time();
-
-            // 2. Define the duration to add (e.g., 5 seconds)
-            time_duration diff = seconds(30);
-
-            // 3. Add the duration to the current time
-            ptime timeout = now + diff;
-    
-            file._mutex
-                ->timed_lock(
-                    timeout
-                );
-            
-            file._mutex->unlock();
-            
-            return;
-            
-
-        }
-        
-/*
-
 namespace bip = boost::interprocess;
+using namespace BeeFishSharedMemory;
 
-// 1. Enforce safety checks at compile time
-static_assert(ATOMIC_INT_LOCK_FREE == 2, "std::atomic<int> must be completely lock-free for shared memory!");
+class LockFile :
+    public File,
+    public SharedMemory
 
-int main() {
-    const char* shm_name = "MySharedMemory";
-    const std::size_t shm_size = 65536;
+{
+public:
 
-    // Ensure clean state for demonstration
-    bip::shared_memory_object::remove(shm_name);
+    typedef bip::scoped_lock<bip::interprocess_recursive_mutex>
+        ScopedLockBase;
+        
+    bip::interprocess_recursive_mutex* _mutex;
+    
+    class ScopedLock : public ScopedLockBase
+    {
+    public:
+        ScopedLock(LockFile& lockFile) :
+            ScopedLockBase(*lockFile._mutex)
+        {
+            
+        }
+    };
 
-    try {
-        // 2. Create the managed shared memory segment
-        bip::managed_shared_memory segment(bip::create_only, shm_name, shm_size);
+    
+    
+protected:
+    // Define Types
 
-        // 6. Initialize the allocator and construct the map in shared memory
-        ShmemAllocator alloc_inst(segment.get_segment_manager());
-        MyShmMap* my_map = segment.construct<MyShmMap>("MyAtomicMap")(std::less<KeyType>(), alloc_inst);
+    typedef Index KeyType;
 
-        // 7. Inserting elements into the map
-        // Note: std::atomic is not copyable/movable, so you must use piecewise_construct or emplace
-        my_map->emplace(std::piecewise_construct, 
-                        std::forward_as_tuple(42), 
-                        std::forward_as_tuple(100)); // Key: 42, Value: 100
+    // Mutex with atomic counter
+    struct MapValueType {
+        bip::interprocess_recursive_mutex
+            _mutex;
+        std::atomic<Index> _counter = 0;
+       // ScopedLock _lock;
+        MapValueType()// :
+           /* _lock(
+                _mutex,
+                bip::defer_lock
+            )
+            */
+        {
+        }
+    };
 
-        my_map->emplace(std::piecewise_construct, 
-                        std::forward_as_tuple(84), 
-                        std::forward_as_tuple(200)); // Key: 84, Value: 200
+    // The value type of the map allocator must pair a const key with the value
+    typedef std::pair<
+    const KeyType,
+          MapValueType
+          > ValueType;
 
-        // 8. Safely manipulate atomic integers across processes
-        // Thread/Process 1
-        (*my_map)[42].fetch_add(5, std::memory_order_relaxed); 
+    // Define the Allocator type
+    typedef bip::allocator<ValueType, bip::managed_shared_memory::segment_manager> ShmemAllocator;
 
-        // Thread/Process 2
-        int current_val = (*my_map)[42].load(std::memory_order_relaxed);
-        std::cout << "Value at key 42: " << current_val << std::endl; // Prints 105
+    // Define the Map type
+    typedef bip::map<KeyType, MapValueType, std::less<KeyType>, ShmemAllocator> SharedMap;
 
-    } catch (const std::exception& ex) {
-        std::cout << "Exception: " << ex.what() << std::endl;
-        bip::shared_memory_object::remove(shm_name);
-        return 1;
+    ShmemAllocator* _allocator;
+
+    SharedMap* _sharedMap;
+    
+public:
+
+    LockFile(
+        const std::string& filename = "",
+        bool readOnly = false
+    ) :
+        File(filename, readOnly),
+        SharedMemory(
+            std::filesystem::path(
+                File::filename()
+            )
+        )
+
+    {
+        _mutex =
+            _sharedMemory.find_or_construct
+            <bip::interprocess_recursive_mutex>
+            ("LockFile.Mutex")();
+            
+        _allocator = new
+        ShmemAllocator(_sharedMemory.get_segment_manager());
+
+        _sharedMap =
+            _sharedMemory
+            .find_or_construct<SharedMap>(
+                "LockFile.Map"
+            )
+            (
+                std::less<KeyType>(),
+                *_allocator
+            );
     }
 
-    bip::shared_memory_object::remove(shm_name);
-    return 0;
-}
+    virtual ~LockFile()
+    {
+        delete _allocator;
+    }
 
-*/
+    void lock(Index index) {
+// cerr << index << " LOCK" << endl;
+
+        ScopedLock lock(*this);
         
-/*
-        virtual void lock(Index position, Size length)
-        {
-            struct flock data;
-            memset(&data, '\0', sizeof(data));
-            data.l_type = F_WRLCK;
-            data.l_whence = SEEK_SET;
-            data.l_start = position;
-            data.l_len = length;
-
-            fcntl(_fileNumber, F_SETLKW, &data);
+       // Index counter = 
+            (*_sharedMap)[index]._counter++;
             
-        }
-
-        virtual void unlock(Index position, Size length)
-        {
-            struct flock data;
-            memset(&data, '\0', sizeof(data));
-            data.l_type = F_UNLCK;
-            data.l_whence = SEEK_SET;
-            data.l_start = position;
-            data.l_len = length;
-            
-            fcntl(_fileNumber, F_SETLK, &data);
-
-        }
-
-*/
-    };
+      //  if (counter != 0)
+            lock.unlock();
+        
+        (*_sharedMap)[index]._mutex.lock();
     
+        /*
+        else
+        {
+            lock.swap(
+                (*_sharedMap)[index]._lock
+            );
+            (*_sharedMap)[index]._lock.lock();
+        }
+        */
+        
+// cerr << index << " LOCKED" << endl;
+
+    }
+
+    void unlock(Index index) {
+
+// cerr << index << " UNLOCK" << endl;
+
+        ScopedLock lock(*this);
+        
+        (*_sharedMap)[index]._mutex.unlock();
+        
+        if (--(*_sharedMap)[index]._counter == 0)
+        {
+
+            _sharedMap->erase(index);
+        }
+      //  else
+      //      (*_sharedMap)[index]._mutex.unlock();
+// cerr << index << " UNLOCKED" << endl;
+
+
+    }
+
+    static void reset(const std::filesystem::path& path)
+    {
+        
+        BeeFishId::Timestamp::Memory::reset();
+
+        SharedMemory::reset(path);
+
+        /*
+        using namespace boost::posix_time;
+
+        // 1. Get the current local time
+        ptime now = second_clock::universal_time();
+
+        // 2. Define the duration to add (e.g., 5 seconds)
+        time_duration diff = seconds(30);
+
+        // 3. Add the duration to the current time
+        ptime timeout = now + diff;
+
+        file._mutex
+            ->timed_lock(
+                timeout
+            );
+
+        file._mutex->unlock();
+
+        file._mutex->lock();
+        for (auto it = file._sharedMap->begin();
+             it != file._sharedMap->end();
+             ++it)
+        {
+            try {
+                it->second._mutex.unlock();
+            }
+            catch (...)
+            {
+            }
+        }
+        file._sharedMap->clear();
+
+        file._mutex->unlock();
+
+        return;
+        */
+
+    }
+
+
+
+    /*
+            virtual void lock(Index position, Size length)
+            {
+                struct flock data;
+                memset(&data, '\0', sizeof(data));
+                data.l_type = F_WRLCK;
+                data.l_whence = SEEK_SET;
+                data.l_start = position;
+                data.l_len = length;
+
+                fcntl(_fileNumber, F_SETLKW, &data);
+
+            }
+
+            virtual void unlock(Index position, Size length)
+            {
+                struct flock data;
+                memset(&data, '\0', sizeof(data));
+                data.l_type = F_UNLCK;
+                data.l_whence = SEEK_SET;
+                data.l_start = position;
+                data.l_len = length;
+
+                fcntl(_fileNumber, F_SETLK, &data);
+
+            }
+
+    */
+};
+
 }
 
 

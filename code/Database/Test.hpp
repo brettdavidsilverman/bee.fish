@@ -1,5 +1,6 @@
 #ifndef BEE_FISH__DATABASE__TEST_HPP
 #define BEE_FISH__DATABASE__TEST_HPP
+#include <boost/interprocess/offset_ptr.hpp>
 
 #include <thread>
 #include "../Miscellaneous/Miscellaneous.hpp"
@@ -41,8 +42,7 @@ inline bool testFromString();
 inline bool test()
 {
     bool success = true;
-    //return testMultiThreaded();
-
+    
     cout << "Test Database " << endl;
 
     success = success &&
@@ -221,26 +221,26 @@ inline bool testStack() {
               "BitStreams compare",
               stream2 == stream2Compare
           );
-          
-          
+
+
     Stack parent;
     parent << 5;
     parent.reset();
     ok &= testResult(
-        "Stack contains 1",
-        parent.contains(5)
-    );
-    
+              "Stack contains 1",
+              parent.contains(5)
+          );
+
     ok &= testResult(
-        "Stack contains 2",
-        parent.contains(5)
-    );
-    
+              "Stack contains 2",
+              parent.contains(5)
+          );
+
     ok &= testResult(
-        "Stack doesnt contains 2",
-        !parent.contains(1)
-    );
-    
+              "Stack doesnt contains 2",
+              !parent.contains(1)
+          );
+
     assert(ok);
 
     BeeFishMisc::outputSuccess(ok);
@@ -252,66 +252,348 @@ inline bool testStack() {
 
 inline bool testFile()
 {
+    namespace bip = boost::interprocess;
+
     cout << "Test file " << endl;
     bool success = true;
 
-    LockFile file;
-
-    cout << "\tLock" << endl;
-    file.lock();
-    file.lock();
-
-    cout << "\tUnlock" << endl;
-    file.unlock();
-    file.unlock();
-
-    BString test = "Hello world";
-    cout << "\tWriting" << endl;
-    file.write(test.data(), test.size());
-
-    file.seek(0);
-    test = BString(test.size(), '\0');
-
-    file.read(test.data(), test.size());
-
-    success = testValue(
-                  "File read/write",
-                  test == "Hello world"
-              );
-
     if (success)
     {
-        cout << "\tLock index 1" << flush;
-        Database db;
-        db.lock();
-        db.unlock();
-        Database db2(db.filename());
-        db2.lock();
-        db2.unlock();
-        outputSuccess(true);
+        File file;
+        /*
+            cout << "\tLock" << endl;
 
-        {
-            cout << "\tLock index 2" << flush;
-            {
-                LockFile::ScopedLock lock1(db);
-                LockFile::ScopedLock lock2(db);
-            }
-            outputSuccess(true);
-        }
+            file.lock();
 
+            cout << "\tUnlock" << endl;
+            file.unlock();
+        */
+        BString test = "Hello world";
+        cout << "\tWriting" << endl;
+        file.write(test.data(), test.size());
 
-        cout << "\tLock index 3" << flush;
-        Path path1 = db;
-        Path path2 = db2;
+        file.seek(0);
+        test = BString(test.size(), '\0');
+
+        file.read(test.data(), test.size());
+
+        success = testValue(
+                      "File read/write",
+                      test == "Hello world"
+                  );
+    }
+    
+    if (success)
+    {
+        cout << "\tDatabase files " << flush;
+        Database db1;
+        Database db2;
+        Database db3(db1.filename());
         {
-            LockFile::ScopedLock lock1(db);
-        }
-        {
-            LockFile::ScopedLock lock2(db2);
+            Database db4;
         }
         outputSuccess(true);
     }
 
+    if (success)
+    {
+        cout << "\tShared memory basicsr" << flush;
+        Database db;
+        //  db.lock();
+        //   db.unlock();
+
+        Database db2(db.filename());
+        //  db2.lock();
+        //  db2.unlock();
+
+        success = success &&
+                  testResult(
+                      "DB filename equal",
+                      db.filename() == db2.filename()
+                  );
+
+        success = success &&
+                  testResult(
+                      "DB shared memory name equal",
+                      db._sharedMemoryName == db2._sharedMemoryName
+                  );
+
+
+        outputSuccess(true);
+
+        auto lockWorker = [](Database* db)
+        {
+            cout << "Locking db" << endl;
+            LockFile::ScopedLock lock(*db);
+
+            cout << "Locked db for 1 sec " << endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            cout << "Unlock db" << endl;
+
+        };
+
+        cout << "Testing database lock" << endl;
+        auto start = std::chrono::steady_clock::now();
+
+        std::thread threads[] = {
+            std::thread(lockWorker, &db),
+            std::thread(lockWorker, &db2)
+        };
+
+
+        for (auto &thread : threads)
+        {
+            thread.join();
+        }
+
+        auto end = std::chrono::steady_clock::now();
+
+        std::chrono::duration<double, std::milli> elapsed = end - start;
+
+        success = success &&
+                  testValue(
+                      "Elapsed time for both locks",
+                      elapsed.count() >= 2000
+                  );
+        /*
+        bip::offset_ptr<bip::interprocess_recursive_mutex> ptr1 = db._mutex;
+                bip::offset_ptr<bip::interprocess_recursive_mutex> ptr2 = db2._mutex;
+
+                success = success &&
+                testResult(
+                    "DB mutexes are equal",
+                    ptr1 == ptr2
+                );
+        */
+        assert(success);
+
+        cout << "\tLock index 2" << flush;
+        {
+            LockFile::ScopedLock lock1(db);
+        }
+        {
+            LockFile::ScopedLock lock2(db);
+        }
+        outputSuccess(true);
+
+
+        cout << "\tLock 3" << flush;
+        Path path1 = db;
+        Path path2 = db2;
+        {
+            Path::ScopedLock lock1(path1);
+        }
+        {
+            Path::ScopedLock lock2(path2);
+        }
+        outputSuccess(true);
+
+        cout << "\tLock Index 1 " << flush;
+        db.lock(1);
+        db2.lock(2);
+        db.unlock(1);
+        db2.unlock(2);
+        outputSuccess(true);
+/*
+        cout << "\tLock Index 2 " << flush;
+        path1.lock();
+        path1.unlock();
+        path1.lock();
+        path1.unlock();
+        path2.lock();
+        path2.unlock();
+        outputSuccess(true);
+        
+        cout << "\tLock Index 3 " << flush;
+        path1.lock();
+        path1.lock();
+        path1.unlock();
+        path1.unlock();
+        outputSuccess(true);
+         
+
+        success = success &&
+                  testValue(
+                      "Path 1 unlocked",
+                      !path1.locked()
+                  );
+
+        success = success &&
+                  testValue(
+                      "Path 2 unlocked",
+                      !path2.locked()
+                  );
+        
+        success = success &&
+                  testValue(
+                      "Path unlocked",
+                      !path2.locked()
+                  );
+                  
+        */
+        
+        cout << "\tPath []" << flush;
+        path2["new index"];
+        outputSuccess(true);
+        
+        cout << "\tScoped Lock on same thread " << endl;
+        path2 = path1;
+        {
+            cout << " path1 " << flush;
+            Path::ScopedLock lock1(path1);
+            cout << " path2 " << flush;
+            Path::ScopedLock lock2(path2);
+        }
+
+        cout << "\tScoped Lock on different threads" << endl;
+        auto worker =
+            [](const BString& filename)
+        {
+            Database db(filename);
+            Path path(db);
+
+            Path::ScopedLock lock(path);
+            cout << "\t\tLocked ";
+            outputSuccess(true);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        };
+
+        Database db3;
+
+        auto start2 = std::chrono::steady_clock::now();
+
+
+        std::thread threads2[] =
+        {
+            std::thread(worker, db3.filename()),
+            std::thread(worker, db3.filename())
+        };
+
+        for (auto& t : threads2) {
+            if (t.joinable()) {
+                t.join();
+            }
+        }
+
+        auto end2 = std::chrono::steady_clock::now();
+
+        std::chrono::duration<double, std::milli> elapsed2 = end2 - start2;
+
+        success = success &&
+                  testValue(
+                      "Elapsed time for path locks",
+                      elapsed2.count() >= 2000
+                  );
+
+        outputSuccess(true);
+
+    }
+
+    if (success)
+    {
+        cout << "Testing database locks" << endl;
+
+        auto dblock =
+            [](string filename, Index index)
+        {
+            Database db(filename);
+            //Path path = Path(db)[index];
+            cout << "\tLocking   " << index << endl;
+            db.lock(index);
+            cout << "\tLocked    " << index << endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            db.unlock(index);
+            cout << "\tUnlocked  " << index << endl;
+        };
+        
+
+        Database db;
+
+        auto start = std::chrono::steady_clock::now();
+
+        std::thread threads[] =
+        {
+            std::thread(dblock, db.filename(), 0),
+            std::thread(dblock, db.filename(), 0),
+            std::thread(dblock, db.filename(), 1)
+        };
+
+
+        for (auto& t : threads) {
+            if (t.joinable()) {
+                t.join();
+            }
+        }
+
+        auto end = std::chrono::steady_clock::now();
+
+        std::chrono::duration<double, std::milli> elapsed = end - start;
+
+        success = success &&
+                  testValue(
+                      "Elapsed time for database locks",
+                      elapsed.count() >= 2000 &&
+                      elapsed.count() <= 2500
+                  );
+                  
+                  
+
+
+        assert(success);
+    }
+
+        
+    if (success)
+    {
+        cout << "Testing path locks" << endl;
+        
+        auto pathlock =
+        [](string filename, Index index)
+        {
+            Database db(filename);
+            Path path = db;
+            path = path[index];
+            
+            cout << "\tLocking   " << index << endl;
+            Path::ScopedLock lock(path);
+
+            
+            cout << "\tLocked    " << index << endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            
+            cout << "\tUnlocked  " << index << endl;
+        };
+        
+        Database db;
+        
+        auto start = std::chrono::steady_clock::now();
+
+        std::thread threads[] =
+        {
+            std::thread(pathlock, db.filename(), 1),
+            std::thread(pathlock, db.filename(), 1),
+            std::thread(pathlock, db.filename(), 2)
+        };
+
+        for (auto& t : threads) {
+            if (t.joinable()) {
+                t.join();
+            }
+        }
+
+        auto end = std::chrono::steady_clock::now();
+
+        std::chrono::duration<double, std::milli> elapsed = end - start;
+
+        success = success &&
+            testValue(
+                "Elapsed time for path locks",
+                elapsed.count() >= 2000 &&
+                elapsed.count() <= 2500
+            );
+                  
+    }
+    
     if (success)
     {
         Database db;
@@ -349,17 +631,32 @@ inline bool testFile()
     }
 
     if (success) {
+        cout << "\tCreate db" << endl;
+
         JSONDatabase db;
+
+        cout << "\tCreate auth" << endl;
 
         BeeFishAuthentication::Authentication
         auth("https://test", db.filename());
 
+        cout << "\tLogon" << endl;
         auth.logon("boo");
 
 
-        JSONPath path = db.origin("https://test");
+        cout << "\tGet origin" << flush;
+
+        JSONPath path(db);
+        //path["boo"];
+
+        path = db.origin("https://test");
+
+        outputSuccess(true);
 
         JSONPathParser parser(auth, path);
+
+        cout << "\tParsing 101" << endl;
+
         parser.read("101");
         parser.eof();
 
@@ -387,9 +684,10 @@ inline bool testNextIndex()
 
     cout << "Testing next index" << endl;
 
-
+    bool success = true;
 
     Database db;
+
 
     cout << "\tIndex 1 " << flush;
     Index index1 = db.getNextIndex(0);
@@ -399,10 +697,11 @@ inline bool testNextIndex()
     Index index2 = db.getNextIndex(0);
     cout << index2 << endl;
 
-    bool success =
-        (index2 == index1 + sizeof(Branch));
+    success = success &&
+              (index2 == index1 + sizeof(Branch));
 
     outputSuccess(success);
+
 
     return success;
 }
@@ -721,7 +1020,7 @@ inline bool testPath()
             int second = -1;
             next =
                 data.next(stack, second);
-            cerr << stack << endl;
+
             success &= (second == 1) && next;
             outputSuccess(success);
         }
@@ -1143,7 +1442,7 @@ inline bool testJSONId()
     using namespace BeeFishId;
 
     cout << endl << "Testing json id" << endl;
-
+    
     bool success = true;
 
     cout << "\tTest id" << endl;
@@ -1175,22 +1474,30 @@ inline bool testJSONId()
         [](std::string filename, Index size)
     {
         Database db(filename);
-        Path path = db;
         std::vector<Timestamp> timestamps(size);
         for (auto timestamp : timestamps)
         {
+            Path path = db;
+            
+            //Path::ScopedLock lock(path);
+            /*
+            if (path.contains(timestamp))
+            {
+                cerr << timestamp << endl;
+                assert(false);
+            }
+            */
             path[timestamp];
         }
     };
 
+    cerr << "Loading timestamps " << endl;
+    
+//Timestamp::Memory::reset();
 
-    const Index size = 100;
+    const Index size = 10;
     Database db;
-    /*
-    cerr << "Press enter to continue" << endl;
-    std::string line;
-    std::getline(std::cin, line);
-    */
+
     std::thread threads[] = {
         std::thread(addTimestamps, db.filename(), size),
         std::thread(addTimestamps, db.filename(), size)
@@ -1205,7 +1512,13 @@ inline bool testJSONId()
     cerr << "Done" << endl;
 
     Path path = db;
-
+    Iterable<Timestamp> timestamps(path);
+    
+    for (auto timestamp : timestamps)
+    {
+        cerr << timestamp << endl;
+    }
+        
     Index count = path.childCount();
     cerr << "Child count " << count << endl;
     success = success &&
@@ -1629,7 +1942,7 @@ inline bool testFile(BeeFishAuthentication:: Authentication& auth, JSONPath root
 
     std::stringstream stream;
     stream.imbue(std::locale::classic());
-    
+
     stream << TEMP_DIRECTORY << &root << "test.json";
 
     string tempFile = stream.str();
@@ -2042,8 +2355,9 @@ inline bool testPathParent()
     cout << "Test parent" << endl;
 
     bool success = true;
-
+cerr << "CREATE DATABASE" << endl;
     Database database;
+    
     Path path = database;
     path = path["hello"]["world"];
 
@@ -2107,7 +2421,7 @@ inline bool testPathParent()
               );
 
     BeeFishMisc::outputSuccess(success);
-
+    
     return success;
 }
 
@@ -2250,7 +2564,7 @@ inline bool testObjects()
         auth.logon("boo");
 
         Path objects = database.objects();
-        
+
         JSONPath start = database.origin("http://test");
         Index startCount = objects.childCount();
 
@@ -2443,7 +2757,7 @@ inline bool testDeleteProperty()
 
         stringstream stream;
         start2["a"].write(auth2, stream);
-        
+
         success = success &&
                   testValue(
                       "Result",
@@ -2702,16 +3016,16 @@ inline bool testFromString()
         JSONPathParser parser(auth, path);
         parser.read("{\"a\":\"b\"}");
         parser.eof();
-        
+
         ok = ok && testValue(
-            "Not user root",
-            path.isUserRoot()
-        );
-        
+                 "Not user root",
+                 path.isUserRoot()
+             );
+
         ok = ok && testValue(
-            "Not user root a",
-            !path["a"].isUserRoot()
-        );
+                 "Not user root a",
+                 !path["a"].isUserRoot()
+             );
 
         JSONPath::Id key = path["a"].toKey();
         Index index;
@@ -2724,47 +3038,47 @@ inline bool testFromString()
 
 
         BString compare =
-            BString("https://test/a?index=") + 
+            BString("https://test/a?index=") +
             BString(to_string(index));
 
         ok = ok && testValue(
                  "From global key",
                  url == compare
-                     
+
              );
     }
-    
+
     {
         JSONPath path = database.origin("https://test");
         path = path[auth.userId()];
-        
+
         JSONPathParser parser(auth, path);
         parser.read("{\"a\":\"b\"}");
         parser.eof();
-        
+
         BString userId;
-        
+
         ok = ok && testValue(
-            "My is user root",
-            path.isUserRoot(userId)
-        );
-        
+                 "My is user root",
+                 path.isUserRoot(userId)
+             );
+
         ok = ok && testValue(
-            "My user",
-            userId == auth.userId()
-        );
-        
+                 "My user",
+                 userId == auth.userId()
+             );
+
         ok = ok && testValue(
-            "My not user root a",
-            !path["a"].isUserRoot()
-        );
-        
-        
-        
+                 "My not user root a",
+                 !path["a"].isUserRoot()
+             );
+
+
+
 
         JSONPath::Id key = path["a"].toKey();
         Index index;
-        BString url = 
+        BString url =
             JSONPath::keyToString(
                 auth,
                 key,
@@ -2773,7 +3087,7 @@ inline bool testFromString()
 
 
         BString compare =
-            BString("https://test/my/a?index=") + 
+            BString("https://test/my/a?index=") +
             BString(to_string(index));
 
         ok = ok && testValue(
@@ -2781,7 +3095,7 @@ inline bool testFromString()
                  url == compare
              );
     }
-    
+
     outputSuccess(ok);
 
     return ok;
@@ -2797,7 +3111,7 @@ inline bool testMultiThreaded()
     // sizes are consistent
     const Index SIZE = 1135312;
 #else
-    const Index SIZE = 3988768;
+    const Index SIZE =  3988768;
 #endif
 
     File authFile;

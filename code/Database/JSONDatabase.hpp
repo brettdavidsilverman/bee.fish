@@ -32,30 +32,28 @@ namespace BeeFishDatabase
             const BString& filePath = "",
             bool readOnly = false
         )
-        : Database(filePath, readOnly)
+           :
+            Database(filePath, readOnly),
+            _root(*this),
+            _authentication(
+                _root[AUTHENTICATION]
+            ),
+            _users(
+                _root[USERS]
+            ),
+            _properties(
+                _root[PROPERTIES]
+            ),
+            _words(
+                _root[WORDS]
+            ),
+            _objects(
+                _root[OBJECTS]
+            ),
+            _json(
+                _root[JSON]
+            )
         {
-
-    
-            _root = *this;
-        
-            _properties = 
-                _root[PROPERTIES];
-                
-            _words =
-                _root[WORDS];
-                
-            _objects =
-                _root[OBJECTS];
-                
-            _users = 
-                _root[USERS];
-            
-            _authentication =
-                _root[AUTHENTICATION];
-            
-            _json =
-                _root[JSON];
-        
         }
 
         virtual Index rootIndex() const

@@ -45,7 +45,7 @@ public:
     using Path::clear;
     using Path::write;
 
-    LockFile::ScopedLock* _lock = nullptr;
+    Path::ScopedLock* _lock = nullptr;
     
     JSONPath()
     {
@@ -137,7 +137,7 @@ public:
 
     bool hasId()
     {
-        Path path = *this;
+        Path path = (*this);//[ID];
         path = path[ID];
         return path.hasData();
     }
@@ -192,7 +192,7 @@ public:
 
         if (index > count)
         {
-            LockFile::ScopedLock lock(database());
+            Path::ScopedLock lock(*this);
 
             if (children.hasData())
                 count = children.getData<Index>();
@@ -233,7 +233,7 @@ public:
 
         if (!path.hasData())
         {
-            LockFile::ScopedLock lock(database());
+            Path::ScopedLock lock(*this);
             if (!path.hasData())
             {
                 path.setData(true);
@@ -301,7 +301,8 @@ protected:
 
     void setType(Type type)
     {
-        LockFile::ScopedLock lock(database());
+
+        Path::ScopedLock lock(*this);
 
         if (!hasData())
         {
@@ -334,7 +335,7 @@ public:
 
     void setUndefined()
     {
-        LockFile::ScopedLock lock(database());
+        Path::ScopedLock lock(*this);
 
         if (type() == Type::UNDEFINED) {
             return;
@@ -359,14 +360,14 @@ public:
 
     void setNull()
     {
-        LockFile::ScopedLock lock(database());
+        Path::ScopedLock lock(*this);
         setType(Type::NULL_);
     }
 
 
     void setBoolean(const BString& value)
     {
-        LockFile::ScopedLock lock(database());
+        Path::ScopedLock lock(*this);
         Path path = *this;
         setType(Type::BOOLEAN);
         path[VALUE].setData<BString>(value);
@@ -374,7 +375,7 @@ public:
 
     void setInteger(const BString& value)
     {
-        LockFile::ScopedLock lock(database());
+        Path::ScopedLock lock(*this);
         Path path = *this;
         setType(Type::INTEGER);
         path[VALUE].setData<BString>(value);
@@ -387,7 +388,7 @@ public:
 
     void setNumber(const BString& value)
     {
-        LockFile::ScopedLock lock(database());
+        Path::ScopedLock lock(*this);
         Path path = *this;
         setType(Type::NUMBER);
         path[VALUE].setData<BString>(value);
@@ -426,10 +427,10 @@ public:
     )
     {
 
-if (!_lock)
-    _lock = new LockFile::ScopedLock(database());
+        if (!_lock)
+            _lock = new Path::ScopedLock(*this);
 
-        //LockFile::ScopedLock lock(database());
+        //Path::ScopedLock lock(*this);
         
         Path path = *this;
         setType(Type::STRING);
@@ -491,7 +492,7 @@ if (!_lock)
         BString& partWord
     )
     {
-       // LockFile::ScopedLock lock(database());
+       // Path::ScopedLock lock(*this);
         
         Path path = *this;
 
@@ -525,8 +526,10 @@ if (!_lock)
 
         partWord = "";
         
-        delete _lock;
+        Path::ScopedLock* temp =
+            _lock;
         _lock = nullptr;
+        delete temp;
          
     }
 
@@ -550,7 +553,7 @@ public:
 
     void setObject()
     {
-        LockFile::ScopedLock lock(database());
+        Path::ScopedLock lock(*this);
 
         setType(Type::OBJECT);
 
@@ -558,7 +561,7 @@ public:
 
     void setArray()
     {
-        LockFile::ScopedLock lock(database());
+        Path::ScopedLock lock(*this);
         setType(Type::ARRAY);
 
     }
@@ -1076,7 +1079,7 @@ public:
 
         if (!objectPropertyPath.hasData())
         {
-            LockFile::ScopedLock lock(database());
+            Path::ScopedLock lock(*this);
             if (!objectPropertyPath.hasData())
             {
                 // New property

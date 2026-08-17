@@ -17,6 +17,8 @@
 #include "../power-encoding/encoding.h"
 #include "../b-string/b-string.h"
 #include "../Script/Script.hpp"
+#include "../Miscellaneous/SharedMemory.hpp"
+
 #include "Version.hpp"
 
 
@@ -27,6 +29,7 @@ using namespace std::chrono;
 using namespace BeeFishPowerEncoding;
 using namespace BeeFishBString;
 using namespace BeeFishScript;
+using namespace BeeFishSharedMemory;
 
     struct Timestamp
     {
@@ -34,37 +37,35 @@ using namespace BeeFishScript;
         unsigned long _milliseconds;
         unsigned long _increment;
         
-        class SharedMemory {
+        class Memory : public SharedMemory 
+        {
+        protected:
+            inline static const BString _sharedMemoryName = "bee.fish.id";
         public:
-            boost::interprocess::
-                named_mutex _mutex;
-
             
-            managed_shared_memory _segment;
             unsigned long* _lastMilliseconds;
-            unsigned long* _lastIncrement;
+            boost::atomic<unsigned long>* _lastIncrement;
                         
-            SharedMemory() :
-                _mutex(boost::interprocess::open_or_create, "BeeFishId::Timestamp::_mutex")
+            Memory() : SharedMemory(_sharedMemoryName.c_str(), 1024)
             {
-#ifdef DEBUG
-                
-                //_mutex.unlock();
-                //shared_memory_object::remove("BeeFishId::Timestamp");
-                
-#endif
-                _segment = managed_shared_memory(open_or_create, "BeeFishId::Timestamp", 1000);
                 _lastMilliseconds = 
-                    _segment.find_or_construct<unsigned long>("lastMilliseconds")(milliseconds());
+                    _sharedMemory.find_or_construct<unsigned long>("Id.lastMilliseconds")(milliseconds());
                     
                 _lastIncrement = 
-                    _segment.find_or_construct<unsigned long>("lastIncrement")(0);
+                    _sharedMemory.find_or_construct<boost::atomic<unsigned long>>("Id.lastIncrement")(0);
+                    
             }
             
-            ~SharedMemory()
+            static void reset()
             {
-                _segment.destroy_ptr(_lastMilliseconds);
-                _segment.destroy_ptr(_lastIncrement);
+                bip::shared_memory_object
+                ::remove(
+                    _sharedMemoryName.c_str()
+                );
+            }
+            
+            ~Memory()
+            {
             }
             
         } inline static _memory;
@@ -72,8 +73,8 @@ using namespace BeeFishScript;
 
         Timestamp()
         {
-            std::scoped_lock lock(_memory._mutex);
-                
+            SharedMemory::ScopedLock lock(_memory);
+
             _milliseconds = milliseconds();
             _increment = increment(_milliseconds);
 
@@ -266,19 +267,19 @@ using namespace BeeFishScript;
         )
         {
  
-            static unsigned long& _lastMilliseconds
+            static unsigned long& lastMilliseconds
                 = *_memory._lastMilliseconds;
-            static unsigned long& _lastIncrement
+            static boost::atomic<unsigned long>& lastIncrement
                 = *_memory._lastIncrement;
 
-            if (milliseconds <= _lastMilliseconds)
-                ++_lastIncrement;
+            if (milliseconds > lastMilliseconds)
+                lastIncrement = 0;
             else
-                _lastIncrement = 0;
+                ++lastIncrement;
 
-            _lastMilliseconds = milliseconds;
+            lastMilliseconds = milliseconds;
             
-            return _lastIncrement;
+            return lastIncrement;
         }
             
         

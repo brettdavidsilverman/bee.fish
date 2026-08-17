@@ -102,7 +102,7 @@ public:
                 _filePath =
                     getFilePath(
                         requestPath + 
-                        BString("/index.html")
+                        BString("/x")
                     );
             }
             catch(filesystem_error& err)

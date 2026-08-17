@@ -19,8 +19,46 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-
-
+    /*
+    BeeFishId::Timestamp timestamp;
+    
+    cerr << timestamp << endl;
+    
+    auto worker =
+    [](std::string filename)
+    {
+        Database* dbs[100];
+        for (int i = 0; i < 100; ++i)
+        {
+            cerr << i << endl;
+            Database* db = new Database(filename);
+            dbs[i] = db;
+        }
+    
+        for (int i = 0; i < 100; ++i)
+        {
+             cerr << i << endl;
+             delete dbs[i];
+        }
+    };
+    
+    Database db;
+    
+    std::thread threads[] =
+    {
+        std::thread(worker, db.filename()),
+        std::thread(worker, db.filename())
+    };
+    
+    for (auto &thread : threads)
+    {
+        thread.join();
+    }
+    
+    cerr << "Ok" << endl;
+    
+    return 0;
+*/
     clog << "bee.fish.database"
               << endl
           << "C++ run time: "
@@ -32,6 +70,7 @@ int main(int argc, const char* argv[])
 
     int filenameArg =
         hasArg(argc, argv, "-filename");
+        
     BString filename = DATABASE_FILENAME;
 
     if (filenameArg != -1 && argc > (filenameArg + 1))
@@ -41,13 +80,30 @@ int main(int argc, const char* argv[])
     
     clog << "Using database " << filename << endl;
     
-    bool unlock =
-        (hasArg(argc, argv, "-unlock") != -1);
+    bool reset =
+        (hasArg(argc, argv, "-reset") != -1);
         
-    if (unlock || true)
+    if (reset)
     {
+        clog << "Resetting" << endl;
+        LockFile::reset(filename.str());
+        return 0;
+    }
+    
+    JSONDatabase database(filename);
+    
+    bool lock =
+        (hasArg(argc, argv, "-lock") != -1);
+        
+    
+    if (lock)
+    {
+        
+        Path path(database);
+        clog << "Locking" << endl;
+        Path::ScopedLock lock(path);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10000));
         clog << "Unlocking" << endl;
-        LockFile::unlock(filename);
     }
     
     bool test =
@@ -60,7 +116,7 @@ int main(int argc, const char* argv[])
         return 0;
     }
     
-    JSONDatabase database(filename);
+    
     
     bool originsArg  =
         (hasArg(argc, argv, "-origins") != -1);
