@@ -148,6 +148,19 @@ async (event) => {
             url.pathname
         );
         
+        var contentType;
+        try {
+            JSON.parse(editor.value);
+            contentType = 
+                 "application/json; charset=utf-8";
+            
+        }
+        catch (error)
+        {
+             contentType = 
+                 "text/html; charset=utf-8";
+        }
+        
         var response = await
             fetch(
                 url,
@@ -159,7 +172,7 @@ async (event) => {
                     body: editor.value,
                     headers: {
                         "content-type": 
-                        "text/html; charset=utf-8"
+                        contentType
                     }
                 }
             );

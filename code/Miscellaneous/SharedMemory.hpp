@@ -25,40 +25,43 @@ public:
     bip::managed_shared_memory
         _sharedMemory;
 
-    //bip::interprocess_mutex* _mutex;
-    bip::named_mutex _mutex;
-
+    
     Index* _counter = nullptr;
+    typedef bip::scoped_lock<bip::interprocess_recursive_mutex>
+        ScopedLockBase;
+        
+    bip::interprocess_recursive_mutex* _mutex;
     
-    typedef bip::scoped_lock<
-        bip::named_mutex
-    >
-    ScopedLockBase;
-    
-    class ScopedLock : ScopedLockBase
+    class ScopedLock : public ScopedLockBase
     {
     public:
         ScopedLock(SharedMemory& memory) :
-            ScopedLockBase(memory._mutex)
+            ScopedLockBase(*memory._mutex)
         {
+            
         }
     };
-        
+
+    
 
 protected:
 
     SharedMemory(const BString& identifier, Index size = 65536) :
-        _sharedMemoryName(identifier),
-        _mutex(bip::open_or_create, "bee.fish.SharedMemory.mutex")
-        
+        _sharedMemoryName(identifier)
     {
-        ScopedLock lock(*this);
         
+
         _sharedMemory = bip::managed_shared_memory(
             bip::open_or_create,
             _sharedMemoryName.c_str(),
             size
         );
+        
+        _mutex =
+            _sharedMemory.find_or_construct
+            <bip::interprocess_recursive_mutex>
+            ("SharedMemory.Mutex")();
+  
         
         _counter =
             _sharedMemory
@@ -92,13 +95,8 @@ public:
         Index counter =
             --(*_counter);
             
-//cerr << "~SHAREDMEMORY " << _counter->load() << endl;
         if (counter == 0)
         {
-//cerr << "~SHAREDMEMORY " << _sharedMemoryName << endl;
-
-            //_sharedMemory.deallocate(_counter);
-            
             bip::shared_memory_object
             ::remove(
                 _sharedMemoryName.c_str()
@@ -115,12 +113,11 @@ public:
                 path
             );
             
-cerr << "REMOVING " << sharedMemoryName << endl;
-        
         bip::shared_memory_object
         ::remove(
             sharedMemoryName.c_str()
         );
+        
     }
     
     static BString makeIdentifier(const std::filesystem::path& path)
@@ -141,8 +138,8 @@ cerr << "REMOVING " << sharedMemoryName << endl;
         stream << hashedValue;
 
         return
-            BString("bee.fish.") +
-            BString(stream.str());
+            BString(path.string())
+                .replace("/", ".");
     }
 
 };

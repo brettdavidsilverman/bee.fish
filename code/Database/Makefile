@@ -25,7 +25,6 @@ debug:	JSON_INDEX =
 debug:	$(OUTPUT)
 
 reset:	$(OUTPUT)
-	rm -f /dev/shm/*
 	$(OUTPUT) -reset
 
 clean:

@@ -58,10 +58,14 @@ using namespace BeeFishSharedMemory;
             
             static void reset()
             {
-                bip::shared_memory_object
-                ::remove(
-                    _sharedMemoryName.c_str()
-                );
+                cerr << "Id::TRY LOCK" << endl;
+                
+                if (!_memory._mutex->try_lock())
+                {
+                    _memory._mutex->unlock();
+                    _memory._mutex->lock();
+                }
+                _memory._mutex->unlock();
             }
             
             ~Memory()
@@ -424,6 +428,10 @@ using namespace BeeFishSharedMemory;
             Id id;
             bits >> id;
             return id;
+        }
+        
+        static void reset() {
+            Timestamp::Memory::reset();
         }
         
     private:

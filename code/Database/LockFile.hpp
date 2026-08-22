@@ -23,21 +23,6 @@ class LockFile :
 {
 public:
 
-    typedef bip::scoped_lock<bip::interprocess_recursive_mutex>
-        ScopedLockBase;
-        
-    bip::interprocess_recursive_mutex* _mutex;
-    
-    class ScopedLock : public ScopedLockBase
-    {
-    public:
-        ScopedLock(LockFile& lockFile) :
-            ScopedLockBase(*lockFile._mutex)
-        {
-            
-        }
-    };
-
     
     
 protected:
@@ -50,13 +35,7 @@ protected:
         bip::interprocess_recursive_mutex
             _mutex;
         std::atomic<Index> _counter = 0;
-       // ScopedLock _lock;
-        MapValueType()// :
-           /* _lock(
-                _mutex,
-                bip::defer_lock
-            )
-            */
+        MapValueType()
         {
         }
     };
@@ -91,11 +70,7 @@ public:
         )
 
     {
-        _mutex =
-            _sharedMemory.find_or_construct
-            <bip::interprocess_recursive_mutex>
-            ("LockFile.Mutex")();
-            
+          
         _allocator = new
         ShmemAllocator(_sharedMemory.get_segment_manager());
 
@@ -116,7 +91,6 @@ public:
     }
 
     void lock(Index index) {
-// cerr << index << " LOCK" << endl;
 
         ScopedLock lock(*this);
         
@@ -138,8 +112,6 @@ public:
         }
         */
         
-// cerr << index << " LOCKED" << endl;
-
     }
 
     void unlock(Index index) {

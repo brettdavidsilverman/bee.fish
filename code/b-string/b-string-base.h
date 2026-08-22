@@ -163,16 +163,28 @@ public:
         return *this;
     }
 
-/*
-    virtual BString& operator = (const BString& rhs) {
-        BStringBase::operator = (rhs);
-        //_utf8 = rhs._utf8;
-        return *this;
-    }
-*/
-
     bool startsWith(const BString& prefix) const {
         return (rfind(prefix, 0) == 0);
+    }
+    
+    BString replace(const std::string& from, const std::string& to) {
+        
+        std::string str = *this;
+        
+        if (from.empty()) 
+             // Prevent infinite loop if target is empty
+             return str;
+             
+        Index startPos = 0;
+    
+        // Loop until no more occurrences are found
+        while ((startPos = str.find(from, startPos)) != std::string::npos) {
+            str.replace(startPos, from.length(), to);
+            // Move the pointer past the replaced substring to avoid infinite loops
+            startPos += to.length(); 
+        }
+        
+        return str;
     }
 
     bool isPunctuation() const {

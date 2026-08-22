@@ -16,6 +16,9 @@ debug:	DEBUG = debug
 debug:	CFLAGS += -Og -g -D DEBUG
 debug:	$(OUTPUT)
 
+reset:	$(OUTPUT)
+	$(OUTPUT) -reset
+
 run_debug:	debug
 	gdb --args $(OUTPUT) -test
 	
