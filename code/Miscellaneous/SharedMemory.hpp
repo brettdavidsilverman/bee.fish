@@ -123,7 +123,7 @@ public:
     static BString makeIdentifier(const std::filesystem::path& path)
     {
         
-
+/*
         std::hash<std::string> hasher;
 
         // Since path character '/' isnt allowed
@@ -136,8 +136,10 @@ public:
         stream.imbue(std::locale::classic());
 
         stream << hashedValue;
+*/
 
         return
+            BString("bee.fish") +
             BString(path.string())
                 .replace("/", ".");
     }

@@ -70,7 +70,6 @@ public:
         )
 
     {
-          
         _allocator = new
         ShmemAllocator(_sharedMemory.get_segment_manager());
 
