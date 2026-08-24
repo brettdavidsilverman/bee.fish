@@ -136,9 +136,9 @@ public:
     static void reset(const std::filesystem::path& path)
     {
         
-        BeeFishId::Timestamp::Memory::reset();
+       // BeeFishId::Timestamp::Memory::reset();
 
-        SharedMemory::reset(path);
+        SharedMemory::reset(makeIdentifier(path));
 
         /*
         using namespace boost::posix_time;

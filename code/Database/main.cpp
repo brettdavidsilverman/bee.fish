@@ -85,9 +85,15 @@ int main(int argc, const char* argv[])
         
     if (reset)
     {
-        clog << "Resetting" << endl;
-        LockFile::reset(filename.str());
-        return 0;
+        clog << "Resetting..." << flush;
+        LockFile::reset(
+            std::filesystem::path(
+                filename.str()
+            )
+        );
+        BeeFishId::Timestamp::Memory
+            ::reset();
+        clog << "Reset" << endl;
     }
     
     JSONDatabase database(filename);

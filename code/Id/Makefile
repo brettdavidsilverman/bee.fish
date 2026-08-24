@@ -1,7 +1,7 @@
 BUILD  = ../../build
 OUTPUT = $(BUILD)/Id
 CFLAGS = -std=c++17 -Wall -fmax-errors=1
-DEPS= $(BUILD)/power-encoding Id.hpp Test.hpp main.cpp Makefile
+DEPS= $(BUILD)/power-encoding Id.hpp Test.hpp main.cpp ../Miscellaneous/SharedMemory.hpp Makefile
 
 $(OUTPUT): $(DEPS)
 	g++ $(CFLAGS) main.cpp -o $(OUTPUT) -lcryptopp

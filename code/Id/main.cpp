@@ -26,9 +26,10 @@ int main(int argc, const char* argv[])
     
     if (hasArg(argc, argv, "-reset") >= 0)
     {
-        cout << "Resetting..." << endl;
-        BeeFishId::Id::reset();
-        return 0;
+        cout << "Resetting..." << flush;
+        BeeFishId::Timestamp::Memory
+            ::reset();
+        cout << "Reset" << endl;
     }
     
     if (hasArg(argc, argv, "-test") >= 0)

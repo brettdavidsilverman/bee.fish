@@ -10,7 +10,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/mutex.hpp>
 
-
 #include "../b-string/b-string.h"
 
 namespace BeeFishSharedMemory
@@ -106,20 +105,32 @@ public:
         
     }
     
-    static void reset(const std::filesystem::path& path)
+    static void reset(const BString& identifier)
     {
-        BString sharedMemoryName =
-            SharedMemory::makeIdentifier(
-                path
-            );
-            
-        bip::shared_memory_object
-        ::remove(
-            sharedMemoryName.c_str()
+        
+        SharedMemory memory(
+            identifier
         );
         
+        boost::posix_time::ptime 
+            timeout = 
+                boost::posix_time::microsec_clock::universal_time() + 
+                boost::posix_time::seconds(30);
+            
+        memory._mutex
+            ->timed_lock(
+                timeout
+            );
+            
+        memory._mutex->unlock();
+            
     }
-    
+    /*
+    static void reset(const std::filesystem::path& path)
+    {
+        reset(makeIdentifier(path));
+    }
+    */
     static BString makeIdentifier(const std::filesystem::path& path)
     {
         

@@ -40,7 +40,8 @@ using namespace BeeFishSharedMemory;
         class Memory : public SharedMemory 
         {
         protected:
-            inline static const BString _sharedMemoryName = "bee.fish.id";
+            inline static const BString _sharedMemoryName = 
+                "bee.fish.id";
         public:
             
             unsigned long* _lastMilliseconds;
@@ -58,14 +59,9 @@ using namespace BeeFishSharedMemory;
             
             static void reset()
             {
-                cerr << "Id::TRY LOCK" << endl;
-                
-                if (!_memory._mutex->try_lock())
-                {
-                    _memory._mutex->unlock();
-                    _memory._mutex->lock();
-                }
-                _memory._mutex->unlock();
+        
+                SharedMemory::reset(_sharedMemoryName);
+             
             }
             
             ~Memory()
@@ -429,11 +425,8 @@ using namespace BeeFishSharedMemory;
             bits >> id;
             return id;
         }
-        
-        static void reset() {
-            Timestamp::Memory::reset();
-        }
-        
+
+
     private:
         
         void write(
