@@ -64,7 +64,11 @@ int main(int argc, const char* argv[])
         if (hasArg(argc, argv, "-reset"))
         {
             cout << "Resetting locks..." << flush;
-            LockFile::reset(DATABASE_FILENAME);
+            LockFile::reset(
+                std::filesystem::path(
+                    DATABASE_FILENAME
+                )
+            );
             BeeFishId::Timestamp::Memory::reset();
             cout << "Reset" << endl;
         }

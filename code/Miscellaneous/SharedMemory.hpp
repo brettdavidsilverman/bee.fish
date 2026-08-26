@@ -26,10 +26,15 @@ public:
 
     
     Index* _counter = nullptr;
-    typedef bip::scoped_lock<bip::interprocess_recursive_mutex>
+    
+    typedef bip::interprocess_recursive_mutex
+        Mutex;
+        
+    typedef bip::scoped_lock<Mutex>
         ScopedLockBase;
         
-    bip::interprocess_recursive_mutex* _mutex;
+    
+    Mutex* _mutex;
     
     class ScopedLock : public ScopedLockBase
     {
@@ -58,7 +63,7 @@ protected:
         
         _mutex =
             _sharedMemory.find_or_construct
-            <bip::interprocess_recursive_mutex>
+            <Mutex>
             ("SharedMemory.Mutex")();
   
         

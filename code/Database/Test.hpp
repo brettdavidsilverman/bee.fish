@@ -435,7 +435,7 @@ inline bool testFile()
         cout << "\tPath []" << flush;
         path2["new index"];
         outputSuccess(true);
-        
+
         cout << "\tScoped Lock on same thread " << endl;
         path2 = path1;
         {
@@ -444,7 +444,7 @@ inline bool testFile()
             cout << " path2 " << flush;
             Path::ScopedLock lock2(path2);
         }
-
+        
         cout << "\tScoped Lock on different threads" << endl;
         auto worker =
             [](const BString& filename)

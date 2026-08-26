@@ -96,6 +96,7 @@ int main(int argc, const char* argv[])
         clog << "Reset" << endl;
     }
     
+    clog << "Opening " << filename << endl;
     JSONDatabase database(filename);
     
     bool lock =

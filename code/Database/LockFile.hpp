@@ -29,13 +29,26 @@ protected:
     // Define Types
 
     typedef Index KeyType;
+    
+    typedef bip::interprocess_recursive_mutex
+        Mutex;
 
     // Mutex with atomic counter
     struct MapValueType {
-        bip::interprocess_recursive_mutex
-            _mutex;
+        Mutex _mutex;
+            /*
+        bip
+        ::scoped_lock<
+            bip
+            ::interprocess_recursive_mutex
+        > _lock;
+        */
         std::atomic<Index> _counter = 0;
-        MapValueType()
+        MapValueType()/* :
+            _lock(
+                _mutex,
+                bip::defer_lock
+            )*/
         {
         }
     };
@@ -90,46 +103,52 @@ public:
     }
 
     void lock(Index index) {
+//cerr << index << "\tLOCK" << endl;
 
         ScopedLock lock(*this);
         
-       // Index counter = 
+        Index counter = 
             (*_sharedMap)[index]._counter++;
             
       //  if (counter != 0)
-            lock.unlock();
+      //      lock.unlock();
         
-        (*_sharedMap)[index]._mutex.lock();
-    
-        /*
-        else
-        {
+        
+        
+      //  lock.unlock();
+        
+        if (counter == 0) {
+            (*_sharedMap)[index]._mutex.lock();
+        }
+        else {
+            /*
             lock.swap(
                 (*_sharedMap)[index]._lock
             );
-            (*_sharedMap)[index]._lock.lock();
+            
+            lock.try_lock();
+            */
+            lock.unlock();
+            
+            
+            (*_sharedMap)[index]._mutex.lock();
+            
         }
-        */
+
+
         
     }
 
     void unlock(Index index) {
-
-// cerr << index << " UNLOCK" << endl;
+//cerr << index << "\tUNLOCK" << endl;
 
         ScopedLock lock(*this);
-        
         (*_sharedMap)[index]._mutex.unlock();
         
         if (--(*_sharedMap)[index]._counter == 0)
         {
-
             _sharedMap->erase(index);
         }
-      //  else
-      //      (*_sharedMap)[index]._mutex.unlock();
-// cerr << index << " UNLOCKED" << endl;
-
 
     }
 
@@ -138,46 +157,30 @@ public:
         
        // BeeFishId::Timestamp::Memory::reset();
 
-        SharedMemory::reset(makeIdentifier(path));
-
+        LockFile file(path);
         /*
-        using namespace boost::posix_time;
-
-        // 1. Get the current local time
-        ptime now = second_clock::universal_time();
-
-        // 2. Define the duration to add (e.g., 5 seconds)
-        time_duration diff = seconds(30);
-
-        // 3. Add the duration to the current time
-        ptime timeout = now + diff;
-
-        file._mutex
-            ->timed_lock(
-                timeout
-            );
-
+        boost::posix_time::ptime 
+            timeout = 
+                boost::posix_time::microsec_clock::universal_time() + 
+                boost::posix_time::seconds(30);
+            */
+    cerr << "TRY_LOCK" << endl;
+        file._mutex->try_lock();
+    cerr << "UNLOCK" << endl;
         file._mutex->unlock();
-
-        file._mutex->lock();
-        for (auto it = file._sharedMap->begin();
-             it != file._sharedMap->end();
-             ++it)
+    
+    cerr << "SCOPED LOCK" << endl;
+        ScopedLock lock(file);
+            /*
+        for (auto& pair : *file._sharedMap)
         {
-            try {
-                it->second._mutex.unlock();
-            }
-            catch (...)
-            {
-            }
+            pair.second._lock.unlock();
         }
-        file._sharedMap->clear();
-
-        file._mutex->unlock();
-
-        return;
         */
-
+    cerr << "SHAREDMAP CLEAR" << endl;
+        file._sharedMap->clear();
+    cerr << "SCOPED UNLOCK" << endl;
+            
     }
 
 
