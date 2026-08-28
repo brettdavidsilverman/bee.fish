@@ -112,23 +112,10 @@ public:
     
     static void reset(const BString& identifier)
     {
-        
-        SharedMemory memory(
-            identifier
-        );
-        
-        boost::posix_time::ptime 
-            timeout = 
-                boost::posix_time::microsec_clock::universal_time() + 
-                boost::posix_time::seconds(30);
-            
-        memory._mutex
-            ->timed_lock(
-                timeout
+        bip::shared_memory_object
+            ::remove(
+                identifier.c_str()
             );
-            
-        memory._mutex->unlock();
-            
     }
     /*
     static void reset(const std::filesystem::path& path)

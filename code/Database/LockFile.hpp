@@ -154,35 +154,11 @@ public:
 
     static void reset(const std::filesystem::path& path)
     {
+        SharedMemory:: reset(
+            makeIdentifier(path)
+        );
         
-       // BeeFishId::Timestamp::Memory::reset();
-
-        LockFile file(path);
-        /*
-        boost::posix_time::ptime 
-            timeout = 
-                boost::posix_time::microsec_clock::universal_time() + 
-                boost::posix_time::seconds(30);
-            */
-    cerr << "TRY_LOCK" << endl;
-        file._mutex->try_lock();
-    cerr << "UNLOCK" << endl;
-        file._mutex->unlock();
-    
-    cerr << "SCOPED LOCK" << endl;
-        ScopedLock lock(file);
-            /*
-        for (auto& pair : *file._sharedMap)
-        {
-            pair.second._lock.unlock();
-        }
-        */
-    cerr << "SHAREDMAP CLEAR" << endl;
-        file._sharedMap->clear();
-    cerr << "SCOPED UNLOCK" << endl;
-            
     }
-
 
 
     /*
