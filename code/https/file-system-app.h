@@ -99,6 +99,8 @@ public:
         {
             try
             {
+                assert(requestPath.endsWith("/"));
+                
                 _filePath =
                     getFilePath(
                         requestPath + 

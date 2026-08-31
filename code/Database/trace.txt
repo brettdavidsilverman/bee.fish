@@ -1,0 +1,14 @@
+==191153== Memcheck, a memory error detector
+==191153== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==191153== Using Valgrind-3.24.0 and LibVEX; rerun with -h for copyright info
+==191153== Command: ../../build/Database -test
+==191153== Parent PID: 191152
+==191153== 
+==191153== 
+==191153== HEAP SUMMARY:
+==191153==     in use at exit: 0 bytes in 0 blocks
+==191153==   total heap usage: 2,147,445 allocs, 2,147,445 frees, 224,269,604 bytes allocated
+==191153== 
+==191153== All heap blocks were freed -- no leaks are possible
+==191153== 
+==191153== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

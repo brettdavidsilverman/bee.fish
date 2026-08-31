@@ -94,10 +94,11 @@ int main(int argc, const char* argv[])
         appFactories.add<OptionsApp>();
         appFactories.add<AuthenticationApp>();
         
-        appFactories.add<FileSystemApp>();
         
-        appFactories.add<StorageApp>();
+        //appFactories.add<StorageApp>();
+        appFactories.add<FileSystemApp>();
         appFactories.add<JSONApp>();
+        
         
         
         appFactories.add<NotFoundApp>();

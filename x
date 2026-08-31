@@ -150,7 +150,8 @@ async (event) => {
         
         var contentType;
         try {
-            JSON.parse(editor.value);
+            if (editor.value.trim() != "undefined")
+                JSON.parse(editor.value);
             contentType = 
                  "application/json; charset=utf-8";
             

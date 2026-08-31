@@ -254,7 +254,7 @@ int main(int argc, const char* argv[])
         JSONPath inputPath =
             path["deaths"];
             
-        JSONPathParser parser(auth, inputPath, clog);
+        JSONPathParser parser(auth, inputPath, cout);
         clog << "Loading deaths.json" << endl;
         
         ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");
