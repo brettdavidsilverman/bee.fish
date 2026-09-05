@@ -35,18 +35,24 @@ private:
 
 public:
     using JSONParser::read;
-    
+
     JSONPathParser(Authentication& auth, JSONPath path, Match& match, ostream& log = cnull) :
         JSONParser(match),
         _auth(auth),
         _start(path),
         _log(log)
     {
-        JSONDatabase& database = path.database();
-        database._onword =
-        [this](JSONPath& path, const BString& word)
+        JSONDatabase& db = 
+            _start.database();
+        db._onlog =
+        [&auth, &log](JSONPath& path, const BString& word)
         {
-            JSONPathParser::log(path, word);
+            JSONDatabase::log(
+                auth,
+                log,
+                path,
+                word
+            );
         };
     }
 
@@ -56,11 +62,17 @@ public:
         _start(path),
         _log(log)
     {
-        JSONDatabase& database = path.database();
-        database._onword =
-        [this](JSONPath& path, const BString& word)
+        JSONDatabase& db = 
+            _start.database();
+        db._onlog =
+        [&auth, &log](JSONPath& path, const BString& word)
         {
-            JSONPathParser::log(path, word);
+            JSONDatabase::log(
+                auth,
+                log,
+                path,
+                word
+            );
         };
     }
 
@@ -121,7 +133,7 @@ private:
             throw std::logic_error("JSONPathParser::setVariable");
         }
 
-        log(start, hash);
+        JSONDatabase::log(_auth, _log, start, hash);
 
 
     }
@@ -341,7 +353,7 @@ private:
             _indexString,
             _partWord
         );
-        
+
         _stringPageIndex = 0;
 
     }
@@ -367,23 +379,7 @@ private:
 
     }
 
-    void log(JSONPath& path, const BString& value)
-    {
-        if (&_log != &cnull) {
-            
-            _log << BeeFishDate::getDateTime()
-                 << " "
-                 << path.toString(_auth);
-                 
-            if (value.size())
-            {
-                _log << "#"
-                     << value;
-            }
-            
-            _log << endl;
-        }
-    }
+    
 
 
 };

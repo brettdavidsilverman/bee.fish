@@ -101,11 +101,21 @@ public:
             {
                 assert(requestPath.endsWith("/"));
                 
-                _filePath =
-                    getFilePath(
-                        requestPath + 
-                        BString("index.html")
-                    );
+                try {
+                    _filePath =
+                        getFilePath(
+                            requestPath + 
+                            BString("x")
+                        );
+                }
+                catch (filesystem_error& err)
+                {
+                    _filePath =
+                        getFilePath(
+                            requestPath + 
+                            BString("index.html")
+                        );
+                }
             }
             catch(filesystem_error& err)
             {

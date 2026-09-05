@@ -85,7 +85,13 @@ using namespace BeeFishWeb;
             
             const BString& origin = _session->origin();
             const BString& host = _session->host();
-
+               
+            BString contentType;
+            if (request()->headers().contains("content-type"))
+                contentType = request()->headers()["content-type"];
+            else
+                contentType = "text/html; charset=utf-8";
+                    
             Authentication::ScopedDatabase database(authentication());
             
             JSONPath jsonPath;
@@ -107,39 +113,39 @@ using namespace BeeFishWeb;
             
             
             _contentLength = -1;
-            if ((method == "GET") && 
-                url.search().contains("index") &&
-                url.search()["index"].size())
+            if ((method == "GET"))
             {
-                // Fetch by index
-                _responseHeaders.replace(
-                    "content-type",
-                    "application/json; charset=utf-8"
-                );
-                _serve = App::SERVE_JSON;
-            }
-            else if (
-                method == "GET" && 
-                url.search().value().length()
-            )
-            {
-                _responseHeaders.replace(
-                    "content-type",
-                    "application/json; charset=utf-8"
-                );
+                if (
+                    url.search().contains("index") &&
+                    url.search()["index"].size())
+                {
+                    // Fetch by index
+                    _responseHeaders.replace(
+                        "content-type",
+                        "application/json; charset=utf-8"
+                    );
+                    _serve = App::SERVE_JSON;
+                }
+                else if (
+                    url.search().value().length()
+                )
+                {
+                    _responseHeaders.replace(
+                        "content-type",
+                        "application/json; charset=utf-8"
+                    );
             
-                _serve = App::SERVE_QUERY;
-                _status = 200;
+                    _serve = App::SERVE_QUERY;
+                    _status = 200;
 
-
-                return;
-            }
-            else if (method == "GET") {
+                    return;
+                }
+                
 
                 // Check for HTTP field
                 // This is a special case for serving
                 // HTTP content
-                if (jsonPath.contains("{HTTP}") &&
+                else if (jsonPath.contains("{HTTP}") &&
                     jsonPath["{HTTP}"].contains("content-type") &&
                     jsonPath["{HTTP}"]["content-type"].type() == Type::STRING)
                 {
@@ -174,7 +180,6 @@ using namespace BeeFishWeb;
 
                 }
                 else if (
-                    method == "GET" &&
                     !url.search().value().size() &&
                     jsonPath.type() == Type::UNDEFINED
                 )
@@ -191,7 +196,6 @@ using namespace BeeFishWeb;
                     );
                     _serve = App::SERVE_JSON;
                 }
-
                 
                 _status = 200;
                 return;
@@ -206,11 +210,6 @@ using namespace BeeFishWeb;
                 // Save the parent
                 JSONPath parent = jsonPath.parent();
                 
-                BString contentType;
-                if (request()->headers().contains("content-type"))
-                    contentType = request()->headers()["content-type"];
-                else
-                    contentType = "text/plain; charset=utf-8";
 
                 if (contentType.startsWith("application/json"))
                 {

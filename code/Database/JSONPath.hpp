@@ -698,8 +698,6 @@ public:
                 {
                     key = BString("\"") + key + BString("\"");
                 }
-//  else
-//     key = key.encodeURI();
 
             }
 
@@ -960,11 +958,9 @@ public:
 
             if (first && (key == "my" || key == userId))
             {
-                if (path.contains(userId) || method == "POST") {
-                    path = path[userId];
-                    continue;
-                }
-
+                path = path[userId];
+                first = false;
+                continue;
             }
 
             if ( database.users().contains(key) && key != userId)
@@ -1129,17 +1125,6 @@ public:
     {
         return (*this)[BString(key)];
     }
-
-    /*
-    friend ostream& operator << (ostream& out, const JSONPath& json)
-    {
-        JSONPath path(json);
-
-        path.write(out, 0);
-
-        return out;
-    }
-    */
     
     BString tabs(Index tabCount) const
     {
@@ -1299,14 +1284,16 @@ public:
 
         getObjectProperties().clear(propertyPath);
         getChildren().clear(position);
-        //--getChildren();
+    
     }
+    
+    
 
 private:
-    void addWords(const BString& word, bool wholeWord = true)
+    void addWords(const BString& word, bool isWholeWord = true)
     {
         BString partWord = "";
-        addWords(word, partWord, wholeWord, true, true);
+        addWords(word, partWord, isWholeWord, true, true);
     }
 
     void addWords(const BString& value, BString& partWord, bool isWholeWord = false, bool isFinalWord = false, bool useCallback = true)
@@ -1330,16 +1317,17 @@ private:
 
             JSONPath json = *this;
 
-while (!json.isRoot())
+            while (!json.isRoot() && 
+                   !json.parent().isRoot())
             {
                 ++wordPath[json.id()];
 
                 json = json.parent();
             }
 
-            if (useCallback && database()._onword)
+            if (useCallback && database()._onlog)
             {
-                database()._onword(*this, word);
+                database()._onlog(*this, word);
             }
 
         }
@@ -1400,7 +1388,8 @@ while (!json.isRoot())
 
                 JSONPath json = (*this);
 
-while  (!json.isRoot())
+                while  (!json.isRoot() &&
+                        !json.parent().isRoot())
                 {
 
                     if (wordPath.contains(json.id()))
@@ -1709,6 +1698,30 @@ JSONPath JSONDatabase::json() const
 JSONPath JSONDatabase::origin(const BString& origin) const
 {
     return json()[origin];
+}
+
+// Declared in JSONDatabase.hpp
+void JSONDatabase::log(
+    BeeFishAuthentication::Authentication& auth,
+    ostream& log,
+    JSONPath& path,
+    const BString& value
+)
+{
+    if (&log != &cnull)
+    {
+        log << BeeFishDate::getDateTime()
+            << " "
+            << path.toString(auth);
+
+        if (value.size())
+        {
+            log << "#"
+                << value;
+        }
+
+        log << endl;
+    }
 }
 
 PowerEncoding& operator << (PowerEncoding& output, const JSONPath& json)

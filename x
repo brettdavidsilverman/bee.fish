@@ -524,8 +524,8 @@ const getTextByURL =
         return url;
 }
 
-download.requestSubmit();
-
+//download.requestSubmit();
+window.onhashchange();
 
 
 </script>

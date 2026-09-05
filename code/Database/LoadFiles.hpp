@@ -101,16 +101,16 @@ void loadFile(
     const std::vector segments =
         relative.split('/');
         
-    auto onword =
+    auto onlog =
     [&auth](JSONPath& path, const BString& word)
     {
-        cout 
-            << path.toString(auth)
-            << "#"
-            << word 
-            << endl;
+        JSONDatabase::log(
+            auth,
+            clog,
+            path,
+            word
+        );
     };
-    
         
         
     for (const auto& segment : segments)
@@ -158,7 +158,7 @@ void loadFile(
 
     Index pageIndex = 0;
     
-    start.database()._onword = onword;
+    start.database()._onlog = onlog;
 
     File input(path.string(), true);
     

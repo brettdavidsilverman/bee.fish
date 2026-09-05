@@ -4,6 +4,11 @@
 #include "Database.hpp"
 #include "JSONIndex.hpp"
 
+namespace BeeFishAuthentication
+{
+    class Authentication;
+}
+
 namespace BeeFishDatabase
 {
 
@@ -21,12 +26,12 @@ namespace BeeFishDatabase
         Path _objects;
         Path _json;
         
-
     public:
+    
+        typedef std::function<void(JSONPath& path, const BString& word)> OnLog;
+        OnLog _onlog = nullptr;
         
-        typedef std::function<void(JSONPath& path, const BString& word)> OnWord;
-        OnWord _onword = nullptr;
-
+    
 
         JSONDatabase(
             const BString& filePath = "",
@@ -109,11 +114,15 @@ namespace BeeFishDatabase
         
         // defined in JSONPath
         JSONPath origin(const BString& origin) const;
-        
-        
-        
-        
-        
+
+        // defined in JSONPath
+        static void log(
+            BeeFishAuthentication::Authentication& auth,
+            ostream& log,
+            JSONPath& path,
+            const BString& value
+        );
+
     };
     
 }

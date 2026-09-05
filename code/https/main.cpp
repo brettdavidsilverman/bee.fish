@@ -60,7 +60,7 @@ int main(int argc, const char* argv[])
           << "Error file: "
               << errorFile
               << endl;
-
+/*
         if (hasArg(argc, argv, "-reset"))
         {
             cout << "Resetting locks..." << flush;
@@ -72,7 +72,7 @@ int main(int argc, const char* argv[])
             BeeFishId::Timestamp::Memory::reset();
             cout << "Reset" << endl;
         }
-
+*/
         unsigned int port = 443;
         int portArg;
         if ((portArg = hasArg(argc, argv, "-port")) >= 0)
