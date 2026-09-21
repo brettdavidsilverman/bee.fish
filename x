@@ -57,7 +57,7 @@
             </tr>
             <tr>
                 <td>
-                    <a href="#?deaths and (alcohol or heroin)">?deaths and (heroin or alcohol)</a>
+                    <a href="#?deaths and (heroin and not methadone)">?deaths and (heroin and not methadone)</a>
                 </td>
             </tr>
         </table>
@@ -76,6 +76,15 @@
             <table id="table">
             </table>
         </form>
+        
+        <br />
+        <a href="/client/logon/" id="logon">Logon/Logoff</a>
+        <br />
+        <a href="/client/">Javascript client library</a>
+        <br />
+        <a href="/code/">C++ server library</a>
+        <br />
+        <a href="https://github.com/brettdavidsilverman/bee.fish">Bee.Fish on Git Hub</a>
 
 
         
@@ -222,7 +231,7 @@ async (event) => {
         table.innerHTML = "";
         editor.innerHTML = "";
         
-        input.oninput();
+       // input.oninput();
 
         var url = new URL(
             input.value,
@@ -310,16 +319,24 @@ async (response) => {
 
     array.forEach(
         (item, key) => {
-            var url = 
-                new URL(item);
-
-            addSearchItem(url);
+            var url;
+            var contentType = null;
+            if (Array.isArray(item))
+            {
+                contentType = item[1];
+                url = new URL(item[0]);
+            }
+            else
+                url = new URL(item);
+                
+            addSearchItem(url, contentType);
         }
     );
 }
 
 const addSearchItem =
-(url) => {
+(url, contentType) => {
+
     var a =
         document.createElement("a");
     var row =
@@ -334,8 +351,19 @@ const addSearchItem =
     var text = getShortURL(url);
     if (url.searchParams.has("next"))
         text = "Next...";
-                    
-    a.href = "#" + getShortURL(url);
+        
+    if (contentType &&
+        contentType
+        .startsWith("image")
+    )
+    {
+        a.href = getShortURL(url);
+    }
+    else
+    {
+        a.href = "#" + getShortURL(url);
+    }
+    
     a.innerText = text;
 }
 
@@ -379,14 +407,20 @@ async (response) => {
     
 
     results.style.display = "none";
-            
+    
+    const contentType = 
+        response
+        .headers
+        .get('content-type');
+        
     var text = await response.text();
         
-    if (text != "undefined")
+    if (text != "undefined") {
         editor.innerText = text;
+    }
     else
         editor.innerText = "Not found";
-        
+    
     editor.style.display = "block";
 }
 
@@ -446,7 +480,7 @@ async () => {
         .location
         .hash;
         
-        
+
     // Remove #
     if (hash.length)
         hash = hash.substr(1);
@@ -531,7 +565,9 @@ const getTextByURL =
         return url;
 }
 
-//download.requestSubmit();
+a.innerText = document.location.origin;
+a.href = a.innerText;
+
 window.onhashchange();
 
 

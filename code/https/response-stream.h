@@ -228,10 +228,36 @@ public:
             while (it != matches.end() &&
                     (count < 10))
             {
+                
+                BString contentType;
+                
+                try {
+                    JSONPath path =
+                        JSONPath::fromString(
+                            app->authentication(),
+                            *database,
+                            *it +
+                                BString("/{HTTP}/content-type")
+                        );
+                    contentType = path.getString();
+                }
+                catch (JSONPath::PathNotFoundException& ex)
+                {
+                    contentType =
+                        "application/json; charset=utf-8";
+                }
 
-                *this << "   \""
+                *this << "    [" 
+                      << endl
+                      << "       \""
                       << it->escape()
-                      << "\"";
+                      << "\""
+                      << "," << endl
+                      << "       \""
+                      << contentType.escape()
+                      << "\""
+                      << endl
+                      << "    ]";
 
                 if (++it != matches.end() && count < 10)
                     *this << ",";
@@ -246,7 +272,7 @@ public:
 
             if (it != matches.end())
             {
-                *this << "   \""
+                *this << "    \""
                       << JSONPath(bookmark).toString(
                           app->authentication()
                       )

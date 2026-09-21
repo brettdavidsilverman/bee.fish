@@ -405,6 +405,24 @@ public:
         stream >> number;
         return number;
     }
+    
+    BString getString()
+    {
+        Path path = *this;
+        Iterable<Index> iterable(path[VALUE]);
+        BString value;
+        
+        for (const auto index : iterable)
+        {
+            value += 
+                path
+                [VALUE]
+                [index]
+                .getStringData();
+        }
+        
+        return value;
+    }
 
     void setString(const BString& value)
     {

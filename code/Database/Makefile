@@ -42,7 +42,7 @@ run:	$(OUTPUT)
 	$(OUTPUT) -input
 	
 run_debug:	debug
-	gdb --args $(OUTPUT) -test
+	gdb --args $(OUTPUT) -files
 	
 	
 trace:	$(OUTPUT)

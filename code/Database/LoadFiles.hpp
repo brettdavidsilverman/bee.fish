@@ -85,6 +85,7 @@ void loadFile(
     std::filesystem::path path
 )
 {
+
     const std::vector<BString> ignoreDirectories {
         ".git",
         "build"
@@ -133,28 +134,27 @@ void loadFile(
     
     cout << start.toString(auth) << endl;
     
+    if (std::filesystem::is_directory(path))
+        return;
+    
     BString extension = path.extension();
     if (!extension.length()) {
         extension = path.filename();
     }
     
-                   
-    
+                
     if (!_mimeTypes.count(
             extension
-        ) ||
-        !_mimeTypes[extension].index
+        )
     )
     {
-        if (_mimeTypes.count(extension))
-        {
-
-            start.setString(
-                _mimeTypes[extension].contentType
-            );
-        }
+        start.setString(
+            _mimeTypes[extension].contentType
+        );
         return;
     }
+    
+    bool index = _mimeTypes[extension].index;
 
     Index pageIndex = 0;
     
@@ -193,7 +193,7 @@ void loadFile(
         const BString page = buffer.substr(0, size);
 
         // this may throw with an range_error
-        content.setString(page, pageIndex++, true,  partWord);
+        content.setString(page, pageIndex++, index,  partWord);
         
     }
 
