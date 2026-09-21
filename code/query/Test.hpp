@@ -385,14 +385,17 @@ namespace BeeFishQuery {
         bool ok = true;
         BString query;
         JSONDatabase db;
-        JSONPath root = db.origin("https://test");
+        BeeFishAuthentication::Authentication
+            auth("https://test", db.filename());
+        auth.logon("boo");
+        JSONPath root = db.origin(auth, "https://test");
     
         auto testmatch =
         [&ok, root](const BString& query, const BString& expected = "") {
             
             if (!ok)
                 return false;
-                
+            
             Expression* expression =
                 new Expression(root);
                 
@@ -1098,7 +1101,7 @@ namespace BeeFishQuery {
             auth("https://test", database.filename());
         auth.logon("boo");
         
-        JSONPath root = database.origin("https://test")[json.filename()];
+        JSONPath root = database.origin(auth, "https://test")[json.filename()];
         JSONPathParser parser(auth, root);
         Path objects = database.objects()[root.id()];
         Path words = database.words();

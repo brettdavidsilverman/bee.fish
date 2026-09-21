@@ -68,7 +68,7 @@
         </form>
         
         <form id="upload" style="display:none" >
-            <textarea id="editor"></textarea>
+            <pre id="editor" contenteditable="true"></pre>
             <button type="submit" id="uploadButton">save</button>
         </form>
         
@@ -118,7 +118,7 @@ const downloadButton =
 const uploadButton =
     document
     .getElementById("uploadButton");
-
+    
 upload.onsubmit =
 async (event) => {
     
@@ -150,8 +150,13 @@ async (event) => {
         
         var contentType;
         try {
-            if (editor.value.trim() != "undefined")
-                JSON.parse(editor.value);
+        
+            if (editor.innerText.trim() 
+                != "undefined")
+            {
+                JSON.parse(editor.innerText);
+            }
+            
             contentType = 
                  "application/json; charset=utf-8";
             
@@ -170,7 +175,7 @@ async (event) => {
                     method: "POST",
                     credentials: "include",
                     signal: upload.controller.signal,
-                    body: editor.value,
+                    body: editor.innerText,
                     headers: {
                         "content-type": 
                         contentType
@@ -215,7 +220,7 @@ async (event) => {
         );
             
         table.innerHTML = "";
-        editor.value = "";
+        editor.innerHTML = "";
         
         input.oninput();
 
@@ -302,10 +307,9 @@ async (response) => {
         alert("No results");
         return;
     }
-                
+
     array.forEach(
         (item, key) => {
-                
             var url = 
                 new URL(item);
 
@@ -372,15 +376,18 @@ async (response) => {
 const downloadData =
 async (response) => {
     upload.style.display = "block";
-    editor.style.display = "block";
+    
+
     results.style.display = "none";
             
     var text = await response.text();
         
-    if (text != undefined)
-        editor.value = text;
+    if (text != "undefined")
+        editor.innerText = text;
     else
-        editor.value = "undefined";
+        editor.innerText = "Not found";
+        
+    editor.style.display = "block";
 }
 
 // Check fetch response errors

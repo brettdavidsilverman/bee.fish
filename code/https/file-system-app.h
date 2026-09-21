@@ -63,6 +63,9 @@ public:
             return;
 
         BString requestPath = request->path();
+        
+if (requestPath.startsWith("/my"))
+    return;
 
         // Get the file path from the request path
         try

@@ -132,8 +132,17 @@ private:
         default:
             throw std::logic_error("JSONPathParser::setVariable");
         }
-
-        JSONDatabase::log(_auth, _log, start, hash);
+        
+        JSONDatabase& db = 
+            start.database();
+            
+        if (db._onlog)
+        {   
+            db._onlog(
+                start, 
+                hash
+            );
+        }
 
 
     }

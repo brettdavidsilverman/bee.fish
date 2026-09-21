@@ -10,7 +10,7 @@ endif
 	
 $(OUTPUT):	$(DEPS)
 	@echo "Linking Web Server"
-	g++ main.cpp $(CFLAGS) $(OPTIMISATION) $(JSON_INDEX) -o $(OUTPUT) -lstdc++fs -lssl -lcrypto -lboost_system -lboost_thread -lcryptopp
+	g++ main.cpp $(CFLAGS) $(OPTIMISATION) $(JSON_INDEX) -o $(OUTPUT) -lstdc++fs -lssl -lboost_system -lboost_thread -lcryptopp -lcrypto
 	@if [ "$(PORT)" = "443" ]; then \
 		echo "Allowing port $(PORT)"; \
 		sudo setcap cap_net_bind_service=ep $(OUTPUT); \

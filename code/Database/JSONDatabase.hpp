@@ -113,7 +113,10 @@ namespace BeeFishDatabase
     
         
         // defined in JSONPath
-        JSONPath origin(const BString& origin) const;
+        JSONPath origin(
+            BeeFishAuthentication::Authentication& auth,
+            const BString& origin
+        );
 
         // defined in JSONPath
         static void log(

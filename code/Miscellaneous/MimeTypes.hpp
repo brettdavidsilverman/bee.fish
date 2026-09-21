@@ -180,6 +180,14 @@ namespace BeeFishMiscellaneous
             }
         },
         {
+            ".gitignore",
+            {
+                "text/plain; charset=utf-8",
+                _defaultCacheControl,
+                true
+            }
+        },
+        {
             ".wav",
             {
                 "audio/wav",

@@ -137,15 +137,6 @@ using namespace BeeFishTest;
             url.search().value() == "?key1=value1&key2=value2&key3"
         );
         
-cerr << "WEB_REQUEST TEST "
-     << endl;
-     
-std::map<BString, BString>& map = 
-     url.search().items();
-for (auto pair : map)
-{
-    cout << pair.first << ":" << pair.second << endl;
-}
 
         ok = ok && testResult(
             "Path search contains key 1",

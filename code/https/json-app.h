@@ -53,8 +53,12 @@ using namespace BeeFishWeb;
 
             const BString& method =
                 request()->method();
-            URL& url =
-                request()->url();
+            
+            const BString& origin = _session->origin();
+            const BString& host = _session->host();
+               
+            URL url =
+                URL(request()->url(), origin);
                 
             if (url.path() == "/" &&
                 url.search() == "")
@@ -83,9 +87,7 @@ using namespace BeeFishWeb;
                 
             }
             
-            const BString& origin = _session->origin();
-            const BString& host = _session->host();
-               
+            
             BString contentType;
             if (request()->headers().contains("content-type"))
                 contentType = request()->headers()["content-type"];
@@ -179,14 +181,17 @@ using namespace BeeFishWeb;
                     _serve = App::SERVE_HTTP;
 
                 }
-                else if (
+/*
+else if (
                     !url.search().value().size() &&
-                    jsonPath.type() == Type::UNDEFINED
+                    jsonPath.type() == Type::UNDEFINED &&
+                    
                 )
                 {
                     redirect("x");
                     return;
                 }
+*/
                 else if (url.path().length())
                 {
 

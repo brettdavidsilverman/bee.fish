@@ -110,9 +110,15 @@ public:
         }
         else if (app->serve() == App::SERVE_QUERY)
         {
+            const BString& origin = _session->origin();
+            const BString& host = _session->host();
+               
+            BeeFishWeb::URL url =
+                URL(app->request()->url(), origin);
+                
             BString search;
             BeeFishWeb::URL::Search& searchObject =
-                app->request()->searchObject();
+                url.search();
 
             if (searchObject.contains("q"))
             {
@@ -137,21 +143,54 @@ public:
             }
 
             BeeFishQuery::Expression
-            expression(bookmark, search);
+                expression(bookmark, search);
 
-            Index count = 0;
-
-
-            BeeFishQuery::AndPath path =
+            BeeFishQuery::PathBase* path =
                 expression
-                .getPath();
+                .getPath().copy();
+                
+            if (url.path() == "/")
+            {
+
+                BeeFishWeb::URL
+                    myURL(
+                        url.origin() +
+                        BString("/my")
+                    );
+                        
+                JSONPath myPath =
+                    JSONPath::fromString(
+                        app->authentication(),
+                        *database,
+                        myURL
+                    );
+                    
+                BeeFishQuery::Expression
+                    expression(myPath, search);
+                    
+                BeeFishQuery::AndPath path2 =
+                expression
+                   .getPath();
+                   
+                BeeFishQuery::PathBase*
+                   tmpPath = new BeeFishQuery::OrPath(
+                        *path,
+                        path2
+                    );
+                    
+                delete path;
+                
+                path = tmpPath;
+            }
 
             BeeFishQuery::Iterable
             matches(
                 app->authentication(),
                 *database,
-                path
+                *path
             );
+            
+            Index count = 0;
             
             if (getCount)
             {
@@ -221,6 +260,8 @@ public:
             }
 
             *this << "]";
+            
+            delete path;
 
             flush();
 

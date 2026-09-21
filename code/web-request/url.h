@@ -270,7 +270,6 @@ namespace BeeFishWeb {
             
             virtual bool contains(const BString& key) {
                 assert(_keyValues);
-//cerr << "CONTAINS KEY " << key << ":" << _keyValues << ":" << typeid(*_keyValues).name() << endl;
                 return _keyValues->count(key) > 0;
             }
             
@@ -376,7 +375,7 @@ namespace BeeFishWeb {
                 origin() +
                 path() +
                 search();
-                        
+                
             return string;
         }
         

@@ -238,6 +238,9 @@ public:
             {
                 path.setData(true);
                 JSONPath json = *this;
+            
+            
+                
                 while (!json.isUserRoot())
                 {
                     BString property;
@@ -247,7 +250,6 @@ public:
                     if (keyType == Type::STRING) {
                         BString partWord;
                         addWords(property, partWord, true, true, false);
-                       // addWords(property);
                     }
 
                 }
@@ -479,7 +481,6 @@ public:
 
         if (indexData && partChanged) 
         {
-
             addWords(value, partWord, false, false, true);
         }
 
@@ -640,26 +641,24 @@ public:
     
     bool isUserRoot(BString& userId)
     {
-
-        if (isRoot() )
-            return true;
-            
-        BString _userId;
-        JSONPath parent = 
-            JSONPath::parent(_userId);
-            
-        if (!parent.isRoot() &&
-            parent.parent().isRoot() &&
-            database()
-            .users()
-            .contains(_userId)
-        )
+                
+                
+        if (isRoot() ||
+            parent().isRoot())
         {
-            userId = _userId;
             return true;
         }
-        else
-            return parent.isRoot();
+        
+        if (!isRoot() &&
+            !parent().isRoot() &&
+            parent().parent().isRoot())
+        {
+            Type type = Type::STRING;
+            parent(userId, type);
+            return true;
+        }
+        
+        return false;
 
     }
 
@@ -679,6 +678,9 @@ public:
             if (!path.isRoot() &&
                 path.parent().isRoot())
             {
+                if (key == "public")
+                    continue;
+                    
                 if (key == userId)
                 {
                     key = "my";
@@ -689,6 +691,7 @@ public:
                 {
                     return "";
                 }
+
             }
 
 
@@ -735,18 +738,23 @@ public:
         Stack stack;
     
         BString userId;
+        Type type = Type::STRING;
     
         while (!path.isUserRoot(userId))
         {
             Stack child;
             
+            // next
             child << true;
             
-            Type type = Type::STRING;
+            // place holder for
+            // public/my
+            child << false;
+            
             BString key;
         
             path = path.parent(key, type);
-            
+
             child << type;
             
 
@@ -777,18 +785,32 @@ public:
             
         }
         
-        if (userId.size())
+    /*
+if (!path.isRoot() &&
+ !path.parent().isRoot() &&
+ path.parent().parent().isRoot())
+*/
         {
             Stack child;
             child << true;
-            child << Type::USER;
+            
+
+            path = path.parent(userId, type);
+
+            if (userId == "public")
+                child << true;
+            else
+                child << false;
+                    
+            child << Type::STRING;
+            
             child << userId;
             child.append(stack);
         
             stack = child;
-        }
         
-        stack << false;
+            stack << false;
+        }
         
         stack << index();
         
@@ -826,12 +848,29 @@ public:
         while (next)
         {
             ++count;
+            
+            bool order;
+            stack >> order;
 
             Type type;
             stack >> type;
         
+            if (count == 1)
+            {
+                BString value;
+                stack >> value;
 
-            if (type == Type::INTEGER)
+                if (value == "public")
+                {
+                    stack >> next;
+                    continue;
+                }
+                else if (value == auth.userId())
+                    string += "my";
+                else
+                    return "";
+            }
+            else if (type == Type::INTEGER)
             {
                 Index index;
                 stack >> index;
@@ -842,15 +881,6 @@ public:
                 BString value;
                 stack >> value;
                 string += value;
-            }
-            else if (type == Type::USER)
-            {
-                BString value;
-                stack >> value;
-                if (value == auth.userId())
-                    string += "my";
-                else
-                    return "";
             }
             
             string += "/";
@@ -940,7 +970,10 @@ public:
         }
         
         JSONPath originPath =
-            database.origin(origin);
+            database.json()
+            [
+                url.origin()
+            ];
 
         std::vector<BString> paths =
             url.paths();
@@ -956,19 +989,37 @@ public:
         {
             key = key.decodeURI();
 
-            if (first && (key == "my" || key == userId))
+            if (first)
             {
-                path = path[userId];
                 first = false;
-                continue;
+                if (key == "my")
+                {
+                    path = path[userId];
+    
+    
+                    continue;
+                }
+                else if (key == userId)
+                {
+                    path = path[userId];
+                    continue;
+                }
+                else if (database
+                         .users()
+                         .contains(key))
+                {
+                    success = false;
+                    break;
+                }
+                else
+                {
+                    path = path["public"];
+                }
+                
+                first = false;
+                    
             }
-
-            if ( database.users().contains(key) && key != userId)
-            {
-                success = false;
-                break;
-            }
-
+        
 
             if (key.isDigitsOnly()) {
                 Index index = atol(key.c_str());
@@ -1009,6 +1060,11 @@ public:
             throw PathNotFoundException(url);
         }
 
+        if (first)
+        {
+            path = path["public"];
+        }
+        
         return path;
     }
 
@@ -1317,6 +1373,7 @@ private:
 
             JSONPath json = *this;
 
+           
             while (!json.isRoot() && 
                    !json.parent().isRoot())
             {
@@ -1695,9 +1752,17 @@ JSONPath JSONDatabase::json() const
 }
 
 // Declared in JSONDatabase.hpp
-JSONPath JSONDatabase::origin(const BString& origin) const
+JSONPath JSONDatabase::origin(
+    BeeFishAuthentication::Authentication& auth,
+    const BString& origin
+)
 {
-    return json()[origin];
+    return JSONPath::fromString(
+        auth,
+        *this,
+        origin,
+        "POST"
+    );
 }
 
 // Declared in JSONDatabase.hpp

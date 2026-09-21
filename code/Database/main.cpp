@@ -19,43 +19,12 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-    /*
-    BeeFishId::Timestamp timestamp;
+/*
+    BeeFishWeb::URL url1("https://test");
+    BeeFishWeb::URL url2("https://test/");
     
-    cerr << timestamp << endl;
-    
-    auto worker =
-    [](std::string filename)
-    {
-        Database* dbs[100];
-        for (int i = 0; i < 100; ++i)
-        {
-            cerr << i << endl;
-            Database* db = new Database(filename);
-            dbs[i] = db;
-        }
-    
-        for (int i = 0; i < 100; ++i)
-        {
-             cerr << i << endl;
-             delete dbs[i];
-        }
-    };
-    
-    Database db;
-    
-    std::thread threads[] =
-    {
-        std::thread(worker, db.filename()),
-        std::thread(worker, db.filename())
-    };
-    
-    for (auto &thread : threads)
-    {
-        thread.join();
-    }
-    
-    cerr << "Ok" << endl;
+    cerr << url1 << endl;
+    cerr << url2 << endl;
     
     return 0;
 */
@@ -165,14 +134,7 @@ int main(int argc, const char* argv[])
     auth.logon("boo");
         
     JSONPath path =
-            database.origin(url.origin());
-            
-    vector<BString> paths = 
-        url.paths();
-    
-    for (auto p : paths) {
-        path = path[p];
-    }
+            database.origin(auth, url.origin());
             
     clog << "Using origin " << url << endl;
     

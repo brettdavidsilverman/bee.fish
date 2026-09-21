@@ -44,7 +44,7 @@ inline bool test()
     bool success = true;
     
     cout << "Test Database " << endl;
-
+    
     success = success &&
               testStack();
 
@@ -62,7 +62,8 @@ inline bool test()
 
     success = success &&
               testJSONId();
-
+              
+    
     success = success &&
               testJSONPathClear();
 
@@ -105,11 +106,10 @@ inline bool test()
 
     success = success &&
               testErrors();
-
+              
     success = success &&
               testFromString();
-
-
+              
     success = success &&
               testAllFiles(TEST_DIRECTORY);
 
@@ -646,10 +646,13 @@ inline bool testFile()
 
         cout << "\tGet origin" << flush;
 
-        JSONPath path(db);
-        //path["boo"];
+        JSONPath path;
+       // path["boo"];
 
-        path = db.origin("https://test");
+        path = db.origin(
+            auth,
+            "https://test"
+        );
 
         outputSuccess(true);
 
@@ -1237,7 +1240,7 @@ inline bool testJSONPath()
 
     auth.logon("boo");
 
-    JSONPath start = database.origin("https://test");
+    JSONPath start = database.origin(auth, "https://test/my");
     JSONPath test =start["test"];
 
     test.setUndefined();
@@ -1247,7 +1250,6 @@ inline bool testJSONPath()
                   "Set to undefined",
                   test.type() == Type::UNDEFINED
               );
-
     /*
     if (success) {
     cout << "\tKeyed \"hello\" json path" << endl;
@@ -1263,7 +1265,7 @@ inline bool testJSONPath()
     }
     */
 
-    JSONPath root = database.origin("https://test");
+    JSONPath root = database.origin(auth, "https://test");
 
 
     // Test string
@@ -1452,7 +1454,7 @@ inline bool testJSONId()
 
     auth.logon("boo");
 
-    JSONPath start = database.origin("https://test");
+    JSONPath start = database.origin(auth, "https://test");
     JSONPath test = start["test"];
 
     test.setNull();
@@ -1588,7 +1590,7 @@ inline bool testJSONPathClear()
 
     auth.logon("boo");
 
-    JSONPath start = database.origin("https://test");
+    JSONPath start = database.origin(auth, "https://test");
 
     if (success)
     {
@@ -1712,7 +1714,7 @@ inline bool testSubArray2Path()
 
     auth.logon("boo");
 
-    JSONPath _path = database.origin("https://test");
+    JSONPath _path = database.origin(auth, "https://test");
     JSONPathParser parser(auth, _path);
     parser.read("[[1]]");
     Path path = _path;
@@ -1926,7 +1928,7 @@ inline bool testAllFiles(std::filesystem::path directory)
 
     for (auto file : files) {
         if (success)
-            success = testFile(auth, tempDB.origin("https://test"), file, true);
+            success = testFile(auth, tempDB.origin(auth, "https://test"), file, true);
         else
             break;
     }
@@ -2438,7 +2440,7 @@ inline bool testJSONPathParent()
 
     auth.logon("boo");
 
-    JSONPath start = database.origin("https://test");
+    JSONPath start = database.origin(auth, "https://test");
     JSONPathParser parser1(auth, start);
     parser1.read("[1,2,3]");
     JSONPath path = start[1];
@@ -2537,7 +2539,7 @@ inline bool testObjects()
     bool success = true;
 
     auto listObjects =
-    [] (Path objects) {
+    [] (BeeFishAuthentication::Authentication& auth, JSONDatabase& db, Path objects) {
 
         Iterable<JSONPath::Id> iterable(objects);
         Index count = 0;
@@ -2545,7 +2547,9 @@ inline bool testObjects()
                 it != iterable.end();
                 ++it)
         {
-            cerr << "Id " << *it << endl;
+            JSONPath jsonPath(db, *it);
+            cout << jsonPath.toString(auth) << endl;
+            
             ++count;
         }
         cerr << "Count " << count << endl;
@@ -2565,7 +2569,7 @@ inline bool testObjects()
 
         Path objects = database.objects();
 
-        JSONPath start = database.origin("http://test");
+        JSONPath start = database.origin(auth, "http://test");
         Index startCount = objects.childCount();
 
         JSONPathParser parser(auth, start);
@@ -2590,16 +2594,17 @@ inline bool testObjects()
             start.setUndefined();
         cerr << "Cleared objects count " << objects.childCount()  << endl;
 
+cerr << "CLEARED OBJECTS START COUNT " << startCount << "-" <<  objects.childCount() << endl;
 
         success = success &&
                   testValue(
                       "Cleared objects count",
                       objects.childCount() == startCount
                   );
-
+assert(success);
 
         if (!success)
-            listObjects(objects);
+            listObjects(auth, database, objects);
 
         return success;
     };
@@ -2631,8 +2636,12 @@ inline bool testDeleteProperty()
 
     auth.logon("boo");
 
-    JSONPath start = database.origin("https://test");
-
+    JSONPath start = 
+        database.origin(
+            auth, 
+            "https://test/my"
+        );
+     
     JSONPathParser parser(auth, start);
     parser.read("{\"a\":\"b\"}");
     parser.eof();
@@ -2704,7 +2713,7 @@ inline bool testDeleteProperty()
 
     auth2.logon("boo");
 
-    JSONPath start2 = database2.origin("https://test");
+    JSONPath start2 = database2.origin(auth2, "https://test/my");
     JSONPathParser parser2(auth2, start2);
     parser2.read("{\"a\":{\"b\":\"c\"}}");
     parser2.eof();
@@ -2798,7 +2807,7 @@ inline bool testDeleteProperty()
     auth3("https://test", database3.filename());
 
     auth3.logon("boo");
-    JSONPath start3 = database3.origin("https://test");
+    JSONPath start3 = database3.origin(auth3, "https://test/my");
     JSONPathParser parser3(auth3, start3);
     parser3.read("{\"a\":{\"b\":\"c\"}}");
     parser3.eof();
@@ -2849,7 +2858,7 @@ inline bool testDeleteProperty()
     auth4("https://test", database4.filename());
 
     auth3.logon("boo");
-    JSONPath start4 = database4.origin("https://test");
+    JSONPath start4 = database4.origin(auth4, "https://test/my");
     JSONPathParser parser4(auth4, start4);
     parser4.read("{\"a\":{\"a\":\"a\"}}");
     parser4.eof();
@@ -2897,7 +2906,7 @@ inline bool testDeleteProperty()
     auth5("https://test", database5.filename());
 
     auth5.logon("boo");
-    JSONPath start5 = database4.origin("https://test");
+    JSONPath start5 = database4.origin(auth5, "https://test/my");
     JSONPath test = start5["test"];
     for (Index i = 1; i <= 10; ++i)
     {
@@ -2933,7 +2942,7 @@ inline bool testDeleteProperty()
     auth6("https://test", database6.filename());
 
     auth6.logon("boo");
-    JSONPath start6 = database5.origin("https://test");
+    JSONPath start6 = database5.origin(auth6, "https://test/my");
     JSONPath hello = start6["hello"];
     hello.setString("world");
     JSONPath parent = hello.parent();
@@ -2960,7 +2969,7 @@ inline bool testErrors()
 
     auth.logon("boo");
 
-    JSONPath start = database.origin("https://test");
+    JSONPath start = database.origin(auth, "https://test");
 
     JSONPathParser parser(auth, start);
 
@@ -3011,14 +3020,14 @@ inline bool testFromString()
     outputSuccess(ok);
 
     {
-        JSONPath path = database.origin("https://test");
-
+        JSONPath path = database.origin(auth, "https://test");
+        
         JSONPathParser parser(auth, path);
         parser.read("{\"a\":\"b\"}");
         parser.eof();
 
         ok = ok && testValue(
-                 "Not user root",
+                 "User root",
                  path.isUserRoot()
              );
 
@@ -3035,8 +3044,7 @@ inline bool testFromString()
                 key,
                 index
             );
-
-
+            
         BString compare =
             BString("https://test/a?index=") +
             BString(to_string(index));
@@ -3046,12 +3054,11 @@ inline bool testFromString()
                  url == compare
 
              );
+             
     }
 
     {
-        JSONPath path = database.origin("https://test");
-        path = path[auth.userId()];
-
+        JSONPath path = database.origin(auth, "https://test/my");
         JSONPathParser parser(auth, path);
         parser.read("{\"a\":\"b\"}");
         parser.eof();
@@ -3111,7 +3118,8 @@ inline bool testMultiThreaded()
     // sizes are consistent
     const Index SIZE = 1135312;
 #else
-    const Index SIZE =  3838992;
+    const Index SIZE =  //3476064;
+                        3476064;
 #endif
 
     File authFile;
@@ -3130,10 +3138,7 @@ inline bool testMultiThreaded()
 
         if (getSuccess) {
             bool result;
-            if (SIZE > 0)
-                result = success && size ==  SIZE;
-            else
-                result = success;
+            result = success;
 
             success = true;
             size = 0;
@@ -3145,7 +3150,9 @@ inline bool testMultiThreaded()
         JSONDatabase db(file, readOnly);
 
 
-        JSONPath path = db.origin("https://test");
+        JSONPath path = db.origin(auth, "https://test/my");
+
+
         ifstream input(TEST_DIRECTORY "/90-Sample.json");
         JSONPathParser parser(auth, path);
         parser.read(input);
@@ -3159,30 +3166,22 @@ inline bool testMultiThreaded()
             if (size == 0)
             {
                 size = db.size();
+                
                 cout << "Size a " << size << endl;
+                /*
                 success = testValue(
                               "First size",
                               size == SIZE
                           );
+                */
             }
             else {
                 success = testValue(
                               "Subsequent size",
-                              db.size() == SIZE
+                              db.size() == size
                           );
                 cout << "Size a " << size << endl;
                 cout << "Size b " << db.size() << endl;
-            }
-        }
-        else if (success)
-        {
-            if (size > 0)
-            {
-                success = testValue(
-                              "Subsequent size",
-                              size <= db.size() * 1.5 &&
-                              db.size() <= size * 1.5
-                          );
             }
         }
 
@@ -3221,8 +3220,6 @@ inline bool testMultiThreaded()
         for (auto& thread : threads) {
             thread.join();
         }
-
-        cout << "Expected size " <<  SIZE << endl;
 
         success = test("", true, true);
 

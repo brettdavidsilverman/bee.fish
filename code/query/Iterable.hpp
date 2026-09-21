@@ -75,13 +75,14 @@ public:
                 {
                     parent = child;
                 }
-                else if (isOurs(_auth, parent))
+                else
                 {
                     child = parent;
                     ++count;
                 }
             }
-            else if (isOurs(_auth, parent)) {
+            else
+            {
                 child = parent;
                 ++count;
             }
@@ -91,36 +92,6 @@ public:
         }
 
         return count;
-    }
-
-    static bool isOurs(
-        BeeFishAuthentication::Authentication& auth,
-        Stack& key
-    )
-    {
-        key.reset();
-        if (!key.peekBit())
-            return true;
-
-        key.readBit();
-
-        bool next;
-        key >> next;
-
-        if (!next)
-            return true;
-
-        Type type;
-        key >> type;
-
-        if (type != Type::USER)
-            return true;
-
-        BString userId;
-        key >> userId;
-
-        return userId ==
-               auth.userId();
     }
 
     static bool startsWith(
@@ -150,15 +121,22 @@ public:
         while (next)
         {
 
+            
+            bool order;
+            parent >> order;
+            
+            if (!child.contains(order))
+                return false;
+                    
+            child >> order;
+
             Type type;
             parent >> type;
 
             if (!child.contains(type))
                 return false;
-
+                
             child >> type;
-
-
 
             if (type == Type::INTEGER)
             {
@@ -327,24 +305,14 @@ public:
                     {
                         parent = child;
                     }
-                    else if (
-                        Iterable::isOurs(
-                            _container->_auth,
-                            parent
-                        )
-                    )
+                    else
                     {
                         child = parent;
                         _value = toString(child);
                         break;
                     }
                 }
-                else if (
-                    Iterable::isOurs(
-                        _container->_auth,
-                        parent
-                    )
-                )
+                else
                 {
                     child = parent;
                     _value = toString(child);
@@ -401,12 +369,7 @@ public:
             return _index;
         }
 
-        /*
-        JSONPath jsonPath()
-        {
-            return _jsonPath;
-        }
-        */
+
         BString toKey()
         {
             return _iterator->toKey();
