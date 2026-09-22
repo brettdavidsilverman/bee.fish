@@ -131,6 +131,9 @@ const uploadButton =
     document
     .getElementById("uploadButton");
     
+var controller = new AbortController();
+var signal = controller.signal;
+var running = false;
 upload.onsubmit =
 async (event) => {
     
@@ -218,8 +221,17 @@ download.onsubmit =
 async (event) => {
 
     try {
+
         event.preventDefault();
         
+        if (running) {
+            controller.abort();
+            controller = new AbortController();
+            signal = controller.signal;
+        }
+     
+        running = true;
+
         downloadButton.disabled = true;
         
         window.setTimeout(
@@ -230,26 +242,14 @@ async (event) => {
             },
             200
         );
-            
+        
         table.innerHTML = "";
         editor.innerHTML = "";
         
-       // input.oninput();
-
         var url = new URL(
             input.value,
             document.location.origin
         );
-        
-        if (download.controller) {
-            download.controller.abort("User cancelled");
-        }
-        
-        download.controller = 
-           new AbortController();
-           
-        const {signal} =
-            download.controller;
         
         var response = await
             fetch(
@@ -258,12 +258,11 @@ async (event) => {
                     mode: "cors",
                     method: "GET",
                     credentials: "include",
-                    signal: signal
+                    signal
                 }
             );
             
-        download.controller = null;
-            
+        
         upload.style.display = "block";
         results.style.display = "none";
             
@@ -293,16 +292,15 @@ async (event) => {
     }
     catch(error)
     {
-        alert(error);
+        if (error.name !== 'AbortError')
+            alert(error);
     }
     finally {
         
-        download.controller = null;
-
         downloadButton
             .disabled 
             = false;
-            
+        running = false;
     }
 }
 
