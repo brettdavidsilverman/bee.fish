@@ -92,6 +92,9 @@
 var console = new Console();
 console.log("Hello World");
 
+document.title =
+    window.location.hostname;
+
 const a =
     document
     .getElementById("a");
