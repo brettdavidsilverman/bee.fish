@@ -292,6 +292,7 @@ public:
                 IdIterator iterator = *_iterator;
 
                 ++iterator;
+
                 if (!iterator._isEnd)
                 {
 
@@ -307,6 +308,7 @@ public:
                     }
                     else
                     {
+    
                         child = parent;
                         _value = toString(child);
                         break;

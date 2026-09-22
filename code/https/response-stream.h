@@ -224,11 +224,16 @@ public:
                 it = matches.begin();
 
             *this << "[" << endl;
-
+            
             while (it != matches.end() &&
                     (count < 10))
             {
-                
+                if (*it == origin)
+                {
+                    ++it;
+                    continue;
+                }
+                    
                 BString contentType;
                 
                 try {

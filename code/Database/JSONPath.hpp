@@ -886,7 +886,11 @@ public:
                 else if (value == auth.userId())
                     string += "my";
                 else
-                    return "";
+                {
+                    stack >> next;
+                    break;
+                   // string += value;
+                }
             }
             else if (type == Type::INTEGER)
             {
