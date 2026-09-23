@@ -134,6 +134,7 @@ const uploadButton =
 var controller = new AbortController();
 var signal = controller.signal;
 var running = false;
+
 upload.onsubmit =
 async (event) => {
     

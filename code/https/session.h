@@ -278,7 +278,7 @@ public:
                   << ipAddress()          << ' '
                   << _request->method()   << ' '
                   << host()
-                  << _request->url() << ' '
+                  << _request->url().toString().decodeURI() << ' '
                   << std::endl;
 
             _response = new Response(

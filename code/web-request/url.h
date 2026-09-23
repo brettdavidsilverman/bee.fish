@@ -249,14 +249,14 @@ namespace BeeFishWeb {
             {
                 assert(_keyValues);
             }
-            
+            /*
             virtual void success()
             override
             {
                 _value = _value.decodeURI();
                 Capture::success();
             }
-            
+            */
             virtual operator const BString& () const
             {
                 return _value;

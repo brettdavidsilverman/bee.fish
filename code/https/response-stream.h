@@ -132,6 +132,7 @@ public:
                     app
                     ->request()
                     ->search()
+                    .decodeURI()
                     .substr(1);
             }
 
@@ -277,6 +278,15 @@ public:
 
             if (it != matches.end())
             {
+stringstream stream;
+stream
+    << "?q="
+    << search.encodeURI()
+    << "&next="
+    << to_string(it.index())
+    << endl;
+cerr << "NEXT " << stream.str() << endl;
+
                 *this << "    \""
                       << JSONPath(bookmark).toString(
                           app->authentication()
