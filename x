@@ -567,8 +567,9 @@ const getTextByURL =
         return url;
 }
 
-a.innerText = document.location.origin;
-a.href = a.innerText;
+a.innerText = "my";
+    
+a.href = "my";
 
 window.onhashchange();
 
