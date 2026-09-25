@@ -265,12 +265,12 @@ BeeFishWeb::URL url =
                       << endl
                       << "    ]";
 
-                if (++it != matches.end() && count < 10)
+                if (++it != matches.end() && 
+                    count < 10 &&
+                    *it != host)
                     *this << ",";
 
                 *this << endl;
-
-
 
                 ++count;
 
