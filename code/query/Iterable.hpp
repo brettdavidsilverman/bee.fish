@@ -122,7 +122,7 @@ public:
         {
 
             
-            bool order;
+            Index order;
             parent >> order;
             
             if (!child.contains(order))

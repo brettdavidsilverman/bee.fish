@@ -768,6 +768,7 @@ public:
             // place holder for
             // root/public/my
             child << 0;
+
             
             BString key;
         
@@ -803,7 +804,9 @@ public:
             
         }
 
+        if (!path.isRoot())
         {
+            
             Stack child;
             child << true;
             
@@ -815,22 +818,24 @@ public:
                 else // private
                     child << 0;
             }
-            
+            /*
             path = path.parent(
                 userId, 
                 type
             );
             
-            
+            */
             child << Type::STRING;
             
             child << userId;
             child.append(stack);
         
             stack = child;
-        
-            stack << false;
+
+            
         }
+        
+        stack << false;
         
         stack << index();
         
