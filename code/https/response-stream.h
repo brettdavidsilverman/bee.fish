@@ -268,9 +268,12 @@ public:
                     if (++it != matches.end() && 
                         count < 10)
                     {
-                        *this << ",";
+                        if (*it != url.origin())
+                        {
+                            *this << ",";
+                        }
                     }
-
+                    
                     *this << endl;
 
                     ++count;
