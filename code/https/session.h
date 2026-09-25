@@ -517,13 +517,11 @@ public:
             host = "https://" +
                    (*requestHeaders)["host"];
         }
-/*
         else if (requestHeaders &&
                  requestHeaders->contains("origin"))
         {
             host = (*requestHeaders)["origin"];
         }
-*/
         else {
             host = server()->origin();
         }

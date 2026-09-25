@@ -158,7 +158,7 @@ public:
 
                 BeeFishWeb::URL
                     myURL(
-                        url.origin() +
+                        host +
                         BString("/my")
                     );
                         
