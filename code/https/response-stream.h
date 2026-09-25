@@ -232,31 +232,28 @@ public:
             while (it != matches.end() &&
                     (count < 10))
             {
-                if (*it == host)
+                if (*it != url.origin())
                 {
-                    ++it;
-                    continue;
-                }
                     
-                BString contentType;
+                    BString contentType;
                 
-                try {
-                    JSONPath path =
-                        JSONPath::fromString(
-                            app->authentication(),
-                            *database,
-                            *it +
-                                BString("/{HTTP}/content-type")
-                        );
-                    contentType = path.getString();
-                }
-                catch (JSONPath::PathNotFoundException& ex)
-                {
-                    contentType =
-                        "application/json; charset=utf-8";
-                }
+                    try {
+                        JSONPath path =
+                            JSONPath::fromString(
+                                app->authentication(),
+                                *database,
+                                *it +
+                                    BString("/{HTTP}/content-type")
+                            );
+                        contentType = path.getString();
+                    }
+                    catch (JSONPath::PathNotFoundException& ex)
+                    {
+                        contentType =
+                            "application/json; charset=utf-8";
+                    }
 
-                *this << "    [" 
+                    *this << "    [" 
                       << endl
                       << "       \""
                       << it->escape()
@@ -268,27 +265,23 @@ public:
                       << endl
                       << "    ]";
 
-                if (++it != matches.end() && 
-                    count < 10 &&
-                    *it != host)
-                    *this << ",";
+                    if (++it != matches.end() && 
+                        count < 10)
+                    {
+                        *this << ",";
+                    }
 
-                *this << endl;
+                    *this << endl;
 
-                ++count;
+                    ++count;
 
+                }
+                else
+                    ++it;
             }
 
             if (it != matches.end())
             {
-stringstream stream;
-stream
-    << "?q="
-    << search.encodeURI()
-    << "&next="
-    << to_string(it.index())
-    << endl;
-cerr << "NEXT " << stream.str() << endl;
 
                 *this << "    \""
                       << JSONPath(bookmark).toString(
