@@ -766,8 +766,8 @@ public:
             child << true;
             
             // place holder for
-            // public/my
-            child << false;
+            // root/public/my
+            child << 0;
             
             BString key;
         
@@ -802,24 +802,26 @@ public:
             stack = child;
             
         }
-        
-    /*
-if (!path.isRoot() &&
- !path.parent().isRoot() &&
- path.parent().parent().isRoot())
-*/
+
         {
             Stack child;
             child << true;
             
-
-            path = path.parent(userId, type);
-
-            if (userId == "public")
-                child << true;
-            else
-                child << false;
-                    
+            if (path.parent().isRoot())
+                child << 1;
+            else {
+                if (userId == "public")
+                    child << 2;
+                else // private
+                    child << 0;
+            }
+            
+            path = path.parent(
+                userId, 
+                type
+            );
+            
+            
             child << Type::STRING;
             
             child << userId;
@@ -867,7 +869,7 @@ public:
         {
             ++count;
             
-            bool order;
+            Index order;
             stack >> order;
 
             Type type;

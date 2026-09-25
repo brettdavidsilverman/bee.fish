@@ -232,28 +232,26 @@ public:
             while (it != matches.end() &&
                     (count < 10))
             {
-                if (*it != url.origin())
-                {
-                    
-                    BString contentType;
+                BString contentType;
                 
-                    try {
-                        JSONPath path =
-                            JSONPath::fromString(
-                                app->authentication(),
-                                *database,
-                                *it +
-                                    BString("/{HTTP}/content-type")
-                            );
-                        contentType = path.getString();
-                    }
-                    catch (JSONPath::PathNotFoundException& ex)
-                    {
-                        contentType =
-                            "application/json; charset=utf-8";
-                    }
+                try {
+                    JSONPath path =
+                        JSONPath::fromString(
+                            app->authentication(),
+                            *database,
+                            *it +
+                                  
+                                  BString("/{HTTP}/content-type")
+                        );
+                    contentType = path.getString();
+                }
+                catch (JSONPath::PathNotFoundException& ex)
+                {
+                    contentType =
+                        "application/json; charset=utf-8";
+                }
 
-                    *this << "    [" 
+                *this << "    [" 
                       << endl
                       << "       \""
                       << it->escape()
@@ -265,22 +263,16 @@ public:
                       << endl
                       << "    ]";
 
-                    if (++it != matches.end() && 
-                        count < 10)
-                    {
-                        if (*it != url.origin())
-                        {
-                            *this << ",";
-                        }
-                    }
-                    
-                    *this << endl;
-
-                    ++count;
-
+                if (++it != matches.end() && 
+                    count < 10)
+                {
+                    *this << ",";
                 }
-                else
-                    ++it;
+                    
+                *this << endl;
+
+                ++count;
+
             }
 
             if (it != matches.end())
