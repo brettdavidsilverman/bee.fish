@@ -161,7 +161,7 @@ public:
                         host +
                         BString("/my")
                     );
-                        
+                    
                 JSONPath myPath =
                     JSONPath::fromString(
                         app->authentication(),
