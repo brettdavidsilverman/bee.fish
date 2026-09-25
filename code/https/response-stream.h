@@ -113,8 +113,11 @@ public:
             const BString& origin = _session->origin();
             const BString& host = _session->host();
                
-BeeFishWeb::URL url =
-    URL(app->request()->url(), host);
+            BeeFishWeb::URL url =
+                URL(
+                    app->request()->url(),
+                    host
+                );
                 
             BString search;
             BeeFishWeb::URL::Search& searchObject =
