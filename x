@@ -247,11 +247,17 @@ async (event) => {
         table.innerHTML = "";
         editor.innerHTML = "";
         
-        var url = new URL(
-            input.value,
-            document.location.origin
-        );
-        
+        var url;
+        if (input.value.trim() == "")
+            url = new URL(
+                document.location.origin
+            );
+        else
+            url = new URL(
+                input.value,
+                document.location.origin
+            );
+
         var response = await
             fetch(
                 url,

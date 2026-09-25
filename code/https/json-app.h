@@ -56,9 +56,12 @@ using namespace BeeFishWeb;
             
             const BString& origin = _session->origin();
             const BString& host = _session->host();
-               
+                
             URL url =
-                URL(request()->url(), origin);
+                URL(
+                    request()->url(),
+                    host
+                );
                 
             if (url.path() == "/" &&
                 url.search() == "")
