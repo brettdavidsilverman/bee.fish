@@ -162,6 +162,11 @@ public:
                         BString("/my")
                     );
                     
+cerr << "HOST " << host << endl;
+cerr << "ORIGIN " << origin << endl;
+cerr << "URL " << url << endl;
+cerr << "MYURL " << myURL << endl;
+                    
                 JSONPath myPath =
                     JSONPath::fromString(
                         app->authentication(),
