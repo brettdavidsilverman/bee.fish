@@ -113,8 +113,8 @@ public:
             const BString& origin = _session->origin();
             const BString& host = _session->host();
                
-            BeeFishWeb::URL url =
-                URL(app->request()->url(), origin);
+BeeFishWeb::URL url =
+    URL(app->request()->url(), host);
                 
             BString search;
             BeeFishWeb::URL::Search& searchObject =
@@ -229,7 +229,7 @@ public:
             while (it != matches.end() &&
                     (count < 10))
             {
-                if (*it == origin)
+                if (*it == host)
                 {
                     ++it;
                     continue;
