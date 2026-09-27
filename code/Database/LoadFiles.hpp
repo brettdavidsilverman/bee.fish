@@ -39,7 +39,8 @@ void loadFiles(
 */
             
     const std::vector<BString> ignoreFiles {
-        "deaths.json"
+        "deaths.json",
+        "deaths-converted.json"
     };
 
     // Create the iterator explicitly

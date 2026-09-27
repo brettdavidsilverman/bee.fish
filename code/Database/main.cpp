@@ -204,12 +204,6 @@ int main(int argc, const char* argv[])
     
     bool loadDeaths =
         (hasArg(argc, argv, "-deaths") != -1);
-
-    if (loadDeaths)
-    {
-        clog << "Input deaths.json" << endl;
-    }
-
     
     if (loadDeaths)
     {
@@ -217,9 +211,9 @@ int main(int argc, const char* argv[])
             path["deaths"];
             
         JSONPathParser parser(auth, inputPath, cout);
-        clog << "Loading deaths.json" << endl;
+        clog << "Loading deaths-converted.json" << endl;
         
-        ifstream file(WWW_ROOT_DIRECTORY "/deaths.json");
+        ifstream file(WWW_ROOT_DIRECTORY "/deaths-converted.json");
         
         parser.read(file);
     }
