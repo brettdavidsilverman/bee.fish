@@ -1,0 +1,71 @@
+<html>
+    <head>
+        <script src="/head.js"></script>
+    </head>
+    <body>
+        <h1>Deaths conversion</h1>
+        <h2>
+            <a href="deaths.json" downloada="deaths.json">Input</a>
+        </h2>
+        <h2>
+            <a id="output" download="deaths-converted.json">Ouput</a>
+        </h2>
+        <script type="module">
+
+alert("Start");
+
+var response = await fetch(
+    "deaths.json",
+    {
+        mode: "cors",
+        method: "GET",
+        credentials: "include",
+    }
+);
+
+var json = await response.json();
+
+var convertAddress = 
+(address) => {
+    if (address == null)
+        return;
+    else if (address[0] == null)
+        return;
+    else
+        address[0] =
+            JSON.parse(address[0]);
+}
+
+for (var index in json.data)
+{
+    var death = json.data[index];
+    
+    convertAddress(death[46]);
+        
+    convertAddress(death[47]);
+        
+    convertAddress(death[48]);
+
+}
+
+// 1. Convert the object to a JSON string
+const jsonString = 
+    JSON.stringify(json, null, "   ");
+/*
+const bytes = new TextEncoder().encode(jsonString);
+const binString = String.fromCodePoint(...bytes);
+const base64 = btoa(binString);
+*/
+const dataUrl = 
+    `data:application/json,${encodeURIComponent(jsonString)}`;
+
+
+var output = document.getElementById("output");
+output.href = dataUrl;
+
+alert("Done");
+
+
+        </script>
+    </body>
+</html>
