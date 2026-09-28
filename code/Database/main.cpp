@@ -236,7 +236,8 @@ int main(int argc, const char* argv[])
         BeeFishDatabase::loadFiles(
             auth,
             path,
-            std::filesystem::path(loadDirectory.str())
+            std::filesystem::path(loadDirectory.str()),
+            cout
         );
     }
     

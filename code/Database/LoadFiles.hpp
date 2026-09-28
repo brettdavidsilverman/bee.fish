@@ -13,13 +13,15 @@ void loadFile(
     BeeFishAuthentication::Authentication& auth,
     JSONPath start,
     std::filesystem::path directory,
-    std::filesystem::path path
+    std::filesystem::path path,
+    ostream& log
 );
 
 void loadFiles(
     BeeFishAuthentication::Authentication& auth,
     JSONPath start,
-    std::filesystem::path directory
+    std::filesystem::path directory,
+    ostream& log = cout
 )
 {
 
@@ -72,7 +74,8 @@ void loadFiles(
             auth,
             start,
             directory,
-            path
+            path,
+            log
         );
         
         ++it;
@@ -83,7 +86,8 @@ void loadFile(
     BeeFishAuthentication::Authentication& auth,
     JSONPath start,
     std::filesystem::path directory,
-    std::filesystem::path path
+    std::filesystem::path path,
+    ostream& log
 )
 {
 
@@ -104,11 +108,11 @@ void loadFile(
         relative.split('/');
         
     auto onlog =
-    [&auth](JSONPath& path, const BString& word)
+    [&auth, &log](JSONPath& path, const BString& word)
     {
         JSONDatabase::log(
             auth,
-            clog,
+            log,
             path,
             word
         );
@@ -133,7 +137,7 @@ void loadFile(
             
     }
     
-    cout << start.toString(auth) << endl;
+    log << start.toString(auth) << endl;
     
     if (std::filesystem::is_directory(path))
         return;
