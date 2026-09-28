@@ -816,7 +816,7 @@ inline bool testPath()
 
         data.setData("");
 
-        success = !data.hasData();
+        success = data.hasData();
 
         if (success)
         {
@@ -1431,6 +1431,29 @@ inline bool testJSONPath()
         success = (value == "1234");
         BeeFishMisc::outputSuccess(success);
     }
+    
+    if (success)
+    {
+        cout << "\tEmpty string" << endl;
+        JSONPath path = root["here"];
+        JSONPathParser parser(auth, path);
+        parser.read("{\"a\":\"\"}");
+        parser.eof();
+        
+        success = success && 
+        testValue(
+            "\tEmpty string has data",
+            path["a"].hasData()
+        );
+        
+        success = success && 
+        testValue(
+            "\tEmpty string type",
+            path["a"].type() == Type::STRING
+        );
+        
+    }
+    
 
     outputSuccess(success);
 
@@ -3057,6 +3080,7 @@ inline bool testFromString()
              
     }
 
+    if (ok)
     {
         JSONPath path = database.origin(auth, "https://test/my");
         JSONPathParser parser(auth, path);
@@ -3102,6 +3126,7 @@ inline bool testFromString()
                  url == compare
              );
     }
+    
 
     outputSuccess(ok);
 

@@ -126,7 +126,8 @@ namespace BeeFishDatabase {
 
             Index dataSize = data.size();
             write(&dataSize, sizeof(Index));
-            write(data.data(), dataSize);
+            if (dataSize)
+                write(data.data(), dataSize);
 
             return dataIndex;
         }
@@ -216,7 +217,8 @@ namespace BeeFishDatabase {
 
             read(&size, sizeof(Index));
             BString buffer(size, '\0');
-            read(buffer.data(), size);
+            if (size)
+                read(buffer.data(), size);
 
             
             return buffer;
@@ -227,16 +229,15 @@ namespace BeeFishDatabase {
     
             Branch branch = getBranch(index);
             
-            if (branch._dataIndex == 0)
-                return false;
-
-
+            return (branch._dataIndex != 0);
+/*
             seek(branch._dataIndex);
             Index size;
 
             read(&size, sizeof(Index));
             
             return size > 0;
+*/
         }
         
         inline void setData(Index dataIndex, const BString& source)
@@ -245,7 +246,8 @@ namespace BeeFishDatabase {
             seek(dataIndex);
             Index size = source.size();
             write(&size, sizeof(Index));
-            write(source.data(), size);
+            if (size > 0)
+                write(source.data(), size);
             
             
         }

@@ -318,6 +318,7 @@ protected:
         }
         else if (JSONPath::type() != type)
         {
+
             Id id = JSONPath::id();
 
             clear();
@@ -327,7 +328,6 @@ protected:
 
             addObject();
         }
-
 
     }
 
@@ -453,8 +453,15 @@ public:
         //Path::ScopedLock lock(*this);
         
         Path path = *this;
-        setType(Type::STRING);
-
+        
+        if (pageIndex == 0) {
+            setType(Type::STRING);
+        }
+        else {
+            assert(hasData());
+            assert(type() == Type::STRING);
+        }
+        
         bool partChanged = false;
         Index max = 0;
         if (!path[VALUE].isDeadEnd())
@@ -511,10 +518,9 @@ public:
         BString& partWord
     )
     {
-       // Path::ScopedLock lock(*this);
-        
+        setType(Type::STRING);
         Path path = *this;
-
+        
         addWords("", partWord, false, true, true);
 
         path = path[VALUE];

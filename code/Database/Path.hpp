@@ -529,17 +529,11 @@ public:
         BString current =
             _database->getData(branch._dataIndex);
 
-        if (value.size() == 0) {
-            if (current.size() > 0) {
+        if (branch._dataIndex) {
+            if (current.size() != value.size()) {
                 deleteData();
+                branch._dataIndex = 0;
             }
-            return true;
-        }
-
-        if (branch._dataIndex && current.size() < value.size())
-        {
-            deleteData();
-            branch._dataIndex = 0;
         }
 
         if (branch._dataIndex == 0)
