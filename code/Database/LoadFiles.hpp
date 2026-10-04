@@ -168,9 +168,11 @@ void loadFile(
 
     
     JSONPath http = start["{HTTP}"];
-    
+    BString contentType =
+        _mimeTypes[extension].contentType;
+        
     http["content-type"].setString(
-        _mimeTypes[extension].contentType
+        contentType
     );
     
     File input(path.string(), true);
@@ -188,16 +190,31 @@ void loadFile(
     BString partWord;
     
     PagedStream pagedStream(
-        [&content, &pageIndex, &partWord]
+        [&content, &contentType, &pageIndex, &partWord]
         (const BString& encoded)
         {
-            content.setString(
-                encoded, 
-                pageIndex++,
-                false,
-                partWord
-                
-            );
+            if (pageIndex == 0)
+            {
+                BString header = 
+                    BString("data:") + 
+                    contentType +
+                    BString(";base64,") +
+                    encoded;
+                                    
+                content.setString(
+                    header,
+                    pageIndex++, 
+                    false, 
+                    partWord);
+            }
+            else {
+                content.setString(
+                    encoded, 
+                    pageIndex++,
+                    false,
+                    partWord
+                );
+            }
         }
     );
                  
