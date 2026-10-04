@@ -28,31 +28,39 @@ using namespace BeeFishWeb;
         virtual void handleResponse()
         override
         {
-/*
-            URL& url = request()->url();
 
-            redirect(
-                BString("/x#") + 
-                    url.path().encodeURI()
-            );
+            //URL& url = request()->url();
+            const BString& method = request()->method();
             
-            return;
-*/
             _responseHeaders.replace(
                 "content-type",
                 "application/json; charset=utf-8"
             );
             
-            _content = "\"" +
-                session()->host() +
-                request()->url().toString().escape() +
-                " Not found" +
-                "\"";
+            if (method == "GET")
+            {
+            
+                _content = "\"" +
+                    session()->host() +
+                    request()->url().toString().escape() +
+                    " Not found" +
+                    "\"";
+                _statusText = "Not found";
+            }
+            else if (method == "POST")
+            {
+                _content = "\"" +
+                    session()->host() +
+                    request()->url().toString().escape() +
+                    " Not writable" +
+                    "\"";
+                _statusText = "Not writable";
+            }
                 
             _serve = App::SERVE_CONTENT;
             
             _status = 404;
-            _statusText = "Not found";
+            
             
         }
         

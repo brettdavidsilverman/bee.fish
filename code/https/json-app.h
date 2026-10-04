@@ -210,6 +210,16 @@ else if (
             }
             else if (method == "POST")
             {
+                if (!url.toString().startsWith(
+                       url.origin() +
+                       BString("/my")
+                    )
+                )
+                {
+                    // Only /my posts allowed
+                    return;
+                }
+                
                 _responseHeaders.replace(
                     "content-type",
                     "application/json; charset=utf-8"
@@ -316,8 +326,9 @@ else if (
                         }
                     );
                     
-                    if (!parseWebRequest(parser)) {
-content.endString(pageIndex, !base64EncodeData, partWord);
+                    if (!parseWebRequest(parser))
+                    {
+                        content.endString(pageIndex, !base64EncodeData, partWord);
                         throw std::runtime_error("Invalid input post to json-app.h");
                     }
 

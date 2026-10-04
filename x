@@ -460,7 +460,8 @@ async function checkResponse(response) {
     }
     else if (response.status == 404)
     {
-        editor.innerText = "Not found";
+        editor.innerText = response.statusText;
+        //"Not found";
         return false;
     }
     // Not ok
