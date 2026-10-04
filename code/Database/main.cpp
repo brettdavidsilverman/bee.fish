@@ -134,7 +134,7 @@ int main(int argc, const char* argv[])
     auth.logon("boo");
         
     JSONPath path =
-            database.origin(auth, url.origin());
+            database.origin(auth, url);
             
     clog << "Using origin " << url << endl;
     

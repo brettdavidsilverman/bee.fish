@@ -28,6 +28,13 @@
     z-index: 1;
 }
 
+#editor {
+    border: 1px solid #767676;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #000000;
+}
+
         </style>
 
     </head>
@@ -67,15 +74,16 @@
             <button type="submit" id="downloadButton">fetch</button>
         </form>
         
-        <form id="upload" style="display:none" >
+        <form id="results" style="display:none">
+            <table id="table">
+            </table>
+        </form>
+        
+        <form id="upload">
             <pre id="editor" contenteditable="true"></pre>
             <button type="submit" id="uploadButton">save</button>
         </form>
         
-        <form id="results">
-            <table id="table">
-            </table>
-        </form>
         
         <br />
         <a href="/client/logon/" id="logon">Logon/Logoff</a>
@@ -145,6 +153,14 @@ async (event) => {
         
         event.preventDefault();
         
+        var url = new URL(
+            input.value,
+            document.location.origin
+        );
+        
+        if (url.search.length)
+            return;
+            
         if (upload.controller)
             upload.controller.abort("User cancelled");
             
@@ -152,11 +168,6 @@ async (event) => {
             new AbortController();
             
         const {signal} = upload.controller;
-        
-        var url = new URL(
-            input.value,
-            document.location.origin
-        );
         
         // Remove search from url
         url = new URL(
@@ -264,10 +275,8 @@ async (event) => {
             );
             
         
-        upload.style.display = "block";
         results.style.display = "none";
-            
-            
+    
         // This checks for login
         // or error
         if (!await checkResponse(response))
@@ -277,7 +286,7 @@ async (event) => {
         // of urls
         if (url.search.length)
         {
-            upload.style.display = "none";
+    
             results.style.display = "block";
     
             if (url.search.endsWith("$"))
@@ -287,7 +296,7 @@ async (event) => {
         }
         else
         {
-            await downloadData(response);
+            await downloadData(url, response);
         }
         
     }
@@ -301,6 +310,7 @@ async (event) => {
         downloadButton
             .disabled 
             = false;
+            
         running = false;
     }
 }
@@ -351,6 +361,7 @@ const addSearchItem =
     td.append(a);
                     
     var text = getShortURL(url);
+
     if (url.searchParams.has("next"))
         text = "Next...";
         
@@ -367,6 +378,7 @@ const addSearchItem =
     }
     
     a.innerText = text;
+    
 }
 
 const downloadCountResults =
@@ -404,26 +416,31 @@ async (response) => {
 }
 
 const downloadData =
-async (response) => {
-    upload.style.display = "block";
-    
-
-    results.style.display = "none";
+async (url, response) => {
     
     const contentType = 
         response
         .headers
         .get('content-type');
         
-    var text = await response.text();
+    if (contentType.startsWith("text") ||
+        contentType.startsWith("application/json"))
+    {
+        var text = await response.text();
         
-    if (text != "undefined") {
-        editor.innerText = text;
+        if (text != "undefined") {
+            editor.innerText = text;
+        }
+        else
+            editor.innerText = "Not found";
+        
     }
     else
-        editor.innerText = "Not found";
+    {
+        addSearchItem(url, contentType);
+        results.style.display = "block";
+    }
     
-    editor.style.display = "block";
 }
 
 // Check fetch response errors
@@ -439,6 +456,11 @@ async function checkResponse(response) {
     {
         var json = await response.json();
         redirect(json);
+        return false;
+    }
+    else if (response.status == 404)
+    {
+        editor.innerText = "Not found";
         return false;
     }
     // Not ok

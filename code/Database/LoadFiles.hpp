@@ -30,16 +30,18 @@ void loadFiles(
             << directory
             << endl;
 /*
+    cerr << "File art-small.jpg" << endl;
     loadFile(
             auth,
             start,
             directory,
-            "/home/brettdavidsilverman/bee.fish/dev.bee.fish/art-small.jpg"
+            "/home/brettdavidsilverman/bee.fish/dev.bee.fish/art-small.jpg",
+            cout
         );
-        
+    cerr << "Done" << endl;
     return;
+
 */
-            
     const std::vector<BString> ignoreFiles {
         "deaths.json",
         "deaths-converted.json"
@@ -137,7 +139,6 @@ void loadFile(
             
     }
     
-    log << start.toString(auth) << endl;
     
     if (std::filesystem::is_directory(path))
         return;
@@ -160,18 +161,21 @@ void loadFile(
     }
     
     bool index = _mimeTypes[extension].index;
-
+    bool binary = !index;
+    
     Index pageIndex = 0;
     
     start.database()._onlog = onlog;
 
-    File input(path.string(), true);
+    
     
     JSONPath http = start["{HTTP}"];
     
     http["content-type"].setString(
         _mimeTypes[extension].contentType
     );
+    
+    File input(path.string(), true);
                     
     http["content-length"].setInteger(input.size());
      
@@ -183,8 +187,26 @@ void loadFile(
     Index fileSize = input.size();
     Index size = 0;
     Index total = 0;
-    
     BString partWord;
+    
+    PagedStream pagedStream(
+        [&content, &index, &pageIndex, &partWord]
+        (const BString& encoded)
+        {
+            content.setString(
+                encoded, 
+                pageIndex++,
+                index,
+                partWord
+                
+            );
+        }
+    );
+                 
+    BeeFishMisc::Base64EncodeStream
+         base64(pagedStream);
+                        
+    
     while (total < fileSize)
     {
         if (total + pageSize > fileSize)
@@ -196,17 +218,26 @@ void loadFile(
         total += size;
         
         const BString page = buffer.substr(0, size);
-
-        // this may throw with an range_error
-        content.setString(page, pageIndex++, index,  partWord);
+        
+        if (!binary)
+        {
+            // this may throw with an range_error
+            content.setString(page, pageIndex++, index, partWord);
+        }
+        else
+        {
+            base64 << page;
+        }
         
     }
+    
+    if (binary)
+        base64.flush();
 
-
-    content.endString(pageIndex, true, partWord);
+    content.endString(pageIndex, index, partWord);
     input.close();
     
-    
+    log << start.toString(auth) << endl;
 }
 
 }

@@ -424,14 +424,14 @@ public:
         return value;
     }
 
-    void setString(const BString& value)
+    void setString(const BString& value, Index pageIndex = 0, bool index = true)
     {
 
         BString partWord;
         setString(
             value,
-            0,
-            true,
+            pageIndex,
+            index,
             partWord
         );
 
