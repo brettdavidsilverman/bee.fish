@@ -64,6 +64,11 @@
             </tr>
             <tr>
                 <td>
+                    <a href="#?deaths and (heroin or methadone)">?deaths and (heroin or methadone)</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <a href="#?deaths and (heroin and not methadone)">?deaths and (heroin and not methadone)</a>
                 </td>
             </tr>
