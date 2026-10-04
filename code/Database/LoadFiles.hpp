@@ -40,8 +40,8 @@ void loadFiles(
         );
     cerr << "Done" << endl;
     return;
-
 */
+
     const std::vector<BString> ignoreFiles {
         "deaths.json",
         "deaths-converted.json"
@@ -161,13 +161,11 @@ void loadFile(
     }
     
     bool index = _mimeTypes[extension].index;
-    bool binary = !index;
     
     Index pageIndex = 0;
     
     start.database()._onlog = onlog;
 
-    
     
     JSONPath http = start["{HTTP}"];
     
@@ -190,13 +188,13 @@ void loadFile(
     BString partWord;
     
     PagedStream pagedStream(
-        [&content, &index, &pageIndex, &partWord]
+        [&content, &pageIndex, &partWord]
         (const BString& encoded)
         {
             content.setString(
                 encoded, 
                 pageIndex++,
-                index,
+                false,
                 partWord
                 
             );
@@ -219,7 +217,7 @@ void loadFile(
         
         const BString page = buffer.substr(0, size);
         
-        if (!binary)
+        if (index)
         {
             // this may throw with an range_error
             content.setString(page, pageIndex++, index, partWord);
@@ -231,9 +229,11 @@ void loadFile(
         
     }
     
-    if (binary)
+    if (!index) {
         base64.flush();
-
+        pagedStream.flush();
+    }
+    
     content.endString(pageIndex, index, partWord);
     input.close();
     
