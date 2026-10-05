@@ -481,7 +481,7 @@ namespace BeeFishQuery {
         
         testmatch("word1 and and word2", "(word1 and word2)");
         testmatch("word1 and or word2", "(word1 or word2)");
-        
+        testmatch("(deaths and (heroin and not methadone)) or art", "(((deaths and ((heroin and not methadone)))) or art)");
         testmatch("word1$", "word1");
         
         if (ok)
@@ -1294,6 +1294,13 @@ namespace BeeFishQuery {
         );
         
         ok = ok && test("z and b and h or c", 
+            {
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2/2"
+            }
+        );
+        
+        ok = ok && test("not a or c", 
             {
                 "https://test/45-Object.json/a/1/2",
                 "https://test/45-Object.json/a/2/2"
