@@ -370,9 +370,12 @@ const addSearchItem =
     if (url.searchParams.has("next"))
         text = "Next...";
         
-    if (contentType &&
-        contentType
-        .startsWith("image")
+    if (contentType && (
+            contentType
+            .startsWith("image")
+        ) || 
+            contentType
+            .startsWith("audio")
     )
     {
         a.href = getShortURL(url);
