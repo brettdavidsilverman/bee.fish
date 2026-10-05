@@ -1266,6 +1266,20 @@ inline bool testJSONPath()
     */
 
     JSONPath root = database.origin(auth, "https://test");
+    
+    success = success && testValue(
+        "Id is index",
+        root.index() ==
+            JSONPath::getIndexFromId(root.id())
+    );
+    
+    JSONPath root2 = database.origin(auth, "https://test/my");
+    
+    success = success && testValue(
+        "My Id is index",
+        root2.index() ==
+            JSONPath::getIndexFromId(root2.id())
+    );
 
 
     // Test string

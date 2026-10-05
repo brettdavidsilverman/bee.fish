@@ -354,9 +354,16 @@ public:
 
         JSONPath jsonPath(IdIterator& iterator)
         {
-            Path path = _container->_database->objects()[*iterator];
-
-            Index index = path.getData<Index>();
+            Index index = 
+                JSONPath::getIndexFromId(
+                    *iterator
+                );
+                
+            Path path = 
+                _container
+                ->_database
+                ->objects()
+                [index];
 
             return JSONPath(
                        *_container->_database,

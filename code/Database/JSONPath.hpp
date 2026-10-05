@@ -62,10 +62,71 @@ public:
         Path(
             database,
             database.objects()
-            [id].getData<Index>()
+                [JSONPath::getIndexFromId(id)]
         )
     {
 
+    }
+    
+    static Index getIndexFromId(const Id& id)
+    {
+        Stack stack = id;
+        
+        stack.readBit();
+        
+        Index count = 0;
+        
+        bool next;
+        stack >> next;
+        
+        while (next)
+        {
+            ++count;
+            
+            Index order;
+            stack >> order;
+
+            Type type;
+            stack >> type;
+        
+            if (count == 1)
+            {
+                BString value;
+                stack >> value;
+            }
+            else if (type == Type::INTEGER)
+            {
+                Index index;
+                stack >> index;
+            }
+            else if (type == Type::STRING)
+            {
+                BString value;
+                stack >> value;
+            }
+            
+            stack >> next;
+    
+        }
+        
+        Index index;
+        
+        stack >> index;
+        
+        stack.readBit();
+        
+        assert(stack.count() == 0);
+        
+        
+        return index;
+        
+
+    }
+    
+#else
+    static Index getIndexFromId(const Id& id)
+    {
+        return id;
     }
 #endif
 
@@ -273,11 +334,10 @@ protected:
         JSONPath json = *this;
         while (!json.isRoot())
         {
-            objects[json.id()][id];
+            objects[json.index()][id];
             json = json.parent();
         }
 
-        objects[id].setData<Index>(index());
     }
 
     void removeObject()
@@ -293,12 +353,12 @@ protected:
         // Remove this child from its parents
         while (!json.isRoot() )
         {
-            objects[json.id()].clear(id);
+            objects[json.index()].clear(id);
             json = json.parent();
         }
 
         // Remove this child
-        objects.clear(id);
+        objects.clear(index());
     }
 
     void setType(Type type)
@@ -1463,7 +1523,7 @@ private:
     void removeWords(const BString& value, BString& partRemoveWords, bool wholeWord, bool isFinalPart)
     {
         Path words = database().words();
-        Path objects = database().objects();
+        //Path objects = database().objects();
 
         std::vector<BString> tokens =
             value.tokenise(

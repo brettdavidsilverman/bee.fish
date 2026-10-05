@@ -581,7 +581,7 @@ public:
         Expression(
             path.database(),
             path.database().words(),
-            path.database().objects()[path.id()]
+            path.database().objects()[path.index()]
         )
     {
     }

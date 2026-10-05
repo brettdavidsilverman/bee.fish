@@ -1103,7 +1103,7 @@ namespace BeeFishQuery {
         
         JSONPath root = database.origin(auth, "https://test")[json.filename()];
         JSONPathParser parser(auth, root);
-        Path objects = database.objects()[root.id()];
+        Path objects = database.objects()[root.index()];
         Path words = database.words();
             
         ifstream input(json);
