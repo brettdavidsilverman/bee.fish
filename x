@@ -373,9 +373,10 @@ const addSearchItem =
     if (contentType && (
             contentType
             .startsWith("image")
-        ) || 
+        || 
             contentType
             .startsWith("audio")
+        )
     )
     {
         a.href = getShortURL(url);

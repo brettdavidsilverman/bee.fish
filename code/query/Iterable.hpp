@@ -299,10 +299,10 @@ public:
                     child = *iterator;
 
                     if (Iterable::startsWith(
-                                parent,
-                                child
-                            )
-                       )
+                            parent,
+                            child
+                        )
+                    )
                     {
                         parent = child;
                     }

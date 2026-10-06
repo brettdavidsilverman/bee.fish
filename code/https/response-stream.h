@@ -204,6 +204,7 @@ public:
                     );
                 
                 flush();
+                delete path;
                 return;
             }
 
@@ -221,6 +222,7 @@ public:
                           << "Invalid query parameters"
                           << "\"";
                     flush();
+                    delete path;
                     return;
                 }
             }

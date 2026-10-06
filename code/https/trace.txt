@@ -1,0 +1,14 @@
+==12229== Memcheck, a memory error detector
+==12229== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==12229== Using Valgrind-3.24.0 and LibVEX; rerun with -h for copyright info
+==12229== Command: ../../build/https -port 8000 -test
+==12229== Parent PID: 12228
+==12229== 
+==12229== 
+==12229== HEAP SUMMARY:
+==12229==     in use at exit: 0 bytes in 0 blocks
+==12229==   total heap usage: 243,438 allocs, 243,438 frees, 38,709,085 bytes allocated
+==12229== 
+==12229== All heap blocks were freed -- no leaks are possible
+==12229== 
+==12229== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
