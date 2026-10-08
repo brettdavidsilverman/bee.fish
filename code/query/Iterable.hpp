@@ -48,9 +48,7 @@ public:
     Index count()
     {
         Index count = 0;
-        Stack child;
-        
-        
+
         IdIterable iterable(*_path);
         IdIterator it(iterable);
 
@@ -65,25 +63,20 @@ public:
             if (!iterator._isEnd)
             {
 
-                child = *iterator;
+                Stack child = *iterator;
 
-                if (startsWith(
+                if (!startsWith(
                             parent,
                             child
                         )
                    )
                 {
-                    parent = child;
-                }
-                else
-                {
-                    child = parent;
                     ++count;
                 }
+                
             }
             else
             {
-                child = parent;
                 ++count;
             }
             
@@ -282,7 +275,7 @@ public:
         void setValue()
         {
             _value.clear();
-            Stack child;
+            
 
             while (!_iterator->_isEnd) {
 
@@ -296,28 +289,21 @@ public:
                 if (!iterator._isEnd)
                 {
 
-                    child = *iterator;
+                    Stack child = *iterator;
 
-                    if (Iterable::startsWith(
+                    if (!Iterable::startsWith(
                             parent,
                             child
                         )
                     )
                     {
-                        parent = child;
-                    }
-                    else
-                    {
-    
-                        child = parent;
-                        _value = toString(child);
+                        _value = toString(parent);
                         break;
                     }
                 }
                 else
                 {
-                    child = parent;
-                    _value = toString(child);
+                    _value = toString(parent);
                     break;
                 }
 
