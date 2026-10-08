@@ -81,7 +81,14 @@ namespace BeeFishMiscellaneous
                 true
             }
         },
-        
+        {
+            ".mk",
+            {
+                "text/plain; charset=utf-8",
+                _defaultCacheControl,
+                true
+            }
+        },
         {
             ".css",
             {

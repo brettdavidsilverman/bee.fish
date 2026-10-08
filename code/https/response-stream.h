@@ -210,7 +210,8 @@ public:
 
             BeeFishQuery::Iterable::Iterator it;
 
-            if (searchObject.contains("next")) {
+            if (searchObject.contains("next") &&
+                searchObject["next"].size()) {
                 try
                 {
                     it =

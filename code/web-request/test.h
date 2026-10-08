@@ -220,6 +220,7 @@ using namespace BeeFishTest;
             cout << "http://test.bee.fish:8000/path" << endl;
             
             const URL url = "http://test.bee.fish:8000/path";
+
             ok = ok && testResult(
                 "URL",
                 url == "http://test.bee.fish:8000/path"
@@ -249,7 +250,7 @@ using namespace BeeFishTest;
             cout << "test.bee.fish:8000" << endl;
             
             const URL url = "test.bee.fish:8000";
-            
+
             ok = ok && testResult(
                 "URL domain",
                 url.domain() == "test.bee.fish"
@@ -380,6 +381,23 @@ using namespace BeeFishTest;
                 
             );
 
+        }
+        
+        if (ok) {
+            cout << "test.bee.fish:8000" << endl;
+            
+            const URL url = "test.bee.fish:8000";
+
+            ok = ok && testResult(
+                "URL domain",
+                url.domain() == "test.bee.fish"
+            );
+            
+            ok = ok && testResult(
+                "URL protocol",
+                url.protocol() == "https"
+            );
+            
         }
         
         return ok;

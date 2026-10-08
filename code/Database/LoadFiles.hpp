@@ -154,9 +154,6 @@ void loadFile(
         )
     )
     {
-        start.setString(
-            _mimeTypes[extension].contentType
-        );
         return;
     }
     

@@ -109,12 +109,15 @@ int main(int argc, const char* argv[])
     
     int originArg =
         hasArg(argc, argv, "-origin");
-    BString origin = ORIGIN;
+    BString base = ORIGIN;
+
 #ifdef DEBUG
     {
-        origin += ":8000";
+        base += ":8000";
     }
 #endif
+
+    BString origin = "";
 
     if (originArg != -1 && 
         argc > (originArg + 1) &&
@@ -124,19 +127,20 @@ int main(int argc, const char* argv[])
         origin = argv[originArg + 1];
     }
     
+    BeeFishWeb::URL url(origin, base);
     
-    
-    BeeFishWeb::URL url(origin);
     
     BeeFishAuthentication::Authentication
         auth(url.origin(), database.filename());
 
-    auth.logon("boo");
+    auth.logon("Database");
         
     JSONPath path =
             database.origin(auth, url);
             
-    clog << "Using origin " << url << endl;
+    clog << "Using origin "
+         << url
+         << endl;
     
     bool propertiesArg =
         (hasArg(argc, argv, "-properties") != -1);
