@@ -1712,8 +1712,15 @@ public:
                 JSONPath value =
                     (*this)[*iterator];
 
-                value.write(auth, out, tabCount + 1);
-
+                if (value.type() == Type::UNDEFINED)
+                {
+                    out << "null";
+                }
+                else
+                {
+                    value.write(auth, out, tabCount + 1);
+                }
+                
                 if (++iterator != end())
                     out << ",\n";
 
