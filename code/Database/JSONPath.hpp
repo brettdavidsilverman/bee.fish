@@ -1459,29 +1459,30 @@ private:
                 isFinalWord,
                 isWholeWord
             );
+            
+        JSONPath json = *this;
+        
+        while (!json.isRoot() && 
+                !json.parent().isRoot())
 
-        for (auto word : tokens)
         {
-
-            Path wordPath = words[word];
-            ++wordPath;
-
-            JSONPath json = *this;
-
            
-            while (!json.isRoot() && 
-                   !json.parent().isRoot())
+            for (auto word : tokens)
             {
+                Path wordPath = words[word];
+                ++wordPath;
+            
                 ++wordPath[json.id()];
-
-                json = json.parent();
+              
+                if (useCallback && database()._onlog)
+                {
+                    database()._onlog(*this, word);
+                }
+                
             }
-
-            if (useCallback && database()._onlog)
-            {
-                database()._onlog(*this, word);
-            }
-
+            
+            json = json.parent();
+            
         }
     }
 
