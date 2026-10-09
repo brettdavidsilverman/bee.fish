@@ -1473,17 +1473,13 @@ private:
                 ++wordPath;
             
                 ++wordPath[json.id()];
-              
-                if (useCallback && database()._onlog)
-                {
-                    database()._onlog(*this, word);
-                }
                 
             }
             
             json = json.parent();
             
         }
+        
     }
 
     void removeWords() {
@@ -1872,24 +1868,30 @@ JSONPath JSONDatabase::origin(
 void JSONDatabase::log(
     BeeFishAuthentication::Authentication& auth,
     ostream& log,
-    JSONPath& path,
-    const BString& value
+    const BString& path
 )
 {
     if (&log != &cnull)
     {
         log << BeeFishDate::getDateTime()
             << " "
-            << path.toString(auth);
-
-        if (value.size())
-        {
-            log << "#"
-                << value;
-        }
-
-        log << endl;
+            << path
+            << endl;
     }
+}
+
+// Declared in JSONDatabase.hpp
+void JSONDatabase::log(
+    BeeFishAuthentication::Authentication& auth,
+    ostream& log,
+    JSONPath& path
+)
+{
+    JSONDatabase::log(
+        auth,
+        log,
+        path.toString(auth)
+    );
 }
 
 PowerEncoding& operator << (PowerEncoding& output, const JSONPath& json)

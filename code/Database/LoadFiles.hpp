@@ -115,8 +115,7 @@ void loadFile(
         JSONDatabase::log(
             auth,
             log,
-            path,
-            word
+            path.toString(auth) + BString("#") + word
         );
     };
         

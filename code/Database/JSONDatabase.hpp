@@ -122,8 +122,14 @@ namespace BeeFishDatabase
         static void log(
             BeeFishAuthentication::Authentication& auth,
             ostream& log,
-            JSONPath& path,
-            const BString& value
+            JSONPath& path
+        );
+        
+        // defined in JSONPath
+        static void log(
+            BeeFishAuthentication::Authentication& auth,
+            ostream& log,
+            const BString& path
         );
 
     };

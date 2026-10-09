@@ -42,18 +42,6 @@ public:
         _start(path),
         _log(log)
     {
-        JSONDatabase& db = 
-            _start.database();
-        db._onlog =
-        [&auth, &log](JSONPath& path, const BString& word)
-        {
-            JSONDatabase::log(
-                auth,
-                log,
-                path,
-                word
-            );
-        };
     }
 
     JSONPathParser(Authentication& auth, JSONPath path, ostream& log = cnull) :
@@ -62,18 +50,6 @@ public:
         _start(path),
         _log(log)
     {
-        JSONDatabase& db = 
-            _start.database();
-        db._onlog =
-        [&auth, &log](JSONPath& path, const BString& word)
-        {
-            JSONDatabase::log(
-                auth,
-                log,
-                path,
-                word
-            );
-        };
     }
 
     virtual ~JSONPathParser()
@@ -92,13 +68,10 @@ public:
     }
 
 private:
-
-
+    
 
     virtual void setVariable(JSONPath start, const Type type, const BString& value)
     {
-        BString hash = value;
-
 
         switch (type)
         {
@@ -109,7 +82,6 @@ private:
             return;
         case Type::NULL_:
             start.setNull();
-            hash = "null";
             break;
         case Type::BOOLEAN:
             start.setBoolean(value);
@@ -133,16 +105,11 @@ private:
             throw std::logic_error("JSONPathParser::setVariable");
         }
         
-        JSONDatabase& db = 
-            start.database();
-            
-        if (db._onlog)
-        {   
-            db._onlog(
-                start, 
-                hash
-            );
-        }
+        JSONDatabase::log(
+            _auth,
+            _log,
+            start
+        );
 
 
     }
