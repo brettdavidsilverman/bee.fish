@@ -232,6 +232,9 @@ private:
 
             pop_back_key();
         }
+        else
+        {
+        }
 
         JSONParser::onobjectvalue(object, key, json);
 
@@ -330,6 +333,12 @@ private:
         );
 
         _stringPageIndex = 0;
+        
+        JSONDatabase::log(
+            _auth,
+            _log,
+            _string
+        );
 
     }
 
