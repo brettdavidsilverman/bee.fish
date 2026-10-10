@@ -1868,15 +1868,21 @@ JSONPath JSONDatabase::origin(
 void JSONDatabase::log(
     BeeFishAuthentication::Authentication& auth,
     ostream& log,
-    const BString& path
+    const BString& path,
+    bool endl
 )
 {
     if (&log != &cnull)
     {
         log << BeeFishDate::getDateTime()
             << " "
-            << path
-            << endl;
+            << path;
+            
+        if (endl)
+            log << std::endl;
+        else
+            log << flush;
+            
     }
 }
 
@@ -1884,14 +1890,19 @@ void JSONDatabase::log(
 void JSONDatabase::log(
     BeeFishAuthentication::Authentication& auth,
     ostream& log,
-    JSONPath& path
+    JSONPath& path,
+    bool endl
 )
 {
-    JSONDatabase::log(
-        auth,
-        log,
-        path.toString(auth)
-    );
+    if (&log != &cnull)
+    {
+        JSONDatabase::log(
+            auth,
+            log,
+            path.toString(auth),
+            endl
+        );
+    }
 }
 
 PowerEncoding& operator << (PowerEncoding& output, const JSONPath& json)

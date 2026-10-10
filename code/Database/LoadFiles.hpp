@@ -109,17 +109,7 @@ void loadFile(
     const std::vector segments =
         relative.split('/');
         
-    auto onlog =
-    [&auth, &log](JSONPath& path, const BString& word)
-    {
-        JSONDatabase::log(
-            auth,
-            log,
-            path.toString(auth) + BString("#") + word
-        );
-    };
-        
-        
+    
     for (const auto& segment : segments)
     {
         
@@ -135,7 +125,6 @@ void loadFile(
         
         start = start[segment];
         
-            
     }
     
     
@@ -160,8 +149,12 @@ void loadFile(
     
     Index pageIndex = 0;
     
-    start.database()._onlog = onlog;
-
+    JSONDatabase::log(
+        auth,
+        log,
+        start.toString(auth),
+        false
+    );
     
     JSONPath http = start["{HTTP}"];
     BString contentType =
@@ -250,7 +243,10 @@ void loadFile(
     content.endString(pageIndex, index, partWord);
     input.close();
     
-    log << start.toString(auth) << endl;
+    if (&log != &cnull)
+        log << endl;
+    
+    
 }
 
 }
