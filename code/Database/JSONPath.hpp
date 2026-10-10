@@ -297,7 +297,7 @@ public:
             Path::ScopedLock lock(*this);
             if (!path.hasData())
             {
-                path.setData(true);
+               // path.setData(true);
                 JSONPath json = *this;
             
             
@@ -314,6 +314,8 @@ public:
                     }
 
                 }
+                
+                path.setData(true);
             }
         }
 
