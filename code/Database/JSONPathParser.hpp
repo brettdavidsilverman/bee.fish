@@ -93,8 +93,7 @@ private:
             start.setNumber(value);
             break;
         case Type::STRING:
-            // String logs itself, simply return
-            return;
+            break;
         case Type::ARRAY:
             start.setArray();
             break;
