@@ -424,11 +424,6 @@ namespace BeeFishQuery {
                         cout << "Got [" << stream.str() << "]" << endl;
 
                 
-                    if (ok) {
-                        cout << "\t" << expected ;
-                        expression->getPath();
-                        outputSuccess(true);
-                    }
                 }
                 
             }
@@ -990,12 +985,12 @@ namespace BeeFishQuery {
             {
                 std::vector<JSONPath::Id> values;
                 
-                AndPath path =
+                PathBase* path =
                     expression
                     .getPath();
                 
                 BeeFishDatabase::Iterable<JSONPath::Id>
-                    iterable(path);
+                    iterable(*path);
                     
                 for (auto value : iterable)
                 {
@@ -1134,11 +1129,11 @@ namespace BeeFishQuery {
             {
                 cout << ": " << expression << "..." << flush;
                 
-                AndPath pathBase =
+                PathBase* pathBase =
                     expression
                     .getPath();
                 
-                BeeFishQuery::Iterable iterable(auth, db, pathBase);
+                BeeFishQuery::Iterable iterable(auth, db, *pathBase);
                 
                 for (auto value : iterable)
                 {

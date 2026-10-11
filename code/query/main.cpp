@@ -71,7 +71,7 @@ int main(int argc, const char* argv[]) {
              << line
              << endl;
     
-        AndPath query =
+        PathBase* query =
             expression
             .getPath();
             
@@ -81,7 +81,7 @@ int main(int argc, const char* argv[]) {
             jsonMatches(
                 auth,
                 database,
-                query
+                *query
             );
             
         auto it = jsonMatches.begin();

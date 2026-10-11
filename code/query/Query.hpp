@@ -780,18 +780,34 @@ public:
             
     }
     
-    AndPath getPath()
+    BeeFishQuery::PathBase* getPath()
     {
 
         IterableItem* item =
             (IterableItem*)
             _stack[_stack.size() - 1];
             
-        return AndPath(
-            *item->_iterable,
-            _bounds
-        );
-        
+        return item->_iterable;
+    }
+    
+    BeeFishQuery::Iterable getIterable(
+        BeeFishAuthentication::Authentication& auth,
+        JSONDatabase& db
+    )
+    {
+        IterableItem* item = 
+            (IterableItem*)
+            _stack[_stack.size() - 1];
+            
+        BeeFishQuery::Iterable
+            iterable(
+                auth,
+                db, 
+                *item->_iterable
+            );
+            
+        return iterable;
+
     }
             
     

@@ -147,11 +147,14 @@ public:
             }
 
             BeeFishQuery::Expression
-                expression(bookmark, search);
+                expression(
+                    jsonPath,
+                    search
+                );
 
             BeeFishQuery::PathBase* path =
                 expression
-                .getPath().copy();
+                .getPath()->copy();
                 
             if (url.path() == "/")
             {
@@ -170,29 +173,26 @@ public:
                     );
                     
                 BeeFishQuery::Expression
-                    expression(myPath, search);
-                    
-                BeeFishQuery::AndPath path2 =
-                expression
-                   .getPath();
-                   
-                BeeFishQuery::PathBase*
-                   tmpPath = new BeeFishQuery::OrPath(
-                        *path,
-                        path2
+                    tmpExpression(
+                        myPath, 
+                        search
                     );
                     
                 delete path;
+                    
+                path = new BeeFishQuery::OrPath(
+                        *expression.getPath(),
+                        *tmpExpression.getPath()
+                    );
                 
-                path = tmpPath;
             }
 
             BeeFishQuery::Iterable
-            matches(
-                app->authentication(),
-                *database,
-                *path
-            );
+                iterable(
+                    app->authentication(),
+                    *database,
+                    *path
+                );
             
             Index count = 0;
             
@@ -200,7 +200,7 @@ public:
             {
                 *this <<
                     to_string(
-                        matches.count()
+                        iterable.count()
                     );
                 
                 flush();
@@ -215,7 +215,7 @@ public:
                 try
                 {
                     it =
-                        matches.begin(std::stol(searchObject["next"]));
+                        iterable.begin(std::stol(searchObject["next"]));
                 }
                 catch (const BeeFishDatabase::InvalidStackException& exception)
                 {
@@ -228,11 +228,11 @@ public:
                 }
             }
             else
-                it = matches.begin();
+                it = iterable.begin();
 
             *this << "[" << endl;
             
-            while (it != matches.end() &&
+            while (it != iterable.end() &&
                     (count < 10))
             {
                 BString contentType;
@@ -243,8 +243,7 @@ public:
                             app->authentication(),
                             *database,
                             *it +
-                                  
-                                  BString("/{HTTP}/content-type")
+                            BString("/{HTTP}/content-type")
                         );
                     contentType = path.getString();
                 }
@@ -266,7 +265,7 @@ public:
                       << endl
                       << "    ]";
 
-                if (++it != matches.end() && 
+                if (++it != iterable.end() && 
                     count < 10)
                 {
                     *this << ",";
@@ -278,7 +277,7 @@ public:
 
             }
 
-            if (it != matches.end())
+            if (it != iterable.end())
             {
 
                 *this << "    \""
@@ -295,10 +294,10 @@ public:
             }
 
             *this << "]";
-            
-            delete path;
 
             flush();
+            
+            delete path;
 
             return;
 

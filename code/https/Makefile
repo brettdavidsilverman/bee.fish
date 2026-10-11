@@ -74,9 +74,14 @@ debug:	$(OUTPUT)
 
 
 
-run_debug:	debug
+run_debug:	DEBUG=debug
+run_debug:	JSON_INDEX=
+run_debug:	OPTIMISATION=
+run_debug:	CFLAGS += -g -D DEBUG
+
+run_debug:	$(OUTPUT)
 	make -C . stop PORT=$(PORT)
-	gdb --args $(OUTPUT) -port $(PORT)
+	gdb --args $(OUTPUT) -port $(PORT) -test
 
 clean:
 	rm -f session.log

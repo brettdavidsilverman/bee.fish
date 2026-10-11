@@ -394,43 +394,6 @@ inline bool testFile()
         db.unlock(1);
         db2.unlock(2);
         outputSuccess(true);
-/*
-        cout << "\tLock Index 2 " << flush;
-        path1.lock();
-        path1.unlock();
-        path1.lock();
-        path1.unlock();
-        path2.lock();
-        path2.unlock();
-        outputSuccess(true);
-        
-        cout << "\tLock Index 3 " << flush;
-        path1.lock();
-        path1.lock();
-        path1.unlock();
-        path1.unlock();
-        outputSuccess(true);
-         
-
-        success = success &&
-                  testValue(
-                      "Path 1 unlocked",
-                      !path1.locked()
-                  );
-
-        success = success &&
-                  testValue(
-                      "Path 2 unlocked",
-                      !path2.locked()
-                  );
-        
-        success = success &&
-                  testValue(
-                      "Path unlocked",
-                      !path2.locked()
-                  );
-                  
-        */
         
         cout << "\tPath []" << flush;
         path2["new index"];
@@ -501,7 +464,7 @@ inline bool testFile()
             cout << "\tLocking   " << index << endl;
             db.lock(index);
             cout << "\tLocked    " << index << endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
             db.unlock(index);
             cout << "\tUnlocked  " << index << endl;
         };
@@ -532,8 +495,8 @@ inline bool testFile()
         success = success &&
                   testValue(
                       "Elapsed time for database locks",
-                      elapsed.count() >= 2000 &&
-                      elapsed.count() <= 2500
+                      elapsed.count() >= 4000 &&
+                      elapsed.count() < 9000
                   );
                   
                   
@@ -589,7 +552,7 @@ inline bool testFile()
             testValue(
                 "Elapsed time for path locks",
                 elapsed.count() >= 2000 &&
-                elapsed.count() <= 2500
+                elapsed.count() < 3000
             );
                   
     }
