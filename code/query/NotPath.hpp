@@ -14,7 +14,7 @@ using namespace BeeFishDatabase;
     {
     protected:
         PathBase* _path;
-        PathBase* _bounds;
+        Path _bounds;
         Stack _stack;
         Index _depth = 0;
         
@@ -22,18 +22,16 @@ using namespace BeeFishDatabase;
 
         NotPath(
             const PathBase& path,
-            const PathBase& bounds
+            const Path bounds
         ) :
             _path(path.copy()),
-            _bounds(bounds.copy())
+            _bounds(bounds)
         {
-        
-            
         }
         
         NotPath(const NotPath& source) :
             _path(source._path->copy()),
-            _bounds(source._bounds->copy()),
+            _bounds(source._bounds),
             _stack(source._stack),
             _depth(source._depth)
         {
@@ -42,7 +40,6 @@ using namespace BeeFishDatabase;
         virtual ~NotPath()
         {
             delete _path;
-            delete _bounds;
         }
         
         
@@ -61,16 +58,16 @@ using namespace BeeFishDatabase;
             {
                 return
                     !_path->canGoLeft() and
-                    _bounds->canGoLeft();
+                    _bounds.canGoLeft();
             }
-            return _bounds->canGoLeft();
+            return _bounds.canGoLeft();
             
         }
         
         virtual bool canGoRight() const
         override
         {
-            return _bounds->canGoRight();
+            return _bounds.canGoRight();
         }
         
         virtual void goLeft()
@@ -84,7 +81,7 @@ using namespace BeeFishDatabase;
             else
                 ++_depth;
             _stack.push_back(0);
-            _bounds->goLeft();
+            _bounds.goLeft();
         }
         
         virtual void goRight()
@@ -98,7 +95,7 @@ using namespace BeeFishDatabase;
             else
                 ++_depth;
             _stack.push_back(1);
-            _bounds->goRight();
+            _bounds.goRight();
         }
         
         virtual void goUp()
@@ -109,7 +106,7 @@ using namespace BeeFishDatabase;
             else {
                 --_depth;
             }
-            _bounds->goUp();
+            _bounds.goUp();
             _stack.pop_back();
             
         }

@@ -168,7 +168,7 @@ public:
                         *database,
                         myURL
                     );
-                    
+
                 BeeFishQuery::Expression
                     expression(myPath, search);
                     
