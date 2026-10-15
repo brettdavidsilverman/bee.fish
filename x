@@ -532,14 +532,7 @@ async () => {
     // Remove #
     if (hash.length)
         hash = hash.substr(1);
-
-    // Remove preceeding /
-    if (hash.startsWith("/") &&
-        hash != "/")
-    {
-        hash = hash.substr(1);
-    }
-    
+        
     if (hash == "")
         hash = "my";
     
