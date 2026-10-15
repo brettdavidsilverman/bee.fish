@@ -342,7 +342,10 @@ async (response) => {
     var json = await
         response.json();
 
-    var array = json.pages;
+    if (json.pages.length == 0) {
+        alert("No results");
+        return;
+    }
                 
     json.pages.forEach(
         (item, key) => {
