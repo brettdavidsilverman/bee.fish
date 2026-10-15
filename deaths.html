@@ -49,15 +49,12 @@ for (var index in json.data)
 }
 
 // 1. Convert the object to a JSON string
-const jsonString = 
-    JSON.stringify(json, null, "   ");
-/*
-const bytes = new TextEncoder().encode(jsonString);
-const binString = String.fromCodePoint(...bytes);
-const base64 = btoa(binString);
-*/
+const string = encodeURIComponent(
+    JSON.stringify(json)
+);
+    
 const dataUrl = 
-    `data:application/json,${encodeURIComponent(jsonString)}`;
+    "data:application/json;" + string;
 
 
 var output = document.getElementById("output");

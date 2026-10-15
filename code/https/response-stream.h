@@ -230,11 +230,14 @@ public:
             else
                 it = matches.begin();
 
-            *this << "[" << endl;
+            *this << "{" << endl
+                  << "    \"pages\": [" << endl;
             
             while (it != matches.end() &&
                     (count < 10))
             {
+                ++count;
+                
                 BString contentType;
                 
                 try {
@@ -254,17 +257,17 @@ public:
                         "application/json; charset=utf-8";
                 }
 
-                *this << "    [" 
+                *this << "        {" 
                       << endl
-                      << "       \""
+                      << "            \"url\": \""
                       << it->escape()
                       << "\""
                       << "," << endl
-                      << "       \""
+                      << "            \"contentType\": \""
                       << contentType.escape()
                       << "\""
                       << endl
-                      << "    ]";
+                      << "        }";
 
                 if (++it != matches.end() && 
                     count < 10)
@@ -274,27 +277,30 @@ public:
                     
                 *this << endl;
 
-                ++count;
+
 
             }
 
+            *this << "    ]";
+                            
             if (it != matches.end())
             {
 
-                *this << "    \""
+                *this << "," << endl
+                      << "    \"next\": \""
                       << JSONPath(bookmark).toString(
-                          app->authentication()
-                      )
+                             app->authentication()
+                         )
                       << "?q="
                       << search.encodeURI()
                       << "&next="
                       << to_string(it.index())
-                      << "\""
-                      << endl;
+                      << "\"" << endl;
 
             }
 
-            *this << "]";
+            *this << endl
+                  << "}";
             
             delete path;
 

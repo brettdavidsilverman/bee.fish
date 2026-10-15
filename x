@@ -48,8 +48,8 @@
         
         <p>This is a database of 5105
         accidental drug related deaths
-        in Conneticut USA from 2012-2018.
-        You can query it using these samples
+        in Conneticut USA from 2012-2018.</p>
+        <p>You can query it using these samples
         or write your own query.</p>
 
         <table id="samples">
@@ -80,7 +80,7 @@
             </tr>
             <tr>
                 <td>
-                    This finds the count
+                    This finds the count of deaths involving marijuana
                     <br />
                     <a href="#?deaths and marijuana$">?deaths and marijuana$</a>
                 </td>
@@ -105,6 +105,8 @@
         
         <br />
         <a href="/client/logon/" id="logon">Logon/Logoff</a>
+        <br />
+        <a href="deaths-converted.json" download="deaths.json">deaths.json</a>
         <br />
         <a href="/client/">Javascript client library</a>
         <br />
@@ -252,7 +254,8 @@ async (event) => {
 
     try {
 
-        event.preventDefault();
+        if (event)
+            event.preventDefault();
         
         if (running) {
             controller.abort();
@@ -339,34 +342,28 @@ async (response) => {
     var json = await
         response.json();
 
-    var array = json;
+    var array = json.pages;
                 
-    if (array.length == 0)
-    {
-        alert("No results");
-        return;
-    }
-
-    array.forEach(
+    json.pages.forEach(
         (item, key) => {
-            var url;
-            var contentType = null;
-            if (Array.isArray(item))
-            {
-                contentType = item[1];
-                url = new URL(item[0]);
-            }
-            else
-                url = new URL(item);
-                
-            addSearchItem(url, contentType);
+            addSearchItem(
+                item.url,
+                item.contentType
+            );
         }
     );
+    
+    if (json.next) {
+        addSearchItem(
+            json.next
+        );
+    }
 }
 
 const addSearchItem =
 (url, contentType) => {
 
+    url = new URL(url);
     var a =
         document.createElement("a");
     var row =
@@ -617,6 +614,7 @@ a.innerText = "my";
 a.href = "my";
 
 window.onhashchange();
+download.onsubmit();
 
 
 </script>
