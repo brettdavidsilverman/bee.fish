@@ -346,7 +346,7 @@ async (response) => {
         response.json();
 
     if (json.pages.length == 0) {
-        alert("No results");
+        editor.innerText = "No results";
         return;
     }
                 
@@ -478,7 +478,7 @@ async function checkResponse(response) {
     // Not found
     else if (response.status == 404)
     {
-        editor.innerText = editorNotFoundText;
+        editor.innerText = "Not found";
         return false;
     }
     // Not ok
