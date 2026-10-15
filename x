@@ -45,6 +45,12 @@
                 bee.fish
             </a>
         </h1>
+        
+        <p>This is a database of 5105
+        accidental drug related deaths
+        in Conneticut USA from 2012-2018.
+        You can query it using these samples
+        or write your own query.</p>
 
         <table id="samples">
             <tr>
@@ -70,6 +76,13 @@
             <tr>
                 <td>
                     <a href="#?deaths and (heroin and not methadone)">?deaths and (heroin and not methadone)</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    This finds the count
+                    <br />
+                    <a href="#?deaths and marijuana$">?deaths and marijuana$</a>
                 </td>
             </tr>
         </table>

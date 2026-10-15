@@ -782,10 +782,14 @@ public:
     
     AndPath getPath()
     {
-
+/*
         IterableItem* item =
             (IterableItem*)
             _stack[_stack.size() - 1];
+*/
+IterableItem* item =
+    (IterableItem*)
+    _stack[0];
             
         return AndPath(
             *item->_iterable,

@@ -60,10 +60,8 @@
         <h1>Audio</h1>
         <div class="audio movable">
             <textarea id="processor">
-import { Processor } from '../processor.js';
-
 // sine-processor.js
-class SineProcessor extends
+export class SineProcessor extends
       Processor
     
 {
@@ -114,7 +112,7 @@ var move = document.getElementById("frequency");
 var startPoint;
 var scale = 2;
 var defaults = {
-    frequency: 200
+   // frequency: 200
 }
 
 move.onstartmove =
@@ -153,7 +151,7 @@ async function setup() {
     await audioContext
         .audioWorklet
         .addModule(
-            "my/processor"
+            "/my/processor"
         );
         
     processor = await
@@ -173,14 +171,18 @@ async function setup() {
     
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 4096; // Small size for faster, less detailed data
-    processor.connect(analyser);
+    
 
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
     
+    
     analyser.connect(
-            audioContext.destination
-        );
+        audioContext.destination
+    );
+    
+    processor.connect(analyser);
+    
     var canvas = document.getElementById("canvas");
     var canvasCtx = canvas.getContext("2d");
     // Fill solid color
@@ -259,38 +261,57 @@ function redirect(path)
 
 async function  saveProcessor(process) {
     
-    var path =
-        "my/processor";
+    var sineProcessor =
+        processorTextArea.value;
         
     var parameters = {
         mode: "cors",
         method: "POST",
         credentials: "include",
         headers: {
-            "content-type": "text/javascript; charset=utf-8"
-        },
-        body: process
+            "content-type": "text/javascript"
+        }
     }
     
     var response;
     var text;
     
     try {
-        
+        parameters.body =
+            sineProcessor;
+            
         response = await fetch(
-            path,
+            "/my/sine-processor",
             parameters
         );
         
-        var status = response.status;
-        if (status == 401) // Unauthorised 
-        {
-            var url = await response.json();
-            redirect(url);
-            return;
-        }
+
+        await checkStatus(response);
+
+        var sineProcessorURL =
+            await response.text();
+            
+        response = await fetch(
+            "processor.js"
+        );
+        
+        await checkStatus(response);
+        
+        parameters.body =
+            await response.text() +
+            "\r" +
+            sineProcessor;
+
+        response = await fetch(
+            "/my/processor",
+            parameters
+        );
+        
+        
+        await checkStatus(response);
         
         var url = await response.json();
+        
     }
     catch (error)
     {
@@ -298,18 +319,59 @@ async function  saveProcessor(process) {
         return;
     }
     
-    await setup();
     
     
+}
+
+async function getProcessor()
+{
+    var path =
+        "/my/sine-processor";
+        
+    var parameters = {
+        mode: "cors",
+        method: "GET",
+        credentials: "include"
+    }
     
+    var response = await fetch(
+        path,
+        parameters
+    );
+    
+    if (!await checkStatus(
+            response
+        ))
+    {
+        return false;
+    }
+    
+    
+    processorTextArea.value =
+        await response.text();
+        
+    return true;
+}
+
+async function checkStatus(response)
+{
+    var status = response.status;
+    if (status == 401) // Unauthorised 
+    {
+        var url = await response.json();
+        redirect(url);
+        // Wont reach here
+        return;
+    }
+    
+    return status == 200;
 }
     
 processorTextArea.onblur =
-(event) => {
-    saveProcessor(event.target.value)
+async (event) => {
+    await saveProcessor();
+    await setup();
 }
-
-await saveProcessor(processorTextArea.value);
 
 
 document.getElementById("setup")
@@ -332,7 +394,9 @@ document.getElementById("stop")
         audioContext.suspend();
     }
     
-
+await getProcessor();
+await saveProcessor();
+await setup();
     
         </script>
     </body>
