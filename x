@@ -82,7 +82,7 @@
                 <td>
                     This finds the count of deaths involving marijuana
                     <br />
-                    <a href="#?deaths and marijuana$">?deaths and marijuana$</a>
+                    <a href="#/deaths/data?marijuana$">/deaths/data?marijuana$</a>
                 </td>
             </tr>
         </table>
@@ -117,8 +117,8 @@
 
         
         <script type="module">
-var console = new Console();
-console.log("Hello World");
+//var console = new Console();
+//console.log("Hello World");
 
 document.title =
     window.location.hostname;
@@ -158,6 +158,9 @@ const downloadButton =
 const uploadButton =
     document
     .getElementById("uploadButton");
+    
+const editorNotFoundText =
+    "Not found, Create new content here...";
     
 var controller = new AbortController();
 var signal = controller.signal;
@@ -405,35 +408,27 @@ const addSearchItem =
 
 const downloadCountResults =
 async (response) => {
-    var number = await response.json();
+    var count = await response.json();
 
     var row =
         document
         .createElement("tr");
                     
-    var tds = [
+    var td = 
         document
-        .createElement("td"),
-        document
-        .createElement("td")
-    ];
+        .createElement("td");
                 
     var a =
         document
         .createElement("a");
                         
-                    
+
     table.append(row);
-    row.append(tds[0]);
-    row.append(tds[1]);
+    row.append(td);
                 
-    a.href = "#" + input.value;
-    a.innerText = input.value;
-                    
-    tds[0].append(a);
-                
-    tds[1].innerText = 
-        String(number);
+    td.innerText = 
+        "Count: " + 
+        String(count);
                 
 }
 
@@ -454,7 +449,7 @@ async (url, response) => {
             editor.innerText = text;
         }
         else
-            editor.innerText = "Not found";
+            editor.innerText = editorNotFoundText;
         
     }
     else
@@ -480,10 +475,10 @@ async function checkResponse(response) {
         redirect(json);
         return false;
     }
+    // Not found
     else if (response.status == 404)
     {
-        editor.innerText = response.statusText;
-        //"Not found";
+        editor.innerText = editorNotFoundText;
         return false;
     }
     // Not ok
@@ -517,6 +512,12 @@ input.oninput =
     a.innerText = getTextByURL(
         input.value
     );
+}
+
+editor.onfocus =
+() => {
+    if (editor.innerText == editorNotFoundText)
+        editor.innerText = "";
 }
 
 window.onhashchange =
