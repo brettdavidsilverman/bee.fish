@@ -65,7 +65,7 @@
             </tr>
             <tr>
                 <td>
-                    <a href="#/deaths/data?female and not hospital">/deaths/data?female and not hospital</a>
+                    <a href="#/deaths/data?female and heroin and not hospital">/deaths/data?female and heroin and not hospital</a>
                 </td>
             </tr>
             <tr>
