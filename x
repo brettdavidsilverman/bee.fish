@@ -60,22 +60,22 @@
             </tr>
             <tr>
                 <td>
-                    <a href="#?deaths and heroin and male">?deaths and heroin and male</a>
+                    <a href="#/deaths/data?heroin and male">/deaths/data?heroin and male</a>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <a href="#?deaths and heroin and female and not hospital">?deaths and heroin and female and not hospital</a>
+                    <a href="#/deaths/data?female and not hospital">/deaths/data?female and not hospital</a>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <a href="#?deaths and (heroin or methadone)">?deaths and (heroin or methadone)</a>
+                    <a href="#/deaths/data?(heroin or methadone)">/deaths/data?(heroin or methadone)</a>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <a href="#?deaths and (heroin and not methadone)">?deaths and (heroin and not methadone)</a>
+                    <a href="#/deaths/data?(heroin and not methadone)">/deaths/data?(heroin and not methadone)</a>
                 </td>
             </tr>
             <tr>
