@@ -70,12 +70,12 @@
             </tr>
             <tr>
                 <td>
-                    <a href="#/deaths/data?(heroin or methadone)">/deaths/data?(heroin or methadone)</a>
+                    <a href="#/deaths/data?female and (heroin or methadone)">/deaths/data?female and (heroin or methadone)</a>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <a href="#/deaths/data?(heroin and not methadone)">/deaths/data?(heroin and not methadone)</a>
+                    <a href="#/deaths/data?female and heroin and not methadone">/deaths/data?female and heroin and not methadone</a>
                 </td>
             </tr>
             <tr>
