@@ -180,8 +180,6 @@ public:
         case Type::USER:
             new (&_value._string) String();
             break;
-        case Type::UNKNOWN:
-            break;
         }
     }
 
@@ -286,8 +284,6 @@ public:
             break;
         case Type::USER:
             _value._string.~String();
-            break;
-        case Type::UNKNOWN:
             break;
         }
 

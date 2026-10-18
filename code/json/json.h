@@ -43,7 +43,7 @@ namespace BeeFishJSON
         Object*     _object;
         
         Or*          _items;
-        Type         _type = Type::UNKNOWN;
+        Type         _type = Type::UNDEFINED;
         
     protected:
         Invoke* invoke(Match* match, Type type)

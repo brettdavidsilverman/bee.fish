@@ -31,6 +31,7 @@
 #editor {
     border: 1px solid #767676;
     border-radius: 4px;
+    padding-left: 2px;
     background-color: #ffffff;
     color: #000000;
 }
@@ -345,7 +346,9 @@ async (response) => {
     var json = await
         response.json();
 
-    if (json.pages.length == 0) {
+    if (json.pages.length == 0) 
+    {
+        editor.clearTextOnFocus = true;
         editor.innerText = "No results";
         return;
     }
@@ -448,9 +451,10 @@ async (url, response) => {
         if (text != "undefined") {
             editor.innerText = text;
         }
-        else
+        else {
+            editor.clearTextOnFocus = true;
             editor.innerText = editorNotFoundText;
-        
+        }
     }
     else
     {
@@ -471,6 +475,8 @@ async function checkResponse(response) {
     // Unauthorised 
     if (response.status == 401) 
     {
+        // Redirect to logon page
+        // given in the url
         var json = await response.json();
         redirect(json);
         return false;
@@ -478,15 +484,16 @@ async function checkResponse(response) {
     // Not found
     else if (response.status == 404)
     {
-        editor.innerText = "Not found";
+        var json = await response.json();
+        editor.clearTextOnFocus = true;
+        editor.innerText = json;
         return false;
     }
     // Not ok
     else if (response.status != 200) {
         var json = await response.json();
-        throw new Error(
-            json
-        );
+        editor.clearTextOnFocus = true;
+        editor.innerText = json;
         return false;
     }
 
@@ -516,8 +523,14 @@ input.oninput =
 
 editor.onfocus =
 () => {
-    if (editor.innerText == editorNotFoundText)
+    if (editor.clearTextOnFocus)
+    {
+        editor.clearTextOnFocus
+            = false;
         editor.innerText = "";
+        editor.focus();
+    }
+    
 }
 
 window.onhashchange =

@@ -16,8 +16,7 @@ enum class Type {
     NUMBER,
     STRING,
     ARRAY,
-    OBJECT,
-    UNKNOWN
+    OBJECT
 };
 
 
@@ -53,8 +52,6 @@ std::string toChar (const Type& type)
     case Type::ARRAY:
         return "array";
         break;
-    case Type::UNKNOWN:
-        return "UNKNOWN";
     }
 
     stringstream stream;

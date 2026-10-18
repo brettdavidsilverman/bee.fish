@@ -1387,8 +1387,6 @@ public:
             break;
 
         }
-        case Type::UNKNOWN:
-            throw runtime_error("Unknown type");
         }
 
 
@@ -1641,12 +1639,13 @@ public:
 
                 if (count == 1)
                     _tabCount--;
-
+/*
                 if (item.type() == Type::UNDEFINED)
                 {
                     out << "null";
                 }
                 else
+*/
                 {
                     item.write(
                         auth,
