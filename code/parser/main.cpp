@@ -121,25 +121,16 @@ int main(int argc, const char* argv[]) {
     
     
     string line;
-    do 
-    {
-        cout << "Number: ";
+    cout << "Number: ";
         
-        Test::Number number;
+    Test::Number number;
         
-        cin >> number;
+    cin >> number;
         
-        if (number.matched())
-            cout << number << endl;
-        else
-            break;
-            
+    if (number.matched()) {
+        cout << number << endl;
+        return 0;
     }
-    while (!cin.eof());
-    
-    
-  
-    cout << "Bye" << endl;
-      
-    return 0;
+
+    return 1;
 }
