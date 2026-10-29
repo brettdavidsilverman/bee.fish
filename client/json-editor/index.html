@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Load the standalone bundle from CDN -->
+  <script src="https://jsdelivr.net"></script>
+</head>
+<body>
+  <div id="jsoneditor" style="width: 100%; height: 400px;"></div>
+
+  <script>
+    const container = document.getElementById('jsoneditor');
+    const content = {
+      json: { name: "John Doe", age: 30, active: true }
+    };
+
+    const editor = createJSONEditor({
+      target: container,
+      props: {
+        content,
+        onChange: (updatedContent) => {
+          console.log('JSON updated:', updatedContent);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

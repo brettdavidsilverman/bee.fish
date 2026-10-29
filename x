@@ -49,7 +49,7 @@
         
         <p>This is a database of 5105
         accidental drug related deaths
-        in Conneticut USA from 2012-2018.</p>
+        in Connecticut USA from 2012-2018.</p>
         <p>You can query it using these samples
         or write your own query.</p>
 
