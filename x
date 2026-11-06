@@ -83,9 +83,11 @@
             </tr>
             <tr>
                 <td>
-                    <p>
-                        This finds the count of deaths involving marijuana
-                    </p>
+                    This finds the count of deaths involving marijuana
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <a href="#/deaths/data?marijuana$">/deaths/data?marijuana$</a>
                 </td>
             </tr>
@@ -116,7 +118,7 @@
         <br />
         <a href="/client/logon/" id="logon">Logon/Logoff</a>
         <br />
-        <a href="deaths-converted.json" download="deaths.json">deaths.json</a>
+        <a href="deaths.json" download="deaths.json">deaths.json</a>
         <br />
         <a href="/client/">Javascript client library</a>
         <br />
