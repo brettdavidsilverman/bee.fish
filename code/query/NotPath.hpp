@@ -56,9 +56,13 @@ using namespace BeeFishDatabase;
             if (_depth == 0 and
                 _stack.count() == 1)
             {
+if (_path->canGoLeft())
+    return false;
+/*
                 return
                     !_path->canGoLeft() and
                     _bounds.canGoLeft();
+*/
             }
             return _bounds.canGoLeft();
             

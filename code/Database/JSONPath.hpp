@@ -61,8 +61,8 @@ public:
     JSONPath(JSONDatabase& database, Id id) :
         Path(
             database,
-            database.objects()
-                [JSONPath::getIndexFromId(id)]
+            //database.objects()
+            JSONPath::getIndexFromId(id)
         )
     {
 

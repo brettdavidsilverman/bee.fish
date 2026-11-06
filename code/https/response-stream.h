@@ -171,20 +171,20 @@ public:
 
                 BeeFishQuery::Expression
                     expression(myPath, search);
-                    
+                
                 BeeFishQuery::AndPath path2 =
                 expression
                    .getPath();
-                   
+                   /*
                 BeeFishQuery::PathBase*
                    tmpPath = new BeeFishQuery::OrPath(
                         *path,
                         path2
                     );
-                    
+                    */
                 delete path;
                 
-                path = tmpPath;
+                path = path2.copy();
             }
 
             BeeFishQuery::Iterable

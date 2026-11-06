@@ -461,6 +461,8 @@ namespace BeeFishQuery {
         testmatch("!(word1 or word2)", "not ((word1 or word2))");
         testmatch("(word1 or word2)", "((word1 or word2))");
         testmatch("(word1 and word2)", "((word1 and word2))");
+        
+
         testmatch("word1 and not word2", "(word1 and not word2)");
         
         testmatch("word1 and (word2 or word3)", "(word1 and ((word2 or word3)))");
@@ -478,7 +480,7 @@ namespace BeeFishQuery {
         testmatch("word1 and not word2 and word3", "((word1 and not word2) and word3)");
         
         testmatch("not not word", "word");
-        
+        testmatch("not (not (word))", "not (not (word))");
         testmatch("word1 and and word2", "(word1 and word2)");
         testmatch("word1 and or word2", "(word1 or word2)");
         testmatch("(deaths and (heroin and not methadone)) or art", "(((deaths and ((heroin and not methadone)))) or art)");
