@@ -816,7 +816,8 @@ public:
     }
     
 public:
-    Stack toKey() const {
+#ifndef JSON_INDEX
+    Id toKey() const {
         
         JSONPath path = *this;
         BString string;
@@ -886,13 +887,7 @@ public:
                 else // private
                     child << 0;
             }
-            /*
-            path = path.parent(
-                userId, 
-                type
-            );
-            
-            */
+
             child << Type::STRING;
             
             child << userId;
@@ -920,8 +915,17 @@ public:
         return temp;
     }
     
+#else
+    Id toKey() const {
+        
+        return index();
+    }
+        
+#endif
+
 public:
     
+#ifndef JSON_INDEX
     static BString keyToString(
         Authentication& auth,
         Stack& stack,
@@ -1010,8 +1014,22 @@ public:
         return string;
         
     }
+#else
+    static BString keyToString(
+        Authentication& auth,
+        Id& id,
+        Index& index
+    )
+    {
+        
+        Authentication::ScopedDatabase database(auth);
+        index = id;
+        
+        JSONPath path(*database, index);
+        return path.toString(auth);
+    }
     
-
+#endif
 
 
     class PathNotFoundException : public std::runtime_error
@@ -1586,9 +1604,13 @@ public:
         case Type::INTEGER:
         case Type::NUMBER:
         {
-            BString value =
-                path[VALUE].getStringData();
-            out << value;
+            if (!path[VALUE].hasData())
+                out << "null";
+            else {
+                BString value =
+                    path[VALUE].getStringData();
+                out << value;
+            }
             break;
         }
         case Type::STRING:
@@ -1639,13 +1661,12 @@ public:
 
                 if (count == 1)
                     _tabCount--;
-/*
+
                 if (item.type() == Type::UNDEFINED)
                 {
                     out << "null";
                 }
                 else
-*/
                 {
                     item.write(
                         auth,

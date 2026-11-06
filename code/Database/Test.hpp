@@ -3082,10 +3082,14 @@ inline bool testFromString()
                 index
             );
             
+#ifndef JSON_INDEX
         BString compare =
             BString("https://test/a?index=") +
             BString(to_string(index));
-
+#else
+       BString compare =
+            "https://test/a";
+#endif
         ok = ok && testValue(
                  "From global key",
                  url == compare
@@ -3130,10 +3134,14 @@ inline bool testFromString()
                 index
             );
 
-
+#ifndef JSON_INDEX
         BString compare =
             BString("https://test/my/a?index=") +
             BString(to_string(index));
+#else
+       BString compare =
+            "https://test/my/a";
+#endif
 
         ok = ok && testValue(
                  "From my key",

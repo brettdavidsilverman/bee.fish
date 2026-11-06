@@ -44,7 +44,7 @@ public:
     {
     }
 
-    // Defined below
+#ifndef JSON_INDEX
     Index count()
     {
         Index count = 0;
@@ -85,6 +85,84 @@ public:
         }
 
         return count;
+    }
+    
+#else
+    Index countQuick()
+    {
+        Index count = 0;
+
+        IdIterable iterable(*_path);
+        IdIterator it(iterable);
+        while (!it._isEnd)
+        {
+            it++;
+            count++;
+        }
+        
+        return count;
+    }
+    
+    Index count()
+    {
+        Index count = 0;
+        IdIterable iterable(*_path);
+        IdIterator it(iterable);
+        while (!it._isEnd)
+        {
+            JSONPath::Id parent = *it;
+            BString parentValue =
+                toString(parent);
+                    
+            IdIterator iterator = it;
+
+            ++iterator;
+
+            if (!iterator._isEnd)
+            {
+
+                JSONPath::Id child = *iterator;
+                BString childValue =
+                    toString(child);
+                        
+                if (!childValue
+                     .startsWith(parentValue)
+                )
+                {
+                    count++;
+                    continue;
+                }
+            }
+            else
+            {
+                count++;
+                continue;
+            }
+
+
+            it = iterator;
+        }
+        
+        return count;
+    }
+    
+#endif
+
+    BString toString(JSONPath::Id& key) const
+    {
+#ifndef JSON_INDEX
+        key.reset();
+#endif
+        Index index;
+        
+        BString string =
+            JSONPath::keyToString(
+                _auth,
+                key,
+                index
+            );
+                
+        return string;
     }
 
     static bool startsWith(
@@ -271,7 +349,7 @@ public:
             return *this;
         }
 
-
+#ifndef JSON_INDEX
         void setValue()
         {
             _value.clear();
@@ -313,30 +391,54 @@ public:
 
 
         }
-
-
-        BString toString(Stack& key)
+#else
+        void setValue()
         {
-            key.reset();
-            BString string =
-                JSONPath::keyToString(
-                    _container->_auth,
-                    key,
-                    _index
-                );
-                
-            JSONPath path(
-                *_container
-                ->_database, 
-                _index
-            );
-        
-            return 
-                path.toString(
-                    _container->_auth
-                );
+            _value.clear();
+            
+            while (!_iterator->_isEnd) {
+
+                JSONPath::Id parent =
+                    **_iterator;
+                    
+                BString parentValue =
+                    _container
+                    ->toString(parent);
+                    
+                IdIterator iterator = *_iterator;
+
+                ++iterator;
+
+                if (!iterator._isEnd)
+                {
+
+                    JSONPath::Id child = *iterator;
+                    BString childValue =
+                        _container
+                        ->toString(child);
+                        
+                    if (!childValue
+                         .startsWith(parentValue)
+                    )
+                    {
+                        _value = parentValue;
+                        break;
+                    }
+                }
+                else
+                {
+                    _value = parentValue;
+                    break;
+                }
+
+
+                *_iterator = iterator;
+            }
+
 
         }
+        
+#endif
 
         JSONPath jsonPath(IdIterator& iterator)
         {

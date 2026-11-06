@@ -63,8 +63,8 @@ stop:
 
 
 debug:	DEBUG=debug
-debug:	JSON_INDEX=
-debug:	OPTIMISATION=
+debug:	JSON_INDEX=-D JSON_INDEX
+debug:	OPTIMISATION= -Ofast
 debug:	CFLAGS += -g -D DEBUG
 
 debug:	$(OUTPUT)
