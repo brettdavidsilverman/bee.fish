@@ -41,10 +41,8 @@
     </head>
     <body>
     
-        <h1 id="h1">
-            <a id="a">
-                bee.fish
-            </a>
+        <h1>
+            Accidental drug related deaths
         </h1>
         
         <p>This is a database of 5105
@@ -52,6 +50,10 @@
         in Connecticut USA from 2012-2018.</p>
         <p>You can query it using these samples
         or write your own query.</p>
+        
+        <h2>
+            How to query
+        </h2>
 
         <table id="samples">
             <tr>
@@ -81,12 +83,19 @@
             </tr>
             <tr>
                 <td>
-                    This finds the count of deaths involving marijuana
-                    <br />
+                    <p>
+                        This finds the count of deaths involving marijuana
+                    </p>
                     <a href="#/deaths/data?marijuana$">/deaths/data?marijuana$</a>
                 </td>
             </tr>
         </table>
+        
+        <h3>
+            <a id="a">
+                bee.fish
+            </a>
+        </h3>
         
         <form id="download">
             <input id="input" value="my"></input>
@@ -271,6 +280,7 @@ async (event) => {
 
         downloadButton.disabled = true;
         
+
         window.setTimeout(
             () => {
                 downloadButton
@@ -279,7 +289,7 @@ async (event) => {
             },
             200
         );
-        
+
         table.innerHTML = "";
         editor.innerHTML = "";
         
