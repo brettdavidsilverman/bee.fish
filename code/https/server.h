@@ -66,14 +66,14 @@ namespace BeeFishHTTPS {
                   boost::asio::io_context&
                       ioContext,
                   unsigned short port,
-                  Size threadCount,
-                  Size databaseCount
+                  Size threadCount
+//,Size databaseCount
         ) :
             BeeFishAuthentication::Server(
                 hostName,
                 port,
                 databaseFile,
-                databaseCount
+                threadCount
             ),
             thread_pool(threadCount),
             _ioContext(ioContext),

@@ -22,12 +22,10 @@ void start(
 
 std::mutex _wait;
 #ifdef DEBUG
-const Size _threadCount = 4;
+Size _threadCount = 20;
 #else
-const Size _threadCount = 20;
+Size _threadCount = 20;
 #endif
-
-const Size _databaseCount = _threadCount;
 
 int main(int argc, const char* argv[])
 
@@ -86,6 +84,21 @@ int main(int argc, const char* argv[])
                      port = converted;
              }
         }
+        
+        int threadCountArg;
+        if ((threadCountArg = hasArg(argc, argv, "-threads")) >= 0)
+        {
+             if (argc > threadCountArg + 1)
+             {
+                 const char* arg = argv[threadCountArg + 1];
+                 char* p;
+                 long converted = strtol(arg, &p, 10);
+                 if (p) 
+                     _threadCount = converted;
+             }
+        }
+        
+        std::cout << "Thread count " << _threadCount << endl;
       
         initializeLogs();
         
@@ -116,8 +129,7 @@ int main(int argc, const char* argv[])
             transactionFile,
             io_context,
             port,
-            _threadCount,
-            _databaseCount
+            _threadCount
         );
         
         _wait.lock();

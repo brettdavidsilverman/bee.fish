@@ -130,13 +130,11 @@ public:
                 )
                 {
                     count++;
-                    continue;
                 }
             }
             else
             {
                 count++;
-                continue;
             }
 
 

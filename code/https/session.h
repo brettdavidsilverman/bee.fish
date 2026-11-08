@@ -102,7 +102,8 @@ public:
             logException("Session::start", "Invalid ipAddress");
             throw std::runtime_error("Couldn't get ip address");
         }
-        */
+*/
+
         _request = new BeeFishWeb::WebRequest(false);
         _parser = new Parser(*_request);
 
@@ -659,6 +660,14 @@ inline void Server::handleAccept(
 
     if (!error)
     {
+        newSession->lowest_layer()
+            .set_option(
+                boost
+                ::asio
+                ::socket_base
+                ::keep_alive(true)
+            );
+        
         try
         {
             newSession->_ipAddress =
