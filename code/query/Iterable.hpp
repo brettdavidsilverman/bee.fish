@@ -162,18 +162,21 @@ public:
     
 #endif
 
-    BString toString(JSONPath::Id& key) const
+    BString toString(JSONPath::Id& key, Index& index) const
     {
 #ifndef JSON_INDEX
         key.reset();
 #endif
+
         JSONPath path(
             *_database,
             key
         );
         
-        return path.toString(_auth);
+        index = path.index();
         
+        return path.toString(_auth);
+/*
         Index index;
         
         BString string =
@@ -184,6 +187,7 @@ public:
             );
                 
         return string;
+*/
     }
 
     static bool startsWith(
@@ -398,7 +402,8 @@ public:
                     {
                         _value =
                             _container
-                            ->toString(parent);
+                            ->toString(parent, _index);
+                            
                         break;
                     }
                 }
@@ -406,7 +411,7 @@ public:
                 {
                     _value =
                         _container
-                        ->toString(parent);
+                        ->toString(parent, _index);
                         
                     break;
                 }
@@ -421,7 +426,7 @@ public:
         void setValue()
         {
             _value.clear();
-            
+            Index index;
             while (!_iterator->_isEnd) {
 
                 JSONPath::Id parent =
@@ -429,7 +434,7 @@ public:
                     
                 BString parentValue =
                     _container
-                    ->toString(parent);
+                    ->toString(parent, index);
                     
                 IdIterator iterator = *_iterator;
 
@@ -441,19 +446,21 @@ public:
                     JSONPath::Id child = *iterator;
                     BString childValue =
                         _container
-                        ->toString(child);
+                        ->toString(child, index);
                         
                     if (!childValue
                          .startsWith(parentValue)
                     )
                     {
                         _value = parentValue;
+_index = index;
                         break;
                     }
                 }
                 else
                 {
                     _value = parentValue;
+_index = index;
                     break;
                 }
 
@@ -472,13 +479,14 @@ public:
                 JSONPath::getIndexFromId(
                     *iterator
                 );
-                
+               
+/*
             Path path = 
                 _container
                 ->_database
                 ->objects()
                 [index];
-
+*/
             return JSONPath(
                        *_container->_database,
                        index
