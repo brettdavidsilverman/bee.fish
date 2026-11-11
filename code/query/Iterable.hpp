@@ -399,13 +399,18 @@ if (!isChild(parent, child))
                         )
                     )
                     {
-                        _value = toString(parent);
+                        _value =
+                            _container
+                            ->toString(parent);
                         break;
                     }
                 }
                 else
                 {
-                    _value = toString(parent);
+                    _value =
+                        _container
+                        ->toString(parent);
+                        
                     break;
                 }
 
