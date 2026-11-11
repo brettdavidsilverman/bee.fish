@@ -36,19 +36,8 @@ protected:
     // Mutex with atomic counter
     struct MapValueType {
         Mutex _mutex;
-            /*
-        bip
-        ::scoped_lock<
-            bip
-            ::interprocess_recursive_mutex
-        > _lock;
-        */
         std::atomic<Index> _counter = 0;
-        MapValueType()/* :
-            _lock(
-                _mutex,
-                bip::defer_lock
-            )*/
+        MapValueType()
         {
         }
     };
@@ -103,45 +92,25 @@ public:
     }
 
     void lock(Index index) {
-//cerr << index << "\tLOCK" << endl;
-
+        
         ScopedLock lock(*this);
         
         Index counter = 
             (*_sharedMap)[index]._counter++;
             
-      //  if (counter != 0)
-      //      lock.unlock();
-        
-        
-        
-      //  lock.unlock();
-        
         if (counter == 0) {
             (*_sharedMap)[index]._mutex.lock();
         }
         else {
-            /*
-            lock.swap(
-                (*_sharedMap)[index]._lock
-            );
-            
-            lock.try_lock();
-            */
             lock.unlock();
-            
             
             (*_sharedMap)[index]._mutex.lock();
             
         }
 
-
-        
     }
 
     void unlock(Index index) {
-//cerr << index << "\tUNLOCK" << endl;
-
         ScopedLock lock(*this);
         (*_sharedMap)[index]._mutex.unlock();
         
@@ -160,35 +129,6 @@ public:
         
     }
 
-
-    /*
-            virtual void lock(Index position, Size length)
-            {
-                struct flock data;
-                memset(&data, '\0', sizeof(data));
-                data.l_type = F_WRLCK;
-                data.l_whence = SEEK_SET;
-                data.l_start = position;
-                data.l_len = length;
-
-                fcntl(_fileNumber, F_SETLKW, &data);
-
-            }
-
-            virtual void unlock(Index position, Size length)
-            {
-                struct flock data;
-                memset(&data, '\0', sizeof(data));
-                data.l_type = F_UNLCK;
-                data.l_whence = SEEK_SET;
-                data.l_start = position;
-                data.l_len = length;
-
-                fcntl(_fileNumber, F_SETLK, &data);
-
-            }
-
-    */
 };
 
 }
