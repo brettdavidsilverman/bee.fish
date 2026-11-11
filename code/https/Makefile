@@ -67,6 +67,7 @@ debug:	JSON_INDEX=-D JSON_INDEX
 debug:	OPTIMISATION= -Ofast
 debug:	CFLAGS += -g -D DEBUG
 debug:	THREADS=1000
+
 debug:	$(OUTPUT)
 	make -C . stop PORT=$(PORT)
 	$(OUTPUT) -port $(PORT) -test
