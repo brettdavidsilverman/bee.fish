@@ -118,7 +118,13 @@
         <br />
         <a href="/client/logon/" id="logon">Logon/Logoff</a>
         <br />
-        <a href="deaths.json" download="deaths.json">deaths.json</a>
+        <a href="deaths.json" download="deaths.json">
+            deaths.json
+        </a> -> <a href="deaths.html">
+            fix addresses
+        </a> -> <a href="deaths-converted.json" download="deaths-converted.json">
+            converted.json
+        </a>
         <br />
         <a href="/client/">Javascript client library</a>
         <br />
