@@ -111,9 +111,10 @@ public:
         while (!it._isEnd)
         {
             JSONPath::Id parent = *it;
+/*
             BString parentValue =
                 toString(parent);
-                    
+*/
             IdIterator iterator = it;
 
             ++iterator;
@@ -122,12 +123,15 @@ public:
             {
 
                 JSONPath::Id child = *iterator;
+/*
                 BString childValue =
                     toString(child);
-                        
+*/
+if (!isChild(parent, child))
+                /*
                 if (!childValue
                      .startsWith(parentValue)
-                )
+                )*/
                 {
                     count++;
                 }
@@ -142,6 +146,28 @@ public:
         }
         
         return count;
+    }
+    
+    bool isChild(Index parent, Index child)
+    {
+        JSONPath path(*_database, child);
+        while (!path.isUserRoot())
+        {
+            if (path.index() == parent)
+                return true;
+                
+            Index index = 
+                path
+                .parent()
+                .index();
+                
+            path = JSONPath(
+                *_database,
+                index
+            );
+        }
+        
+        return false;
     }
     
 #endif

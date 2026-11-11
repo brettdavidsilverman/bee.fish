@@ -70,7 +70,7 @@ debug:	THREADS=1000
 debug:	$(OUTPUT)
 	make -C . stop PORT=$(PORT)
 	$(OUTPUT) -port $(PORT) -test
-	$(OUTPUT) -port $(PORT) -threads $(THREADS)&
+	$(OUTPUT) -port $(PORT) -threads $(THREADS) &
 
 
 
