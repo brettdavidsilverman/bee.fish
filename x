@@ -520,9 +520,8 @@ async function checkResponse(response) {
 function redirect(path)
 {
     var url = new URL(path);
-    url.search = "?redirect=" +
-        encodeURIComponent(document.location.href);
-    document.location.replace(url);
+    url.search = "?redirect";
+    document.location.href = url;
 }
 
 input.onchange =

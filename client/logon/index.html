@@ -84,9 +84,7 @@ async function logon(secret)
         const params = new URLSearchParams(window.location.search);
 
         if (params.has("redirect")) {
-            var redirect = params.get("redirect");
-            var url = new URL(decodeURIComponent(redirect));
-            document.location.href = url;
+            window.history.back();
         }
         else {
             window.location.reload();
