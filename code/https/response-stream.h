@@ -246,8 +246,7 @@ public:
                             app->authentication(),
                             *database,
                             *it +
-                                  
-                                  BString("/{HTTP}/content-type")
+                                BString("/{HTTP}/content-type")
                         );
                     contentType = path.getString();
                 }
@@ -292,7 +291,7 @@ public:
                              app->authentication()
                          )
                       << "?q="
-                      << search.encodeURI()
+                      << search
                       << "&next="
                       << to_string(it.index())
                       << "\"" << endl;
