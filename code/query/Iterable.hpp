@@ -140,16 +140,16 @@ public:
     
     bool isChild(Index parent, Index child)
     {
-        JSONPath path(*_database, child);
-        while (!path.isUserRoot())
+        Path path(*_database, child);
+        while (!path.isRoot())
         {
             if (path.index() == parent)
                 return true;
                 
             Index index = 
                 path
-                .parent()
-                .index();
+                .getBranch()
+                ._parent;
                 
             path = JSONPath(
                 *_database,

@@ -465,7 +465,7 @@ async (url, response) => {
         contentType.startsWith("application/json"))
     {
         var text = await response.text();
-        
+        editor.clearTextOnFocus = false;
         if (text != "undefined") {
             editor.innerText = text;
         }
