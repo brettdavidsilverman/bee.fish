@@ -13,7 +13,7 @@ all:	$(BUILD)
 	make -C Database $(DEBUG) test $(LOAD) 
 	make -C query $(DEBUG) test
 	make -C Script $(DEBUG) test
-	make -C https $(DEBUG) PORT=$(PORT)
+	make -C https $(DEBUG) test PORT=$(PORT)
 
 $(BUILD):
 	mkdir $(BUILD)

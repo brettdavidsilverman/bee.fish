@@ -5,7 +5,7 @@ stop:
 
 start:
 	-mkdir bee.fish/build
-	make -C bee.fish/code/https test PORT=443
+	make -C bee.fish/code test PORT=443
 
 clean:
 	make -C bee.fish/code clean
