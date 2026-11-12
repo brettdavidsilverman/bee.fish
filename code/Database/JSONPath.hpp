@@ -67,8 +67,8 @@ public:
     {
 
     }
-    
-    static Index getIndexFromId(const Id& id)
+#endif 
+    static Index getIndexFromId(const Stack& id)
     {
         Stack stack = id;
         
@@ -123,12 +123,10 @@ public:
 
     }
     
-#else
-    static Index getIndexFromId(const Id& id)
+    static Index getIndexFromId(const Index& id)
     {
         return id;
     }
-#endif
 
     JSONPath(JSONDatabase& database, const Path& start) :
         Path(database, start.index())
@@ -925,7 +923,6 @@ public:
 
 public:
     
-#ifndef JSON_INDEX
     static BString keyToString(
         Authentication& auth,
         Stack& stack,
@@ -1014,10 +1011,10 @@ public:
         return string;
         
     }
-#else
+    
     static BString keyToString(
         Authentication& auth,
-        Id& id,
+        Index& id,
         Index& index
     )
     {
@@ -1028,9 +1025,6 @@ public:
         JSONPath path(*database, index);
         return path.toString(auth);
     }
-    
-#endif
-
 
     class PathNotFoundException : public std::runtime_error
     {

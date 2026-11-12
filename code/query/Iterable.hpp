@@ -453,14 +453,14 @@ public:
                     )
                     {
                         _value = parentValue;
-_index = index;
+                        _index = index;
                         break;
                     }
                 }
                 else
                 {
                     _value = parentValue;
-_index = index;
+                    _index = index;
                     break;
                 }
 
