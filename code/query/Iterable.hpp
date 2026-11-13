@@ -20,14 +20,14 @@ protected:
     PathBase* _path;
 
 public:
-    typedef BeeFishDatabase::Iterable<JSONPath::Id>::Iterator IdIterator;
-    typedef BeeFishDatabase::Iterable<JSONPath::Id> IdIterable;
+    typedef BeeFishDatabase::Iterable<BeeFishDatabase::Id>::Iterator IdIterator;
+    typedef BeeFishDatabase::Iterable<BeeFishDatabase::Id> IdIterable;
     
     Iterable(
         BeeFishAuthentication::
         Authentication& auth,
         JSONDatabase& database,
-        PathBase& path
+        const PathBase& path
 
     ) :
         _auth(auth),
@@ -44,7 +44,7 @@ public:
     {
     }
 
-#ifndef JSON_INDEX
+/*
     Index count()
     {
         Index count = 0;
@@ -87,7 +87,7 @@ public:
         return count;
     }
     
-#else
+*/
     Index countQuick()
     {
         Index count = 0;
@@ -110,7 +110,12 @@ public:
         IdIterator it(iterable);
         while (!it._isEnd)
         {
-            JSONPath::Id parent = *it;
+            Index parent =
+                JSONPath
+                ::getIndexFromId(
+                    *_database,
+                    *it
+                );
 
             IdIterator iterator = it;
 
@@ -119,7 +124,12 @@ public:
             if (!iterator._isEnd)
             {
 
-                JSONPath::Id child = *iterator;
+                Index child =
+                    JSONPath
+                    ::getIndexFromId(
+                        *_database,
+                        *iterator
+                    );
 
                 if (!isChild(parent, child))
                 {
@@ -160,13 +170,23 @@ public:
         return false;
     }
     
-#endif
-
-    BString toString(JSONPath::Id& key, Index& index) const
+    BString toString(BeeFishDatabase::Id& key, Index& index) const
     {
-#ifndef JSON_INDEX
+        JSONPath path(
+            *_database,
+            key
+        );
+        
+        index = path.index();
+        
+        return
+            path
+            .toString(_auth);
+    }
+    
+    BString toString(Stack& key, Index& index) const
+    {
         key.reset();
-#endif
 
         JSONPath path(
             *_database,
@@ -175,21 +195,11 @@ public:
         
         index = path.index();
         
-        return path.toString(_auth);
-/*
-        Index index;
-        
-        BString string =
-            JSONPath::keyToString(
-                _auth,
-                key,
-                index
-            );
-                
-        return string;
-*/
+        return
+            path
+            .toString(_auth);
     }
-
+/*
     static bool startsWith(
         Stack& parent,
         Stack& child
@@ -268,7 +278,7 @@ public:
 
         return true;
     }
-
+*/
 
     virtual ~Iterable()
     {
@@ -326,7 +336,7 @@ public:
             _iterable(new IdIterable(*iterable._path))
         {
             JSONPath json(*_container->_database, from);
-            JSONPath::Id id = json.id();
+            BeeFishDatabase::Id id = json.id();
 
             Stack stack;
             stack << id;
@@ -374,7 +384,7 @@ public:
             return *this;
         }
 
-#ifndef JSON_INDEX
+/*
         void setValue()
         {
             _value.clear();
@@ -422,14 +432,14 @@ public:
 
 
         }
-#else
+*/
         void setValue()
         {
             _value.clear();
             Index index;
             while (!_iterator->_isEnd) {
 
-                JSONPath::Id parent =
+                BeeFishDatabase::Id parent =
                     **_iterator;
                     
                 BString parentValue =
@@ -443,7 +453,7 @@ public:
                 if (!iterator._isEnd)
                 {
 
-                    JSONPath::Id child = *iterator;
+                    BeeFishDatabase::Id child = *iterator;
                     BString childValue =
                         _container
                         ->toString(child, index);
@@ -471,27 +481,21 @@ public:
 
         }
         
-#endif
 
         JSONPath jsonPath(IdIterator& iterator)
         {
             Index index = 
                 JSONPath::getIndexFromId(
+                    *_container->_database,
                     *iterator
                 );
-               
-/*
-            Path path = 
-                _container
-                ->_database
-                ->objects()
-                [index];
-*/
-            return JSONPath(
-                       *_container->_database,
-                       index
-                   );
 
+            return 
+                JSONPath(
+                    *_container
+                    ->_database,
+                    index
+                );
 
         }
 

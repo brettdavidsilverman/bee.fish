@@ -397,7 +397,7 @@ namespace BeeFishQuery {
                 return false;
             
             Expression* expression =
-                new Expression(root);
+                new Expression(root, JSONPath::Sort::Insertion);
                 
             Capture* capture =
                 new Capture(expression);
@@ -492,7 +492,7 @@ namespace BeeFishQuery {
             
             try {
                 ok = false;
-                Expression expression(root, "and and");
+                Expression expression(root, "and and", JSONPath::Sort::Insertion);
             }
             catch (std::exception& ex)
             {
@@ -516,20 +516,19 @@ namespace BeeFishQuery {
         
         JSONDatabase db;
         Words words = db.words();
-        JSONPath::Id ids[5];
+        BeeFishDatabase::Id ids[5];
         
 
-        Index count = 0;
+        
         for (auto& id : ids)
         {
-#ifdef JSON_INDEX
-            id = count++;
-#else
+            id = Id();
+/*
             Stack stack;
             stack << count++;
             stack.reset();
             id = stack;
-#endif
+*/
         }
         
         
@@ -559,8 +558,8 @@ namespace BeeFishQuery {
         
         if (ok) 
         {
-            JSONPath::Id min = 
-                andPath.min<JSONPath::Id>();
+            BeeFishDatabase::Id min = 
+                andPath.min<BeeFishDatabase::Id>();
             
             ok = ok &&
                 testResult(
@@ -589,13 +588,13 @@ namespace BeeFishQuery {
         
         if (ok)
         {
-            vector<JSONPath::Id> array;
+            vector<BeeFishDatabase::Id> array;
             
             
-            BeeFishDatabase::Iterable<JSONPath::Id>
+            BeeFishDatabase::Iterable<BeeFishDatabase::Id>
                 iterable(andPath);
                 
-            for (const JSONPath::Id& value : iterable)
+            for (const BeeFishDatabase::Id& value : iterable)
             {
                 array.push_back(value);
             }
@@ -636,19 +635,19 @@ namespace BeeFishQuery {
         Words words(db);
         words = words["words"];
 
-        JSONPath::Id ids[3];
+        BeeFishDatabase::Id ids[3];
         
-        Index count = 0;
+        
         for (auto& id : ids)
         {
-#ifdef JSON_INDEX
-            id = count++;
-#else
+
+            id = Id();
+/*
             Stack stack;
             stack << count++;
             stack.reset();
             id = stack;
-#endif
+*/
         }
         
         words["one"][ids[0]];
@@ -674,8 +673,8 @@ namespace BeeFishQuery {
         
         if (ok) 
         {
-            JSONPath::Id min = 
-                orPath.min<JSONPath::Id>();
+            BeeFishDatabase::Id min = 
+                orPath.min<BeeFishDatabase::Id>();
 
             ok = ok &&
                 testResult(
@@ -686,8 +685,8 @@ namespace BeeFishQuery {
         
         if (ok) 
         {
-            JSONPath::Id  max =
-                orPath.max<JSONPath::Id>();
+            BeeFishDatabase::Id  max =
+                orPath.max<BeeFishDatabase::Id>();
             
             ok = ok &&
                 testResult(
@@ -703,7 +702,7 @@ namespace BeeFishQuery {
             OrPath copy = orPath;
 
             bool result = copy.next(stack);
-            JSONPath::Id  value;
+            BeeFishDatabase::Id  value;
             stack.reset();
             stack >> value;
             
@@ -760,8 +759,8 @@ namespace BeeFishQuery {
         
         if (ok)
         {
-            vector<JSONPath::Id> array;
-            BeeFishDatabase::Iterable<JSONPath::Id>
+            vector<BeeFishDatabase::Id> array;
+            BeeFishDatabase::Iterable<BeeFishDatabase::Id>
                 iterable(orPath);
 
             for (auto value : iterable)
@@ -806,19 +805,18 @@ namespace BeeFishQuery {
         Words words = path["words"];
         Bounds bounds = path["bounds"];
         
-        JSONPath::Id ids[3];
+        BeeFishDatabase::Id ids[3];
         
-        Index count = 0;
+        
         for (auto& id : ids)
         {
-#ifdef JSON_INDEX
-            id = count++;
-#else
+            id = Id();
+/*
             Stack stack;
             stack << count++;
             stack.reset();
             id = stack;
-#endif
+*/
         }
         
         words["one"][ids[0]];
@@ -849,8 +847,8 @@ namespace BeeFishQuery {
         if (ok) 
         {
             
-            JSONPath::Id min = 
-                notPath.min<JSONPath::Id>();
+            BeeFishDatabase::Id min = 
+                notPath.min<BeeFishDatabase::Id>();
             
             ok = ok &&
                 testResult(
@@ -867,7 +865,7 @@ namespace BeeFishQuery {
     
             bool result = notPath.next(stack);
             stack.reset();
-            JSONPath::Id  value;
+            BeeFishDatabase::Id  value;
             stack >> value;
             
             
@@ -899,8 +897,8 @@ namespace BeeFishQuery {
         
         if (ok)
         {
-            vector<JSONPath::Id> array;
-            BeeFishDatabase::Iterable<JSONPath::Id>
+            vector<BeeFishDatabase::Id> array;
+            BeeFishDatabase::Iterable<BeeFishDatabase::Id>
                 iterable(notPath);
 
 
@@ -934,8 +932,8 @@ namespace BeeFishQuery {
         
             if (ok)
             {
-                vector<JSONPath::Id> array;
-                BeeFishDatabase::Iterable<JSONPath::Id>
+                vector<BeeFishDatabase::Id> array;
+                BeeFishDatabase::Iterable<BeeFishDatabase::Id>
                     iterable(notNotPath);
 
                 for (auto value : iterable)
@@ -973,15 +971,17 @@ namespace BeeFishQuery {
         JSONDatabase db;
         Words words = db.words();
         Bounds bounds = db.objects();
-        
+        JSONPath::Sort sort =
+            JSONPath::Sort::Insertion;
+            
         bool ok  = true;
         auto test =
-        [&db, &words, &bounds](BString input, JSONPath::Id* ids, vector<Index> check) {
+        [&db, &words, &bounds, &sort](BString input, BeeFishDatabase::Id* ids, vector<Index> check) {
             
             
             cout << input << flush;
             
-            Expression expression(db, words, bounds);
+            Expression expression(db, words, bounds, sort);
             Parser parser(expression);
             parser.read(input);
             parser.eof();
@@ -990,13 +990,13 @@ namespace BeeFishQuery {
         
             if (ok)
             {
-                std::vector<JSONPath::Id> values;
+                std::vector<BeeFishDatabase::Id> values;
                 
                 AndPath path =
                     expression
                     .getPath();
                 
-                BeeFishDatabase::Iterable<JSONPath::Id>
+                BeeFishDatabase::Iterable<BeeFishDatabase::Id>
                     iterable(path);
                     
                 for (auto value : iterable)
@@ -1047,27 +1047,26 @@ namespace BeeFishQuery {
             return ok;
         };
         
-        JSONPath::Id ids[5];
-        Index count = 0;
+        BeeFishDatabase::Id ids[5];
+        
         for (auto& id : ids)
         {
-#ifdef JSON_INDEX
-            id = count++;
-#else
+            id = Id();
+/*
             Stack stack;
             stack << count++;
             stack.reset();
             id = stack;
-#endif
+*/
         }
         
-        words["one"][ids[0]];
-        words["one"][ids[1]];
-        words["one"][ids[2]];
-        words["one"][ids[3]];
-        words["two"][ids[2]];
-        words["two"][ids[3]];
-        words["two"][ids[4]];
+        words["one"][sort][ids[0]];
+        words["one"][sort][ids[1]];
+        words["one"][sort][ids[2]];
+        words["one"][sort][ids[3]];
+        words["two"][sort][ids[2]];
+        words["two"][sort][ids[3]];
+        words["two"][sort][ids[4]];
         
         for (auto& id : ids)
             bounds[id];
@@ -1107,6 +1106,8 @@ namespace BeeFishQuery {
         JSONPathParser parser(auth, root);
         Path objects = database.objects()[root.index()];
         Path words = database.words();
+        JSONPath::Sort sort =
+            JSONPath::Sort::Insertion;
             
         ifstream input(json);
         parser.read(input);
@@ -1115,13 +1116,13 @@ namespace BeeFishQuery {
         
         JSONDatabase readOnlyDatabase(database.filename(), true);
         auto test =
-        [&readOnlyDatabase, &words, &objects, &ok, &auth](BString query, vector<BString> check) {
+        [&readOnlyDatabase, &words, &objects, &ok, &auth, &sort](BString query, vector<BString> check) {
             
             cout << "\t" << query << flush;
 
             JSONDatabase& db = readOnlyDatabase;
             
-            Expression expression(db, words, objects);
+            Expression expression(db, words, objects, sort);
             if (ok)
             {
                 Parser parser(expression);

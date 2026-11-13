@@ -5,7 +5,7 @@ OPTIMISATION=-Ofast
 DEPS=$(BUILD)/json main.cpp ../Miscellaneous/Stack.hpp ../Miscellaneous/SharedMemory.hpp ../Miscellaneous/MimeTypes.hpp Database.hpp DatabaseBase.hpp LockFile.hpp Version.hpp Test.hpp File.hpp Version.hpp Branch.hpp Path.hpp PathBase.hpp PathBase.hpp Iterable.hpp Makefile JSONPath.hpp JSONPathParser.hpp JSONDatabase.hpp JSONIndex.hpp NullStream.hpp LoadFiles.hpp ../Size.hpp Makefile
 
 $(OUTPUT): $(DEPS)
-	g++ $(CFLAGS) $(OPTIMISATION) main.cpp $(JSON_INDEX) -o $(OUTPUT) -lcryptopp
+	g++ $(CFLAGS) $(OPTIMISATION) main.cpp -o $(OUTPUT) -lcryptopp
 
 
 $(BUILD)/json:
@@ -19,8 +19,7 @@ test:	$(OUTPUT)
 
 debug:	CFLAGS += -g -D DEBUG
 debug:	DEBUG = debug
-debug:	OPTIMISATION= -Ofast
-debug:	JSON_INDEX = -D JSON_INDEX
+debug:	OPTIMISATION=
 
 debug:	$(OUTPUT)
 
@@ -42,7 +41,7 @@ run:	$(OUTPUT)
 	$(OUTPUT) -input
 	
 run_debug:	debug
-	gdb --args $(OUTPUT) -files
+	gdb --args $(OUTPUT) -test
 	
 	
 trace:	$(OUTPUT)

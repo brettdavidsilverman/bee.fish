@@ -11,7 +11,8 @@ namespace BeeFishAuthentication
 
 namespace BeeFishDatabase
 {
-
+    typedef BeeFishId::Id Id;
+    
     class JSONPath;
     
     class JSONDatabase : public Database
@@ -24,6 +25,7 @@ namespace BeeFishDatabase
         Path _properties;
         Path _words;
         Path _objects;
+        Path _ids;
         Path _json;
         
     public:
@@ -54,6 +56,9 @@ namespace BeeFishDatabase
             ),
             _objects(
                 _root[OBJECTS]
+            ),
+            _ids(
+                _root[IDS]
             ),
             _json(
                 _root[JSON]
@@ -90,6 +95,11 @@ namespace BeeFishDatabase
         Path users() const
         {
             return _users;
+        }
+        
+        Path ids() const
+        {
+            return _ids;
         }
         
         Path userData(const BString& userId)

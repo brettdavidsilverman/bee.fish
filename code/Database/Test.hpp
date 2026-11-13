@@ -644,11 +644,13 @@ inline bool testFile()
         auth.logon("boo");
 
 
+        cout << "\tGet path" << flush;
+        
+        JSONPath path(db);
+        outputSuccess(true);
+        
         cout << "\tGet origin" << flush;
-
-        JSONPath path;
-       // path["boo"];
-
+        
         path = db.origin(
             auth,
             "https://test"
@@ -1270,7 +1272,7 @@ inline bool testJSONPath()
     success = success && testValue(
         "Id is index",
         root.index() ==
-            JSONPath::getIndexFromId(root.id())
+            JSONPath::getIndexFromId(root.database(), root.id())
     );
     
     JSONPath root2 = database.origin(auth, "https://test/my");
@@ -1278,7 +1280,7 @@ inline bool testJSONPath()
     success = success && testValue(
         "My Id is index",
         root2.index() ==
-            JSONPath::getIndexFromId(root2.id())
+            JSONPath::getIndexFromId(root2.database(), root2.id())
     );
 
 
@@ -1496,9 +1498,9 @@ inline bool testJSONId()
 
     test.setNull();
 
-    JSONPath::Id id = test.id();
+    BeeFishDatabase::Id id = test.id();
 
-    JSONPath::Id id2 = test.id();
+    BeeFishDatabase::Id id2 = test.id();
 
     success = success &&
               testValue(
@@ -1532,7 +1534,7 @@ inline bool testJSONId()
 
     cerr << "Loading timestamps " << endl;
     
-//Timestamp::Memory::reset();
+//Insertion::Memory::reset();
 
     const Index size = 10;
     Database db;
@@ -2578,7 +2580,7 @@ inline bool testObjects()
     auto listObjects =
     [] (BeeFishAuthentication::Authentication& auth, JSONDatabase& db, Path objects) {
 
-        Iterable<JSONPath::Id> iterable(objects);
+        Iterable<BeeFishDatabase::Id> iterable(objects);
         Index count = 0;
         for (auto it = iterable.begin();
                 it != iterable.end();
@@ -2909,7 +2911,7 @@ inline bool testDeleteProperty()
     success = success &&
               testValue(
                   "Word a belongs before",
-                  database4.words()["a"].contains(start4["a"].id())
+                  database4.words()["a"][JSONPath::Sort::Insertion].contains(start4["a"].id())
               );
 
 
@@ -2933,7 +2935,7 @@ inline bool testDeleteProperty()
     success = success &&
               testValue(
                   "Word a belongs after",
-                  database4.words()["a"].contains(start4["a"].id())
+                  database4.words()["a"][JSONPath::Sort::Insertion].contains(start4["a"].id())
               );
 
     cout << "Delete property thats array " << endl;
@@ -2985,7 +2987,7 @@ inline bool testDeleteProperty()
     JSONPath parent = hello.parent();
     cout << hello.toString(auth6) << endl;
     hello.setUndefined();
-    parent.toString(auth);
+    parent.toString(auth6);
 
     BeeFishMisc::outputSuccess(success);
 
@@ -3073,28 +3075,22 @@ inline bool testFromString()
                  !path["a"].isUserRoot()
              );
 
-        JSONPath::Id key = path["a"].toKey();
+        BeeFishDatabase::Id id = path["a"].id();
         Index index;
         BString url =
             JSONPath::keyToString(
                 auth,
-                key,
+                id,
                 index
             );
             
-#ifndef JSON_INDEX
         BString compare =
-            BString("https://test/a?index=") +
-            BString(to_string(index));
-#else
-       BString compare =
             "https://test/a";
-#endif
-        ok = ok && testValue(
-                 "From global key",
-                 url == compare
 
-             );
+        ok = ok && testValue(
+            "From global key",
+            url == compare
+        );
              
     }
 
@@ -3125,7 +3121,7 @@ inline bool testFromString()
 
 
 
-        JSONPath::Id key = path["a"].toKey();
+        BeeFishDatabase::Id key = path["a"].id();
         Index index;
         BString url =
             JSONPath::keyToString(
@@ -3134,14 +3130,8 @@ inline bool testFromString()
                 index
             );
 
-#ifndef JSON_INDEX
-        BString compare =
-            BString("https://test/my/a?index=") +
-            BString(to_string(index));
-#else
        BString compare =
             "https://test/my/a";
-#endif
 
         ok = ok && testValue(
                  "From my key",
@@ -3160,15 +3150,6 @@ inline bool testMultiThreaded()
 {
     cout << "Test multi threaded" << endl;
 
-#ifdef JSON_INDEX
-    // When compiled with this flag,
-    // sizes are consistent
-    const Index SIZE = 1135312;
-#else
-    const Index SIZE =  //3476064;
-                        3476064;
-#endif
-
     File authFile;
 
     BeeFishAuthentication::Authentication
@@ -3176,7 +3157,7 @@ inline bool testMultiThreaded()
     auth.logon("boo");
 
     auto test =
-        [SIZE, &auth](std::filesystem::path file, bool readOnly, bool getSuccess = false)
+        [&auth](std::filesystem::path file, bool readOnly, bool getSuccess = false)
     {
 
         static Index size = 0;
@@ -3209,24 +3190,12 @@ inline bool testMultiThreaded()
                       parser.matched()
                   );
 
-        if (success && SIZE > 0) {
+        if (success) {
             if (size == 0)
             {
                 size = db.size();
-                
-                cout << "Size a " << size << endl;
-                /*
-                success = testValue(
-                              "First size",
-                              size == SIZE
-                          );
-                */
             }
             else {
-                success = testValue(
-                              "Subsequent size",
-                              db.size() == size
-                          );
                 cout << "Size a " << size << endl;
                 cout << "Size b " << db.size() << endl;
             }

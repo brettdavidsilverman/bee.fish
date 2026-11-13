@@ -206,7 +206,44 @@ public:
 
 class Expression : public BeeFishParser::Match
 {
-
+    
+    class Sort : public BeeFishParser::And
+    {
+        Expression* _expression;
+        BeeFishParser::Or* _sort;
+        
+    public:
+        Sort(Expression* expression) :
+            BeeFishParser::And(
+                _sort = new BeeFishParser::Or(
+                    new BeeFishParser::CIWord("key"),
+                    new BeeFishParser::CIWord("insertion")
+                )
+            ),
+            _expression(expression)
+        {
+        }
+        
+        virtual void success()
+        override
+        {
+            _expression->sort() =
+                (JSONPath::Sort)
+                (_sort->_index);
+cerr << "SET SORT ";
+if (_expression->sort() == JSONPath::Sort::Key)
+    cerr << "KEY";
+else if (_expression->sort() == JSONPath::Sort::Insertion)
+    cerr << "INSERTION";
+else
+    cerr << "UNKNOWN";
+    
+cerr << endl;
+            BeeFishParser::And::success();
+        }
+                
+    };
+    
     class Item
     {
     public:
@@ -258,7 +295,8 @@ class Expression : public BeeFishParser::Match
             IterableItem* iterable = new IterableItem(
                 new BeeFishQuery::WordPath(
                     expression._words,
-                    _word
+                    _word,
+                    expression.sort()
                 ),
                 _word
             );
@@ -412,7 +450,8 @@ class Expression : public BeeFishParser::Match
             return new Expression(
                 *_parent->_database,
                 _parent->_words,
-                _parent->_bounds
+                _parent->_bounds,
+                _parent->sort()
             );
         }
     };
@@ -481,6 +520,7 @@ class Expression : public BeeFishParser::Match
                     return true;
                 }
             )
+
         )
         {
         }
@@ -563,38 +603,55 @@ public:
     JSONDatabase* _database;
     Path _words;
     Path _bounds;
+    JSONPath::Sort _sort;
     
     Expression()
     {
         throw logic_error("Query::Expression private constructor");
     }
     
-    Expression(JSONDatabase& database, Path words, Path bounds) :
+    Expression(
+        JSONDatabase& database,
+        Path words,
+        Path bounds,
+        JSONPath::Sort sort
+    ) :
         Match(),
         _database(&database),
         _words(words),
-        _bounds(bounds)
+        _bounds(bounds),
+        _sort(sort)
     {
     }
     
-    Expression(JSONPath path) :
+    Expression(
+        JSONPath path,
+        JSONPath::Sort sort
+    ) :
         Expression(
             path.database(),
             path.database().words(),
-            path.database().objects()[path.index()]
+            path.database().objects()[path.index()],
+            sort
         )
     {
     }
     
-    Expression(JSONPath path, const BString& query) :
-        Expression(path)
+    Expression(
+        JSONPath path,
+        const BString& query,
+        JSONPath::Sort sort
+    ) :
+        Expression(path, sort)
     {
         Parser parser(*this);
         parser.read(query);
         parser.eof();
         
         if (!parser.matched())
+        {
             throw runtime_error(parser.getError());
+        }
     }
         
     
@@ -637,6 +694,10 @@ public:
     virtual void setup(Parser* parser)
     {
         _match = new BeeFishParser::And(
+            new Blankspaces(),
+            new Optional(
+                new Sort(this)
+            ),
             new Blankspaces(),
             new Tokens(this),
             new Optional(
@@ -797,6 +858,11 @@ IterableItem* item =
         );
         
     }
+    
+    JSONPath::Sort& sort()
+    {
+        return _sort;
+    }
             
     
 
@@ -811,16 +877,20 @@ public:
     Expression* _expression;
 
 public:
-    Statement(JSONPath path) :
+    Statement(JSONPath path, JSONPath::Sort sort) :
         BeeFishParser::Match()
     {
         _match = new BeeFishParser::And(
             _capture = new Capture(
                 _expression =
-                    new Expression(path)
+                    new Expression(path, sort)
             ),
-            new Blankspaces(),
-            new Character(";")
+            new Optional(
+                new Blankspaces()
+            ),
+            new Optional(
+                new Character(";")
+            )
         );
     }
 

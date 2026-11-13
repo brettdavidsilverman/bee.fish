@@ -13,6 +13,7 @@ namespace BeeFishParser {
     public:
         vector<Match*> _inputs;
         Match* _item = nullptr;
+        Index _index = 0;
         
     public:
 
@@ -59,19 +60,23 @@ namespace BeeFishParser {
                 return false;
             
             bool matched = false;
-
+            Index index = 0;
+            
             for ( auto
                       it  = _inputs.begin();
                       it != _inputs.end();
-                     ++it
+                      ++it
                  )
             {
                 
                 Match* item = *it;
                 
                 if (item->result() == false)
+                {
+                    ++index;
                     continue;
-                    
+                }
+                
                 if ( item->result() == nullopt &&
                      item->match(_parser, character) )
                 {
@@ -86,14 +91,15 @@ namespace BeeFishParser {
                         break;
                     }
                 }
+                
+                ++index;
 
             }
          
             if (_item)
             {
+                _index = index;
                 success();
-//cerr << "OOfPre::this: " << this << ":" << result() << endl;
-
             }
             else if ( result() == nullopt && 
                          !matched )
@@ -116,18 +122,22 @@ namespace BeeFishParser {
 
                 
             _item = nullptr;
+            Index index = 0;
             
             for ( auto item : _inputs)
             {
-
+                
                 item->eof(parser);
                     
                 if (item->result() == true)
                 {
                     _item = item;
+                    _index = index;
                     success();
                     return;
                 }
+                
+                ++index;
             }
 
             fail();

@@ -21,7 +21,8 @@ using namespace BeeFishDatabase;
 
         WordPath(
             const Path& words,
-            const BString& word
+            const BString& word,
+            const JSONPath::Sort sort
         ) :
             _words(words),
             _word(word)
@@ -31,7 +32,13 @@ using namespace BeeFishDatabase;
                 word.toLower();
                 
             if (words.contains(lower))
-                _a = new Path(words[lower]);
+            {
+                _a = new Path(
+                    words
+                    [lower]
+                    [sort]
+                );
+            }
             else
                 _a = nullptr;
                 

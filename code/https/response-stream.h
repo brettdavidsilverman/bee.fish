@@ -144,55 +144,74 @@ public:
             {
                 getCount = true;
                 search = search.substr(0, search.size() - 1);
+
             }
 
-            BeeFishQuery::Expression
-                expression(bookmark, search);
-
-            BeeFishQuery::PathBase* path =
-                expression
-                .getPath().copy();
-                
+            
+            
+            JSONPath searchPath;
+            
             if (url.path() == "/")
             {
 
                 BeeFishWeb::URL
                     myURL(
                         url.origin() +
-                        BString("/my")
+                            "/my"
                     );
                     
-                JSONPath myPath =
+                searchPath =
                     JSONPath::fromString(
                         app->authentication(),
                         *database,
                         myURL
                     );
-
-                BeeFishQuery::Expression
-                    expression(myPath, search);
                 
-                BeeFishQuery::AndPath path2 =
-                expression
-                   .getPath();
-                   /*
-                BeeFishQuery::PathBase*
-                   tmpPath = new BeeFishQuery::OrPath(
-                        *path,
-                        path2
-                    );
-                    */
-                delete path;
-                
-                path = path2.copy();
             }
+            else
+            {
+                searchPath = jsonPath;
+            }
+            
+cerr << "SEARCH " << search << endl;
+
+            BeeFishQuery::Expression*
+                expression = new
+                BeeFishQuery::Expression(
+                    searchPath,
+                    search,
+                    JSONPath::Sort::Insertion
+                );
+                
+            if (getCount && expression->sort() !=
+                JSONPath::Sort::Insertion)
+            {
+                stringstream stream;
+                stream << *expression;
+                delete expression;
+                expression = new BeeFishQuery::Expression(
+                    searchPath,
+                    stream.str(),
+                    JSONPath::Sort::Insertion
+                );
+            }
+                
+cerr << "EXPRESSION " << *expression << " ";
+if (expression->sort() == JSONPath::Sort::Key)
+    cerr << "{KEY}";
+else if (expression->sort() == JSONPath::Sort::Insertion)
+    cerr << "{INSERTION}";
+cerr << endl;
 
             BeeFishQuery::Iterable
             matches(
                 app->authentication(),
                 *database,
-                *path
+                expression
+                    ->getPath()
             );
+            
+            delete expression;
             
             Index count = 0;
             
@@ -204,7 +223,6 @@ public:
                     );
                 
                 flush();
-                delete path;
                 return;
             }
 
@@ -223,7 +241,6 @@ public:
                           << "Invalid query parameters"
                           << "\"";
                     flush();
-                    delete path;
                     return;
                 }
             }
@@ -300,8 +317,6 @@ public:
 
             *this << endl
                   << "}";
-            
-            delete path;
 
             flush();
 

@@ -31,14 +31,13 @@ public:
     inline static const Index ID = 4;
     inline static const Index INDEXED = 5;
     inline static const Index CHILDREN = 6;
+    
+    enum Sort {
+        Key = 0,
+        Insertion = 1
+    };
+    
 public:
-
-#ifdef JSON_INDEX
-    typedef Index Id;
-#else
-    // typedef BeeFishId::Id Id;
-    typedef Stack Id;
-#endif
 
 
     using Path::contains;
@@ -57,21 +56,56 @@ public:
 
     }
 
-#ifndef JSON_INDEX
-    JSONPath(JSONDatabase& database, Id id) :
+    JSONPath(JSONDatabase& database, Stack& key) :
         Path(
             database,
-            //database.objects()
-            JSONPath::getIndexFromId(id)
+            JSONPath::getIndexFromId(key)
         )
     {
 
     }
-#endif 
-    static Index getIndexFromId(const Stack& id)
+    
+    JSONPath(JSONDatabase& database, Id id) :
+        Path(
+            database,
+            JSONPath::getIndexFromId(
+                database,
+                id
+            )
+        )
     {
-        Stack stack = id;
+
+    }
+    
+    JSONPath(JSONDatabase& database, const Path& start) :
+        Path(database, start.index())
+    {
+
+    }
+
+    JSONPath(Path start) :
+        JSONPath((JSONDatabase&)start.database(), start)
+    {
+    }
+
+    JSONPath(const JSONPath& source) :
+        Path(source)
+    {
+
+    }
+    
+    static Index getIndexFromId(JSONDatabase& database, Id id)
+    {
+        Index index;
+        database
+        .ids()[id]
+        .getData(index);
         
+        return index;
+    }
+    
+    static Index getIndexFromId(Stack& stack)
+    {
         stack.readBit();
         
         Index count = 0;
@@ -120,31 +154,8 @@ public:
         
         return index;
         
-
     }
     
-    static Index getIndexFromId(const Index& id)
-    {
-        return id;
-    }
-
-    JSONPath(JSONDatabase& database, const Path& start) :
-        Path(database, start.index())
-    {
-
-    }
-
-    JSONPath(Path start) :
-        JSONPath((JSONDatabase&)start.database(), start)
-    {
-    }
-
-    JSONPath(const JSONPath& source) :
-        Path(source)
-    {
-
-    }
-
     virtual PathBase* copy() const
     override
     {
@@ -160,9 +171,9 @@ public:
 
     Id id() const
     {
-#ifndef JSON_INDEX
-        return toKey();
-#endif
+        if (!hasId())
+            setId();
+            
         Path path = *this;
         path = path[ID];
         Id id;
@@ -170,35 +181,37 @@ public:
         
         return id;
     }
-
-
-    Id setId()
+    
+    Id setId() const
     {
-#ifdef JSON_INDEX
-        const Id id = index();
-#else
-        const Id id = toKey();
-#endif
+        Id id;
+        
         return setId(id);
     }
 
 
-    Id setId(const Id& id)
+    Id& setId(Id& id) const
     {
-#ifdef JSON_INDEX
+
+        database()
+        .ids()[id]
+        .setData(
+            index()
+        );
+        
         Path path = *this;
         path = path[ID];
-
         path.setData<Id>(id);
-#endif
+        
         return id;
     }
 
-    bool hasId()
+
+    bool hasId() const
     {
-        Path path = (*this);//[ID];
-        path = path[ID];
-        return path.hasData();
+        return 
+            Path(*this)[ID]
+            .hasData();
     }
 
 
@@ -264,8 +277,7 @@ public:
                     {
                         JSONPath child = children[++count];
 
-                        if (!child.hasId())
-                            child.setId();
+                        child.id();
 
                         child.indexProperties();
                     }
@@ -344,7 +356,9 @@ protected:
     {
 
         Id id = JSONPath::id();
-
+        
+        database().ids().clear(id);
+        
         Path objects =
             database().objects();
 
@@ -370,9 +384,8 @@ protected:
         {
             setData<Type>(type);
 
-            if (!hasId())
-                setId();
-
+            id();
+            
             addObject();
 
         }
@@ -814,8 +827,9 @@ public:
     }
     
 public:
-#ifndef JSON_INDEX
-    Id toKey() const {
+    
+
+    Stack toKey() const {
         
         JSONPath path = *this;
         BString string;
@@ -913,13 +927,6 @@ public:
         return temp;
     }
     
-#else
-    Id toKey() const {
-        
-        return index();
-    }
-        
-#endif
 
 public:
     
@@ -929,6 +936,7 @@ public:
         Index& index
     )
     {
+        stack.reset();
         
         stack.readBit();
         
@@ -1014,13 +1022,16 @@ public:
     
     static BString keyToString(
         Authentication& auth,
-        Index& id,
+        Id& id,
         Index& index
     )
     {
         
         Authentication::ScopedDatabase database(auth);
-        index = id;
+        index = JSONPath::getIndexFromId(
+            *database,
+            id
+        );
         
         JSONPath path(*database, index);
         return path.toString(auth);
@@ -1360,6 +1371,7 @@ public:
         case Type::STRING:
         {
             removeWords();
+            
             Path path = *this;
             path.clear(VALUE);
         }
@@ -1483,8 +1495,18 @@ private:
             {
                 Path wordPath = words[word];
                 ++wordPath;
-            
-                ++wordPath[json.id()];
+        
+                ++(wordPath[
+                    JSONPath::Sort::Insertion
+                ]
+                [json.id()]
+                );
+                
+                wordPath[
+                    JSONPath::Sort::Key
+                ]
+                [json.toKey()];
+                
                 
             }
             
@@ -1532,8 +1554,7 @@ private:
     void removeWords(const BString& value, BString& partRemoveWords, bool wholeWord, bool isFinalPart)
     {
         Path words = database().words();
-        //Path objects = database().objects();
-
+        
         std::vector<BString> tokens =
             value.tokenise(
                 partRemoveWords,
@@ -1543,40 +1564,64 @@ private:
 
         for (auto word : tokens)
         {
+            bool clearWord = false;
+            
             if (words.contains(word))
             {
                 Path wordPath = words[word];
+                Path timestampPath =
+                    wordPath[
+                        JSONPath
+                        ::Sort
+                        ::Insertion
+                    ];
 
                 JSONPath json = (*this);
-
+                
+                
                 while  (!json.isRoot() &&
                         !json.parent().isRoot())
                 {
+                    Id id = json.id();
 
-                    if (wordPath.contains(json.id()))
+                    if (timestampPath
+                        .contains(id))
                     {
 
-                        Index count = --wordPath[json.id()];
+                        Index count = 
+                            --(timestampPath[
+                                id
+                            ]);
 
                         if (count == 0)
                         {
-
-                            wordPath.clear(json.id());
-                            if (wordPath.isDeadEnd())
-                                words.clear(word);
+                            Path keyPath =
+                                wordPath[
+                                    JSONPath
+                                    ::Sort
+                                    ::Key
+                                ];
+                                
+                            keyPath.clear(toKey());
+                            
+                            timestampPath.clear(id);
                         }
                     }
 
+                    if (--wordPath == 0)
+                    {
+                       clearWord = true;
+                    }
+                    
                     json = json.parent();
                 }
-
-
-
             }
-
-
+            if (clearWord)
+            {
+                words.clear(word);
+                clearWord = false;
+            }
         }
-
     }
 
 public:
@@ -1919,6 +1964,19 @@ void JSONDatabase::log(
             endl
         );
     }
+}
+
+PowerEncoding& operator << (PowerEncoding& output, const JSONPath::Sort& sort)
+{
+    return output << (Index)sort;
+}
+
+PowerEncoding& operator >> (PowerEncoding& input, JSONPath::Sort& sort)
+{
+    Index index;
+    input >> index;
+    sort = (JSONPath::Sort)index;
+    return input;
 }
 
 PowerEncoding& operator << (PowerEncoding& output, const JSONPath& json)

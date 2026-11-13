@@ -31,7 +31,7 @@ run:
 	sudo gdb --args bee.fish/build/https -port 443
 
 run_debug:	debug
-	make -C dev.bee.fish/code/https debug stop PORT=8000
+	make -C dev.bee.fish/code/https stop PORT=8000
 	sudo gdb --args dev.bee.fish/build/https -port 8000
 
 	

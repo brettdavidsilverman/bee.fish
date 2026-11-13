@@ -117,8 +117,7 @@ int main(int argc, const char* argv[]) {
     {
         
         line = argv[queryArg + 1];
-        
-        Expression expression(path);
+        Expression expression(path, JSONPath::Sort::Insertion);
         stringstream stream(line);
         stream >> expression;
         displayResults(expression);
@@ -142,7 +141,11 @@ int main(int argc, const char* argv[]) {
             }
             
             BeeFishQuery::Expression
-                expression(path, line);
+                expression(
+                    path, 
+                    line, 
+                    JSONPath::Sort::Insertion
+                );
                     
             displayResults(expression);
             
