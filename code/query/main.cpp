@@ -81,7 +81,8 @@ int main(int argc, const char* argv[]) {
             jsonMatches(
                 auth,
                 database,
-                query
+                query,
+                JSONPath::Sort::Id
             );
             
         auto it = jsonMatches.begin();
@@ -117,7 +118,7 @@ int main(int argc, const char* argv[]) {
     {
         
         line = argv[queryArg + 1];
-        Expression expression(path, JSONPath::Sort::Insertion);
+        Expression expression(path, JSONPath::Sort::Id);
         stringstream stream(line);
         stream >> expression;
         displayResults(expression);
@@ -144,7 +145,7 @@ int main(int argc, const char* argv[]) {
                 expression(
                     path, 
                     line, 
-                    JSONPath::Sort::Insertion
+                    JSONPath::Sort::Id
                 );
                     
             displayResults(expression);

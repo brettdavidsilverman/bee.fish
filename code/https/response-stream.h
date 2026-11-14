@@ -180,11 +180,11 @@ cerr << "SEARCH " << search << endl;
                 BeeFishQuery::Expression(
                     searchPath,
                     search,
-                    JSONPath::Sort::Insertion
+                    JSONPath::Sort::Id
                 );
                 
             if (getCount && expression->sort() !=
-                JSONPath::Sort::Insertion)
+                JSONPath::Sort::Id)
             {
                 stringstream stream;
                 stream << *expression;
@@ -192,15 +192,15 @@ cerr << "SEARCH " << search << endl;
                 expression = new BeeFishQuery::Expression(
                     searchPath,
                     stream.str(),
-                    JSONPath::Sort::Insertion
+                    JSONPath::Sort::Id
                 );
             }
                 
-cerr << "EXPRESSION " << *expression << " ";
+cerr << "EXPRESSION " << *expression << " sort ";
 if (expression->sort() == JSONPath::Sort::Key)
-    cerr << "{KEY}";
-else if (expression->sort() == JSONPath::Sort::Insertion)
-    cerr << "{INSERTION}";
+    cerr << "KEY";
+else if (expression->sort() == JSONPath::Sort::Id)
+    cerr << "ID";
 cerr << endl;
 
             BeeFishQuery::Iterable
@@ -208,7 +208,8 @@ cerr << endl;
                 app->authentication(),
                 *database,
                 expression
-                    ->getPath()
+                    ->getPath(),
+                expression->sort()
             );
             
             delete expression;

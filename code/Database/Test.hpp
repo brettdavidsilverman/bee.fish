@@ -1534,7 +1534,7 @@ inline bool testJSONId()
 
     cerr << "Loading timestamps " << endl;
     
-//Insertion::Memory::reset();
+//Id::Memory::reset();
 
     const Index size = 10;
     Database db;
@@ -2911,7 +2911,7 @@ inline bool testDeleteProperty()
     success = success &&
               testValue(
                   "Word a belongs before",
-                  database4.words()["a"][JSONPath::Sort::Insertion].contains(start4["a"].id())
+                  database4.words()["a"][JSONPath::Sort::Id].contains(start4["a"].id())
               );
 
 
@@ -2935,7 +2935,7 @@ inline bool testDeleteProperty()
     success = success &&
               testValue(
                   "Word a belongs after",
-                  database4.words()["a"][JSONPath::Sort::Insertion].contains(start4["a"].id())
+                  database4.words()["a"][JSONPath::Sort::Id].contains(start4["a"].id())
               );
 
     cout << "Delete property thats array " << endl;

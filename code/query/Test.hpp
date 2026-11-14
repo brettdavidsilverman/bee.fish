@@ -397,7 +397,7 @@ namespace BeeFishQuery {
                 return false;
             
             Expression* expression =
-                new Expression(root, JSONPath::Sort::Insertion);
+                new Expression(root, JSONPath::Sort::Id);
                 
             Capture* capture =
                 new Capture(expression);
@@ -492,7 +492,7 @@ namespace BeeFishQuery {
             
             try {
                 ok = false;
-                Expression expression(root, "and and", JSONPath::Sort::Insertion);
+                Expression expression(root, "and and", JSONPath::Sort::Id);
             }
             catch (std::exception& ex)
             {
@@ -972,7 +972,7 @@ namespace BeeFishQuery {
         Words words = db.words();
         Bounds bounds = db.objects();
         JSONPath::Sort sort =
-            JSONPath::Sort::Insertion;
+            JSONPath::Sort::Id;
             
         bool ok  = true;
         auto test =
@@ -1107,7 +1107,7 @@ namespace BeeFishQuery {
         Path objects = database.objects()[root.index()];
         Path words = database.words();
         JSONPath::Sort sort =
-            JSONPath::Sort::Insertion;
+            JSONPath::Sort::Id;
             
         ifstream input(json);
         parser.read(input);
@@ -1141,7 +1141,7 @@ namespace BeeFishQuery {
                     expression
                     .getPath();
                 
-                BeeFishQuery::Iterable iterable(auth, db, pathBase);
+                BeeFishQuery::Iterable iterable(auth, db, pathBase, JSONPath::Sort::Id);
                 
                 for (auto value : iterable)
                 {

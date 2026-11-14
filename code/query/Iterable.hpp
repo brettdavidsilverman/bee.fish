@@ -18,30 +18,34 @@ protected:
     Authentication& _auth;
     JSONDatabase* _database;
     PathBase* _path;
-
+    const JSONPath::Sort _sort;
+    
 public:
     typedef BeeFishDatabase::Iterable<BeeFishDatabase::Id> IdIterable;
     typedef IdIterable::Iterator IdIterator;
     
+    typedef BeeFishDatabase::Iterable<BeeFishDatabase::Key> KeyIterable;
+    typedef KeyIterable::Iterator KeyIterator;
     
     Iterable(
         BeeFishAuthentication::
         Authentication& auth,
         JSONDatabase& database,
-        const PathBase& path
-
+        const PathBase& path,
+        JSONPath::Sort sort
     ) :
         _auth(auth),
         _database(&database),
-        _path(path.copy())
-
+        _path(path.copy()),
+        _sort(sort)
     {
     }
 
     Iterable(const Iterable& source) :
         _auth(source._auth),
         _database(source._database),
-        _path(source._path->copy())
+        _path(source._path->copy()),
+        _sort(source._sort)
     {
     }
 
@@ -292,15 +296,19 @@ public:
         const Iterable* _container = nullptr;
         BString _value;
         Index _index;
-        
-        typedef typename BeeFishDatabase::Iterable<BeeFishDatabase::Id> IdIterable;
-        typedef typename IdIterable::Iterator IdIterator;
-    
+
         IdIterable*
             _idIterable = nullptr;
         
         IdIterator* 
             _idIterator = nullptr;
+            
+        KeyIterable*
+            _keyIterable = nullptr;
+        
+        KeyIterator* 
+            _keyIterator = nullptr;
+            
     public:
         
         // Iterator traits (required for STL compatibility in C++17 and earlier)
@@ -323,10 +331,21 @@ public:
         Iterator(
             const Iterable& iterable
         ) :
-            _container(&iterable),
-            _idIterable(new IdIterable(*iterable._path)),
-            _idIterator(new IdIterator(*_idIterable))
+            _container(&iterable)
         {
+            if (iterable._sort == JSONPath::Sort::Id)
+            {
+                _idIterable =
+                    new IdIterable(
+                        *iterable._path
+                    );
+                    
+                _idIterator =
+                    new IdIterator(
+                         *_idIterable
+                    );
+            }
+            
             setValue();
         }
         

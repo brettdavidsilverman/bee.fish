@@ -32,9 +32,9 @@ public:
     inline static const Index INDEXED = 5;
     inline static const Index CHILDREN = 6;
     
-    enum Sort {
+    enum class Sort {
         Key = 0,
-        Insertion = 1
+        Id = 1
     };
     
 public:
@@ -1497,7 +1497,7 @@ private:
                 ++wordPath;
         
                 ++(wordPath[
-                    JSONPath::Sort::Insertion
+                    JSONPath::Sort::Id
                 ]
                 [json.id()]
                 );
@@ -1573,7 +1573,7 @@ private:
                     wordPath[
                         JSONPath
                         ::Sort
-                        ::Insertion
+                        ::Id
                     ];
 
                 JSONPath json = (*this);

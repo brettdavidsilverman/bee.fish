@@ -217,7 +217,7 @@ class Expression : public BeeFishParser::Match
             BeeFishParser::And(
                 _sort = new BeeFishParser::Or(
                     new BeeFishParser::CIWord("key"),
-                    new BeeFishParser::CIWord("insertion")
+                    new BeeFishParser::CIWord("id")
                 )
             ),
             _expression(expression)
@@ -233,8 +233,8 @@ class Expression : public BeeFishParser::Match
 cerr << "SET SORT ";
 if (_expression->sort() == JSONPath::Sort::Key)
     cerr << "KEY";
-else if (_expression->sort() == JSONPath::Sort::Insertion)
-    cerr << "INSERTION";
+else if (_expression->sort() == JSONPath::Sort::Id)
+    cerr << "ID";
 else
     cerr << "UNKNOWN";
     
