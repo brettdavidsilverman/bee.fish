@@ -12,6 +12,7 @@ namespace BeeFishAuthentication
 namespace BeeFishDatabase
 {
     typedef BeeFishId::Id Id;
+    typedef Stack Key;
     
     class JSONPath;
     

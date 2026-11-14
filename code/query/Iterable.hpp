@@ -20,8 +20,9 @@ protected:
     PathBase* _path;
 
 public:
-    typedef BeeFishDatabase::Iterable<BeeFishDatabase::Id>::Iterator IdIterator;
     typedef BeeFishDatabase::Iterable<BeeFishDatabase::Id> IdIterable;
+    typedef IdIterable::Iterator IdIterator;
+    
     
     Iterable(
         BeeFishAuthentication::
@@ -284,25 +285,41 @@ public:
     {
         delete _path;
     }
-
-    class Iterator {
+    
+    class Iterator
+    {
     protected:
-        
         const Iterable* _container = nullptr;
-        IdIterable* _iterable = nullptr;
-        IdIterator* _iterator = nullptr;
         BString _value;
         Index _index;
+        
+        typedef typename BeeFishDatabase::Iterable<BeeFishDatabase::Id> IdIterable;
+        typedef typename IdIterable::Iterator IdIterator;
+    
+        IdIterable*
+            _iterable = nullptr;
+        
+        IdIterator* 
+            _iterator = nullptr;
     public:
-
+        
         // Iterator traits (required for STL compatibility in C++17 and earlier)
         using iterator_category = std::forward_iterator_tag;
         using value_type        = BString;
         using difference_type   = std::ptrdiff_t;
         using pointer           = const BString*;
         using reference         = const BString&;
-
-
+        
+        Iterator()
+        {
+        }
+        
+        Iterator(const Iterable* container)
+        :
+            _container(container)
+        {
+        }
+        
         Iterator(
             const Iterable& iterable
         ) :
@@ -312,26 +329,25 @@ public:
         {
             setValue();
         }
-
-        Iterator(
-            const Iterator& source
-        ) :
-            _container(source._container)
+        
+        Iterator(const Iterator& source)
+        :
+            _container(source._container),
+            _value(source._value),
+            _index(source._index)
         {
             _iterable = nullptr;
-
+                 
             if (source._iterator)
                 _iterator = new IdIterator(*source._iterator);
             else
                 _iterator = nullptr;
-
-            _value = source._value;
-            _index = source._index;
-
         }
-
-        Iterator(const Iterable& iterable,
-                 Index from) :
+        
+        Iterator(
+            const Iterable& iterable,
+            Index from
+        ) :
             _container(&iterable),
             _iterable(new IdIterable(*iterable._path))
         {
@@ -346,12 +362,7 @@ public:
 
             setValue();
         }
-
-
-        Iterator()
-        {
-        }
-
+        
         virtual ~Iterator()
         {
             if (_iterator)
@@ -360,7 +371,40 @@ public:
             if (_iterable)
                 delete _iterable;
         }
+        
+        
+        Index index() const
+        {
+            return _index;
+        }
+        
+        // Dereference operator (*)
+        reference operator*() const
+        {
+            return _value;
+        }
 
+        pointer operator->() const
+        {
+            return &_value;
+        }
+        
+        // Prefix increment operator (++)
+        Iterator& operator++() {
+            ++(*_iterator);
+            setValue();
+            return *this;
+        }
+
+        // Postfix increment operator (++)
+        Iterator operator++(int)
+        {
+            Iterator tmp = *this;
+
+            ++(*this);
+            return tmp;
+        }
+        
         Iterator& operator = (const Iterator& source)
         {
 
@@ -371,7 +415,7 @@ public:
                 delete _iterable;
 
             _iterable = nullptr;
-
+                
             if (source._iterator)
                 _iterator = new IdIterator(*source._iterator);
             else
@@ -383,8 +427,68 @@ public:
 
             return *this;
         }
+        
+        JSONPath jsonPath(IdIterator& iterator)
+        {
+            Index index = 
+                JSONPath::getIndexFromId(
+                    *_container->_database,
+                    *iterator
+                );
 
-/*
+            return 
+                JSONPath(
+                    *_container
+                    ->_database,
+                    index
+                );
+                
+        }
+
+        BString toKey()
+        {
+            return _iterator->toKey();
+        }
+        
+        friend bool operator == (
+            const Iterator& a,
+            const Iterator& b
+        )
+        {
+            bool aIsEnd = true;
+            bool bIsEnd = true;
+
+            if (a._iterator)
+                aIsEnd = a._iterator->_isEnd;
+
+            if (b._iterator)
+                bIsEnd = b._iterator->_isEnd;
+
+            return aIsEnd == bIsEnd;
+
+        }
+
+        friend bool operator != (
+            const Iterator& a,
+            const Iterator& b
+        )
+        {
+
+            bool aIsEnd = true;
+            bool bIsEnd = true;
+
+            if (a._iterator)
+                aIsEnd = a._iterator->_isEnd;
+
+            if (b._iterator)
+                bIsEnd = b._iterator->_isEnd;
+
+            return aIsEnd != bIsEnd;
+
+        }
+        
+        /*
+// By Key
         void setValue()
         {
             _value.clear();
@@ -433,6 +537,7 @@ public:
 
         }
 */
+        // By Id
         void setValue()
         {
             _value.clear();
@@ -481,103 +586,11 @@ public:
 
         }
         
-
-        JSONPath jsonPath(IdIterator& iterator)
-        {
-            Index index = 
-                JSONPath::getIndexFromId(
-                    *_container->_database,
-                    *iterator
-                );
-
-            return 
-                JSONPath(
-                    *_container
-                    ->_database,
-                    index
-                );
-
-        }
-
-        Index index() const
-        {
-            return _index;
-        }
-
-
-        BString toKey()
-        {
-            return _iterator->toKey();
-        }
-
-        // Dereference operator (*)
-        reference operator*() const
-        {
-            return _value;
-        }
-
-        pointer operator->() const
-        {
-            return &_value;
-        }
-
-        // Prefix increment operator (++)
-        Iterator& operator++() {
-            ++(*_iterator);
-            setValue();
-            return *this;
-        }
-
-        // Postfix increment operator (++)
-        Iterator operator++(int)
-        {
-            Iterator tmp = *this;
-
-            ++(*this);
-            return tmp;
-        }
-
-        friend bool operator == (
-            const Iterator& a,
-            const Iterator& b
-        )
-        {
-            bool aIsEnd = true;
-            bool bIsEnd = true;
-
-            if (a._iterator)
-                aIsEnd = a._iterator->_isEnd;
-
-            if (b._iterator)
-                bIsEnd = b._iterator->_isEnd;
-
-            return aIsEnd == bIsEnd;
-        }
-
-        friend bool operator != (
-            const Iterator& a,
-            const Iterator& b
-        )
-        {
-
-            bool aIsEnd = true;
-            bool bIsEnd = true;
-
-            if (a._iterator)
-                aIsEnd = a._iterator->_isEnd;
-
-            if (b._iterator)
-                bIsEnd = b._iterator->_isEnd;
-
-            return aIsEnd != bIsEnd;
-        }
-
-
     };
-
 
     virtual Iterator begin()
     {
+        
         return Iterator(*this);
     }
 
@@ -587,7 +600,6 @@ public:
     {
         return Iterator(*this, from);
     }
-
 
 
     // Points one past the last element
