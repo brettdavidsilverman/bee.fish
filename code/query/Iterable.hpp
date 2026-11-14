@@ -297,10 +297,10 @@ public:
         typedef typename IdIterable::Iterator IdIterator;
     
         IdIterable*
-            _iterable = nullptr;
+            _idIterable = nullptr;
         
         IdIterator* 
-            _iterator = nullptr;
+            _idIterator = nullptr;
     public:
         
         // Iterator traits (required for STL compatibility in C++17 and earlier)
@@ -324,8 +324,8 @@ public:
             const Iterable& iterable
         ) :
             _container(&iterable),
-            _iterable(new IdIterable(*iterable._path)),
-            _iterator(new IdIterator(*_iterable))
+            _idIterable(new IdIterable(*iterable._path)),
+            _idIterator(new IdIterator(*_idIterable))
         {
             setValue();
         }
@@ -336,12 +336,12 @@ public:
             _value(source._value),
             _index(source._index)
         {
-            _iterable = nullptr;
+            _idIterable = nullptr;
                  
-            if (source._iterator)
-                _iterator = new IdIterator(*source._iterator);
+            if (source._idIterator)
+                _idIterator = new IdIterator(*source._idIterator);
             else
-                _iterator = nullptr;
+                _idIterator = nullptr;
         }
         
         Iterator(
@@ -349,7 +349,7 @@ public:
             Index from
         ) :
             _container(&iterable),
-            _iterable(new IdIterable(*iterable._path))
+            _idIterable(new IdIterable(*iterable._path))
         {
             JSONPath json(*_container->_database, from);
             BeeFishDatabase::Id id = json.id();
@@ -357,19 +357,19 @@ public:
             Stack stack;
             stack << id;
 
-            _iterator =
-                new IdIterator(*_iterable, stack);
+            _idIterator =
+                new IdIterator(*_idIterable, stack);
 
             setValue();
         }
         
         virtual ~Iterator()
         {
-            if (_iterator)
-                delete _iterator;
+            if (_idIterator)
+                delete _idIterator;
 
-            if (_iterable)
-                delete _iterable;
+            if (_idIterable)
+                delete _idIterable;
         }
         
         
@@ -391,7 +391,7 @@ public:
         
         // Prefix increment operator (++)
         Iterator& operator++() {
-            ++(*_iterator);
+            ++(*_idIterator);
             setValue();
             return *this;
         }
@@ -408,18 +408,18 @@ public:
         Iterator& operator = (const Iterator& source)
         {
 
-            if (_iterator)
-                delete _iterator;
+            if (_idIterator)
+                delete _idIterator;
 
-            if (_iterable)
-                delete _iterable;
+            if (_idIterable)
+                delete _idIterable;
 
-            _iterable = nullptr;
+            _idIterable = nullptr;
                 
-            if (source._iterator)
-                _iterator = new IdIterator(*source._iterator);
+            if (source._idIterator)
+                _idIterator = new IdIterator(*source._idIterator);
             else
-                _iterator = nullptr;
+                _idIterator = nullptr;
 
             _container = source._container;
             _value = source._value;
@@ -447,7 +447,7 @@ public:
 
         BString toKey()
         {
-            return _iterator->toKey();
+            return _idIterator->toKey();
         }
         
         friend bool operator == (
@@ -458,11 +458,11 @@ public:
             bool aIsEnd = true;
             bool bIsEnd = true;
 
-            if (a._iterator)
-                aIsEnd = a._iterator->_isEnd;
+            if (a._idIterator)
+                aIsEnd = a._idIterator->_isEnd;
 
-            if (b._iterator)
-                bIsEnd = b._iterator->_isEnd;
+            if (b._idIterator)
+                bIsEnd = b._idIterator->_isEnd;
 
             return aIsEnd == bIsEnd;
 
@@ -477,26 +477,26 @@ public:
             bool aIsEnd = true;
             bool bIsEnd = true;
 
-            if (a._iterator)
-                aIsEnd = a._iterator->_isEnd;
+            if (a._idIterator)
+                aIsEnd = a._idIterator->_isEnd;
 
-            if (b._iterator)
-                bIsEnd = b._iterator->_isEnd;
+            if (b._idIterator)
+                bIsEnd = b._idIterator->_isEnd;
 
             return aIsEnd != bIsEnd;
 
         }
-        
-        /*
+
+/*
 // By Key
-        void setValue()
+        void setValue(int)
         {
             _value.clear();
             
 
             while (!_iterator->_isEnd) {
 
-                Stack parent =
+                Key parent =
                     **_iterator;
 
                 IdIterator iterator = *_iterator;
@@ -506,7 +506,7 @@ public:
                 if (!iterator._isEnd)
                 {
 
-                    Stack child = *iterator;
+                    Key child = *iterator;
 
                     if (!Iterable::startsWith(
                             parent,
@@ -542,16 +542,16 @@ public:
         {
             _value.clear();
             Index index;
-            while (!_iterator->_isEnd) {
+            while (!_idIterator->_isEnd) {
 
                 BeeFishDatabase::Id parent =
-                    **_iterator;
+                    **_idIterator;
                     
                 BString parentValue =
                     _container
                     ->toString(parent, index);
                     
-                IdIterator iterator = *_iterator;
+                IdIterator iterator = *_idIterator;
 
                 ++iterator;
 
@@ -580,7 +580,7 @@ public:
                 }
 
 
-                *_iterator = iterator;
+                *_idIterator = iterator;
             }
 
 
