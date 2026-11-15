@@ -21,7 +21,7 @@ all:	$(OUTPUT)
 	make -C . stop PORT=$(PORT)
 	@echo "Testing on port $(PORT)"
 	$(OUTPUT) -port $(PORT) -test
-	$(OUTPUT) -port $(PORT) &
+	$(OUTPUT) -port $(PORT) -threads 1000 &
 	
 $(BUILD):
 	mkdir $(BUILD)
