@@ -62,7 +62,7 @@ int main(int argc, const char* argv[]) {
     
     BString line;
     auto displayResults =
-    [&database, &line, &auth, &path](Expression& expression)
+    [&database, &line, &auth, &path](Statement& statement)
     {
         
         cout << "Querying " 
@@ -71,18 +71,13 @@ int main(int argc, const char* argv[]) {
              << line
              << endl;
     
-        AndPath query =
-            expression
-            .getPath();
-            
         Index count = 0;
         
         BeeFishQuery::Iterable
             jsonMatches(
                 auth,
                 database,
-                query,
-                JSONPath::Sort::Id
+                statement
             );
             
         auto it = jsonMatches.begin();
@@ -118,17 +113,15 @@ int main(int argc, const char* argv[]) {
     {
         
         line = argv[queryArg + 1];
-        Expression expression(path, JSONPath::Sort::Id);
-        stringstream stream(line);
-        stream >> expression;
-        displayResults(expression);
-        return 0;
+        Statement statement(path, line, JSONPath::Sort::Id);
+        displayResults(statement);
+        return 0; 
     }
     
 
     do 
     {
-        cout << "Expression: ";
+        cout << "Statement: ";
         
         try {
             
@@ -141,14 +134,14 @@ int main(int argc, const char* argv[]) {
                 break;
             }
             
-            BeeFishQuery::Expression
-                expression(
+            BeeFishQuery::Statement
+                statement(
                     path, 
                     line, 
                     JSONPath::Sort::Id
                 );
                     
-            displayResults(expression);
+            displayResults(statement);
             
             cout << "ok" << endl;
         

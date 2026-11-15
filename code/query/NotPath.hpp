@@ -22,7 +22,7 @@ using namespace BeeFishDatabase;
 
         NotPath(
             const PathBase& path,
-            const Path bounds
+            const Path& bounds
         ) :
             _path(path.copy()),
             _bounds(bounds)

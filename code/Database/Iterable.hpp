@@ -120,7 +120,7 @@ public:
         using value_type        = T;
         using difference_type   = std::ptrdiff_t;
         using pointer           = T*;
-        using reference         = const T&;
+        using reference         = T&;
 
         // Constructor
         Iterator() {
@@ -217,7 +217,12 @@ public:
         }
 
         // Dereference operator (*)
-        reference operator*() const
+        reference operator*()
+        {
+            return _item;
+        }
+        
+        const reference operator*() const
         {
             return _item;
         }

@@ -27,10 +27,10 @@ using namespace BeeFishDatabase;
             _words(words),
             _word(word)
         {
-            
+
             BString lower = 
                 word.toLower();
-                
+
             if (words.contains(lower))
             {
                 _a = new Path(

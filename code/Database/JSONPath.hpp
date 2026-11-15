@@ -37,6 +37,22 @@ public:
         Id = 1
     };
     
+    friend ostream& operator << (ostream& output, const Sort& sort)
+    {
+        switch (sort)
+        {
+        case JSONPath::Sort::Id:
+            output << "Id";
+            break;
+        case JSONPath::Sort::Key:
+            output << "Key";
+            break;
+        };
+        
+        return output;
+    }
+    
+    
 public:
 
 
@@ -56,16 +72,16 @@ public:
 
     }
 
-    JSONPath(JSONDatabase& database, Stack& key) :
+    JSONPath(JSONDatabase& database, Key& key) :
         Path(
             database,
-            JSONPath::getIndexFromId(key)
+            JSONPath::getIndexFromKey(key)
         )
     {
 
     }
     
-    JSONPath(JSONDatabase& database, Id id) :
+    JSONPath(JSONDatabase& database, BeeFishDatabase::Id id) :
         Path(
             database,
             JSONPath::getIndexFromId(
@@ -94,7 +110,7 @@ public:
 
     }
     
-    static Index getIndexFromId(JSONDatabase& database, Id id)
+    static Index getIndexFromId(JSONDatabase& database, BeeFishDatabase::Id id)
     {
         Index index;
         database
@@ -104,7 +120,7 @@ public:
         return index;
     }
     
-    static Index getIndexFromId(Stack& stack)
+    static Index getIndexFromKey(Key& stack)
     {
         stack.readBit();
         
@@ -338,15 +354,25 @@ protected:
     {
 
         Id id = JSONPath::id();
-
+        Key key = JSONPath::toKey();
+        
         Path objects =
             database().objects();
-
+            
         // Add this child to all parents
         JSONPath json = *this;
         while (!json.isRoot())
         {
-            objects[json.index()][id];
+            objects
+                [json.index()]
+                [JSONPath::Sort::Id]
+                [id];
+            
+            objects
+                [json.index()]
+                [JSONPath::Sort::Key]
+                [key];
+                
             json = json.parent();
         }
 
@@ -356,6 +382,7 @@ protected:
     {
 
         Id id = JSONPath::id();
+        Key key = JSONPath::toKey();
         
         database().ids().clear(id);
         
@@ -367,11 +394,20 @@ protected:
         // Remove this child from its parents
         while (!json.isRoot() )
         {
-            objects[json.index()].clear(id);
+            objects
+                [json.index()]
+                [JSONPath::Sort::Id]
+                .clear(id);
+            objects
+                [json.index()]
+                [JSONPath::Sort::Key]
+                .clear(key);
+                 
             json = json.parent();
         }
 
         // Remove this child
+        objects.clear(index());
         objects.clear(index());
     }
 
@@ -829,7 +865,7 @@ public:
 public:
     
 
-    Stack toKey() const {
+    Key toKey() const {
         
         JSONPath path = *this;
         BString string;

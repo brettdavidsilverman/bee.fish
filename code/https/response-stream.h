@@ -173,46 +173,33 @@ public:
                 searchPath = jsonPath;
             }
             
-cerr << "SEARCH " << search << endl;
-
-            BeeFishQuery::Expression*
-                expression = new
-                BeeFishQuery::Expression(
+            BeeFishQuery::Statement*
+                statement = new
+                BeeFishQuery::Statement(
                     searchPath,
                     search,
-                    JSONPath::Sort::Id
+                    JSONPath::Sort::Key
                 );
                 
-            if (getCount && expression->sort() !=
+            if (getCount && statement->expression().sort() !=
                 JSONPath::Sort::Id)
             {
-                stringstream stream;
-                stream << *expression;
-                delete expression;
-                expression = new BeeFishQuery::Expression(
+                delete statement;
+                statement = new BeeFishQuery::Statement(
                     searchPath,
-                    stream.str(),
+                    statement->expression().value(),
                     JSONPath::Sort::Id
                 );
             }
                 
-cerr << "EXPRESSION " << *expression << " sort ";
-if (expression->sort() == JSONPath::Sort::Key)
-    cerr << "KEY";
-else if (expression->sort() == JSONPath::Sort::Id)
-    cerr << "ID";
-cerr << endl;
-
             BeeFishQuery::Iterable
             matches(
                 app->authentication(),
                 *database,
-                expression
-                    ->getPath(),
-                expression->sort()
+                *statement
             );
             
-            delete expression;
+            delete statement;
             
             Index count = 0;
             
@@ -486,8 +473,6 @@ cerr << endl;
 
     virtual void flush()
     {
-
-// std::ostream::flush();
 
 
         if (chunkedEncoding() &&

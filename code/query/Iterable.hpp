@@ -3,6 +3,7 @@
 
 #include "../Database/Database.hpp"
 #include "../Authentication/authentication.h"
+#include "QueryBase.hpp"
 
 namespace BeeFishQuery {
 
@@ -39,6 +40,7 @@ public:
         _path(path.copy()),
         _sort(sort)
     {
+
     }
 
     Iterable(const Iterable& source) :
@@ -46,6 +48,26 @@ public:
         _database(source._database),
         _path(source._path->copy()),
         _sort(source._sort)
+    {
+    }
+    
+    Iterable(
+        BeeFishAuthentication::
+            Authentication& auth,
+        JSONDatabase& database,
+        const BeeFishQuery::Statement& statement
+    )
+    :
+        Iterable(
+             auth,
+             database,
+             statement
+                 .expression()
+                 .getPath(),
+             statement
+                 .expression()
+                 .sort()
+        )
     {
     }
 
@@ -175,42 +197,46 @@ public:
         return false;
     }
     
-    BString toString(BeeFishDatabase::Id& key, Index& index) const
+    BString toString(BeeFishDatabase::Id& id, Index& index) const
     {
+        index = JSONPath::getIndexFromId(
+            *_database,
+            id
+        );
+
         JSONPath path(
             *_database,
-            key
+            index
         );
-        
-        index = path.index();
         
         return
             path
             .toString(_auth);
     }
     
-    BString toString(Stack& key, Index& index) const
+    BString toString(Key& key, Index& index) const
     {
         key.reset();
+        
+        index = JSONPath::getIndexFromKey(
+            key
+        );
 
         JSONPath path(
             *_database,
-            key
+            index
         );
-        
-        index = path.index();
         
         return
             path
             .toString(_auth);
     }
-/*
+    
     static bool startsWith(
         Stack& parent,
         Stack& child
     )
     {
-
         parent.reset();
         child.reset();
 
@@ -283,7 +309,6 @@ public:
 
         return true;
     }
-*/
 
     virtual ~Iterable()
     {
@@ -333,8 +358,10 @@ public:
         ) :
             _container(&iterable)
         {
-            if (iterable._sort == JSONPath::Sort::Id)
+
+            switch (iterable._sort)
             {
+            case JSONPath::Sort::Id:
                 _idIterable =
                     new IdIterable(
                         *iterable._path
@@ -344,9 +371,27 @@ public:
                     new IdIterator(
                          *_idIterable
                     );
-            }
+                    
+                setValueById();
+                
+                break;
+            case JSONPath::Sort::Key:
+
+                _keyIterable =
+                    new KeyIterable(
+                        *iterable._path
+                    );
+                    
+                _keyIterator =
+                    new KeyIterator(
+                         *_keyIterable
+                    );
+                    
+                setValueByKey();
+                
+                break;
+            };
             
-            setValue();
         }
         
         Iterator(const Iterator& source)
@@ -361,25 +406,54 @@ public:
                 _idIterator = new IdIterator(*source._idIterator);
             else
                 _idIterator = nullptr;
+                
+            if (source._keyIterator)
+                _keyIterator = new KeyIterator(*source._keyIterator);
+            else
+                _keyIterator = nullptr;
         }
         
         Iterator(
             const Iterable& iterable,
             Index from
         ) :
-            _container(&iterable),
-            _idIterable(new IdIterable(*iterable._path))
+            _container(&iterable)
+            
         {
+            
             JSONPath json(*_container->_database, from);
-            BeeFishDatabase::Id id = json.id();
+            
+            switch (iterable._sort)
+            {
+            case JSONPath::Sort::Id:
+            {
+                _idIterable = new IdIterable(*iterable._path);
+                
+                BeeFishDatabase::Id id = json.id();
 
-            Stack stack;
-            stack << id;
+                Stack stack;
+                stack << id;
 
-            _idIterator =
-                new IdIterator(*_idIterable, stack);
+                _idIterator =
+                    new IdIterator(*_idIterable, stack);
 
-            setValue();
+                setValueById();
+                break;
+            }
+            case JSONPath::Sort::Key:
+            {
+                _keyIterable = new KeyIterable(*iterable._path);
+                BeeFishDatabase::Key key = json.toKey();
+                
+                _keyIterator =
+                    new KeyIterator(*_keyIterable, key);
+
+                setValueByKey();
+                break;
+            }
+            };
+            
+            
         }
         
         virtual ~Iterator()
@@ -389,6 +463,12 @@ public:
 
             if (_idIterable)
                 delete _idIterable;
+                
+            if (_keyIterator)
+                delete _keyIterator;
+
+            if (_keyIterable)
+                delete _keyIterable;
         }
         
         
@@ -410,8 +490,16 @@ public:
         
         // Prefix increment operator (++)
         Iterator& operator++() {
-            ++(*_idIterator);
-            setValue();
+            if (_idIterator) 
+            {
+                ++(*_idIterator);
+                setValueById();
+            }
+            else if (_keyIterator)
+            {
+                ++(*_keyIterator);
+                setValueByKey();
+            }
             return *this;
         }
 
@@ -419,14 +507,12 @@ public:
         Iterator operator++(int)
         {
             Iterator tmp = *this;
-
             ++(*this);
             return tmp;
         }
         
         Iterator& operator = (const Iterator& source)
         {
-
             if (_idIterator)
                 delete _idIterator;
 
@@ -439,6 +525,20 @@ public:
                 _idIterator = new IdIterator(*source._idIterator);
             else
                 _idIterator = nullptr;
+                
+                
+            if (_keyIterator)
+                delete _keyIterator;
+
+            if (_keyIterable)
+                delete _keyIterable;
+
+            _keyIterable = nullptr;
+                
+            if (source._keyIterator)
+                _keyIterator = new KeyIterator(*source._keyIterator);
+            else
+                _keyIterator = nullptr;
 
             _container = source._container;
             _value = source._value;
@@ -466,9 +566,12 @@ public:
 
         BString toKey()
         {
-            return _idIterator->toKey();
+            if (_idIterator)
+                return _idIterator->toKey();
+            else if (_keyIterator)
+                return _keyIterator->toKey();
         }
-        
+
         friend bool operator == (
             const Iterator& a,
             const Iterator& b
@@ -479,10 +582,14 @@ public:
 
             if (a._idIterator)
                 aIsEnd = a._idIterator->_isEnd;
-
+            else if (a._keyIterator)
+                aIsEnd = a._keyIterator->_isEnd;
+                
             if (b._idIterator)
                 bIsEnd = b._idIterator->_isEnd;
-
+            else if (b._keyIterator)
+                bIsEnd = b._keyIterator->_isEnd;
+                
             return aIsEnd == bIsEnd;
 
         }
@@ -498,27 +605,30 @@ public:
 
             if (a._idIterator)
                 aIsEnd = a._idIterator->_isEnd;
-
+            else if (a._keyIterator)
+                aIsEnd = a._keyIterator->_isEnd;
+                
             if (b._idIterator)
                 bIsEnd = b._idIterator->_isEnd;
-
+            else if (b._keyIterator)
+                bIsEnd = b._keyIterator->_isEnd;
+                
             return aIsEnd != bIsEnd;
 
         }
 
-/*
-// By Key
-        void setValue(int)
+        // By Key
+        void setValueByKey()
         {
+
             _value.clear();
+            while (!_keyIterator->_isEnd) {
+
             
-
-            while (!_iterator->_isEnd) {
-
                 Key parent =
-                    **_iterator;
+                    **_keyIterator;
 
-                IdIterator iterator = *_iterator;
+                KeyIterator iterator = *_keyIterator;
 
                 ++iterator;
 
@@ -545,19 +655,19 @@ public:
                     _value =
                         _container
                         ->toString(parent, _index);
-                        
+                    
                     break;
                 }
 
 
-                *_iterator = iterator;
+                *_keyIterator = iterator;
             }
 
 
         }
-*/
+
         // By Id
-        void setValue()
+        void setValueById()
         {
             _value.clear();
             Index index;
@@ -609,7 +719,6 @@ public:
 
     virtual Iterator begin()
     {
-        
         return Iterator(*this);
     }
 

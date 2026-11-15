@@ -492,7 +492,7 @@ namespace BeeFishQuery {
             
             try {
                 ok = false;
-                Expression expression(root, "and and", JSONPath::Sort::Id);
+                Statement statement(root, "and and", JSONPath::Sort::Id);
             }
             catch (std::exception& ex)
             {
@@ -1104,8 +1104,7 @@ namespace BeeFishQuery {
         
         JSONPath root = database.origin(auth, "https://test")[json.filename()];
         JSONPathParser parser(auth, root);
-        Path objects = database.objects()[root.index()];
-        Path words = database.words();
+    
         JSONPath::Sort sort =
             JSONPath::Sort::Id;
             
@@ -1116,16 +1115,20 @@ namespace BeeFishQuery {
         
         JSONDatabase readOnlyDatabase(database.filename(), true);
         auto test =
-        [&readOnlyDatabase, &words, &objects, &ok, &auth, &sort](BString query, vector<BString> check) {
+        [&readOnlyDatabase, &root, &ok, &auth, &sort](BString query, vector<BString> check) {
             
             cout << "\t" << query << flush;
 
             JSONDatabase& db = readOnlyDatabase;
             
-            Expression expression(db, words, objects, sort);
+            Statement statement(root, sort);
+            
+            Expression& expression =
+                statement.expression();
+                
             if (ok)
             {
-                Parser parser(expression);
+                Parser parser(statement);
                 parser.read(query);
                 parser.eof();
         
@@ -1141,7 +1144,7 @@ namespace BeeFishQuery {
                     expression
                     .getPath();
                 
-                BeeFishQuery::Iterable iterable(auth, db, pathBase, JSONPath::Sort::Id);
+                BeeFishQuery::Iterable iterable(auth, db, pathBase, expression.sort());
                 
                 for (auto value : iterable)
                 {
@@ -1209,7 +1212,7 @@ namespace BeeFishQuery {
 }
 */
         ok = ok && test("boo", {});
-        ok = ok && test("json",
+        ok = ok && test("id json",
             {
         
                 "https://test/45-Object.json/a/1/1",
@@ -1218,7 +1221,7 @@ namespace BeeFishQuery {
                 "https://test/45-Object.json/a/2/2"
             }
         );
-        ok = ok && test("a", 
+        ok = ok && test("key a", 
             {
                 "https://test/45-Object.json/a/1/1",
                 "https://test/45-Object.json/a/1/2",
@@ -1304,6 +1307,13 @@ namespace BeeFishQuery {
         );
         
         ok = ok && test("not a or c", 
+            {
+                "https://test/45-Object.json/a/1/2",
+                "https://test/45-Object.json/a/2/2"
+            }
+        );
+        
+        ok = ok && test("key not a or c", 
             {
                 "https://test/45-Object.json/a/1/2",
                 "https://test/45-Object.json/a/2/2"
