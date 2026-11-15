@@ -7,6 +7,12 @@ THREADS=20
 ifeq ("$(PORT)","")
 	PORT=8000
 endif
+
+all:	$(OUTPUT)
+	make -C . stop PORT=$(PORT)
+	@echo "Testing on port $(PORT)"
+	$(OUTPUT) -port $(PORT) -test
+	$(OUTPUT) -port $(PORT) -threads 1000 &
 	
 $(OUTPUT):	$(DEPS)
 	@echo "Linking Web Server"
@@ -17,11 +23,7 @@ $(OUTPUT):	$(DEPS)
 	fi
 
 
-all:	$(OUTPUT)
-	make -C . stop PORT=$(PORT)
-	@echo "Testing on port $(PORT)"
-	$(OUTPUT) -port $(PORT) -test
-	$(OUTPUT) -port $(PORT) -threads 1000 &
+
 	
 $(BUILD):
 	mkdir $(BUILD)
