@@ -361,7 +361,8 @@ protected:
             
         // Add this child to all parents
         JSONPath json = *this;
-        while (!json.isRoot())
+        while (!json.isRoot() &&
+               !json.parent().isRoot())
         {
             objects
                 [json.index()]
@@ -392,7 +393,8 @@ protected:
         JSONPath json = *this;
 
         // Remove this child from its parents
-        while (!json.isRoot() )
+        while (!json.isRoot() &&
+               !json.parent().isRoot())
         {
             objects
                 [json.index()]
