@@ -18,6 +18,9 @@ $(OUTPUT):	$(DEPS)
 
 
 all:	$(OUTPUT)
+	make -C . stop PORT=$(PORT)
+	@echo "Testing on port $(PORT)"
+	$(OUTPUT) -port $(PORT) -test
 	$(OUTPUT) -port $(PORT) &
 	
 $(BUILD):
@@ -35,11 +38,8 @@ install:	start
 time:	CFLAGS += -Ofast
 time:	install
 
-test:	$(OUTPUT)
-	make -C . stop PORT=$(PORT)
-	@echo "Testing on port $(PORT)"
-	$(OUTPUT) -port $(PORT) -test
-	$(OUTPUT) -port $(PORT) &
+test:	all
+
 
 trace:	$(OUTPUT)
 trace:	stop
