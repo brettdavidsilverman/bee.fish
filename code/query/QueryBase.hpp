@@ -203,7 +203,7 @@ public:
 
 
 
-class Expression : public BeeFishParser::Match
+class Expression : public BeeFishParser::Capture
 {
     
     
@@ -584,28 +584,42 @@ public:
         Path bounds,
         JSONPath::Sort sort
     ) :
-        Match(),
+        Capture(),
         _database(&database),
         _words(words),
         _bounds(bounds),
         _root(database.json()),
         _sort(sort)
     {
-
+        setupMatch();
     }
     
     Expression(
         JSONPath path,
         JSONPath::Sort sort
     ) :
-        Match(),
+        Capture(),
         _database(&path.database()),
         _words(path.database().words()),
         _bounds(path.database().objects()[path.index()][sort]),
         _root(path),
         _sort(sort)
     {
+        setupMatch();
+        
     }
+    
+    void setupMatch()
+    {
+        _match = new BeeFishParser::And(
+            new Blankspaces(),
+            new Tokens(this),
+            new Optional(
+                new Character("$")
+            )
+        );
+    }
+    
 /*
     Expression(
         JSONPath path,
@@ -659,19 +673,6 @@ public:
     {
         for (auto item : _stack)
             delete item;
-    }
-    
-    virtual void setup(Parser* parser)
-    {
-        _match = new BeeFishParser::And(
-            new Blankspaces(),
-            new Tokens(this),
-            new Optional(
-                new Character("$")
-            )
-        );
-        
-        Match::setup(parser);
     }
     
 
@@ -841,27 +842,34 @@ public:
 };
 
 
-class Statement : public BeeFishParser::Match
+class Statement : public BeeFishParser::Capture
 {
 public:
 
-    Capture* _capture;
+   // Capture* _capture;
     Expression* _expression;
 
 public:
     
     Statement(JSONPath path, JSONPath::Sort sort) :
-        BeeFishParser::Match()
+        BeeFishParser::Capture()
     {
         _expression =
             new Expression(path, sort);
                     
         _match = new BeeFishParser::And(
             new Optional(
+                new Blankspaces()
+            ),
+            new Optional(
                 new Sort(_expression)
             ),
-            _capture = new Capture(
-                _expression
+            _expression,
+            new Optional(
+                new Blankspaces()
+            ),
+            new Optional(
+                new Character("$")
             ),
             new Optional(
                 new Blankspaces()
@@ -888,7 +896,7 @@ public:
             throw runtime_error(parser.getError());
         }
     }
-
+/*
     virtual BString& value()
     override
     {
@@ -900,7 +908,7 @@ public:
     {
         return _capture->value();
     }
-    
+    */
     Expression& expression()
     {
         return *_expression;

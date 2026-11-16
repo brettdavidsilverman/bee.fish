@@ -140,12 +140,7 @@ public:
             }
 
             bool getCount = false;
-            if (search.endsWith("$"))
-            {
-                getCount = true;
-                search = search.substr(0, search.size() - 1);
-
-            }
+            
 
             
             
@@ -181,13 +176,16 @@ public:
                     JSONPath::Sort::Key
                 );
                 
-            if (getCount && statement->expression().sort() !=
-                JSONPath::Sort::Id)
+            if (statement->matched() && statement->value().endsWith("$"))
             {
+                getCount = true;
+                
+                search = statement->expression().value();
+                
                 delete statement;
                 statement = new BeeFishQuery::Statement(
                     searchPath,
-                    statement->expression().value(),
+                    search,
                     JSONPath::Sort::Id
                 );
             }
