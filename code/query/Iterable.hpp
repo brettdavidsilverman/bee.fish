@@ -643,20 +643,28 @@ public:
                         )
                     )
                     {
-                        _value =
+                        BString value =
                             _container
                             ->toString(parent, _index);
                             
-                        break;
+                        if (URL(value).path() != "/")
+                        {
+                            _value = value;
+                            break;
+                        }
                     }
                 }
                 else
                 {
-                    _value =
+                    BString value =
                         _container
                         ->toString(parent, _index);
                     
-                    break;
+                    if (URL(value).path() != "/")
+                    {
+                        _value = value;
+                        break;
+                    }
                 }
 
 
@@ -696,16 +704,20 @@ public:
                          .startsWith(parentValue)
                     )
                     {
-                        _value = parentValue;
-                        _index = index;
-                        break;
+                        if (URL(parentValue).path() != "/") {
+                            _value = parentValue;
+                            _index = index;
+                            break;
+                        }
                     }
                 }
                 else
                 {
-                    _value = parentValue;
-                    _index = index;
-                    break;
+                    if (URL(parentValue).path() != "/") {
+                        _value = parentValue;
+                        _index = index;
+                        break;
+                    }
                 }
 
 
