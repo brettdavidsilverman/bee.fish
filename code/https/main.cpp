@@ -16,7 +16,6 @@ using namespace BeeFishDatabase;
 using namespace BeeFishHTTPS;
 
 void start(
-    boost::asio::io_context& io_context,
     BeeFishHTTPS::Server& server
 );
 
@@ -116,8 +115,6 @@ int main(int argc, const char* argv[])
         
         appFactories.add<NotFoundApp>();
         
-        boost::asio::io_context io_context(_threadCount);
-        
         std::cout << "Starting on port " << port << "..." << endl;
 
   
@@ -127,7 +124,6 @@ int main(int argc, const char* argv[])
             HOST,
             databaseFile,
             transactionFile,
-            io_context,
             port,
             _threadCount
         );
@@ -136,7 +132,6 @@ int main(int argc, const char* argv[])
         
         std::thread startThread(
             start, 
-            std::ref(io_context),
             std::ref(server)
         );
         
@@ -152,7 +147,7 @@ int main(int argc, const char* argv[])
         if (test) {
 
             bool ok = BeeFishHTTPS::test(server.origin());
-            io_context.stop();
+            server.stop();
             startThread.join();
             
             if (ok)
@@ -185,14 +180,13 @@ int main(int argc, const char* argv[])
 }
 
 void start(
-    boost::asio::io_context& io_context,
     BeeFishHTTPS::Server& server
 )
 {
         
     _wait.unlock();
     
-    io_context.run();
+    server.run();
     
     server.join();
 }

@@ -57,14 +57,13 @@ namespace BeeFishHTTPS {
     
     class Server :
         public BeeFishAuthentication::Server,
-        public thread_pool
+        public thread_pool,
+        public boost::asio::io_context
     {
     public:
         Server( const BString& hostName,
                   const BString& databaseFile,
                   const BString& transactionFile,
-                  boost::asio::io_context&
-                      ioContext,
                   unsigned short port,
                   Size threadCount
 //,Size databaseCount
@@ -76,16 +75,17 @@ namespace BeeFishHTTPS {
                 threadCount
             ),
             thread_pool(threadCount),
-            _ioContext(ioContext),
+            boost::asio::io_context(threadCount),
+            _threadCount(threadCount),
             _acceptor(
-                ioContext,
+                *(boost::asio::io_context*)this,
                 boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
                     port
                 )
             ),
             _context(boost::asio::ssl::context::sslv23),
-            _threadCount(threadCount),
+            
             _newSession(nullptr)
         {
 
@@ -115,7 +115,16 @@ namespace BeeFishHTTPS {
             _context.use_private_key_file(KEY_FILE, boost::asio::ssl::context::file_format::pem);
   
             _context.use_tmp_dh_file(TMP_DH_FILE);
-  
+            /*
+            for (Index i = 0; i < _threadCount; ++i)
+            {
+                _threads.emplace_back(
+                    [this]() {
+                        this->run();
+                    }
+                );
+            }
+  */
             std::cout << "Start accepting..." << std::endl;
 
             startAccept();
@@ -125,6 +134,18 @@ namespace BeeFishHTTPS {
 
         // Defined in session.h
         virtual ~Server();
+        /*
+        void join() {
+            for (auto& t : _threads)
+                t.join();
+        }
+        */
+        
+        void stop()
+        {
+            thread_pool::stop();
+            io_context::stop();
+        }
         
         const unsigned short port() const
         {
@@ -171,13 +192,13 @@ namespace BeeFishHTTPS {
         }
 
     private:
-        
-        boost::asio::io_context& _ioContext;
+        Size _threadCount;
+        std::vector<std::thread> _threads;
         boost::asio::ip::tcp::acceptor _acceptor;
         boost::asio::ssl::context _context;
         std::ofstream _transactionFile;
         std::mutex _mutex;
-        Size _threadCount;
+        
         Session* _newSession;
         
     };

@@ -58,10 +58,9 @@ public:
 
     Session(
         Server* server,
-        boost::asio::io_context& ioContext,
         boost::asio::ssl::context& sslContext
     ) :
-        SSLSocket(ioContext, sslContext),
+        SSLSocket(*(boost::asio::io_context*)server, sslContext),
         _server(server),
         _maxLength(getPageSize()),
         _data(_maxLength, '\0'),
@@ -175,10 +174,10 @@ public:
 
 
         boost::asio::post(
-            *_server,
-        [this, bytesTransferred]() {
-            threadedHandleRead(bytesTransferred);
-        }
+            *(thread_pool*)_server,
+            [this, bytesTransferred]() {
+                threadedHandleRead(bytesTransferred);
+            }
         );
     }
 
@@ -633,10 +632,9 @@ inline void Server::startAccept()
 
     _newSession =
         new Session(
-        this,
-        _ioContext,
-        _context
-    );
+            this,
+            _context
+        );
 
 
     _acceptor.async_accept(
