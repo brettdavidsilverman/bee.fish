@@ -139,13 +139,22 @@ public:
                     .substr(1);
             }
 
-            bool getCount = false;
             
-
+            JSONPath searchPath =
+                jsonPath;
+            JSONPath::Sort sort =
+                JSONPath::Sort::Key;
+            JSONPath searchPathMy;
+            bool isRoot = false;
+            bool isCount = false;
             
             
-            JSONPath searchPath;
-            
+            sort = BeeFishQuery::Statement(
+                searchPath,
+                search,
+                sort
+            ).sort();
+                    
             if (url.path() == "/")
             {
 
@@ -155,53 +164,93 @@ public:
                             "/my"
                     );
                     
-                searchPath =
+                searchPathMy =
                     JSONPath::fromString(
                         app->authentication(),
                         *database,
                         myURL
                     );
+                    
+                isRoot = true;
+            }
                 
+            if (search.endsWith("$"))
+            {
+                isCount = true;
+                
+                search = 
+                    BeeFishQuery::Statement(
+                        searchPath,
+                        search,
+                        sort
+                    )
+                    .expression()
+                    .value() + "$";
+                
+                sort = JSONPath::Sort::Id;
+            
+            }
+            
+            PathBase* path;
+            
+            if (isRoot)
+            {
+                path =
+                BeeFishQuery::OrPath(
+                    BeeFishQuery
+                    ::Statement(
+                        searchPath,
+                        search,
+                        sort
+                    )
+                    .expression()
+                    .getPath(),
+               
+                    BeeFishQuery
+                    ::Statement(
+                        searchPathMy,
+                        search,
+                        sort
+                    )
+                    .expression()
+                    .getPath()
+                ).copy();
+                    
             }
             else
             {
-                searchPath = jsonPath;
+                path =
+                    BeeFishQuery
+                    ::Statement(
+                        searchPath,
+                        search,
+                        sort
+                    )
+                    .expression()
+                    .getPath()
+                    .copy();
             }
             
-            BeeFishQuery::Statement*
-                statement = new
-                BeeFishQuery::Statement(
-                    searchPath,
-                    search,
-                    JSONPath::Sort::Key
-                );
-                
-            if (statement->matched() && statement->value().endsWith("$"))
-            {
-                getCount = true;
-                
-                search = statement->expression().value();
-                
-                delete statement;
-                statement = new BeeFishQuery::Statement(
-                    searchPath,
-                    search,
-                    JSONPath::Sort::Id
-                );
-            }
-                
+/*
             BeeFishQuery::Iterable
             matches(
                 app->authentication(),
                 *database,
                 *statement
             );
-            
-            delete statement;
+*/
+
+            BeeFishQuery::Iterable
+            matches(
+                app->authentication(),
+                *database,
+                *path,
+                sort
+            );
             
             Index count = 0;
             
-            if (getCount)
+            if (isCount)
             {
                 *this <<
                     to_string(
@@ -209,13 +258,15 @@ public:
                     );
                 
                 flush();
+                delete path;
                 return;
             }
 
             BeeFishQuery::Iterable::Iterator it;
 
             if (searchObject.contains("next") &&
-                searchObject["next"].size()) {
+                searchObject["next"].size())
+            {
                 try
                 {
                     it =
@@ -227,6 +278,8 @@ public:
                           << "Invalid query parameters"
                           << "\"";
                     flush();
+                    
+                    delete path;
                     return;
                 }
             }
@@ -305,7 +358,9 @@ public:
                   << "}";
 
             flush();
-
+            
+            delete path;
+            
             return;
 
         }

@@ -919,6 +919,11 @@ public:
         return *_expression;
     }
     
+    JSONPath::Sort sort() const
+    {
+        return _expression->sort();
+    }
+    
     class Sort : public BeeFishParser::And
     {
         Expression* _expression;

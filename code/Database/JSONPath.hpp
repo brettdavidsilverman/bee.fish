@@ -929,14 +929,14 @@ public:
             Stack child;
             child << true;
             
-           // if (path.parent().isRoot())
-           //     child << 0;
-          //  else {
+            if (path.parent().isRoot())
+                child << 1;
+            else {
                 if (userId == "public")
                     child << 2;
                 else // private
                     child << 1;
-           // }
+            }
 
             child << Type::STRING;
             

@@ -12,7 +12,7 @@ all:	$(OUTPUT)
 	make -C . stop PORT=$(PORT)
 	@echo "Testing on port $(PORT)"
 	$(OUTPUT) -port $(PORT) -test
-	$(OUTPUT) -port $(PORT) -threads 1000 &
+	$(OUTPUT) -port $(PORT) -threads $(THREADS) &
 	
 $(OUTPUT):	$(DEPS)
 	@echo "Linking Web Server"
@@ -54,7 +54,7 @@ start:	$(OUTPUT)
 	@if [ "$$(sudo lsof -t -i :$(PORT))" != "" ]; then \
 		sudo kill -9 $$(sudo lsof -t -i :$(PORT)); \
 	fi
-	$(OUTPUT) -port $(PORT) &
+	$(OUTPUT) -port $(PORT) & -threads $(THREADS)
 
 stop:
 	@echo Stopping $(PORT)...
@@ -67,7 +67,7 @@ stop:
 debug:	DEBUG=debug
 debug:	OPTIMISATION=
 debug:	CFLAGS += -g -D DEBUG
-debug:	THREADS=1000
+debug:	THREADS=2
 
 debug:	$(OUTPUT)
 	make -C . stop PORT=$(PORT)
