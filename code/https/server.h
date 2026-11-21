@@ -115,16 +115,7 @@ namespace BeeFishHTTPS {
             _context.use_private_key_file(KEY_FILE, boost::asio::ssl::context::file_format::pem);
   
             _context.use_tmp_dh_file(TMP_DH_FILE);
-            /*
-            for (Index i = 0; i < _threadCount; ++i)
-            {
-                _threads.emplace_back(
-                    [this]() {
-                        this->run();
-                    }
-                );
-            }
-  */
+            
             std::cout << "Start accepting..." << std::endl;
 
             startAccept();
