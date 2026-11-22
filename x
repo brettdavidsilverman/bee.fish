@@ -545,9 +545,24 @@ editor.onfocus =
         editor.clearTextOnFocus
             = false;
         editor.innerText = "";
-        editor.focus();
+        
+        focusAtEnd(editor);
     }
     
+}
+
+function focusAtEnd(element) {
+  element.contentEditable = 'true';
+  element.focus();
+
+  const range = document.createRange();
+  const selection = window.getSelection();
+  
+  range.selectNodeContents(element);
+  range.collapse(false); // false collapses the range to the end
+  
+  selection.removeAllRanges();
+  selection.addRange(range);
 }
 
 window.onhashchange =

@@ -1602,64 +1602,48 @@ private:
 
         for (auto word : tokens)
         {
-            bool clearWord = false;
-            
-            if (words.contains(word))
+            JSONPath json = (*this);
+        
+            while (!json.isRoot() && 
+                   !json.parent().isRoot())
+
             {
-                Path wordPath = words[word];
-                Path timestampPath =
-                    wordPath[
-                        JSONPath
-                        ::Sort
-                        ::Id
-                    ];
-
-                JSONPath json = (*this);
-                
-                
-                while  (!json.isRoot() &&
-                        !json.parent().isRoot())
+           
+                for (auto word : tokens)
                 {
-                    Id id = json.id();
+                    Path wordPath = words[word];
 
-                    if (timestampPath
-                        .contains(id))
-                    {
-
-                        Index count = 
-                            --(timestampPath[
-                                id
-                            ]);
-
-                        if (count == 0)
-                        {
-                            Path keyPath =
-                                wordPath[
-                                    JSONPath
-                                    ::Sort
-                                    ::Key
-                                ];
-                                
-                            keyPath.clear(toKey());
-                            
-                            timestampPath.clear(id);
-                        }
-                    }
-
+        
                     if (--wordPath == 0)
                     {
-                       clearWord = true;
+                        words.clear(word);
                     }
+                    else if (
+                        --(wordPath
+                            [JSONPath::Sort::Id]
+                            [json.id()]
+                        ) == 0
+                    )
+                    {
+                        wordPath
+                            [JSONPath::Sort::Id]
+                            .clear(json.id());
                     
-                    json = json.parent();
+                        wordPath
+                            [JSONPath::Sort::Key]
+                            .clear(json.toKey());
+                    }
+                
+                
                 }
+            
+                json = json.parent();
+            
             }
-            if (clearWord)
-            {
-                words.clear(word);
-                clearWord = false;
-            }
+    
+
         }
+        
     }
 
 public:
