@@ -125,12 +125,6 @@ namespace BeeFishHTTPS {
 
         // Defined in session.h
         virtual ~Server();
-        /*
-        void join() {
-            for (auto& t : _threads)
-                t.join();
-        }
-        */
         
         void stop()
         {

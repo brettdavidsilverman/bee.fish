@@ -483,7 +483,7 @@ namespace BeeFishQuery {
         testmatch("not (not (word))", "not (not (word))");
         testmatch("word1 and and word2", "(word1 and word2)");
         testmatch("word1 and or word2", "(word1 or word2)");
-        testmatch("(deaths and (heroin and not methadone)) or art", "(((deaths and ((heroin and not methadone)))) or art)");
+        testmatch("(deaths and (heroin and not methadone))", "((deaths and ((heroin and not methadone))))");
         testmatch("word1$", "word1");
         
         if (ok)

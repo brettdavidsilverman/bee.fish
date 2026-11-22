@@ -29,18 +29,6 @@ void loadFiles(
             << "Loading directory "
             << directory
             << endl;
-/*
-    cerr << "File art-small.jpg" << endl;
-    loadFile(
-            auth,
-            start,
-            directory,
-            "/home/brettdavidsilverman/bee.fish/dev.bee.fish/art-small.jpg",
-            cout
-        );
-    cerr << "Done" << endl;
-    return;
-*/
 
     const std::vector<BString> ignoreFiles {
         "deaths.json",
