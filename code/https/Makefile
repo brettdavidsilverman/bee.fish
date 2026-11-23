@@ -54,7 +54,7 @@ start:	$(OUTPUT)
 	@if [ "$$(sudo lsof -t -i :$(PORT))" != "" ]; then \
 		sudo kill -9 $$(sudo lsof -t -i :$(PORT)); \
 	fi
-	$(OUTPUT) -port $(PORT) & -threads $(THREADS)
+	$(OUTPUT) -port $(PORT) -threads $(THREADS) &
 
 stop:
 	@echo Stopping $(PORT)...
