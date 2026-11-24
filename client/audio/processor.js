@@ -49,7 +49,7 @@ export class Processor extends
 
                 }
                 outputChannel[i] = 
-                    this.f(this.index++ / this.sampleRate, _inputs);
+                    this.f(this.index++, _inputs);
             }
 
         }

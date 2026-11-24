@@ -91,6 +91,17 @@
                     <a href="#/deaths/data?marijuana$">/deaths/data?marijuana$</a>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <p>This is your own secrets personal folder.</p>
+                    <p>You can query it too like the samples above.</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href="#/my">/my</a>
+                </td>
+            </tr>
         </table>
         
         <h3>
