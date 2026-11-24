@@ -3,7 +3,7 @@ OPTIMISATION = -Ofast
 BUILD = ../../build
 OUTPUT=$(BUILD)/https
 DEPS=server.h session.h response.h response-headers.h response-stream.h app.h json-app.h file-system-app.h storage-app.h not-found-app.h options-app.h test.h authentication.h ../Authentication/authentication.h ../Authentication/server.h ../Miscellaneous/MimeTypes.hpp version.h Makefile main.cpp ../Config.hpp https.h authentication-app.h $(BUILD)/query $(BUILD)/Database Makefile
-THREADS=1000
+THREADS=50
 ifeq ("$(PORT)","")
 	PORT=8000
 endif
