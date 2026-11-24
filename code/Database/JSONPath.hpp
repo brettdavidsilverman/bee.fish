@@ -72,15 +72,6 @@ public:
 
     }
 
-    JSONPath(JSONDatabase& database, Key& key) :
-        Path(
-            database,
-            JSONPath::getIndexFromKey(key)
-        )
-    {
-
-    }
-    
     JSONPath(JSONDatabase& database, BeeFishDatabase::Id id) :
         Path(
             database,
