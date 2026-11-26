@@ -192,16 +192,16 @@ namespace BeeFishDatabase {
         
         Size size() const
         {
-            /*
-            Size pos = seek(0, SEEK_CUR);
+            
+Size pos = seek(0, SEEK_CUR);
             
             Size size = seek(0, SEEK_END);
             
             seek(pos, SEEK_SET);
             
             return size;
-            */
-            return std::filesystem::file_size(_filename);
+            
+            //return std::filesystem::file_size(_filename);
         }
         
     protected:
