@@ -24,6 +24,8 @@ sudo apt install libcrypto++-dev libcrypto++-doc libcrypto++-utils
 
 sudo apt-get install -y locales
 
+sudo nano /etc/locale.gen
+
 sudo install -y locale-gen
 
 sudo locale-gen en_US.UTF-8
