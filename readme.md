@@ -22,5 +22,6 @@ sudo apt install build-essential
 
 sudo apt install libcrypto++-dev libcrypto++-doc libcrypto++-utils
 
+sudo apt-get install -y locales && sudo locale-gen en_US.UTF-8
 
 sudo make
